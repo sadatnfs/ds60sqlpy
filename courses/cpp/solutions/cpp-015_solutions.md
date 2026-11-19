@@ -25,7 +25,7 @@ Exclusive ownership is not appropriate for every graph. shared_ptr introduces sh
 
 ## Debugging the contract
 
-If live remains1 after the scope, inspect whether ownership escaped or was released without cleanup. If a moved-from unique_ptr is dereferenced, test its empty state and use the new owner instead. Do not construct two unique_ptr objects from the same raw pointer: that creates two deletion responsibilities for one allocation. A destructor counter proves the fixture lifecycle, not the safety of every borrowed pointer elsewhere in the program.
+If live remains 1 after the scope, inspect whether ownership escaped or was released without cleanup. If a moved-from unique_ptr is dereferenced, test its empty state and use the new owner instead. Do not construct two unique_ptr objects from the same raw pointer: that creates two deletion responsibilities for one allocation. A destructor counter proves the fixture lifecycle, not the safety of every borrowed pointer elsewhere in the program.
 <!-- depth:end -->
 
 ## Worked example 1
@@ -55,7 +55,7 @@ Draw p and q before and after moving unique_ptr<int>(7).
 
 **Reasoning:** Moving transfers the pointer ownership.
 
-**Verify:** Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.
+**Verify:** Check the drawing against Worked example 1's assertion `!p && q && *q == 7`: after the move `p` is null, `q` owns the single int 7, and no second allocation appears.
 
 ## Exercise 2: Check normal cleanup
 
@@ -65,7 +65,7 @@ Run the Tracked scoped case.
 
 **Reasoning:** Destructor cleanup is tied to scope.
 
-**Verify:** Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.
+**Verify:** Print `live` inside the inner scope and after it closes, and confirm the two lines show 1 and 0, matching Worked example 2's assertions.
 
 ## Exercise 3: Check exceptional cleanup
 
@@ -75,7 +75,7 @@ Throw after constructing Tracked and catch outside.
 
 **Reasoning:** Stack unwinding destroys the owner.
 
-**Verify:** Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.
+**Verify:** Create a `std::unique_ptr<Tracked>` inside `try`, throw `std::runtime_error`, and assert `live == 0` in the `catch` block, which shows the destructor ran during unwinding.
 
 ## Exercise 4: Reject accidental copy
 
@@ -85,7 +85,7 @@ Try auto q=p with unique_ptr.
 
 **Reasoning:** unique_ptr disables copying by design.
 
-**Verify:** Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.
+**Verify:** Compile the scratch line and keep the error about the deleted copy constructor of `std::unique_ptr`; `auto q = std::move(p);` must compile instead.
 
 ## Exercise 5: Handle empty owner
 
@@ -95,7 +95,7 @@ Default-construct unique_ptr<int> and inspect Boolean state.
 
 **Reasoning:** An empty owner has nothing to destroy.
 
-**Verify:** Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.
+**Verify:** Assert `!std::unique_ptr<int>{}` and confirm the program never applies `*` to the empty pointer.
 
 ## Exercise 6: Transfer to a collection
 
@@ -105,4 +105,4 @@ Own three unique_ptr<int> values in a vector then leave scope.
 
 **Reasoning:** Composed RAII owners clean up recursively.
 
-**Verify:** Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.
+**Verify:** Put three `std::unique_ptr<Tracked>` values in a vector inside a scope and assert `live == 3` inside and `live == 0` afterward; the code must contain no `delete`.

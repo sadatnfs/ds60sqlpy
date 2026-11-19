@@ -8,7 +8,7 @@ Separate namespaces from source files, execute a tiny owned multi-file project o
 
 ## Classroom execution
 
-Choose **Julia language and scientific computing** in `/classroom`, open this unit, and select its prepared `julia` runtime. The worker starts a fresh `main.jl` process with two Julia threads, a fixed package environment, no startup file and offline package settings. Both worked examples are complete under that environment. Save your current pad before replacing it. No package, model or dataset is fetched by a lesson.
+Open `julia-027` in `/classroom` with its prepared `julia` runtime. Worked case A (a small reusable namespace) and worked case B (exercise a real multi-file layout) are complete programs: save your current pad, paste one of them and press Run. The learner file contains the six investigations below; the explained reference ends by printing `julia-027: all reference checks passed`. The [course overview](../README.md) describes the shared runtime: a fresh offline `main.jl` process with two threads and a fixed package environment.
 
 ## A namespace and a file are different things
 
@@ -115,9 +115,9 @@ Separate a pure numerical kernel from CSV preparation, plotting and command-line
 
 ### 1. Use qualified access
 
-Call LocalStats.center on[2,4].
+Call `LocalStats.center` on `[2, 4]`.
 
-**Expected:** The result is[-1,1].
+**Expected:** The result is `[-1, 1]`.
 
 **Hint:** The module owns the name.
 
@@ -169,4 +169,4 @@ Separate a CSV workflow into numerical core, IO and tests.
 
 ## Study companion
 
-Use the repository learning-companion skill with this lesson ID, your prediction and your actual source/output. Ask for a diagnosis of the first incorrect type, shape, state transition or assumption. Keep observed execution distinct from a timing claim, inferred mathematical result or external deployment.
+A repository-aware assistant with the learning-companion skill can review `julia-027` with you. Give it your prediction for one investigation, your source and the actual output, and ask it to find the first incorrect assumption about modules, exports, include, package layout, Project.toml or Manifest.toml.

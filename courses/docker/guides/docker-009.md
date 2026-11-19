@@ -6,7 +6,7 @@ Beginner; about 100 minutes, with additional time for the optional host experime
 
 ## Learning objectives
 
-Draw a host browser request path. Choose public and internal endpoints for a two-service app. Explain the difference between a configuration, an observed process and evidence of the application's behavior.
+Draw a host browser request path. Choose public and internal endpoints for a two-service app. Use port publishing, loopback address and bind address accurately when you explain what you observed.
 
 ## Purpose, vocabulary and mental model
 
@@ -24,11 +24,11 @@ Troubleshoot in layers: application listen address, process state, container por
 
 ## How to use this lesson
 
-The classroom displays this guide and saves your worksheet. Its Run button does not control your Docker engine. Docker engine access is powerful host access, so the classroom deliberately receives no engine socket. Work through the supplied examples without starting anything, then use the optional host lab only in your own disposable project. Reading a command, parsing YAML and actually running the project are different forms of evidence.
+The classroom displays this guide and saves your worksheet, `courses/docker/lessons/docker-009.md`. Its Run button does not control your Docker engine. Docker engine access is powerful host access, so the classroom deliberately receives no engine socket. Work through the supplied examples without starting anything, then use the optional host lab only in your own disposable project. Reading a command, parsing YAML and actually running the project are different forms of evidence.
 
 Use Bash in Linux, macOS Terminal, or Ubuntu under WSL 2 on Windows. The supported engine runs Linux containers. The maintained fixture is `courses/docker/fixtures/compose-lab/`; its README explains copying it into a new ignored learner directory, checking the engine, building locally with visible logs, and using the fixed project name `ds60-docker-study`. The fixture uses port 18080 on host loopback. Stop if that project name or port belongs to unrelated work; choose a new project name consistently in your own copy. Never paste a command against a remote Docker context simply because it is currently selected.
 
-For Dockerfile examples, create a file named `Dockerfile` in a scratch project. YAML snippets describe a fragment unless explicitly called a complete file. Text transcripts are synthetic illustrations, not claims about your machine. Do not substitute a real password, token or private registry into a checked-in example.
+For Dockerfile examples, create a file named `Dockerfile` in a scratch project. YAML snippets describe a fragment unless explicitly called a complete file. Text transcripts are synthetic illustrations, not claims about your machine. Do not substitute a real password, token or private registry into a checked-in example. **How to use the lessons** in the [subject README](../README.md) collects these rules in one place.
 
 ## Worked example / walkthrough
 
@@ -56,58 +56,50 @@ Peer container -> DNS name app -> container address:8080
 
 ## Six progressive exercises
 
+For each exercise, name the object involved and the phase of its lifetime before changing anything, then vary only the condition the task names. Exercises that ask you to predict, explain, compare or diagnose keep their answers in the solutions file; the others show the evidence to look for.
+
 ### Exercise 1: Label every component of the mapping.
 
 **Expected evidence:** Host loopback, host port 18080 and container port 8080.
 
-**Hint:** Identify the object and the phase of its lifetime before changing it. Use the relevant worked example, then vary only the condition named in this task.
+**Hint:** Read 127.0.0.1:18080:8080 from left to right as host address, host port and container port.
 
 ### Exercise 2: Predict whether localhost:18080 inside app reaches the host browser endpoint.
 
-**Expected evidence:** It refers to app container loopback and normally fails.
-
-**Hint:** Identify the object and the phase of its lifetime before changing it. Use the relevant worked example, then vary only the condition named in this task.
+**Hint:** Ask whose loopback interface localhost means inside the container.
 
 ### Exercise 3: Draw a host browser request path.
 
-**Expected evidence:** Browser, host socket mapping, container interface and app listener.
-
-**Hint:** Identify the object and the phase of its lifetime before changing it. Use the relevant worked example, then vary only the condition named in this task.
+**Hint:** Follow the request from the browser to the published socket to the app's listener.
 
 ### Exercise 4: Diagnose a server bound to container 127.0.0.1 only.
 
-**Expected evidence:** It may answer locally but not through the published mapping.
-
-**Hint:** Identify the object and the phase of its lifetime before changing it. Use the relevant worked example, then vary only the condition named in this task.
+**Hint:** Check the address the server listens on inside the container.
 
 ### Exercise 5: Distinguish connection refused from HTTP 404.
 
-**Expected evidence:** Transport failure versus application routing result.
-
-**Hint:** Identify the object and the phase of its lifetime before changing it. Use the relevant worked example, then vary only the condition named in this task.
+**Hint:** Ask whether any HTTP response came back at all.
 
 ### Exercise 6: Choose public and internal endpoints for a two-service app.
 
-**Expected evidence:** Only the user-facing service gets a deliberate published port.
-
-**Hint:** Identify the object and the phase of its lifetime before changing it. Use the relevant worked example, then vary only the condition named in this task.
+**Hint:** Publish only what a person outside the project must reach.
 
 ## Common mistakes and diagnosis
 
-Start with the smallest observation that separates two plausible causes. An image inspection answers questions about the packaged filesystem and configuration; container inspection adds runtime mounts, network attachment and exit status. An application request adds another layer of evidence. A healthy container can still serve the wrong application result. Preserve the original failure and the exact changed field before retrying.
+Binding the server to 127.0.0.1 inside the container, so the published port cannot reach it. Publishing on all host interfaces when loopback is enough. Using `localhost` in one container to reach another.
 
-The boundary case in this chapter is: Diagnose a server bound to container 127.0.0.1 only. Use its expected observation, It may answer locally but not through the published mapping., to avoid treating a successful command as proof of the wrong claim. Keep source edits in your own copy. Do not make a container privileged, mount the engine socket, disable all checks or delete every volume to make an example succeed.
+Exercise 4 is this chapter's boundary case: Diagnose a server bound to container 127.0.0.1 only. Start with the smallest observation that separates two plausible causes. An image inspection answers questions about the packaged filesystem and configuration; container inspection adds runtime mounts, network attachment and exit status; an application request adds another layer, and a healthy container can still serve the wrong result. Preserve the original failure and the exact changed field before retrying. Keep source edits in your own copy. Do not make a container privileged, mount the engine socket, disable all checks or delete every volume to make an example succeed.
 
 ## Retrieval, transfer and next steps
 
-Close the explanations and draw the path from source files to image to container to the observation relevant here. Reconstruct the second worked example with one different value and predict what changes. Explain which state survives process restart, container recreation and image rebuild. If none of those operations applies to this mechanism, explain why.
+Close the explanations and draw the path from source files to image to container to the observation relevant here, using port publishing, loopback address, bind address, host port and container port. Reconstruct worked example 2 (Compare two destinations) with one different value and predict what changes. Explain which state survives process restart, container recreation and image rebuild, or why none of those operations applies to this mechanism.
 
-Before proceeding, retain six evidence records. For the optional host project, use `docker compose -p ds60-docker-study down` from the fixture copy to stop its containers and remove its ordinary network. This command preserves named volumes. Volume deletion is a separate deliberate reset of that disposable lab after a backup or export, never a general cleanup step. The fixture README describes its exact scoped reset.
+When a host session ends, run `docker compose -p ds60-docker-study down` from your fixture copy. It removes the project's containers and network but keeps named volumes; deleting a volume is a separate, deliberate reset described in the fixture README.
 
 ## Primary references
 
-- [Official reference 1](https://docs.docker.com/engine/network/port-publishing/)
-- [Official reference 2](https://docs.docker.com/engine/network/)
+- [Port publishing and mapping](https://docs.docker.com/engine/network/port-publishing/)
+- [Networking overview](https://docs.docker.com/engine/network/)
 
 ## Ask an AI tutor about this lesson
 

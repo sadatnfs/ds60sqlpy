@@ -15,17 +15,17 @@
   "exercises": [
     {
       "title": "Trace the accumulator",
-      "task": "Trace total after each element of [1.0,2.0,3.0].",
-      "expected": "The values are 1,5,14.",
+      "task": "Trace `total` after each element of `[1.0, 2.0, 3.0]`.",
+      "expected": "The values are 1, 5 and 14.",
       "hint": "Square each item before adding.",
       "answer": "The accumulator is Float64 throughout; the final value is 14."
     },
     {
       "title": "Preserve precision",
-      "task": "Run sum_squares on Float32[1,2].",
-      "expected": "The result is Float32(5).",
+      "task": "Run `sum_squares` on `Float32[1, 2]`.",
+      "expected": "The result is `Float32(5)`.",
       "hint": "Inspect typeof as well as value.",
-      "answer": "zero(T) and floating multiplication preserve the specified small-case element arithmetic."
+      "answer": "`zero(T)` and floating multiplication preserve the specified small-case element arithmetic."
     },
     {
       "title": "Change workload size",
@@ -36,7 +36,7 @@
     },
     {
       "title": "Diagnose invalid science",
-      "task": "Pass [NaN] and explain why inference still succeeds.",
+      "task": "Pass `[NaN]` and explain why inference still succeeds.",
       "expected": "The numerical result is NaN.",
       "hint": "A known type is not a finite value.",
       "answer": "Inference concerns types. Scientific input validation is a separate contract."

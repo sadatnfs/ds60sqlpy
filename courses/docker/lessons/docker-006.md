@@ -10,7 +10,7 @@ My evidence:
 
 My explanation and remaining limitation:
 
-## Exercise 2: Identify three private paths to exclude.
+## Exercise 2: Predict whether the pattern `*.pyc` excludes `app/__pycache__/server.cpython-312.pyc`.
 
 My prediction:
 

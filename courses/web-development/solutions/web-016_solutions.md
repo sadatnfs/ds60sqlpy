@@ -1,51 +1,43 @@
 # web-016: explanatory solutions
 
-Compare after your own attempt or an explicit solution reveal. This file explains the supplied deterministic fixtures. It does not claim that a learner or a production deployment passed.
-
-## Why the mechanism works
-
-Grid arranges items along rows and columns. A track is the space between two adjacent grid lines. Fractional fr units share remaining space after fixed sizes and gaps have been considered. They are not a fixed percentage of the full container. An item's minimum content contribution can still affect track size, which explains why a long unbroken value may widen an apparently equal grid.
-
-Grid is useful when rows and columns must align across a collection. An auto-fit repeat with minmax can create as many columns as fit a preferred minimum, then distribute remaining room. The minimum must still fit a narrow viewport. A layout should adapt to its content, not depend on one device model or a fixed card count.
-
-Use `grid-template-columns:repeat(auto-fit,minmax(min(100%,14rem),1fr))` for a resilient card collection. The inner min permits a track to fit a container narrower than the preferred minimum. `gap` adds separation without changing source order. Named grid areas are useful for a page shell, but the source order must remain understandable when the layout collapses.
+Open this after your own attempt. Each answer explains the lesson's synthetic fixtures; it does not show that your work or a deployment passed. The mechanism is explained in `courses/web-development/guides/web-016.md`.
 
 ## Exercise 1: Explain why two 1fr tracks plus a gap are not two 50% widths plus a gap.
 
-Fractional tracks divide the remaining space after the gap.
+**Expected answer:** Fractional tracks divide the remaining space after the gap.
 
-Trace the smallest example before editing. Name which values are source and which are observations.
+**Why:** fr units share the space left after gaps and fixed tracks, so two 1fr tracks plus a 1rem gap are each half of the remaining width, not 50 percent of the container.
 
 ## Exercise 2: Add a fourth card without new positional rules.
 
-Auto placement incorporates the item using the same layout contract.
+**Expected evidence:** Auto placement incorporates the item using the same layout contract.
 
-Change only the named feature. Compare with the unchanged example and explain any unaffected behavior.
+**Why:** Auto placement fills the next available cell, so the existing column definition decides where a new item goes.
 
 ## Exercise 3: Build an adaptive topic grid that survives a narrow container.
 
-Cards change column count while preserving reading order and avoiding page overflow.
+**Expected evidence:** Cards change column count while preserving reading order and avoiding page overflow.
 
-Sketch the structure or data contract first. Reuse the mechanism from the examples without copying the reference.
+**Why:** minmax with min(100%, 14rem) lets each track shrink to the container width on narrow screens, and auto-fit chooses the column count from the available space.
 
 ## Exercise 4: Diagnose a long value widening a track.
 
-Inspect minimum content sizing and use a deliberate minmax or wrapping policy.
+**Expected answer:** Inspect minimum content sizing and use a deliberate minmax or wrapping policy.
 
-Keep the failing input. Identify the first layer where the observed result differs from the intended contract.
+**Why:** A 1fr track has an automatic minimum equal to its min-content size, so minmax(0, 1fr) or wrapping is needed to stop one long value from widening it.
 
 ## Exercise 5: Test empty, one-card and seven-card collections.
 
-The layout remains coherent without a special case tied to three cards.
+**Expected evidence:** The layout remains coherent without a special case tied to three cards.
 
-Predict the boundary before running it. Add an explicit check or manual observation that would detect a regression.
+**Why:** Intrinsic grid rules adapt to any item count, while rules written for exactly three cards break when content changes.
 
 ## Exercise 6: Explain auto-fit versus auto-fill at a high level.
 
-Auto-fit can collapse empty repeated tracks; auto-fill preserves the generated track slots.
+**Expected answer:** Auto-fit can collapse empty repeated tracks; auto-fill preserves the generated track slots.
 
-Explain your choice to someone who has not seen the code. Include one limitation and the evidence needed to remove it.
+**Why:** auto-fill keeps empty tracks reserved, while auto-fit collapses empty tracks so the existing cards stretch to fill the row.
 
-## Reference comparison and limits
+## Reference comparison
 
-Read the separate executable reference, where supplied, only after retaining your attempt. Compare structure and decisions rather than matching every identifier. A different implementation is acceptable when it satisfies the same behavior, preserves accessibility and rejects the same invalid cases. The checked reference uses tiny synthetic inputs so that each transformation can be inspected. It is not a ready-to-deploy authenticated application. Server lifecycle, persistence, concurrency and security require their own integration evidence.
+Open `courses/web-development/solutions/web-016_solution.html` only after saving your attempt, and compare decisions rather than identifiers. A different implementation is acceptable when it shows the same behavior and rejects the same invalid cases. The reference checks only its named synthetic cases; its success message is not an accessibility audit or proof of responsive behavior at every size.

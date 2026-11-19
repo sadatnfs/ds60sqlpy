@@ -8,9 +8,11 @@ Tests are executable claims about behavior. A test should distinguish the intend
 
 A test table is often a slice of anonymous structs with name, input and want fields. In a prepared project, func TestName(t *testing.T) is discovered by go test, and t.Run creates named subtests. Compare actual and expected values directly; include the case name in failure messages. Fuzz tests describe invariants across generated inputs, but they need a bounded execution budget and persistent regression seeds. Do not treat successful compilation as a behavior test.
 
-## 1. Build a named table
+## 1. Build a named table: change one input
 
-Test clamp with values below, inside and above the range 0 to 10.
+Copy worked example 1 into a scratch pad and change `cases := []struct{ in, want int }{{-2, 0}, {4, 4}, {12, 10}}` to `cases := []struct{ in, want int }{{-2, 1}, {4, 4}, {12, 10}}`. Before running, predict which check fails and which value it now sees; then run it and restore the original line.
+
+The unchanged code is worked example 1:
 
 ```go
 cases := []struct{ in, want int }{{-2, 0}, {4, 4}, {12, 10}}
@@ -19,19 +21,21 @@ for _, tc := range cases {
 }
 ```
 
-**Expected:** The outputs are 0, 4 and 10.
+**Expected:** The changed run panics with `clamp table` because `clamp(tc.in) == tc.want` no longer holds. Restoring the original line brings back the worked observation: the outputs are 0, 4 and 10.
 
 A wrong implementation that only returns its input fails the outside cases; one that always returns an endpoint fails the interior case.
 
-## 2. Include exact endpoints
+## 2. Include exact endpoints: diagnose an edited check
 
-Test clamp at 0 and 10.
+A careless edit changed the check in worked example 2 so that it reads `check(clamp(1) == 0 && clamp(10) == 10, "endpoints")`. Run worked example 2 with that line, explain why the edited check now fails for the same program state, and restore it.
+
+The unchanged code is worked example 2:
 
 ```go
 check(clamp(0) == 0 && clamp(10) == 10, "endpoints")
 ```
 
-**Expected:** Both endpoints are preserved.
+**Expected:** Before the repair the program panics with `endpoints`; after it the line reads `check(clamp(0) == 0 && clamp(10) == 10, "endpoints")` again and both endpoints are preserved.
 
 Endpoint tests distinguish inclusive boundaries from off-by-one policies. They should be named in the API contract.
 

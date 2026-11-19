@@ -15,6 +15,16 @@ struct LessonMain {
       increment(&count)
       precondition(count == 5)
     }
+
+    do {
+      // Task 3: Independent construction
+      func normalized(_ quantity: Int, limit: Int) -> Int {
+        min(max(quantity, 0), limit)
+      }
+      let requested = 15
+      precondition(normalized(requested, limit: 10) == 10)
+      precondition(normalized(-4, limit: 10) == 0 && requested == 15)
+    }
     print("swift-008: passed")
   }
 }

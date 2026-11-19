@@ -16,7 +16,7 @@ No existing Quantity filter; all three forms select quantity at least two.
 
 Agreement on an unfiltered example does not establish interchangeability under interactive selections.
 
-- S2 and S 6 have quantity 1 and contribute 4 +20 =24.
+- S2 and S6 have quantity 1 and contribute 4 + 20 = 24.
 - Removing those lines from 187 leaves 163.
 - The three forms agree in this incoming context.
 
@@ -30,7 +30,7 @@ Incoming Sales.Quantity=1; compare filtering current rows with replacing or inte
 
 A rewrite that changes BLANK to 163 is not an optimization of the same calculation. It is a change in the question.
 
-- The incoming visible fact rows are S2 and S 6, both quantity 1.
+- The incoming visible fact rows are S2 and S6, both quantity 1.
 - FILTER over those rows finds no quantity>=2 line, while the plain Boolean predicate replaces the original selection.
 - KEEPFILTERS intersects incompatible quantity conditions and also yields BLANK.
 
@@ -46,7 +46,7 @@ All three return 163 in this fixture, another agreement case that does not repla
 
 Change the predicate to Quantity>=3.
 
-Without other filters the retained revenue is 27 +20 =47.
+Without other filters the retained revenue is 27 + 20 = 47.
 
 ### Exercise 3
 

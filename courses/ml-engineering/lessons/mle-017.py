@@ -1,4 +1,4 @@
-"""mle-017: worked starting point; complete the guide's six changes."""
+"""mle-017: both worked cases; complete the guide's six changes."""
 
 
 def example_one():
@@ -16,8 +16,29 @@ def example_one():
     return {"slice_metrics": report, "metric_parity_alone_is_not_fairness": True}
 
 
+def example_two():
+    card = {
+        "purpose": "optional support prioritization",
+        "features": ["usage", "tickets", "region"],
+        "excluded": ["email", "free_text"],
+        "owner": "learning team",
+        "limits": ["synthetic population", "delayed labels"],
+        "rollback_version": "v1",
+    }
+    request = {"usage": 10, "tickets": 2, "region": "north", "email": "learner@example.invalid"}
+    allowed = set(card["features"])
+    rejected = set(request) - allowed
+    assert rejected == {"email"} and card["rollback_version"] == "v1" and card["limits"]
+    return {
+        "rejected_fields": sorted(rejected),
+        "review_card": card,
+        "not_a_legal_compliance_certificate": True,
+    }
+
+
 if __name__ == "__main__":
     print(example_one())
+    print(example_two())
 
 # TODO 1: Identify the denominator of true-positive rate for each slice.
 # TODO 2: Describe an appropriate uncertainty analysis for the slice comparison.

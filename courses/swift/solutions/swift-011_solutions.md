@@ -1,6 +1,6 @@
 # swift-011: explanation and comparison
 
-Attempt the six guide tasks before opening this comparison. The executable reference is [swift-011_solution.swift](swift-011_solution.swift). Its assertions are always active under the prepared classroom compile settings.
+Attempt the six guide tasks before opening this comparison. The executable reference is [swift-011_solution.swift](swift-011_solution.swift). It runs both worked examples and the reference answers below, and its assertions are always active under the prepared classroom compile settings.
 
 ## Why the two examples differ
 
@@ -8,21 +8,64 @@ Attempt the six guide tasks before opening this comparison. The executable refer
 
 **Model distinct outcomes:** The switch extracts data after establishing the state case. Each outcome exposes only its own meaningful payload.
 
-## Reason through the six tasks
+## Task answers
 
-1. **Predict and explain.** Name the meaning of each tuple field.
+### Task 1: Predict and explain
 
-2. **Guided modification.** Add a third accounting field only if its meaning is independent.
+Name the meaning of each tuple field.
 
-3. **Independent construction.** Model loading, ready and failed states with an enum.
+No separate reference answer has been written for this task. Example A is the evidence to compare with: The grouping is useful locally without requiring an entire class hierarchy. Named tuple fields expose the accounting relationship.
 
-4. **Diagnose a defect.** Diagnose several optional fields that permit contradictory state combinations.
+### Task 2: Guided modification
 
-5. **Boundary evidence.** Add a new enum case and inspect the compiler-reported consumers requiring updates.
+Add a third accounting field only if its meaning is independent.
 
-6. **Transfer and justify.** Choose tuple or named enum/struct for a reusable public API and explain the tradeoff.
+No separate reference answer has been written for this task. Start from Example B: The switch extracts data after establishing the state case. Each outcome exposes only its own meaningful payload.
 
-For tasks 1 and 2, use the checked values and mechanism trace in the two examples. For task 3, choose names that expose the input and result contract and retain the same invariants. For task 4, the diagnosed mistakes below supply a concrete wrong assumption: preserve its counterexample before repairing it. Task 5 needs an explicit expected value or documented rejection at the boundary, not just successful execution. For task 6, explain what changes in the new context and which part of the original mechanism remains applicable. Several representations may satisfy this transfer task; justify the choice rather than treating this reference as the only architecture.
+### Task 3: Independent construction
+
+Model loading, ready and failed states with an enum.
+
+**Reference answer.** It runs as the `Task 3` block of the reference program.
+
+```swift
+enum Load {
+  case loading
+  case ready(Int)
+  case failed(String)
+}
+func label(_ state: Load) -> String {
+  switch state {
+  case .loading: return "loading"
+  case .ready(let count): return "ready:\(count)"
+  case .failed(let reason): return "failed:\(reason)"
+  }
+}
+precondition(label(.loading) == "loading" && label(.ready(3)) == "ready:3")
+precondition(label(.failed("offline")) == "failed:offline")
+```
+
+**Observe:** The states render as loading, ready:3 and failed:offline.
+
+Each case carries only the data that exists in that state, and the switch must handle all three.
+
+### Task 4: Diagnose a defect
+
+Diagnose several optional fields that permit contradictory state combinations.
+
+No reference answer has been written for this task yet. The wrong assumptions to look for are this lesson's pitfalls: An enum raw value and an associated value solve different problems. A catch-all default can conceal a newly added state. Avoid using tuples so large that their positional relationship becomes obscure.
+
+### Task 5: Boundary evidence
+
+Add a new enum case and inspect the compiler-reported consumers requiring updates.
+
+No reference answer has been written for this task yet. Write the expected value or documented rejection for each boundary before running it, and compare with the checks in Example A (Return two related counts) and Example B (Model distinct outcomes).
+
+### Task 6: Transfer and justify
+
+Choose tuple or named enum/struct for a reusable public API and explain the tradeoff.
+
+No single reference answer exists: several designs can satisfy this transfer task. Justify yours against the mechanism described below and the vocabulary entry **Tuple**, and state one limitation of your choice.
 
 ## Mechanism and diagnostic reasoning
 
@@ -36,4 +79,4 @@ An enum raw value and an associated value solve different problems. A catch-all 
 
 ## Review before continuing
 
-The reference checks the worked scenarios, including their boundary distinctions. Your independent and transfer artifacts may have additional checks. Compare observations rather than only source text. Preserve any new regression case you discover and explain why it would reject a plausible wrong implementation. External project steps require their own build and platform evidence and are not established by a portable reference passing.
+Run the reference and confirm that it prints `swift-011: passed`, then reconstruct one boundary case from memory and explain which check would reject a plausible wrong implementation. External project steps need their own build and platform evidence; a passing portable reference does not establish them.

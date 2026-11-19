@@ -8,22 +8,26 @@ A struct groups named fields into one object. An enum gives meaningful names to 
 
 struct Point names a type unless a typedef adds a shorter alias. A designated initializer uses .field=value. The dot operator accesses a struct value; -> accesses through a struct pointer. A union shares storage among alternatives. Switch on an enum tag and handle unexpected values explicitly. Compare meaningful fields rather than relying on memcmp over padding bytes.
 
-## Exercise 1: Use named fields
+## Exercise 1: Use named fields: change one input
 
-Construct Point with x 2 and y 3.
+Copy worked example 1 into a scratch pad and change `struct Point p = {.x = 2, .y = 3};` to `struct Point p = {.x = 3, .y = 3};`. Before running, predict which CHECK fails and which value it now sees; then run it and restore the original line.
+
+The unchanged code is worked example 1:
 
 ```c
 struct Point p = {.x = 2, .y = 3};
 CHECK(p.x + p.y == 5);
 ```
 
-**Expected:** The field sum is 5.
+**Expected:** The changed run stops with `Check failed` at the CHECK on `p.x + p.y == 5`. Restoring the original line brings back the worked observation: the field sum is 5.
 
 Designated initialization preserves field meaning even if declaration order changes.
 
-## Exercise 2: Copy scalar fields
+## Exercise 2: Copy scalar fields: debug a regression
 
-Copy a Point and change the copied x.
+A regression changed one token in worked example 2, so one line now reads `struct Point a = {3, 3};`. Run worked example 2 with that line, use the failing CHECK to locate the defect and repair it without changing the CHECK.
+
+The unchanged code is worked example 2:
 
 ```c
 struct Point a = {2, 3};
@@ -32,7 +36,7 @@ b.x = 9;
 CHECK(a.x == 2 && b.x == 9);
 ```
 
-**Expected:** The original x stays 2.
+**Expected:** Before the repair the run stops with `Check failed` at the CHECK on `a.x == 2 && b.x == 9`; after it the line reads `struct Point a = {2, 3};` again and the original x stays 2.
 
 Scalar fields are copied into independent struct storage. Pointer fields would still designate their original targets.
 

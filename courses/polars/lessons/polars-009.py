@@ -1,4 +1,4 @@
-"""polars-009: worked starting point; complete the guide's six changes."""
+"""polars-009: both worked cases; complete the guide's six changes."""
 
 import polars as pl
 
@@ -22,8 +22,20 @@ def example_one():
     return {"ordered_windows": output.to_dicts()}
 
 
+def example_two():
+    frame = pl.DataFrame({"group": ["A", "A", "B"], "value": [2.0, 6.0, 9.0]})
+    centered = frame.with_columns(
+        (pl.col("value") - pl.col("value").mean().over("group")).alias("centered")
+    )
+    assert centered["centered"].to_list() == [-2.0, 2.0, 0.0]
+    assert frame.group_by("group").agg(pl.col("value").mean()).height == 2
+    assert centered.height == 3
+    return {"row_preserving_values": centered["centered"].to_list(), "grouped_rows": 2}
+
+
 if __name__ == "__main__":
     print(example_one())
+    print(example_two())
 
 # TODO 1: Change the input ordering and retain the explicit sort.
 # TODO 2: Add a same-customer event sharing a timestamp and define its order.

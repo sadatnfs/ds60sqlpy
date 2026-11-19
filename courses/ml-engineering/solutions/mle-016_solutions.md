@@ -102,4 +102,4 @@ if __name__ == "__main__":
 
 ## Interpretation
 
-Activate and recover model state through explicit accepted versions. Test failure before publication and exact rollback behavior, then distinguish local atomicity from the additional guarantees required by a deployed multi-process system.
+Test failure before publication and exact rollback behavior, then distinguish local atomicity from the additional guarantees required by a deployed multi-process system.

@@ -14,55 +14,56 @@ Pretraining data provenance records where a document came from, what use is perm
 
 ## Reading the implementation
 
-A useful record has document_id,source,permission,split,family andcontent_hash. Source identifies origin; permission records an explicit basis or unresolved status. Split states intended information use. Family groups related derivatives. Audit the complete dependency path, including tokenizer fitting and prompt selection, because contamination can occur before gradient training.
+A useful record has document_id, source, permission, split, family and content_hash. Source identifies origin; permission records an explicit basis or unresolved status. Split states intended information use. Family groups related derivatives. Audit the complete dependency path, including tokenizer fitting and prompt selection, because contamination can occur before gradient training.
 
-## Exercise 1: Complete a manifest
+## Exercise 1: Complete a validation row
 
-The question is: Documentd1 is authored for the lesson, familyF1, training;d2 is an authored evaluation question, familyF2,test. Fill required fields.
+The question is: Document d6 is an authored practice question placed in validation, family F3. Write its manifest row and state which uses it may serve.
 
-The placeholder hash labels in this worksheet identify the field to calculate from actual bytes. They are not claimed cryptographic receipts. Every real manifest row needs its actual digest.
-
-```text
-d1 | local author | course fixture permission | train | F1 | hash-of-d1
-d2 | local author | course fixture permission | test  | F2 | hash-of-d2
-```
-
-**Expected:** both rows have source,permission,split,family,hash.
-
-**Verify:** Compare the computed values or written argument with both rows have source,permission,split,family,hash.
-
-## Exercise 2: Flag a benchmark answer
-
-The question is: A candidate training document reproduces the answer tod2. Decide how to treat it before fitting.
-
-Changing the filename or splitting at the row level does not remove the information transfer. The answer has already exposed the assessment target.
+Validation data may guide choices such as early stopping, which is why it must stay separate from the test family F2 used for the final report.
 
 ```text
-candidate d3: answer-to-d2
-Relationship: evaluation-derived
-Training admission: blocked
-Selection-source admission: blocked
+d6 | local author | course fixture permission | validation | F3 | hash-of-d6
+Gradient updates: not admitted
+Model selection: admitted
+Final test reporting: not admitted
 ```
 
-**Expected:** exclude from training and selection sources pending contamination review.
+**Expected:** row d6 | local author | course fixture permission | validation | F3 | hash-of-d6; model selection only, not gradients or final test reporting.
 
-**Verify:** Compare the computed values or written argument with exclude from training and selection sources pending contamination review.
+**Verify:** Check that the d6 row fills all five required fields and that the use list admits model selection while refusing gradient updates and final test reporting.
+
+## Exercise 2: Correct a mislabelled family
+
+The question is: A manifest records d3, the answer to test document d2, as family F1 in train because it came from a crawl labelled training. Identify the error and correct the row.
+
+The family follows the evaluation relationship, not the folder where the bytes were found. Leaving d3 in F1 would let a test answer reach training while every manifest field looked complete.
+
+```text
+Recorded: d3 | crawl | unknown | train | F1
+Problem: d3 reproduces the answer to test document d2
+Corrected: d3 | crawl | unresolved permission | blocked | F2 (evaluation-derived)
+```
+
+**Expected:** d3 belongs to evaluation-derived family F2 and is blocked; a crawl label is neither provenance nor permission.
+
+**Verify:** Check that the corrected row moves d3 from F1 to F2, blocks its training admission and keeps permission unresolved instead of inferring it from the crawl label.
 
 ## Exercise 3: Follow a paraphrase family
 
-The question is: d4 rewritesd3 without sharing an exact hash. Assign a family and audit.
+The question is: d4 rewrites d3 without sharing an exact hash. Assign a family and audit.
 
 A hash detects exact identity, not semantic derivation. Family metadata preserves the relation that matters to this contamination scenario.
 
 ```text
 d3 -> paraphrase -> d4
 Different bytes do not erase provenance.
-FamilyF2 must not cross into train or prompt-selection material.
+Family F2 must not cross into train or prompt-selection material.
 ```
 
-**Expected:** d4 remains in evaluation-derived familyF2.
+**Expected:** d4 remains in evaluation-derived family F2.
 
-**Verify:** Compare the computed values or written argument with d4 remains in evaluation-derived familyF2.
+**Verify:** Check that d4 inherits family F2 through its d3 relationship even though its hash differs, and that the record blocks F2 from training and prompt selection.
 
 ## Exercise 4: Separate permission and cleanliness
 
@@ -78,7 +79,7 @@ Training decision for this experiment: exclude
 
 **Expected:** permission alone does not resolve contamination.
 
-**Verify:** Compare the computed values or written argument with permission alone does not resolve contamination.
+**Verify:** Check that the record has two separate results, permission pass and evaluation independence fail, and that the exclusion follows from the failed check.
 
 ## Exercise 5: Audit preprocessing inputs
 
@@ -95,7 +96,7 @@ Repair: refit tokenizer on admitted training sources and rerun evaluation.
 
 **Expected:** test information influenced the fitted tokenizer.
 
-**Verify:** Compare the computed values or written argument with test information influenced the fitted tokenizer.
+**Verify:** Check that the audit lists d2 among the tokenizer fit sources but not among allowed training sources, and that the repair refits on d1 before evaluation is rerun.
 
 ## Exercise 6: Record an unresolved source
 
@@ -110,7 +111,7 @@ Action: obtain evidence before admitting to the experiment.
 
 **Expected:** origin unresolved; permission unresolved; admission blocked.
 
-**Verify:** Compare the computed values or written argument with origin unresolved; permission unresolved; admission blocked.
+**Verify:** Check that the d5 row keeps origin, permission and family unresolved, requires the actual hash and leaves the document unadmitted.
 
 ## Review after comparison
 

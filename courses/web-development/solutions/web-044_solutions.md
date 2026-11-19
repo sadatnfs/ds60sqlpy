@@ -1,51 +1,43 @@
 # web-044: explanatory solutions
 
-Compare after your own attempt or an explicit solution reveal. This file explains the supplied deterministic fixtures. It does not claim that a learner or a production deployment passed.
-
-## Why the mechanism works
-
-A test compares an observation with an expected contract. A unit test isolates a small behavior; an integration test exercises a boundary such as a database or HTTP server. Both are useful, and neither should be mislabeled as the other. A reference program that prints a success marker without checking the relevant behavior provides weak evidence.
-
-Good cases include ordinary input, an empty or zero boundary, invalid types or ranges, and a previously observed failure. Tests should explain why the expected result is correct instead of repeating the implementation's internal steps. A function and its test can share the same bug if the expected value is computed using the same faulty algorithm.
-
-This course uses a tiny check function that throws RuntimeException on failure, making behavior independent of whether PHP assertions are enabled. Test exceptions by recording whether the expected exception occurred, then check that flag. Do not catch every exception and treat it as the expected one. Full projects can adopt a prepared testing framework, but no dependency installation is needed here.
+Open this after your own attempt. Each answer explains the lesson's synthetic fixtures; it does not show that your work or a deployment passed. The mechanism is explained in `courses/web-development/guides/web-044.md`.
 
 ## Exercise 1: Classify a pure-function check and a real database transaction check.
 
-The first is unit evidence; the second is integration evidence.
+**Expected answer:** The first is unit evidence; the second is integration evidence.
 
-Trace the smallest example before editing. Name which values are source and which are observations.
+**Why:** A pure function check is unit evidence, while a real transaction exercises the database and is integration evidence.
 
 ## Exercise 2: Add an empty-input test with an explicit expected result.
 
-The test records the domain policy rather than guessing from the implementation.
+**Expected evidence:** The test records the domain policy rather than guessing from the implementation.
 
-Change only the named feature. Compare with the unchanged example and explain any unaffected behavior.
+**Why:** Writing the expectation first records the domain policy instead of copying whatever the implementation returns.
 
 ## Exercise 3: Create a test table for a bounded study-duration function.
 
-Normal, zero, invalid and boundary cases have independently justified outcomes.
+**Expected evidence:** Normal, zero, invalid and boundary cases have independently justified outcomes.
 
-Sketch the structure or data contract first. Reuse the mechanism from the examples without copying the reference.
+**Why:** A table with independently justified outcomes catches more defects than examples chosen to match the code.
 
 ## Exercise 4: Diagnose a test that catches the wrong exception as success.
 
-Catch the declared exception narrowly and let unexpected failures remain failures.
+**Expected answer:** Catch the declared exception narrowly and let unexpected failures remain failures.
 
-Keep the failing input. Identify the first layer where the observed result differs from the intended contract.
+**Why:** A broad catch turns any failure into a pass, so the test must catch only the declared exception.
 
 ## Exercise 5: Temporarily introduce a known bug in a learner copy.
 
-A meaningful test fails for the intended reason, then passes after the repair.
+**Expected evidence:** A meaningful test fails for the intended reason, then passes after the repair.
 
-Predict the boundary before running it. Add an explicit check or manual observation that would detect a regression.
+**Why:** A test is meaningful when it fails for the injected bug and passes again after the fix.
 
 ## Exercise 6: Explain why a passing reference is not a bug-free guarantee.
 
-It qualifies the tested contract and cases; untested integration and environment behavior remain separate.
+**Expected answer:** It qualifies the tested contract and cases; untested integration and environment behavior remain separate.
 
-Explain your choice to someone who has not seen the code. Include one limitation and the evidence needed to remove it.
+**Why:** A passing reference covers only its cases and environment; integration, configuration and other inputs remain unverified.
 
-## Reference comparison and limits
+## Reference comparison
 
-Read the separate executable reference, where supplied, only after retaining your attempt. Compare structure and decisions rather than matching every identifier. A different implementation is acceptable when it satisfies the same behavior, preserves accessibility and rejects the same invalid cases. The checked reference uses tiny synthetic inputs so that each transformation can be inspected. It is not a ready-to-deploy authenticated application. Server lifecycle, persistence, concurrency and security require their own integration evidence.
+Open `courses/web-development/solutions/web-044_solution.php` only after saving your attempt, and compare decisions rather than identifiers. A different implementation is acceptable when it shows the same behavior and rejects the same invalid cases. The reference checks only its named synthetic cases; server lifecycle, persistence, concurrency and security need their own integration evidence.

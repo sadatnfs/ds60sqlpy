@@ -16,9 +16,9 @@
         "Compiler",
         "Entrypoint"
       ],
-      "outcome": "Model boxes containing packets containing items. Explain each intermediate value and check the final product.",
+      "outcome": "Build and run Program.cs and check a computed result instead of trusting printed text.",
       "lab": "Write a program calculating the number of seats in four rows of six seats. Check 24 explicitly.",
-      "verification": "Hello, C# appears before the lesson marker. The total is 12, while adding the two inputs gives 7."
+      "verification": "The program computes 24 seats and the check passes silently."
     },
     {
       "id": "csharp-002",
@@ -34,9 +34,9 @@
         "Conversion",
         "Try pattern"
       ],
-      "outcome": "Design an input boundary for a percentage and document its accepted textual and numeric ranges.",
+      "outcome": "Choose numeric types deliberately, convert explicitly and parse text with TryParse instead of exceptions.",
       "lab": "Write a TryParse-based validator accepting only nonnegative whole-number quantities.",
-      "verification": "The integer result is 3 and the floating result is 3.5. 42 parses successfully; words fail without an exception."
+      "verification": "42 is accepted; -1, 4.5 and empty text are rejected without an exception."
     },
     {
       "id": "csharp-003",
@@ -52,9 +52,9 @@
         "Decimal",
         "Rounding policy"
       ],
-      "outcome": "Design a quantity and currency contract that states overflow, rounding and invalid-input behavior.",
+      "outcome": "Detect integer overflow with checked arithmetic and calculate money with decimal and a named rounding rule.",
       "lab": "Calculate a decimal subtotal and tax, rounding only the final payable amount.",
-      "verification": "The maximum int plus one is rejected; 100 plus 20 is accepted. Two valid midpoint policies produce 2.34 and 2.35."
+      "verification": "Subtotal 25.35, unrounded tax 2.091375 and payable 27.44."
     },
     {
       "id": "csharp-004",
@@ -70,9 +70,9 @@
         "Unicode scalar",
         "Encoding"
       ],
-      "outcome": "Design a text-field limit and explain whether its contract measures bytes, scalars or user-visible graphemes.",
+      "outcome": "Compare, transform and measure strings with explicit culture and Unicode policies.",
       "lab": "Implement case-insensitive machine-key comparison with an explicit policy.",
-      "verification": "The original remains data while the result is DATA. One scalar occupies two UTF-16 units and four UTF-8 bytes."
+      "verification": "Keys that differ only by ASCII case match; a different separator does not."
     },
     {
       "id": "csharp-005",
@@ -88,9 +88,9 @@
         "Short circuit",
         "Boundary"
       ],
-      "outcome": "Choose a routing policy with three mutually exclusive outcomes and explain how invalid values are represented.",
+      "outcome": "Write complete, non-overlapping decisions with if statements and switch expressions, including boundary values.",
       "lab": "Write a classifier for negative, zero and positive temperatures.",
-      "verification": "The missing value is handled without dereferencing null. 59 retries, 60 passes, and 101 is rejected."
+      "verification": "-5, 0 and 12 are classified as below zero, zero and above zero."
     },
     {
       "id": "csharp-006",
@@ -106,9 +106,9 @@
         "Accumulator",
         "Termination"
       ],
-      "outcome": "Design a bounded retry loop and explain both its invariant and its stopping argument.",
+      "outcome": "Write loops with a stated invariant and termination condition, including empty and not-found cases.",
       "lab": "Implement a first-match search returning a separate not-found representation.",
-      "verification": "The sum is 12 and the empty sum is zero. The first 8 is at index 1; 9 is absent."
+      "verification": "The first 7 is at index 1; a missing target and an empty array both return false."
     },
     {
       "id": "csharp-007",
@@ -124,9 +124,9 @@
         "Argument",
         "Pure function"
       ],
-      "outcome": "Extract one computation from a larger program and state its input, output, mutation and failure contract.",
+      "outcome": "Write methods with validated parameters and explicit return contracts that reject invalid input.",
       "lab": "Write a method computing an area from validated nonnegative dimensions.",
-      "verification": "The result is 14 and the caller still holds 7. 12 divided by 3 returns 4; the exact-integer contract rejects 7 divided by 2."
+      "verification": "3 by 4 gives 12, a zero side gives 0, and a negative side throws."
     },
     {
       "id": "csharp-008",
@@ -142,9 +142,9 @@
         "Alias",
         "Shape"
       ],
-      "outcome": "Choose rectangular or jagged storage for variable-length sensor histories and justify the choice.",
+      "outcome": "Tell array aliases from copies and traverse rectangular arrays with bounds taken from the data.",
       "lab": "Compute each row sum of the two-by-three grid.",
-      "verification": "The alias changes source; the copied integer array retains 2. The shape is two by three and the sum is 21."
+      "verification": "The row sums are 6 and 15."
     },
     {
       "id": "csharp-009",
@@ -160,9 +160,9 @@
         "Capacity",
         "Snapshot"
       ],
-      "outcome": "Choose mutation or a new sequence for an undoable editor operation and explain who observes the change.",
+      "outcome": "Filter and mutate lists safely, telling capacity from count and copies from in-place changes.",
       "lab": "Produce a filtered list while preserving the original.",
-      "verification": "Reserving ten slots leaves Count at zero; two appends produce Count two. Two entries are removed while the earlier integer snapshot keeps four values."
+      "verification": "The new list holds 2 and 4 while the original still has four items."
     },
     {
       "id": "csharp-010",
@@ -178,9 +178,9 @@
         "Hashing",
         "Membership"
       ],
-      "outcome": "Design stable identity for records and explain which fields may change without invalidating lookup.",
+      "outcome": "Count and deduplicate with dictionaries and sets under an explicit comparer, keeping a present zero distinct from absence.",
       "lab": "Build a frequency dictionary from a list of tags.",
-      "verification": "OAK finds a present zero; Pine is absent. RED is a duplicate under the selected comparer."
+      "verification": "red counts 2 and blue counts 1."
     },
     {
       "id": "csharp-011",
@@ -196,9 +196,9 @@
         "Flow analysis",
         "Fallback"
       ],
-      "outcome": "Design an import field whose missing value has different meaning from an explicit zero or empty value.",
+      "outcome": "Represent missing information with nullable types and keep missing, zero and present values distinct.",
       "lab": "Write a formatter preserving missing, zero and positive measurements.",
-      "verification": "The optional length is absent, not zero. A measured zero and an unknown measurement produce distinct descriptions."
+      "verification": "null, 0 and 5 are formatted as missing, zero and 5 units."
     },
     {
       "id": "csharp-012",
@@ -214,9 +214,9 @@
         "Reference semantics",
         "Ownership"
       ],
-      "outcome": "Design a data boundary that prevents callers from mutating an internal collection.",
+      "outcome": "Predict copying and sharing for structs and classes and choose the right kind for a value or shared state.",
       "lab": "Choose a representation for a coordinate and for a shared session, explaining the difference.",
-      "verification": "Changing the copied point leaves the original X at 2. Both references observe the same counter increment."
+      "verification": "Changing the copied coordinate leaves the original at 1, while both session variables see 3."
     },
     {
       "id": "csharp-013",
@@ -232,8 +232,8 @@
         "Encapsulation",
         "Failure atomicity"
       ],
-      "outcome": "Explain whether a shared wallet needs synchronization when several tasks may spend concurrently.",
-      "lab": "Implement a bounded inventory whose reservations never make stock negative.",
+      "outcome": "Encapsulate state in a class whose constructor and methods keep its invariants on every path.",
+      "lab": "Reproduce Example A (Preserve a nonnegative balance) and Example B (Reject malformed operations) and explain each check.",
       "verification": "Spending 4 succeeds; spending 7 afterward fails without changing 6. Negative spending is rejected and zero is an accepted no-op."
     },
     {
@@ -250,8 +250,8 @@
         "With expression",
         "Shallow copy"
       ],
-      "outcome": "Choose identity-based or data-based equality for an order and explain how updates affect collection membership.",
-      "lab": "Design an immutable coordinate using a readonly record struct.",
+      "outcome": "Use records and structs for value equality and explain what a shallow with-copy shares.",
+      "lab": "Reproduce Example A (Equal data with distinct identities) and Example B (Notice nested shared state) and explain each check.",
       "verification": "Equal records can be distinct objects; with preserves the previous age. Both records see the appended list item."
     },
     {
@@ -268,8 +268,8 @@
         "Guard",
         "State model"
       ],
-      "outcome": "Replace several loosely related flags in a program with explicit states and justify which impossible combinations disappear.",
-      "lab": "Model a loading, ready and failed operation with separate payloads.",
+      "outcome": "Model explicit states with records and pattern matching so each state carries only its own data.",
+      "lab": "Reproduce Example A (Narrow before using a value) and Example B (Represent results without impossible combinations) and explain each check.",
       "verification": "The same method distinguishes type, value range and string shape. Success carries a count; failure carries a reason."
     },
     {
@@ -286,9 +286,9 @@
         "Rejection",
         "Aggregation"
       ],
-      "outcome": "Design a reusable import result that retains per-line rejection reasons without exposing sensitive raw input.",
+      "outcome": "Build a validated inventory importer that reports accepted totals and rejected lines deterministically.",
       "lab": "Build a sorted text report from the accepted dictionary and the rejection count.",
-      "verification": "Pear totals 6 and apple totals 3. Three rejected lines do not alter the valid pear total."
+      "verification": "The report lists apple: 3, pear: 3 and rejected: 1 in that order."
     },
     {
       "id": "csharp-017",
@@ -304,8 +304,8 @@
         "Substitution",
         "Dependency injection"
       ],
-      "outcome": "Choose one dependency worth injecting in the inventory importer and explain the testing benefit.",
-      "lab": "Define a small interface for a deterministic label formatter.",
+      "outcome": "Program against an interface so different policies can be substituted without changing the consumer.",
+      "lab": "Reproduce Example A (Use a declared contract) and Example B (Change policy without changing the consumer) and explain each check.",
       "verification": "Four units cost 12 and zero units cost zero. The same consumer applies a capped or uncapped policy."
     },
     {
@@ -322,8 +322,8 @@
         "Constraint",
         "Type safety"
       ],
-      "outcome": "Design a generic helper with the smallest useful capability constraint.",
-      "lab": "Create a generic immutable three-element container.",
+      "outcome": "Write generic types and methods whose constraints state exactly the capabilities they need.",
+      "lab": "Reproduce Example A (Retain the element type) and Example B (Preserve a generic relationship) and explain each check.",
       "verification": "The same method returns an int or a string without object casts. Swap preserves the element type, and a tie remains a valid value."
     },
     {
@@ -340,9 +340,9 @@
         "Closure",
         "Subscription"
       ],
-      "outcome": "Design ownership for subscriptions in a screen or service that can be disposed.",
+      "outcome": "Use delegates, closures and events, including what a closure captures and how to unsubscribe.",
       "lab": "Write a transformation method accepting Func<int,int>.",
-      "verification": "Changing factor changes later calls through the closure. Only the first emission reaches the removed handler."
+      "verification": "Applying value * 10 gives 10, 20 and 30 and leaves the input unchanged."
     },
     {
       "id": "csharp-020",
@@ -358,9 +358,9 @@
         "Projection",
         "Materialization"
       ],
-      "outcome": "Choose streaming or materialization for a large import and explain memory and repeatability tradeoffs.",
+      "outcome": "Write LINQ queries and predict when deferred execution observes later source changes.",
       "lab": "Build a deterministic report selecting, transforming and ordering records.",
-      "verification": "The deferred query sees the subsequently appended 3. The earlier snapshot contains only 2 while a new projection sees three values."
+      "verification": "The report is apple=5 then pear=2; fig with quantity 0 is filtered out."
     },
     {
       "id": "csharp-021",
@@ -376,9 +376,9 @@
         "Cardinality",
         "Join key"
       ],
-      "outcome": "Design checks that distinguish one-to-one, one-to-many and many-to-many joins before aggregation.",
+      "outcome": "Group and join data at an explicit grain without duplicating or dropping records.",
       "lab": "Build a report joining unique item metadata to item totals.",
-      "verification": "Three event rows become two category totals. One left row becomes two joined rows."
+      "verification": "Each item appears once with its total: pear=5 and apple=4."
     },
     {
       "id": "csharp-022",
@@ -394,9 +394,9 @@
         "Enumeration",
         "Laziness"
       ],
-      "outcome": "Choose a sequence API for a large file and document repeated-enumeration and resource-lifetime behavior.",
+      "outcome": "Write lazy iterators with yield return and validate their arguments at the call boundary.",
       "lab": "Implement a lazy sequence of cumulative totals.",
-      "verification": "The consumer receives 5 and 6 and can stop before the full range. Negative count is rejected immediately, without enumeration."
+      "verification": "1, 2, 3 produces 1, 3, 6; an empty input produces nothing."
     },
     {
       "id": "csharp-023",
@@ -412,9 +412,9 @@
         "Stack trace",
         "Translation"
       ],
-      "outcome": "Decide which layer owns user-facing error translation and which details should remain private diagnostics.",
+      "outcome": "Throw and catch exceptions that keep invalid input, environment failures and their causes distinct.",
       "lab": "Define an import API with distinct invalid-input and storage-failure outcomes.",
-      "verification": "Malformed numeric text is caught as a format error. The outer domain failure still contains the I/O cause."
+      "verification": "Valid input returns 3; bad text and unavailable storage end in different exception types."
     },
     {
       "id": "csharp-024",
@@ -430,9 +430,9 @@
         "IDisposable",
         "Scope"
       ],
-      "outcome": "Document ownership and leave-open behavior for a parser that wraps a stream reader.",
+      "outcome": "Release disposable resources deterministically with using, including when an exception occurs.",
       "lab": "Write a helper that reads from a caller-owned stream without closing it.",
-      "verification": "The resource is open inside and closed afterward. The controlled exception still triggers cleanup."
+      "verification": "The helper returns data and the caller's stream is still readable afterward."
     },
     {
       "id": "csharp-025",
@@ -448,9 +448,9 @@
         "Encoding",
         "Owned temporary directory"
       ],
-      "outcome": "Explain what must change to make a persistent report update crash-recoverable.",
+      "outcome": "Read and write files with explicit encodings inside an owned temporary folder that is always cleaned up.",
       "lab": "Build a temporary-file round trip for a small inventory report.",
-      "verification": "The Unicode text round-trips and the owned directory is removed. A simple leaf name and a nested path are recognized as different shapes."
+      "verification": "The report reads back unchanged and the temporary folder is gone afterward."
     },
     {
       "id": "csharp-026",
@@ -466,9 +466,9 @@
         "Schema",
         "Migration"
       ],
-      "outcome": "Design a migration from a renamed quantity field while retaining old saved records.",
+      "outcome": "Serialize JSON contracts and validate decoded data before trusting it.",
       "lab": "Write a decoder returning explicit validation errors for missing name and negative quantity.",
-      "verification": "The restored name and quantity match the original record. Valid JSON can decode into a rejected domain value."
+      "verification": "A valid item gives no errors; a missing name with quantity -1 gives two errors."
     },
     {
       "id": "csharp-027",
@@ -484,9 +484,9 @@
         "Offset",
         "Duration"
       ],
-      "outcome": "Design storage and display policies for appointments in a named time zone.",
+      "outcome": "Represent instants and durations with DateTimeOffset and format them independently of culture.",
       "lab": "Build a duration report using fixed UTC timestamps.",
-      "verification": "The values denote the same instant despite different offsets. The elapsed duration is 90 minutes and the timestamp round-trips."
+      "verification": "22:30 to 01:15 UTC is reported as 165 minutes."
     },
     {
       "id": "csharp-028",
@@ -502,9 +502,9 @@
         "Regression case",
         "Boundary test"
       ],
-      "outcome": "Separate unit and integration evidence for a JSON file importer.",
+      "outcome": "Write table-driven tests with boundary cases that a plausible wrong implementation fails.",
       "lab": "Write table-driven checks for your inventory quantity validator.",
-      "verification": "Negative, zero and positive cases preserve their intended categories. The zero case catches the incorrect default, and clamping twice changes nothing further."
+      "verification": "All four rows pass, including both edges of the 0 to 1000 range."
     },
     {
       "id": "csharp-029",
@@ -520,9 +520,9 @@
         "Await",
         "Composition"
       ],
-      "outcome": "Explain when CPU work might need scheduling separately from an asynchronous I/O API.",
+      "outcome": "Write async methods that await results, propagate failures and keep input order with Task.WhenAll.",
       "lab": "Write an async method returning a validated total.",
-      "verification": "Await yields 7 and confirms successful completion. WhenAll retains input order and await exposes the task exception."
+      "verification": "Parts 2 and 5 produce the validated total 7."
     },
     {
       "id": "csharp-030",
@@ -538,9 +538,9 @@
         "Wait cancellation",
         "Unknown result"
       ],
-      "outcome": "Design an operation receipt distinguishing cancelled waiting, confirmed cancellation and unknown outcome.",
+      "outcome": "Cancel work cooperatively with CancellationToken while keeping already committed results.",
       "lab": "Write an operation that stops cooperatively and preserves already committed work.",
-      "verification": "The token check acknowledges cancellation. The wait cancels, then the original task later completes with 9."
+      "verification": "Processing stops before item 3, and items 1 and 2 remain committed."
     },
     {
       "id": "csharp-031",
@@ -556,9 +556,9 @@
         "Admission",
         "Drain"
       ],
-      "outcome": "Choose wait, reject or drop behavior for a workload and explain what evidence the producer receives.",
+      "outcome": "Connect producers and consumers through bounded channels with explicit completion.",
       "lab": "Build a bounded producer-consumer pipeline with explicit writer completion.",
-      "verification": "The first item is accepted and the second immediate write is refused. Both admitted items are read after completion, and later writes fail."
+      "verification": "The consumer receives five items, 1 to 5, and the sum is 15."
     },
     {
       "id": "csharp-032",
@@ -574,9 +574,9 @@
         "Domain validation",
         "Service result"
       ],
-      "outcome": "Design an adapter boundary for a file or HTTP source without putting I/O inside the pure aggregation.",
+      "outcome": "Build a deterministic, cancellable import service that keeps per-item results and rejection counts.",
       "lab": "Build a per-item result while preserving the rejected count.",
-      "verification": "The service returns total 2 and one rejected record. A cancelled request and a successful empty import have different outcomes."
+      "verification": "pear has 2 accepted units and one rejected record is counted."
     },
     {
       "id": "csharp-033",
@@ -592,9 +592,9 @@
         "Mutual exclusion",
         "Deadlock"
       ],
-      "outcome": "Choose immutable snapshots or a lock for a shared report cache and justify the ownership model.",
+      "outcome": "Protect compound invariants with a lock so concurrent updates never expose a half-finished change.",
       "lab": "Implement a locked transfer preserving the sum of two balances.",
-      "verification": "Four tasks produce exactly 400 increments. The reader uses the same gate as mutation."
+      "verification": "After ten concurrent transfers of 5 the balances are 50 and 50, still summing to 100."
     },
     {
       "id": "csharp-034",
@@ -610,9 +610,9 @@
         "Thread-safe operation",
         "Factory purity"
       ],
-      "outcome": "Explain why atomically updating two separate balances does not preserve a transfer invariant.",
+      "outcome": "Use Interlocked and concurrent collections with pure update functions for correct concurrent counts.",
       "lab": "Build a concurrent frequency counter using pure update functions.",
-      "verification": "The atomic count is exactly 400. Twenty admitted updates produce 20."
+      "verification": "a is counted 3 times and b once."
     },
     {
       "id": "csharp-035",
@@ -628,9 +628,9 @@
         "Slice",
         "Lifetime"
       ],
-      "outcome": "Choose Span or Memory for a synchronous parser and an asynchronous buffer owner.",
+      "outcome": "Use Span and ReadOnlySpan to slice data without copying while respecting their lifetime rules.",
       "lab": "Write a synchronous span helper counting separators.",
-      "verification": "Only the middle element changes. The digit total is 6 and empty input totals zero."
+      "verification": "a,b,c has two separators and an empty span has none."
     },
     {
       "id": "csharp-036",
@@ -646,9 +646,9 @@
         "Pool",
         "Logical length"
       ],
-      "outcome": "Decide whether pooling is justified using allocation measurements and a stated lifetime contract.",
+      "outcome": "Rent and return pooled buffers with finally and reason about retained memory.",
       "lab": "Write a pooled-buffer helper with finally-based return.",
-      "verification": "Only three initialized elements contribute to the total. Clearing removes the application references without promising collection timing."
+      "verification": "Summing the first four slots gives 10."
     },
     {
       "id": "csharp-037",
@@ -664,9 +664,9 @@
         "Cost model",
         "Benchmark"
       ],
-      "outcome": "Write a benchmark plan specifying workload, correctness checks, warmup and allocation measurements.",
+      "outcome": "Compare an algorithm's work with and without an index while keeping the same equality policy.",
       "lab": "Compare repeated list scans with one built index while preserving equality policy.",
-      "verification": "Finding the last element needs four comparisons. The index answers membership while storing four identities."
+      "verification": "Both approaches find 2 of the 3 queries."
     },
     {
       "id": "csharp-038",
@@ -682,9 +682,9 @@
         "Semantic validation",
         "ReDoS"
       ],
-      "outcome": "Choose a parser or regex for a nested format and justify complexity and error reporting.",
+      "outcome": "Validate bounded input with non-backtracking regular expressions and separate domain rules.",
       "lab": "Validate a structured identifier and then check its domain-specific reserved words.",
-      "verification": "The identifier begins with a lowercase letter and uses only admitted characters. The plus sign is matched literally."
+      "verification": "report_2 is accepted; admin and 2report are rejected for different reasons."
     },
     {
       "id": "csharp-039",
@@ -700,9 +700,9 @@
         "Status code",
         "Test double"
       ],
-      "outcome": "Design a retry policy that distinguishes safe reads from writes with unknown outcomes.",
+      "outcome": "Call HTTP services through an injected HttpClient and test status and content contracts offline.",
       "lab": "Write a client method accepting a supplied HttpClient and CancellationToken.",
-      "verification": "The handler supplies count 3 without network access. 503 remains an observable failure rather than a default successful count."
+      "verification": "The method returns 4 from the fixture handler without any network access."
     },
     {
       "id": "csharp-040",
@@ -718,9 +718,9 @@
         "Adapter",
         "Dependency direction"
       ],
-      "outcome": "Draw dependency direction for a command-line adapter, HTTP adapter and shared domain library.",
+      "outcome": "Separate a domain core from its adapters so validation and time are testable without infrastructure.",
       "lab": "Extract the inventory aggregation into a transport-independent core.",
-      "verification": "The result uses the supplied instant. A different clock does not bypass identity validation."
+      "verification": "Quantities 2, -1 and 3 aggregate to total 5 with one rejection."
     },
     {
       "id": "csharp-041",
@@ -736,8 +736,8 @@
         "Status mapping",
         "Idempotency"
       ],
-      "outcome": "Design idempotent update behavior and explain how duplicate creation differs.",
-      "lab": "Run the separately prepared ApiLab project and inspect GET and POST responses.",
+      "outcome": "Design an HTTP API contract and run it in the prepared ASP.NET project with real responses.",
+      "lab": "Reproduce Example A (Map a valid request) and Example B (Reject before claiming success) and explain each check.",
       "verification": "Valid input maps to the created outcome. Invalid requests produce 400 decisions."
     },
     {
@@ -754,9 +754,9 @@
         "Authorization",
         "Default deny"
       ],
-      "outcome": "Describe authorization checks for a resource owned by another user and the evidence each check needs.",
+      "outcome": "Apply allowlists and redaction at trust boundaries so errors stay useful without leaking secrets.",
       "lab": "Design an allowlist of fields safe to include in an import error.",
-      "verification": "Read is allowed and delete is denied. The token is replaced while a status remains visible."
+      "verification": "The visible error keeps line, field and reason and drops the token."
     },
     {
       "id": "csharp-043",
@@ -772,9 +772,9 @@
         "Restore",
         "Publish"
       ],
-      "outcome": "Design a dependency update review including lock changes, license checks and runtime evidence.",
-      "lab": "Move a pure domain type into the supplied class-library project and run its executable checks.",
-      "verification": "The running framework generation is compatible with the declared classroom target. The example preserves the intended target and nullable policy."
+      "outcome": "Explain restore, build, run and publish, and check the target framework a build actually produced.",
+      "lab": "Reproduce Example A (Expose environment facts without overclaiming) and Example B (Read the compiled target framework) and explain each check.",
+      "verification": "The running framework generation is compatible with the declared classroom target. The compiled program reports .NETCoreApp,Version=v10.0, the framework its project targeted, and runs on a .NET 10 runtime."
     },
     {
       "id": "csharp-044",
@@ -790,9 +790,9 @@
         "Correlation identity",
         "Metric"
       ],
-      "outcome": "Design a latency report that includes percentiles, sample count and measurement boundaries.",
+      "outcome": "Emit structured events and counts that account for every submitted record.",
       "lab": "Instrument your import project with submitted, accepted and rejected counts.",
-      "verification": "The serialized event contains an explicit rejected outcome. Five submitted records are fully accounted for and rejection rate is 0.4."
+      "verification": "5 submitted records split into 3 accepted and 2 rejected."
     },
     {
       "id": "csharp-045",
@@ -808,9 +808,9 @@
         "AOT",
         "ABI"
       ],
-      "outcome": "Plan an external Native AOT experiment stating target architecture, native prerequisites and runtime checks.",
+      "outcome": "Weigh reflection against typed access and explain what trimming and AOT require.",
       "lab": "Replace string-based access in a small report with a typed projection.",
-      "verification": "The known property is an int and the missing property is absent. The fixed projection needs no string-based member lookup."
+      "verification": "The typed projection sums the counts to 7."
     },
     {
       "id": "csharp-046",
@@ -826,9 +826,9 @@
         "Target typing",
         "Primary constructor"
       ],
-      "outcome": "Review a proposed new feature and justify adopting it using readability, compatibility and tooling evidence.",
-      "lab": "Refactor one simple class to a primary constructor without changing behavior.",
-      "verification": "The target types select array and list representations. The supplied factor is used by the instance operation."
+      "outcome": "Use C# 12 to 14 features such as collection expressions, primary constructors and null-conditional assignment where they make code clearer.",
+      "lab": "Reproduce Example A (Use a target-typed collection) and Example B (Keep constructor policy visible) and explain each check.",
+      "verification": "The target types select array and list representations. The supplied factor is used by the instance operation, nameof(List<>) is List, missing?.Capacity = 32 leaves the null builder alone, and \\e is the escape character."
     },
     {
       "id": "csharp-047",
@@ -844,15 +844,15 @@
         "Transient failure",
         "Reconciliation"
       ],
-      "outcome": "Design durable atomic storage for an effect and its receipt and state remaining failure modes.",
+      "outcome": "Make retried operations idempotent by storing receipts and rejecting conflicting reuse of an identifier.",
       "lab": "Implement a result lookup that does not execute the command again.",
-      "verification": "The repeated identity returns its prior result without increasing the total. A new identity applies separately, while a changed payload under an old key is rejected."
+      "verification": "Both calls return receipt 30, and the command ran only once."
     },
     {
       "id": "csharp-048",
       "title": "Capstone: a reviewable .NET data application",
       "level": "advanced",
-      "minutes": 120,
+      "minutes": 180,
       "prerequisites": [
         "csharp-047"
       ],
@@ -862,8 +862,8 @@
         "Evidence boundary",
         "Maintainability"
       ],
-      "outcome": "Deliver a project README with build commands, architecture, failure policies, tests, operational limits and a proposed next extension.",
-      "lab": "Build the external DomainLab and expose the domain contract through the ApiLab adapter.",
+      "outcome": "Build, test and review a complete .NET data application across a domain library and an API adapter.",
+      "lab": "Reproduce Example A (Build a stable valid report) and Example B (Preserve rejected data accounting) and explain each check.",
       "verification": "The sorted report is a=3;b=6. A valid zero remains in the report while two invalid rows are counted."
     }
   ]

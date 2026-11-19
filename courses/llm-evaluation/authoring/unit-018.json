@@ -9,6 +9,7 @@
     "autograd"
   ],
   "outcome": "Perform actual CPU gradient updates on a tiny reward predictor and expose a length shortcut using independent comparison features.",
+  "verification": "The analytic and autograd initial gradients match in float64, a reversed comparison flips the margin sign, the trained model weights length above both evidence features, and the final-state loss differs from the last pre-update loss.",
   "level": "advanced",
   "runtime": "llm-torch-cpu",
   "minutes": 120,

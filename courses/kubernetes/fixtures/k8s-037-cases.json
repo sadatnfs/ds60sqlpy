@@ -6,7 +6,7 @@
   "cases": [
     {
       "exercise": 1,
-      "task": "Name server,node image,client,controller and storage/network versions needed in a receipt.",
+      "task": "Name server, node image, client, controller and storage/network versions needed in a receipt.",
       "expected": "A concrete pinned stack rather than a generic latest label."
     },
     {

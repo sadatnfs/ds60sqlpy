@@ -1,6 +1,6 @@
 # rust-009: explanation and comparison
 
-Attempt the six guide tasks before opening this comparison. The executable reference is [rust-009_solution.rs](rust-009_solution.rs). Its assertions are always active under the prepared classroom compile settings.
+Attempt the six guide tasks before opening this comparison. The executable reference is [rust-009_solution.rs](rust-009_solution.rs). It runs both worked examples and the reference answers below, and its assertions are always active under the prepared classroom compile settings.
 
 ## Why the two examples differ
 
@@ -8,21 +8,59 @@ Attempt the six guide tasks before opening this comparison. The executable refer
 
 **Return a borrowed view:** The function returns a slice whose validity depends on the input owner. The result is a view into caller-owned text, with an explicit empty policy.
 
-## Reason through the six tasks
+## Task answers
 
-1. **Predict and explain.** Identify the owner and both readers.
+### Task 1: Predict and explain
 
-2. **Guided modification.** Add another read-only inspection without cloning.
+Identify the owner and both readers.
 
-3. **Independent construction.** Write a last-word function returning a borrowed slice.
+No separate reference answer has been written for this task. Example A is the evidence to compare with: Both references inspect the same allocation without taking release responsibility. Two readers coexist and the owner remains intact.
 
-4. **Diagnose a defect.** Try returning a reference to a local String and explain the compiler rejection.
+### Task 2: Guided modification
 
-5. **Boundary evidence.** Test empty text and a single word.
+Add another read-only inspection without cloning.
 
-6. **Transfer and justify.** Choose a borrowed view or owned result for a parser whose caller may discard the input immediately.
+No separate reference answer has been written for this task. Start from Example B: The function returns a slice whose validity depends on the input owner. The result is a view into caller-owned text, with an explicit empty policy.
 
-For tasks 1 and 2, use the checked values and mechanism trace in the two examples. For task 3, choose names that expose the input and result contract and retain the same invariants. For task 4, the diagnosed mistakes below supply a concrete wrong assumption: preserve its counterexample before repairing it. Task 5 needs an explicit expected value or documented rejection at the boundary, not just successful execution. For task 6, explain what changes in the new context and which part of the original mechanism remains applicable. Several representations may satisfy this transfer task; justify the choice rather than treating this reference as the only architecture.
+### Task 3: Independent construction
+
+Write a last-word function returning a borrowed slice.
+
+**Reference answer.** The same statements run as the `Task 3` block of the reference program; here they are wrapped in `main` as a complete file.
+
+```rust
+fn main() -> Result<(), Box<dyn std::error::Error>> {
+    fn last_word(text: &str) -> &str {
+        text.split_whitespace().last().unwrap_or("")
+    }
+    let sentence = String::from("pear apple");
+    assert_eq!(last_word(&sentence), "apple");
+    assert_eq!(last_word(""), "");
+    Ok(())
+}
+```
+
+**Observe:** The last word of pear apple is apple; empty text gives an empty slice.
+
+The returned slice borrows from the input, so the elided lifetime ties the result to text and no new String is allocated.
+
+### Task 4: Diagnose a defect
+
+Try returning a reference to a local String and explain the compiler rejection.
+
+No reference answer has been written for this task yet. The wrong assumptions to look for are this lesson's pitfalls: A reference cannot make its owner live longer by declaration alone. Borrow duration follows actual use constraints. Avoid converting every slice to String unless independent ownership is needed.
+
+### Task 5: Boundary evidence
+
+Test empty text and a single word.
+
+No reference answer has been written for this task yet. Write the expected value or documented rejection for each boundary before running it, and compare with the checks in Example A (Borrow more than once) and Example B (Return a borrowed view).
+
+### Task 6: Transfer and justify
+
+Choose a borrowed view or owned result for a parser whose caller may discard the input immediately.
+
+No single reference answer exists: several designs can satisfy this transfer task. Justify yours against the mechanism described below and the vocabulary entry **Shared borrow**, and state one limitation of your choice.
 
 ## Mechanism and diagnostic reasoning
 
@@ -36,4 +74,4 @@ A reference cannot make its owner live longer by declaration alone. Borrow durat
 
 ## Review before continuing
 
-The reference checks the worked scenarios, including their boundary distinctions. Your independent and transfer artifacts may have additional checks. Compare observations rather than only source text. Preserve any new regression case you discover and explain why it would reject a plausible wrong implementation. External project steps require their own build and platform evidence and are not established by a portable reference passing.
+Run the reference and confirm that it prints `rust-009: passed`, then reconstruct one boundary case from memory and explain which check would reject a plausible wrong implementation. External project steps need their own build and platform evidence; a passing portable reference does not establish them.

@@ -53,7 +53,7 @@ Reverse [1, 2, 3] against a literal expected vector.
 
 **Reasoning:** The expected result is independent of the implementation.
 
-**Verify:** Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.
+**Verify:** Assert `reversed({1, 2, 3}) == std::vector<int>{3, 2, 1}`, as Worked example 1 does; the expected vector is typed by hand, not computed with `std::reverse`.
 
 ## Exercise 2: Enumerate a property
 
@@ -63,7 +63,7 @@ Test all pairs from integers -2 through 2.
 
 **Reasoning:** The finite domain gives a known work budget.
 
-**Verify:** Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.
+**Verify:** Loop over every pair `a, b` from -2 to 2, count the pairs whose double reversal returns `{a, b}`, and assert the count is 25.
 
 ## Exercise 3: Add a boundary corpus
 
@@ -73,7 +73,7 @@ Include empty, singleton and duplicate vectors.
 
 **Reasoning:** Edges exercise different shapes.
 
-**Verify:** Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.
+**Verify:** Assert that double reversal returns `{}`, `{7}` and `{2, 2}` unchanged, and also that `reversed({7}) == std::vector<int>{7}` directly.
 
 ## Exercise 4: Expose a weak property
 
@@ -83,7 +83,7 @@ Replace reversal with identity in a scratch copy.
 
 **Reasoning:** A property can be necessary without being sufficient.
 
-**Verify:** Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.
+**Verify:** Run both tests against the identity version: the double-reversal assertion still passes while the `{3, 2, 1}` golden assertion fails, so the property alone is too weak.
 
 ## Exercise 5: Save a reproduction
 
@@ -93,7 +93,7 @@ Break reversal to drop the first item.
 
 **Reasoning:** A minimized failing case is easier to diagnose than a seed alone.
 
-**Verify:** Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.
+**Verify:** Record the smallest input that fails, such as the singleton `{7}` coming back empty, together with the exact assertion that fired.
 
 ## Exercise 6: Transfer to a parser
 
@@ -103,4 +103,4 @@ Design encode/decode properties and independent malformed inputs.
 
 **Reasoning:** Round-trip tests alone can let matching bugs agree.
 
-**Verify:** Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.
+**Verify:** Assert that decoding an encoded record returns the same ID and cents for several valid pairs, and separately that hand-written `"v1,7,125x"` and `"v2,7,125"` are rejected.

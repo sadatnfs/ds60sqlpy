@@ -9,6 +9,7 @@
     "policy gradient"
   ],
   "outcome": "Derive an exact finite-policy optimum and show why improving a proxy reward can reduce independently defined task utility.",
+  "verification": "Adding a reward constant or rescaling reward together with beta leaves the optimal policy unchanged, the gradient sums to approximately 0, large rewards still normalize to finite probabilities, missing support is rejected, and proxy reward rises while independent utility falls.",
   "level": "advanced",
   "runtime": "python-core",
   "minutes": 120,

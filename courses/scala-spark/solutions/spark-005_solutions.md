@@ -60,7 +60,7 @@ assert(parseAmount(None) == parseAmount(Some("bad")))
 
 Return valid parsed amounts in original order using flatMap. Preserve zero and duplicate amounts; do not substitute defaults for missing or rejected tokens.
 
-**Expected:** The five-token fixture yields Seq(0L,25L). Adding another Some("25") yields two 25-cent occurrences.
+**Expected:** The five-token fixture yields Seq(0L, 25L). Adding another Some("25") yields two 25-cent occurrences.
 
 ```scala
 def observed(tokens: Seq[Option[String]]): Seq[Long] = {

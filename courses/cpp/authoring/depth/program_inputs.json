@@ -49,7 +49,7 @@
     "definitions": "std::vector<int> doubled(const std::vector<int>& xs) { auto out=xs; for(int& x:out) x*=2; return out; }",
     "program_bodies": [
       "auto out=doubled(std::vector<int>{2,4});\nassert((out==std::vector<int>{4,8}));",
-      "const std::vector<int> xs{2,4}; auto ys=xs; ys[0]=99;"
+      "const std::vector<int> xs{2,4}; auto ys=xs; ys[0]=99;\nassert((xs==std::vector<int>{2,4}));\nassert((ys==std::vector<int>{99,4}));"
     ],
     "original_observations": [
       "An owned result [4,8] survives the temporary argument.",
@@ -132,7 +132,7 @@
     "number": 16,
     "definitions": "struct Batch { std::vector<int> values; std::string label; };",
     "program_bodies": [
-      "Batch a{{1,2},\"A\"}; Batch b=a; b.values[0]=9;",
+      "Batch a{{1,2},\"A\"}; Batch b=a; b.values[0]=9;\nassert((a.values==std::vector<int>{1,2}));\nassert((b.values==std::vector<int>{9,2}));",
       "Batch a{{1,2},\"A\"};\nBatch b=std::move(a);\nassert((b.values==std::vector<int>{1,2}));\na=Batch{{4},\"new\"};\nassert(a.values[0]==4);"
     ],
     "original_observations": [

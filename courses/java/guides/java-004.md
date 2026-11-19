@@ -6,7 +6,7 @@ Beginner, approximately 90 minutes. Direct prerequisites: `java-003`
 
 ## Learning objectives
 
-Explain parameter, return value, pass by value using a concrete program. Trace the normal execution, identify its boundary assumptions and make a failure case observable. The first investigation is Implement doubleValue(int x) and evaluate 7 and 0. The final exercise transfers the mechanism to inspect overload selection.
+Write methods with explicit preconditions and predict what a call can change for primitive and object arguments. Along the way, explain parameter, return value, pass by value using a concrete program. Trace the normal execution, identify its boundary assumptions and make a failure case observable. Exercises 1 and 2 start from the worked examples; the authored investigations begin with this task: Pass int 5 to a helper that reassigns its local parameter to 99. The final exercise transfers the mechanism to inspect overload selection.
 
 ## Purpose and mental model
 
@@ -37,7 +37,7 @@ The public class name and source filename must agree. Each worked example below 
 
 ## Syntax anatomy and execution trace
 
-A method declaration includes return type,name and parameter list. return sends one value to the caller and ends that invocation. Validate a domain precondition before calculating. Overloaded methods need different parameter signatures, not merely different return types. A defensive copy can prevent a helper from changing caller-owned mutable data. Use named exceptions when an argument violates the contract.
+A method declaration includes return type, name and parameter list. return sends one value to the caller and ends that invocation. Validate a domain precondition before calculating. Overloaded methods need different parameter signatures, not merely different return types. A defensive copy can prevent a helper from changing caller-owned mutable data. Use named exceptions when an argument violates the contract.
 
 ## Worked example / walkthrough
 
@@ -146,7 +146,7 @@ public class Main {
 }
 ```
 
-**Expected:** 3by4 gives12;zero width throwsIllegalArgumentException.
+**Expected:** 3 by 4 gives 12; zero width throws IllegalArgumentException.
 
 ## Prediction before your attempt
 
@@ -154,29 +154,29 @@ Read the source from the entry point and name each value before executing it. Id
 
 ## Exercises
 
-1. **Call a pure calculation.** Implement doubleValue(int x) and evaluate 7 and 0.
-   **Expected:** 14 and 0.
-   **Verify:** Compare your assertion values or captured diagnostic with 14 and 0.
+1. **Call a pure calculation: predict an edited check.** Copy Example A into a scratch `Main.java` and change `assert doubleValue(0) == 0;` to `assert doubleValue(1) == 0;` inside its assertion. Before running it with `java -ea Main`, predict whether the assertion still holds and explain why; then restore it.
+   **Expected:** The changed run fails with an `AssertionError` from the assertion on `doubleValue(0) == 0`. Restoring the original line brings back the worked observation: 14 and 0.
+   **Verify:** Compare your written prediction with the reported `AssertionError` and its stack-trace line, and explain why the edited condition is false for the values that satisfy `doubleValue(0) == 0`. After restoring the line, the program completes without an `AssertionError` again.
 
-2. **Validate a precondition.** Implement positiveArea(width,height) rejecting nonpositive dimensions.
-   **Expected:** 3by4 gives12;zero width throwsIllegalArgumentException.
-   **Verify:** Compare your assertion values or captured diagnostic with 3by4 gives12;zero width throwsIllegalArgumentException.
+2. **Validate a precondition: debug a regression.** A regression changed one token in the code that Example B adds after Example A, so one line now reads `positiveArea(1, 4);`. Run Example B with that line, use the failing assertion to locate the defect and repair it without changing the assertion.
+   **Expected:** Before the repair the run fails with an `AssertionError` from the assertion on `badArea`; after it the line reads `positiveArea(0, 4);` again and 3 by 4 gives 12; zero width throws IllegalArgumentException.
+   **Verify:** Keep the failing and the repaired runs. Explain why the changed token alters the value tested by `badArea` for this input.
 
-3. **Observe copied primitive values.** Passint5 to a helper that reassigns its local parameter to99.
-   **Expected:** caller value remains5.
-   **Verify:** Compare your assertion values or captured diagnostic with caller value remains5.
+3. **Observe copied primitive values.** Pass int 5 to a helper that reassigns its local parameter to 99.
+   **Expected:** caller value remains 5.
+   **Verify:** Keep an assertion equivalent to `original == 5`. As a control, change `int original = 5;` to `int original = 6;`: the run must fail with an `AssertionError` from the assertion on `original == 5`. Restore the line before continuing.
 
-4. **Observe shared object mutation.** Pass a list containing1 to a helper that appends2.
-   **Expected:** caller list becomes1,2.
-   **Verify:** Compare your assertion values or captured diagnostic with caller list becomes1,2.
+4. **Observe shared object mutation.** Pass a list containing 1 to a helper that appends 2.
+   **Expected:** caller list becomes 1, 2.
+   **Verify:** Keep an assertion equivalent to `list.equals(List.of(1, 2))`. As a control, change `List<Integer> list = new ArrayList<>(List.of(1));` to `List<Integer> list = new ArrayList<>(List.of(2));`: the run must fail with an `AssertionError` from the assertion on `list.equals(List.of(1, 2))`. Restore the line before continuing.
 
 5. **Distinguish reference reassignment.** Pass the list to a helper that replaces only its local parameter with a new list.
-   **Expected:** caller list remains1,2.
-   **Verify:** Compare your assertion values or captured diagnostic with caller list remains1,2.
+   **Expected:** caller list remains 1, 2.
+   **Verify:** Keep an assertion equivalent to `list.equals(List.of(1, 2))`. As a control, change `assert list.equals(List.of(1, 2));` to `assert list.equals(List.of(2, 2));` inside it: the run must fail with an `AssertionError`, which shows the assertion can fail. Restore it.
 
-6. **Inspect overload selection.** Call describe withint1 andlong1L using two overloads.
+6. **Inspect overload selection.** Call describe with int 1 and long 1L using two overloads.
    **Expected:** int and long respectively.
-   **Verify:** Compare your assertion values or captured diagnostic with int and long respectively.
+   **Verify:** Keep an assertion equivalent to `describe(1L).equals("long")`. As a control, change `assert describe(1L).equals("long");` to `assert describe(1L).equals("long!");` inside it: the run must fail with an `AssertionError`, which shows the assertion can fail. Restore it.
 
 ## Common pitfalls and diagnosis
 
@@ -186,7 +186,14 @@ Do not replace a precise exception with a catch-all that returns a plausible def
 
 ## Progressive hints
 
-First reconstruct the values and identities in the worked example. Next isolate the line that changes the result when one input is altered. Finally compare the normal and failure paths with the stated contract. Use a small table of input, expected value, actual value and exception type. Ask for one hint about the first incorrect assumption before requesting the entire reference implementation.
+Read one hint at a time and attempt the exercise again before reading the next. Keep a small table of input, expected value, actual value and exception type. Ask for one hint about the first incorrect assumption before requesting the entire reference implementation.
+
+- **Exercise 1:** First restate the expected observation: 14 and 0. Then list the values read by `doubleValue(0) == 0` and trace each one from its declaration. Finally, compute the asserted value with `assert doubleValue(1) == 0;` in place before running.
+- **Exercise 2:** First restate the expected observation: 3 by 4 gives 12; zero width throws IllegalArgumentException. Then list the values read by `badArea` and trace each one from its declaration. Finally, compare `positiveArea(1, 4);` with the same line in Example B and state the claim each version makes.
+- **Exercise 3:** First restate the expected observation: caller value remains 5. Then list the values read by `original == 5` and trace each one from its declaration. Finally, predict the effect of changing `int original = 5;` to `int original = 6;` before running anything.
+- **Exercise 4:** First restate the expected observation: caller list becomes 1, 2. Then list the values read by `list.equals(List.of(1, 2))` and trace each one from its declaration. Finally, predict the effect of changing `List<Integer> list = new ArrayList<>(List.of(1));` to `List<Integer> list = new ArrayList<>(List.of(2));` before running anything.
+- **Exercise 5:** First restate the expected observation: caller list remains 1, 2. Then list the values read by `list.equals(List.of(1, 2))` and trace each one from its declaration. Finally, name one input that would make `list.equals(List.of(1, 2))` false.
+- **Exercise 6:** First restate the expected observation: int and long respectively. Then list the values read by `describe(1L).equals("long")` and trace each one from its declaration. Finally, name one input that would make `describe(1L).equals("long")` false.
 
 ## Self-check and retrieval
 
@@ -198,7 +205,7 @@ Preserve the saved pad and the six exercise observations. Continue to the next l
 
 ## Sources and verification status
 
-[Official Java21 API or language reference](https://docs.oracle.com/en/java/javase/21/docs/api/index.html), reviewed2026-10-22. Examples and exercise fixtures are original course material. Use the [validation guide](../../../docs/validation.md) and CI artifacts for the exact revision and platform to inspect actual compile/run results. Authoring, parsing, compilation, execution and learner mastery are separate forms of evidence.
+[Official Java 21 API or language reference](https://docs.oracle.com/en/java/javase/21/docs/api/index.html), reviewed 2026-10-22. Examples and exercise fixtures are original course material. Use the [validation guide](../../../docs/validation.md) and CI artifacts for the exact revision and platform to inspect actual compile/run results. Authoring, parsing, compilation, execution and learner mastery are separate forms of evidence.
 
 ## Ask an AI tutor about this lesson
 
@@ -208,7 +215,7 @@ Read courses/java/guides/java-004.md and courses/java/lessons/java-004.java. Dir
 Explain the mechanism, ask for a prediction, review my attempt, give one hint,
 request compiler/runtime evidence, and ask a fresh retrieval question.
 Keep courses/java/solutions/ closed until I request comparison or show an attempt.
-Use Java21 and the declared offline fixture. Done when I can explain the state
+Use Java 21 and the declared offline fixture. Done when I can explain the state
 transitions, pass all six exercise contracts, diagnose one failure and solve a
 new boundary case without copying the solution.
 ```

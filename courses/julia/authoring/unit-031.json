@@ -14,8 +14,8 @@
   "exercises": [
     {
       "title": "Inspect syntax",
-      "task": "Identify the head and first argument of parsed 1+2.",
-      "expected": "The head is:call and the function symbol is:+.",
+      "task": "Identify the head and first argument of parsed `1 + 2`.",
+      "expected": "The head is `:call` and the function symbol is `:+`.",
       "hint": "Parsing constructs syntax.",
       "answer": "The representation describes a call; this inspection does not evaluate arbitrary input."
     },

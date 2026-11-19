@@ -8,9 +8,11 @@ Building text incrementally requires an invariant connecting length, capacity an
 
 The builder owns a fixed character array and a length. append_text obtains the source length, checks it against capacity-1-length, then copies payload plus terminator with memcpy. The subtraction form avoids overflowing length+incoming+1. Source and destination must not overlap for this helper. Initial zero state is a valid empty string, which makes construction and cleanup simple.
 
-## Exercise 1: Append two fragments
+## Exercise 1: Append two fragments: predict an edited check
 
-Append red then space sky.
+Copy worked example 1 into a scratch pad and change `CHECK(append_text(&b, "red") && append_text(&b, " sky"));` to `CHECK(append_text(&b, "red!") && append_text(&b, " sky"));` inside its CHECK. Before running, predict whether the CHECK still holds and explain why; then restore it.
+
+The unchanged code is worked example 1:
 
 ```c
 struct Builder b = {0};
@@ -18,13 +20,15 @@ CHECK(append_text(&b, "red") && append_text(&b, " sky"));
 CHECK(b.len == 7 && strcmp(b.data, "red sky") == 0);
 ```
 
-**Expected:** The result is red sky with length 7.
+**Expected:** The changed run stops with `Check failed` at the CHECK on `b.len == 7 && strcmp(b.data, "red sky") == 0`. Restoring the original line brings back the worked observation: the result is red sky with length 7.
 
 The stored length avoids rescanning previous content before every append.
 
-## Exercise 2: Append empty text
+## Exercise 2: Append empty text: diagnose an edited check
 
-Append an empty fragment to abc.
+A careless edit changed the CHECK in worked example 2 so that it reads `CHECK(append_text(&b, "abc!") && append_text(&b, ""));`. Run worked example 2 with that line, explain why the edited CHECK now fails for the same program state, and restore it.
+
+The unchanged code is worked example 2:
 
 ```c
 struct Builder b = {0};
@@ -32,7 +36,7 @@ CHECK(append_text(&b, "abc") && append_text(&b, ""));
 CHECK(b.len == 3 && strcmp(b.data, "abc") == 0);
 ```
 
-**Expected:** Length and content remain unchanged.
+**Expected:** Before the repair the run stops with `Check failed` at the CHECK on `b.len == 3 && strcmp(b.data, "abc") == 0`; after it the line reads `CHECK(append_text(&b, "abc") && append_text(&b, ""));` again and length and content remain unchanged.
 
 The empty append is a successful no-op, not an error or a new terminator-free state.
 

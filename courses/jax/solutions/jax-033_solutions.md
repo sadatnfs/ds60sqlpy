@@ -40,7 +40,7 @@ The actual execution surface determines the scope of the evidence.
 
 **Expected:** It demonstrates the mapped mathematical reduction, not network communication or multi-host performance.
 
-Use the CPU model as a numerical oracle for a later real deployment, retaining separate receipts.
+Use the CPU model as a numerical oracle for a later real deployment, retaining separate run records.
 
 ## Exercise 6: Specify a scaling study
 

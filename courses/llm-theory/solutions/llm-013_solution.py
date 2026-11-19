@@ -4,14 +4,14 @@ import numpy as np
 
 
 def verify():
-    # Exercise 1: Construct next-token pairs
+    # Worked example A: Construct next-token pairs
     ids = np.array([2, 5, 7, 3])
     inputs = ids[:-1]
     labels = ids[1:]
     np.testing.assert_array_equal(inputs, [2, 5, 7])
     np.testing.assert_array_equal(labels, [5, 7, 3])
 
-    # Exercise 2: Expose identity labels
+    # Worked example B: Expose identity labels
     copied = inputs.copy()
     assert np.count_nonzero(copied != labels) == 3
 
@@ -37,6 +37,20 @@ def verify():
     documents = [[2, 5, 7, 3], [8, 3]]
     pairs = [(a, b) for doc in documents for a, b in zip(doc[:-1], doc[1:])]
     assert len(pairs) == 4 and (3, 8) not in pairs
+
+    # Exercise 1: Shift a batch of two sequences
+    batch = np.array([[4, 1, 6, 2, 9], [3, 3, 8, 0, 5]])
+    x_in = batch[:, :-1]
+    y_out = batch[:, 1:]
+    assert x_in.shape == y_out.shape == (2, 4)
+    np.testing.assert_array_equal(y_out, [[1, 6, 2, 9], [3, 8, 0, 5]])
+
+    # Exercise 2: Predict a partly hidden label bug
+    row = batch[1]
+    copied_row = row[:-1]
+    target_row = row[1:]
+    assert int(np.count_nonzero(copied_row == target_row)) == 1
+    assert int(np.count_nonzero(copied_row != target_row)) == 3
     return {"checks": 6, "status": "passed"}
 
 

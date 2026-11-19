@@ -4,6 +4,7 @@ from pathlib import Path
 import json
 import runpy
 import sys
+from urllib.parse import urlsplit
 
 BASE = Path(__file__).resolve().parents[2]
 ROOT = BASE.parents[1]
@@ -14,6 +15,54 @@ from scripts.format_inline_code import canonical_markdown, ownership  # noqa: E4
 from scripts.format_repo import load_policy  # noqa: E402
 
 SPECS = runpy.run_path(str(Path(__file__).with_name("chapters.py")))["CHAPTERS"]
+
+SITES = {
+    "kubernetes.io": "Kubernetes documentation",
+    "gateway-api.sigs.k8s.io": "Gateway API documentation",
+    "docs.python.org": "Python documentation",
+    "www.cni.dev": "CNI documentation",
+    "kind.sigs.k8s.io": "kind documentation",
+    "doc.traefik.io": "Traefik documentation",
+    "opentelemetry.io": "OpenTelemetry documentation",
+    "istio.io": "Istio documentation",
+    "nginx.org": "nginx documentation",
+}
+LEAVES = {
+    "ipaddress": "ipaddress module",
+    "ngx_http_proxy_module": "ngx_http_proxy_module",
+    "type-nodeport": "Type NodePort",
+    "loadbalancer": "Type LoadBalancer",
+    "virtual-ips": "Virtual IPs and service proxies",
+    "endpoint-slice-v1": "EndpointSlice API reference",
+    "nodelocaldns": "NodeLocal DNSCache",
+    "dns-pod-service": "DNS for Services and Pods",
+    "httproute": "HTTPRoute",
+    "referencegrant": "ReferenceGrant",
+    "tls": "TLS",
+    "docs": "Overview",
+    "services-networking": "Services, load balancing and networking",
+    "cluster-ip-allocation": "ClusterIP allocation",
+    "dns-debugging-resolution": "Debugging DNS resolution",
+    "endpoint-slices": "EndpointSlices",
+    "source-ip": "Source IP",
+    "headless-services": "Headless Services",
+    "statefulset": "StatefulSets",
+    "dual-stack": "IPv4/IPv6 dual-stack",
+    "topology-aware-routing": "Topology-aware routing",
+    "liveness-readiness-startup-probes": "Liveness, readiness and startup probes",
+    "debug-service": "Debug Services",
+    "debug-running-pod": "Debug running Pods",
+}
+
+
+def reference_label(url):
+    """Readable link text from a documentation URL, keeping the site name."""
+    parts = urlsplit(url)
+    leaf = parts.fragment or parts.path.rstrip("/").rsplit("/", 1)[-1]
+    leaf = leaf.removesuffix(".html")
+    words = LEAVES.get(leaf, leaf.replace("-", " "))
+    site = SITES.get(parts.netloc, parts.netloc)
+    return f"{site}: {words[:1].upper()}{words[1:]}" if words else site
 
 
 def write(path, text):
@@ -117,7 +166,7 @@ This is a scoped read, not permission to create resources or change cluster netw
             f"""
 ## Diagnosis, failure boundaries and common mistakes
 
-The controlled failure in this chapter is: {tasks[3][0]} Its distinguishing result is {tasks[3][1]} Keep that observation separate from guesses about adjacent layers. A DNS answer is not proof of a listening process. A Ready Pod is not proof of an externally reachable listener. A load-balancer address is not proof of TLS identity, path routing or a correct application response.
+Exercise 4 is this chapter's controlled failure: {tasks[3][0]} The distinguishing result: {tasks[3][1]} Keep that observation separate from guesses about adjacent layers. A DNS answer is not proof of a listening process. A Ready Pod is not proof of an externally reachable listener. A load-balancer address is not proof of TLS identity, path routing or a correct application response.
 
 Use bounded observations from the actual caller's network namespace. Preserve timestamps, object UIDs, generation or resource versions where relevant, and the intended image identity. A stale healthy result from another namespace or an earlier revision cannot qualify the current path. Avoid broad packet captures, all-namespace dumps and secret output when a smaller field-level observation answers the question.
 
@@ -132,7 +181,7 @@ Complete the six evidence records before advancing. For optional live work, revi
 ## Primary references
 
 """
-            + "\n".join(f"- [Official reference {i}]({url})" for i, url in enumerate(refs, 1))
+            + "\n".join(f"- [{reference_label(url)}]({url})" for url in refs)
             + f"""
 
 ## Ask an AI tutor about this lesson

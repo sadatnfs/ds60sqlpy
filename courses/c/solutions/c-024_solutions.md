@@ -8,29 +8,33 @@ An algorithm contract includes input assumptions and output meaning. Binary sear
 
 Maintain an interval [low, high) containing the answer. Compute middle as low+(high-low)/2. If values[middle] is below the target, advance low to middle+1; otherwise set high to middle. The interval strictly shrinks until both bounds meet. Never dereference the returned index before checking it is below length. Sorting and deduplication are different operations.
 
-## Exercise 1: Find an interior boundary
+## Exercise 1: Find an interior boundary: change one input
 
-Search 2, 4, 6, 8 for target 5.
+Copy worked example 1 into a scratch pad and change `int values[] = {2, 4, 6, 8};` to `int values[] = {2, 5, 6, 8};`. Before running, predict which CHECK fails and which value it now sees; then run it and restore the original line.
+
+The unchanged code is worked example 1:
 
 ```c
 int values[] = {2, 4, 6, 8};
 CHECK(lower_bound(values, 4, 5) == 2);
 ```
 
-**Expected:** The lower-bound index is 2.
+**Expected:** The changed run stops with `Check failed` at the CHECK on `lower_bound(values, 4, 5) == 2`. Restoring the original line brings back the worked observation: the lower-bound index is 2.
 
 The result is an insertion position, not a claim that 5 exists.
 
-## Exercise 2: Find the first duplicate
+## Exercise 2: Find the first duplicate: diagnose an edited check
 
-Search 1, 3, 3, 5 for target 3.
+A careless edit changed the CHECK in worked example 2 so that it reads `CHECK(lower_bound(values, 4, 4) == 1);`. Run worked example 2 with that line, explain why the edited CHECK now fails for the same program state, and restore it.
+
+The unchanged code is worked example 2:
 
 ```c
 int values[] = {1, 3, 3, 5};
 CHECK(lower_bound(values, 4, 3) == 1);
 ```
 
-**Expected:** The index is the first 3 at position 1.
+**Expected:** Before the repair the run stops with `Check failed` at the CHECK on `lower_bound(values, 4, 3) == 1`; after it the line reads `CHECK(lower_bound(values, 4, 3) == 1);` again and the index is the first 3 at position 1.
 
 The high=middle branch keeps earlier equal values in the candidate interval.
 

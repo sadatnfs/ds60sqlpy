@@ -185,6 +185,16 @@ An output cannot be confidently labeled for a critical condition.
 - [NIST adversarial machine learning taxonomy](https://doi.org/10.6028/NIST.AI.100-2e2025)
 - [Existing grounded assistant controls](../../../courses/llm-applied/README.md)
 
-## Study companion
+## Ask an AI tutor about this lesson
 
-Use the repository learning-companion skill with this lesson ID and your own source/output. Ask for clarification of the estimand, probability distribution, data split or gradient before a hint. Keep claims about the authored fixture separate from claims requiring real population or model evidence.
+```text
+Use the checked-in $guide-ds60sqlpy-learning skill for eval-014, Robustness, access policy and adversarial evaluation.
+Read courses/llm-evaluation/guides/eval-014.md and courses/llm-evaluation/lessons/eval-014.py. Direct prerequisites: eval-009, eval-011.
+Ask me to state the estimand, probability distribution, data split or gradient
+before giving a hint. Review my attempt at the six investigations one at a time,
+give one hint, and ask for the printed evidence.
+Keep courses/llm-evaluation/solutions/ closed until I attempt or explicitly request comparison.
+Keep claims about the authored fixture separate from claims that need real
+population or model evidence. Done when I can reproduce both worked programs,
+pass the six investigations and explain one failure case.
+```

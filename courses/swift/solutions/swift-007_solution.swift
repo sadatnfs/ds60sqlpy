@@ -23,6 +23,19 @@ struct LessonMain {
       precondition(found == 1)
       precondition(values.firstIndex(of: 9) == nil)
     }
+
+    do {
+      // Task 3: Independent construction
+      func firstIndex(of target: Int, in values: [Int]) -> Int? {
+        for (offset, value) in values.enumerated() where value == target {
+          return offset
+        }
+        return nil
+      }
+      precondition(firstIndex(of: 7, in: [5, 7, 7]) == 1)
+      precondition(firstIndex(of: 9, in: [5, 7]) == nil)
+      precondition(firstIndex(of: 1, in: []) == nil)
+    }
     print("swift-007: passed")
   }
 }

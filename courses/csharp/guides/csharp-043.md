@@ -6,7 +6,7 @@ Advanced, approximately 120 minutes. Prerequisites: `csharp-042`
 
 ## Learning objectives
 
-Move a pure domain type into the supplied class-library project and run its executable checks. Then design a dependency update review including lock changes, license checks and runtime evidence.
+Explain restore, build, run and publish, and check the target framework a build actually produced. The central exercise is task 3: Move a pure domain type into the supplied class-library project and run its executable checks.
 
 ## Purpose and mental model
 
@@ -79,9 +79,9 @@ internal static class Program {
 
 **Observe:** The running framework generation is compatible with the declared classroom target.
 
-### Example B: Keep configuration explicit
+### Example B: Read the compiled target framework
 
-A real project fixture, rather than this metadata demonstration, is required to qualify multi-file build behavior.
+Both values come from the build and the runtime rather than from a hand-written table, so the checks fail if the project targets another framework. A real multi-project fixture is still required to qualify restore and publish behavior.
 
 ```csharp
 using System;
@@ -108,12 +108,9 @@ internal static class Program {
 
   private static async Task Main() {
     {
-      var configuration =
-          new Dictionary<string, string> { ["target"] = "net10.0",
-                                           ["nullable"] = "enable" };
-      Check(configuration["target"] == "net10.0" &&
-                configuration["nullable"] == "enable",
-            "reviewed build contract");
+      string? target = AppContext.TargetFrameworkName;
+      Check(target == ".NETCoreApp,Version=v10.0", "compiled target framework");
+      Check(Environment.Version.Major == 10, "running runtime generation");
     }
     Console.WriteLine("csharp-043: passed");
     await Task.CompletedTask;
@@ -121,7 +118,7 @@ internal static class Program {
 }
 ```
 
-**Observe:** The example preserves the intended target and nullable policy.
+**Observe:** The compiled program reports .NETCoreApp,Version=v10.0, the framework its project targeted, and runs on a .NET 10 runtime.
 
 ## Exercises
 
@@ -137,7 +134,7 @@ internal static class Program {
 
 6. **Transfer and justify.** Design a dependency update review including lock changes, license checks and runtime evidence.
 
-For each task, keep a short evidence table: input or initial state, prediction, observed value or diagnostic, and the rule that explains it. The guided examples establish mechanisms; the independent and transfer tasks require your own representation and explanation. Use the separate solution after attempting the task, then close it and reconstruct one boundary case.
+For each task, keep a short evidence table: input or initial state, prediction, observed value or diagnostic, and the rule that explains it. The guided examples establish mechanisms; the independent and transfer tasks require your own representation and explanation. The separate explanation gives an executed reference answer where one has been written and says plainly where none exists yet. Open it only after your own attempt, then close it and reconstruct one boundary case.
 
 ## Common pitfalls and diagnosis
 
@@ -147,9 +144,9 @@ A useful regression case distinguishes the intended rule from the tempting wrong
 
 ## Progressive hints
 
-1. Name the input, output and invariant using the vocabulary above. Reproduce Example A before changing two things at once.
-2. Compare the changed condition in Example B. Identify the first line whose behavior differs and state why.
-3. Reduce your independent task to a normal case, an empty or boundary case, and an invalid case. Write expected observations before inspecting the reference.
+1. Reproduce Example A (Expose environment facts without overclaiming) before changing anything, and confirm its observation: The running framework generation is compatible with the declared classroom target.
+2. Compare Example B (Read the compiled target framework) with Example A and name the first line whose behavior differs. Its observation is: The compiled program reports .NETCoreApp,Version=v10.0, the framework its project targeted, and runs on a .NET 10 runtime.
+3. Before opening the explanation, test your task 3 attempt against this lesson's main pitfall: An SDK version and target framework are related but different.
 
 ## Self-check and next step
 
@@ -157,7 +154,7 @@ Explain Target framework, Restore, Publish without reading the definitions. Reco
 
 ## Sources and execution boundary
 
-[Official language or framework documentation](https://learn.microsoft.com/en-us/dotnet/csharp/). The prose, small fixtures and task designs in this chapter are original. Documentation links provide additional API detail, not a dependency fetched by the classroom. Runtime qualification is recorded separately by the repository validation workflow. Reading a guide, compiling a reference, running its assertions and completing an external project are distinct achievements.
+[Official language or framework documentation](https://learn.microsoft.com/en-us/dotnet/csharp/). The prose, small fixtures and task designs in this chapter are original. Documentation links provide additional API detail, not a dependency fetched by the classroom. Reading a guide, compiling a reference, running its assertions and completing an external project are distinct achievements.
 
 ## Ask an AI tutor about this lesson
 

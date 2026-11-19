@@ -15,6 +15,14 @@ Use `../../projects/` for project links in source chapters; the generator reloca
 that explicit prefix to `../projects/` in generated guides. Test both locations.
 Do not use a path that works only after generation. Never edit shared reader HTML.
 
+A chapter line `<!-- include: projects/PATH #symbol from="..." to="..." python -->`
+embeds project source; the symbol and `from`/`to`/`until` selectors are optional.
+A Python include must begin and end on whole statements of the cited file. The
+generator prints it as the repository fence formatting check does (dedented, in the
+locked Ruff style, with the same syntax and literal guards), so generation needs
+Ruff from the `quality` extra. A fragment that check cannot admit as a program, such
+as a lone decorator, stays verbatim.
+
 The API pilot is a real-library compatibility check, not a service substitute.
 See [environment decisions](ENVIRONMENTS.md) for version/platform qualification.
 Every service workshop must retain independent positive, negative and restart

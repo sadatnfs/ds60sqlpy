@@ -2,7 +2,7 @@
 
 A complete 32-unit progression from first scripts to numerical work, data contracts, generic functions, concurrency and reproducible scientific analysis. The classroom uses the prepared Linux Julia profile, with no package downloads during a lesson.
 
-Start with the [main classroom instructions](../../README.md). Julia source is staged as `main.jl` in a fresh process. Code, notes and receipts are saved by the classroom; scratch files disappear after the run. Optional projects and unfamiliar external ecosystems need their own preparation.
+Start with the [main classroom instructions](../../README.md). Julia source is staged as `main.jl` in a fresh process with two Julia threads, a fixed read-only package environment, no startup file and offline package settings. The classroom saves your code, notes and run output; scratch files disappear after the run. Optional projects and unfamiliar external ecosystems need their own preparation.
 
 | Unit | Stage | Topic |
 | --- | --- | --- |
@@ -41,4 +41,4 @@ Start with the [main classroom instructions](../../README.md). Julia source is s
 
 ## Prepared environment and boundaries
 
-The Julia profile uses a locked project containing CSV, DataFrames, Distributions, ForwardDiff, Optim and JSON3. The classroom-specific `DS60Plots` helper writes bounded Plotly figures for browser display; it is not a standard Julia plotting package. Standard libraries support tests, dates, Unicode, arrays and linear algebra. GPU packages, distributed clusters and external services are separate optional projects. A successful source run does not establish numerical conditioning, statistical validity or universal performance. See [authoring](authoring/README.md) for maintained source and checks.
+The Julia profile uses a locked project containing CSV, DataFrames, Distributions, ForwardDiff, Optim and JSON3. The classroom-specific `DS60Plots` helper writes bounded Plotly figures for browser display; it is not a standard Julia plotting package. Standard libraries support tests, dates, Unicode, arrays and linear algebra. GPU packages, distributed clusters and external services are separate optional projects. A successful source run does not establish numerical conditioning, statistical validity or universal performance; keep an observed run separate from a timing claim, an inferred mathematical result or an external deployment. Each guide ends with an optional study-companion prompt for a repository-aware assistant; the guides are complete without it. See [authoring](authoring/README.md) for maintained source and checks.

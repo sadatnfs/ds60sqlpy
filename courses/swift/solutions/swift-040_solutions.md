@@ -1,6 +1,6 @@
 # swift-040: explanation and comparison
 
-Attempt the six guide tasks before opening this comparison. The executable reference is [swift-040_solution.swift](swift-040_solution.swift). Its assertions are always active under the prepared classroom compile settings.
+Attempt the six guide tasks before opening this comparison. The executable reference is [swift-040_solution.swift](swift-040_solution.swift). It runs both worked examples, and its assertions are always active under the prepared classroom compile settings.
 
 ## Why the two examples differ
 
@@ -8,21 +8,43 @@ Attempt the six guide tasks before opening this comparison. The executable refer
 
 **A state change updates its derived view:** The transition has one source of truth and independent fields remain unchanged. Changing completion changes the derived label while retaining the title.
 
-## Reason through the six tasks
+## Task answers
 
-1. **Predict and explain.** Identify stored and derived state in the kernel.
+### Task 1: Predict and explain
 
-2. **Guided modification.** Add a derived disabled state for an empty title.
+Identify stored and derived state in the kernel.
 
-3. **Independent construction.** Run JourneyApp and edit a title through its real binding.
+No separate reference answer has been written for this task. Example A is the evidence to compare with: Derived presentation avoids a second label field that can become stale. The label follows the stored completion state.
 
-4. **Diagnose a defect.** Diagnose a child view copying input into unrelated state and losing later parent updates.
+### Task 2: Guided modification
 
-5. **Boundary evidence.** Test a title edit, cancellation and return to the list.
+Add a derived disabled state for an empty title.
 
-6. **Transfer and justify.** Decide whether a piece of state belongs to the view, model or domain core and justify its lifetime.
+No separate reference answer has been written for this task. Start from Example B: The transition has one source of truth and independent fields remain unchanged. Changing completion changes the derived label while retaining the title.
 
-For tasks 1 and 2, use the checked values and mechanism trace in the two examples. For task 3, choose names that expose the input and result contract and retain the same invariants. For task 4, the diagnosed mistakes below supply a concrete wrong assumption: preserve its counterexample before repairing it. Task 5 needs an explicit expected value or documented rejection at the boundary, not just successful execution. For task 6, explain what changes in the new context and which part of the original mechanism remains applicable. Several representations may satisfy this transfer task; justify the choice rather than treating this reference as the only architecture.
+### Task 3: Independent construction
+
+Run JourneyApp and edit a title through its real binding.
+
+No reference answer has been written for this task yet. It needs a project or platform outside the single-file pad, so record your own build and run evidence and judge it against the vocabulary entry **Source of truth** and the lesson notes.
+
+### Task 4: Diagnose a defect
+
+Diagnose a child view copying input into unrelated state and losing later parent updates.
+
+No reference answer has been written for this task yet. The wrong assumptions to look for are this lesson's pitfalls: A binding is not a cloned value. Recreating a model in a transient view computation can discard edits. UI disablement does not replace domain validation.
+
+### Task 5: Boundary evidence
+
+Test a title edit, cancellation and return to the list.
+
+No reference answer has been written for this task yet. Write the expected value or documented rejection for each boundary before running it, and compare with the checks in Example A (Derive presentation from one state) and Example B (A state change updates its derived view).
+
+### Task 6: Transfer and justify
+
+Decide whether a piece of state belongs to the view, model or domain core and justify its lifetime.
+
+No single reference answer exists: several designs can satisfy this transfer task. Justify yours against the mechanism described below and the vocabulary entry **Source of truth**, and state one limitation of your choice.
 
 ## Mechanism and diagnostic reasoning
 
@@ -36,4 +58,4 @@ A binding is not a cloned value. Recreating a model in a transient view computat
 
 ## Review before continuing
 
-The reference checks the worked scenarios, including their boundary distinctions. Your independent and transfer artifacts may have additional checks. Compare observations rather than only source text. Preserve any new regression case you discover and explain why it would reject a plausible wrong implementation. External project steps require their own build and platform evidence and are not established by a portable reference passing.
+Run the reference and confirm that it prints `swift-040: passed`, then reconstruct one boundary case from memory and explain which check would reject a plausible wrong implementation. External project steps need their own build and platform evidence; a passing portable reference does not establish them.

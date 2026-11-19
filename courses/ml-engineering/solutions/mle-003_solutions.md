@@ -98,4 +98,4 @@ if __name__ == "__main__":
 
 ## Interpretation
 
-Build features at the decision grain while preserving all requests and missingness categories. Verify the temporal rule with identified rows, then use the same contract to evaluate a real feature-store implementation.
+Verify the temporal rule with identified rows, then use the same contract to evaluate a real feature-store implementation.

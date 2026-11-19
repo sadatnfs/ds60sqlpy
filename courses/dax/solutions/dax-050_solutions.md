@@ -16,8 +16,8 @@ No filters; dimension population 4 products by 4 customers; observed pair grain 
 
 The ten unobserved pairs may matter for a coverage report even though they contribute no current revenue. Their inclusion is a question of semantics.
 
-- The full dimension product is 4 times 4 =16 pairs.
-- Observed pairs are(1,10),(2,10),(3,20),(2,30),(1,20),(3,30).
+- The full dimension product is 4 times 4 = 16 pairs.
+- Observed pairs are (1, 10), (2, 10), (3, 20), (2, 30), (1, 20), (3, 30).
 - Repeated purchases of the same pair do not add a new pair, leaving six observed groups.
 
 ### Case B: Adding a complete calendar dimension
@@ -30,7 +30,7 @@ Whole two-year Date dimension has 731 days; compare possible versus observed pro
 
 These are logical table sizes. Engine optimizations may avoid constructing the full product, and a source-only exercise cannot establish the physical materialization or elapsed time.
 
-- The possible-cell count is 4 *4 *731 =11696.
+- The possible-cell count is 4 * 4 * 731 = 11696.
 - Each of the eight sales lines has a distinct product/customer/order-date combination in this fixture.
 - The observed grouping therefore has eight cells.
 
@@ -40,13 +40,13 @@ These are logical table sizes. Engine optimizations may avoid constructing the f
 
 Predict candidate pairs after adding one unsold product.
 
-The full candidate grid becomes 5 *4 =20; observed pairs can remain six.
+The full candidate grid becomes 5 * 4 = 20; observed pairs can remain six.
 
 ### Exercise 2
 
 Restrict the calendar to January 2025.
 
-The candidate grid becomes 4 *4 *31 =496; the observed fact combinations in that month must be counted separately.
+The candidate grid becomes 4 * 4 * 31 = 496; the observed fact combinations in that month must be counted separately.
 
 ### Exercise 3
 

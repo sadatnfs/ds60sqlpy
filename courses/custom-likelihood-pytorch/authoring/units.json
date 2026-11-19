@@ -10,6 +10,8 @@
     "suffix": ".py",
     "concepts": ["observation unit", "Bernoulli likelihood", "latent dependence"],
     "outcome": "Derive a Bernoulli score and explain why repeated-subject observations do not factor marginally.",
+    "lab": "Compute the Bernoulli negative log likelihood and its probability gradient for three independent trials, then compare one repeated subject's probability of two successes.",
+    "verification": "The loss matches the torch distribution and the gradient equals -2/0.4 + 1/0.6; the same-subject probability of two successes is 0.34, larger than the independent marginal product.",
     "sources": [
       [
         "PyTorch distribution probability APIs",
@@ -28,6 +30,8 @@
     "suffix": ".py",
     "concepts": ["weighted likelihood", "global denominator", "partition invariance"],
     "outcome": "Recover the declared weighted objective from unequal partition numerators and masses.",
+    "lab": "Combine unequal partition numerators and weight masses into the declared weighted mean, then replicate the weighting measure.",
+    "verification": "Weighted sum 92 over mass 8 gives mean 11.5 (an equal-partition average gives 8.5) with global gradient -3; multiplying every weight by 7 leaves the mean unchanged.",
     "sources": [
       [
         "PyTorch automatic differentiation mechanics",
@@ -46,6 +50,8 @@
     "suffix": ".py",
     "concepts": ["reverse automatic differentiation", "finite differences", "gradient oracle"],
     "outcome": "Compare independent analytic, finite-difference and automatic derivatives for normal and decay models.",
+    "lab": "Compare analytic, central finite-difference and autograd derivatives for a Gaussian location score and a nonlinear decay model.",
+    "verification": "Autograd matches the analytic Gaussian and decay gradients within 1e-12, and the best finite-difference error is below 1e-8 in float64.",
     "sources": [
       [
         "PyTorch automatic differentiation mechanics",
@@ -68,6 +74,8 @@
     "suffix": ".py",
     "concepts": ["parameter coordinates", "density Jacobian", "positive scales"],
     "outcome": "Distinguish parameter reparameterization from observation and prior density transformations.",
+    "lab": "Fit a positive scale through a log parameterization, then build a lognormal observation density with its Jacobian.",
+    "verification": "The scale gradient is 0 at the MLE while a spurious parameter Jacobian gives -1; the lognormal density integrates to 1 within 1e-5, and the transformed correlation has derivative 1 - rho^2.",
     "sources": [
       [
         "PyTorch distribution probability APIs",
@@ -84,12 +92,14 @@
     "title": "Gaussian linear MLE from first principles",
     "level": "beginner",
     "minutes": 90,
-    "prerequisites": ["clp-004", "r-043"],
+    "prerequisites": ["clp-004", "statistics-011"],
     "runtime": "llm-torch-cpu",
     "language": "python",
     "suffix": ".py",
     "concepts": ["Gaussian likelihood", "least squares", "variance estimation"],
     "outcome": "Recover Gaussian coefficients and maximum-likelihood scale from an independent least-squares oracle.",
+    "lab": "Jointly fit Gaussian coefficients and log scale by maximum likelihood, then recenter the predictor and compare fitted values.",
+    "verification": "Coefficients match the least-squares closed form within 2e-6, the fitted scale equals the MLE sigma rather than the unbiased root, recentering leaves fitted values unchanged and the maximum gradient is below 2e-4.",
     "sources": [
       [
         "PyTorch least-squares solver API",
@@ -106,12 +116,14 @@
     "title": "Nonlinear decay and forecasting",
     "level": "intermediate",
     "minutes": 90,
-    "prerequisites": ["clp-005", "r-049"],
+    "prerequisites": ["clp-005", "statistics-022"],
     "runtime": "llm-torch-cpu",
     "language": "python",
     "suffix": ".py",
     "concepts": ["nonlinear mean", "extrapolation", "sensitivity geometry"],
     "outcome": "Fit a transformed nonlinear curve and diagnose the information lost in a short observation window.",
+    "lab": "Recover a known decay curve on log-transformed amplitude and rate, then shorten the observation window and compare conditioning.",
+    "verification": "The fit recovers the generating parameters within 3e-5 with gradient below 1e-4, and the short window's condition number exceeds 100 times the long window's.",
     "sources": [
       [
         "PyTorch automatic differentiation mechanics",
@@ -134,6 +146,8 @@
     "suffix": ".py",
     "concepts": ["stable logits", "Bernoulli score", "separation"],
     "outcome": "Check stable logistic scores and recognize when separated data have no finite coefficient MLE.",
+    "lab": "Fit logistic regression on overlapping outcomes and check its analytic gradient, then follow the loss along an increasing slope for separated data.",
+    "verification": "The autograd gradient matches X^T(p - y) within 1e-12 and the fit's gradient is below 1e-6; on separated data the loss falls at every step, so no finite MLE exists, while the stable loss stays finite at extreme logits.",
     "sources": [
       [
         "PyTorch distribution probability APIs",
@@ -152,6 +166,8 @@
     "suffix": ".py",
     "concepts": ["Poisson rate", "exposure offset", "boundary estimate"],
     "outcome": "Fit an exposure-adjusted event rate and distinguish expected counts from rates.",
+    "lab": "Fit a common Poisson rate with a log-exposure offset, then forecast counts at a new exposure.",
+    "verification": "The rate is 0.875 events per exposure unit with score 0 at the MLE, manual and library log likelihoods agree, and doubling exposure doubles the expected count.",
     "sources": [
       [
         "PyTorch distribution probability APIs",
@@ -164,12 +180,14 @@
     "title": "Censoring contributes survival probability",
     "level": "intermediate",
     "minutes": 90,
-    "prerequisites": ["clp-004", "r-048"],
+    "prerequisites": ["clp-004", "statistics-028"],
     "runtime": "llm-torch-cpu",
     "language": "python",
     "suffix": ".py",
     "concepts": ["right censoring", "delayed entry", "survival likelihood"],
     "outcome": "Construct event and survival contributions and account for delayed entry in time at risk.",
+    "lab": "Fit an exponential rate from events and censored times, then add delayed entry and recompute time at risk.",
+    "verification": "The censoring-aware rate is 0.15 (0.10 with one fewer event) with zero score, the naive all-events rate is larger, and delayed entry gives 3/16.5.",
     "sources": [
       [
         "PyTorch distribution probability APIs",
@@ -182,12 +200,14 @@
     "title": "Heteroskedastic observation models",
     "level": "intermediate",
     "minutes": 90,
-    "prerequisites": ["clp-005", "r-043"],
+    "prerequisites": ["clp-005", "statistics-011"],
     "runtime": "llm-torch-cpu",
     "language": "python",
     "suffix": ".py",
     "concepts": ["log scale regression", "normalization", "noise calibration"],
     "outcome": "Jointly fit a mean and covariate scale while detecting a missing likelihood normalization term.",
+    "lab": "Fit a mean and a covariate-dependent log scale for two noise regimes, then remove the normalization term and inflate the scale.",
+    "verification": "Parameters recover (0, 0, log 3), so the group scales are 1 and 3; without the log-scale term the loss keeps falling as the scale inflates, while the proper NLL rises.",
     "sources": [
       [
         "PyTorch distribution probability APIs",
@@ -204,12 +224,14 @@
     "title": "Mixture likelihoods and stable log sums",
     "level": "intermediate",
     "minutes": 90,
-    "prerequisites": ["clp-008", "bayes-022"],
+    "prerequisites": ["clp-008", "statistics-021"],
     "runtime": "llm-torch-cpu",
     "language": "python",
     "suffix": ".py",
     "concepts": ["logsumexp", "latent mixtures", "scale collapse"],
     "outcome": "Evaluate a stable marginalized mixture and explain label invariance and likelihood degeneracy.",
+    "lab": "Evaluate a two-component mixture with log-sum-exp at a remote observation, then swap labels and shrink one component onto a single point.",
+    "verification": "Stable log probabilities match the library mixture while the direct probability underflows to 0; label swapping leaves the likelihood unchanged, and the log likelihood keeps rising as one component's scale shrinks from 1 to 0.01.",
     "sources": [
       [
         "PyTorch distribution probability APIs",
@@ -222,12 +244,14 @@
     "title": "Correlated panel residuals",
     "level": "intermediate",
     "minutes": 90,
-    "prerequisites": ["clp-006", "r-049"],
+    "prerequisites": ["clp-006", "statistics-012"],
     "runtime": "llm-torch-cpu",
     "language": "python",
     "suffix": ".py",
     "concepts": ["AR1 covariance", "Cholesky likelihood", "complete panels"],
     "outcome": "Evaluate complete-panel likelihoods and detect false covariance introduced across subject boundaries.",
+    "lab": "Evaluate the AR(1) likelihood for two complete independent panels, then flatten them into one series across the subject boundary.",
+    "verification": "The panel NLL matches an independent oracle, rho = 0 reproduces the iid likelihood, and the cross-boundary series gives a different NLL.",
     "sources": [
       [
         "PyTorch Cholesky factorization API",
@@ -250,6 +274,8 @@
     "suffix": ".py",
     "concepts": ["penalized likelihood", "MAP", "global penalty"],
     "outcome": "Distinguish MLE, ridge and MAP and preserve a single global penalty across partitions.",
+    "lab": "Add one ridge penalty to a partitioned objective and compare it with MAP, then duplicate the penalty in every partition.",
+    "verification": "The penalty added once matches the MAP gradient; each duplicate adds precision * mu^2 / 2 and shrinks the estimate further, so duplicated < penalized < MLE.",
     "sources": [
       [
         "PyTorch distribution probability APIs",
@@ -262,12 +288,14 @@
     "title": "Identifiability and profile likelihood",
     "level": "advanced",
     "minutes": 90,
-    "prerequisites": ["clp-006", "r-039"],
+    "prerequisites": ["clp-006", "statistics-008"],
     "runtime": "llm-torch-cpu",
     "language": "python",
     "suffix": ".py",
     "concepts": ["rank deficiency", "profile likelihood", "weak identification"],
     "outcome": "Diagnose redundant parameters and refit nuisance parameters when profiling a nonlinear rate.",
+    "lab": "Inspect the Hessian of a model with duplicated design columns, then profile a nonlinear decay rate by refitting the nuisance parameters.",
+    "verification": "The Hessian has eigenvalues 0 and 60, coefficient pairs with the same sum have identical NLL, the long-window profile is minimized at rate 0.7 and the short-window profile contrast is under one-thousandth of the long one.",
     "sources": [
       [
         "PyTorch least-squares solver API",
@@ -290,6 +318,8 @@
     "suffix": ".py",
     "concepts": ["LBFGS closure", "Adam", "evaluation accounting"],
     "outcome": "Implement deterministic optimizer closures and distinguish returned step loss from final objective.",
+    "lab": "Minimize the same objective with L-BFGS from two starting values and with Adam, counting every closure call.",
+    "verification": "Every fit reaches mean 1.5 within 2e-5; L-BFGS evaluates the objective more often than it steps, and the loss returned by step() exceeds the recomputed final objective.",
     "sources": [
       [
         "PyTorch L-BFGS closure API",
@@ -312,6 +342,8 @@
     "suffix": ".py",
     "concepts": ["gradcheck", "Hessian", "detached graph"],
     "outcome": "Verify Hessians independently and detect deliberately broken gradient paths.",
+    "lab": "Compare an autograd Hessian with its analytic matrix and run gradcheck, then detach part of the graph and try an in-place update of a leaf.",
+    "verification": "The Hessian equals [[3.2, 3], [3, 5.2]], gradcheck passes for the correct function and fails for the detached one, and the in-place leaf update is rejected.",
     "sources": [
       [
         "PyTorch gradcheck assumptions",
@@ -334,6 +366,8 @@
     "suffix": ".py",
     "concepts": ["delta method", "prediction intervals", "lognormal expectation"],
     "outcome": "Separate mean, observation and new-group uncertainty and distinguish transformed means from medians.",
+    "lab": "Separate mean, observation and new-group variance of forecasts with the delta method, then compare the mean and median of a lognormal prediction.",
+    "verification": "At time 0 the variances are 0.05 for the mean, 0.14 for a new observation and 0.30 for a new group; the lognormal mean exp(0.58) exceeds the median exp(0.4).",
     "sources": [
       [
         "PyTorch automatic differentiation mechanics",
@@ -350,12 +384,14 @@
     "title": "Frequentist uncertainty and limits",
     "level": "advanced",
     "minutes": 90,
-    "prerequisites": ["clp-016", "r-042"],
+    "prerequisites": ["clp-016", "statistics-008"],
     "runtime": "llm-torch-cpu",
     "language": "python",
     "suffix": ".py",
     "concepts": ["sandwich covariance", "cluster bootstrap", "weak information"],
     "outcome": "Compare model, iid and cluster variance calculations and enumerate a whole-cluster bootstrap.",
+    "lab": "Compare model-based, iid sandwich and cluster sandwich variances for four clusters with duplicated measurements, then enumerate every whole-cluster bootstrap sample.",
+    "verification": "The iid sandwich variance is 0.625 while the cluster sandwich and the exact cluster bootstrap both give 1.25, and a weakly informed curvature matrix is rejected.",
     "sources": [
       [
         "White (1982), Maximum Likelihood Estimation of Misspecified Models",
@@ -378,6 +414,8 @@
     "suffix": ".py",
     "concepts": ["unequal rank mass", "DistributedSampler", "serial reduction oracle"],
     "outcome": "Derive the global mean gradient under rank averaging and inspect sampler padding and dropping.",
+    "lab": "Compute the global mean gradient for unequal local batches, compare naive rank averaging with corrected multipliers, then inspect padded and drop-last sampler shards.",
+    "verification": "The global gradient is -3, naive rank averaging gives -1.75 and the corrected multipliers recover -3; padding fills six slots with index 0 twice, and drop_last keeps indices 0 to 3.",
     "sources": [
       [
         "PyTorch DistributedDataParallel gradient contract",
@@ -400,6 +438,8 @@
     "suffix": ".py",
     "concepts": ["shared nonlinear MLE", "conditional AR1 prediction", "reproducibility"],
     "outcome": "Fit and audit a shared nonlinear panel model with explicit prediction and evidence limitations.",
+    "lab": "Fit the shared nonlinear panel model, audit its gradient and information, predict conditionally on each group, then refit under false independence.",
+    "verification": "Parameters recover (2.5, 0.55, 0.6) with maximum gradient below 5e-4 and a positive minimum information eigenvalue; the independence fit recovers the same means, so compare the reported conditional and independence forecast errors instead.",
     "sources": [
       [
         "PyTorch Cholesky factorization API",

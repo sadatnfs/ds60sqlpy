@@ -10,7 +10,7 @@ The example compares an intercept-only normal model with a linear normal model o
 
 ## Worked case 1: compare PSIS with exact refitting
 
-Both models produce pointwise log-likelihood arrays, and `az.loo` returns an estimated expected log predictive density together with Pareto-k diagnostics. Large Pareto-k values indicate unreliable importance-weight behavior for the approximation. A returned score is not automatically a trustworthy estimate merely because the function completed.
+Both models produce pointwise log-likelihood arrays, and `az.loo` returns an estimated expected log predictive density together with Pareto-k diagnostics. Large Pareto-k values indicate unreliable importance-weight behavior for the approximation. ArviZ 0.23.4 sets `warning` when any observation's k exceeds \(\min(1-1/\log_{10}S,\,0.7)\), where \(S\) is the total number of posterior draws; for this program's \(S=240\) draws the cutoff is about 0.58. Values above 0.7 make the PSIS estimate for that observation unreliable however many draws are used, while values between the sample-size cutoff and 0.7 can improve with more draws. Compare the printed `pareto_k_max` with that cutoff as well as reading `psis_warning`. A returned score is not automatically a trustworthy estimate merely because the function completed.
 
 The program independently removes each observation and calculates the conjugate coefficient posterior from the remaining data. The held-out predictive distribution is normal with mean \(x_i^{\mathsf T}m_{-i}\) and variance \(\sigma^2+x_i^{\mathsf T}V_{-i}x_i\). Summing those held-out log densities gives an exact leave-one-out value for this model family.
 
@@ -39,7 +39,7 @@ A larger ELPD means a larger average log predictive density under the stated eva
 
 Selecting repeatedly among many models using the same cross-validation results introduces selection. Preserve the search procedure and consider an independent final assessment where appropriate. A score for one fitted model is not automatically an unbiased evaluation of all the analyst decisions that produced it.
 
-The demonstration uses short chains and retains imperfect diagnostics. The exact conjugate oracle is the source of its reliable comparison, while sampled PSIS values illustrate approximation behavior. Do not turn the tutorial's successful execution into a claim that every reported Monte Carlo score is suitable for a deployment decision.
+The demonstration uses short chains and retains imperfect diagnostics; its R-hat and effective-sample-size record can fail the screen from the Markov chain unit. The exact conjugate oracle is the source of its reliable comparison, while sampled PSIS values illustrate approximation behavior. Do not turn the tutorial's successful execution into a claim that every reported Monte Carlo score is suitable for a deployment decision.
 
 ## Answered scientific discussion
 
@@ -49,7 +49,7 @@ The demonstration uses short chains and retains imperfect diagnostics. The exact
 
 ## Complete reproducible program
 
-Run the complete program in the classroom's declared prepared profile. Every run starts a fresh process with tiny offline synthetic data. This is a worked tutorial, with no exam or hidden solution. Runtime: `bayesian-cpu`.
+Run the complete program in the classroom's declared prepared profile. Every run starts a fresh process with tiny offline synthetic data. This is a worked tutorial, with no exam or hidden solution. These teaching-sized chains can fail the convergence screen from `bayes-006` (R-hat below 1.01, at least 100 bulk and tail effective draws per chain, no divergences); read the printed diagnostics against it before interpreting any estimate. Runtime: `bayesian-cpu`.
 
 ```python
 """Complete bounded synthetic Bayesian investigation; no external data."""
@@ -81,8 +81,8 @@ def sample_model(model, seed):
 def diagnostics(trace, names):
     import arviz as az
 
-    rhat = np.asarray(az.rhat(trace, var_names=names).to_array(), float)
-    ess = np.asarray(az.ess(trace, var_names=names, method="bulk").to_array(), float)
+    rhat = np.asarray(az.rhat(trace, var_names=names).to_dataarray(), float)
+    ess = np.asarray(az.ess(trace, var_names=names, method="bulk").to_dataarray(), float)
 
     def finite_extreme(values, maximum):
         values = values[np.isfinite(values)]
@@ -163,4 +163,5 @@ if __name__ == "__main__":
 ## Primary references
 
 - [Vehtari and colleagues, LOO and WAIC](https://arxiv.org/abs/1507.04544)
-- [ArviZ InferenceData-era LOO interface](https://python.arviz.org/en/v0.19.0/api/generated/arviz.loo.html)
+- [Vehtari and colleagues, Pareto smoothed importance sampling](https://arxiv.org/abs/1507.02646)
+- [ArviZ 0.23.4 LOO interface (InferenceData era)](https://python.arviz.org/en/v0.23.4/api/generated/arviz.loo.html)

@@ -1,6 +1,6 @@
 # spark-deploy-004: Submit a bounded distributed fit
 
-Tutorial mode. Stage: beginner. Direct prerequisites: `spark-deploy-003`, `spark-022`.
+Tutorial mode. Stage: intermediate. Direct prerequisites: `spark-deploy-003`, `spark-022`.
 
 Read this tutorial in the classroom. Its commands run only in the separately prepared [owned workshop](../projects/cluster-lab/README.md); there is no pad Run action. Examples describe expected observations. Check the workshop qualification ledger for actual execution evidence.
 
@@ -15,6 +15,42 @@ This is a real distributed fitting calculation with a deliberately simple analyt
 ```sh
 python3 lab.py submit --hold-seconds 60
 ```
+
+Each partition reduces its rows to five sufficient statistics before anything
+returns to the driver:
+
+From [`projects/cluster-lab/app/bounded_job.py`](../projects/cluster-lab/app/bounded_job.py):
+
+```python
+def partition_summary(rows, pause_seconds):
+    context = TaskContext.get()
+    n = sx = sxx = sy = sxy = 0
+    for row in rows:
+        x = int(row.id)
+        y = 3 + 2 * x
+        n += 1
+        sx += x
+        sxx += x * x
+        sy += y
+        sxy += x * y
+    time.sleep(pause_seconds)
+    yield {
+        "partition": context.partitionId(),
+        "attempt": context.attemptNumber(),
+        "host": socket.gethostname(),
+        "python_pid": os.getpid(),
+        "n": n,
+        "sx": sx,
+        "sxx": sxx,
+        "sy": sy,
+        "sxy": sxy,
+    }
+```
+
+The driver adds the per-partition `n`, `sx`, `sxx`, `sy` and `sxy` values and solves
+the least-squares line from those totals, so only one small dictionary per
+partition crosses the network. `TaskContext` records which partition and attempt
+produced each summary.
 
 During the hold interval, use `lab.py urls` in another terminal to inspect the live driver UI. The script verifies eight distinct partition IDs, exact count and integer moments, both named worker hosts and bounded executor metadata. The report is written under `.workshop/results` before the hold. Spark stops in `finally` even if the numerical assertion fails.
 

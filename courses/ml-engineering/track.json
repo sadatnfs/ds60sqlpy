@@ -22,7 +22,7 @@
       ],
       "outcome": "Define an ML product through its decision, information boundary and accepted artifacts.",
       "lab": "Define an ML product through its decision, information boundary and accepted artifacts. Run both complete local examples, explain the changed assumption, and retain evidence for the six practice changes.",
-      "verification": "Run the assertions and inspect mle-001 reference checks passed. Interpret the counterexample in the guide."
+      "verification": "Run the starter and compare both printed results with the guide. Worked case 1: There are 120 unique decisions; label is excluded from features and labels become available after their cutoffs. Worked case 2: The only next ready stage is evaluate."
     },
     {
       "id": "mle-002",
@@ -42,7 +42,7 @@
       ],
       "outcome": "Construct an eligible training cohort from explicit feature and label clocks.",
       "lab": "Construct an eligible training cohort from explicit feature and label clocks. Run both complete local examples, explain the changed assumption, and retain evidence for the six practice changes.",
-      "verification": "Run the assertions and inspect mle-002 reference checks passed. Interpret the counterexample in the guide."
+      "verification": "Run the starter and compare both printed results with the guide. Worked case 1: Correct feature values are [10, 30]; the leaking event-only result includes 999. Worked case 2: Training uses 77 rows; decisions 77,78 and 79 have labels that are not yet mature."
     },
     {
       "id": "mle-003",
@@ -63,7 +63,7 @@
       ],
       "outcome": "Build features at the decision grain while preserving all requests and missingness categories.",
       "lab": "Build features at the decision grain while preserving all requests and missingness categories. Run both complete local examples, explain the changed assumption, and retain evidence for the six practice changes.",
-      "verification": "Run the assertions and inspect mle-003 reference checks passed. Interpret the counterexample in the guide."
+      "verification": "Run the starter and compare both printed results with the guide. Worked case 1: Request totals/counts are 10:2/1,11:15/3 and 12:3/1. Worked case 2: Values are [0, 4, null] and coverage is 2/3."
     },
     {
       "id": "mle-004",
@@ -83,7 +83,7 @@
       ],
       "outcome": "Validate a feature interface structurally and semantically.",
       "lab": "Validate a feature interface structurally and semantically. Run both complete local examples, explain the changed assumption, and retain evidence for the six practice changes.",
-      "verification": "Run the assertions and inspect mle-004 reference checks passed. Interpret the counterexample in the guide."
+      "verification": "Run the starter and compare both printed results with the guide. Worked case 1: Only id 1 is accepted; ids 2 and 3 carry distinct reasons. Worked case 2: The column sets agree while contract hashes differ."
     },
     {
       "id": "mle-005",
@@ -104,12 +104,12 @@
       ],
       "outcome": "Design evaluation around the target population and information boundary.",
       "lab": "Design evaluation around the target population and information boundary. Run both complete local examples, explain the changed assumption, and retain evidence for the six practice changes.",
-      "verification": "Run the assertions and inspect mle-005 reference checks passed. Interpret the counterexample in the guide."
+      "verification": "Run the starter and compare both printed results with the guide. Worked case 1: Repeated-entity accuracy is 1.0; the chosen unseen-entity case is 0.5. Worked case 2: Training has 77 rows, future evaluation 40 rows, with no decision-id overlap."
     },
     {
       "id": "mle-006",
       "title": "Register and retrieve actual Feast historical features",
-      "level": "beginner",
+      "level": "intermediate",
       "minutes": 90,
       "prerequisites": [
         "mle-002",
@@ -127,7 +127,7 @@
       ],
       "outcome": "Qualify a real feature-store retrieval against independent temporal and coverage checks.",
       "lab": "Qualify a real feature-store retrieval against independent temporal and coverage checks. Run both complete local examples, explain the changed assumption, and retain evidence for the six practice changes.",
-      "verification": "Run the assertions and inspect mle-006 reference checks passed. Interpret the counterexample in the guide."
+      "verification": "Run the starter and compare both printed results with the guide. Worked case 1: Historical usage is [10, 20, 5] and one feature view is registered. Worked case 2: The normalized population has 3 rows with values [10, null, null], regardless of whether the backend returned unmatched rows."
     },
     {
       "id": "mle-007",
@@ -147,7 +147,7 @@
       ],
       "outcome": "Populate a real online feature store and enforce a consumer freshness contract.",
       "lab": "Populate a real online feature store and enforce a consumer freshness contract. Run both complete local examples, explain the changed assumption, and retain evidence for the six practice changes.",
-      "verification": "Run the assertions and inspect mle-007 reference checks passed. Interpret the counterexample in the guide."
+      "verification": "Run the starter and compare both printed results with the guide. Worked case 1: Latest usage values are [20, 5] for the two customers. Worked case 2: Ages are 86,400 and 259,200 seconds; freshness decisions are [true, false]."
     },
     {
       "id": "mle-008",
@@ -168,7 +168,7 @@
       ],
       "outcome": "Package and use a single fitted preprocessing/model interface.",
       "lab": "Package and use a single fitted preprocessing/model interface. Run both complete local examples, explain the changed assumption, and retain evidence for the six practice changes.",
-      "verification": "Run the assertions and inspect mle-008 reference checks passed. Interpret the counterexample in the guide."
+      "verification": "Run the starter and compare both printed results with the guide. Worked case 1: Single-request and batch probabilities match and remain between 0 and 1. Worked case 2: The proper transformed value is 99; the leaking result differs by more than 90."
     },
     {
       "id": "mle-009",
@@ -190,7 +190,7 @@
       ],
       "outcome": "Evaluate probabilities, ranking and actions with separately interpreted evidence.",
       "lab": "Evaluate probabilities, ranking and actions with separately interpreted evidence. Run both complete local examples, explain the changed assumption, and retain evidence for the six practice changes.",
-      "verification": "Run the assertions and inspect mle-009 reference checks passed. Interpret the counterexample in the guide."
+      "verification": "Run the starter and compare both printed results with the guide. Worked case 1: Forty evaluation rows contribute; all metric values are finite and their descriptive chart retains exact bin counts. Worked case 2: Utilities are 8,10 and 5 for the three thresholds."
     },
     {
       "id": "mle-010",
@@ -212,7 +212,7 @@
       ],
       "outcome": "Use real tracking APIs to bind parameters, metrics, artifacts and terminal outcomes to an owned run.",
       "lab": "Use real tracking APIs to bind parameters, metrics, artifacts and terminal outcomes to an owned run. Run both complete local examples, explain the changed assumption, and retain evidence for the six practice changes.",
-      "verification": "Run the assertions and inspect mle-010 reference checks passed. Interpret the counterexample in the guide."
+      "verification": "Run the starter and compare both printed results with the guide. Worked case 1: The run is FINISHED, its metric is 0.2 and the evidence artifact is listed. Worked case 2: The failed run retains its 0.1 training-loss observation."
     },
     {
       "id": "mle-011",
@@ -233,7 +233,7 @@
       ],
       "outcome": "Publish and resolve a model artifact with an explicit trusted interface.",
       "lab": "Publish and resolve a model artifact with an explicit trusted interface. Run both complete local examples, explain the changed assumption, and retain evidence for the six practice changes.",
-      "verification": "Run the assertions and inspect mle-011 reference checks passed. Interpret the counterexample in the guide."
+      "verification": "Run the starter and compare both printed results with the guide. Worked case 1: Reloaded predictions match, and the actual registry version retains its linked run. Worked case 2: Tampered bytes fail their expected hash and the changed unit contract has a different identity."
     },
     {
       "id": "mle-012",
@@ -256,7 +256,7 @@
       ],
       "outcome": "Define and test a serving contract with positive and negative requests.",
       "lab": "Define and test a serving contract with positive and negative requests. Run both complete local examples, explain the changed assumption, and retain evidence for the six practice changes.",
-      "verification": "Run the assertions and inspect mle-012 reference checks passed. Interpret the counterexample in the guide."
+      "verification": "Run the starter and compare both printed results with the guide. Worked case 1: The accepted request returns a probability matching the fitted model and version fixture-v1. Worked case 2: Both requests return 422 validation responses."
     },
     {
       "id": "mle-013",
@@ -278,7 +278,7 @@
       ],
       "outcome": "Define checkpoint and retry behavior using artifact identities.",
       "lab": "Define checkpoint and retry behavior using artifact identities. Run both complete local examples, explain the changed assumption, and retain evidence for the six practice changes.",
-      "verification": "Run the assertions and inspect mle-013 reference checks passed. Interpret the counterexample in the guide."
+      "verification": "Run the starter and compare both printed results with the guide. Worked case 1: The feature checkpoint survives; resumed model mean is 4 and repeated publication identity is unchanged. Worked case 2: New features are [2, 4, 8] and the mean is 14/3."
     },
     {
       "id": "mle-014",
@@ -299,7 +299,7 @@
       ],
       "outcome": "Design stable routing and shadow comparisons with bounded conclusions.",
       "lab": "Design stable routing and shadow comparisons with bounded conclusions. Run both complete local examples, explain the changed assumption, and retain evidence for the six practice changes.",
-      "verification": "Run the assertions and inspect mle-014 reference checks passed. Interpret the counterexample in the guide."
+      "verification": "Run the starter and compare both printed results with the guide. Worked case 1: The smaller selected set is a nonempty subset of the larger set, and assignments repeat exactly. Worked case 2: All thresholded decisions agree, while the probabilities have changed."
     },
     {
       "id": "mle-015",
@@ -321,7 +321,7 @@
       ],
       "outcome": "Monitor operations, data contracts and mature outcomes as distinct signals.",
       "lab": "Monitor operations, data contracts and mature outcomes as distinct signals. Run both complete local examples, explain the changed assumption, and retain evidence for the six practice changes.",
-      "verification": "Run the assertions and inspect mle-015 reference checks passed. Interpret the counterexample in the guide."
+      "verification": "Run the starter and compare both printed results with the guide. Worked case 1: Mature-label coverage is 0.5 and observed Brier loss is 0.085. Worked case 2: The shift statistic is 1.0; the observed higher-method p95 latency is 15 milliseconds."
     },
     {
       "id": "mle-016",
@@ -343,7 +343,7 @@
       ],
       "outcome": "Activate and recover model state through explicit accepted versions.",
       "lab": "Activate and recover model state through explicit accepted versions. Run both complete local examples, explain the changed assumption, and retain evidence for the six practice changes.",
-      "verification": "Run the assertions and inspect mle-016 reference checks passed. Interpret the counterexample in the guide."
+      "verification": "Run the starter and compare both printed results with the guide. Worked case 1: The failed candidate leaves the active v1 pointer byte-identical. Worked case 2: The accepted version returns to v1 with no pending pointer file."
     },
     {
       "id": "mle-017",
@@ -366,7 +366,7 @@
       ],
       "outcome": "Write a model card that is grounded in actual data, metrics and operational decisions.",
       "lab": "Write a model card that is grounded in actual data, metrics and operational decisions. Run both complete local examples, explain the changed assumption, and retain evidence for the six practice changes.",
-      "verification": "Run the assertions and inspect mle-017 reference checks passed. Interpret the counterexample in the guide."
+      "verification": "Run the starter and compare both printed results with the guide. Worked case 1: The two TPRs are 0.8 and 0.4, with different sample sizes. Worked case 2: Email is rejected by the allowlist and the card retains its synthetic-data limit."
     },
     {
       "id": "mle-018",
@@ -394,7 +394,7 @@
       ],
       "outcome": "Deliver a connected local ML product with actual tool execution and a reviewable acceptance decision.",
       "lab": "Deliver a connected local ML product with actual tool execution and a reviewable acceptance decision. Run both complete local examples, explain the changed assumption, and retain evidence for the six practice changes.",
-      "verification": "Run the assertions and inspect mle-018 reference checks passed. Interpret the counterexample in the guide."
+      "verification": "Run the starter and compare both printed results with the guide. Worked case 1: All 120 requests reconcile, model input/output is valid, and the report identifies actual local tools and the no-external-deployment boundary. Worked case 2: The publication decision is false with an explicit coverage reason and retained accepted version."
     }
   ]
 }

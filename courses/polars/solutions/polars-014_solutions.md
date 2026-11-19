@@ -9,6 +9,15 @@ The executable reference contains the two complete worked cases with assertions.
 
 This is a stricter freshness rule, not necessarily a better model. State what should happen when no feature qualifies.
 
+```python
+import polars as pl
+
+requests = pl.DataFrame({"id": [1, 2, 3], "time": [2, 5, 9]}).sort("time")
+features = pl.DataFrame({"time": [1, 4, 8], "value": [10, 20, 30]}).sort("time")
+exact = requests.join_asof(features, on="time", strategy="backward", tolerance=0)
+assert exact["value"].to_list() == [None, None, None]
+```
+
 **Expected:** No unequal-time feature is matched.
 
 ## 2. Add an entity key
@@ -20,6 +29,23 @@ Use the by key for grouped as-of matching or include entity identity in the cand
 ## 3. Change availability
 
 The feature value 999 can then be selected legitimately under the fixture, though its plausibility would still require a data-quality check.
+
+```python
+import polars as pl
+
+requests = pl.DataFrame({"request": [1, 2], "customer": [10, 10], "cutoff": [5, 9]})
+features = pl.DataFrame(
+    {"customer": [10, 10, 10], "event": [2, 4, 8], "known": [3, 4, 8], "value": [10, 999, 30]}
+)
+available = (
+    requests.join(features, on="customer")
+    .filter((pl.col("event") <= pl.col("cutoff")) & (pl.col("known") <= pl.col("cutoff")))
+    .sort("request", "event", "known")
+    .group_by("request", maintain_order=True)
+    .last()
+)
+assert available["value"].to_list() == [999, 30]
+```
 
 **Expected:** It becomes eligible at cutoff 5.
 
@@ -94,4 +120,4 @@ if __name__ == "__main__":
 
 ## Interpretation
 
-Reconstruct features using only information eligible at each prediction time. Test a late arrival, a stale feature, a timestamp tie and an unmatched request. Carry those semantics into the later Feast and ML engineering lessons, where library behavior is checked against explicit temporal fixtures.
+Test a late arrival, a stale feature, a timestamp tie and an unmatched request. Carry those semantics into the later Feast and ML engineering lessons, where library behavior is checked against explicit temporal fixtures.

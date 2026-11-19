@@ -26,6 +26,22 @@ struct LessonMain {
       precondition(!inventory.reserve(-1))
       precondition(inventory.stock == 3)
     }
+
+    do {
+      // Task 3: Independent construction
+      struct BoundedCounter {
+        private(set) var value = 0
+        let limit: Int
+        mutating func increment() -> Bool {
+          guard value < limit else { return false }
+          value += 1
+          return true
+        }
+      }
+      var counter = BoundedCounter(limit: 2)
+      precondition(counter.increment() && counter.increment())
+      precondition(!counter.increment() && counter.value == 2)
+    }
     print("swift-012: passed")
   }
 }

@@ -6,23 +6,23 @@ Advanced, approximately 120 minutes. Direct prerequisites: `java-026`
 
 ## Learning objectives
 
-Explain build input, reproducible artifact, dependency pin, jar using a concrete program. Trace the normal execution, identify its boundary assumptions and make a failure case observable. The first investigation is Build a Hello class whose main prints build-ok. The final exercise transfers the mechanism to record an explicit dependency contract.
+Build a runnable JAR reproducibly and detect when a changed source produces a different artifact. Along the way, explain build input, reproducible artifact, dependency pin, jar using a concrete program. Trace the normal execution, identify its boundary assumptions and make a failure case observable. Exercises 1 and 2 start from the worked examples; the authored investigations begin with this task: Package the same classes twice with the same timestamp. The final exercise transfers the mechanism to record an explicit dependency contract.
 
 ## Purpose and mental model
 
-A build turns source and declared dependencies into an artifact. Reproducibility requires identifying the compiler,target level,inputs,dependency versions and packaging metadata. A source repository alone is not enough if a build fetches moving dependency versions or embeds timestamps that change everyrun. Maven and Gradle can manage larger builds,but their configuration still needs explicit versions,verification and offline preparation. This default lesson uses only the JDK'sjavac and jar tools on a literal source fixture.
+A build turns source and declared dependencies into an artifact. Reproducibility requires identifying the compiler, target level, inputs, dependency versions and packaging metadata. A source repository alone is not enough if a build fetches moving dependency versions or embeds timestamps that change every run. Maven and Gradle can manage larger builds, but their configuration still needs explicit versions, verification and offline preparation. This default lesson uses only the JDK'sjavac and jar tools on a literal source fixture.
 
-The example compiles one small application,packages it twice with a fixed archive timestamp,and compares the resulting bytes in the same prepared JDK environment. It then executes the JAR. This establishes a bounded local reproducibility property,not byte-identical builds across everyJDK or OS. A dependency lock or checksum is an identity control,not proof that a dependency is safe or appropriate.
+The example compiles one small application, packages it twice with a fixed archive timestamp, and compares the resulting bytes in the same prepared JDK environment. It then executes the JAR. This establishes a bounded local reproducibility property, not byte-identical builds across every JDK or OS. A dependency lock or checksum is an identity control, not proof that a dependency is safe or appropriate.
 
 ## Vocabulary and concepts
 
-**Build input:** Source,toolchain and dependency state used to produce an artifact.
+**Build input:** Source, toolchain and dependency state used to produce an artifact.
 
 **Reproducible artifact:** An output matching a declared byte-identity contract under fixed inputs.
 
 **Dependency pin:** An exact version or hash identifying a required component.
 
-**JAR:** A Java archive containing classes,resources and optional launch metadata.
+**JAR:** A Java archive containing classes, resources and optional launch metadata.
 
 ## How to run this lesson
 
@@ -43,7 +43,7 @@ The [JAR fixture](../fixtures/java-027/README.md) provides the matching source a
 
 ## Syntax anatomy and execution trace
 
-The JavaCompiler API invokes the prepared compiler with --release 21. The JDKjar tool can be accessed throughjava.util.spi.ToolProvider and given a fixed--date plusmain-class. Package only the intended classes directory. SHA256 compares artifact bytes;use a fresh childJVM to prove the JAR entrypoint works. A changed source or dependency identity should change the recorded build manifest. The child process inherits the prepared environment unchanged. JVM startup notices such as JAVA_TOOL_OPTIONS belong to stderr, while the application result belongs to stdout. Capture both streams separately in owned files so diagnostics cannot corrupt an exact output comparison; include stderr when a child fails. Do not remove inherited CPU or resource settings to make a test pass.
+The JavaCompiler API invokes the prepared compiler with --release 21. The JDK jar tool can be accessed through java.util.spi.ToolProvider and given a fixed--date plusmain-class. Package only the intended classes directory. SHA256 compares artifact bytes; use a fresh child JVM to prove the JAR entrypoint works. A changed source or dependency identity should change the recorded build manifest. The child process inherits the prepared environment unchanged. JVM startup notices such as JAVA_TOOL_OPTIONS belong to stderr, while the application result belongs to stdout. Capture both streams separately in owned files so diagnostics cannot corrupt an exact output comparison; include stderr when a child fails. Do not remove inherited CPU or resource settings to make a test pass.
 
 ## Worked example / walkthrough
 
@@ -143,14 +143,15 @@ public class Main {
 
   public static void main(String[] args) throws Exception {
     try (BuildFixture fixture = new BuildFixture()) {
-      assert fixture.compile() == 0;
+      int compiled = fixture.compile();
+      assert compiled == 0;
       assert java.nio.file.Files.isRegularFile(fixture.classes.resolve("Hello.class"));
     }
   }
 }
 ```
 
-**Expected:** compiler exit 0;Hello.class exists.
+**Expected:** compiler exit 0; Hello.class exists.
 
 ### Example B: Create a runnable archive
 
@@ -248,12 +249,14 @@ public class Main {
 
   public static void main(String[] args) throws Exception {
     try (BuildFixture fixture = new BuildFixture()) {
-      assert fixture.compile() == 0;
+      int compiled = fixture.compile();
+      assert compiled == 0;
       assert java.nio.file.Files.isRegularFile(fixture.classes.resolve("Hello.class"));
     }
 
     try (BuildFixture fixture = new BuildFixture()) {
-      assert fixture.compile() == 0;
+      int compiled = fixture.compile();
+      assert compiled == 0;
       var jar = fixture.pack("one.jar");
       try (var archive = new java.util.jar.JarFile(jar.toFile())) {
         assert archive.getJarEntry("Hello.class") != null;
@@ -264,7 +267,7 @@ public class Main {
 }
 ```
 
-**Expected:** JAR exists andcontainsHello.class.
+**Expected:** JAR exists and contains Hello.class.
 
 ## Prediction before your attempt
 
@@ -272,29 +275,29 @@ Read the source from the entry point and name each value before executing it. Id
 
 ## Exercises
 
-1. **Compile a literal application.** Build a Hello class whose main prints build-ok.
-   **Expected:** compiler exit 0;Hello.class exists.
-   **Verify:** Compare your assertion values or captured diagnostic with compiler exit 0;Hello.class exists.
+1. **Compile a literal application: predict an edited check.** Copy Example A into a scratch `Main.java` and change `assert java.nio.file.Files.isRegularFile(fixture.classes.resolve("Hello.class"));` to `assert java.nio.file.Files.isRegularFile(fixture.classes.resolve("Hello.class!"));` inside its assertion. Before running it with `java -ea Main`, predict whether the assertion still holds and explain why; then restore it.
+   **Expected:** The changed run fails with an `AssertionError` from the assertion on `java.nio.file.Files.isRegularFile(fixture.classes.resolve("Hello.class"))`. Restoring the original line brings back the worked observation: compiler exit 0; Hello.class exists.
+   **Verify:** Compare your written prediction with the reported `AssertionError` and its stack-trace line, and explain why the edited condition is false for the values that satisfy `java.nio.file.Files.isRegularFile(fixture.classes.resolve("Hello.class"))`. After restoring the line, the program completes without an `AssertionError` again.
 
-2. **Create a runnable archive.** Package the compiled classes withmain-classHello and fixed timestamp.
-   **Expected:** JAR exists andcontainsHello.class.
-   **Verify:** Compare your assertion values or captured diagnostic with JAR exists andcontainsHello.class.
+2. **Create a runnable archive: diagnose an edited check.** A careless edit changed the assertion that Example B adds after Example A so that it reads `assert archive.getManifest().getMainAttributes().getValue("Main-Class").equals("Hello!");`. Run Example B with that line, explain why the edited assertion now fails for the same program state, and restore it.
+   **Expected:** Before the repair the run fails with an `AssertionError` from the assertion on `archive.getManifest().getMainAttributes().getValue("Main-Class").equals("Hello")`; after it the line reads `assert archive.getManifest().getMainAttributes().getValue("Main-Class").equals("Hello");` again and JAR exists and contains Hello.class.
+   **Verify:** Keep the failing and the repaired runs. Explain why the edited assertion rejects the same program state that `archive.getManifest().getMainAttributes().getValue("Main-Class").equals("Hello")` accepts.
 
 3. **Compare two builds with fixed metadata.** Package the same classes twice with the same timestamp.
-   **Expected:** archive byte hashes equal in this preparedJDK.
-   **Verify:** Compare your assertion values or captured diagnostic with archive byte hashes equal in this preparedJDK.
+   **Expected:** archive byte hashes equal in this prepared JDK.
+   **Verify:** Keep an assertion equivalent to `compiled == 0`. As a control, change `assert compiled == 0;` to `assert compiled != 0;` inside it: the run must fail with an `AssertionError`, which shows the assertion can fail. Restore it.
 
-4. **Execute the packaged entrypoint.** Run the JAR in a bounded childJVM.
-   **Expected:** stdoutbuild-ok;exit 0.
-   **Verify:** Compare your assertion values or captured diagnostic with stdoutbuild-ok;exit 0.
+4. **Execute the packaged entrypoint.** Run the JAR in a bounded child JVM.
+   **Expected:** stdout build-ok; exit 0.
+   **Verify:** Keep an assertion equivalent to `output.strip().equals("build-ok")`. As a control, change `assert output.strip().equals("build-ok");` to `assert output.strip().equals("build-ok!");` inside it: the run must fail with an `AssertionError`, which shows the assertion can fail. Restore it.
 
 5. **Detect a changed source identity.** Hash two source strings differing in their printed message.
-   **Expected:** differentSHA256digests.
-   **Verify:** Compare your assertion values or captured diagnostic with differentSHA256digests.
+   **Expected:** different SHA-256 digests.
+   **Verify:** Keep an assertion equivalent to `!Arrays.equals(first, second)`. As a control, change `"class A { int x=1; }".getBytes(java.nio.charset.StandardCharsets.UTF_8)` to `"class A { int x=2; }".getBytes(java.nio.charset.StandardCharsets.UTF_8)`: the run must fail with an `AssertionError` from the assertion on `!Arrays.equals(first, second)`. Restore the line before continuing.
 
-6. **Record an explicit dependency contract.** Represent H2 asversion2.5.252 witha required verified hash field and reject a movingLATEST label.
+6. **Record an explicit dependency contract.** Represent H2 as version 2.5.252 with a required verified hash field and reject a moving LATEST label.
    **Expected:** exact version accepted; LATEST not treated as a pin.
-   **Verify:** Compare your assertion values or captured diagnostic with exact version accepted; LATEST not treated as a pin.
+   **Verify:** Keep an assertion equivalent to `dependency.get("version").equals("2.5.252") && !dependency.get("version").equals("LATEST")`. As a control, change `"2.5.252",` to `"3.5.252",`: the run must fail with an `AssertionError` from the assertion on `dependency.get("version").equals("2.5.252") && !dependency.get("version").equals("LATEST")`. Restore the line before continuing.
 
 ## Common pitfalls and diagnosis
 
@@ -304,7 +307,14 @@ Do not replace a precise exception with a catch-all that returns a plausible def
 
 ## Progressive hints
 
-First reconstruct the values and identities in the worked example. Next isolate the line that changes the result when one input is altered. Finally compare the normal and failure paths with the stated contract. Use a small table of input, expected value, actual value and exception type. Ask for one hint about the first incorrect assumption before requesting the entire reference implementation.
+Read one hint at a time and attempt the exercise again before reading the next. Keep a small table of input, expected value, actual value and exception type. Ask for one hint about the first incorrect assumption before requesting the entire reference implementation.
+
+- **Exercise 1:** First restate the expected observation: compiler exit 0; Hello.class exists. Then list the values read by `java.nio.file.Files.isRegularFile(fixture.classes.resolve("Hello.class"))` and trace each one from its declaration. Finally, compute the asserted value with `assert java.nio.file.Files.isRegularFile(fixture.classes.resolve("Hello.class!"));` in place before running.
+- **Exercise 2:** First restate the expected observation: JAR exists and contains Hello.class. Then list the values read by `archive.getManifest().getMainAttributes().getValue("Main-Class").equals("Hello")` and trace each one from its declaration. Finally, compare `assert archive.getManifest().getMainAttributes().getValue("Main-Class").equals("Hello!");` with the same line in Example B and state the claim each version makes.
+- **Exercise 3:** First restate the expected observation: archive byte hashes equal in this prepared JDK. Then list the values read by `compiled == 0` and trace each one from its declaration. Finally, name one input that would make `compiled == 0` false.
+- **Exercise 4:** First restate the expected observation: stdout build-ok; exit 0. Then list the values read by `output.strip().equals("build-ok")` and trace each one from its declaration. Finally, name one input that would make `output.strip().equals("build-ok")` false.
+- **Exercise 5:** First restate the expected observation: different SHA-256 digests. Then list the values read by `!Arrays.equals(first, second)` and trace each one from its declaration. Finally, predict the effect of changing `"class A { int x=1; }".getBytes(java.nio.charset.StandardCharsets.UTF_8)` to `"class A { int x=2; }".getBytes(java.nio.charset.StandardCharsets.UTF_8)` before running anything.
+- **Exercise 6:** First restate the expected observation: exact version accepted; LATEST not treated as a pin. Then list the values read by `dependency.get("version").equals("2.5.252") && !dependency.get("version").equals("LATEST")` and trace each one from its declaration. Finally, predict the effect of changing `"2.5.252",` to `"3.5.252",` before running anything.
 
 ## Self-check and retrieval
 
@@ -316,7 +326,7 @@ Preserve the saved pad and the six exercise observations. Continue to the next l
 
 ## Sources and verification status
 
-[Official Java21 API or language reference](https://docs.oracle.com/en/java/javase/21/docs/specs/man/jar.html), reviewed2026-10-22. Examples and exercise fixtures are original course material. Use the [validation guide](../../../docs/validation.md) and CI artifacts for the exact revision and platform to inspect actual compile/run results. Authoring, parsing, compilation, execution and learner mastery are separate forms of evidence.
+[Official Java 21 API or language reference](https://docs.oracle.com/en/java/javase/21/docs/specs/man/jar.html), reviewed 2026-10-22. Examples and exercise fixtures are original course material. Use the [validation guide](../../../docs/validation.md) and CI artifacts for the exact revision and platform to inspect actual compile/run results. Authoring, parsing, compilation, execution and learner mastery are separate forms of evidence.
 
 ## Ask an AI tutor about this lesson
 
@@ -326,7 +336,7 @@ Read courses/java/guides/java-027.md and courses/java/lessons/java-027.java. Dir
 Explain the mechanism, ask for a prediction, review my attempt, give one hint,
 request compiler/runtime evidence, and ask a fresh retrieval question.
 Keep courses/java/solutions/ closed until I request comparison or show an attempt.
-Use Java21 and the declared offline fixture. Done when I can explain the state
+Use Java 21 and the declared offline fixture. Done when I can explain the state
 transitions, pass all six exercise contracts, diagnose one failure and solve a
 new boundary case without copying the solution.
 ```

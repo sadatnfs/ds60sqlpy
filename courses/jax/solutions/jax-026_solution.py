@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import math
 import numpy as np
 import jax
 import jax.numpy as jnp
@@ -63,7 +62,7 @@ def main():
     result = consume(jnp.zeros(4, dtype=jnp.float64))
     assert result.size == 4 and result.nbytes == 32
 
-    print("jax-026" + ": 8 asserted cases passed")
+    print("jax-026: 8 asserted cases passed")
 
 
 if __name__ == "__main__":

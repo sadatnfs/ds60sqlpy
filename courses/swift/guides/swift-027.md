@@ -6,13 +6,13 @@ Intermediate, approximately 90 minutes. Prerequisites: `swift-026`
 
 ## Learning objectives
 
-Add a real JourneyCore test for rejected negative quantity. Then create a verification plan distinguishing unit, package, UI and device evidence.
+Write behavior tests for the prepared package with XCTest and know where Swift Testing fits. The central exercise is task 3: Add a real JourneyCore test for rejected negative quantity.
 
 ## Purpose and mental model
 
 A meaningful test rejects a plausible wrong implementation. Examples should include independently derived expected values, boundaries and a known misconception. Properties such as idempotence can cover a wider family, but they complement concrete expected cases rather than replacing them.
 
-The pad uses precondition for dependency-free executable checks. The JourneyCore package includes XCTest tests available with the prepared Swift toolchain. Swift Testing is another modern test framework and its macro-based API has a distinct project/toolchain requirement. Keep whichever test surface is actually prepared explicit. Unit tests do not prove UI interaction, signing or remote service availability.
+The pad uses precondition for dependency-free executable checks. The JourneyCore package includes XCTest tests available with the prepared Swift toolchain. Swift Testing (import Testing, @Test, #expect) also ships with Swift 6 toolchains, including the Linux toolchain used here, and swift test runs it alongside XCTest without an extra package dependency. This fixture keeps XCTest so its existing tests stay unchanged. Keep whichever test surface is actually prepared explicit. Unit tests do not prove UI interaction, signing or remote service availability.
 
 ## Vocabulary and concepts
 
@@ -95,7 +95,7 @@ struct LessonMain {
 
 6. **Transfer and justify.** Create a verification plan distinguishing unit, package, UI and device evidence.
 
-For each task, keep a short evidence table: input or initial state, prediction, observed value or diagnostic, and the rule that explains it. The guided examples establish mechanisms; the independent and transfer tasks require your own representation and explanation. Use the separate solution after attempting the task, then close it and reconstruct one boundary case.
+For each task, keep a short evidence table: input or initial state, prediction, observed value or diagnostic, and the rule that explains it. The guided examples establish mechanisms; the independent and transfer tasks require your own representation and explanation. The separate explanation gives an executed reference answer where one has been written and says plainly where none exists yet. Open it only after your own attempt, then close it and reconstruct one boundary case.
 
 ## Common pitfalls and diagnosis
 
@@ -105,9 +105,9 @@ A useful regression case distinguishes the intended rule from the tempting wrong
 
 ## Progressive hints
 
-1. Name the input, output and invariant using the vocabulary above. Reproduce Example A before changing two things at once.
-2. Compare the changed condition in Example B. Identify the first line whose behavior differs and state why.
-3. Reduce your independent task to a normal case, an empty or boundary case, and an invalid case. Write expected observations before inspecting the reference.
+1. Reproduce Example A (Check independently derived cases) before changing anything, and confirm its observation: Normal and boundary values satisfy the clamp contract.
+2. Compare Example B (Catch a plausible wrong boundary) with Example A and name the first line whose behavior differs. Its observation is: The zero case catches the wrong default and clamping is idempotent.
+3. Before opening the explanation, test your task 3 attempt against this lesson's main pitfall: Random tests need reproducible seeds and an oracle.
 
 ## Self-check and next step
 
@@ -115,7 +115,7 @@ Explain Oracle, Regression, Property without reading the definitions. Reconstruc
 
 ## Sources and execution boundary
 
-[Official language or framework documentation](https://docs.swift.org/swift-book/documentation/the-swift-programming-language/). The prose, small fixtures and task designs in this chapter are original. Documentation links provide additional API detail, not a dependency fetched by the classroom. Runtime qualification is recorded separately by the repository validation workflow. Reading a guide, compiling a reference, running its assertions and completing an external project are distinct achievements.
+[Official language or framework documentation](https://docs.swift.org/swift-book/documentation/the-swift-programming-language/). The prose, small fixtures and task designs in this chapter are original. Documentation links provide additional API detail, not a dependency fetched by the classroom. Reading a guide, compiling a reference, running its assertions and completing an external project are distinct achievements.
 
 ## Ask an AI tutor about this lesson
 

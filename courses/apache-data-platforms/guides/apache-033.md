@@ -32,6 +32,35 @@ reads through the official Kafka CLI and compares the exact key/value multiset
 with a separate fixture file. It also checks that the sum of partition end offsets
 is three for this nontransactional fixture.
 
+The check script creates the topic with explicit policy instead of relying on broker
+defaults:
+
+From [`projects/streaming/check-kafka.sh`](../projects/streaming/check-kafka.sh):
+
+```bash
+"$kafka/kafka-topics.sh" --bootstrap-server kafka:9092 --command-config /project/check-client.properties --create --if-not-exists \
+  --topic "$topic" --partitions 2 --replication-factor 1 \
+  --config cleanup.policy=delete --config retention.ms=-1 --config retention.bytes=-1 \
+  >/tmp/topic-check.log 2>&1
+```
+
+It then writes the three keyed fixture lines with the console producer only when the
+topic is empty:
+
+From [`projects/streaming/check-kafka.sh`](../projects/streaming/check-kafka.sh):
+
+```bash
+"$kafka/kafka-console-producer.sh" --bootstrap-server kafka:9092 --topic "$topic" \
+  --reader-property parse.key=true --reader-property 'key.separator=|' \
+  --command-property acks=all --command-property enable.idempotence=true \
+  --command-property request.timeout.ms=3000 --command-property delivery.timeout.ms=15000 \
+  --command-property max.block.ms=10000 \
+  </project/events.txt
+```
+
+`parse.key=true` with `key.separator=|` turns each `key|value` line into a keyed
+record, and the record key decides which of the two partitions it lands in.
+
 Comparing a multiset is deliberate: partition-local order does not promise the
 original interleaving across two partitions. Sorting only for the oracle does
 not reorder the broker's log or create a global sequence. An application needing

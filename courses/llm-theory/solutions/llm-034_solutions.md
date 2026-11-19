@@ -4,7 +4,7 @@ Compare these answers only after an attempt or an explicit solution reveal. They
 
 ## Mechanism review
 
-Quantization represents approximate values with a limited set of integers and a scale. Symmetric signed int8 quantization here uses values-127..127, reserving a common zero-centered convention. A per-tensor scale shares one maximum magnitude across all weights; per-row scales adapt to different row ranges. Round-to-nearest-even determines ties under NumPy rint, and clipping handles values beyond the representable range. Dequantized weights are approximate, so measure error in the resulting matrix-vector product as well as weight error. Storage estimates must include scale metadata and distinguish raw numeric bytes from file or runtime overhead. One small matrix cannot establish universal model-quality preservation.
+Quantization represents approximate values with a limited set of integers and a scale. Symmetric signed int8 quantization here uses values -127..127, reserving a common zero-centered convention. A per-tensor scale shares one maximum magnitude across all weights; per-row scales adapt to different row ranges. Round-to-nearest-even determines ties under NumPy rint, and clipping handles values beyond the representable range. Dequantized weights are approximate, so measure error in the resulting matrix-vector product as well as weight error. Storage estimates must include scale metadata and distinguish raw numeric bytes from file or runtime overhead. One small matrix cannot establish universal model-quality preservation.
 
 **Scale:** The real-valued spacing represented by one integer quantization step.
 
@@ -14,42 +14,41 @@ Quantization represents approximate values with a limited set of integers and a 
 
 ## Reading the implementation
 
-For a nonzero block, \(\mathrm{scale}=\frac{\max(\left|W\right|)}{127}\). Quantize with rint(W/scale), clip and cast toint8. Dequantize by multiplying the integer array by its scale. Row scales use keepdims=True to preserve broadcasting along columns. A zero block needs an explicit nonzero scale convention. Compare against full precision W@x for x[1,-2].
+For a nonzero block, \(\mathrm{scale}=\frac{\max(\left|W\right|)}{127}\). Quantize with rint(W/scale), clip and cast to int8. Dequantize by multiplying the integer array by its scale. Row scales use keepdims=True to preserve broadcasting along columns. A zero block needs an explicit nonzero scale convention. Compare against full precision W@x for x[1, -2].
 
-## Exercise 1: Compute the full-precision reference
+## Exercise 1: Quantize a second matrix
 
-The question is: Multiply W[[.1,-.9],[1.7,-.2]] byx[1,-2].
+The question is: Quantize W[[0.5, -1.2], [0.25, 2.0]] with one shared scale, the maximum absolute value divided by 127, and nearest-even rounding.
 
-The reference keeps the original floating-point values. It must not be recomputed from dequantized weights, which would erase the approximation being measured.
-
-```python
-w = np.array([[0.1, -0.9], [1.7, -0.2]])
-x = np.array([1.0, -2.0])
-reference = w @ x
-np.testing.assert_allclose(reference, [1.9, 2.1], atol=1e-12, rtol=0)
-```
-
-**Expected:** output[1.9,2.1].
-
-**Verify:** Compare the computed values or written argument with output[1.9,2.1].
-
-## Exercise 2: Quantize one shared scale
-
-The question is: Use maxabs1.7 divided by127,nearest-even rounding and signed int8.
-
-The smaller first row uses the scale set by the largest value in the second row. Its values therefore receive coarser relative resolution.
+The largest magnitude maps exactly to 127, and every other entry is rounded on the same grid. Values such as 31.75 and 15.875 round to the nearest integer without a tie.
 
 ```python
-scale = np.abs(w).max() / 127
-raw = np.rint(w / scale)
-q = np.clip(raw, -127, 127).astype(np.int8)
-np.testing.assert_array_equal(q, [[7, -67], [127, -15]])
-assert scale == 1.7 / 127
+w2 = np.array([[0.5, -1.2], [0.25, 2.0]])
+scale2 = np.abs(w2).max() / 127
+q2 = np.clip(np.rint(w2 / scale2), -127, 127).astype(np.int8)
+np.testing.assert_array_equal(q2, [[32, -76], [16, 127]])
+assert scale2 == 2 / 127
 ```
 
-**Expected:** scale1.7/127;integer array[[7,-67],[127,-15]].
+**Expected:** scale 2/127; integer array [[32, -76], [16, 127]].
 
-**Verify:** Compare the computed values or written argument with scale1.7/127;integer array[[7,-67],[127,-15]].
+**Verify:** In a fresh process, the exercise checks confirm `q2` equals `[[32, -76], [16, 127]]` and `scale2 == 2 / 127`.
+
+## Exercise 2: Predict the reconstruction error
+
+The question is: Dequantize the new integers and predict the largest absolute weight error and the bound it must respect.
+
+Rounding moves each value by at most half a quantization step, here \(1/127\). The entry 0.5 maps to 31.75 steps and is rounded by a quarter step, the largest move in this matrix.
+
+```python
+err = np.abs(q2 * scale2 - w2).max()
+np.testing.assert_allclose(err, 0.5 / 127, atol=1e-12, rtol=0)
+assert err <= scale2 / 2
+```
+
+**Expected:** largest error 0.5/127, about 0.0039, within the half-step bound 1/127.
+
+**Verify:** In a fresh process, the exercise checks confirm `err` matches `0.5 / 127` within 1e-12 and `err <= scale2 / 2`.
 
 ## Exercise 3: Measure output error
 
@@ -64,9 +63,9 @@ error = float(np.max(np.abs(output - reference)))
 assert np.isfinite(error) and 0 < error < 0.02
 ```
 
-**Expected:** finite maximum absolute output error below.02.
+**Expected:** finite maximum absolute output error below 0.02.
 
-**Verify:** Compare the computed values or written argument with finite maximum absolute output error below.02.
+**Verify:** In a fresh process, the exercise checks confirm `np.isfinite(error)` and `0 < error < 0.02`.
 
 ## Exercise 4: Use per-row scales
 
@@ -83,13 +82,13 @@ row_error = float(np.max(np.abs((qr.astype(float) * scales) @ x - reference)))
 assert np.isfinite(row_error)
 ```
 
-**Expected:** row scales.9/127 and 1.7/127;row0 integers[14,-127].
+**Expected:** row scales 0.9/127 and 1.7/127; row 0 integers [14, -127].
 
-**Verify:** Compare the computed values or written argument with row scales.9/127 and 1.7/127;row0 integers[14,-127].
+**Verify:** In a fresh process, the exercise checks confirm `qr[0]` equals `[14, -127]`; `scales[:, 0]` matches `[0.9 / 127, 1.7 / 127]` within 1e-12 and `np.isfinite(row_error)`.
 
 ## Exercise 5: Account for storage metadata
 
-The question is: Count4 int8 weights plusone float32 scale versus two float32 row scales.
+The question is: Count 4 int8 weights plus one float32 scale versus two float32 row scales.
 
 For tiny arrays, scale metadata can dominate. A claimed compression ratio should state whether it counts metadata, alignment and runtime representations.
 
@@ -99,13 +98,13 @@ per_row = 4 * 1 + 2 * 4
 assert (per_tensor, per_row) == (8, 12)
 ```
 
-**Expected:** 8 bytes per-tensor;12 bytes per-row;excluding overhead.
+**Expected:** 8 bytes per-tensor; 12 bytes per-row; excluding overhead.
 
-**Verify:** Compare the computed values or written argument with 8 bytes per-tensor;12 bytes per-row;excluding overhead.
+**Verify:** In a fresh process, the exercise checks confirm `(per_tensor, per_row) == (8, 12)`.
 
 ## Exercise 6: Expose clipping and tie policy
 
-The question is: Quantize values exceeding a scale1 range and inspect nearest-even rounding of.5,1.5,2.5.
+The question is: Quantize values exceeding a scale 1 range and inspect nearest-even rounding of 0.5, 1.5, 2.5.
 
 The calibration maximum from one dataset does not guarantee future values remain in range. Counting saturation exposes a distinct source of error beyond ordinary rounding.
 
@@ -117,9 +116,9 @@ assert saturated == 1
 np.testing.assert_array_equal(np.rint([0.5, 1.5, 2.5]), [0, 2, 2])
 ```
 
-**Expected:** one saturation for128;ties round0,2,2.
+**Expected:** one saturation for 128; ties round 0, 2, 2.
 
-**Verify:** Compare the computed values or written argument with one saturation for128;ties round0,2,2.
+**Verify:** In a fresh process, the exercise checks confirm `saturated == 1` and `np.rint([0.5, 1.5, 2.5])` equals `[0, 2, 2]`.
 
 ## Review after comparison
 

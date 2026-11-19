@@ -36,6 +36,19 @@ internal static class Program {
       Check(Redact("status", "failed") == "failed",
             "useful nonsecret context retained");
     }
+    {
+      // Task 3: Independent construction
+      string[] allowed = { "line", "field", "reason" };
+      var safe = new HashSet<string>(allowed, StringComparer.Ordinal);
+      var error = new Dictionary<string, string>();
+      error["line"] = "4";
+      error["field"] = "quantity";
+      error["reason"] = "negative";
+      error["token"] = "synthetic-secret";
+      var visible = error.Where(item => safe.Contains(item.Key));
+      var shown = visible.ToDictionary(item => item.Key, item => item.Value);
+      Check(shown.Count == 3 && !shown.ContainsKey("token"), "allowlisted");
+    }
     Console.WriteLine("csharp-042: passed");
     await Task.CompletedTask;
   }

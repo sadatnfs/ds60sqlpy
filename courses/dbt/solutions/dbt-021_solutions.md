@@ -158,8 +158,10 @@ def ci_case(bad):
         state = p / "state"
         state.mkdir()
         shutil.copyfile(p / "target/manifest.json", state / "manifest.json")
-        sql = "select id from {{ ref('base') }}" + (
-            " union all select id from {{ ref('base') }}" if bad else " where id > 0"
+        sql = (
+            "select id\nfrom {{ ref('base') }}\nunion all\nselect id\nfrom {{ ref('base') }}"
+            if bad
+            else "select id from {{ ref('base') }} where id > 0"
         )
         (p / "models/child.sql").write_text(sql)
         invoke(
@@ -200,4 +202,4 @@ if __name__ == "__main__":
 
 ## Interpretation
 
-Implement a reproducible reduced CI workflow with explicit selection, baseline and ownership. Demonstrate that a meaningful defect fails and that accepted data remains intact. Explain when the change requires a broader validation scope.
+Demonstrate that a meaningful defect fails and that accepted data remains intact. Explain when the change requires a broader validation scope.

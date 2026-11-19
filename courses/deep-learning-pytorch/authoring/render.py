@@ -8,7 +8,21 @@ if str(SOURCE_ROOT) not in sys.path:
     sys.path.insert(0, str(SOURCE_ROOT))
 from scripts.format_inline_code import canonical_markdown  # noqa: E402
 
+if str(Path(__file__).resolve().parent) not in sys.path:
+    sys.path.insert(0, str(Path(__file__).resolve().parent))
+from objectives import OBJECTIVES  # noqa: E402
+from verify_text import describe_checks  # noqa: E402
+
 SPECS = {}
+AUTHORING = Path(__file__).resolve().parent
+# References bound to immutable runtime receipts keep their original six exercises,
+# whose first three are also the worked examples. Every other lesson publishes the
+# worked examples separately and adds three transfer exercises with new inputs.
+FROZEN_REFERENCES = {"torch-005", "torch-012", "torch-014", "torch-015", "torch-016", "torch-030"}
+# These guides are byte-bound by curriculum/presentation-parity.json and runtime
+# receipts. Their reviewed presentation is reproduced from authoring/frozen_guides/
+# until a new presentation binding is recorded for regenerated text.
+FROZEN_GUIDES = {"torch-005", "torch-012", "torch-015", "torch-016"}
 
 
 def ex(title, prompt, expected, code, why):
@@ -45,23 +59,29 @@ def add(
     )
 
 
-def polish(value):
-    value = re.sub(r",(?=\S)", ", ", value)
-    value = re.sub(r";(?=\S)", "; ", value)
-    value = re.sub(
-        r"\b(with|of|by|rank|alpha|beta|size|overlap|budget|reserve|lengths|visits|purchases|version|seed|steps|count|value|rate)(?=\d)",
-        r"\1 ",
-        value,
-    )
-    value = re.sub(
-        r"(?<=\d)(?=records|steps|tokens|bytes|updates|entries|documents|times|characters)",
-        " ",
-        value,
-    )
-    return value
+def verify_line(lesson_id, exercise, reading):
+    """Name the exercise's own checks; authored text covers written reasoning cases."""
+    from transfer_exercises import AUTHORED_VERIFY
+
+    if "verify" in exercise:
+        return exercise["verify"]
+    if (lesson_id, exercise["title"]) in AUTHORED_VERIFY:
+        return AUTHORED_VERIFY[(lesson_id, exercise["title"])]
+    described = None if reading else describe_checks(exercise["code"])
+    if described is None:
+        raise ValueError(f"{lesson_id}: exercise {exercise['title']!r} needs an authored verify")
+    return f"In a fresh process, the exercise checks confirm {described}."
+
+
+def practice_note(lesson_id):
+    if lesson_id in FROZEN_REFERENCES:
+        return "Exercises 1-3 repeat the worked examples as guided reconstructions; exercises 4-6 change the fixture or expose a failure."
+    return "The worked examples demonstrate the mechanism; exercises 1-3 transfer it to new inputs and exercises 4-6 extend it to failures and boundary cases."
 
 
 def write_all(only=None, markdown_only=False):
+    from transfer_exercises import TRANSFER
+
     for track in ["deep-learning-pytorch"]:
         base = ROOT / "courses" / track
         plan = json.loads((base / "track.json").read_text(encoding="utf-8"))
@@ -72,16 +92,19 @@ def write_all(only=None, markdown_only=False):
             if id not in SPECS or (only is not None and id not in only):
                 continue
             s = SPECS[id]
-            for field in ["mental", "anatomy", "decisions", "comparison"]:
-                s[field] = polish(s[field])
-            for exercise in s["exercises"]:
-                for field in ["prompt", "expected", "why"]:
-                    exercise[field] = polish(exercise[field])
-            p["outcome"] = s["mental"].split(".")[0] + "."
-            p["lab"] = s["exercises"][0]["prompt"]
-            p["verification"] = s["exercises"][0]["expected"] + " " + s["exercises"][-1]["expected"]
+            p["outcome"], p["lab"], p["verification"] = OBJECTIVES[id]
             p["concepts"] = [k for k, v in s["terms"]]
             reading = p["runtime"] == "reading"
+            if id in FROZEN_REFERENCES:
+                worked, exercises = s["exercises"][:3], s["exercises"]
+                reference_order = list(range(6))
+            else:
+                worked = s["exercises"][:3]
+                exercises = TRANSFER[id] + s["exercises"][3:]
+                # Exercises 4-6 continue the worked fixture state exactly as before;
+                # the transfer exercises build their own fixtures and run afterward.
+                reference_order = [3, 4, 5, 0, 1, 2]
+            assert len(exercises) == 6, id
             ext = "md" if reading else "py"
             prefix = f"courses/{track}"
             guide = f"{prefix}/guides/{id}.md"
@@ -91,12 +114,12 @@ def write_all(only=None, markdown_only=False):
             prereq = ", ".join(f"`{q}`" for q in p["prerequisites"])
             terms = "\n\n".join(f"**{k}:** {v}" for k, v in s["terms"])
             exercise_text = "\n\n".join(
-                f"{n}. **{e['title']}.** {e['prompt']}\n   **Expected:** {e['expected']}\n   **Verify:** Save the {('reasoning table' if reading else 'assertion results')} for exercise {n}, including {e['expected']}"
-                for n, e in enumerate(s["exercises"], 1)
+                f"{n}. **{e['title']}.** {e['prompt']}\n   **Expected:** {e['expected']}\n   **Verify:** {verify_line(id, e, reading)}"
+                for n, e in enumerate(exercises, 1)
             )
             examples = "\n\n".join(
                 f"### Example {chr(65 + n)}: {e['title']}\n\n{e['why']}\n\n```{'text' if reading else 'python'}\n{(s['imports'] + chr(10) + s['helper'] + chr(10)) if not reading and n == 0 else ''}{e['code']}\n```\n\n**Expected:** {e['expected']}"
-                for n, e in enumerate(s["exercises"][:3])
+                for n, e in enumerate(worked)
             )
             runtime = (
                 "Use the reading worksheet. Write a reasoned response for each case; no execution or model download is required."
@@ -132,7 +155,13 @@ and evidence about generalization. Done when I can derive the worked values, pas
 
 ## Learning objectives
 
-{p["outcome"]} The central investigation is concrete: {p["lab"]} The finish condition is {p["verification"]} A useful explanation connects the calculation to the reason it is needed, rather than treating a function name as a definition.
+{p["outcome"]}
+
+Central investigation: {p["lab"]}
+
+Finish condition: {p["verification"]}
+
+{practice_note(id)} A useful explanation connects the calculation to the reason it is needed, rather than treating a function name as a definition.
 
 ## Purpose and mental model
 
@@ -186,7 +215,7 @@ First draw the state described in the vocabulary section. Next use the smallest 
 
 ## Self-check and retrieval
 
-Close both worked examples. Explain {", ".join(k for k, v in s["terms"][:3])} using the lesson fixture. Reconstruct one computation from its inputs. Then change one input while retaining the mechanism and predict whether the conclusion survives. Write which part is guaranteed by the code and which part would need new observations. This last distinction prevents a tiny deterministic teaching example from being presented as evidence about an unseen population or a production model.
+Close all three worked examples. Explain {", ".join(k for k, v in s["terms"][:3])} using the lesson fixture. Reconstruct one computation from its inputs. Then change one input while retaining the mechanism and predict whether the conclusion survives. Write which part is guaranteed by the code and which part would need new observations. This last distinction prevents a tiny deterministic teaching example from being presented as evidence about an unseen population or a production model.
 
 ## Next step
 
@@ -226,7 +255,14 @@ Compare these answers only after an attempt or an explicit solution reveal. They
 
 """
             blocks = []
-            for n, e in enumerate(s["exercises"], 1):
+            if id not in FROZEN_REFERENCES:
+                blocks = [
+                    f"    # Worked example {chr(65 + n)}: {e['title']}\n"
+                    + textwrap.indent(e["code"], "    ")
+                    for n, e in enumerate(worked)
+                ]
+            exercise_blocks = {}
+            for n, e in enumerate(exercises, 1):
                 explanation_doc += f"""## Exercise {n}: {e["title"]}
 
 The question is: {e["prompt"]}
@@ -239,18 +275,24 @@ The question is: {e["prompt"]}
 
 **Expected:** {e["expected"]}
 
-**Verify:** Compare the computed values or written argument with {e["expected"]}
+**Verify:** {verify_line(id, e, reading)}
 
 """
-                blocks.append(
-                    f"    # Exercise {n}: {e['title']}\n" + textwrap.indent(e["code"], "    ")
+                exercise_blocks[n - 1] = f"    # Exercise {n}: {e['title']}\n" + textwrap.indent(
+                    e["code"], "    "
                 )
+            blocks.extend(exercise_blocks[index] for index in reference_order)
             explanation_doc += "## Review after comparison\n\nRepeat one case with a changed fixture and explain the difference before running it. Keep the original failure case as well as the repaired result. Record a missing framework separately from a failing assertion. No solution downloads data, calls an online model, deploys a service or changes a database.\n"
-            (ROOT / guide).write_text(
-                canonical_markdown(document, root=SOURCE_ROOT, path=guide),
-                encoding="utf-8",
-                newline="\n",
-            )
+            if id in FROZEN_GUIDES:
+                (ROOT / guide).write_bytes(
+                    (AUTHORING / "frozen_guides" / f"{id}.md.snapshot").read_bytes()
+                )
+            else:
+                (ROOT / guide).write_text(
+                    canonical_markdown(document, root=SOURCE_ROOT, path=guide),
+                    encoding="utf-8",
+                    newline="\n",
+                )
             (ROOT / explanation).write_text(
                 canonical_markdown(explanation_doc, root=SOURCE_ROOT, path=explanation),
                 encoding="utf-8",
@@ -268,7 +310,7 @@ The question is: {e["prompt"]}
                 )
             else:
                 source = f'"""{id}: {p["title"]}.\n\nAnswer-free learner worksheet. See the companion guide for worked examples.\nCopy to .learning before editing. Six independent attempts belong below.\n"""\n\n'
-                for n, e in enumerate(s["exercises"], 1):
+                for n, e in enumerate(exercises, 1):
                     source += (
                         f"# Exercise {n}: {e['title']}\n"
                         + "\n".join("# " + x for x in textwrap.wrap(e["prompt"], 88))

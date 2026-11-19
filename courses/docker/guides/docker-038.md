@@ -6,7 +6,7 @@ Advanced; about 120 minutes, with additional time for the optional host experime
 
 ## Learning objectives
 
-Design an incident evidence packet. Write a scoped recovery and cleanup plan. Explain the difference between a configuration, an observed process and evidence of the application's behavior.
+Design an incident evidence packet. Write a scoped recovery and cleanup plan. Use incident response, disk pressure and docker system df accurately when you explain what you observed.
 
 ## Purpose, vocabulary and mental model
 
@@ -24,11 +24,11 @@ Routine course cleanup uses Compose down without volume deletion. A full disposa
 
 ## How to use this lesson
 
-The classroom displays this guide and saves your worksheet. Its Run button does not control your Docker engine. Docker engine access is powerful host access, so the classroom deliberately receives no engine socket. Work through the supplied examples without starting anything, then use the optional host lab only in your own disposable project. Reading a command, parsing YAML and actually running the project are different forms of evidence.
+The classroom displays this guide and saves your worksheet, `courses/docker/lessons/docker-038.md`. Its Run button does not control your Docker engine. Docker engine access is powerful host access, so the classroom deliberately receives no engine socket. Work through the supplied examples without starting anything, then use the optional host lab only in your own disposable project. Reading a command, parsing YAML and actually running the project are different forms of evidence.
 
 Use Bash in Linux, macOS Terminal, or Ubuntu under WSL 2 on Windows. The supported engine runs Linux containers. The maintained fixture is `courses/docker/fixtures/compose-lab/`; its README explains copying it into a new ignored learner directory, checking the engine, building locally with visible logs, and using the fixed project name `ds60-docker-study`. The fixture uses port 18080 on host loopback. Stop if that project name or port belongs to unrelated work; choose a new project name consistently in your own copy. Never paste a command against a remote Docker context simply because it is currently selected.
 
-For Dockerfile examples, create a file named `Dockerfile` in a scratch project. YAML snippets describe a fragment unless explicitly called a complete file. Text transcripts are synthetic illustrations, not claims about your machine. Do not substitute a real password, token or private registry into a checked-in example.
+For Dockerfile examples, create a file named `Dockerfile` in a scratch project. YAML snippets describe a fragment unless explicitly called a complete file. Text transcripts are synthetic illustrations, not claims about your machine. Do not substitute a real password, token or private registry into a checked-in example. **How to use the lessons** in the [subject README](../README.md) collects these rules in one place.
 
 ## Worked example / walkthrough
 
@@ -56,58 +56,52 @@ docker compose -p ds60-docker-study down
 
 ## Six progressive exercises
 
+For each exercise, name the object involved and the phase of its lifetime before changing anything, then vary only the condition the task names. Exercises that ask you to predict, explain, compare or diagnose keep their answers in the solutions file; the others show the evidence to look for.
+
 ### Exercise 1: Classify disk usage by resource type.
 
-**Expected evidence:** Images, cache, writable layers, logs and volumes.
-
-**Hint:** Identify the object and the phase of its lifetime before changing it. Use the relevant worked example, then vary only the condition named in this task.
+**Hint:** Run docker system df and read each row.
 
 ### Exercise 2: Predict the effect of ordinary Compose down.
 
-**Expected evidence:** It preserves named volumes unless explicit volume deletion is requested.
-
-**Hint:** Identify the object and the phase of its lifetime before changing it. Use the relevant worked example, then vary only the condition named in this task.
+**Hint:** Compare docker compose down with and without -v.
 
 ### Exercise 3: Design an incident evidence packet.
 
 **Expected evidence:** Failure symptom, time, resource inventory and bounded relevant logs.
 
-**Hint:** Identify the object and the phase of its lifetime before changing it. Use the relevant worked example, then vary only the condition named in this task.
+**Hint:** Record the symptom, time, resource inventory and relevant logs before acting.
 
 ### Exercise 4: Diagnose a detached volume labeled unused.
 
-**Expected evidence:** Determine its owner and retained data purpose before deletion.
-
-**Hint:** Identify the object and the phase of its lifetime before changing it. Use the relevant worked example, then vary only the condition named in this task.
+**Hint:** Find who created the volume and what it holds.
 
 ### Exercise 5: Explain why broad engine pruning is out of scope.
 
-**Expected evidence:** It can affect unrelated workloads and recoverable state.
-
-**Hint:** Identify the object and the phase of its lifetime before changing it. Use the relevant worked example, then vary only the condition named in this task.
+**Hint:** Ask which other projects share the engine.
 
 ### Exercise 6: Write a scoped recovery and cleanup plan.
 
 **Expected evidence:** Explicit targets, retained data, repair check and final ownership readback.
 
-**Hint:** Identify the object and the phase of its lifetime before changing it. Use the relevant worked example, then vary only the condition named in this task.
+**Hint:** List the exact targets, what to keep, the repair check and a final readback.
 
 ## Common mistakes and diagnosis
 
-Start with the smallest observation that separates two plausible causes. An image inspection answers questions about the packaged filesystem and configuration; container inspection adds runtime mounts, network attachment and exit status. An application request adds another layer of evidence. A healthy container can still serve the wrong application result. Preserve the original failure and the exact changed field before retrying.
+Running `docker system prune -a --volumes` during an incident. Deleting a dangling volume without finding its owner. Cleaning up before recording evidence.
 
-The boundary case in this chapter is: Diagnose a detached volume labeled unused. Use its expected observation, Determine its owner and retained data purpose before deletion., to avoid treating a successful command as proof of the wrong claim. Keep source edits in your own copy. Do not make a container privileged, mount the engine socket, disable all checks or delete every volume to make an example succeed.
+Exercise 4 is this chapter's boundary case: Diagnose a detached volume labeled unused. Start with the smallest observation that separates two plausible causes. An image inspection answers questions about the packaged filesystem and configuration; container inspection adds runtime mounts, network attachment and exit status; an application request adds another layer, and a healthy container can still serve the wrong result. Preserve the original failure and the exact changed field before retrying. Keep source edits in your own copy. Do not make a container privileged, mount the engine socket, disable all checks or delete every volume to make an example succeed.
 
 ## Retrieval, transfer and next steps
 
-Close the explanations and draw the path from source files to image to container to the observation relevant here. Reconstruct the second worked example with one different value and predict what changes. Explain which state survives process restart, container recreation and image rebuild. If none of those operations applies to this mechanism, explain why.
+Close the explanations and draw the path from source files to image to container to the observation relevant here, using incident response, disk pressure, docker system df and scoped cleanup. Reconstruct worked example 2 (Stop only the study application) with one different value and predict what changes. Explain which state survives process restart, container recreation and image rebuild, or why none of those operations applies to this mechanism.
 
-Before proceeding, retain six evidence records. For the optional host project, use `docker compose -p ds60-docker-study down` from the fixture copy to stop its containers and remove its ordinary network. This command preserves named volumes. Volume deletion is a separate deliberate reset of that disposable lab after a backup or export, never a general cleanup step. The fixture README describes its exact scoped reset.
+When a host session ends, run `docker compose -p ds60-docker-study down` from your fixture copy. It removes the project's containers and network but keeps named volumes; deleting a volume is a separate, deliberate reset described in the fixture README.
 
 ## Primary references
 
-- [Official reference 1](https://docs.docker.com/engine/manage-resources/pruning/)
-- [Official reference 2](https://docs.docker.com/reference/cli/docker/system/df/)
+- [Prune unused Docker objects](https://docs.docker.com/engine/manage-resources/pruning/)
+- [docker system df reference](https://docs.docker.com/reference/cli/docker/system/df/)
 
 ## Ask an AI tutor about this lesson
 

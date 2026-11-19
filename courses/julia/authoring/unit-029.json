@@ -24,14 +24,14 @@
     },
     {
       "title": "Preserve output meaning",
-      "task": "Predict the output for[-2,0,3].",
-      "expected": "The result is[4,0,9].",
+      "task": "Predict the output for `[-2, 0, 3]`.",
+      "expected": "The result is `[4, 0, 9]`.",
       "hint": "One producer preserves this input order.",
       "answer": "Squares are emitted into the result in channel-consumption order; broader parallel pipelines need explicit ordering."
     },
     {
       "title": "Inject a failure",
-      "task": "Set fail_after=0 on a nonempty list.",
+      "task": "Set `fail_after = 0` on a nonempty list.",
       "expected": "A CompositeException reaches the caller.",
       "hint": "The finally block still closes the channel.",
       "answer": "No shortened result is mislabeled success; joining propagates the producer failure."

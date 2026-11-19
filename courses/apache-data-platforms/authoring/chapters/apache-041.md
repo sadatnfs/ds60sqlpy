@@ -15,8 +15,11 @@ row-level predicate. Dropping that residual predicate can return incorrect rows
 from an old unpartitioned file.
 
 The prepared core deliberately uses identity transforms because they require no
-additional native transform package. Some PyIceberg bucket transforms need a
-separately prepared native extension. The lesson does not install dependencies
+additional native transform package. With PyIceberg 0.12, appending through PyArrow
+to a table partitioned by any non-identity transform (year, month, day, hour, bucket
+or truncate) requires the separately installed `pyiceberg-core` extension, which
+this profile does not include. The time transforms that motivate hidden
+partitioning, such as `day(order_ts)`, are therefore described here but not run. The lesson does not install dependencies
 inside a pad or advertise every transform as executable merely because its class
 can be imported. The same distinction matters when moving a table between engines.
 

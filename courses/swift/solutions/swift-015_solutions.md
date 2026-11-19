@@ -1,6 +1,6 @@
 # swift-015: explanation and comparison
 
-Attempt the six guide tasks before opening this comparison. The executable reference is [swift-015_solution.swift](swift-015_solution.swift). Its assertions are always active under the prepared classroom compile settings.
+Attempt the six guide tasks before opening this comparison. The executable reference is [swift-015_solution.swift](swift-015_solution.swift). It runs both worked examples and the reference answers below, and its assertions are always active under the prepared classroom compile settings.
 
 ## Why the two examples differ
 
@@ -8,21 +8,57 @@ Attempt the six guide tasks before opening this comparison. The executable refer
 
 **Freeze a captured value deliberately:** This differs from a closure observing a mutable captured variable later. The explicit capture list retains factor 2 for the closure.
 
-## Reason through the six tasks
+## Task answers
 
-1. **Predict and explain.** Predict the mapped result and unchanged source.
+### Task 1: Predict and explain
 
-2. **Guided modification.** Filter even numbers before mapping.
+Predict the mapped result and unchanged source.
 
-3. **Independent construction.** Write a function accepting a transformation closure.
+No separate reference answer has been written for this task. Example A is the evidence to compare with: The transformation is pure and its element-to-element relationship is visible. Map creates transformed values while retaining the original array.
 
-4. **Diagnose a defect.** Diagnose a closure whose captured mutable state changes before later execution.
+### Task 2: Guided modification
 
-5. **Boundary evidence.** Test empty arrays and a closure that returns an optional.
+Filter even numbers before mapping.
 
-6. **Transfer and justify.** Choose a named function or closure for a reusable domain transformation and explain readability and capture policy.
+No separate reference answer has been written for this task. Start from Example B: This differs from a closure observing a mutable captured variable later. The explicit capture list retains factor 2 for the closure.
 
-For tasks 1 and 2, use the checked values and mechanism trace in the two examples. For task 3, choose names that expose the input and result contract and retain the same invariants. For task 4, the diagnosed mistakes below supply a concrete wrong assumption: preserve its counterexample before repairing it. Task 5 needs an explicit expected value or documented rejection at the boundary, not just successful execution. For task 6, explain what changes in the new context and which part of the original mechanism remains applicable. Several representations may satisfy this transfer task; justify the choice rather than treating this reference as the only architecture.
+### Task 3: Independent construction
+
+Write a function accepting a transformation closure.
+
+**Reference answer.** It runs as the `Task 3` block of the reference program.
+
+```swift
+func transformAll(_ values: [Int], _ change: (Int) -> Int) -> [Int] {
+  var result: [Int] = []
+  for value in values { result.append(change(value)) }
+  return result
+}
+let scaled = transformAll([1, 2, 3]) { $0 * 10 }
+precondition(scaled == [10, 20, 30])
+```
+
+**Observe:** Applying the closure gives 10, 20 and 30.
+
+The caller supplies the behavior; the closure is non-escaping, so it runs only during the call.
+
+### Task 4: Diagnose a defect
+
+Diagnose a closure whose captured mutable state changes before later execution.
+
+No reference answer has been written for this task yet. The wrong assumptions to look for are this lesson's pitfalls: An escaping closure can outlive its creating scope. Capturing self strongly can create a retain cycle, covered in ARC. A short expression is not automatically clearer than a named intermediate.
+
+### Task 5: Boundary evidence
+
+Test empty arrays and a closure that returns an optional.
+
+No reference answer has been written for this task yet. Write the expected value or documented rejection for each boundary before running it, and compare with the checks in Example A (Transform a sequence) and Example B (Freeze a captured value deliberately).
+
+### Task 6: Transfer and justify
+
+Choose a named function or closure for a reusable domain transformation and explain readability and capture policy.
+
+No single reference answer exists: several designs can satisfy this transfer task. Justify yours against the mechanism described below and the vocabulary entry **Closure**, and state one limitation of your choice.
 
 ## Mechanism and diagnostic reasoning
 
@@ -36,4 +72,4 @@ An escaping closure can outlive its creating scope. Capturing self strongly can 
 
 ## Review before continuing
 
-The reference checks the worked scenarios, including their boundary distinctions. Your independent and transfer artifacts may have additional checks. Compare observations rather than only source text. Preserve any new regression case you discover and explain why it would reject a plausible wrong implementation. External project steps require their own build and platform evidence and are not established by a portable reference passing.
+Run the reference and confirm that it prints `swift-015: passed`, then reconstruct one boundary case from memory and explain which check would reject a plausible wrong implementation. External project steps need their own build and platform evidence; a passing portable reference does not establish them.

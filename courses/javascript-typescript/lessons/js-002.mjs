@@ -1,11 +1,20 @@
 // Answer-free learner source. Save your own copy before editing.
-// Exercise 1: Trace plus versus numeric conversion
-// Compare 2+3, 2+string 3, and Number(string 3)+2.
-// Expected: 5, string 23, and 5.
+// Exercise 1: Trace plus versus numeric conversion: predict an edited check
+// Copy Example A into a scratch `main.mjs` and change `assert.equal(Number('3') + 2, 5);` to
+// `assert.equal(Number('3') + 3, 5);` inside its check. Before running it, predict whether
+// the check still passes and explain why; then restore it.
+// Expected: The changed run fails with an `AssertionError` at the check
+// `assert.equal(Number('3') + 2, 5)`. Restoring the original line brings back the worked
+// observation: 5, string 23, and 5.
 
-// Exercise 2: Inspect absence and NaN
-// Compare typeof null, undefined and Number.isNaN results.
-// Expected: null reports object; undefined reports undefined; only numeric NaN passes isNaN.
+// Exercise 2: Inspect absence and NaN: diagnose an edited check
+// A careless edit changed a check in Example B so that it reads
+// `assert.equal(Number.isNaN('not a number'), true);`. Run Example B with that line, explain
+// why the edited check now fails for the same program state, and restore it.
+// Expected: Before the repair the run fails with an `AssertionError` at the check
+// `assert.equal(Number.isNaN('not a number'), false)`; after it the line reads
+// `assert.equal(Number.isNaN('not a number'), false);` again and null reports object;
+// undefined reports undefined; only numeric NaN passes isNaN.
 
 // Exercise 3: Compare equality contracts
 // Use NaN, +0 and -0 with strict equality and Object.is.

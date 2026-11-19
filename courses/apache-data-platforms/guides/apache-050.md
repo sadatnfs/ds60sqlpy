@@ -50,6 +50,20 @@ restore must report an operator/state mapping failure. The checker inspects that
 specific diagnostic and verifies that prior retained output was not reset or
 replaced just to make the new job run.
 
+The only source difference between the compatible and incompatible restore is the
+operator UID chosen in the job's final branch:
+
+From [`projects/flink/src/WorkshopJobs.java`](../projects/flink/src/WorkshopJobs.java):
+
+```java
+.map(new ManagedTotal())
+.name("checkpointed-total")
+.uid(mode.equals("changed-uid") ? "counter-v2" : "counter-v1");
+```
+
+Savepoint state is mapped to operators by UID, so state saved under `counter-v1`
+has no destination when the restored job names the operator `counter-v2`.
+
 An unknown or failed restore is not automatically retried as a fresh empty-state
 job. Doing so would turn a migration failure into data loss that looks like
 success. The operator must decide whether the change is a deliberate state reset,

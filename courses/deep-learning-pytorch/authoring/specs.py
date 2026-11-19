@@ -1,7 +1,7 @@
 from render import add, ex
 
-PT = ("PyTorch2.9 reference", "https://docs.pytorch.org/docs/2.9/index.html")
-AUTOGRAD = ("PyTorch2.9 autograd", "https://docs.pytorch.org/docs/2.9/autograd.html")
+PT = ("PyTorch 2.9 reference", "https://docs.pytorch.org/docs/2.9/index.html")
+AUTOGRAD = ("PyTorch 2.9 autograd", "https://docs.pytorch.org/docs/2.9/autograd.html")
 IMPORTS = (
     "import numpy as np\nimport torch\nfrom torch import nn\nfrom torch.nn import functional as F"
 )
@@ -48,19 +48,19 @@ lesson(
     [
         ex(
             "Define a prediction unit",
-            "Use three training points(1, 2), (2, 4), (3, 6) and four untouched points(4, 8)..(7, 14); name one row as the prediction unit.",
+            "Use three training points (1, 2), (2, 4), (3, 6) and four untouched points (4, 8)..(7, 14); name one row as the prediction unit.",
             "3 training rows, 4 holdout rows, one prediction per row.",
             """Training IDs: t1,t2,t3
 Holdout IDs: h4,h5,h6,h7
 Input: scalar x
 Target: scalar y in the same declared target unit
 Prediction unit: one identified row""",
-            "The unit determines the denominator and split design. If several rows later belong to one person or account, the independence assumption must be re visited.",
+            "The unit determines the denominator and split design. If several rows later belong to one person or account, the independence assumption must be revisited.",
         ),
         ex(
             "Calculate a mean baseline",
-            "Use training targets2, 4, 6 to predict the constant training mean on holdout8, 10, 12, 14.",
-            "mean4; holdout squared errors16, 36, 64, 100; MSE54.",
+            "Use training targets 2, 4, 6 to predict the constant training mean on holdout 8, 10, 12, 14.",
+            "mean 4; holdout squared errors 16, 36, 64, 100; MSE 54.",
             """Training mean=(2+4+6)/3=4
 Holdout residuals=4,6,8,10
 Squared errors=16,36,64,100
@@ -79,7 +79,7 @@ Training execution evidence: absent unless an actual optimizer run is recorded""
         ),
         ex(
             "Audit selection leakage",
-            "After looking at holdout errors, a research e r changes the learning rate and reports the better result as final.",
+            "After looking at holdout errors, a researcher changes the learning rate and reports the better result as final.",
             "holdout was used for selection; new untouched assessment needed.",
             """Observed holdout -> learning-rate change -> second score
 Information boundary: crossed
@@ -98,7 +98,7 @@ Do not infer equivalence from a matching first scalar alone.""",
         ex(
             "Bound the conclusion",
             "Write a report for a successful tiny CPU reference that avoids a production-quality claim.",
-            "report says arithmetic/software checked; population reliability u n established.",
+            "report says arithmetic/software checked; population reliability unestablished.",
             """Checked: literal fixture arithmetic and executed local assertions.
 Not established: unseen-population quality,privacy,fairness,GPU throughput or production safety.
 Next evidence: representative independent units and task-specific acceptance tests.""",
@@ -121,7 +121,7 @@ Next evidence: representative independent units and task-specific acceptance tes
 )
 lesson(
     2,
-    "A PyTorch tensor has values plus metadata:shape, dtype, device, strides and gradient-tracking state. Shape tells you the number of elements along each axis; strides describe how an index moves through storage. A view can share storage with another tensor, so mutation through one reference may change the other. clone creates independent storage. Transpose changes the interpretation of axes and often produces a noncontiguous view. reshape may return a view or a copy, so code should not infer ownership solely from its name.\n\nDevice and dtype are part of a computation contract. This course uses CPU explicitly, with float64 for hand-derived numerical checks and float32 for small neural modules unless stated otherwise. Broadcasting aligns trailing dimensions and can silently create pairwise results. A vector of shape(3, ) subtracted from a column(3, 1) produces(3, 3), not three paired residuals.",
+    "A PyTorch tensor has values plus metadata: shape, dtype, device, strides and gradient-tracking state. Shape tells you the number of elements along each axis; strides describe how an index moves through storage. A view can share storage with another tensor, so mutation through one reference may change the other. clone creates independent storage. Transpose changes the interpretation of axes and often produces a noncontiguous view. reshape may return a view or a copy, so code should not infer ownership solely from its name.\n\nDevice and dtype are part of a computation contract. This course uses CPU explicitly, with float64 for hand-derived numerical checks and float32 for small neural modules unless stated otherwise. Broadcasting aligns trailing dimensions and can silently create pairwise results. A vector of shape (3, ) subtracted from a column (3, 1) produces (3, 3), not three paired residuals.",
     "torch.arange creates a one-dimensional tensor; reshape supplies the desired axes. stride returns element offsets rather than byte offsets. Transpose .T swaps matrix axes. view requires a compatible storage layout, while contiguous can materialize a suitable layout. clone is the explicit ownership operation. Use shape equality before paired subtraction and keep device placement visible with device='cpu'.",
     [
         ("Stride", "Storage offset in elements for advancing one position along an axis."),
@@ -132,8 +132,8 @@ lesson(
     [
         ex(
             "Inspect shape and stride",
-            "Create a 2-by-3 float64CPU tensor from values0..5.",
-            "shape(2, 3), stride(3, 1), CPU, float64.",
+            "Create a 2-by-3 float64 CPU tensor from values 0..5.",
+            "shape (2, 3), stride (3, 1), CPU, float64.",
             """x=torch.arange(6,dtype=torch.float64,device='cpu').reshape(2,3)
 assert tuple(x.shape)==(2,3) and x.stride()==(3,1) and x.device.type=='cpu' and x.dtype==torch.float64""",
             "The last axis advances by one stored element and the first by three. These metadata explain the matrix layout without relying on a printed table alone.",
@@ -141,7 +141,7 @@ assert tuple(x.shape)==(2,3) and x.stride()==(3,1) and x.device.type=='cpu' and 
         ex(
             "Expose shared storage",
             "Slice the first row, change its first value, and inspect the original tensor.",
-            "original x[0, 0] becomes99.",
+            "original x[0, 0] becomes 99.",
             """row=x[0]; row[0]=99
 assert x[0,0].item()==99""",
             "Basic slicing returns a view here. A function receiving that view can mutate caller-owned data unless it copies or documents the ownership contract.",
@@ -149,15 +149,15 @@ assert x[0,0].item()==99""",
         ex(
             "Create an independent copy",
             "Clone the tensor, change the clone and compare the original.",
-            "clone starts-1; original remains99.",
+            "clone holds -1 at [0, 0]; original remains 99.",
             """owned=x.clone(); owned[0,0]=-1
 assert owned[0,0].item()==-1 and x[0,0].item()==99""",
-            "clone copies storage and preserves a differentiable relationship when gradients are enabled. Detach in g and copying are separate operations discussed later.",
+            "clone copies storage and preserves a differentiable relationship when gradients are enabled. Detaching and copying are separate operations discussed later.",
         ),
         ex(
             "Trace a transposed layout",
             "Transpose x and inspect shape, strides and contiguity.",
-            "shape(3, 2), stride(1, 3), noncontiguous.",
+            "shape (3, 2), stride (1, 3), noncontiguous.",
             """transposed=x.T
 assert tuple(transposed.shape)==(3,2) and transposed.stride()==(1,3) and not transposed.is_contiguous()
 assert transposed.contiguous().is_contiguous()""",
@@ -165,15 +165,15 @@ assert transposed.contiguous().is_contiguous()""",
         ),
         ex(
             "Detect a pairing broadcast",
-            "Subtract vector[1, 2, 3] from its column representation and inspect the result.",
-            "shape(3, 3), while equal-vector subtraction has shape(3, ).",
+            "Subtract vector [1, 2, 3] from its column representation and inspect the result.",
+            "shape (3, 3), while equal-vector subtraction has shape (3, ).",
             """v=torch.tensor([1.,2.,3.]); column=v[:,None]
 assert tuple((v-column).shape)==(3,3) and tuple((v-v).shape)==(3,)""",
             "Both shapes are legal arithmetic, but they represent different questions. Paired-record losses should validate equal target and prediction shapes.",
         ),
         ex(
             "Reject incompatible arithmetic",
-            "Add tensors shaped(2, 3) and(4, ) and capture the shape failure.",
+            "Add tensors shaped (2, 3) and (4, ) and capture the shape failure.",
             "RuntimeError for incompatible trailing dimensions.",
             """try: torch.zeros((2,3))+torch.zeros(4)
 except RuntimeError: pass
@@ -195,8 +195,8 @@ else: raise AssertionError('incompatible shapes accepted')""",
 )
 lesson(
     3,
-    "A linear layer computes an affine transformation from input features to output features. For a batch X shaped(B, I), PyTorch nn.Linear(I, O) stores weight shaped(O, I) and computes X@weight.T+bias. This storage orientation differs from the common mathematical W shaped(I, O) and from a Keras Dense kernel. The batch axis is not part of the parameter shape. Bias has one value per output feature and is shared across observations.\n\nAnnn.Parameter assigned to annn.Module is registered as trainable state. A plain tensor attribute is not automatically an optimizer parameter, even if it participates in arithmetic. Registration lets model.parameters(), state_dict and device/dtype conversion find the intended state. Shape inspection and a hand-calculated first row provide an independent check before any training occurs.",
-    "Construct nn.Linear(3, 1, bias=True, dtype=torch.float64). Assign known values under no_grad so initialization does not become part of an autograd graph. copy_ requires the stored layout(1, 3). Calling the module performs the forward computation; it does not update weights. parameters enumerates both weight and bias when enabled. Count scalar entries with numel, not the number of Parameter objects.",
+    "A linear layer computes an affine transformation from input features to output features. For a batch X shaped (B, I), PyTorch nn.Linear(I, O) stores weight shaped (O, I) and computes X@weight.T+bias. This storage orientation differs from the common mathematical W shaped (I, O) and from a Keras Dense kernel. The batch axis is not part of the parameter shape. Bias has one value per output feature and is shared across observations.\n\nAn nn.Parameter assigned to an nn.Module is registered as trainable state. A plain tensor attribute is not automatically an optimizer parameter, even if it participates in arithmetic. Registration lets model.parameters(), state_dict and device/dtype conversion find the intended state. Shape inspection and a hand-calculated first row provide an independent check before any training occurs.",
+    "Construct nn.Linear(3, 1, bias=True, dtype=torch.float64). Assign known values under no_grad so initialization does not become part of an autograd graph. copy_ requires the stored layout (1, 3). Calling the module performs the forward computation; it does not update weights. parameters enumerates both weight and bias when enabled. Count scalar entries with numel, not the number of Parameter objects.",
     [
         ("Affine map", "A matrix transformation plus an additive bias."),
         ("Parameter registration", "Tracking model state for optimization and serialization."),
@@ -205,13 +205,13 @@ lesson(
     [
         ex(
             "Calculate a known affine layer",
-            "UseX[[1, 2, 3], [0, 1, 0]], weight[[1, 0, -1]], bias2.",
-            "outputs[[0], [2]], shape(2, 1).",
+            "Use X = [[1, 2, 3], [0, 1, 0]], weight [[1, 0, -1]] and bias 2.",
+            "outputs [[0], [2]], shape (2, 1).",
             """layer=nn.Linear(3,1,bias=True,dtype=torch.float64)
 with torch.no_grad(): layer.weight.copy_(torch.tensor([[1.,0.,-1.]],dtype=torch.float64)); layer.bias.fill_(2.)
 x=torch.tensor([[1.,2.,3.],[0.,1.,0.]],dtype=torch.float64); out=layer(x)
 torch.testing.assert_close(out,torch.tensor([[0.],[2.]],dtype=torch.float64),atol=1e-12,rtol=0)""",
-            "The first output is1-3+2=0, and the second is 0+2=2. This calculation checks orientation and bias independently of random initialization.",
+            "The first output is 1-3+2=0, and the second is 0+2=2. This calculation checks orientation and bias independently of random initialization.",
         ),
         ex(
             "Inspect registered state",
@@ -233,7 +233,7 @@ torch.testing.assert_close(x@mathematical_w+layer.bias,out,atol=1e-12,rtol=0)"""
         ex(
             "Remove the intercept explicitly",
             "Create a bias-free layer with the same stored weights.",
-            "3 parameters; outputs-2 and 0.",
+            "3 parameters; outputs -2 and 0.",
             """no_bias=nn.Linear(3,1,bias=False,dtype=torch.float64)
 with torch.no_grad(): no_bias.weight.copy_(layer.weight)
 assert sum(p.numel() for p in no_bias.parameters())==3
@@ -243,7 +243,7 @@ torch.testing.assert_close(no_bias(x),torch.tensor([[-2.],[0.]],dtype=torch.floa
         ex(
             "Expose an unregistered tensor",
             "Compare a Module holding a plain requires_grad tensor with one holding Parameter.",
-            "plain module has0 registered parameters; proper module has1.",
+            "plain module has 0 registered parameters; proper module has 1.",
             """plain=nn.Module(); plain.weight=torch.tensor([1.],requires_grad=True)
 proper=nn.Module(); proper.weight=nn.Parameter(torch.tensor([1.]))
 assert len(list(plain.parameters()))==0 and len(list(proper.parameters()))==1""",
@@ -251,7 +251,7 @@ assert len(list(plain.parameters()))==0 and len(list(proper.parameters()))==1"""
         ),
         ex(
             "Reject wrong feature width",
-            "Pass a2-feature row to the3-input layer.",
+            "Pass a 2-feature row to the 3-input layer.",
             "RuntimeError from incompatible matrix dimensions.",
             """try: layer(torch.ones((1,2),dtype=torch.float64))
 except RuntimeError: pass
@@ -263,7 +263,7 @@ else: raise AssertionError('wrong feature width accepted')""",
     [
         (
             "Why does Linear store a transposed-looking weight?",
-            "Its public contract defines weight as(out, in) and applies the transpose during the batched row-vector computation. The important check is the documented layout, not which notation fee l s more natural.",
+            "Its public contract defines weight as(out, in) and applies the transpose during the batched row-vector computation. The important check is the documented layout, not which notation feels more natural.",
         ),
         (
             "Can a tensor have gradients but be absent from an optimizer?",
@@ -274,7 +274,7 @@ else: raise AssertionError('wrong feature width accepted')""",
 lesson(
     4,
     "A loss is a numerical objective with a declared unit and denominator. Squared residuals have squared target units. Summing losses makes the objective scale with the number of participating entries; averaging removes that count from the scalar but changes gradient magnitude. PyTorch MSELoss with reduction='mean' averages all tensor elements, not an abstract notion of records inferred from their meaning. If each record has several outputs, those outputs also enter the denominator.\n\nCompare reductions before comparing learning rates or frameworks. Duplicating a batch doubles a sum loss and its gradient but leaves a mean unchanged when every observation is duplicated equally. A metric such as absolute error may be reported beside squared loss, but it is not the same quantity. Masked objectives need a numerator and denominator using the same participation rule; zeroing excluded entries while dividing by padded length changes the objective.",
-    "F.mse_loss accepts prediction and target tensors; this course validates exact shape equality before calling it. reduction='none' preserves per-entry losses, 'sum' adds them, and'mean' divides by the number of elements. autograd.grad returns derivatives without accumulating into leaf.grad. Use a fresh forward graph for each independent derivative comparison.",
+    "F.mse_loss accepts prediction and target tensors; a paired-record application should validate exact shape equality before calling it; these literal fixtures construct matching shapes. reduction='none' preserves per-entry losses, 'sum' adds them, and'mean' divides by the number of elements. autograd.grad returns derivatives without accumulating into leaf.grad. Use a fresh forward graph for each independent derivative comparison.",
     [
         ("Reduction", "The rule combining per-entry losses into a scalar."),
         ("Loss unit", "The measurement unit implied by the objective."),
@@ -283,18 +283,18 @@ lesson(
     [
         ex(
             "Compute residual reductions",
-            "Use residuals[1, -1, 2] against zero targets.",
-            "squared entries1, 1, 4; sum6; mean 2.",
+            "Use residuals [1, -1, 2] against zero targets.",
+            "squared entries 1, 1, 4; sum 6; mean 2.",
             """residual=torch.tensor([1.,-1.,2.],dtype=torch.float64); zero=torch.zeros_like(residual)
 assert F.mse_loss(residual,zero,reduction='sum').item()==6
 assert F.mse_loss(residual,zero,reduction='mean').item()==2
 torch.testing.assert_close(F.mse_loss(residual,zero,reduction='none'),torch.tensor([1.,1.,4.],dtype=torch.float64))""",
-            "The sum and mean differ only by the known count3 here. Neither value can be interpreted without its denominator and squared-unit label.",
+            "The sum and mean differ only by the known count 3 here. Neither value can be interpreted without its denominator and squared-unit label.",
         ),
         ex(
             "Duplicate the batch",
             "Repeat every residual twice and compare reductions.",
-            "sum12; mean 2.",
+            "sum 12; mean 2.",
             """duplicated=residual.repeat(2)
 assert F.mse_loss(duplicated,torch.zeros_like(duplicated),reduction='sum').item()==12
 assert F.mse_loss(duplicated,torch.zeros_like(duplicated),reduction='mean').item()==2""",
@@ -302,8 +302,8 @@ assert F.mse_loss(duplicated,torch.zeros_like(duplicated),reduction='mean').item
         ),
         ex(
             "Compare derivative scale",
-            "Differentiate sum and mean squared loss for a fresh3-entry tensor.",
-            "sum gradient equals3 times mean gradient.",
+            "Differentiate sum and mean squared loss for a fresh 3-entry tensor.",
+            "sum gradient equals 3 times mean gradient.",
             """a=residual.clone().requires_grad_(); gsum=torch.autograd.grad((a*a).sum(),a)[0]
 b=residual.clone().requires_grad_(); gmean=torch.autograd.grad((b*b).mean(),b)[0]
 torch.testing.assert_close(gsum,3*gmean,atol=1e-12,rtol=0)""",
@@ -311,16 +311,16 @@ torch.testing.assert_close(gsum,3*gmean,atol=1e-12,rtol=0)""",
         ),
         ex(
             "Inspect a feature denominator",
-            "Use a2x2 residual matrix of ones and mean reduction.",
-            "loss1 and 4 participating elements.",
+            "Use a 2-by-2 residual matrix of ones and mean reduction.",
+            "loss 1 and 4 participating elements.",
             """matrix=torch.ones((2,2),dtype=torch.float64)
 assert F.mse_loss(matrix,torch.zeros_like(matrix)).item()==1 and matrix.numel()==4""",
             "The framework does not know whether columns are features, tasks or repeated observations. The author must define whether averaging over all entries matches the intended objective.",
         ),
         ex(
             "Mask numerator and denominator together",
-            "Use losses[1, 4, 100] with mask True, True, False.",
-            "valid mean 2.5, not5/3.",
+            "Use losses [1, 4, 100] with mask True, True, False.",
+            "valid mean 2.5, not 5/3.",
             """losses=torch.tensor([1.,4.,100.]); mask=torch.tensor([True,True,False])
 valid=losses[mask].sum()/mask.sum()
 assert valid.item()==2.5 and valid.item()!=5/3""",
@@ -328,8 +328,8 @@ assert valid.item()==2.5 and valid.item()!=5/3""",
         ),
         ex(
             "Separate a metric from the objective",
-            "Compare mean absolute residual and mean squared residual for[1, -1, 2].",
-            "MAE4/3; MSE2.",
+            "Compare mean absolute residual and mean squared residual for [1, -1, 2].",
+            "MAE 4/3; MSE 2.",
             """np.testing.assert_allclose(residual.abs().mean().item(),4/3,atol=1e-12,rtol=0)
 assert residual.square().mean().item()==2""",
             "The two measures have different units and emphasize large errors differently. Reporting one does not prove the other was optimized.",
@@ -349,8 +349,8 @@ assert residual.square().mean().item()==2""",
 )
 lesson(
     5,
-    "A derivative measures local sensitivity:how much a function changes for a small input change. It is not itself a new parameter value. Gradient descent combines the derivative with a learning rate and a subtraction rule. PyTorch tracks operations involving tensors with `requires_grad=True` and can calculate a derivative through `autograd.grad`. A central finite difference estimates the same slope by evaluating the function at nearby inputs, providing an independent numerical check.\n\nFinite differences involve a tradeoff:large steps measure a wider region, while extremely small steps lose precision through subtract iv e cancellation. Float64 is useful for this small diagnostic. At a nondifferentiable kink, a framework's chosen subgradient convention need not equal a symmetric finite difference. This lesson uses a smooth quadratic so the expected derivative is exact and the comparison is interpretable.",
-    "Forf(w)=(w-2)^2, the analytic derivative is2(w-2). Construct a scalar float64tensor with requires_grad=True, calculate f, and request autograd.grad(f, w). The returned tensor does not automatically populate w.grad. A central difference uses(f(w+h)-f(w-h))/(2h). Validate positive finite h and finite function values before comparing.",
+    "A derivative measures local sensitivity: how much a function changes for a small input change. It is not itself a new parameter value. Gradient descent combines the derivative with a learning rate and a subtraction rule. PyTorch tracks operations involving tensors with `requires_grad=True` and can calculate a derivative through `autograd.grad`. A central finite difference estimates the same slope by evaluating the function at nearby inputs, providing an independent numerical check.\n\nFinite differences involve a tradeoff: large steps measure a wider region, while extremely small steps lose precision through subtractive cancellation. Float64 is useful for this small diagnostic. At a nondifferentiable kink, a framework's chosen subgradient convention need not equal a symmetric finite difference. This lesson uses a smooth quadratic so the expected derivative is exact and the comparison is interpretable.",
+    "For f(w)=(w-2)^2, the analytic derivative is 2(w-2). Construct a scalar float64 tensor with requires_grad=True, calculate f, and request autograd.grad(f, w). The returned tensor does not automatically populate w.grad. A central difference uses (f(w+h)-f(w-h))/(2h). Validate positive finite h and finite function values before comparing.",
     [
         ("Derivative", "The local rate of change of a function."),
         ("Finite difference", "A numerical slope estimate from nearby function evaluations."),
@@ -360,7 +360,7 @@ lesson(
         ex(
             "Derive a scalar slope",
             "Differentiate (w-2)**2 at w=0 using autograd.grad.",
-            "derivative -4; loss4.",
+            "derivative -4; loss 4.",
             """w=torch.tensor(0.,dtype=torch.float64,requires_grad=True); loss=(w-2)**2
 gradient=torch.autograd.grad(loss,w)[0]
 assert gradient.item()==-4 and loss.item()==4""",
@@ -369,7 +369,7 @@ assert gradient.item()==-4 and loss.item()==4""",
         ex(
             "Check three finite differences",
             "Use \\(h\\in\\{0.1, 0.01, 0.001\\}\\) at \\(w=0\\) and compare each slope with \\(-4\\).",
-            "all agree within1e-10.",
+            "all agree within 1e-10.",
             """for h in [.1,.01,.001]:
     slope=central(lambda value:(value-2)**2,0.,h)
     np.testing.assert_allclose(slope,-4,atol=1e-10,rtol=0)""",
@@ -387,7 +387,7 @@ assert updated!=gradient.item()""",
         ex(
             "Inspect a stationary point",
             "Differentiate the same objective at \\(w=2\\).",
-            "gradient0 and loss0.",
+            "gradient 0 and loss 0.",
             """optimum=torch.tensor(2.,dtype=torch.float64,requires_grad=True)
 value=(optimum-2)**2; derivative=torch.autograd.grad(value,optimum)[0]
 assert value.item()==0 and derivative.item()==0""",
@@ -402,7 +402,7 @@ assert value.item()==0 and derivative.item()==0""",
         ),
         ex(
             "Reject invalid probes",
-            "Pass h0, negative h and a function returning infinity to the finite-difference helper.",
+            "Pass h=0, negative h and a function returning infinity to the finite-difference helper.",
             "all raise ValueError.",
             """for function,h in [(lambda x:x*x,0),(lambda x:x*x,-.1),(lambda x:float('inf'),.1)]:
     try: central(function,0.,h)
@@ -414,7 +414,7 @@ else: raise AssertionError('nonfinite probe point accepted')""",
             "Validation distinguishes an unusable numerical check from a disagreement with the analytic derivative. Widening a tolerance cannot repair undefined input.",
         ),
     ],
-    "TensorFlow GradientTape.gradient returns gradients explicitly, while PyTorch autograd.grad also returns them and backward accumulates into leaf.grad. Both must record the relevant forward computation. The same float64finite-difference oracle applies to either framework.",
+    "TensorFlow GradientTape.gradient returns gradients explicitly, while PyTorch autograd.grad also returns them and backward accumulates into leaf.grad. Both must record the relevant forward computation. The same float64 finite-difference oracle applies to either framework.",
     [
         (
             "Why not make h arbitrarily tiny?",
@@ -436,7 +436,7 @@ else: raise AssertionError('nonfinite probe point accepted')""",
 )
 lesson(
     6,
-    "Autograd follows the chain of tensor operations from a scalar objective back to its inputs. Forz=2w, a=z², loss=(a-1)², the derivative multiplies the local sensitivities along that chain. PyTorch builds the graph dynamically during the forward pass and saves values needed for backward. An in-place mutation can invalidate those saved values, so the framework uses version checks and restricts some mutations. A failure is a signal to understand ownership and graph lifetime, not a reason to bypass checks with.data.\n\nGraph state is also temporary. After a normal backward pass, the saved intermediates are released; reusing the same graph for another backward usually requires an explicit retention policy or a fresh forward computation. Most training loops should recompute the forward graph per batch. Nonlinearities such as ReLU introduce points where a derivative convention matters.",
+    "Autograd follows the chain of tensor operations from a scalar objective back to its inputs. Forz=2w, a=z², loss=(a-1)², the derivative multiplies the local sensitivities along that chain. PyTorch builds the graph dynamically during the forward pass and saves values needed for backward. An in-place mutation can invalidate those saved values, so the framework uses version checks and restricts some mutations. A failure is a signal to understand ownership and graph lifetime, not a reason to bypass checks with .data.\n\nGraph state is also temporary. After a normal backward pass, the saved intermediates are released; reusing the same graph for another backward usually requires an explicit retention policy or a fresh forward computation. Most training loops should recompute the forward graph per batch. Nonlinearities such as ReLU introduce points where a derivative convention matters.",
     "Build every intermediate from a requires_grad leaf. autograd.grad(loss, w) composes the chain rule. A direct in-place add on a leaf requiring gradients raises RuntimeError unless performed under a deliberate no_grad update context. Mutating a saved input under no_grad can still make a later backward fail its version check. Use clone when a separate mutable value is needed and recompute the graph after optimizer updates.",
     [
         ("Autograd graph", "The recorded tensor-operation dependencies used for differentiation."),
@@ -447,20 +447,20 @@ lesson(
         ex(
             "Trace the chain rule",
             "Use w=1, z=2*w, a=z*z and loss=(a-1)**2.",
-            "z2, a4, loss9, gradient48.",
+            "z = 2, a = 4, loss 9, gradient 48.",
             """w=torch.tensor(1.,dtype=torch.float64,requires_grad=True); z=2*w; a=z*z; loss=(a-1)**2
 gradient=torch.autograd.grad(loss,w)[0]
 assert (z.item(),a.item(),loss.item(),gradient.item())==(2.,4.,9.,48.)""",
-            "The factors are dL/da=2(a-1)=6, da/dz=2z=4 and dz/dw=2. Multiplying6*4*2 gives48 at the supplied point.",
+            "The factors are dL/da=2(a-1)=6, da/dz=2z=4 and dz/dw=2. Multiplying 6*4*2 gives 48 at the supplied point.",
         ),
         ex(
             "Check an independent slope",
             "Compare the chain derivative with a central difference of the complete scalar expression.",
-            "approximately48 within1e-5.",
+            "approximately 48 within 1e-5.",
             """h=1e-5; f=lambda value:((2*value)**2-1)**2
 numeric=(f(1+h)-f(1-h))/(2*h)
 np.testing.assert_allclose(numeric,48,atol=1e-5,rtol=0)""",
-            "The finite difference treats the entire function as a black box. It can expose an incorrect manual chain factor without reading the graph internal s.",
+            "The finite difference treats the entire function as a black box. It can expose an incorrect manual chain factor without reading the graph internals.",
         ),
         ex(
             "Observe a leaf mutation guard",
@@ -486,7 +486,7 @@ else: raise AssertionError('stale saved value accepted')""",
         ex(
             "Inspect a ReLU convention",
             "Differentiate ReLU at negative, zero and positive inputs.",
-            "gradients0, 0, 1.",
+            "gradients 0, 0, 1.",
             """points=torch.tensor([-1.,0.,1.],requires_grad=True); torch.relu(points).sum().backward()
 torch.testing.assert_close(points.grad,torch.tensor([0.,0.,1.]))""",
             "PyTorch chooses zero at the kink. A symmetric finite difference at zero would produce one-half, so that point is not a valid smooth-derivative equality test.",
@@ -509,7 +509,7 @@ assert torch.autograd.grad(fresh,parameter)[0].item()==-1""",
             "No. It stops recording new operations, but a mutation can still invalidate values saved by an earlier graph. Update only at a deliberate boundary and recompute the forward pass.",
         ),
         (
-            "Why avoid.data as a work around?",
+            "Why avoid .data as a workaround?",
             "It can bypass useful autograd safeguards and create silently incorrect derivatives. Understand the graph and use documented no_grad, detach and clone semantics instead.",
         ),
     ],
@@ -548,7 +548,7 @@ assert w.is_leaf and not intermediate.is_leaf and w.grad.item()==2 and intermedi
         ex(
             "Clear before an independent step",
             "Set grad None and backpropagate once more.",
-            "grad returns to-4.",
+            "grad returns to -4.",
             """w.grad=None; ((w-2)**2).backward(); assert w.grad.item()==-4""",
             "This is the intended reset for independent batches. Intentional microbatch accumulation needs a separate scaling and update policy.",
         ),
@@ -593,8 +593,8 @@ assert result.requires_grad and model.training is False""",
 )
 lesson(
     8,
-    "One optimizer step is the smallest complete training experiment. Specify inputs, targets, initial weight, dtype, loss reduction, learning rate and optimizer rule. Calculate the forward loss, derive the gradient, apply the update and recompute the loss at the new state. A PyTorch optimizer does not calculate gradients itself:backward populates the parameter.grad fields and optimizer.step consumes them. zero_grad establishes which contributions belong to the next step.\n\nThe scalar fixture x1, 2, 3, y2x, w0 and rate.1 has an exact oracle. Mean squared loss starts at56/3, the derivative is-56/3, the new weight is28/15, and the new loss is56/675. A mistaken l y broadcast column target gives the same initial loss but a different gradient. This is why comparing only a printed initial objective is an inadequate correctness test.",
-    "Wrap the scalar weight innn.Parameter with float64. Use an SGD optimizer with momentum0 and no weight decay. Call zero_grad, set the mean squared residual objective, backward, save the gradient, then step. Use a fresh forward expression for the post-update loss. Validate prediction/target shape equality before allowing a production loss helper to rely on broadcasting.",
+    "One optimizer step is the smallest complete training experiment. Specify inputs, targets, initial weight, dtype, loss reduction, learning rate and optimizer rule. Calculate the forward loss, derive the gradient, apply the update and recompute the loss at the new state. A PyTorch optimizer does not calculate gradients itself: backward populates the parameter.grad fields and optimizer.step consumes them. zero_grad establishes which contributions belong to the next step.\n\nThe scalar fixture x = [1, 2, 3], y = 2x, w = 0 and rate 0.1 has an exact oracle. Mean squared loss starts at 56/3, the derivative is -56/3, the new weight is 28/15, and the new loss is 56/675. A mistakenly broadcast column target gives the same initial loss but a different gradient. This is why comparing only a printed initial objective is an inadequate correctness test.",
+    "Wrap the scalar weight in nn.Parameter with float64. Use an SGD optimizer with momentum 0 and no weight decay. Call zero_grad, set the mean squared residual objective, backward, save the gradient, then step. Use a fresh forward expression for the post-update loss. Validate prediction/target shape equality before allowing a production loss helper to rely on broadcasting.",
     [
         (
             "Optimizer membership",
@@ -606,24 +606,24 @@ lesson(
     [
         ex(
             "Calculate the initial loss",
-            "Use float64x1, 2, 3, y = 2x and scalar w = 0.",
-            "mean squared loss56/3.",
+            "Use float64 x = 1, 2, 3, y = 2x and scalar w = 0.",
+            "mean squared loss 56/3.",
             """x=torch.tensor([1.,2.,3.],dtype=torch.float64); y=2*x; w=nn.Parameter(torch.tensor(0.,dtype=torch.float64))
 loss=((w*x-y)**2).mean(); np.testing.assert_allclose(loss.item(),56/3,atol=1e-12,rtol=0)""",
-            "The three squared residuals are4, 16, 36. Their sum56 divided by three defines the objective denominator.",
+            "The three squared residuals are 4, 16, 36. Their sum 56 divided by three defines the objective denominator.",
         ),
         ex(
             "Inspect the gradient before updating",
-            "Back propagate the initial loss and compare with-56/3.",
-            "gradient-56/3; weight still0.",
+            "Backpropagate the initial loss and compare with -56/3.",
+            "gradient -56/3; weight still 0.",
             """loss.backward(); np.testing.assert_allclose(w.grad.item(),-56/3,atol=1e-12,rtol=0)
 assert w.item()==0""",
             "Backward computes derivatives but does not update the parameter. Separating these observations helps diagnose a missing optimizer step.",
         ),
         ex(
             "Apply exactly one SGD update",
-            "Use SGD learning rate 0.1 onw and recompute the objective afterward.",
-            "w28/15; loss56/675.",
+            "Use SGD learning rate 0.1 on w and recompute the objective afterward.",
+            "w = 28/15; loss 56/675.",
             """optimizer=torch.optim.SGD([w],lr=.1); optimizer.step()
 np.testing.assert_allclose(w.item(),28/15,atol=1e-12,rtol=0)
 np.testing.assert_allclose(((w*x-y)**2).mean().item(),56/675,atol=1e-12,rtol=0)""",
@@ -631,8 +631,8 @@ np.testing.assert_allclose(((w*x-y)**2).mean().item(),56/675,atol=1e-12,rtol=0)"
         ),
         ex(
             "Expose the broadcast counterexample",
-            "At a fresh w = 0, compare vector predictions with column targets shaped(3, 1).",
-            "initial loss still56/3, but gradient-16.",
+            "At a fresh w = 0, compare vector predictions with column targets shaped (3, 1).",
+            "initial loss still 56/3, but gradient -16.",
             """wrong=nn.Parameter(torch.tensor(0.,dtype=torch.float64)); broken=((wrong*x-y[:,None])**2).mean(); broken.backward()
 np.testing.assert_allclose(broken.item(),56/3,atol=1e-12,rtol=0); assert wrong.grad.item()==-16""",
             "The result now contains nine pairwise residuals. Equal initial loss is a coincidence of the zero prediction and does not preserve the intended pairing.",
@@ -640,7 +640,7 @@ np.testing.assert_allclose(broken.item(),56/3,atol=1e-12,rtol=0); assert wrong.g
         ex(
             "Check a finite-difference gradient",
             "Use a plain NumPy scalar objective around \\(w=0\\) with finite-difference step \\(h=0.001\\).",
-            "slope-56/3 within1e-9.",
+            "slope -56/3 within 1e-9.",
             """values=np.array([1.,2.,3.]); objective=lambda value:np.mean((value*values-2*values)**2); h=.001
 slope=(objective(h)-objective(-h))/(2*h)
 np.testing.assert_allclose(slope,-56/3,atol=1e-9,rtol=0)""",
@@ -652,14 +652,14 @@ np.testing.assert_allclose(slope,-56/3,atol=1e-9,rtol=0)""",
             "w.grad None; updated weight unchanged.",
             """saved=w.item(); optimizer.zero_grad(set_to_none=True)
 assert w.grad is None and w.item()==saved""",
-            "Clearing derivatives is not undo in g the parameter update. It prepares an independent next gradient calculation.",
+            "Clearing derivatives is not undoing the parameter update. It prepares an independent next gradient calculation.",
         ),
     ],
     "The paired TensorFlow GradientTape example has the same arithmetic oracle. PyTorch separates backward accumulation and optimizer.step, while the TensorFlow example explicitly passes returned gradients to an update. Both need an exact shape contract and a fresh post-update forward calculation.",
     [
         (
             "Why can the wrong broadcast have the same first loss?",
-            "Atw0 every prediction is zero, so repeating each target across a new axis leaves its mean squared magnitude unchanged. The derivative also depends on how each input is paired with targets, and that pairing changed.",
+            "At w=0 every prediction is zero, so repeating each target across a new axis leaves its mean squared magnitude unchanged. The derivative also depends on how each input is paired with targets, and that pairing changed.",
         ),
         (
             "Does optimizer.step recompute the loss?",
@@ -669,7 +669,7 @@ assert w.grad is None and w.item()==saved""",
 )
 lesson(
     9,
-    "An epoch is a traversal of selected records; a batch is the set reduced before an update; an optimizer step changes parameters once. These counts differ. Six records with batch size2 produce three updates per epoch, while batch size1 produces six. Later batches see weights changed by earlier updates, so equal epochs do not imply equal trajectories. PyTorch also accumulates gradients unless they are clear e d, which can accidentally turn a minibatch loop into an unplanned accumulation scheme.\n\nRecord IDs should travel with features and targets. A final short batch is retained unless drop_last is explicitly chosen. Its mean loss uses its own number of examples. To report an epoch mean from unequal batches, accumulate loss sums and counts rather than averaging batch means equally. This lesson makes the loop explicit before introducing DataLoader configuration.",
+    "An epoch is a traversal of selected records; a batch is the set reduced before an update; an optimizer step changes parameters once. These counts differ. Six records with batch size 2 produce three updates per epoch, while batch size 1 produces six. Later batches see weights changed by earlier updates, so equal epochs do not imply equal trajectories. PyTorch also accumulates gradients unless they are cleared, which can accidentally turn a minibatch loop into an unplanned accumulation scheme.\n\nRecord IDs should travel with features and targets. A final short batch is retained unless drop_last is explicitly chosen. Its mean loss uses its own number of examples. To report an epoch mean from unequal batches, accumulate loss sums and counts rather than averaging batch means equally. This lesson makes the loop explicit before introducing DataLoader configuration.",
     "Slice the leading observation axis into batches. For each independent update, call zero_grad(set_to_none=True), compute the current mean loss, backward and step. Log parameter values after each step and counts separately from epochs. A shared index permutation preserves x/y pairing. Changing only one side creates a different learning task even when marginal distributions remain unchanged.",
     [
         ("Epoch", "One traversal of the chosen observation set."),
@@ -679,23 +679,23 @@ lesson(
     [
         ex(
             "Count batches and updates",
-            "Partition IDs1..6 into batches of2.",
-            "three batches[[1, 2], [3, 4], [5, 6]].",
+            "Partition IDs 1..6 into batches of 2.",
+            "three batches [[1, 2], [3, 4], [5, 6]].",
             """ids=list(range(1,7)); batches=[ids[i:i+2] for i in range(0,len(ids),2)]
 assert batches==[[1,2],[3,4],[5,6]]""",
             "The update count is the number of batches when there is one step per batch. It is neither the number of examples nor the number of epochs.",
         ),
         ex(
             "Retain a short tail",
-            "Partition five IDs with batch size2.",
-            "batch sizes2, 2, 1.",
+            "Partition five IDs with batch size 2.",
+            "batch sizes 2, 2, 1.",
             """short=[list(range(5))[i:i+2] for i in range(0,5,2)]
 assert [len(batch) for batch in short]==[2,2,1]""",
             "Dropping the last singleton would change the effective training set. Record that choice explicitly when fixed batch shapes are required.",
         ),
         ex(
             "Run three independent updates",
-            "Train x = 1..6, y = 2x, w = 0 with batch size2, rate 0.01, clearing gradients each batch.",
+            "Train x = 1..6, y = 2x, w = 0 with batch size 2, rate 0.01, clearing gradients each batch.",
             "three finite distinct weights.",
             """x=torch.arange(1,7,dtype=torch.float64); y=2*x; w=nn.Parameter(torch.tensor(0.,dtype=torch.float64)); optimizer=torch.optim.SGD([w],lr=.01); history=[]
 for start in range(0,6,2):
@@ -715,7 +715,7 @@ assert abs(bad.item()-history[-1])>1e-6""",
         ),
         ex(
             "Shuffle paired records together",
-            "Use permutation5, 0, 4, 1, 3, 2 for both x andy.",
+            "Use permutation 5, 0, 4, 1, 3, 2 for both x and y.",
             "every shuffled target equals twice its input.",
             """order=torch.tensor([5,0,4,1,3,2]); sx=x[order]; sy=y[order]
 torch.testing.assert_close(sy,2*sx,atol=0,rtol=0)""",
@@ -723,8 +723,8 @@ torch.testing.assert_close(sy,2*sx,atol=0,rtol=0)""",
         ),
         ex(
             "Aggregate unequal batch means",
-            "Combine mean loss2 over2examples and mean loss8 over1example.",
-            "epoch mean4, not5.",
+            "Combine mean loss 2 over 2 examples and mean loss 8 over 1 example.",
+            "epoch mean 4, not 5.",
             """assert (2*2+8*1)/3==4 and (2+8)/2==5""",
             "Reconstruct numerators before combining means. This denominator discipline applies to reported metrics as well as gradients.",
         ),
@@ -744,18 +744,18 @@ torch.testing.assert_close(sy,2*sx,atol=0,rtol=0)""",
 lesson(
     10,
     "A Dataset is an interface for retrieving observations, not a guarantee that the experiment is leakage-free. Related records need a shared split unit, such as account or source document. Subset selects indices from a dataset, but choosing those indices is a statistical-design responsibility. Fit preprocessing only on the training subset and freeze it before transforming validation or holdout records. A validation-only extreme should not change a training mean.\n\nThis lesson implements a tiny map-style Dataset over eight literal account records. Each item includes identity, group and numeric value so split and pairing checks remain possible. The dataset is deterministic and contains no file or network reads. Grouped splitting, training-only normalization and an explicit held-out perturbation distinguish data-interface correctness from evaluation validity.",
-    "Subclass Dataset and implement__len__ and__get item__. A Subset stores a sequence of indices and delegates item retrieval to the original dataset. Build training indices from whole account groups before calculating any statistic. Stack only selected training values to estimate the mean. Use sets of group IDs to check isolation; disjoint row indices alone are insufficient.",
+    "Subclass Dataset and implement __len__ and__getitem__. A Subset stores a sequence of indices and delegates item retrieval to the original dataset. Build training indices from whole account groups before calculating any statistic. Stack only selected training values to estimate the mean. Use sets of group IDs to check isolation; disjoint row indices alone are insufficient.",
     [
         ("Map-style Dataset", "A dataset providing indexed item retrieval and a length."),
         ("Subset", "An index selection over an existing dataset."),
-        ("Split unit", "The entity assigned who ll y to one partition."),
+        ("Split unit", "The entity assigned wholly to one partition."),
         ("Training-only fit", "Estimating preprocessing state without assessment inputs."),
     ],
     [
         ex(
             "Inspect a literal Dataset",
-            "Create eight records with groups A, A, B, B, C, C, D, D and values1, 3, 5, 7, 20, 22, 30, 32.",
-            "length8; item0has ID0, group A, value1.",
+            "Create eight records with groups A, A, B, B, C, C, D, D and values 1, 3, 5, 7, 20, 22, 30, 32.",
+            "length 8; item 0 has ID 0, group A, value 1.",
             """dataset=Accounts(); assert len(dataset)==8
 identity,group,value=dataset[0]; assert identity==0 and group=='A' and value.item()==1""",
             "The dataset returns metadata beside the tensor. A value-only interface would make it harder to audit group membership and record conservation.",
@@ -772,14 +772,14 @@ assert len(train)==len(test)==4 and not {row[1] for row in train}&{row[1] for ro
         ex(
             "Fit only training values",
             "Calculate the mean from the four training tensors.",
-            "mean4.",
+            "mean 4.",
             """mean=torch.stack([row[2] for row in train]).mean(); assert mean.item()==4""",
             "The statistic is fitted state. Even without labels, it would leak assessment information if computed over the entire dataset.",
         ),
         ex(
             "Perturb only assessment values",
-            "Replace the final held-out value with3200 in a copied dataset and recompute the training mean.",
-            "training mean unchanged4; global mean changes.",
+            "Replace the final held-out value with 3200 in a copied dataset and recompute the training mean.",
+            "training mean unchanged 4; global mean changes.",
             """changed=Accounts(); changed.values=changed.values.clone(); changed.values[-1]=3200
 new_mean=torch.stack([changed[i][2] for i in train_ids]).mean()
 assert new_mean.item()==4 and changed.values.mean()!=dataset.values.mean()""",
@@ -787,8 +787,8 @@ assert new_mean.item()==4 and changed.values.mean()!=dataset.values.mean()""",
         ),
         ex(
             "Expose row-level leakage",
-            "Assign alter nat in g indices to train/test and inspect group intersection.",
-            "allA, B, C, D cross.",
+            "Assign alternating indices to train/test and inspect group intersection.",
+            "all four account groups A, B, C and D cross the split.",
             """left={dataset[i][1] for i in range(0,8,2)}; right={dataset[i][1] for i in range(1,8,2)}
 assert left&right==set('ABCD')""",
             "Balanced row counts can hide complete group leakage. The independent entity identities determine whether assessment is genuinely unseen.",
@@ -802,7 +802,7 @@ torch.testing.assert_close(centered,torch.tensor([16.,18.,26.,28.],dtype=torch.f
             "Validation values need not have zero mean after a training-fitted transform. Re-centering them independently would use new fitted state and conceal distribution shift.",
         ),
     ],
-    "TensorFlow tf.data and PyTorch Dataset/Subset organize access to records, but neither chooses a valid statistical split automatically. The same held-out perturbation oracle applies. PyTorch Dataset commonly separates item retrieval from DataLoader batching, which is taught in lesson015.",
+    "TensorFlow tf.data and PyTorch Dataset/Subset organize access to records, but neither chooses a valid statistical split automatically. The same held-out perturbation oracle applies. PyTorch Dataset commonly separates item retrieval from DataLoader batching, which is taught in lesson 015.",
     [
         (
             "Does using Subset prevent leakage?",
@@ -819,21 +819,21 @@ torch.testing.assert_close(centered,torch.tensor([16.,18.,26.,28.],dtype=torch.f
     def __len__(self): return len(self.groups)
     def __getitem__(self,index): return index,self.groups[index],self.values[index]
 """,
-    source=("PyTorch2.9 data utilities", "https://docs.pytorch.org/docs/2.9/data.html"),
+    source=("PyTorch 2.9 data utilities", "https://docs.pytorch.org/docs/2.9/data.html"),
 )
 lesson(
     11,
-    "Annn.Module owns a model's registered parameters, buffers and child modules. Its forward method defines a computation, but the optimizer membership and training loop remain explicit. A plain tensor attribute is not automatically a Parameter. A buffer is tracked state that moves with the module and appears in state_dict without being optimized by default. This distinction is useful for fixed preprocessing statistics, running counts or nontrainable masks.\n\nCalling model(x) routes through Module machinery and forward; it does not calculate a loss or apply an update. A complete loop selects parameters for an optimizer, clears gradients, computes an objective, backpropagates and steps. Replacing a Parameter after constructing an optimizer does not automatically update the optimizer object list. This lesson uses a scalar module to make ownership and membership observable before larger architectures hide them.",
+    "An nn.Module owns a model's registered parameters, buffers and child modules. Its forward method defines a computation, but the optimizer membership and training loop remain explicit. A plain tensor attribute is not automatically a Parameter. A buffer is tracked state that moves with the module and appears in state_dict without being optimized by default. This distinction is useful for fixed preprocessing statistics, running counts or nontrainable masks.\n\nCalling model(x) routes through Module machinery and forward; it does not calculate a loss or apply an update. A complete loop selects parameters for an optimizer, clears gradients, computes an objective, backpropagates and steps. Replacing a Parameter after constructing an optimizer does not automatically update the optimizer object list. This lesson uses a scalar module to make ownership and membership observable before larger architectures hide them.",
     "Define parameters in__init__ after super().__init__, using nn.Parameter or registered child layers. register_buffer names a nontrainable tensor. forward uses those attributes without creating a new parameter on every call. named_parameters and named_buffers expose different state sets. state_dict includes both. An SGD optimizer captures references to the parameter objects supplied at construction.",
     [
-        ("Module", "An object org an i z in g computation and tracked model state."),
+        ("Module", "An object organizing computation and tracked model state."),
         ("Buffer", "Tracked non parameter tensor state."),
         ("Optimizer membership", "The parameter objects explicitly owned by an optimizer."),
     ],
     [
         ex(
             "Inspect module state",
-            "Build Scalar Model with weight 0 and buffer offset0.",
+            "Build ScalarModel with weight 0 and buffer offset 0.",
             "one parameter weight; one buffer offset; both in state_dict.",
             """model=ScalarModel()
 assert set(dict(model.named_parameters()))=={'weight'} and set(dict(model.named_buffers()))=={'offset'}
@@ -842,7 +842,7 @@ assert set(model.state_dict())=={'weight','offset'}""",
         ),
         ex(
             "Check a forward call",
-            "Runx1, 2, 3 through the zero-weight module.",
+            "Run x = 1, 2, 3 through the zero-weight module.",
             "three zero outputs; weight unchanged.",
             """x=torch.tensor([1.,2.,3.],dtype=torch.float64); y=2*x
 assert torch.equal(model(x),torch.zeros_like(x)) and model.weight.item()==0""",
@@ -851,7 +851,7 @@ assert torch.equal(model(x),torch.zeros_like(x)) and model.weight.item()==0""",
         ex(
             "Run one explicit loop step",
             "Use SGD with rate 0.1 and mean squared error, clearing gradients before backward.",
-            "weight28/15; buffer still0.",
+            "weight 28/15; buffer still 0.",
             """optimizer=torch.optim.SGD(model.parameters(),lr=.1); optimizer.zero_grad(set_to_none=True)
 loss=((model(x)-y)**2).mean(); loss.backward(); optimizer.step()
 np.testing.assert_allclose(model.weight.item(),28/15,atol=1e-12,rtol=0); assert model.offset.item()==0""",
@@ -875,7 +875,7 @@ assert stale.param_groups[0]['params'][0] is old and stale.param_groups[0]['para
         ),
         ex(
             "Keep parameter count stable across calls",
-            "Call a fresh module on batches of length1 and 4 and compare parameter identities.",
+            "Call a fresh module on batches of length 1 and 4 and compare parameter identities.",
             "same weight object and one parameter.",
             """stable=ScalarModel(); identity=id(stable.weight); stable(torch.ones(1,dtype=torch.float64)); stable(torch.ones(4,dtype=torch.float64))
 assert id(stable.weight)==identity and len(list(stable.parameters()))==1""",
@@ -901,8 +901,8 @@ assert id(stable.weight)==identity and len(list(stable.parameters()))==1""",
 )
 lesson(
     12,
-    "An auditable regressor combines data identity, a baseline, an explicit training loop and separate assessment. The three-feature fixture uses target2a-b+c, so every row can be checked by hand. Four rows are used for fitting and two are reserved for assessment. A training-mean baseline provides a comparison that ignores features. The learned linear model updates under a fixed100-step budget without using the holdout to choose settings.\n\nThe capstone must report what it actually establishes. A small synthetic holdout can show that the implementation uses features in the intended way, but it cannot establish robustness or population accuracy. Keep the scalar arithmetic pilot from lesson008 as an independent mechanism check alongside the larger experiment. Hashing split IDs records identity; it does not prove the split design was appropriate.",
-    "Create X shaped(6, 3), targets shaped(6, 1), and nn.Linear(3, 1, bias=False) with zero weights. Select rows by frozen index lists. Use MSELoss and SGD.1, zeroing gradients every step. Evaluate after the fixed budget under no_grad. Record train and holdout losses with their counts, plus model state and split identities. Do not overwrite the original split after seeing errors.",
+    "An auditable regressor combines data identity, a baseline, an explicit training loop and separate assessment. The three-feature fixture uses target 2 a-b+c, so every row can be checked by hand. Four rows are used for fitting and two are reserved for assessment. A training-mean baseline provides a comparison that ignores features. The learned linear model updates under a fixed 100-step budget without using the holdout to choose settings.\n\nThe capstone must report what it actually establishes. A small synthetic holdout can show that the implementation uses features in the intended way, but it cannot establish robustness or population accuracy. Keep the scalar arithmetic pilot from lesson 008 as an independent mechanism check alongside the larger experiment. Hashing split IDs records identity; it does not prove the split design was appropriate.",
+    "Create X shaped (6, 3), targets shaped (6, 1), and nn.Linear(3, 1, bias=False) with zero weights. Select rows by frozen index lists. Use MSELoss and SGD 0.1, zeroing gradients every step. Evaluate after the fixed budget under no_grad. Record train and holdout losses with their counts, plus model state and split identities. Do not overwrite the original split after seeing errors.",
     [
         ("Experiment manifest", "The identities and settings needed to reconstruct a run."),
         ("Training baseline", "A simple rule fitted only on training data."),
@@ -911,8 +911,8 @@ lesson(
     [
         ex(
             "Create the three-feature fixture",
-            "Use rows zero, e1, e2, e3, [1, 1, 1], [2, 1, 1] and target2a-b+c.",
-            "targets0, 2, -1, 1, 2, 4.",
+            "Use rows zero, e1, e2, e3, [1, 1, 1], [2, 1, 1] and target 2 a-b+c.",
+            "targets 0, 2, -1, 1, 2, 4.",
             """x=torch.tensor([[0.,0.,0.],[1.,0.,0.],[0.,1.,0.],[0.,0.,1.],[1.,1.,1.],[2.,1.,1.]],dtype=torch.float64)
 y=x@torch.tensor([[2.],[-1.],[1.]],dtype=torch.float64); train=[0,1,2,3]; test=[4,5]
 torch.testing.assert_close(y[:,0],torch.tensor([0.,2.,-1.,1.,2.,4.],dtype=torch.float64),atol=0,rtol=0)""",
@@ -921,14 +921,14 @@ torch.testing.assert_close(y[:,0],torch.tensor([0.,2.,-1.,1.,2.,4.],dtype=torch.
         ex(
             "Measure the training-mean baseline",
             "Fit the constant from training targets and score the two holdout rows.",
-            "mean.5; holdout MSE7.25.",
+            "mean 0.5; holdout MSE 7.25.",
             """mean=y[train].mean(); baseline=((y[test]-mean)**2).mean()
 assert mean.item()==.5 and baseline.item()==7.25""",
             "The baseline receives the same assessment rows as the model, but its constant is fitted only on training targets.",
         ),
         ex(
             "Train a bounded linear model",
-            "Initialize a bias-free3-to-1Linear layer at zero and run100SGD.1 updates.",
+            "Initialize a bias-free 3-to-1 Linear layer at zero and run 100 SGD updates with learning rate 0.1.",
             "100 finite updates; training loss decreases.",
             """model=nn.Linear(3,1,bias=False,dtype=torch.float64)
 with torch.no_grad(): model.weight.zero_()
@@ -944,7 +944,7 @@ np.testing.assert_allclose([curve[0],curve[-1]],[1.5,1.5*.95**198],atol=1e-12,rt
         ex(
             "Open the holdout after fitting",
             "Calculate final training and holdout MSE without updates.",
-            "finite errors; holdout error below7.25on this fixture.",
+            "finite errors; holdout error below 7.25 on this fixture.",
             """model.eval()
 with torch.no_grad(): train_error=((model(x[train])-y[train])**2).mean().item(); test_error=((model(x[test])-y[test])**2).mean().item()
 assert np.isfinite([train_error,test_error]).all() and test_error<baseline.item()
@@ -954,15 +954,15 @@ np.testing.assert_allclose([train_error,test_error],[1.5*.95**200,10*.95**200],a
         ex(
             "Retain an independent pilot oracle",
             "Calculate the scalar first update directly from NumPy without using the module.",
-            "w28/15and loss56/675.",
+            "w = 28/15 and loss 56/675.",
             """pilot=np.array([1.,2.,3.]); gradient=2*np.mean((-2*pilot)*pilot); updated=-.1*gradient
 np.testing.assert_allclose([updated,np.mean((updated*pilot-2*pilot)**2)],[28/15,56/675],atol=1e-12,rtol=0)""",
             "The pilot protects the update mechanism independently of the feature model. A low final error could otherwise conceal a compensating implementation mistake.",
         ),
         ex(
             "Write the bounded evidence report",
-            "Record split IDs, 100steps, errors and the two-row limitation.",
-            "disjoint IDs; holdout count2; explicit limited scope.",
+            "Record split IDs, 100 steps, errors and the two-row limitation.",
+            "disjoint IDs; holdout count 2; explicit limited scope.",
             """report={'train_ids':train,'test_ids':test,'steps':100,'train_mse':train_error,'test_mse':test_error,'limit':'two synthetic holdout rows'}
 assert not set(train)&set(test) and len(report['test_ids'])==2 and report['steps']==100""",
             "The report should let a reviewer distinguish local software evidence from statistical reliability. A small successful fixture is a beginning, not a deployment certificate.",
@@ -982,8 +982,8 @@ assert not set(train)&set(test) and len(report['test_ids'])==2 and report['steps
 )
 lesson(
     13,
-    "A binary logit is an unrestricted score. Its sigmoid maps that score to a number between zero and one under the model's probability convention. BCEWithLogitsLoss combines the sigmoid and binary cross-entropy algebra in a numerically stable form, so its input should be logits rather than already-sigmoid e d probabilities. Applying sigmoid twice changes the objective while often producing finite values that look plausible.\n\nA classification threshold is a separate decision policy. Changing it alters predicted labels without changing fitted logits. The threshold can reflect costs or coverage, but must be chosen on validation evidence rather than after viewing final-test results. The tiny scores-2, 0, 2 make the midpoint and boundary policy inspectable. Their probabilities are not automatically calibrated merely because sigmoid produced them.",
-    "`F.binary_cross_entropy_with_logits` expects floating targets and logits of matching shape. `torch.sigmoid` is useful for reporting probabilities after the objective convention is fixed. Use `probability>=threshold` to declare a tie policy. Compare loss at zero logit with log2 and use extreme logits to check stable arithmetic. Do not infer label correctness from confidence alone.",
+    "A binary logit is an unrestricted score. Its sigmoid maps that score to a number between zero and one under the model's probability convention. BCEWithLogitsLoss combines the sigmoid and binary cross-entropy algebra in a numerically stable form, so its input should be logits rather than already-sigmoid-transformed probabilities. Applying sigmoid twice changes the objective while often producing finite values that look plausible.\n\nA classification threshold is a separate decision policy. Changing it alters predicted labels without changing fitted logits. The threshold can reflect costs or coverage, but must be chosen on validation evidence rather than after viewing final-test results. The tiny scores -2, 0, 2 make the midpoint and boundary policy inspectable. Their probabilities are not automatically calibrated merely because sigmoid produced them.",
+    "`F.binary_cross_entropy_with_logits` expects floating targets and logits of matching shape. `torch.sigmoid` is useful for reporting probabilities after the objective convention is fixed. Use `probability>=threshold` to declare a tie policy. Compare loss at zero logit with log 2 and use extreme logits to check stable arithmetic. Do not infer label correctness from confidence alone.",
     [
         ("Logit", "A binary score before the sigmoid probability transformation."),
         ("BCEWithLogitsLoss", "A stable combined binary logistic objective."),
@@ -992,8 +992,8 @@ lesson(
     [
         ex(
             "Convert fixed logits",
-            "Apply sigmoid to-2, 0, 2.",
-            "middle probability.5 and strictly increasing values.",
+            "Apply sigmoid to the logits -2, 0 and 2.",
+            "middle probability 0.5 and strictly increasing values.",
             """logits=torch.tensor([-2.,0.,2.],dtype=torch.float64); probabilities=torch.sigmoid(logits)
 assert probabilities[1].item()==.5 and bool(torch.all(torch.diff(probabilities)>0))""",
             "The monotonic transformation preserves ranking. A score of zero is the exact midpoint, which makes threshold ties explicit.",
@@ -1001,14 +1001,14 @@ assert probabilities[1].item()==.5 and bool(torch.all(torch.diff(probabilities)>
         ex(
             "Check the midpoint objective",
             "Compute positive-label BCE at zero logit.",
-            "loss log2 within1e-12.",
+            "loss log 2 within 1e-12.",
             """loss=F.binary_cross_entropy_with_logits(torch.tensor([0.],dtype=torch.float64),torch.tensor([1.],dtype=torch.float64))
 np.testing.assert_allclose(loss.item(),np.log(2),atol=1e-12,rtol=0)""",
             "A fifty-fifty prediction assigns probability one-half to the observed label. Its negative logarithm is an independent reference.",
         ),
         ex(
             "Move the decision threshold",
-            "Compare thresholds.5 and.8 with>=ties.",
+            "Compare decision thresholds 0.5 and 0.8, counting a probability equal to the threshold as positive.",
             "labels False, True, True versus False, False, True.",
             """assert (probabilities>=.5).tolist()==[False,True,True]
 assert (probabilities>=.8).tolist()==[False,False,True]""",
@@ -1016,94 +1016,94 @@ assert (probabilities>=.8).tolist()==[False,False,True]""",
         ),
         ex(
             "Expose a double-sigmoid mistake",
-            "Feed probability.5 as though it were a logit and compare with log2.",
-            "incorrect loss differs by more than.1.",
+            "Feed probability 0.5 as though it were a logit and compare with log 2.",
+            "incorrect loss differs by more than 0.1.",
             """wrong=F.binary_cross_entropy_with_logits(torch.tensor([.5],dtype=torch.float64),torch.tensor([1.],dtype=torch.float64))
 assert abs(wrong.item()-np.log(2))>.1""",
-            "The API interprets.5 as a score favor in g the positive class. It cannot infer that the caller already transformed the score.",
+            "The API interprets 0.5 as a score favoring the positive class. It cannot infer that the caller already transformed the score.",
         ),
         ex(
             "Test extreme finite scores",
-            "Use logits 1000, -1000 with labels1, 0.",
-            "finite losses approximately0.",
+            "Use logits 1000, -1000 with labels 1, 0.",
+            "finite losses approximately 0.",
             """extreme=F.binary_cross_entropy_with_logits(torch.tensor([1000.,-1000.]),torch.tensor([1.,0.]),reduction='none')
 assert torch.isfinite(extreme).all(); torch.testing.assert_close(extreme,torch.zeros(2),atol=1e-6,rtol=0)""",
             "The combined objective avoids an unstable log(sigmoid()) round trip. This protects arithmetic but does not validate labels or shapes.",
         ),
         ex(
             "Count threshold errors",
-            "Use truth0, 1, 1 and compare the two decision policies.",
-            "0 errors at.5 and 1 at.8.",
+            "Use truth 0, 1, 1 and compare the two decision policies.",
+            "0 errors at 0.5 and 1 at 0.8.",
             """truth=torch.tensor([False,True,True])
 assert int(((probabilities>=.5)!=truth).sum())==0 and int(((probabilities>=.8)!=truth).sum())==1""",
             "A decision error count is not the same as probability loss. A different cost matrix or population can favor a different threshold.",
         ),
     ],
-    "TensorFlow's sigmoid-cross-entropy-with-logits operation and PyTorch BCEWithLogitsLoss share the logit convention. Keras Binary Cross entropy requires its from_logits setting to agree with the model output. Match dtype, shape and element reduction before comparing scalar values.",
+    "TensorFlow's sigmoid-cross-entropy-with-logits operation and PyTorch BCEWithLogitsLoss share the logit convention. Keras BinaryCrossentropy requires its from_logits setting to agree with the model output. Match dtype, shape and element reduction before comparing scalar values.",
     [
         (
             "Why prefer BCEWithLogitsLoss over manually applying sigmoid and log?",
             "The combined implementation can rearrange the algebra to avoid overflow and loss of precision at extreme scores. Manual probability conversion can round to zero or one first.",
         ),
         (
-            "Does a probability.9 mean90percent of such predictions are correct?",
+            "Does a probability 0.9 mean 90 percent of such predictions are correct?",
             "Only if calibration evidence supports that interpretation for the relevant population. Sigmoid alone defines a model output, not an empirical reliability guarantee.",
         ),
     ],
 )
 lesson(
     14,
-    "Multiclass classification chooses exactly one outcome among mutually exclusive classes. Multi label classification makes several independent binary decisions, so multiple labels can be present. A final layer with three outputs can serve either task; the target meaning determines the loss. PyTorch CrossEntropyLoss expects raw class logits and class-index targets by default. It includes log-softmax internally, so applying softmax first changes the intended calculation.\n\nThe class axis convention matters. For ordinary batches, logits have shape(N, C) and targets(N). For spatial tasks, the class axis remains dimension1, unlike many channels-last examples in other frameworks. Multi label BCEWithLogitsLoss instead expects a target matrix matching the logits. Report which axes are averaged before comparing losses with different output widths.",
-    "UseF.cross_entropy with long integer class indices and floating logits. Sparse target indices must satisfy0<=target<C. For independent labels, use floating0/1targets with F.binary_cross_entropy_with_logits. softmax(dim=1) creates a class distribution for reporting. A uniform three-class logit vector gives loss log3, while three independent binary logits at zero each give probability.5.",
+    "Multiclass classification chooses exactly one outcome among mutually exclusive classes. Multilabel classification makes several independent binary decisions, so multiple labels can be present. A final layer with three outputs can serve either task; the target meaning determines the loss. PyTorch CrossEntropyLoss expects raw class logits and class-index targets by default. It includes log-softmax internally, so applying softmax first changes the intended calculation.\n\nThe class axis convention matters. For ordinary batches, logits have shape (N, C) and targets (N). For spatial tasks, the class axis remains dimension 1, unlike many channels-last examples in other frameworks. Multilabel BCEWithLogitsLoss instead expects a target matrix matching the logits. Report which axes are averaged before comparing losses with different output widths.",
+    "Use F.cross_entropy with long integer class indices and floating logits. Sparse target indices must satisfy 0<=target<C. For independent labels, use floating 0/1 targets with F.binary_cross_entropy_with_logits. softmax(dim=1) creates a class distribution for reporting. A uniform three-class logit vector gives loss log 3, while three independent binary logits at zero each give probability 0.5.",
     [
         ("Multiclass target", "One class identity among mutually exclusive alternatives."),
-        ("Multi label target", "A binary presence value for each independently meaningful label."),
+        ("Multilabel target", "A binary presence value for each independently meaningful label."),
         ("Class axis", "The dimension indexing alternative categories in a logit tensor."),
     ],
     [
         ex(
             "Calculate uniform multiclass loss",
-            "Use one row of three zero logits and target class1.",
-            "cross entropy log3.",
+            "Use one row of three zero logits and target class 1.",
+            "cross entropy log 3.",
             """logits=torch.zeros((1,3),dtype=torch.float64); target=torch.tensor([1],dtype=torch.long)
 np.testing.assert_allclose(F.cross_entropy(logits,target).item(),np.log(3),atol=1e-12,rtol=0)""",
             "Every class has probability one-third. The target index identifies a category, not a numeric magnitude to regress.",
         ),
         ex(
             "Contrast independent binary outputs",
-            "Apply sigmoid to the same three zero logits for a multi label task.",
-            "probabilities.5, .5, .5 with sum1.5.",
+            "Apply sigmoid to the same three zero logits for a multilabel task.",
+            "probabilities 0.5, 0.5, 0.5 with sum 1.5.",
             """independent=torch.sigmoid(logits)
 assert independent.tolist()==[[.5,.5,.5]] and independent.sum().item()==1.5""",
             "Independent probabilities need not sum to one. A softmax would force labels to compete and change the task.",
         ),
         ex(
             "Inspect target shapes and types",
-            "Create class indices2, 0 and binary rows[1, 0, 1], [0, 1, 0].",
-            "shapes(2, ) and(2, 3); long versus floating.",
+            "Create class indices 2, 0 and binary rows [1, 0, 1], [0, 1, 0].",
+            "shapes (2, ) and (2, 3); long versus floating.",
             """classes=torch.tensor([2,0],dtype=torch.long); labels=torch.tensor([[1.,0.,1.],[0.,1.,0.]])
 assert tuple(classes.shape)==(2,) and tuple(labels.shape)==(2,3) and classes.dtype==torch.long and labels.is_floating_point()""",
             "The target contracts differ because the prediction events differ. Reshaping or casting without understanding those events can make a wrong task appear accepted.",
         ),
         ex(
             "Check class-axis normalization",
-            "Apply softmax(dim1) to a2x3matrix.",
-            "each row sums1.",
+            "Apply softmax with dim=1 to a 2-by-3 matrix.",
+            "each row sums 1.",
             """scores=torch.tensor([[2.,0.,-2.],[0.,1.,3.]])
 probs=torch.softmax(scores,dim=1); torch.testing.assert_close(probs.sum(1),torch.ones(2),atol=1e-6,rtol=0)""",
-            "Normalizing over the batch axis would couple unrelated observations. Row mass isa direct axis check.",
+            "Normalizing over the batch axis would couple unrelated observations. Row mass is a direct axis check.",
         ),
         ex(
-            "Name the multi label denominator",
-            "Compute B C E over two rows and three labels of zero logits.",
-            "sum6log2; mean log2.",
+            "Name the multilabel denominator",
+            "Compute BCE over two rows and three labels of zero logits.",
+            "sum 6 log 2; mean log 2.",
             """per_entry=F.binary_cross_entropy_with_logits(torch.zeros_like(labels),labels,reduction='none')
 np.testing.assert_allclose([per_entry.sum().item(),per_entry.mean().item()],[6*np.log(2),np.log(2)],atol=1e-6,rtol=0)""",
             "There are six binary events but two records. A mean per record of summed label loss would differ by a factor of three.",
         ),
         ex(
             "Reject an out-of-vocabulary class",
-            "Use class index3 for a three-class row.",
+            "Use class index 3 for a three-class row.",
             "IndexError or RuntimeError identifying an invalid target.",
             """try: F.cross_entropy(torch.zeros((1,3)),torch.tensor([3]))
 except (IndexError,RuntimeError): pass
@@ -1111,7 +1111,7 @@ else: raise AssertionError('unknown class accepted')""",
             "Class indices are bounded by the output vocabulary. Validation at the data boundary gives a clearer diagnostic before loss calculation.",
         ),
     ],
-    "Keras sparse categorical loss commonly treats the last axis as classes, while PyTorch CrossEntropyLoss uses dimension1 for batched/spatial logits. Both need raw logits when configured as logits losses. Independent multi label targets use binary objectives rather than one class-index objective.",
+    "Keras sparse categorical loss commonly treats the last axis as classes, while PyTorch CrossEntropyLoss uses dimension 1 for batched/spatial logits. Both need raw logits when configured as logits losses. Independent multilabel targets use binary objectives rather than one class-index objective.",
     [
         (
             "Why should softmax usually stay out of the training forward for CrossEntropyLoss?",
@@ -1136,8 +1136,8 @@ lesson(
     [
         ex(
             "Inspect retained batches",
-            "Load five paired ID/value records with batch size2 and no shuffle.",
-            "sizes2, 2, 1 and IDs0..4 exactly once.",
+            "Load five paired ID/value records with batch size 2 and no shuffle.",
+            "sizes 2, 2, 1 and IDs 0..4 exactly once.",
             """dataset=torch.utils.data.TensorDataset(torch.arange(5),torch.arange(1,6,dtype=torch.float32))
 loader=torch.utils.data.DataLoader(dataset,batch_size=2,shuffle=False,num_workers=0)
 batches=list(loader)
@@ -1148,14 +1148,14 @@ assert torch.cat([ids for ids,values in batches]).tolist()==[0,1,2,3,4]""",
         ex(
             "Make dropping explicit",
             "Set drop_last True on the same fixture.",
-            "two batches; ID4 omitted.",
+            "two batches; ID 4 omitted.",
             """dropped=list(torch.utils.data.DataLoader(dataset,batch_size=2,drop_last=True,num_workers=0))
 assert len(dropped)==2 and torch.cat([ids for ids,values in dropped]).tolist()==[0,1,2,3]""",
             "The policy changes the effective epoch population. It may be useful for fixed shapes, but it must not be described as an identical traversal.",
         ),
         ex(
             "Reproduce shuffle with a local generator",
-            "Construct two loaders with fresh generators both seeded7.",
+            "Construct two loaders with fresh generators both seeded 7.",
             "same permutation; all five IDs retained.",
             """def order(seed):
     generator=torch.Generator().manual_seed(seed)
@@ -1165,12 +1165,12 @@ assert order(7)==order(7) and sorted(order(7))==list(range(5))""",
             "A new generator recreates the starting state. Reusing one already-consumed generator would produce a later random sequence rather than a replay.",
         ),
         ex(
-            "Col late variable-length sequences",
-            "Pad sequences[2, 3] and[4] with zero while keeping lengths.",
-            "batch[[2, 3], [4, 0]] and lengths2, 1.",
+            "Collate variable-length sequences",
+            "Pad sequences [2, 3] and [4] with zero while keeping lengths.",
+            "batch [[2, 3], [4, 0]] and lengths 2, 1.",
             """padded,lengths=collate([[2,3],[4]])
 assert padded.tolist()==[[2,3],[4,0]] and lengths.tolist()==[2,1]""",
-            "Padding equalize s storage without inventing a valid token. Length metadata is needed for recurrent packing or loss masking later.",
+            "Padding equalizes storage without inventing a valid token. Length metadata is needed for recurrent packing or loss masking later.",
         ),
         ex(
             "Preserve pairing after shuffle",
@@ -1195,7 +1195,7 @@ for invalid in [[[2.7]],[[True]],[[-1]],[[2**63]]]:
             "Some applications can represent empty sequences, but this lesson's recurrent contract cannot. Rejecting the case early keeps an undefined loss denominator from appearing later.",
         ),
     ],
-    "TensorFlow tf.data combines dataset transformations and pre fetching in its pipeline API. PyTorch commonly separates Dataset retrieval from DataLoader sampling/collation. Both need explicit cardinality, ordering and training-only preprocessing checks; num_workers0is this course's bounded default, not a throughput recommendation.",
+    "TensorFlow tf.data combines dataset transformations and prefetching in its pipeline API. PyTorch commonly separates Dataset retrieval from DataLoader sampling/collation. Both need explicit cardinality, ordering and training-only preprocessing checks; num_workers=0 is this course's bounded default, not a throughput recommendation.",
     [
         (
             "Why is a seed insufficient by itself?",
@@ -1213,12 +1213,12 @@ for invalid in [[[2.7]],[[True]],[[-1]],[[2**63]]]:
     for row,sequence in enumerate(sequences): batch[row,:len(sequence)]=torch.tensor(sequence)
     return batch,lengths
 """,
-    source=("PyTorch2.9 DataLoader", "https://docs.pytorch.org/docs/2.9/data.html"),
+    source=("PyTorch 2.9 DataLoader", "https://docs.pytorch.org/docs/2.9/data.html"),
 )
 lesson(
     16,
-    "Nonlinearity changes which functions a network can represent. Stacking linear layers without activations still produces one affine map. XOR assigns opposite labels to diagonal l y opposite corners of a square, so there is no linear threshold separating all four cases. Two rectified differences h1=max(x1-x2, 0), h2=max(x2-x1, 0) produce the exact binary pattern when added. This manual construction distinguishes representation al capacity from whether an optimizer happens to find it.\n\nInitialization selects a starting point and can preserve or break symmetry between units. Equal hidden weights can produce identical features and gradients, making units redundant. Gradient diagnostics should inspect where activations and derivatives become zero or nonfinite instead of assuming the architecture is in capable. PyTorch provides explicit initialization functions and no_grad assignment for controlled fixtures.",
-    "UseF.relu after a matrix product. Innn.Linear, the columns of a mathematical projection are the rows of the stored weight. torch.nn.init.zeros_ or constant_ set known initial state without constructing an optimization graph. Compare all four XOR inputs before training. A ReLU negative preactivation has zero local derivative; a zero gradient and a missing gradient path are not the same diagnosis.",
+    "Nonlinearity changes which functions a network can represent. Stacking linear layers without activations still produces one affine map. XOR assigns opposite labels to diagonally opposite corners of a square, so there is no linear threshold separating all four cases. Two rectified differences h1=max(x1-x2, 0), h2=max(x2-x1, 0) produce the exact binary pattern when added. This manual construction distinguishes representational capacity from whether an optimizer happens to find it.\n\nInitialization selects a starting point and can preserve or break symmetry between units. Equal hidden weights can produce identical features and gradients, making units redundant. Gradient diagnostics should inspect where activations and derivatives become zero or nonfinite instead of assuming the architecture is incapable. PyTorch provides explicit initialization functions and no_grad assignment for controlled fixtures.",
+    "Use F.relu after a matrix product. In nn.Linear, the columns of a mathematical projection are the rows of the stored weight. torch.nn.init.zeros_ or constant_ set known initial state without constructing an optimization graph. Compare all four XOR inputs before training. A ReLU negative preactivation has zero local derivative; a zero gradient and a missing gradient path are not the same diagnosis.",
     [
         ("Nonlinearity", "A transformation that cannot be collapsed into one affine map."),
         ("Initialization", "The policy choosing parameter values before training."),
@@ -1228,7 +1228,7 @@ lesson(
     [
         ex(
             "Construct XOR by hand",
-            "Use inputs00, 01, 10, 11 and two rectified differences.",
+            "Use inputs 00, 01, 10, 11 and two rectified differences.",
             "outputs 0, 1, 1, 0.",
             """x=torch.tensor([[0.,0.],[0.,1.],[1.,0.],[1.,1.]])
 w=torch.tensor([[1.,-1.],[-1.,1.]])
@@ -1241,7 +1241,7 @@ assert output.tolist()==[0.,1.,1.,0.]""",
             "Sum the raw difference features without ReLU.",
             "all four outputs 0.",
             """assert (x@w).sum(1).tolist()==[0.,0.,0.,0.]""",
-            "The two columns are opposite s, so a linear sum cancels. Adding more linear layers would not create the piecewise behavior needed for XOR.",
+            "The two columns are opposites, so a linear sum cancels. Adding more linear layers would not create the piecewise behavior needed for XOR.",
         ),
         ex(
             "Map the construction into Linear",
@@ -1259,8 +1259,8 @@ assert not torch.equal(x@asymmetric,x@asymmetric.T)""",
         ),
         ex(
             "Inspect activation gradients",
-            "Differentiate ReLU at-2 and2.",
-            "gradients0 and 1.",
+            "Differentiate ReLU at -2 and 2.",
+            "gradients 0 and 1.",
             """z=torch.tensor([-2.,2.],requires_grad=True); F.relu(z).sum().backward()
 assert z.grad.tolist()==[0.,1.]""",
             "An inactive unit receives no derivative from these inputs. This is a connected zero, so adding retain_grad or detach would not repair the learning condition.",
@@ -1276,8 +1276,8 @@ features=symmetric(x); torch.testing.assert_close(features[:,0],features[:,1],at
         ),
         ex(
             "Transfer to continuous inputs",
-            "Evaluate the fixed construction at(.2, .8) and(.8, .2).",
-            "both.6; the function is absolute difference.",
+            "Evaluate the fixed construction at (0.2, 0.8) and (0.8, 0.2).",
+            "both 0.6; the function is absolute difference.",
             """points=torch.tensor([[.2,.8],[.8,.2]])
 torch.testing.assert_close(F.relu(points@w).sum(1),torch.tensor([.6,.6]),atol=1e-6,rtol=0)""",
             "The architecture computes a continuous function outside the binary fixture. Calling every output XOR would hide the input-domain assumption.",
@@ -1297,8 +1297,8 @@ torch.testing.assert_close(F.relu(points@w).sum(1),torch.tensor([.6,.6]),atol=1e
 )
 lesson(
     17,
-    "Regularization and training mode affect different parts of the experiment. An explicit L1orL2penalty adds a term to the objective. Dropout randomly zeroes activations during training and rescales retained values; in evaluation it returns the unmodified input. model.train and model.eval recursively set module behavior, but neither changes whether autograd records operations. Optimizer weight decay and an explicit penalty can have different semantics, especially for adaptive optimizers, so their names do not establish equivalence.\n\nThe fixture uses weights1, -2 and unit activations. It separates data loss from penalty, checks stochastic outputs by allowed values rather than a fixed random mask, and confirms deterministic evaluation. None of these checks proves that regularization improves held-out quality; that requires a controlled validation comparison.",
-    "nn.Dropout(p=.5) scales retained training activations by1/(1-p). Call train or eval to select behavior. Compute sum(abs(w)) and sum(w²) for declared penalty conventions, then multiply by an explicit coefficient. A half-scaled squared penalty would have a different derivative. Keep metrics and penalty components separate in logs.",
+    "Regularization and training mode affect different parts of the experiment. An explicit L1orL2penalty adds a term to the objective. Dropout randomly zeroes activations during training and rescales retained values; in evaluation it returns the unmodified input. model.train and model.eval recursively set module behavior, but neither changes whether autograd records operations. Optimizer weight decay and an explicit penalty can have different semantics, especially for adaptive optimizers, so their names do not establish equivalence.\n\nThe fixture uses weights 1, -2 and unit activations. It separates data loss from penalty, checks stochastic outputs by allowed values rather than a fixed random mask, and confirms deterministic evaluation. None of these checks proves that regularization improves held-out quality; that requires a controlled validation comparison.",
+    "nn.Dropout(p=0.5) scales retained training activations by 1/(1-p). Call train or eval to select behavior. Compute sum(abs(w)) and sum(w²) for declared penalty conventions, then multiply by an explicit coefficient. A half-scaled squared penalty would have a different derivative. Keep metrics and penalty components separate in logs.",
     [
         ("Regularization penalty", "A parameter-dependent term added to the training objective."),
         ("Dropout mode", "Whether stochastic activation masking is applied."),
@@ -1310,14 +1310,14 @@ lesson(
     [
         ex(
             "Calculate two penalties",
-            "Use weights1, -2 and compute L1 and squared L2 sums.",
+            "Use weights 1, -2 and compute L1 and squared L2 sums.",
             "L1=3; squared L2=5.",
             """w=torch.tensor([1.,-2.]); assert w.abs().sum().item()==3 and w.square().sum().item()==5""",
             "The squared L2penalty is not the square root norm. Naming the convention avoids a factor or square-root mismatch when comparing implementations.",
         ),
         ex(
             "Check evaluation dropout",
-            "Apply Dropout.5 in eval mode to ones twice.",
+            "Apply Dropout 0.5 in eval mode to ones twice.",
             "both outputs exactly ones.",
             """drop=nn.Dropout(.5); drop.eval(); x=torch.ones((4,8))
 assert torch.equal(drop(x),x) and torch.equal(drop(x),x)""",
@@ -1326,26 +1326,26 @@ assert torch.equal(drop(x),x) and torch.equal(drop(x),x)""",
         ex(
             "Check training invariants",
             "Switch the same layer to train mode and inspect output values.",
-            "shape(4, 8); only0or2.",
+            "shape (4, 8); only 0 or 2.",
             """drop.train(); sampled=drop(x)
 assert tuple(sampled.shape)==(4,8) and set(sampled.unique().tolist())<={0.,2.}""",
             "The test does not require a particular mask or count of zeros. Such a pattern would overfit the random implementation rather than the Dropout contract.",
         ),
         ex(
             "Separate data and penalty terms",
-            "Combine data loss2 with coefficient.1 times squared L2.",
-            "penalty.5; total2.5.",
+            "Combine data loss 2 with coefficient 0.1 times squared L2.",
+            "penalty 0.5; total 2.5.",
             """data_loss=torch.tensor(2.); penalty=.1*w.square().sum()
 assert penalty.item()==.5 and (data_loss+penalty).item()==2.5""",
             "A total objective may change while the predictive error stays fixed. Logging components helps distinguish those mechanisms.",
         ),
         ex(
             "Differentiate the explicit penalty",
-            "Differentiate .1*sum(v*v) at v=[1,-2].",
-            "gradient [.2,-.4].",
+            "Differentiate 0.1*sum(v*v) at v=[1, -2].",
+            "gradient [0.2, -0.4].",
             """v=torch.tensor([1.,-2.],requires_grad=True); (.1*v.square().sum()).backward()
 torch.testing.assert_close(v.grad,torch.tensor([.2,-.4]),atol=1e-6,rtol=0)""",
-            "The derivative contains2*coefficient*v under this definition. Copying a coefficient from a half-scaled objective would change the update.",
+            "The derivative contains 2*coefficient*v under this definition. Copying a coefficient from a half-scaled objective would change the update.",
         ),
         ex(
             "Keep mode separate from gradients",
@@ -1364,14 +1364,14 @@ assert observed.requires_grad and torch.equal(differentiable.grad,torch.ones(3))
         ),
         (
             "Is weight decay always L2regularization?",
-            "No. Equivalence depends on the optimizer and implementation. For adaptive optimizers, de coupled weight decay is not generally the same as adding a squared penalty to the gradient.",
+            "No. Equivalence depends on the optimizer and implementation. For adaptive optimizers, decoupled weight decay is not generally the same as adding a squared penalty to the gradient.",
         ),
     ],
 )
 lesson(
     18,
-    "Normalization can introduce both state and cross-observation dependencies. BatchNorm uses batch statistics during training and updates running statistics for later inference. LayerNorm normalizes feature values within each record and does not mix unrelated batch rows. PyTorch BatchNorm momentum specifies the weight of the new batch statistic, whereas Keras momentum specifies the retention weight of the old statistic. Equal numeric momentum arguments therefore usually mean different updates.\n\nPyTorch BatchNorm also distinguishes the variance estimate used for training normalization from the unbiased estimate used in the running-variance update. A comparison must name both. The fixture uses a batch with mean2, 4 and momentum.5 to check running mean1, 2 from zero. Evaluation must leave running state unchanged. Tokenwise LayerNorm is checked with a future-row perturbation to expose wrong-axis leakage.",
-    "nn.BatchNorm1d(2, momentum=.5) treats columns as features for an(N, C)input. train mode updates running_mean and running_var; eval mode uses stored state. nn.LayerNorm(2) reduces the last two-feature dimension independently for each row. Its default epsilon and affine parameters are part of the comparison. Track num_batches_tracked as a buffer, separate from trainable weight and bias.",
+    "Normalization can introduce both state and cross-observation dependencies. BatchNorm uses batch statistics during training and updates running statistics for later inference. LayerNorm normalizes feature values within each record and does not mix unrelated batch rows. PyTorch BatchNorm momentum specifies the weight of the new batch statistic, whereas Keras momentum specifies the retention weight of the old statistic. Equal numeric momentum arguments therefore usually mean different updates.\n\nPyTorch BatchNorm also distinguishes the variance estimate used for training normalization from the unbiased estimate used in the running-variance update. A comparison must name both. The fixture uses a batch with mean 2, 4 and momentum 0.5 to check running mean 1, 2 from zero. Evaluation must leave running state unchanged. Tokenwise LayerNorm is checked with a future-row perturbation to expose wrong-axis leakage.",
+    "nn.BatchNorm1d(2, momentum=0.5) treats columns as features for an (N, C)input. train mode updates running_mean and running_var; eval mode uses stored state. nn.LayerNorm(2) reduces the last two-feature dimension independently for each row. Its default epsilon and affine parameters are part of the comparison. Track num_batches_tracked as a buffer, separate from trainable weight and bias.",
     [
         ("Running statistic", "Persistent state updated from training batches."),
         ("Momentum convention", "Which coefficient weights the old versus new statistic."),
@@ -1381,12 +1381,12 @@ lesson(
     [
         ex(
             "Update a running mean",
-            "Apply BatchNorm momentum.5 to rows1, 3 and3, 5.",
-            "running mean1, 2; batch counter1.",
+            "Apply BatchNorm momentum 0.5 to rows 1, 3 and 3, 5.",
+            "running mean 1, 2; batch counter 1.",
             """bn=nn.BatchNorm1d(2,momentum=.5); x=torch.tensor([[1.,3.],[3.,5.]])
 bn.train(); bn(x)
 torch.testing.assert_close(bn.running_mean,torch.tensor([1.,2.]),atol=1e-6,rtol=0); assert bn.num_batches_tracked.item()==1""",
-            "The batch mean is2, 4 and the new-statistic weight is.5. The result is not yet the full batch mean.",
+            "The batch mean is 2, 4 and the new-statistic weight is 0.5. The result is not yet the full batch mean.",
         ),
         ex(
             "Freeze state during evaluation",
@@ -1398,42 +1398,42 @@ assert torch.equal(before,bn.running_mean) and torch.equal(count,bn.num_batches_
         ),
         ex(
             "Check LayerNorm row independence",
-            "Normalize1, 3alone and beside100, 200.",
-            "first row matches within1e-6.",
+            "Normalize 1, 3 alone and beside 100, 200.",
+            "first row matches within 1e-6.",
             """ln=nn.LayerNorm(2); alone=ln(torch.tensor([[1.,3.]])); together=ln(torch.tensor([[1.,3.],[100.,200.]]))
 torch.testing.assert_close(alone[0],together[0],atol=1e-6,rtol=0)""",
             "LayerNorm uses only the current row's features in this configuration. A sequence-wide or batch-wide reduction would fail the perturbation test.",
         ),
         ex(
             "Inspect running variance convention",
-            "From initial running variance1, use batch values1, 3whose unbiased variance is2 and momentum.5.",
-            "running variance1.5 for each feature.",
+            "From initial running variance 1, use batch values 1 and 3 (unbiased variance 2) with momentum 0.5.",
+            "running variance 1.5 for each feature.",
             """torch.testing.assert_close(bn.running_var,torch.tensor([1.5,1.5]),atol=1e-6,rtol=0)
 assert x.var(0,correction=0).tolist()==[1.,1.] and x.var(0,correction=1).tolist()==[2.,2.]""",
             "Forward training normalization uses a biased variance estimate, but the running variance update uses an unbiased one. Comparing only the layer title would miss this detail.",
         ),
         ex(
             "Translate momentum explicitly",
-            "Compute updates with old mean0, batch mean 10 and PyTorch momentum.1versus Keras momentum.1.",
-            "PyTorch1; Keras9 under their respective conventions.",
+            "Compute updates with old mean 0, batch mean 10 and PyTorch momentum 0.1 versus Keras momentum 0.1.",
+            "PyTorch 1; Keras 9 under their respective conventions.",
             """old,batch=0.,10.; torch_update=(1-.1)*old+.1*batch; keras_update=.1*old+(1-.1)*batch
 assert torch_update==1 and keras_update==9""",
-            "To match a PyTorch new-statistic coefficient.1, the Keras old-statistic retention coefficient would be.9. Equal argument names are not enough evidence of equivalence.",
+            "To match a PyTorch new-statistic coefficient 0.1, the Keras old-statistic retention coefficient would be 0.9. Equal argument names are not enough evidence of equivalence.",
         ),
         ex(
             "Handle a constant feature row",
-            "Apply LayerNorm to5, 5 and inspect finiteness.",
+            "Apply LayerNorm to 5, 5 and inspect finiteness.",
             "finite zeros with default affine initialization.",
             """constant=ln(torch.tensor([[5.,5.]])); assert torch.isfinite(constant).all()
 torch.testing.assert_close(constant,torch.zeros((1,2)),atol=1e-6,rtol=0)""",
-            "Epsilon avoid division by zero and the centered numerator is zero. Learned affine offsets would need to be included in a general expected value.",
+            "Epsilon avoids division by zero and the centered numerator is zero. Learned affine offsets would need to be included in a general expected value.",
         ),
     ],
-    "The paired TensorFlow lesson includes momentum0.5 and0.8 probes, explicit population-variance moving state and Keras BatchNorm trainable=False behavior. PyTorch momentum weights the new batch statistic; Keras momentum retains the old statistic. Translate the coefficient, then separately compare reduction axes, variance estimators, epsilon, affine parameters and mode behavior. Matching the running mean does not establish output or full-state parity.",
+    "The paired TensorFlow lesson includes momentum 0.5 and 0.8 probes, explicit population-variance moving state and Keras BatchNorm trainable=False behavior. PyTorch momentum weights the new batch statistic; Keras momentum retains the old statistic. Translate the coefficient, then separately compare reduction axes, variance estimators, epsilon, affine parameters and mode behavior. Matching the running mean does not establish output or full-state parity.",
     [
         (
             "Why can BatchNorm predictions depend on batch neighbors?",
-            "In training mode, the mean and variance a recomputed across batch observations. Changing a neighbor changes those shared statistics.",
+            "In training mode, the mean and variance are computed across batch observations. Changing a neighbor changes those shared statistics.",
         ),
         (
             "Why state buffers rather than just weights must be saved?",
@@ -1441,25 +1441,25 @@ torch.testing.assert_close(constant,torch.zeros((1,2)),atol=1e-6,rtol=0)""",
         ),
     ],
     source=(
-        "PyTorch2.9 BatchNorm1d",
+        "PyTorch 2.9 BatchNorm1d",
         "https://docs.pytorch.org/docs/2.9/generated/torch.nn.BatchNorm1d.html",
     ),
 )
 lesson(
     19,
-    "Convolution applies a shared local kernel across spatial positions. PyTorch C on v2d expects NCHW layout:batch, channels, height, width. Its weight shape is output_channels, input_channels, kernel_height, kernel_width, which differs from the common TensorFlow NHWC image and HWIO kernel conventions. A legal reshape is not always a correct layout conversion; use permute to exchange the meaning of axes.\n\nThe operation is cross-correlation:the kernel slide s without spatial rotation. VALID-style padding0 includes only fully contained patches. Stride controls the gap between patch starts. The3x3ramp image and asymmetric2x2kernel produce an exact output of-4at all four positions, making orientation and layout mistakes visible before introducing learned filters.",
-    "Build image with shape(1, 1, 3, 3) and kernel(1, 1, 2, 2), then use F.conv2d with stride1, padding0. nn.Conv2d register s weight and optional bias. Count parameters as out_channels*in_channels*kernel_area plus bias entries. torch.flip(kernel, (-2, -1)) rotates both spatial axes for the convolution-versus-correlation counterexample.",
+    "Convolution applies a shared local kernel across spatial positions. PyTorch Conv2d expects NCHW layout: batch, channels, height, width. Its weight shape is output_channels, input_channels, kernel_height, kernel_width, which differs from the common TensorFlow NHWC image and HWIO kernel conventions. A legal reshape is not always a correct layout conversion; use permute to exchange the meaning of axes.\n\nThe operation is cross-correlation: the kernel slides without spatial rotation. VALID-style padding 0 includes only fully contained patches. Stride controls the gap between patch starts. The 3 x3ramp image and asymmetric 2 x2kernel produce an exact output of -4 at all four positions, making orientation and layout mistakes visible before introducing learned filters.",
+    "Build image with shape (1, 1, 3, 3) and kernel (1, 1, 2, 2), then use F.conv 2 d with stride 1, padding 0. nn.Conv2d registers weight and optional bias. Count parameters as out_channels*in_channels*kernel_area plus bias entries. torch.flip(kernel, (-2, -1)) rotates both spatial axes for the convolution-versus-correlation counterexample.",
     [
         ("NCHW", "Batch, channel, height, width axis order for PyTorch images."),
         ("Shared kernel", "One weight pattern reused at many spatial locations."),
         ("Receptive field", "Input positions capable of influencing an output."),
-        ("Cross-correlation", "Sliding a kernel without r o t at in git."),
+        ("Cross-correlation", "Sliding a kernel without rotating it."),
     ],
     [
         ex(
             "Compute the fixed spatial filter",
-            "Apply kernel1, 0; 0, -1 to image1..9 in3x3NCHW layout.",
-            "output shape1, 1, 2, 2; all values-4.",
+            "Apply kernel [[1, 0], [0, -1]] to the 3-by-3 image with values 1..9 in NCHW layout.",
+            "output shape 1, 1, 2, 2; all values -4.",
             """image=torch.arange(1,10,dtype=torch.float64).reshape(1,1,3,3); kernel=torch.tensor([[[[1.,0.],[0.,-1.]]]],dtype=torch.float64)
 out=F.conv2d(image,kernel)
 assert tuple(out.shape)==(1,1,2,2); torch.testing.assert_close(out,torch.full_like(out,-4),atol=0,rtol=0)""",
@@ -1468,38 +1468,38 @@ assert tuple(out.shape)==(1,1,2,2); torch.testing.assert_close(out,torch.full_li
         ex(
             "Rotate the kernel explicitly",
             "Flip both kernel spatial axes and repeat.",
-            "all outputs+4.",
+            "all outputs +4.",
             """rotated=torch.flip(kernel,(-2,-1)); changed=F.conv2d(image,rotated)
 torch.testing.assert_close(changed,torch.full_like(changed,4),atol=0,rtol=0)""",
-            "An asymmetric kernel makes the convention observable. Asymmetric kernel could hide an unintended rotation.",
+            "An asymmetric kernel makes the convention observable. A symmetric kernel could hide an unintended rotation.",
         ),
         ex(
             "Translate image layout",
             "Convert NCHW to NHWC with permute and back.",
-            "exact round trip; NHWC shape1, 3, 3, 1.",
+            "exact round trip; NHWC shape 1, 3, 3, 1.",
             """nhwc=image.permute(0,2,3,1); assert tuple(nhwc.shape)==(1,3,3,1)
 assert torch.equal(nhwc.permute(0,3,1,2),image)""",
             "Permutation changes axis meaning without inventing new values. Reshaping the element count alone would not implement a general layout translation.",
         ),
         ex(
             "Inspect stride output size",
-            "Repeat with stride2 and padding0.",
-            "output shape1, 1, 1, 1.",
+            "Repeat with stride 2 and padding 0.",
+            "output shape 1, 1, 1, 1.",
             """assert tuple(F.conv2d(image,kernel,stride=2).shape)==(1,1,1,1)""",
             "Only one fully contained patch start is visited in this small image. Output-size arithmetic should precede interpretation of feature maps.",
         ),
         ex(
             "Trace one pixel influence",
-            "Add10to the top-left pixel and compare output delta.",
-            "only top-left output increases10.",
+            "Add 10 to the top-left pixel and compare output delta.",
+            "only top-left output increases 10.",
             """perturbed=image.clone(); perturbed[0,0,0,0]+=10; delta=F.conv2d(perturbed,kernel)-out
 torch.testing.assert_close(delta[0,0],torch.tensor([[10.,0.],[0.,0.]],dtype=torch.float64),atol=0,rtol=0)""",
             "The controlled perturbation demonstrates locality directly. A global normalization or other layer could introduce additional dependencies in a complete network.",
         ),
         ex(
             "Count shared parameters",
-            "Build a1-input-channel, 2-output-channel, 2x2bias-free C on v2d.",
-            "8trainable scalars.",
+            "Build a bias-free Conv2d with 1 input channel, 2 output channels and a 2-by-2 kernel.",
+            "8 trainable scalars.",
             """layer=nn.Conv2d(1,2,2,bias=False)
 assert sum(p.numel() for p in layer.parameters())==8""",
             "Increasing image height creates more applications of the same kernel, not a separate weight set for each position.",
@@ -1523,8 +1523,8 @@ assert sum(p.numel() for p in layer.parameters())==8""",
 )
 lesson(
     20,
-    "Pooling reduces local spatial information. Max pooling retains the largest response; average pooling uses every entry. Both can make certain perturbations less visible while also discarding potentially useful details. Augmentation changes training inputs under a declared label policy. A horizontal flip may preserve a shape label but reverse a left/right direction label. A transform's availability in a library does not establish its validity for the task.\n\nThis lesson uses only torch operations on literal images, not torch vision or a data download. Training transforms and evaluation transforms are separate functions. Evaluation remains deterministic. Random augmentation, when introduced, should use the intended random state and be tested by invariants rather than a hard coded cross-platform mask.",
-    "F.max_pool2d and avg_pool2d operate on NCHW tensors. torch.flip(image, dims=(-1, )) reverses width, and flipping twice restores the original. A training flag or a separate transform object should decide whether augmentation applies. Inspect the label transformation beside the image:geometry alone cannot prove semantic invariance.",
+    "Pooling reduces local spatial information. Max pooling retains the largest response; average pooling uses every entry. Both can make certain perturbations less visible while also discarding potentially useful details. Augmentation changes training inputs under a declared label policy. A horizontal flip may preserve a shape label but reverse a left/right direction label. A transform's availability in a library does not establish its validity for the task.\n\nThis lesson uses only torch operations on literal images, not torchvision or a data download. Training transforms and evaluation transforms are separate functions. Evaluation remains deterministic. Random augmentation, when introduced, should use the intended random state and be tested by invariants rather than a hard coded cross-platform mask.",
+    "F.max_pool2d and avg_pool2d operate on NCHW tensors. torch.flip(image, dims=(-1, )) reverses width, and flipping twice restores the original. A training flag or a separate transform object should decide whether augmentation applies. Inspect the label transformation beside the image: geometry alone cannot prove semantic invariance.",
     [
         ("Pooling", "A local reduction discarding spatial detail."),
         ("Augmentation", "A training transform with a declared target policy."),
@@ -1533,31 +1533,31 @@ lesson(
     [
         ex(
             "Compare local reductions",
-            "Pool patch1, 3; 2, 4 with a 2-by-2 window.",
-            "max4; average2.5.",
+            "Pool patch 1, 3; 2, 4 with a 2-by-2 window.",
+            "max 4; average 2.5.",
             """image=torch.tensor([[[[1.,3.],[2.,4.]]]])
 assert F.max_pool2d(image,2).item()==4 and F.avg_pool2d(image,2).item()==2.5""",
             "The two operators retain different information despite identical output shape. The average uses all four values while the maximum ignores three smaller ones.",
         ),
         ex(
             "Inspect a horizontal flip",
-            "Flip the width axis and read the pixel s.",
-            "rows3, 1 and 4, 2.",
+            "Flip the width axis and read the pixels.",
+            "rows 3, 1 and 4, 2.",
             """flipped=torch.flip(image,dims=(-1,))
 assert flipped[0,0].tolist()==[[3.,1.],[4.,2.]]""",
             "The last axis is the width under NCHW. Flipping the channel or height axis would be a different operation.",
         ),
         ex(
             "Check the round trip",
-            "Flip the image horizontal l y twice.",
+            "Flip the image horizontally twice.",
             "exact original values.",
             """assert torch.equal(torch.flip(flipped,dims=(-1,)),image)""",
             "Reversibility is a useful indexing check, but does not prove the intermediate image has the original semantic label.",
         ),
         ex(
             "Expose discarded information",
-            "Change only the non maximum pixel1to0 and compare pool s.",
-            "max still4; average2.25.",
+            "Change only the non-maximum pixel 1 to 0 and compare both pools.",
+            "max still 4; average 2.25.",
             """changed=image.clone(); changed[0,0,0,0]=0
 assert F.max_pool2d(changed,2).item()==4 and F.avg_pool2d(changed,2).item()==2.25""",
             "The perturbation is invisible to max pooling. That can be useful robustness or harmful information loss, depending on the task.",
@@ -1573,14 +1573,14 @@ evaluated[0,0,0,0]=99; assert image[0,0,0,0].item()==1""",
         ),
         ex(
             "Transform directional labels consistently",
-            "Map left to right under horizontal reflect i on and check the inverse.",
+            "Map left to right under horizontal reflection and check the inverse.",
             "left->right->left.",
             """labels={'left':'right','right':'left'}
 assert labels['left']=='right' and labels[labels['left']]=='left' """,
             "A valid augmentation can transform the target rather than preserve it, but that mapping must be explicit. Keeping the left label after a flip would teach contradictory examples.",
         ),
     ],
-    "TensorFlow image operations commonly use channels-last layout, while these PyTorch examples use NCHW. The pooling and augmentation semantics are the same only after axis translation. This course does not assume torch vision; all fixtures are literal arrays.",
+    "TensorFlow image operations commonly use channels-last layout, while these PyTorch examples use NCHW. The pooling and augmentation semantics are the same only after axis translation. This course does not assume torchvision; all fixtures are literal arrays.",
     [
         (
             "Does a flip round trip prove augmentation validity?",
@@ -1595,11 +1595,11 @@ assert labels['left']=='right' and labels[labels['left']]=='left' """,
 lesson(
     21,
     "A padded sequence contains real positions and artificial storage positions. Embedding lookup takes token IDs to feature vectors, but padding does not become an observation merely because it has a vector. PyTorch Embedding can use padding_idx to prevent gradient updates for that row, but a recurrent network still needs length or mask information to avoid processing padding as real time steps.\n\npack_padded_sequence lets an RNN or GRU process the valid prefixes and return a final state after the last real position. Without packing, a GRU can continue to update on padding because its biases and recurrent state are still active, even when padding embeddings are zero. Loss averages must also divide by valid target count, not padded width. The lesson uses a literal embedding table and fixed GRU weights so the distinction is observable.",
-    "Use Embedding.from_pretrained with padding_idx0 and freeze=False for the known4x2table. Set batch_first=True on GRU so inputs are(batch, time, features). pack_padded_sequence receives CPU lengths and enforce_sorted=False for this tiny fixture. Compare the packed final state with an unpadded valid-prefix run. For loss, use an explicit boolean valid mask and reject an all-padding denominator.",
+    "Use Embedding.from_pretrained with padding_idx=0 and freeze=False for the known 4-by-2 table. Set batch_first=True on GRU so inputs are (batch, time, features). pack_padded_sequence receives CPU lengths and enforce_sorted=False for this tiny fixture. Compare the packed final state with an unpadded valid-prefix run. For loss, use an explicit boolean valid mask and reject an all-padding denominator.",
     [
         ("Padding index", "A vocabulary entry reserved for artificial storage positions."),
         (
-            "P ac k e d sequence",
+            "Packed sequence",
             "A representation allowing recurrent layers to skip invalid tail positions.",
         ),
         ("Final valid state", "The hidden state after the last real observation."),
@@ -1608,8 +1608,8 @@ lesson(
     [
         ex(
             "Lookup and mark padding",
-            "Use IDs2, 3, 0 and a fixed4x2table with zero padding row.",
-            "embedding shape1, 3, 2; mask True, True, False.",
+            "Use IDs 2, 3, 0 and a fixed 4-by-2 table whose padding row is zero.",
+            "embedding shape 1, 3, 2; mask True, True, False.",
             """table=torch.tensor([[0.,0.],[1.,0.],[2.,2.],[3.,-1.]])
 embedding=nn.Embedding.from_pretrained(table,freeze=False,padding_idx=0); ids=torch.tensor([[2,3,0]]); values=embedding(ids); mask=ids!=0
 assert tuple(values.shape)==(1,3,2) and mask.tolist()==[[True,True,False]]""",
@@ -1618,16 +1618,16 @@ assert tuple(values.shape)==(1,3,2) and mask.tolist()==[[True,True,False]]""",
         ex(
             "Verify padding-row gradient behavior",
             "Sum embedding outputs and backpropagate.",
-            "padding row gradient zero; rows2and3nonzero.",
+            "padding row gradient zero; rows 2 and 3 nonzero.",
             """values.sum().backward()
 assert torch.count_nonzero(embedding.weight.grad[0]).item()==0
 assert torch.count_nonzero(embedding.weight.grad[2:4]).item()>0""",
-            "padding_id x controls that embedding row's gradient, but does not automatically mask every later operation in the model.",
+            "padding_idx controls that embedding row's gradient, but does not automatically mask every later operation in the model.",
         ),
         ex(
             "Compare packed and valid-prefix GRU state",
-            "Use fixed GRU parameters.1 and length2; compare packed run with the unpadded first two embeddings.",
-            "final states match within1e-6.",
+            "Use fixed GRU parameters 0.1 and length 2; compare packed run with the unpadded first two embeddings.",
+            "final states match within 1e-6.",
             """gru=nn.GRU(2,2,batch_first=True)
 with torch.no_grad():
     for parameter in gru.parameters(): parameter.fill_(.1)
@@ -1638,7 +1638,7 @@ torch.testing.assert_close(packed_state,prefix_state,atol=1e-6,rtol=0)""",
         ),
         ex(
             "Expose an unmasked recurrent tail",
-            "Run GRU overall three positions including zero embedding padding.",
+            "Run the GRU over all three positions, including the zero padding embedding.",
             "final state differs from the valid-prefix state.",
             """_,padded_state=gru(values.detach())
 assert not torch.allclose(padded_state,prefix_state,atol=1e-6,rtol=0)""",
@@ -1646,15 +1646,15 @@ assert not torch.allclose(padded_state,prefix_state,atol=1e-6,rtol=0)""",
         ),
         ex(
             "Average only valid token losses",
-            "Use losses log2, log2, 100with the valid mask.",
-            "mean log2, unchanged by the padding loss.",
+            "Use losses log 2, log 2, 100 with the valid mask.",
+            "mean log 2, unchanged by the padding loss.",
             """losses=torch.tensor([[np.log(2),np.log(2),100.]],dtype=torch.float64)
 mean=losses[mask].mean(); np.testing.assert_allclose(mean.item(),np.log(2),atol=1e-12,rtol=0)""",
             "The valid count is two. Zeroing the third numerator but dividing by three would make padding artificially improve the metric.",
         ),
         ex(
             "Reject zero-length recurrent input",
-            "Attempt to pack a sequence with length0.",
+            "Attempt to pack a sequence with length 0.",
             "RuntimeError for invalid length.",
             """try: nn.utils.rnn.pack_padded_sequence(values.detach(),torch.tensor([0]),batch_first=True,enforce_sorted=False)
 except RuntimeError: pass
@@ -1662,22 +1662,22 @@ else: raise AssertionError('zero-length packed sequence accepted')""",
             "The application should detect empty records before this low-level call and choose an explicit policy. An undefined target mean must not be converted into perfect loss.",
         ),
     ],
-    "Keras can propagate mask metadata from `Embedding(mask_zero=True)` through compatible layers. PyTorch often uses explicit lengths, masks or PackedSequence. padding_id x is not the same as automatic recurrent mask propagation. Both frameworks require a valid-token loss denominator.",
+    "Keras can propagate mask metadata from `Embedding(mask_zero=True)` through compatible layers. PyTorch often uses explicit lengths, masks or PackedSequence. padding_idx is not the same as automatic recurrent mask propagation. Both frameworks require a valid-token loss denominator.",
     [
         (
             "Why do not zero embeddings make padding harmless for an R NN?",
             "The hidden state and biases can still change on a zero-input step. Length-aware execution or masking is needed for the intended final-state contract.",
         ),
         (
-            "Does padding_id x mask the loss?",
+            "Does padding_idx mask the loss?",
             "No. It controls gradient behavior for that embedding row. The loss still needs its own valid-target policy.",
         ),
     ],
 )
 lesson(
     22,
-    "Attention forms weighted combinations of value vectors using query-key comparisons. A causal decoder restricts each query to current and earlier positions. PyTorch's functional scaled_dot_product_attention uses boolean True for allowed positions, while other attention APIs such as Multihead Attention key_padding_mask use True for ignored keys. Mask polarity belongs to the exact parameter contract, not to the framework name.\n\nThe functional API also applies dropout according to its `dropout_p` argument; calling an enclosing `module.eval` does not automatically change an explicit nonzero probability. For an evaluation oracle, pass dropout_p0. Equal queries and keys make legal scores uniform, so the expected outputs are prefix means. Nonuniform scores and future-only perturbations add stronger checks than causal-looking triangles alone.",
-    "The checked helper accepts nonempty2D self-attention matrices and a boolean square allowed mask. Reject fully masked rows before normalization. F.scaled_dot_product_attention supplies the1/sqrt(key_width) scaling and normalizes over the key axis. A causal lower triangle includes its diagonal for shifted next-token targets. Independently recompute each prefix rather than slicing full weights.",
+    "Attention forms weighted combinations of value vectors using query-key comparisons. A causal decoder restricts each query to current and earlier positions. PyTorch's functional scaled_dot_product_attention uses boolean True for allowed positions, while other attention APIs such as Multihead Attention key_padding_mask use True for ignored keys. Mask polarity belongs to the exact parameter contract, not to the framework name.\n\nThe functional API also applies dropout according to its `dropout_p` argument; calling an enclosing `module.eval` does not automatically change an explicit nonzero probability. For an evaluation oracle, pass dropout_p=0. Equal queries and keys make legal scores uniform, so the expected outputs are prefix means. Nonuniform scores and future-only perturbations add stronger checks than causal-looking triangles alone.",
+    "The checked helper accepts nonempty 2 D self-attention matrices and a boolean square allowed mask. Reject fully masked rows before normalization. F.scaled_dot_product_attention supplies the 1/sqrt(key_width) scaling and normalizes over the key axis. A causal lower triangle includes its diagonal for shifted next-token targets. Independently recompute each prefix rather than slicing full weights.",
     [
         ("SDPA", "Scaled dot-product attention implemented by a functional API."),
         ("Mask polarity", "Whether True means allowed or excluded for this parameter."),
@@ -1690,8 +1690,8 @@ lesson(
     [
         ex(
             "Compute uniform causal mixtures",
-            "Use zero3x2queries/keys and values2, 0; 0, 2; 6, 6.",
-            "outputs2, 0; 1, 1; 8/3, 8/3.",
+            "Use zero 3-by-2 queries/keys and values 2, 0; 0, 2; 6, 6.",
+            "outputs 2, 0; 1, 1; 8/3, 8/3.",
             """q=torch.zeros((3,2),dtype=torch.float64); v=torch.tensor([[2.,0.],[0.,2.],[6.,6.]],dtype=torch.float64); allowed=torch.ones((3,3),dtype=torch.bool).tril()
 out=attention(q,q,v,allowed)
 torch.testing.assert_close(out,torch.tensor([[2.,0.],[1.,1.],[8/3,8/3]],dtype=torch.float64),atol=1e-12,rtol=0)""",
@@ -1699,8 +1699,8 @@ torch.testing.assert_close(out,torch.tensor([[2.,0.],[1.,1.],[8/3,8/3]],dtype=to
         ),
         ex(
             "Perturb only the future",
-            "Change only the third value to100, 200.",
-            "first two rows unchanged; last34, 202/3.",
+            "Change only the third value to 100, 200.",
+            "first two rows unchanged; last 34, 202/3.",
             """future=v.clone(); future[2]=torch.tensor([100.,200.]); changed=attention(q,q,future,allowed)
 torch.testing.assert_close(changed[:2],out[:2],atol=1e-12,rtol=0)
 torch.testing.assert_close(changed[2],torch.tensor([34.,202/3],dtype=torch.float64),atol=1e-12,rtol=0)""",
@@ -1708,11 +1708,11 @@ torch.testing.assert_close(changed[2],torch.tensor([34.,202/3],dtype=torch.float
         ),
         ex(
             "Recompute nonuniform prefixes",
-            "UseQ=K rows1, 0; 0, 1; 1, 1 and compare cuts1..3.",
-            "all prefix outputs match within1e-12.",
+            "Use Q=K rows 1, 0; 0, 1; 1, 1 and compare cuts 1..3.",
+            "all prefix outputs match within 1e-12.",
             """non=torch.tensor([[1.,0.],[0.,1.],[1.,1.]],dtype=torch.float64); full=attention(non,non,v,allowed)
 for cut in range(1,4): torch.testing.assert_close(attention(non[:cut],non[:cut],v[:cut],allowed[:cut,:cut]),full[:cut],atol=1e-12,rtol=0)""",
-            "Nonuniform scores exercise query-key arithmetic and scaling. The checker rebuild s the computation on the shorter inputs.",
+            "Nonuniform scores exercise query-key arithmetic and scaling. The checker rebuilds the computation on the shorter inputs.",
         ),
         ex(
             "Reject an all-masked row",
@@ -1734,14 +1734,14 @@ assert forbidden[0].tolist()==[False,True,True]""",
         ),
         ex(
             "Keep inference dropout disabled",
-            "Repeat functional attention with dropout_p0 and compare exact outputs.",
+            "Repeat functional attention with dropout_p=0 and compare exact outputs.",
             "repeated evaluation matches.",
             """again=attention(q,q,v,allowed)
 torch.testing.assert_close(again,out,atol=0,rtol=0)""",
-            "The helper fixes dropout_p0, so its behavior is independent of the mode of any surrounding module. A training wrapper must pass its chosen probability explicitly.",
+            "The helper fixes dropout_p=0, so its behavior is independent of the mode of any surrounding module. A training wrapper must pass its chosen probability explicitly.",
         ),
     ],
-    "Keras MultiHead Attention attention_mask uses True/1for allowed positions, matching the course allowed convention. PyTorch functional SDPA also uses True allowed, but Multihead Attention key_padding_mask uses True ignored. Functional PyTorch dropout must be set explicitly for inference.",
+    "Keras MultiHead Attention attention_mask uses True or 1 for allowed positions, matching the course allowed convention. PyTorch functional SDPA also uses True allowed, but Multihead Attention key_padding_mask uses True ignored. Functional PyTorch dropout must be set explicitly for inference.",
     [
         (
             "Can a mask be copied unchanged between all attention APIs?",
@@ -1766,8 +1766,8 @@ torch.testing.assert_close(again,out,atol=0,rtol=0)""",
 )
 lesson(
     23,
-    "A custom training loop can fail by disconnecting the graph, forgetting an update, reusing old gradients or applying an incorrect reduction. Debug the first small state transition before adding epochs and logging infrastructure. A gradient of None means no stored derivative was produced for that parameter; a zero tensor may be a valid derivative. Clearing with set_to_none preserves that diagnostic distinction.\n\nGradient clipping limits a norm after backward and before the optimizer step. It does not repair invalid labels, nonfinite forward values or a data leak. The clip function returns the pre-clipping norm, which is useful for diagnostics. Repeatedly clipping large gradients may indicate an underlying objective or scale problem rather than a complete fix. This lesson uses exact scalar updates and a3, 4gradient vector so all observations have independent oracles.",
-    "Check loss.requires_grad and parameter.grad before calling step. Use optimizer.zero_grad(set_to_none=True) for independent updates. nn.utils.clip_grad_norm_ mutates gradients inplace and returns the norm before clipping. Record weight before, gradient before clipping, gradient after clipping and weight after step as distinct states. A detached numeric loss cannot backpropagate to its origin.",
+    "A custom training loop can fail by disconnecting the graph, forgetting an update, reusing old gradients or applying an incorrect reduction. Debug the first small state transition before adding epochs and logging infrastructure. A gradient of None means no stored derivative was produced for that parameter; a zero tensor may be a valid derivative. Clearing with set_to_none preserves that diagnostic distinction.\n\nGradient clipping limits a norm after backward and before the optimizer step. It does not repair invalid labels, nonfinite forward values or a data leak. The clip function returns the pre-clipping norm, which is useful for diagnostics. Repeatedly clipping large gradients may indicate an underlying objective or scale problem rather than a complete fix. This lesson uses exact scalar updates and a [3, 4] gradient vector so all observations have independent oracles.",
+    "Check loss.requires_grad and parameter.grad before calling step. Use optimizer.zero_grad(set_to_none=True) for independent updates. nn.utils.clip_grad_norm_ mutates gradients in place and returns the norm before clipping. Record weight before, gradient before clipping, gradient after clipping and weight after step as distinct states. A detached numeric loss cannot backpropagate to its origin.",
     [
         ("Disconnected loss", "A value with no gradient path to the intended parameters."),
         ("Gradient clipping", "Bounding gradient magnitude before an update."),
@@ -1787,8 +1787,8 @@ else: raise AssertionError('detached loss backpropagated')""",
         ),
         ex(
             "Repair two exact updates",
-            "Usex1, 2, 3, y = 2x, w = 0 and two SGD.1steps with gradient clearing.",
-            "weights28/15 then448/225.",
+            "Use x = 1, 2, 3, y = 2x, w = 0 and two SGD steps with learning rate 0.1, clearing gradients before each.",
+            "weights 28/15 then 448/225.",
             """x=torch.tensor([1.,2.,3.],dtype=torch.float64); y=2*x; optimizer=torch.optim.SGD([w],lr=.1); history=[]
 for _ in range(2):
     optimizer.zero_grad(set_to_none=True); loss=((w*x-y)**2).mean(); loss.backward(); assert w.grad is not None; optimizer.step(); history.append(w.item())
@@ -1797,8 +1797,8 @@ np.testing.assert_allclose(history,[28/15,448/225],atol=1e-12,rtol=0)""",
         ),
         ex(
             "Inspect norm clipping",
-            "Assign gradient3, 4 to a parameter vector and clip to norm 1.",
-            "returned norm5; new gradient approximately.6, .8.",
+            "Assign gradient 3, 4 to a parameter vector and clip to norm 1.",
+            "returned norm 5; new gradient approximately 0.6, 0.8.",
             """parameter=nn.Parameter(torch.zeros(2)); parameter.grad=torch.tensor([3.,4.])
 before=torch.nn.utils.clip_grad_norm_([parameter],1.)
 assert before.item()==5; torch.testing.assert_close(parameter.grad,torch.tensor([.6,.8]),atol=1e-6,rtol=0)""",
@@ -1807,7 +1807,7 @@ assert before.item()==5; torch.testing.assert_close(parameter.grad,torch.tensor(
         ex(
             "Apply the clipped update",
             "Use SGD with rate 0.1 after clipping and inspect the parameter.",
-            "approximately-.06, -.08.",
+            "approximately -0.06, -0.08.",
             """torch.optim.SGD([parameter],lr=.1).step()
 torch.testing.assert_close(parameter.detach(),torch.tensor([-.06,-.08]),atol=1e-6,rtol=0)""",
             "Clipping after step would not undo an oversized update. The order backward, inspect, clip, step is part of the training contract.",
@@ -1825,12 +1825,12 @@ else: raise AssertionError('nonfinite gradient accepted')""",
         ex(
             "Recompute post-update loss",
             "Calculate current loss after the two scalar updates and compare with the one-step oracle.",
-            "nonnegative and below56/675.",
+            "nonnegative and below 56/675.",
             """after=((w*x-y)**2).mean().item(); assert 0<=after<56/675""",
             "An old loss object does not retroactively change when the parameter changes. Recompute at the new state before labelling a value post-update.",
         ),
     ],
-    "TensorFlow GradientTape can return None for a disconnected variable; PyTorch may have an untracked loss or None grad field depending on how the d is connection occurred. Both need explicit failure handling. PyTorch's clip_grad_norm_works on the accumulated parameter gradients, so its position in the loop matters.",
+    "TensorFlow GradientTape can return None for a disconnected variable; PyTorch may have an untracked loss or None grad field depending on how the disconnection occurred. Both need explicit failure handling. PyTorch's clip_grad_norm_works on the accumulated parameter gradients, so its position in the loop matters.",
     [
         (
             "Is gradient clipping a fix for every exploding loss?",
@@ -1845,7 +1845,7 @@ else: raise AssertionError('nonfinite gradient accepted')""",
 lesson(
     24,
     "A classifier capstone must connect the task definition to training and evaluation evidence. The literal fixture classifies the sign of a scalar coordinate. Training and test IDs are fixed before fitting. Normalization statistics use only training rows, and the decision threshold is declared before test scoring. Aone-weight logistic model is sufficient for the fixture; unnecessary depth would obscure the experiment rather than improve its meaning.\n\nReport confusion counts and their denominator, not only accuracy. A mean baseline or constant-class baseline provides a comparison under the same held-out units. Per-group failures can be hidden by an aggregate. The tiny test contains only two rows, so the capstone proves an inspectable local pipeline without establishing population reliability. PyTorch standard-deviation defaults differ from NumPy's population default, so the preprocessing comparison must set correction explicitly.",
-    "Use X shaped (4, 1), floating binary targets and nn.Linear(1, 1, bias=False). Calculate `x.std(dim=0, correction=0)` to match the declared population normalization fixture. Train with BCEWithLogitsLoss for40fixed SGD updates. Evaluate with model.eval and no_grad, then classify logits>=0. Count TP, TN, FP, FN with boolean masks and verify their sum.",
+    "Use X shaped (4, 1), floating binary targets and nn.Linear(1, 1, bias=False). Calculate `x.std(dim=0, correction=0)` to match the declared population normalization fixture. Train with BCEWithLogitsLoss for 40 fixed SGD updates. Evaluate with model.eval and no_grad, then classify logits>=0. Count TP, TN, FP, FN with boolean masks and verify their sum.",
     [
         ("Confusion matrix", "Counts of true/false positive and negative decisions."),
         ("Frozen threshold", "A decision policy chosen before final assessment."),
@@ -1855,8 +1855,8 @@ lesson(
     [
         ex(
             "Freeze the geometric task",
-            "Use training x-2, -1, 1, 2 with labels 0, 0, 1, 1 and test x-3, 3.",
-            "4training records, 2test records.",
+            "Use training x = -2, -1, 1, 2 with labels 0, 0, 1, 1 and test x = -3, 3.",
+            "4 training records, 2 test records.",
             """x=torch.tensor([[-2.],[-1.],[1.],[2.]]); y=torch.tensor([[0.],[0.],[1.],[1.]])
 test_x=torch.tensor([[-3.],[3.]]); truth=torch.tensor([False,True]); train_ids={'a','b','c','d'}; test_ids={'e','f'}
 assert not train_ids&test_ids and len(test_ids)==2""",
@@ -1865,15 +1865,15 @@ assert not train_ids&test_ids and len(test_ids)==2""",
         ex(
             "Fit explicit normalization",
             "Calculate training mean and population standard deviation.",
-            "mean0; scale sqrt2.5.",
+            "mean 0; scale sqrt(2.5).",
             """mean=x.mean(0); scale=x.std(0,correction=0); tx=(x-mean)/scale; vx=(test_x-mean)/scale
 assert mean.item()==0; np.testing.assert_allclose(scale.item(),np.sqrt(2.5),atol=1e-6,rtol=0)""",
-            "PyTorch's default sample correction would produce a different scale. Specifying correction0aligns this fixture with the paired TensorFlow/NumPy calculation.",
+            "PyTorch's default sample correction would produce a different scale. Specifying correction 0 aligns this fixture with the paired TensorFlow/NumPy calculation.",
         ),
         ex(
             "Train a fixed classifier",
-            "Zero-initialize the weight and run40SGD.1steps with binary logits loss.",
-            "positive finite weight after40updates.",
+            "Zero-initialize the weight and run 40 SGD steps with learning rate 0.1 and the binary logits loss.",
+            "positive finite weight after 40 updates.",
             """model=nn.Linear(1,1,bias=False)
 with torch.no_grad(): model.weight.zero_()
 optimizer=torch.optim.SGD(model.parameters(),lr=.1)
@@ -1884,8 +1884,8 @@ assert model.weight.item()>0 and torch.isfinite(model.weight).all()""",
         ),
         ex(
             "Account for every test prediction",
-            "Threshold test logits at0 and calculate confusion counts.",
-            "TP1, TN1, FP0, FN0, total2.",
+            "Threshold test logits at 0 and calculate confusion counts.",
+            "TP 1, TN 1, FP 0, FN 0, total 2.",
             """model.eval()
 with torch.no_grad(): prediction=model(vx).ravel()>=0
 counts={'tp':int((prediction&truth).sum()),'tn':int((~prediction&~truth).sum()),'fp':int((prediction&~truth).sum()),'fn':int((~prediction&truth).sum())}
@@ -1894,8 +1894,8 @@ assert counts=={'tp':1,'tn':1,'fp':0,'fn':0} and sum(counts.values())==2""",
         ),
         ex(
             "Compare a constant baseline",
-            "Predict class0for both test rows and count mistakes.",
-            "baseline1error; model0on this fixture.",
+            "Predict class 0 for both test rows and count mistakes.",
+            "baseline 1 error; model 0 on this fixture.",
             """baseline=torch.zeros(2,dtype=torch.bool)
 assert int((baseline!=truth).sum())==1 and int((prediction!=truth).sum())==0""",
             "The comparison uses identical test units. It does not justify a population claim from two cases.",
@@ -1903,21 +1903,21 @@ assert int((baseline!=truth).sum())==1 and int((prediction!=truth).sum())==0""",
         ex(
             "Reveal a group-specific failure",
             "Flip only the positive group decision and report group counts.",
-            "negative0/1errors; positive1/1.",
+            "negative class: 0 of 1 wrong; positive class: 1 of 1 wrong.",
             """broken=prediction.clone(); broken[1]=False
 report={group:(int(broken[i]!=truth[i]),1) for i,group in enumerate(['negative','positive'])}
 assert report=={'negative':(0,1),'positive':(1,1)}""",
             "A global error rate of one-half would hide the entire failure in the positive group. Counts and group meaning belong beside the aggregate.",
         ),
     ],
-    "The paired TensorFlow classifier uses the same geometry. Match normalization variance conventions:NumPy default std uses N, while PyTorch std defaults to a correction that must be over r id den here. Both need logit loss, threshold policy, train-only fit and complete confusion counts.",
+    "The paired TensorFlow classifier uses the same geometry. Match normalization variance conventions: NumPy default std uses N, while PyTorch std defaults to a correction that must be overridden here. Both need logit loss, threshold policy, train-only fit and complete confusion counts.",
     [
         (
             "Why can identical models disagree after preprocessing?",
             "Different variance corrections, dtypes or fit partitions change the input values. Framework comparisons must include preprocessing state.",
         ),
         (
-            "Does100percent on two test rows establish reliability?",
+            "Does 100 percent on two test rows establish reliability?",
             "No. It establishes those observations under this fixture. Representative independent data and uncertainty are separate evidence.",
         ),
     ],
@@ -1925,20 +1925,20 @@ assert report=={'negative':(0,1),'positive':(1,1)}""",
 lesson(
     25,
     "Embedding objectives teach a representation to preserve selected relationships. A positive pair is declared related under a task definition, while a negative pair is declared unrelated. Those labels are assumptions supplied by the dataset, not facts inferred from a similarity score. Dot products depend on vector magnitude and direction. Cosine similarity divides by both norms and compares direction. A high score can still belong to an irrelevant or duplicated example.\n\nContrastive cross entropy compares a positive candidate with selected negatives. Its temperature changes score concentration and gradient scale. False negatives can create contradictory supervision, especially when two document versions contain the same answer. This lesson uses literal vectors and an actual differentiable projection so the objective and gradient are inspectable. It does not claim that the tiny representation has learned natural-language semantics.",
-    """Use torch.dot for one-dimensional vectors and F.cosine_similarity with an explicit feature dimension. Check nonzero finite norms before interpreting cosine. Build a two-candidate logit row and use class index0 for the positive. A trainable projection can receive gradients through these scores. Keep candidate identities beside vectors and reject a positive/negative identity collision before training.""",
+    """Use torch.dot for one-dimensional vectors and F.cosine_similarity with an explicit feature dimension. Check nonzero finite norms before interpreting cosine. Build a two-candidate logit row and use class index 0 for the positive. A trainable projection can receive gradients through these scores. Keep candidate identities beside vectors and reject a positive/negative identity collision before training.""",
     [
         (
             "Contrastive objective",
-            "A loss encouraging a positive candidate to out rank chosen negatives.",
+            "A loss encouraging a positive candidate to outrank chosen negatives.",
         ),
         ("Cosine similarity", "A directional comparison normalized by vector lengths."),
-        ("False negative", "A related candidate incorrectly label led unrelated."),
+        ("False negative", "A related candidate incorrectly labeled unrelated."),
     ],
     [
         ex(
             "Compare dot and cosine scores",
-            "Use anchor[1, 0], positive[1, 1], negative[0, 1].",
-            "dots1, 0; cosines1/sqrt2, 0.",
+            "Use anchor [1, 0], positive [1, 1], negative [0, 1].",
+            "dots 1, 0; cosines 1/sqrt(2), 0.",
             """anchor=torch.tensor([1.,0.],dtype=torch.float64); positive=torch.tensor([1.,1.],dtype=torch.float64); negative=torch.tensor([0.,1.],dtype=torch.float64)
 assert torch.dot(anchor,positive).item()==1 and torch.dot(anchor,negative).item()==0
 np.testing.assert_allclose(F.cosine_similarity(anchor,positive,dim=0).item(),1/np.sqrt(2),atol=1e-12,rtol=0)""",
@@ -1946,8 +1946,8 @@ np.testing.assert_allclose(F.cosine_similarity(anchor,positive,dim=0).item(),1/n
         ),
         ex(
             "Scale without changing direction",
-            "Multiply the positive vector by10 and compare scores.",
-            "dot becomes10; cosine unchanged.",
+            "Multiply the positive vector by 10 and compare scores.",
+            "dot becomes 10; cosine unchanged.",
             """scaled=10*positive
 assert torch.dot(anchor,scaled).item()==10
 torch.testing.assert_close(F.cosine_similarity(anchor,scaled,dim=0),F.cosine_similarity(anchor,positive,dim=0),atol=1e-12,rtol=0)""",
@@ -1955,7 +1955,7 @@ torch.testing.assert_close(F.cosine_similarity(anchor,scaled,dim=0),F.cosine_sim
         ),
         ex(
             "Calculate a two-candidate loss",
-            "Use logits[1, 0] with target0.",
+            "Use logits [1, 0] with target 0.",
             "cross entropy log(1+exp(-1)).",
             """logits=torch.tensor([[1.,0.]],dtype=torch.float64)
 np.testing.assert_allclose(F.cross_entropy(logits,torch.tensor([0])).item(),np.log1p(np.exp(-1)),atol=1e-12,rtol=0)""",
@@ -1963,7 +1963,7 @@ np.testing.assert_allclose(F.cross_entropy(logits,torch.tensor([0])).item(),np.l
         ),
         ex(
             "Inspect a projection gradient",
-            "Create a trainable2x2identity projection and back propagate the positive-versus-negative objective.",
+            "Create a trainable 2-by-2 identity projection and backpropagate the positive-versus-negative objective.",
             "finite nonzero projection gradient.",
             """projection=nn.Parameter(torch.eye(2,dtype=torch.float64)); query=anchor@projection
 scores=torch.stack([query@positive,query@negative])[None,:]
@@ -1981,8 +1981,8 @@ assert pair['positive']==pair['negative']""",
         ),
         ex(
             "Separate temperature from ranking",
-            "Compare softmax[1, 0] at temperatures1 and.5.",
-            "positive probability increases; argmax remains0.",
+            "Compare the softmax of logits [1, 0] at temperatures 1 and 0.5.",
+            "positive probability increases; argmax remains 0.",
             """warm=torch.softmax(logits,dim=1); cool=torch.softmax(logits/.5,dim=1)
 assert cool[0,0]>warm[0,0] and warm.argmax(1).item()==cool.argmax(1).item()==0""",
             "Temperature changes confidence concentration and gradients. It does not supply additional relevance evidence or guarantee calibration.",
@@ -2002,8 +2002,8 @@ assert cool[0,0]>warm[0,0] and warm.argmax(1).item()==cool.argmax(1).item()==0""
 )
 lesson(
     26,
-    "Custom modules should make state ownership and differentiation explicit. Parameters are optimized; buffers are tracked but normally fixed; temporary activations are rebuilt during forward. A residual branch adds a transformed input to the original, so feature dimensions must match or an explicit projection must reconcile them. Creating new parameters in forward would change model identity and invalidate optimizer membership.\n\nA custom differentiable function should be checked against independent derivatives before being trusted in a large network. PyTorch grad check uses finite differences, usually with float64 inputs, to compare a backward formula with the numerical behavior of forward. Passing a few checks is useful evidence under those inputs, not a proof for every branch or nondifferentiable point. This lesson combines a simple residual module with a tiny custom cube function so both registration and derivative contracts remain inspectable.",
-    "Assign nn.Parameter in __init__, register a scale buffer, and implement forward without allocating new trainable state. Use named_parameters and named_buffers to inspect ownership. A torch.autograd.Function defines static forward and backward methods; save_for_backward stores inputs needed later. grad check perturbs double-precision inputs and should avoid kinks. The cube derivative is3*x² times the incoming gradient.",
+    "Custom modules should make state ownership and differentiation explicit. Parameters are optimized; buffers are tracked but normally fixed; temporary activations are rebuilt during forward. A residual branch adds a transformed input to the original, so feature dimensions must match or an explicit projection must reconcile them. Creating new parameters in forward would change model identity and invalidate optimizer membership.\n\nA custom differentiable function should be checked against independent derivatives before being trusted in a large network. PyTorch gradcheck uses finite differences, usually with float64 inputs, to compare a backward formula with the numerical behavior of forward. Passing a few checks is useful evidence under those inputs, not a proof for every branch or nondifferentiable point. This lesson combines a simple residual module with a tiny custom cube function so both registration and derivative contracts remain inspectable.",
+    "Assign nn.Parameter in __init__, register a scale buffer, and implement forward without allocating new trainable state. Use named_parameters and named_buffers to inspect ownership. A torch.autograd.Function defines static forward and backward methods; save_for_backward stores inputs needed later. gradcheck perturbs double-precision inputs and should avoid kinks. The cube derivative is 3*x² times the incoming gradient.",
     [
         ("Custom module", "A reusable computation with explicitly registered state."),
         ("Buffer", "Tracked tensor state outside the optimizer parameter set."),
@@ -2016,7 +2016,7 @@ lesson(
     [
         ex(
             "Build an identity residual",
-            "Create a width2 residual with zero kernel and scale buffer1.",
+            "Create a width 2 residual with zero kernel and scale buffer 1.",
             "output equals input; one parameter and one buffer.",
             """module=Residual(2); x=torch.tensor([[1.,2.],[3.,4.]],dtype=torch.float64)
 assert torch.equal(module(x),x)
@@ -2026,22 +2026,22 @@ assert set(dict(module.named_parameters()))=={'kernel'} and set(dict(module.name
         ex(
             "Keep state stable across calls",
             "Call the same module on a second batch with the same width.",
-            "same kernel object and parameter count4.",
+            "same kernel object and parameter count 4.",
             """identity=id(module.kernel); module(torch.ones((1,2),dtype=torch.float64))
 assert id(module.kernel)==identity and sum(p.numel() for p in module.parameters())==4""",
             "Batch length changes transient activations, not the number of learned coefficients. Stable state is necessary for optimizer and checkpoint consistency.",
         ),
         ex(
             "Check a known residual transform",
-            "Assign an identity kernel and scale.5.",
-            "output1.5*x.",
+            "Assign an identity kernel and scale 0.5.",
+            "output 1.5*x.",
             """with torch.no_grad(): module.kernel.copy_(torch.eye(2,dtype=torch.float64)); module.scale.fill_(.5)
 torch.testing.assert_close(module(x),1.5*x,atol=1e-12,rtol=0)""",
             "The buffer changes forward behavior while remaining outside the trainable parameter list. It therefore belongs in the serialized state contract.",
         ),
         ex(
             "Reject incompatible feature width",
-            "Pass a width3 row to the width2 module.",
+            "Pass a width 3 row to the width 2 module.",
             "ValueError naming feature width.",
             """try: module(torch.ones((1,3),dtype=torch.float64))
 except ValueError: pass
@@ -2050,19 +2050,19 @@ else: raise AssertionError('incompatible residual accepted')""",
         ),
         ex(
             "Validate a custom cube derivative",
-            "Run grad check on Cube.apply at float64values.2, -.7.",
-            "grad check True.",
+            "Run gradcheck on Cube.apply at float64 values 0.2, -0.7.",
+            "gradcheck returns True.",
             """probe=torch.tensor([.2,-.7],dtype=torch.float64,requires_grad=True)
 assert torch.autograd.gradcheck(Cube.apply,(probe,),eps=1e-6,atol=1e-5,rtol=1e-3)""",
             "The finite-difference checker is independent of the written backward formula. Double precision reduces numerical noise for the small diagnostic.",
         ),
         ex(
             "Inspect the incoming-gradient factor",
-            "Differentiate the sum of2*Cube(x) atx2.",
-            "gradient24.",
+            "Differentiate the sum of 2*Cube(x) at x = 2.",
+            "gradient 24.",
             """value=torch.tensor([2.],dtype=torch.float64,requires_grad=True); (2*Cube.apply(value)).sum().backward()
 assert value.grad.item()==24""",
-            "The local derivative3*x² must be multiplied by the incoming derivative2. Forgetting that factor can pass a simple standalone test but fail when the function is composed.",
+            "The local derivative 3*x² must be multiplied by the incoming derivative 2. Forgetting that factor can pass a simple standalone test but fail when the function is composed.",
         ),
     ],
     "Keras custom layers often create weights in build and define call; PyTorch modules usually register state in __init__ and define forward. TensorFlow custom-gradient mechanisms and PyTorch autograd.Function both require a correct local derivative multiplied by the incoming gradient.",
@@ -2072,7 +2072,7 @@ assert value.grad.item()==24""",
             "Buffers participate in state_dict and module device/dtype movement. An ordinary attribute can be omitted from those operations and cause inconsistent reconstruction.",
         ),
         (
-            "What does grad check not establish?",
+            "What does gradcheck not establish?",
             "It does not prove behavior on every branch, shape or nondifferentiable point. Add domain, boundary and composition tests alongside numerical derivative checks.",
         ),
     ],
@@ -2093,7 +2093,7 @@ class Cube(torch.autograd.Function):
 )
 lesson(
     27,
-    "Transfer learning reuses a representation while adapting a task-specific head. Freezing requires both a gradient policy and a correct optimizer membership policy. Setting `requires_grad=False` prevents new derivatives for those parameters, but an optimizer can still contain stale gradient state if the transition is handled care lessly. Clear old gradients and deliberately select trainable parameters. Evaluation mode is a separate concern: a frozen BatchNorm base can still update running buffers if left in training mode.\n\nThe local fixture uses a fixed identity base and a new linear head, so a byte-level snapshot can verify that only the head changes. A later unfreeze phase creates a new optimizer with a declared rate and membership list. No pretrained weights are downloaded. The lesson teaches the state transition required for transfer rather than claiming that freezing always improves quality.",
+    "Transfer learning reuses a representation while adapting a task-specific head. Freezing requires both a gradient policy and a correct optimizer membership policy. Setting `requires_grad=False` prevents new derivatives for those parameters, but an optimizer can still contain stale gradient state if the transition is handled carelessly. Clear old gradients and deliberately select trainable parameters. Evaluation mode is a separate concern: a frozen BatchNorm base can still update running buffers if left in training mode.\n\nThe local fixture uses a fixed identity base and a new linear head, so a byte-level snapshot can verify that only the head changes. A later unfreeze phase creates a new optimizer with a declared rate and membership list. No pretrained weights are downloaded. The lesson teaches the state transition required for transfer rather than claiming that freezing always improves quality.",
     "Call requires_grad_(False) on base parameters, clear their grad fields, and construct the head optimizer from head.parameters only. Use base.eval when its mode-dependent state should remain fixed. Snapshot all base state_dict tensors with clone. After training the head, compare both parameters and buffers. Unfreezing changes the intended update set and requires an explicit optimizer policy.",
     [
         ("Frozen base", "A reused model component excluded from parameter updates."),
@@ -2107,7 +2107,7 @@ lesson(
     [
         ex(
             "Freeze a known base",
-            "Create a bias-free2-to-2identity Linear base and disable its parameter gradients.",
+            "Create a bias-free 2-to-2 identity Linear base and disable its parameter gradients.",
             "base output equals input; all base parameters frozen.",
             """base=nn.Linear(2,2,bias=False)
 with torch.no_grad(): base.weight.copy_(torch.eye(2))
@@ -2118,7 +2118,7 @@ assert torch.equal(base(x),x) and not any(p.requires_grad for p in base.paramete
         ),
         ex(
             "Train a new head",
-            "Attach a zero-initialized2-to-1head and take one SGD.1step toward targets1, 2, 3.",
+            "Attach a zero-initialized 2-to-1 head and take one SGD step with learning rate 0.1 toward targets 1, 2, 3.",
             "head changes; base remains exact identity.",
             """head=nn.Linear(2,1,bias=False)
 with torch.no_grad(): head.weight.zero_()
@@ -2188,8 +2188,8 @@ lesson(
     [
         ex(
             "Create nontrivial training state",
-            "Take two Adam updates of a zero-weight linear model onx1, 2 andy2x.",
-            "optimizer step2 and positive weight.",
+            "Take two Adam updates of a zero-weight linear model on x = 1, 2 and y = 2x.",
+            "optimizer step 2 and positive weight.",
             """torch.manual_seed(7); model,optimizer=make_state()
 for _ in range(2): step(model,optimizer,torch.zeros((2,1)))
 parameter=next(model.parameters()); assert optimizer.state[parameter]['step'].item()==2 and parameter.item()>0""",
@@ -2197,8 +2197,8 @@ parameter=next(model.parameters()); assert optimizer.state[parameter]['step'].it
         ),
         ex(
             "Save the complete local contract",
-            "Write model, optimizer, RNG and data_position2 into an owned temporary checkpoint.",
-            "file exists and metadata position2.",
+            "Write model, optimizer, RNG and data_position=2 into an owned temporary checkpoint.",
+            "file exists and metadata position 2.",
             """temporary=tempfile.TemporaryDirectory(); folder=Path(temporary.name); path=folder/'checkpoint.pt'
 checkpoint={'model':model.state_dict(),'optimizer':optimizer.state_dict(),'rng':torch.get_rng_state(),'data_position':2}
 torch.save(checkpoint,path); assert path.is_file() and checkpoint['data_position']==2""",
@@ -2207,7 +2207,7 @@ torch.save(checkpoint,path); assert path.is_file() and checkpoint['data_position
         ex(
             "Record uninterrupted continuation",
             "Draw three random values, then a small target perturbation, and perform the third update.",
-            "finite weight, step3, and saved three-value random probe.",
+            "finite weight, step 3, and saved three-value random probe.",
             """probe=torch.rand(3); noise=torch.rand((2,1))*.01; step(model,optimizer,noise); expected=parameter.item()
 assert torch.isfinite(probe).all() and optimizer.state[parameter]['step'].item()==3 and np.isfinite(expected)""",
             "The order of random draws is part of the continuation contract. Restoring only the seed without the consumed generator state would not reproduce this point.",
@@ -2215,7 +2215,7 @@ assert torch.isfinite(probe).all() and optimizer.state[parameter]['step'].item()
         ex(
             "Restore in a fresh interpreter",
             "Recreate model and Adam, restore all state, repeat the same draws and update.",
-            "probe matches and next weight agrees within1e-6; position3.",
+            "probe matches and next weight agrees within 1e-6; position 3.",
             '''program=textwrap.dedent("""
 import json,sys,torch
 from torch import nn
@@ -2280,10 +2280,10 @@ def step(model,optimizer,noise):
 )
 lesson(
     29,
-    "Numerical stability concerns how an equivalent mathematical expression behaves in a finite representation. Logits1000, 999 define a valid two-class distribution, but directly exponentiating them overflows common floating-point types. Subtracting a shared maximum before softmax preserves the distribution. CrossEntropyLoss and log sum exp implement stable combined operations that avoid unnecessary probability round trips.\n\nPrecision and range differ across float16, bfloat16, float32 and float64. Automatic mixed precision selects operation dtypes under a backend policy; gradient scaling addresses underflow in certain training paths. Those mechanisms require hardware-specific validation. This default CPU lesson checks stable objectives and dtype limits without claiming GPU speed or a qualified mixed-precision training configuration. A stable loss can still optimize the wrong labels or denominator, so numerical and semantic checks remain separate.",
-    "UseF.cross_entropy on raw logits and torch.log sum exp for a stable log normalizer. Inspect torch.isfinite on forward values and gradients. torch.finfo reports represent able ranges and epsilon, but is not a performance benchmark. Keep dtype explicit in independent arithmetic comparisons. Do not cast arbitrary nonfinite inputs into a lower-precision type and expect a stable objective to repair them.",
+    "Numerical stability concerns how an equivalent mathematical expression behaves in a finite representation. Logits 1000, 999 define a valid two-class distribution, but directly exponentiating them overflows common floating-point types. Subtracting a shared maximum before softmax preserves the distribution. CrossEntropyLoss and logsumexp implement stable combined operations that avoid unnecessary probability round trips.\n\nPrecision and range differ across float16, bfloat16, float32 and float64. Automatic mixed precision selects operation dtypes under a backend policy; gradient scaling addresses underflow in certain training paths. Those mechanisms require hardware-specific validation. This default CPU lesson checks stable objectives and dtype limits without claiming GPU speed or a qualified mixed-precision training configuration. A stable loss can still optimize the wrong labels or denominator, so numerical and semantic checks remain separate.",
+    "Use F.cross_entropy on raw logits and torch.logsumexp for a stable log normalizer. Inspect torch.isfinite on forward values and gradients. torch.finfo reports representable ranges and epsilon, but is not a performance benchmark. Keep dtype explicit in independent arithmetic comparisons. Do not cast arbitrary nonfinite inputs into a lower-precision type and expect a stable objective to repair them.",
     [
-        ("Overflow", "A result exceeding the numeric type's represent able range."),
+        ("Overflow", "A result exceeding the numeric type's representable range."),
         ("Log-sum-exp", "A stable logarithm of summed exponentials."),
         ("Mixed precision", "A policy using different numeric types for different operations."),
         (
@@ -2294,7 +2294,7 @@ lesson(
     [
         ex(
             "Expose naive overflow",
-            "Exponentiate float32logits1000, 999 directly.",
+            "Exponentiate float32 logits 1000, 999 directly.",
             "both exponentials infinite.",
             """logits=torch.tensor([1000.,999.],dtype=torch.float32); naive=torch.exp(logits)
 assert torch.isinf(naive).all()""",
@@ -2302,38 +2302,38 @@ assert torch.isinf(naive).all()""",
         ),
         ex(
             "Compute a stable class loss",
-            "Use target0 with the same logits.",
-            "loss log(1+exp(-1)) within1e-6.",
+            "Use target 0 with the same logits.",
+            "loss log(1+exp(-1)) within 1e-6.",
             """stable=F.cross_entropy(logits[None,:],torch.tensor([0]))
 np.testing.assert_allclose(stable.item(),np.log1p(np.exp(-1)),atol=1e-6,rtol=0)""",
             "The meaningful score difference is one. The stable combined objective avoids constructing enormous raw exponential values.",
         ),
         ex(
             "Check shift invariance",
-            "Compare softmax1000, 999 with softmax0, -1.",
-            "probabilities match within1e-6.",
+            "Compare softmax 1000, 999 with softmax 0, -1.",
+            "probabilities match within 1e-6.",
             """torch.testing.assert_close(torch.softmax(logits,0),torch.softmax(torch.tensor([0.,-1.]),0),atol=1e-6,rtol=0)""",
             "A common logit shift cancels from the normalizer. This property is useful for detecting wrong-axis or inconsistent-clipping implementations.",
         ),
         ex(
             "Inspect stable gradients",
-            "Differentiate the target0loss with respect to both logits.",
-            "finite gradients summing approximately0.",
+            "Differentiate the target 0 loss with respect to both logits.",
+            "finite gradients summing approximately 0.",
             """values=logits.clone().requires_grad_(); F.cross_entropy(values[None,:],torch.tensor([0])).backward()
 assert torch.isfinite(values.grad).all(); np.testing.assert_allclose(values.grad.sum().item(),0,atol=1e-6,rtol=0)""",
             "The derivative is probability minus the target indicator. Its components sum to zero because both distributions have total mass one.",
         ),
         ex(
             "Compare dtype ranges explicitly",
-            "Inspect float16 andbfloat16 maximum values and float32epsilon.",
-            "bfloat16 range exceeds float16; float32epsilon positive.",
+            "Inspect float16 and bfloat16 maximum values and float32 epsilon.",
+            "bfloat16 range exceeds float16; float32 epsilon positive.",
             """assert torch.finfo(torch.bfloat16).max>torch.finfo(torch.float16).max
 assert torch.finfo(torch.float32).eps>0""",
             "bfloat16 has a wider exponent range but fewer fraction bits than float16. Range alone does not determine accuracy or backend support.",
         ),
         ex(
             "Reject a nonfinite input contract",
-            "Pass aN aN logit through an explicit finite-input validator.",
+            "Pass a NaN logit through an explicit finite-input validator.",
             "ValueError before loss evaluation.",
             """def checked_loss(value,target):
     if not bool(torch.isfinite(value).all()): raise ValueError('finite logits required')
@@ -2341,7 +2341,7 @@ assert torch.finfo(torch.float32).eps>0""",
 try: checked_loss(torch.tensor([[0.,float('nan')]]),torch.tensor([0]))
 except ValueError: pass
 else: raise AssertionError('NaN logits accepted')""",
-            "Stable algebra protects particular finite inputs from avoidable overflow. It does not turn aN aN source into a meaningful probability model.",
+            "Stable algebra protects particular finite inputs from avoidable overflow. It does not turn a NaN source into a meaningful probability model.",
         ),
     ],
     "TensorFlow and PyTorch provide stable logits-based objectives. Match dtype and reduction before comparison. Their mixed-precision policies and loss-scaling APIs differ, and a CPU arithmetic check does not qualify either framework's GPU training path.",
@@ -2358,7 +2358,7 @@ else: raise AssertionError('NaN logits accepted')""",
 )
 lesson(
     30,
-    "Distributed and accumulated gradients should represent a declared global objective. Equal averaging of sha rd means weights shards equally, not examples. If one sha rd contains one observation with mean gradient2 and another contains three with mean6, the global example mean is5 rather than4. The same issue appears with unequal microbatches on one CPU.\n\nTo reproduce a full-batch mean through accumulation, hold parameters fixed while adding gradient sums, divide by the total active count, and apply one optimizer update. Stepping after each microbatch is a different trajectory because later gradients use changed weights. Distributed Data Parallel has its own reduction semantics; this lesson does not launch multiple processes or claim scaling. It derives the weighting rule that a real distributed implementation must preserve and explains which additional runtime evidence would be required.",
+    "Distributed and accumulated gradients should represent a declared global objective. Equal averaging of shard means weights shards equally, not examples. If one shard contains one observation with mean gradient 2 and another contains three with mean 6, the global example mean is 5 rather than 4. The same issue appears with unequal microbatches on one CPU.\n\nTo reproduce a full-batch mean through accumulation, hold parameters fixed while adding gradient sums, divide by the total active count, and apply one optimizer update. Stepping after each microbatch is a different trajectory because later gradients use changed weights. Distributed Data Parallel has its own reduction semantics; this lesson does not launch multiple processes or claim scaling. It derives the weighting rule that a real distributed implementation must preserve and explains which additional runtime evidence would be required.",
     "Use reduction='sum' for each microbatch, call backward without stepping, then divide accumulated gradients by the total count before one step. Clear gradients before starting the accumulation group. Count active masked targets when appropriate, not merely tensor storage size. If a distributed backend averages gradients across ranks, the local loss scaling must account for that reduction and unequal local counts.",
     [
         ("Global objective", "The loss definition over all participating examples."),
@@ -2371,25 +2371,25 @@ lesson(
     ],
     [
         ex(
-            "Weight unequal sha rd means",
-            "Combine means2, 6 with counts1, 3.",
-            "global mean5; unweighted sha rd mean4.",
+            "Weight unequal shard means",
+            "Combine means 2, 6 with counts 1, 3.",
+            "global mean 5; unweighted shard mean 4.",
             """means=torch.tensor([2.,6.]); counts=torch.tensor([1.,3.])
 assert (means*counts).sum().div(counts.sum()).item()==5 and means.mean().item()==4""",
             "Each mean must be multiplied by its denominator to recover a sum. Averaging means directly discards that information.",
         ),
         ex(
             "Reconstruct an example mean",
-            "Split gradients2, 4, 6, 8 into one and three elements and recombine sums/counts.",
-            "global mean5.",
+            "Split gradients 2, 4, 6, 8 into one and three elements and recombine sums/counts.",
+            "global mean 5.",
             """values=torch.tensor([2.,4.,6.,8.]); parts=[values[:1],values[1:]]
 assert sum(part.sum() for part in parts).div(sum(part.numel() for part in parts)).item()==values.mean().item()==5""",
-            "The per-example vector is an independent oracle for the sha rd formula. It catches a checker that merely repeats a wrong averaging assumption.",
+            "The per-example vector is an independent oracle for the shard formula. It catches a checker that merely repeats a wrong averaging assumption.",
         ),
         ex(
             "Accumulate one full-batch gradient",
-            "At \\(w=0\\), use \\(x=(1,2,3,4)\\) and \\(y=2x\\), accumulate squared-loss sums for shards of sizes 1 and 3, and divide by the total sample count 4.",
-            "gradient-30, matching full-batch mean.",
+            "At \\(w=0\\), use \\(x=(1, 2, 3, 4)\\) and \\(y=2x\\), accumulate squared-loss sums for shards of sizes 1 and 3, and divide by the total sample count 4.",
+            "gradient -30, matching full-batch mean.",
             """x=torch.arange(1,5,dtype=torch.float64); y=2*x; w=nn.Parameter(torch.tensor(0.,dtype=torch.float64))
 for start,end in [(0,1),(1,4)]: ((w*x[start:end]-y[start:end])**2).sum().backward()
 w.grad.div_(4)
@@ -2399,15 +2399,15 @@ oracle=torch.tensor(0.,dtype=torch.float64,requires_grad=True); full=((oracle*x-
         ),
         ex(
             "Apply one accumulated update",
-            "Take SGD.01 after the global gradient is formed.",
-            "new weight.3.",
+            "Take one SGD step with learning rate 0.01 after the global gradient is formed.",
+            "new weight 0.3.",
             """torch.optim.SGD([w],lr=.01).step(); np.testing.assert_allclose(w.item(),.3,atol=1e-12,rtol=0)""",
             "The effective batch produces one optimizer step. Learning-rate schedules and optimizer counters should follow that declared step unit.",
         ),
         ex(
             "Contrast separate microbatch updates",
-            "Reset w0and step after eachs hard mean instead.",
-            "endpoint differs from.3.",
+            "Reset w to 0 and step after each shard mean instead.",
+            "endpoint differs from 0.3.",
             """other=nn.Parameter(torch.tensor(0.,dtype=torch.float64)); optimizer=torch.optim.SGD([other],lr=.01)
 for start,end in [(0,1),(1,4)]:
     optimizer.zero_grad(set_to_none=True); ((other*x[start:end]-y[start:end])**2).mean().backward(); optimizer.step()
@@ -2415,15 +2415,15 @@ assert abs(other.item()-.3)>1e-6""",
             "This is ordinary minibatch training. It is not an implementation of one full-batch update because the second derivative is evaluated at a new state.",
         ),
         ex(
-            "Represent empty-sha rd contributions",
-            "Combine an emptys hard and the four real gradients using sums and counts.",
-            "empty sha rd contributes0; global mean5.",
+            "Represent empty-shard contributions",
+            "Combine an empty shard and the four real gradients using sums and counts.",
+            "empty shard contributes 0; global mean 5.",
             """empty=torch.empty(0); numerator=empty.sum()+values.sum(); denominator=empty.numel()+values.numel()
 assert denominator==4 and numerator.div(denominator).item()==5""",
-            "A local empty sha rd can contribute a zero sum without computing an undefined mean. A globally empty batch must be rejected separately.",
+            "A local empty shard can contribute a zero sum without computing an undefined mean. A globally empty batch must be rejected separately.",
         ),
     ],
-    "TensorFlow distributed strategies andPyTorchDDP can use different default reduction conventions. The paired CPU arithmetic establishes the intended example-weighted result; it does not demonstrate either backend's communication, scaling or failure behavior.",
+    "TensorFlow distributed strategies and PyTorchDDP can use different default reduction conventions. The paired CPU arithmetic establishes the intended example-weighted result; it does not demonstrate either backend's communication, scaling or failure behavior.",
     [
         (
             "Why is an average of means sometimes wrong?",
@@ -2438,7 +2438,7 @@ assert denominator==4 and numerator.div(denominator).item()==5""",
 lesson(
     31,
     "Compilation and profiling answer different questions. torch.compile captures eligible Python/tensor computation and sends graphs to a selected backend. An eager graph backend can demonstrate capture and specialization without compiling optimized native kernels. That is useful in a bounded classroom image but is not an Inductor speedup claim. Input dtype, shape and Python control can affect graph reuse or graph breaks.\n\nMeasure correctness before performance. The first call can include capture and setup, while later calls reuse prepared work. A small timing sample is an observation for one environment, not a universal ranking. The CPU profiler can identify which operations ran and where time was attributed, but profiling itself adds overhead. This lesson uses a custom backend that records captured graphs and returns their eager forward function, then separates warmup and steady-state measurements explicitly.",
-    "torch.compile(function, backend=counting_backend, full graph=True, dynamic=False) passes capture dF X graphs to a local backend. The backend records each graph and returns graph.forward. Repeated equal signatures should reuse the capture; changed dtype needs separate treatment. time.perf_counter measures elapsed wall time. torch.profiler.profile with CPU act iv i ties records eager tensor operations without assuming aGPU or native optimizing compiler.",
+    "torch.compile(function, backend=counting_backend, fullgraph=True, dynamic=False) passes captured FX graphs to a local backend. The backend records each graph and returns graph.forward. Repeated equal signatures should reuse the capture; changed dtype needs separate treatment. time.perf_counter measures elapsed wall time. torch.profiler.profile with CPU activities records eager tensor operations without assuming a GPU or native optimizing compiler.",
     [
         ("Graph capture", "Representing eligible tensor computation as a reusable graph."),
         ("Backend", "The implementation receiving a captured graph for execution or compilation."),
@@ -2448,8 +2448,8 @@ lesson(
     [
         ex(
             "Establish an eager oracle",
-            "Evaluatef(x)=x*x+1 at float32[1, 2].",
-            "output[2, 5].",
+            "Evaluate f(x)=x*x+1 at the float32 inputs [1, 2].",
+            "output [2, 5].",
             """def function(value): return value*value+1
 x=torch.tensor([1.,2.]); eager=function(x)
 assert eager.tolist()==[2.,5.]""",
@@ -2467,7 +2467,7 @@ torch.testing.assert_close(compiled(x),eager,atol=0,rtol=0); first=len(graphs); 
         ),
         ex(
             "Check signature reuse",
-            "Call with float32[3, 4], then with float64[1, 2].",
+            "Call with float32 inputs [3, 4], then with float64 inputs [1, 2].",
             "same signature reuses capture; changed dtype adds a graph.",
             """assert compiled(torch.tensor([3.,4.])).tolist()==[10.,17.] and len(graphs)==first
 assert compiled(torch.tensor([1.,2.],dtype=torch.float64)).tolist()==[2.,5.] and len(graphs)>first""",
@@ -2475,7 +2475,7 @@ assert compiled(torch.tensor([1.,2.],dtype=torch.float64)).tolist()==[2.,5.] and
         ),
         ex(
             "Measure warmed calls honestly",
-            "Warm the float32path, then execute20calls and record elapsed time.",
+            "Warm the float32 path, then execute 20 calls and record elapsed time.",
             "20 correct outputs and nonnegative elapsed time.",
             """import time
 compiled(x); start=time.perf_counter()
@@ -2487,7 +2487,7 @@ assert observed.tolist()==[2.,5.] and elapsed>=0""",
         ex(
             "Inspect actual CPU operations",
             "Profile one eager call and inspect operation names.",
-            "aten::mul and a ten::add appear.",
+            "aten::mul and aten::add appear.",
             """with torch.profiler.profile(activities=[torch.profiler.ProfilerActivity.CPU]) as profile:
     function(x)
 operations={event.key for event in profile.key_averages()}
@@ -2522,7 +2522,7 @@ assert receipt['graph_capture_checked'] and not receipt['optimizing_native_backe
 lesson(
     32,
     "A state dictionary stores named parameters and buffers, not the complete Python architecture. Reconstruct the intended module and validate its configuration before loading state. torch.export captures a constrained tensor program for inference and records input-shape assumptions. These artifacts solve different problems. A default export can specialize to the example batch size; dynamic dimensions must be declared and tested if variable batches are required.\n\nThis lesson saves a fixed two-feature linear model and an exported program, then loads both in a fresh interpreter and compares predictions. The files are owned temporary artifacts and contain no external model download. weights_only=True is used for the local state dictionary. Export load is also restricted to the artifact created by this lesson. Prediction parity does not establish optimizer restart parity, which was tested separately.",
-    "Save model.state_dict with torch.save and load into ann.Linear(2, 1, bias=False). torch.export.export(model, (example, ), strict=True) captures a static program; torch.export.save/load persists it. Call loaded_program.module() to obtain the checked inference module. For variable batch length, declareDim('batch', min=1, max=4) through dynamic_shapes and test within and outside the bound. Keep loaded owners in named variables while using their derived objects.",
+    "Save model.state_dict with torch.save and load into an nn.Linear(2, 1, bias=False). torch.export.export(model, (example, ), strict=True) captures a static program; torch.export.save/load persists it. Call loaded_program.module() to obtain the checked inference module. For variable batch length, declare Dim('batch', min=1, max=4) through dynamic_shapes and test within and outside the bound. Keep loaded owners in named variables while using their derived objects.",
     [
         ("state_dict", "Named tensor state requiring a compatible reconstructed architecture."),
         ("Exported program", "A captured tensor program with declared input constraints."),
@@ -2532,7 +2532,7 @@ lesson(
     [
         ex(
             "Create a known inference model",
-            "Set a 2-to-1 bias-free Linear weight to[2, -1] and predict rows1, 2 and3, 4.",
+            "Set a 2-to-1 bias-free Linear weight to [2, -1] and predict rows 1, 2 and 3, 4.",
             "outputs 0, 2.",
             """model=nn.Linear(2,1,bias=False)
 with torch.no_grad(): model.weight.copy_(torch.tensor([[2.,-1.]]))
@@ -2543,7 +2543,7 @@ assert expected.tolist()==[[0.],[2.]]""",
         ex(
             "Round-trip named state",
             "Save state_dict to an owned temporary file, reconstruct the architecture and load weights_only.",
-            "restored predictions match within1e-6.",
+            "restored predictions match within 1e-6.",
             """temporary=tempfile.TemporaryDirectory(); folder=Path(temporary.name); state_path=folder/'weights.pt'; torch.save(model.state_dict(),state_path)
 restored=nn.Linear(2,1,bias=False); restored.load_state_dict(torch.load(state_path,map_location='cpu',weights_only=True)); restored.eval()
 torch.testing.assert_close(restored(x),expected,atol=1e-6,rtol=0)""",
@@ -2552,7 +2552,7 @@ torch.testing.assert_close(restored(x),expected,atol=1e-6,rtol=0)""",
         ex(
             "Save an exported program",
             "Export the fixed batch program, save it, and load its module.",
-            "exported predictions match within1e-6.",
+            "exported predictions match within 1e-6.",
             """program=torch.export.export(model,(x,),strict=True); export_path=folder/'model.pt2'; torch.export.save(program,export_path)
 loaded_program=torch.export.load(export_path); exported_module=loaded_program.module()
 torch.testing.assert_close(exported_module(x),expected,atol=1e-6,rtol=0)""",
@@ -2561,7 +2561,7 @@ torch.testing.assert_close(exported_module(x),expected,atol=1e-6,rtol=0)""",
         ex(
             "Check both artifacts in a fresh process",
             "Load the state and exported program in a new interpreter and compare outputs.",
-            "both child predictions0, 2.",
+            "both child predictions 0, 2.",
             '''child=textwrap.dedent("""
 import json,sys,torch
 from torch import nn
@@ -2580,18 +2580,18 @@ a,b=json.loads(result.stdout.strip().splitlines()[-1]); np.testing.assert_allclo
         ex(
             "Expose static batch specialization",
             "Pass three rows to the statically exported module and compare with ordinary Linear.",
-            "ordinary Linear accepts3; static export rejects its batch constraint.",
+            "ordinary Linear accepts 3; static export rejects its batch constraint.",
             """three=torch.tensor([[0.,0.],[1.,2.],[3.,4.]])
 assert tuple(restored(three).shape)==(3,1)
 try: exported_module(three)
 except AssertionError as error:
     if 'Guard failed: input.size()[0] == 2' not in str(error): raise
 else: raise AssertionError('static export constraint not enforced')""",
-            "Mathematical batch flexibility does not automatically make an export contract dynamic. The pinned PyTorch2.9.1 profile raises AssertionError with the exact guard input.size()[0] == 2 for this invalid batch. The handler recognizes that shape guard and re-raises unrelated assertions. Exception types can differ across framework versions, so the diagnostic is tied to the prepared profile.",
+            "Mathematical batch flexibility does not automatically make an export contract dynamic. The pinned PyTorch 2.9.1 profile raises AssertionError with the exact guard input.size()[0] == 2 for this invalid batch. The handler recognizes that shape guard and re-raises unrelated assertions. Exception types can differ across framework versions, so the diagnostic is tied to the prepared profile.",
         ),
         ex(
             "Declare a bounded dynamic batch and clean up",
-            "Export with batch Dim range1..4, test three rows, and remove owned files.",
+            "Export with batch Dim range 1..4, test three rows, and remove owned files.",
             "three-row parity passes; temporary directory absent.",
             """batch=torch.export.Dim('batch',min=1,max=4)
 dynamic=torch.export.export(model,(x,),dynamic_shapes=({0:batch},),strict=True).module()
@@ -2600,7 +2600,7 @@ temporary.cleanup(); assert not folder.exists()""",
             "Dynamic dimensions describe allowed variation, not arbitrary inputs. Feature width, dtype and finite-value policy still need their own contracts.",
         ),
     ],
-    "TensorFlow/Keras distinguishes.keras reconstruction from Saved Model inference export. PyTorch distinguishes explicit architecture+state_dict from torch.export programs and their constraints. Both need fresh-process prediction checks, and neither inference parity check proves optimizer continuation.",
+    "TensorFlow/Keras distinguishes.keras reconstruction from SavedModel inference export. PyTorch distinguishes explicit architecture+state_dict from torch.export programs and their constraints. Both need fresh-process prediction checks, and neither inference parity check proves optimizer continuation.",
     [
         (
             "Does state_dict include the architecture?",
@@ -2616,8 +2616,8 @@ temporary.cleanup(); assert not folder.exists()""",
 )
 lesson(
     33,
-    "Inference is a bounded function with an input and output contract. A model may accept many tensors that are syntactically legal but semantically wrong:missing batch axes, wrong feature order, unexpected dtype, nonfinite values oran oversized request. Validate these conditions before forward computation. Batching should preserve each record'sp re dict i on for a stateless model in the declared evaluation mode.\n\nPyTorch inference_mode disables more autograd bookkeeping than no_grad and creates tensors with restrictions relevant to later gradient use. It is appropriate for a pure inference boundary, but should not be substituted blindly into training or gradient-based analysis. model.eval remains necessary for mode-dependent layers. This lesson uses a fixed linear model and no server, deployment or GPU so the contract can be tested locally.",
-    "The predict helper requires a CPU float32tensor shaped(batch, 2), with batch size1..4 and finite entries. It calls model.eval and uses inference_mode, then returns an owned clone suitable for caller inspection. The coefficient vector[2, -1] supplies an independent output oracle. Treat shape, dtype, device and value validation as different diagnostics rather than silently coercing every input.",
+    "Inference is a bounded function with an input and output contract. A model may accept many tensors that are syntactically legal but semantically wrong: missing batch axes, wrong feature order, unexpected dtype, nonfinite values or an oversized request. Validate these conditions before forward computation. Batching should preserve each record's prediction for a stateless model in the declared evaluation mode.\n\nPyTorch inference_mode disables more autograd bookkeeping than no_grad and creates tensors with restrictions relevant to later gradient use. It is appropriate for a pure inference boundary, but should not be substituted blindly into training or gradient-based analysis. model.eval remains necessary for mode-dependent layers. This lesson uses a fixed linear model and no server, deployment or GPU so the contract can be tested locally.",
+    "The predict helper requires a CPU float32 tensor shaped(batch, 2), with batch size 1..4 and finite entries. It calls model.eval and uses inference_mode, then returns an owned clone suitable for caller inspection. The coefficient vector [2, -1] supplies an independent output oracle. Treat shape, dtype, device and value validation as different diagnostics rather than silently coercing every input.",
     [
         (
             "Inference mode",
@@ -2630,8 +2630,8 @@ lesson(
     [
         ex(
             "Predict a valid batch",
-            "Use float32CPU rows1, 2 and3, 4.",
-            "outputs 0, 2 with shape(2, ).",
+            "Use float32 CPU rows 1, 2 and 3, 4.",
+            "outputs 0, 2 with shape (2, ).",
             """x=torch.tensor([[1.,2.],[3.,4.]],dtype=torch.float32); result=predict(x)
 assert result.tolist()==[0.,2.] and tuple(result.shape)==(2,) and not result.requires_grad""",
             "The output has one scalar per record. The absence of gradient tracking is part of this inference-only contract.",
@@ -2646,17 +2646,17 @@ torch.testing.assert_close(single,result,atol=0,rtol=0)""",
         ),
         ex(
             "Reject empty and oversized batches",
-            "Pass shapes0x2 and5x2.",
+            "Pass batches shaped (0, 2) and (5, 2).",
             "ValueError naming batch limit.",
             """for bad in [torch.empty((0,2)),torch.zeros((5,2))]:
     try: predict(bad)
     except ValueError as error: assert 'batch' in str(error)
     else: raise AssertionError('invalid batch accepted')""",
-            "Are source bound must be checked before computation. An empty batch also has no observations to score.",
+            "A resource bound must be checked before computation. An empty batch also has no observations to score.",
         ),
         ex(
             "Reject shape and dtype ambiguity",
-            "Pass a vector, a3-feature matrix and an int64matrix.",
+            "Pass a vector, a 3-feature matrix and an int64 matrix.",
             "shape ValueErrors and dtype TypeError.",
             """for bad,kind in [(torch.tensor([1.,2.]),ValueError),(torch.zeros((2,3)),ValueError),(torch.ones((1,2),dtype=torch.int64),TypeError)]:
     try: predict(bad)
@@ -2666,7 +2666,7 @@ torch.testing.assert_close(single,result,atol=0,rtol=0)""",
         ),
         ex(
             "Reject nonfinite values",
-            "Pass aN aN feature and inspect the failure.",
+            "Pass a NaN feature and inspect the failure.",
             "ValueError for finite-value contract.",
             """try: predict(torch.tensor([[float('nan'),1.]]))
 except ValueError as error: assert 'finite' in str(error)
@@ -2712,7 +2712,7 @@ def predict(x):
 )
 lesson(
     34,
-    "A reliability report should preserve the conditions and denominators behind a score. Group A with zero errors in one case does not provide the same evidence as zero errors in hundreds of independent cases. Duplicate records can improve an apparent rate without testing new conditions. Perturbation tests need a label policy:crossing a legitimate decision boundary may change the correct target rather than reveal a robustness failure.\n\nPrivacy and safety claims require their own mechanisms and evidence. A synthetic fixture containing no personal data does not establish differential privacy. A finite set of successful adversarial checks does not prove all future inputs are safe. This chapter uses Torch tensors for error accounting and controlled perturbations, then writes a bounded model-card record with untested conditions and failure severity.",
+    "A reliability report should preserve the conditions and denominators behind a score. Group A with zero errors in one case does not provide the same evidence as zero errors in hundreds of independent cases. Duplicate records can improve an apparent rate without testing new conditions. Perturbation tests need a label policy: crossing a legitimate decision boundary may change the correct target rather than reveal a robustness failure.\n\nPrivacy and safety claims require their own mechanisms and evidence. A synthetic fixture containing no personal data does not establish differential privacy. A finite set of successful adversarial checks does not prove all future inputs are safe. This chapter uses Torch tensors for error accounting and controlled perturbations, then writes a bounded model-card record with untested conditions and failure severity.",
     "Compute boolean error vectors before aggregation. Groupby declared labels and retain integer error/count pairs. Compare row count with unique ID count to expose duplicates. Use None for an untested group rather than a rate of zero. Keep severity categories separate from overall pass rate, and make the decision gate explicit before inspecting results.",
     [
         ("Subgroup denominator", "The observation count supporting a group metric."),
@@ -2726,8 +2726,8 @@ lesson(
     [
         ex(
             "Count group errors",
-            "Use groups A, A, B with truth1, 1, 0 and prediction1, 0, 0.",
-            "A1/2errors; B0/1.",
+            "Use groups A, A, B with truth 1, 1, 0 and prediction 1, 0, 0.",
+            "group A: 1 of 2 wrong; group B: 0 of 1 wrong.",
             """truth=torch.tensor([1,1,0]); prediction=torch.tensor([1,0,0]); groups=['A','A','B']; errors=prediction!=truth
 report={group:(int(errors[torch.tensor([g==group for g in groups])].sum()),groups.count(group)) for group in ['A','B']}
 assert report=={'A':(1,2),'B':(0,1)}""",
@@ -2736,23 +2736,23 @@ assert report=={'A':(1,2),'B':(0,1)}""",
         ex(
             "Expose repeated identities",
             "Repeat correct record c five times and compare row count with unique IDs.",
-            "8rows but3unique IDs.",
+            "8 rows but 3 unique IDs.",
             """ids=['a','b','c']+['c']*5
 assert len(ids)==8 and len(set(ids))==3""",
             "Repeated rows can bias a metric without adding independent cases. Identity validation belongs before aggregation.",
         ),
         ex(
             "Trace a controlled perturbation",
-            "Classify x>=0 at base1 after shifts-.1, -.9, -1.1.",
-            "labels1, 1, 0.",
+            "Classify x>=0 at base 1 after shifts -0.1, -0.9, -1.1.",
+            "labels 1, 1, 0.",
             """base=torch.tensor(1.); shifts=torch.tensor([-.1,-.9,-1.1]); changed=(base+shifts>=0).long()
 assert changed.tolist()==[1,1,0]""",
             "The last shift crosses the defined boundary. Whether that counts as a robustness failure depends on the intended label semantics.",
         ),
         ex(
             "Keep severe failures visible",
-            "Use9minor passes and1severe failure.",
-            "overall pass rate.9; severe failure count1.",
+            "Use 9 minor passes and 1 severe failure.",
+            "overall pass rate 0.9; severe failure count 1.",
             """passed=torch.tensor([True]*9+[False]); severe=torch.tensor([False]*9+[True])
 np.testing.assert_allclose(passed.float().mean().item(),.9,atol=1e-6,rtol=0)
 assert int((~passed&severe).sum())==1""",
@@ -2760,15 +2760,15 @@ assert int((~passed&severe).sum())==1""",
         ),
         ex(
             "Represent an untested group",
-            "Define a rate helper with count0.",
-            "None for untested; 0for zero errors in one case.",
+            "Define a rate helper with count 0.",
+            "None for untested; 0 for zero errors in one case.",
             """def rate(errors,count): return None if count==0 else errors/count
 assert rate(0,0) is None and rate(0,1)==0""",
             "Absence of observations is not a perfect score. Keeping None visible prevents an untested group from looking validated.",
         ),
         ex(
             "Write a bounded card",
-            "Record3unique units, synthetic teaching use and untested future conditions.",
+            "Record 3 unique units, synthetic teaching use and untested future conditions.",
             "card explicitly has no privacy guarantee.",
             """card={'unique_units':3,'use':'synthetic teaching','untested':['future population','private-data behavior'],'differential_privacy_established':False}
 assert card['unique_units']==3 and not card['differential_privacy_established']""",
@@ -2790,7 +2790,7 @@ assert card['unique_units']==3 and not card['differential_privacy_established']"
 lesson(
     35,
     "Model comparisons should preserve the pairing between predictions on the same held-out identities. Subtract per-record losses before averaging, so shared case difficulty remains represented. A bootstrap resamples observed units with replacement and estimates variability under a stated sampling model. It cannot repair biased data or create independent units from many duplicates. Related records may need group-level resampling rather than row-level draws.\n\nPyTorch generators provide a local reproducible random stream for this calculation. A seed makes an implementation repeatable in the tested runtime, but does not make the inference assumptions valid. Keep model selection on validation data and freeze the final test before choosing a winner. A confidence interval or mean loss difference is one piece of evidence, not a complete release policy.",
-    "Align prediction dictionaries by stable IDs and check equal keysets. Calculate squared-error A minus squared-errorB for each ID. Sample indices with torch.rand int and an explicit Generator, then index the paired difference vector. Use the same resampling unit for both systems by resampling the already-paired values. Report independent count and selection history beside the estimate.",
+    "Align prediction dictionaries by stable IDs and check equal keysets. Calculate squared error A minus squared error B for each ID. Sample indices with torch.randint and an explicit Generator, then index the paired difference vector. Use the same resampling unit for both systems by resampling the already-paired values. Report independent count and selection history beside the estimate.",
     [
         ("Paired difference", "The loss contrast for the same identified observation."),
         ("Resampling unit", "The independent entity selected during a bootstrap draw."),
@@ -2806,8 +2806,8 @@ lesson(
     [
         ex(
             "Align predictions by ID",
-            "Use truth a0, b1, c2 with A0, 2, 2 andB1, 2, 3 in different dictionary order.",
-            "paired squared-loss differences-1, 0, -1.",
+            "Use truth a=0, b=1, c=2 with model A predictions 0, 2, 2 and model B predictions 1, 2, 3 in different dictionary order.",
+            "paired squared-loss differences -1, 0, -1.",
             """truth={'a':0.,'b':1.,'c':2.}; a={'a':0.,'b':2.,'c':2.}; b={'c':3.,'a':1.,'b':2.}; ids=sorted(truth)
 difference=torch.tensor([(a[i]-truth[i])**2-(b[i]-truth[i])**2 for i in ids],dtype=torch.float64)
 assert difference.tolist()==[-1.,0.,-1.]""",
@@ -2816,21 +2816,21 @@ assert difference.tolist()==[-1.,0.,-1.]""",
         ex(
             "Interpret the average contrast",
             "Average the three paired differences.",
-            "mean-2/3, favoring A on this loss fixture.",
+            "mean -2/3, favoring A on this loss fixture.",
             """np.testing.assert_allclose(difference.mean().item(),-2/3,atol=1e-12,rtol=0)""",
             "The sign follows the declared A-minus-Blossorder. A negative value favors A only for this metric and assessment set.",
         ),
         ex(
             "Resample pairs reproducibly",
-            "Draw1000three-index bootstrap samples with local Generator seed7.",
-            "1000finite estimates within-1..0.",
+            "Draw 1000 three-index bootstrap samples with local Generator seed 7.",
+            "1000 finite estimates within -1..0.",
             """generator=torch.Generator().manual_seed(7); indices=torch.randint(0,3,(1000,3),generator=generator); estimates=difference[indices].mean(1)
 assert tuple(estimates.shape)==(1000,) and torch.isfinite(estimates).all() and estimates.min()>=-1 and estimates.max()<=0""",
             "The known range of per-record differences bounds every resampled mean. That independent bound can expose an indexing or reduction error.",
         ),
         ex(
             "Replay the local random stream",
-            "Create a new Generator with seed7 and compare the index matrix.",
+            "Create a new Generator with seed 7 and compare the index matrix.",
             "exact match.",
             """again=torch.randint(0,3,(1000,3),generator=torch.Generator().manual_seed(7))
 assert torch.equal(indices,again)""",
@@ -2869,7 +2869,7 @@ assert ('choose','test')[1]!='validation' """,
 lesson(
     36,
     "A reproducible model release is a bundle of state, schema, data identity, execution evidence and limitations. A valid artifact must reconstruct the intended model and produce checked predictions in a fresh process. A hash detects changed bytes but does not prove that the bytes contain a useful or honestly evaluated model. Release gates should fail on missing or incorrect evidence rather than silently treat unknown checks as passed.\n\nThis capstone trains a small scalar regressor under a fixed budget, saves its state with a feature/dtype schema and split manifest, and executes a fresh-process inference check. It then deliberately corrupts the declared state hash and proves that the loader rejects the bundle before using it. The temporary release is a local teaching artifact, not a deployment. The final record distinguishes local contract acceptance from unestablished production reliability and retains a rollback identity.",
-    "Train ann.Linear(1, 1, bias=False) on literal float64points using fixed SGD updates. Serialize state_dict, canonical JSON schema and split IDs into an owned Temporary Directory. Record SHA256 of the weight file. The child verifies the hash and schema before constructing the module and loading weights_only=True. Bound the subprocess, include stderr on unexpected failure, and remove only the owned temporary directory.",
+    "Train an nn.Linear(1, 1, bias=False) on literal float64 points using fixed SGD updates. Serialize state_dict, canonical JSON schema and split IDs into an owned Temporary Directory. Record SHA256 of the weight file. The child verifies the hash and schema before constructing the module and loading weights_only=True. Bound the subprocess, include stderr on unexpected failure, and remove only the owned temporary directory.",
     [
         (
             "Release bundle",
@@ -2885,16 +2885,16 @@ lesson(
     [
         ex(
             "Freeze the scalar experiment",
-            "Use train x = [1, 2, 3] and holdout4, 5 with target2x and disjoint IDs.",
-            "3 training and2holdout records.",
+            "Use train x = [1, 2, 3] and holdout 4, 5 with target 2x and disjoint IDs.",
+            "3 training and 2 holdout records.",
             """x=torch.tensor([[1.],[2.],[3.]],dtype=torch.float64); y=2*x; held=torch.tensor([[4.],[5.]],dtype=torch.float64)
 split={'train':['a','b','c'],'test':['d','e']}; assert not set(split['train'])&set(split['test']) and len(split['test'])==2""",
             "The data identity is fixed before training. The tiny holdout is useful for local mechanics but not sufficient for a broad quality claim.",
         ),
         ex(
             "Train within a declared budget",
-            "Zero-initialize float64Linear and run30SGD.01updates.",
-            "finite weights; holdout error below constant training-mean baseline26.",
+            "Zero-initialize a float64 Linear layer and run 30 SGD updates with learning rate 0.01.",
+            "finite weights; holdout error below constant training-mean baseline 26.",
             """model=nn.Linear(1,1,bias=False,dtype=torch.float64)
 with torch.no_grad(): model.weight.zero_()
 optimizer=torch.optim.SGD(model.parameters(),lr=.01)
@@ -2903,12 +2903,12 @@ for _ in range(30):
 model.eval()
 with torch.no_grad(): expected=model(held); error=(expected-2*held).square().mean().item()
 assert torch.isfinite(model.weight).all() and error<26""",
-            "The budget is not extended after seeing the holdout. The baseline predicts training mean target4, so gives errors16and36on the two test rows.",
+            "The budget is not extended after seeing the holdout. The baseline predicts training mean target 4, so gives errors 16 and 36 on the two test rows.",
         ),
         ex(
             "Build the owned release bundle",
             "Save weights, schema and split manifest with a weight SHA256.",
-            "manifest has feature x, float64, width1and matching hash.",
+            "manifest has feature x, float64, width 1 and matching hash.",
             """temporary=tempfile.TemporaryDirectory(); folder=Path(temporary.name); weights=folder/'weights.pt'; torch.save(model.state_dict(),weights)
 manifest={'schema':{'features':['x'],'dtype':'float64','width':1},'split':split,'weight_sha256':hashlib.sha256(weights.read_bytes()).hexdigest(),'steps':30}
 manifest_path=folder/'manifest.json'; manifest_path.write_text(json.dumps(manifest,sort_keys=True))
@@ -2918,7 +2918,7 @@ assert len(manifest['weight_sha256'])==64 and manifest['schema']['width']==1""",
         ex(
             "Verify fresh-process prediction parity",
             "Run the checked loader in a fresh interpreter and compare holdout predictions.",
-            "predictions match within1e-12.",
+            "predictions match within 1e-12.",
             '''child=textwrap.dedent("""
 import hashlib,json,sys,torch
 from pathlib import Path
@@ -2938,7 +2938,7 @@ np.testing.assert_allclose(json.loads(result.stdout.strip().splitlines()[-1]),ex
         ),
         ex(
             "Make a corrupted artifact fail",
-            "Replace the declared weight hash with64zeros and rerun the loader.",
+            "Replace the declared weight hash with 64 zeros and rerun the loader.",
             "nonzero child exit and weight hash mismatch diagnostic.",
             """broken={**manifest,'weight_sha256':'0'*64}; manifest_path.write_text(json.dumps(broken,sort_keys=True))
 rejected=subprocess.run([sys.executable,'-c',child,str(folder)],capture_output=True,text=True,timeout=60,check=False)
@@ -2948,7 +2948,7 @@ manifest_path.write_text(json.dumps(manifest,sort_keys=True))""",
         ),
         ex(
             "Record a bounded decision and cleanup",
-            "Record local parity pass, holdout count2, previous artifact v1 and production no-go, then remove owned files.",
+            "Record local parity pass, holdout count 2, previous artifact v1 and production no-go, then remove owned files.",
             "local checks True; production no-go; directory absent.",
             """receipt={'local_contracts_pass':True,'test_count':2,'previous_artifact':'v1','production_go':False,'limits':['synthetic fixture','no operational deployment test']}
 temporary.cleanup()

@@ -1,6 +1,6 @@
 # apache-024: Clients and supported language APIs
 
-Tutorial mode. Stage: intermediate. Direct prerequisites: `apache-021`, `apache-019`, `rust-001`.
+Tutorial mode. Stage: advanced. Direct prerequisites: `apache-021`, `apache-019`, `rust-001`.
 
 ## A language binding is not a universal compatibility promise
 
@@ -10,7 +10,7 @@ to a scheduler. A Java or Scala program does not gain the complete Spark API by
 connecting to a Ballista endpoint. Language, SQL dialect, wire protocol and release
 compatibility are separate questions that must be answered for the chosen path.
 
-The prepared workshop uses the released Python54.1.0 binding and its declared
+The prepared workshop uses the released 54.1.0 Python binding and its declared
 DataFusion 54 dependency. Its service classes are native Rust implementations exposed
 through Python, not Python simulations. The same image supplies scheduler, executors
 and client, reducing one source of version mismatch. This does not make arbitrary
@@ -40,7 +40,7 @@ A type mismatch or unsupported function should be surfaced as its actual error.
 Do not silently fall back to a local engine when distributed execution fails,
 because that changes the resource and data-visibility contract. A local control
 query can be useful, but its result must be labeled separately from the scheduler's
-result, as it is in chapter021.
+result, as it is in apache-021.
 
 ## Worked case B: read the native Rust client boundary
 
@@ -49,6 +49,39 @@ and collects a bounded grouped query. The source uses the selected crate's publi
 API and a prepared dependency graph. It illustrates the native entry point and
 ownership types without pretending that the ordinary Rust pad has those crates.
 Run its explicit preparation only when the compatible project environment is ready.
+
+The complete native client is short:
+
+From [`projects/ballista/rust-client/src/main.rs`](../projects/ballista/rust-client/src/main.rs):
+
+```rust
+use ballista::datafusion::{
+    common::Result,
+    prelude::{ParquetReadOptions, SessionContext},
+};
+use ballista::prelude::*;
+
+#[tokio::main]
+async fn main() -> Result<()> {
+    let context = SessionContext::remote("df://scheduler:50050").await?;
+    context
+        .register_parquet(
+            "orders",
+            "/state/orders.parquet",
+            ParquetReadOptions::default(),
+        )
+        .await?;
+    let batches = context.sql("SELECT region,COUNT(*) AS n,SUM(amount) AS total FROM orders GROUP BY region ORDER BY region").await?.collect().await?;
+    let rows: usize = batches.iter().map(|batch| batch.num_rows()).sum();
+    assert_eq!(rows, 2);
+    println!("Actual collected rows: {rows}; reconcile values with the independent fixture oracle");
+    Ok(())
+}
+```
+
+`SessionContext::remote` comes from `ballista::prelude` and returns an ordinary
+DataFusion `SessionContext` whose queries are planned for the remote scheduler, so
+`register_parquet`, `sql` and `collect` are the same calls as in local DataFusion.
 
 A Rust client still relies on matching plan codecs and supported operators at the
 remote scheduler and executors. Static compilation does not prove a query completed

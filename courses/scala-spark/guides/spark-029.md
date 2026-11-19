@@ -1,22 +1,22 @@
 # spark-029: Restartable batch writes and data-quality contracts
 
-Authored paired Scala/PySpark teaching content. The default fixtures are tiny,local and deterministic. Runtime acceptance,logical correctness and learner understanding remain separate evidence.
+Authored paired Scala/PySpark teaching content. The default fixtures are tiny, local and deterministic. Runtime acceptance, logical correctness and learner understanding remain separate evidence.
 
 ## Level and prerequisites
 
-Advanced; approximately 120 minutes. Direct design prerequisites: `spark-028`. The prepared baseline is Spark 4.0.1,Scala binary2.13,JDK 17 and Python 3.12. Read the [execution baseline](../execution-baseline.md); a proposed future tuple is not a runtime receipt.
+Advanced; approximately 120 minutes. Direct prerequisites: `spark-028`. The prepared baseline is Spark 4.0.1, Scala binary 2.13, JDK 17 and Python 3.12. Read the [execution baseline](../execution-baseline.md).
 
 ## How to run this lesson
 
-Open `spark-029` in the classroom and choose the Scala or PySpark implementation you understand. Prepare only its fixed `spark-local-scala` or `spark-local-python` profile,save your pad and run the complete source. Scala stages as `Main.scala` with `object Main`; Python stages as `main.py` with a main guard. Each program creates its own local[2] session,disables the UI,binds the driver to loopback and stops the session in finally. No external dataset,package download,JDBC connection or cloud service is requested.
+Open `spark-029` in the classroom and choose the Scala or PySpark implementation you understand. Prepare only its fixed `spark-local-scala` or `spark-local-python` profile, save your pad and run the complete source. Scala stages as `Main.scala` with `object Main`; Python stages as `main.py` with a main guard. Each program creates its own local[2] session, disables the UI, binds the driver to loopback and stops the session in finally. No external dataset, package download, JDBC connection or cloud service is requested.
 
 The [Scala learner](../lessons/spark-029.scala) and [PySpark learner](../lessons/spark-029.py) run two complete demonstrations and retain six explicit task stubs. Use the [explained solutions](../solutions/spark-029_solutions.md) only after an attempt or an explicit worked comparison; the [Scala reference](../solutions/spark-029_solution.scala) and [PySpark reference](../solutions/spark-029_solution.py) contain complete assertions. A bounded collect is used only for the declared tiny fixture; do not copy it onto an unbounded or large production table.
 
 ## Learning objectives
 
 - Make a bounded batch product repeatable without confusing overwrite, append and transactional publication.
-- State the input and output grain,schema,NULL policy and ordering before executing a transformation.
-- Compare each language implementation with independent literal expectations,not only with the other implementation.
+- State the input and output grain, schema, NULL policy and ordering before executing a transformation.
+- Compare each language implementation with independent literal expectations, not only with the other implementation.
 
 ## Vocabulary and concepts
 
@@ -36,7 +36,7 @@ Writing a dataset and publishing a dataset are separate operations. A reader sho
 
 The product contract is intentionally concrete: id and value are bigints, IDs 0 through 29 appear exactly once, value equals twice id, and the value total is 870. The canonical digest sorts the 30 rows by id, serializes each row through Spark's JSON representation, joins lines with a newline and no trailing newline, then hashes UTF-8 bytes with SHA-256. Both languages follow the same convention. The small full collection is explicitly bounded by the validated 30-row contract.
 
-A digest is not a substitute for validation. A file full of incorrect rows still has a perfectly validSHA-256. The validator therefore checks schema, population, identity range, uniqueness, missingness and the value rule before producing the digest. The staged Parquet product is read back and validated again, so the receipt describes actual persisted data rather than only an in-memory input that was intended to be written.
+A digest is not a substitute for validation. A file full of incorrect rows still has a perfectly valid SHA-256. The validator therefore checks schema, population, identity range, uniqueness, missingness and the value rule before producing the digest. The staged Parquet product is read back and validated again, so the receipt describes actual persisted data rather than only an in-memory input that was intended to be written.
 
 Each run ID is a restricted relative identifier such asrun-a. Paths are constructed inside the fresh owned root; manifest metadata cannot choose an arbitrary external file. The receipt records runs/run-a/data, row count 30, the declared schema and the content digest. Validation requires the stored run identity and relative path to match the expected values before opening that fixed owned path. This makes the manifest a governed pointer rather than a general filesystem command.
 
@@ -141,11 +141,11 @@ These synthetic receipt strings illustrate run identity without publishing anyth
 
 ### Exercise 1: Validate the product before computing its digest
 
-Require ordered fieldsid, value with bigint types, exactly 30 known unique IDs 0..29, known values equal to 2*id and total 870. ReturnSHA-256 of sorted SparkJSON lines joined by newline without a trailing newline.
+Require ordered fieldsid, value with bigint types, exactly 30 known unique IDs 0..29, known values equal to 2*id and total 870. Return SHA-256 of sorted Spark JSON lines joined by newline without a trailing newline.
 
 **Expected result/shape:** A64-character lowercase digest for the valid product. Wrong values, counts, types or identities are rejected before hashing.
 
-**Verify:** Assert a64-hex digest and equal digest after repartitioning; reject a 31-row source.
+**Verify:** Assert a 64-hex digest and equal digest after repartitioning; reject a 31-row source.
 
 **Progressive hint:** Schema/count/domain checks precede the bounded 30-row canonical collection.
 
@@ -205,17 +205,17 @@ Do not call append an idempotent retry or assume overwrite is atomic publication
 
 ## Self-check
 
-Explain the contract of `productDigest` / `product_digest` without reading its solution. Trace the specified boundary case,then explain the final exercise's evidence and limitation. Identify where a transformation builds a plan and where an action requests execution. Retain exact values or operator evidence rather than treating a successful process exit as proof of the whole learning objective.
+Explain the contract of `productDigest` / `product_digest` without reading its solution. Trace the specified boundary case, then explain the final exercise's evidence and limitation. Identify where a transformation builds a plan and where an action requests execution. Retain exact values or operator evidence rather than treating a successful process exit as proof of the whole learning objective.
 
 ## Next step
 
-Use the [course route](../README.md) to continue. Paired-language agreement is useful only when both outputs also satisfy the independent fixture contract. Keep runtime/profile receipts separate from any cluster-performance or production-recovery claim.
+Use the [course route](../README.md) to continue. Paired-language agreement is useful only when both outputs also satisfy the independent fixture contract. A successful local run is not evidence of cluster performance or production recovery.
 
 ## Primary sources and official APIs
 
 - [Spark 4.0.1 save modes and file writes](https://spark.apache.org/docs/4.0.1/sql-data-sources-load-save-functions.html)
 
-- [Java17 Files.move atomic-move contract](https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/nio/file/Files.html#move(java.nio.file.Path,java.nio.file.Path,java.nio.file.CopyOption...))
+- [Java 17 Files.move atomic-move contract](https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/nio/file/Files.html#move(java.nio.file.Path,java.nio.file.Path,java.nio.file.CopyOption...))
 
 - [Python os.replace](https://docs.python.org/3/library/os.html#os.replace)
 
@@ -223,8 +223,8 @@ Use the [course route](../README.md) to continue. Paired-language agreement is u
 
 ```text
 Use $guide-ds60sqlpy-learning to coach me through spark-029: Restartable batch writes and data-quality contracts.
-Read courses/scala-spark/guides/spark-029.md and courses/scala-spark/lessons/spark-029.py;the paired sources are courses/scala-spark/lessons/spark-029.scala and courses/scala-spark/lessons/spark-029.py.
-Direct prerequisites: spark-028. Explain the schema,row grain and new Scala/Python/Spark syntax,ask me to predict a concrete result,then inspect my attempt. Give one hint at a time,review exact result and boundary evidence,and ask retrieval questions in my own words. Do not read solutions/ until I ask or have made an honest attempt.
-Use only the prepared local[2] worker profile and owned job scratch. Do not download dependencies,start a remote service,reset existing checkpoints or alter unrelated learner work.
+Read courses/scala-spark/guides/spark-029.md and courses/scala-spark/lessons/spark-029.py; the paired sources are courses/scala-spark/lessons/spark-029.scala and courses/scala-spark/lessons/spark-029.py.
+Direct prerequisites: spark-028. Explain the schema, row grain and new Scala/Python/Spark syntax, ask me to predict a concrete result, then inspect my attempt. Give one hint at a time, review exact result and boundary evidence, and ask retrieval questions in my own words. Do not read solutions/ until I ask or have made an honest attempt.
+Use only the prepared local[2] worker profile and owned job scratch. Do not download dependencies, start a remote service, reset existing checkpoints or alter unrelated learner work.
 Done when all six contracts have inspected evidence and I can explain the stated assumptions and a meaningful failure case.
 ```

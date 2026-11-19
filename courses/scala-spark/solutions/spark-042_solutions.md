@@ -1,6 +1,6 @@
 # spark-042: Explained paired reference solutions
 
-Read the [guide](../guides/spark-042.md) and attempt one language first. The [Scala reference](spark-042_solution.scala) and [PySpark reference](spark-042_solution.py) are complete single-file programs with explicit local sessions and finally-based stop. Each compares with literal expectations;matching two implementations alone would not rule out a shared mistake.
+Read the [guide](../guides/spark-042.md) and attempt one language first. The [Scala reference](spark-042_solution.scala) and [PySpark reference](spark-042_solution.py) are complete single-file programs with explicit local sessions and finally-based stop. Each compares with literal expectations; matching two implementations alone would not rule out a shared mistake.
 
 ## Exercises and reasoning
 
@@ -8,7 +8,7 @@ Read the [guide](../guides/spark-042.md) and attempt one language first. The [Sc
 
 Require the explicit four-field schema, at most 8 rows and unique delivery IDs 1..12. Preserve NULL/business-invalid fields for classification and emit deterministic JSON.
 
-**Expected:** BatchA has four occurrences with IDsA, B, A, NULL;NULL is preserved in canonical input. An oversized batch is rejected before collection.
+**Expected:** Batch A has four occurrences with IDs A, B, A, NULL; NULL is preserved in canonical input. An oversized batch is rejected before collection.
 
 ```scala
 def canonicalProductInput(frame: DataFrame): String = {
@@ -74,15 +74,15 @@ def canonical_product_input(frame):
     return json.dumps(rows, sort_keys=True, separators=(",", ":"), ensure_ascii=False)
 ```
 
-The canonical input contains every occurrence, including rejected business data, so replay identity covers the complete batch rather than only successful rows. The structural delivery key makes accounting possible. A duplicated delivery ID or oversized batch is a fatal input-contract error;an ordinary NULL business ID is retained for the invalid ledger.
+The canonical input contains every occurrence, including rejected business data, so replay identity covers the complete batch rather than only successful rows. The structural delivery key makes accounting possible. A duplicated delivery ID or oversized batch is a fatal input-contract error; an ordinary NULL business ID is retained for the invalid ledger.
 
-**Verification evidence:** Compare decoded delivery IDs 1..4 and the NULL marker;reject a 12-row union.
+**Verification evidence:** Compare decoded delivery IDs 1..4 and the NULL marker; reject a 12-row union.
 
 ### Exercise 2: Implement the explicit state and lateness policy
 
 Freeze cutoff at previous committed max_event_second minus 10. Validate domain, then classify existing equal ID payload as duplicate, conflicting payload as invalid, new old event as late, and remaining event as accepted.
 
-**Expected:** AfterA:accepted 2, duplicate 1, late 0, invalid 1, total 30, max 105. An invalid far-future row does not advance max time.
+**Expected:** After A: accepted 2, duplicate 1, late 0, invalid 1, total 30, max 105. An invalid far-future row does not advance max time.
 
 ```scala
 def advancePolicy(previous: ProductState, events: Seq[ProductEvent]): ProductState = {
@@ -168,15 +168,15 @@ def advance_policy(previous, events):
     return next_state
 ```
 
-The classification order makes categories mutually exclusive and reviewable. A known equal event is duplicate even if its timestamp is now older than the admission cutoff;an ID conflict is invalid rather than a silent last-write-wins update. Only accepted events advance the committed maximum. The policy is application-managed bounded state, not a claim about Spark native watermark eviction.
+The classification order makes categories mutually exclusive and reviewable. A known equal event is duplicate even if its timestamp is now older than the admission cutoff; an ID conflict is invalid rather than a silent last-write-wins update. Only accepted events advance the committed maximum. The policy is application-managed bounded state, not a claim about Spark native watermark eviction.
 
-**Verification evidence:** Assert exact state and an invalid future control;preserve the original state value.
+**Verification evidence:** Assert exact state and an invalid future control; preserve the original state value.
 
 ### Exercise 3: Inject failure after publication but before query completion
 
 Run the actual foreachBatch query with one injected exception after the atomic commit file becomes visible.
 
-**Expected:** The query fails with injected_after_publication;commit 0 is readable and contains the correct first-state ledger.
+**Expected:** The query fails with injected_after_publication; commit 0 is readable and contains the correct first-state ledger.
 
 ```scala
 def failAfterCommit(spark: SparkSession, input: Path, checkpoint: Path, sink: Path): Unit = {
@@ -231,9 +231,9 @@ The same batch is delivered again because Spark did not record its successful co
 
 ### Exercise 5: Process late, boundary, duplicate and conflicting events
 
-PublishBatchB thenBatchC as separate immutable files and run each finite invocation against the same checkpoint.
+Publish Batch B then Batch C as separate immutable files and run each finite invocation against the same checkpoint.
 
-**Expected:** Final accepted IDsA, B, D, E, F, total 75;duplicate 2, late 1, invalid 2;10 logical occurrences. Zero-valuedD and cutoff-boundaryF remain accepted.
+**Expected:** Final accepted IDs A, B, D, E, F, total 75;duplicate 2, late 1, invalid 2;10 logical occurrences. Zero-valued D and cutoff-boundary F remain accepted.
 
 ```scala
 def finishProduct(
@@ -310,15 +310,15 @@ def finish_product(spark, root, input_path, checkpoint, sink):
     return load_product(sink, 2)
 ```
 
-BatchB deliberately presents eventE at 120 before eventD at 95. A mistaken moving cutoff would rejectD even though 95 is exactly the frozen boundary. BatchC distinguishes a conflictingB payload from an equal duplicate and acceptsF at the new boundary 110. The independent accepted-ID list catches a zero-dropping bug that the total alone would miss.
+Batch B deliberately presents event E at 120 before event D at 95. A mistaken moving cutoff would reject D even though 95 is exactly the frozen boundary. Batch C distinguishes a conflicting B payload from an equal duplicate and accepts F at the new boundary 110. The independent accepted-ID list catches a zero-dropping bug that the total alone would miss.
 
-**Verification evidence:** Compare intermediateB counts and the final literal state;the high-timeE must not make same-batchD late.
+**Verification evidence:** Compare intermediate B counts and the final literal state; the high-time E must not make same-batch D late.
 
 ### Exercise 6: Hand off correctness, recovery and resource evidence
 
 Return the exact final canonical state, record callback work 14 versus logical occurrences 10, and reject binding the existing sink to a different checkpoint.
 
-**Expected:** Literal golden state matches;attempt IDs 0,0,1,2;callback rows 4,4,4,2;only owned inactive queries are eligible for cleanup.
+**Expected:** Literal golden state matches; attempt IDs 0,0,1,2;callback rows 4,4,4,2;only owned inactive queries are eligible for cleanup.
 
 ```scala
 def handoffState(state: ProductState): String = {
@@ -338,10 +338,10 @@ def handoff_state(state):
     return state_json(state)
 ```
 
-The final state is compared with an independent literal JSON oracle, not only with the other language implementation. Four extra callback rows come from replayingBatchA, while the logical event ledger remains ten occurrences. The namespace guard refuses a new checkpoint before launching a query. Counts, retained keys, commit files and bounded attempts form a resource-work packet;they are not a measured cloud bill or proof of distributed durability.
+The final state is compared with an independent literal JSON oracle, not only with the other language implementation. Four extra callback rows come from replaying Batch A, while the logical event ledger remains ten occurrences. The namespace guard refuses a new checkpoint before launching a query. Counts, retained keys, commit files and bounded attempts form a resource-work packet; they are not a measured cloud bill or proof of distributed durability.
 
-**Verification evidence:** Compare the complete state JSON and namespace-refusal negative;state the single-writer/local-filesystem limitations.
+**Verification evidence:** Compare the complete state JSON and namespace-refusal negative; state the single-writer/local-filesystem limitations.
 
 ## Execution and interpretation
 
-Run the complete reference in its prepared fixed worker. The small fixture is constructed inside the program,so opening a lesson does not fetch data. A final success line is printed only after the reference assertions complete. Plan observations,partition evidence and resource measurements apply to the actual local configuration;they do not establish cluster-scale performance. Session cleanup is explicit,and any additional owned file/query lifecycle is described in the lesson.
+Run the complete reference in its prepared fixed worker. The small fixture is constructed inside the program, so opening a lesson does not fetch data. A final success line is printed only after the reference assertions complete. Plan observations, partition evidence and resource measurements apply to the actual local configuration; they do not establish cluster-scale performance. Session cleanup is explicit, and any additional owned file/query lifecycle is described in the lesson.

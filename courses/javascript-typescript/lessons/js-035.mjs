@@ -1,11 +1,22 @@
 // Answer-free learner source. Save your own copy before editing.
-// Exercise 1: Compare offset spellings of one instant
-// Parse UTC midnight and the equivalent previous-day offset representation.
-// Expected: equal timestamps and UTC ISO output.
+// Exercise 1: Compare offset spellings of one instant: change one input
+// Copy Example A into a scratch `main.mjs` and change `const utc = new
+// Date('2024-01-01T00:00:00Z');` to `const utc = new Date('2025-01-01T00:00:00Z');`. Before
+// running it, predict which check fails and which value it now sees; then run it and restore
+// the original line.
+// Expected: The changed run fails with an `AssertionError` at the check
+// `assert.equal(utc.getTime(), offset.getTime())`. Restoring the original line brings back
+// the worked observation: equal timestamps and UTC ISO output.
 
-// Exercise 2: Observe a spring-forward clock gap
-// Format two instants one hour apart across the New York spring transition.
-// Expected: local hour changes from 01 to 03 while elapsed time is one hour.
+// Exercise 2: Observe a spring-forward clock gap: diagnose an edited check
+// A careless edit changed a check in Example B so that it reads
+// `assert.equal(after.getTime() + before.getTime(), 60 * 60 * 1000);`. Run Example B with
+// that line, explain why the edited check now fails for the same program state, and restore
+// it.
+// Expected: Before the repair the run fails with an `AssertionError` at the check
+// `assert.equal(after.getTime() - before.getTime(), 60 * 60 * 1000)`; after it the line
+// reads `assert.equal(after.getTime() - before.getTime(), 60 * 60 * 1000);` again and local
+// hour changes from 01 to 03 while elapsed time is one hour.
 
 // Exercise 3: Reject impossible or ambiguous calendar text
 // Accept leap-day 2024-02-29 and reject 2023-02-29, slash format and month 13.

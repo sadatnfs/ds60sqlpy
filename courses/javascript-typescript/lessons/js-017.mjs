@@ -1,11 +1,20 @@
 // Answer-free learner source. Save your own copy before editing.
-// Exercise 1: Request a valid local calculation
-// GET /sum with a=2 and b=3 and inspect status, content type and JSON.
-// Expected: status 200; application/json; total 5.
+// Exercise 1: Request a valid local calculation: change one input
+// Copy Example A into a scratch `main.mjs` and change `new URL('/sum?a=2&b=3', base)` to
+// `new URL('/sum?a=3&b=3', base)`. Before running it, predict which check fails and which
+// value it now sees; then run it and restore the original line.
+// Expected: The changed run fails with an `AssertionError` at the check
+// `assert.deepEqual(await response.json(), { total: 5 })`. Restoring the original line
+// brings back the worked observation: status 200; application/json; total 5.
 
-// Exercise 2: Inspect an HTTP error without expecting fetch rejection
-// Request an unknown route and inspect the actual response.
-// Expected: fetch resolves; status 404, ok false, error not_found.
+// Exercise 2: Inspect an HTTP error without expecting fetch rejection: diagnose an edited check
+// A careless edit changed a check in Example B so that it reads `assert.deepEqual(await
+// response.json(), { error: 'not_found!' });`. Run Example B with that line, explain why the
+// edited check now fails for the same program state, and restore it.
+// Expected: Before the repair the run fails with an `AssertionError` at the check
+// `assert.deepEqual(await response.json(), { error: 'not_found' })`; after it the line reads
+// `assert.deepEqual(await response.json(), { error: 'not_found' });` again and fetch
+// resolves; status 404, ok false, error not_found.
 
 // Exercise 3: Encode query values through the URL API
 // Round-trip a query containing spaces, ampersand and equals without contacting a server.

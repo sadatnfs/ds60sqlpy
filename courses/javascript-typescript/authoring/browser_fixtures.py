@@ -213,10 +213,10 @@ Copy this whole folder into a new learner-owned ignored directory, for example `
 
 Use Explorer, Finder or your native file-copy tool to make a **new learner-owned copy** of this whole folder under `.learning/expansion/js-{number:03d}-browser/`. Preserve an existing copy by choosing a new name. Open a terminal in that copied folder. Mount only this copy, not the repository, its parent directory or the authenticated classroom files.
 
-The already prepared `ds60sqlpy-lab:0.4.1` image supplies Python inside Docker, so no host Python installation is required. Use a separate origin for each lesson. From the copied directory, POSIX shells use:
+The already prepared `ds60sqlpy-lab:1.4.0` image supplies Python inside Docker, so no host Python installation is required. Use a separate origin for each lesson. From the copied directory, POSIX shells use:
 
 ```bash
-docker run --pull never --rm --name ds60-js-{number:03d}-static --read-only --user 65534:65534 --cap-drop ALL --security-opt no-new-privileges --memory 128m --cpus 1 --pids-limit 64 --publish 127.0.0.1:{8700 + number}:8000 --mount "type=bind,source=$PWD,target=/site,readonly" --entrypoint python ds60sqlpy-lab:0.4.1 -m http.server 8000 --bind 0.0.0.0 --directory /site
+docker run --pull never --rm --name ds60-js-{number:03d}-static --read-only --user 65534:65534 --cap-drop ALL --security-opt no-new-privileges --memory 128m --cpus 1 --pids-limit 64 --publish 127.0.0.1:{8700 + number}:8000 --mount "type=bind,source=$PWD,target=/site,readonly" --entrypoint python ds60sqlpy-lab:1.4.0 -m http.server 8000 --bind 0.0.0.0 --directory /site
 ```
 
 Windows users run the same Bash command inside their Docker-integrated WSL 2 terminal.

@@ -17,6 +17,16 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         assert_eq!(iterator.next(), Some(3));
         assert_eq!(iterator.next(), None);
     }
+
+    {
+        // Task 3: Independent construction
+        fn upper_names(names: &[&str]) -> Vec<String> {
+            names.iter().map(|name| name.to_uppercase()).collect()
+        }
+        let names = ["pear", "fig"];
+        assert_eq!(upper_names(&names), vec!["PEAR", "FIG"]);
+        assert_eq!(names, ["pear", "fig"]);
+    }
     println!("rust-020: passed");
     Ok(())
 }

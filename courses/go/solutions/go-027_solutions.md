@@ -8,9 +8,11 @@ A mutex protects a state invariant across several operations. Every relevant acc
 
 sync.Mutex uses Lock and Unlock; defer Unlock after acquisition handles early returns. atomic.Int64 supplies typed Load, Store and Add. sync.Once runs one initialization function. Keep synchronized state in a pointer-owned holder so it is not copied accidentally. count++ on an ordinary shared integer is a read-modify-write sequence, not an atomic operation.
 
-## 1. Protect a concurrent count
+## 1. Protect a concurrent count: change one input
 
-Run four workers doing 100 protected increments each.
+Copy worked example 1 into a scratch pad and change `for i := 0; i < 4; i++ {` to `for i := 1; i < 4; i++ {`. Before running, predict which check fails and which value it now sees; then run it and restore the original line.
+
+The unchanged code is worked example 1:
 
 ```go
 c := &LockedCount{}
@@ -28,13 +30,15 @@ wg.Wait()
 check(c.Value() == 400, "count")
 ```
 
-**Expected:** The joined final count is 400.
+**Expected:** The changed run panics with `count` because `c.Value() == 400` no longer holds. Restoring the original line brings back the worked observation: the joined final count is 400.
 
 Reads and writes use the same lock. The join establishes task completion before inspection.
 
-## 2. Use a typed atomic
+## 2. Use a typed atomic: debug a regression
 
-Add 3 and 4 through atomic.Int64.
+A regression changed `n.Add(3)` to `n.Add(4)` in worked example 2. Run worked example 2 with that change, use the failure to explain the defect and repair it without changing the check.
+
+The unchanged code is worked example 2:
 
 ```go
 var n atomic.Int64
@@ -43,7 +47,7 @@ n.Add(4)
 check(n.Load() == 7, "atomic")
 ```
 
-**Expected:** Load returns 7.
+**Expected:** Before the repair the program panics with `atomic`; after it the line reads `n.Add(3)` again and load returns 7.
 
 Use the atomic access API consistently. Mixing it with ordinary conflicting accesses undermines the protocol.
 

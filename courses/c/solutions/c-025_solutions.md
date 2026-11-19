@@ -8,9 +8,11 @@ Recursion solves a problem by invoking the same mechanism on smaller subproblems
 
 A node stores value, left and right pointers. NULL represents an empty subtree. A sum traversal combines the root value with both subtree sums. A depth function returns zero for empty and one plus the greater child depth otherwise. The bounded search checks its remaining depth before descending. General graph traversal also needs visited-state handling because a cycle is not a valid finite tree.
 
-## Exercise 1: Traverse a small tree
+## Exercise 1: Traverse a small tree: change one input
 
-Sum a root 2 with children 1 and 3.
+Copy worked example 1 into a scratch pad and change `struct Tree left = {1, NULL, NULL}, right = {3, NULL, NULL},` to `struct Tree left = {2, NULL, NULL}, right = {3, NULL, NULL},`. Before running, predict which CHECK fails and which value it now sees; then run it and restore the original line.
+
+The unchanged code is worked example 1:
 
 ```c
 struct Tree left = {1, NULL, NULL}, right = {3, NULL, NULL},
@@ -18,19 +20,21 @@ struct Tree left = {1, NULL, NULL}, right = {3, NULL, NULL},
 CHECK(tree_sum(&root) == 6);
 ```
 
-**Expected:** The total is 6.
+**Expected:** The changed run stops with `Check failed` at the CHECK on `tree_sum(&root) == 6`. Restoring the original line brings back the worked observation: the total is 6.
 
 Each node contributes once under the acyclic tree assumption.
 
-## Exercise 2: Handle an empty tree
+## Exercise 2: Handle an empty tree: diagnose an edited check
 
-Sum NULL.
+A careless edit changed the CHECK in worked example 2 so that it reads `CHECK(tree_sum(NULL) != 0);`. Run worked example 2 with that line, explain why the edited CHECK now fails for the same program state, and restore it.
+
+The unchanged code is worked example 2:
 
 ```c
 CHECK(tree_sum(NULL) == 0);
 ```
 
-**Expected:** The result is zero.
+**Expected:** Before the repair the run stops with `Check failed` at the CHECK on `tree_sum(NULL) == 0`; after it the line reads `CHECK(tree_sum(NULL) == 0);` again and the result is zero.
 
 The empty subtree contributes the additive identity and ends recursion.
 

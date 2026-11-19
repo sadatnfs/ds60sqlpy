@@ -15,6 +15,14 @@ The model states SQL logic, project configuration defines resource locations, an
 
 The source expression changes while the result remains equal. That is a concrete example of why source identity and result equality are different evidence.
 
+```python
+# Uses the tempfile import and the project(), invoke() and rows() helpers in main.py.
+with tempfile.TemporaryDirectory() as d:
+    p = project(d, models={"answer": "select 21 * 2 as answer"})
+    invoke(p, "build")
+    assert rows(p, "select answer from answer") == [(42,)]
+```
+
 **Expected:** The database still returns 42.
 
 ## 3. Introduce invalid SQL
@@ -173,4 +181,4 @@ if __name__ == "__main__":
 
 ## Interpretation
 
-Build and inspect a local dbt project through its real adapter. Keep parsing, compilation, materialization and validation distinct. This gives you a reliable basis for the later incremental, contract and publication lessons without depending on a hosted warehouse.
+Keep parsing, compilation, materialization and validation distinct. This gives you a reliable basis for the later incremental, contract and publication lessons without depending on a hosted warehouse.

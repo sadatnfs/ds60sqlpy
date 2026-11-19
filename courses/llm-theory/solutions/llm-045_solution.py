@@ -16,7 +16,7 @@ def layer_norm(x, eps=1e-8):
 
 
 def verify():
-    # Exercise 1: Compare RMSNorm andLayerNorm
+    # Exercise 1: Compare RMSNorm and LayerNorm
     x = torch.tensor([3.0, 4.0], dtype=torch.float64)
     rms = rms_norm(x)
     centered = layer_norm(x)
@@ -67,7 +67,7 @@ def verify():
     result = (F.silu(inputs @ wg) * (inputs @ wu)) @ wd
     assert tuple(result.shape) == (2, 4) and torch.isfinite(result).all()
 
-    # Exercise 6: Test invariance andzero-vector boundaries
+    # Exercise 6: Test invariance and zero-vector boundaries
     base = torch.tensor([1.0, 2.0, 3.0], dtype=torch.float64)
     torch.testing.assert_close(layer_norm(base + 5), layer_norm(base), atol=1e-12, rtol=0)
     assert not torch.allclose(rms_norm(base + 5), rms_norm(base))

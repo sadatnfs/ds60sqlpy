@@ -57,6 +57,7 @@ Never use a live production snapshot as a convenient classroom fixture. The synt
             "Two distinct sources and restore checks.",
             "Ask where each byte is actually stored.",
             "The API data store records Kubernetes state, while workload data can live in a separate storage system. Treating the claim object as the file backup confuses a reference to storage with the contents of that storage.",
+            "For each item, name where its bytes live, the API store or the volume, and which backup captures them.",
         ),
         (
             "Record a synthetic data checksum",
@@ -64,6 +65,7 @@ Never use a live production snapshot as a convenient classroom fixture. The synt
             "Equal bytes match; changed bytes fail the reference digest.",
             "Keep the reference independent from the restored copy.",
             "Recomputing both expected and actual from the restored file would make the check meaningless. The expected digest belongs to the captured backup record, and the read-only verification must inspect the restored application path.",
+            "Hash both byte strings with SHA-256 and compare each digest with the independent reference digest.",
         ),
         (
             "Define consistency assumptions",
@@ -71,6 +73,7 @@ Never use a live production snapshot as a convenient classroom fixture. The synt
             "No claim of database-consistent backup or log replay.",
             "Concurrent writes change the backup problem.",
             "The fixture deliberately holds data constant so the learner can isolate restoration boundaries. A real database requires its own consistency and recovery design, which cannot be inferred from a successful marker copy.",
+            "Name one property of a live database, such as concurrent writes or transactions, that this fixture does not have.",
         ),
         (
             "Evaluate the partial restore",
@@ -78,6 +81,7 @@ Never use a live production snapshot as a convenient classroom fixture. The synt
             "Overall recovery fails until both API and data gates pass.",
             "Ready does not mean correct data.",
             "The separate failure row prevents a misleading success report. It also points to the correct repair path: investigate or repeat the qualified data restoration, rather than merely restarting an already Ready Pod.",
+            "Evaluate the API gate and the data gate separately, then combine them with AND.",
         ),
         (
             "Protect backup material",
@@ -85,6 +89,7 @@ Never use a live production snapshot as a convenient classroom fixture. The synt
             "No snapshots or secrets in portable progress; only bounded metadata and synthetic checksums.",
             "API snapshots can include sensitive objects.",
             "Operational evidence should identify the procedure and outcome without copying the source of sensitive data. Access, encryption and retention belong to the host backup contract and are distinct from the classroom checksum exercise.",
+            "Check each item against the rule that snapshots and secrets stay private while bounded metadata and checksums may be shared.",
         ),
         (
             "Review target isolation and cleanup",
@@ -92,6 +97,7 @@ Never use a live production snapshot as a convenient classroom fixture. The synt
             "No restore into an ambient or shared target; exact owned cleanup.",
             "A restore is a state replacement operation.",
             "The host must prove the intended destination before executing a restore and retain a recovery path for failures. The lesson worksheet alone never authorizes arbitrary control-plane changes or deletion of unrelated volumes.",
+            "Confirm that the destination is a dedicated owned target and that the disposal step names exact identities.",
         ),
     ],
     [cm],
@@ -132,7 +138,7 @@ The normal runtime currently qualifies one pinned stack. A second stack is unava
 
 Include CRD schemas, conversion behavior, controller images, admission policies, Gateway/CNI and storage-driver contracts when the workload uses them. The application can fail even when every built-in object is accepted. A deprecated API still served on source may be removed on destination; changing apiVersion may require field and behavior changes rather than a text substitution.
 
-Consult the version-skew policy for the exact component releases before the host qualifies a pair. Do not infer compatibility because two versions share the same major number. Record actual tools and server versions in the receipt, and distinguish supported combinations from combinations that merely happened to start.""",
+Consult the version-skew policy for the exact component releases before the host qualifies a pair. Its core rules are: a kubelet and kube-proxy must never be newer than the kube-apiserver and may be up to three minor versions older; kube-controller-manager, kube-scheduler and cloud-controller-manager must not be newer than the kube-apiserver and may be at most one minor version older; and kubectl is supported within one minor version, older or newer, of the kube-apiserver. Upgrade the control plane first, then the nodes, one minor version at a time. Do not infer compatibility because two versions share the same major number. Record actual tools and server versions in the receipt, and distinguish supported combinations from combinations that merely happened to start.""",
         ),
         (
             "Rehearse replacement with reversible routing",
@@ -152,7 +158,7 @@ Do not treat replacement as a universal substitute for an upgrade procedure. Pro
     [
         (
             "Read a four-gate matrix",
-            """Synthetic A: API pass,controller pass,application pass,data pass. Synthetic B before preparation: API pass,controller unavailable,application unavailable,data not restored. The second row is not accepted merely because its API gate passed.""",
+            """Synthetic A: API pass, controller pass, application pass, data pass. Synthetic B before preparation: API pass, controller unavailable, application unavailable, data not restored. The second row is not accepted merely because its API gate passed.""",
             "B remains unavailable until all required capability and acceptance rows have evidence.",
         ),
         (
@@ -164,10 +170,11 @@ Do not treat replacement as a universal substitute for an upgrade procedure. Pro
     [
         (
             "List exact version inputs",
-            "Name server,node image,client,controller and storage/network versions needed in a receipt.",
+            "Name server, node image, client, controller and storage/network versions needed in a receipt.",
             "A concrete pinned stack rather than a generic latest label.",
             "Extensions have compatibility contracts too.",
             "The core skew policy is only one part of the environment. A reproducible rehearsal identifies the actual components and immutable artifacts so another host can understand what was tested and what remains outside scope.",
+            "Check that every component in your receipt has an exact version and that kubelet and kubectl sit within the supported version skew from the API server.",
         ),
         (
             "Audit API usage",
@@ -175,6 +182,7 @@ Do not treat replacement as a universal substitute for an upgrade procedure. Pro
             "Every used API/feature has a server acceptance row.",
             "Local YAML parsing is not API discovery.",
             "This inventory exposes removed APIs and feature fields before application testing. A simple textual version replacement can miss changed schemas or semantics, so validation needs the actual destination API contract.",
+            "Use `kubectl api-resources` or a server-side dry run against each destination and mark each API row accepted or missing.",
         ),
         (
             "Evaluate the incomplete matrix",
@@ -182,6 +190,7 @@ Do not treat replacement as a universal substitute for an upgrade procedure. Pro
             "Destination not accepted; controller capability remains missing.",
             "One successful layer does not stand in for all layers.",
             "The matrix prevents an early check from being inflated into overall readiness. A missing controller is explicit work for the host qualification process, not an excuse to invent its effects in a worksheet.",
+            "Read each layer's row separately; one unavailable layer is enough to block acceptance.",
         ),
         (
             "Compare synthetic data",
@@ -189,6 +198,7 @@ Do not treat replacement as a universal substitute for an upgrade procedure. Pro
             "Mismatch blocks promotion even when /version succeeds.",
             "Keep data lineage separate from image/version output.",
             "The application can run with empty or wrong storage. The marker is a small but concrete data contract that catches this class of migration defect without pretending to represent a full database migration.",
+            "Compare the destination hash with the independently captured source hash, not with the `/version` response.",
         ),
         (
             "Design a rollback boundary",
@@ -196,6 +206,7 @@ Do not treat replacement as a universal substitute for an upgrade procedure. Pro
             "Source retained through the stated window; mutable-data rollback is outside this immutable fixture.",
             "Routing reversal does not reverse data history.",
             "The controlled example has a fixed marker, so rollback reasoning is simple. A real write-producing workload requires a plan for divergence and data compatibility, which cannot be solved by keeping an old cluster name alone.",
+            "State when the source may be released and which destination writes a reversal would lose.",
         ),
         (
             "Write the qualification conclusion",
@@ -203,6 +214,7 @@ Do not treat replacement as a universal substitute for an upgrade procedure. Pro
             "Only the exact tested stack and synthetic workload gates are claimed.",
             "Name untested plugins and failure modes.",
             "The conclusion should be useful without exaggeration: it can establish specific API and application compatibility, expose missing capabilities and preserve a repeatable packet, while leaving broader production upgrade design to its own procedure.",
+            "Check that the conclusion names the exact versions tested and lists the untested plugins and failure modes.",
         ),
     ],
     hello(True),
@@ -260,13 +272,13 @@ The synthetic attestation includes a publisher label for teaching. The label is 
 openssl dgst -sha256 -verify courses/kubernetes/fixtures/provenance/publisher-public.txt -signature courses/kubernetes/fixtures/provenance/attestation.sig courses/kubernetes/fixtures/provenance/attestation.json
 ```
 
-Expected: verification succeeds and the process exit code is0. Run the same command with attestation-tampered.json as the final argument. Expected: verification fails and the exit code is nonzero. In POSIX inspect `$?` immediately after the command; in PowerShell inspect `$LASTEXITCODE`. Do not judge success from a banner alone.
+Expected: verification succeeds and the process exit code is 0. Run the same command with attestation-tampered.json as the final argument. Expected: verification fails and the exit code is nonzero. In POSIX inspect `$?` immediately after the command; in PowerShell inspect `$LASTEXITCODE`. Do not judge success from a banner alone.
 
-The authoring receipt records both outcomes using LibreSSL3.3.6's OpenSSL-compatible command. This is an actual local cryptographic test, distinct from the standard-library hash checker linked below. A different qualified verifier should repeat both controls before being used for live policy decisions.""",
+The authoring receipt records both outcomes using LibreSSL 3.3.6's OpenSSL-compatible command. This is an actual local cryptographic test, distinct from the standard-library hash checker linked below. A different qualified verifier should repeat both controls before being used for live policy decisions.""",
         ),
         (
             "Connect verification to deployment cautiously",
-            """An OCI image digest identifies a registry manifest or index under the image-distribution contract, not the arbitrary synthetic string used here. Multi-platform indices and platform-specific manifests also need explicit interpretation. The current course image tag0.2.0 remains a runtime allowlist identity, not a signature-based admission policy.
+            """An OCI image digest identifies a registry manifest or index under the image-distribution contract, not the arbitrary synthetic string used here. Multi-platform indices and platform-specific manifests also need explicit interpretation. The current course image tag 0.2.0 remains a runtime allowlist identity, not a signature-based admission policy.
 
 A full image-provenance lab requires prewarmed real image digest and signature/bundle material, an offline-qualified verification tool and a host policy that binds the verified subject to the submitted image. Those capabilities are not supplied by this synthetic signature exercise. Never fetch new trust data silently or replace a failed trusted key with one found in the rejected artifact.""",
         ),
@@ -279,17 +291,18 @@ A full image-provenance lab requires prewarmed real image digest and signature/b
         ),
         (
             "Verify original and tampered signed bytes",
-            """Use the two CLI invocations above with the same public key and signature. Only the input attestation changes from schema1 to schema2. The original succeeds and the modified file fails.""",
+            """Use the two CLI invocations above with the same public key and signature. Only the input attestation changes from schema 1 to schema 2. The original succeeds and the modified file fails.""",
             "The tamper control demonstrates that verification depends on the signed bytes; this is a synthetic publisher test, not real image provenance certification.",
         ),
     ],
     [
         (
             "Identify trust inputs",
-            "List payload,signature,public key and expected content digest.",
+            "List payload, signature, public key and expected content digest.",
             "Four distinct roles with an independently chosen trust key.",
             "Do not obtain the trusted key from the untrusted payload itself.",
             "A signature check is meaningful only relative to a trust decision. The course fixes a synthetic public key so the mathematical verification can be tested while making clear that no real organizational publisher identity is established.",
+            "Confirm that the trusted key came from a source other than the payload being verified.",
         ),
         (
             "Check content integrity",
@@ -297,13 +310,15 @@ A full image-provenance lab requires prewarmed real image digest and signature/b
             "Different content produces a different expected comparison result.",
             "Hash the exact bytes with the declared algorithm.",
             "The digest comparison must use an independent expected value. Computing a fresh digest and merely printing it is not an integrity check, because there is nothing trusted to compare it against.",
+            "Hash both byte sequences with the declared algorithm and compare the digests.",
         ),
         (
             "Verify the positive signature",
             "Run the qualified CLI over attestation.json with the fixed key/signature.",
-            "Exit0 plus successful verification output, with tool identity recorded.",
+            "Exit 0 plus successful verification output, with tool identity recorded.",
             "Use the exact signed file bytes.",
             "This is the cryptographic positive control. The standard-library chapter checker cannot replace it because it only computes hashes. Keep the tool version and trust input fingerprint with the receipt for reproducibility.",
+            "Record the exact command, its exit status and the tool version for the original file.",
         ),
         (
             "Verify the tamper negative",
@@ -311,6 +326,7 @@ A full image-provenance lab requires prewarmed real image digest and signature/b
             "Nonzero exit and verification failure.",
             "Hold trust inputs constant.",
             "The negative control catches a verifier invocation that accidentally ignores the signature or checks the wrong file. Re-signing the modified file or replacing the public key would destroy the intended experiment.",
+            "Repeat with the same key and signature; only the payload file may differ between the two runs.",
         ),
         (
             "Join signature subject to artifact",
@@ -318,6 +334,7 @@ A full image-provenance lab requires prewarmed real image digest and signature/b
             "The signed subject digest must match the actual artifact under the correct format contract.",
             "Verification is not transferable to arbitrary bytes.",
             "A signature authenticates a statement under its trust assumptions. Deployment authorization also requires matching that statement to the artifact being deployed and applying the intended policy, rather than accepting any valid signature.",
+            "Compare the subject digest inside the signed statement with the actual artifact digest.",
         ),
         (
             "State enforcement and offline limits",
@@ -325,6 +342,7 @@ A full image-provenance lab requires prewarmed real image digest and signature/b
             "Synthetic RSA fixture only; real image and cluster policy qualification remain separate.",
             "Local verification does not install an admission rule.",
             "The report should state exactly which algorithm, key and payload were tested. It should not claim registry provenance, transparency-log validation or enforced cluster protection without the corresponding real materials and runtime receipts.",
+            "List what this check cannot prove: registry provenance, cluster admission and the identity of a real image.",
         ),
     ],
     hello(),
@@ -393,37 +411,41 @@ Do not widen permissions to demonstrate a forbidden action live. Do not collect 
         (
             "Distinguish evidence layers",
             """Synthetic result A: hostPath YAML refused locally. Result B: independent server admission test refuses privileged container. Result C: paired traffic clients confirm an allowed/denied path in a qualified CNI.""",
-            "A,B,C are three separate controls. None should be relabeled as proof that every other layer was exercised.",
+            "A, B, C are three separate controls. None should be relabeled as proof that every other layer was exercised.",
         ),
     ],
     [
         (
             "Write a threat model",
-            "Name learner,host operator and unrelated tenant, with their trusted capabilities.",
+            "Name learner, host operator and unrelated tenant, with their trusted capabilities.",
             "Actors and assets are explicit rather than a blanket secure claim.",
             "Start with who can submit what.",
             "The host operator has powers the learner deliberately lacks. Distinguishing those actors prevents a namespace boundary from being misrepresented as protection against the administrator who controls the host or credentials.",
+            "Check that each actor has listed capabilities and that each asset has an owner.",
         ),
         (
             "Classify six adversarial fields",
-            "Map foreign namespace,privileged,hostPath,unapproved image,foreign service account and shell command to rejections.",
+            "Map foreign namespace, privileged, hostPath, unapproved image, foreign service account and shell command to rejections.",
             "Every field has a named closed-schema or ownership rule.",
             "Inspect fields rather than executing the payload.",
             "The rejected shapes are concrete and reviewable. A successful local negative test shows the broker source boundary, while independent API and runtime controls require their own evidence and should not be inferred automatically.",
+            "For each field, cite the parser or ownership rule that rejects it.",
         ),
         (
             "Review credential exposure",
-            "Explain why tokens,engine sockets and ambient kubeconfig stay outside learner artifacts.",
+            "Explain why tokens, engine sockets and ambient kubeconfig stay outside learner artifacts.",
             "No alternate path around the bounded operation API.",
             "A hidden broad credential can defeat a narrow UI.",
             "The effective boundary includes the process environment and mounts, not just the manifest form. A learner-facing API that rejects unsafe YAML is insufficient if the same process can directly reach an unrestricted engine socket.",
+            "Confirm that no credential, engine socket or kubeconfig path appears in any learner-visible file.",
         ),
         (
             "Separate resource and network controls",
-            "Compare CPU limits,quota,deadlines and NetworkPolicy.",
+            "Compare CPU limits, quota, deadlines and NetworkPolicy.",
             "Each constrains a different resource or traffic dimension.",
             "Do not substitute one control for another.",
             "CPU limits constrain execution consumption, quotas constrain admitted object/resource totals, deadlines bound operations, and network policy governs supported traffic paths. Their effectiveness and failure modes must be tested separately.",
+            "Name the dimension each control constrains: compute, object count, time or traffic.",
         ),
         (
             "Inspect cleanup identity defenses",
@@ -431,6 +453,7 @@ Do not widen permissions to demonstrate a forbidden action live. Do not collect 
             "Foreign object preserved and cleanup reports the mismatch.",
             "Names can be reused by another operation.",
             "Cleanup is itself a security-sensitive action. Ownership labels, nonce and UID preconditions prevent a stale operation from deleting a replacement or unrelated object after a race or partial failure.",
+            "Compare UID and nonce with the receipt before cleanup; a mismatched object must be preserved and reported.",
         ),
         (
             "State residual assumptions",
@@ -438,6 +461,7 @@ Do not widen permissions to demonstrate a forbidden action live. Do not collect 
             "No arbitrary-code or VM-equivalent isolation claim; host trust and qualified controls are named.",
             "A bounded allowed workload is a smaller claim.",
             "The conclusion should tell an instructor what was actually established and what would need a different design. It preserves useful assurance while avoiding an unsupported promise about hostile tenants or kernel vulnerabilities.",
+            "Confirm that the statement lists untested threats and makes no virtual-machine-equivalent isolation claim.",
         ),
     ],
     hello(),

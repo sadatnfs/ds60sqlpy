@@ -19,6 +19,14 @@ def write_readme():
     }
     text = f"""# Language-model mechanisms and evidence
 
+> **Study in the unified classroom:** run `./classroom` from the repository
+> root, then choose **Language-model mechanisms and evidence** on `/classroom`. Python, SQL and all other
+> subjects share this home and workspace. Each subject has its own theme;
+> prerequisites guide your choices and you set the pace. The
+> [one-command setup](../../docs/one-command-classroom.md) prepares the Docker runtimes and preserves saved
+> work.
+
+
 All **48 chapters** are authored, from probability and tokenization through actual tiny-model training, inference, evaluation and modern Transformer mechanisms. The route has {counts["python-core"]} Core/NumPy lessons, {counts["llm-torch-cpu"]} PyTorch CPU lessons and {counts["reading"]} reading lessons. The index below is generated from the reviewed plan and complete authored manifest.
 
 ## Start in the Docker classroom
@@ -27,13 +35,15 @@ Use the [Docker classroom setup](../../docs/docker-classroom.md), open **All lea
 
 Reading chapters use written calculations and reasoning cases. Their read marker is a study record, not an executed test or proof of mastery. For code chapters, record predictions, attempt the six tasks, use progressive hints, then compare the separate executable and explained solutions after an attempt. Preserve learner work under the classroom's saved pad or ignored `.learning/expansion/` directories.
 
-The default lessons use tiny literal offline fixtures and bounded CPU computations. No default chapter downloads model weights or calls a paid model API. The [validation guide](../../docs/validation.md) defines execution gates. Inspect CI artifacts for the exact revision and platform before claiming that a reference or worked example was executed. Runtime evidence is separate from a claim that a small model is a reliable subject expert.
+The default lessons use tiny literal offline fixtures and bounded CPU computations. No default chapter downloads model weights or calls a paid model API. The [implementation checkpoint](../../docs/implementation/CHECKPOINT.md) explains the current architecture and evidence boundaries. Runtime evidence is separate from a claim that a small model is a reliable subject expert.
 
 ## Follow a complete Transformer calculation
 
 [Inside a Transformer](../../docs/learning/inside-a-transformer.md) walks through an inspectable NumPy decoder forward pass, tensor shapes, causal-prefix checks, a finite-difference derivative and an explicitly head-only update. Use it alongside chapters 009-011 and 016, then continue to 043-048 for architecture families, positional methods, RMSNorm/SwiGLU, head sharing and exact blockwise attention, sparse experts and speculative decoding.
 
 For a subject assistant, retrieval or fine-tuning project, continue into [Applied LLM systems](../llm-applied/README.md). That route develops corpus provenance, chunking, lexical/hybrid retrieval, access boundaries, grounded citations, abstention, evaluation, actual tiny-model adaptation and an explicitly optional pretrained recipe. [NLP foundations](../nlp/README.md) supplies additional text and classical retrieval methods. The dedicated [PyTorch](../deep-learning-pytorch/README.md) and [TensorFlow](../deep-learning-tensorflow/README.md) journeys cover their frameworks broadly.
+
+For evaluation and alignment beyond chapters 027, 033 and 040, continue into [LLM evaluation and alignment](../llm-evaluation/README.md). It develops evaluation contracts, annotation agreement, paired and clustered uncertainty, judge calibration, reward models, DPO, PPO with generalized advantage estimation, GRPO and off-policy evaluation with explicit numerical checks. Actual GPU execution belongs to the [CUDA route](../cuda/README.md).
 
 ## Complete chapter index
 

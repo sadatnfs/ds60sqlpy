@@ -28,6 +28,17 @@ and west regions, with a deterministic amount formula. The client registers the
 shared Parquet path, constructs an ordered grouped SQL query, and collects a
 bounded result from the actual scheduler/executor path.
 
+The Python client connects to the scheduler, registers the shared Parquet file and
+runs the grouped query, then repeats the query in an embedded DataFusion session:
+
+<!-- include: projects/ballista/client.py #context python -->
+
+<!-- include: projects/ballista/client.py from="def execute(mode: str)" to='raise AssertionError("Embedded control differs")' python -->
+
+`df://localhost:50050` is the scheduler's address. The Ballista context plans the
+SQL and submits it to the scheduler; the plain `SessionContext` runs the same SQL in
+the client process.
+
 The result oracle is calculated independently from the synthetic input records.
 It checks region identities, row counts and amount totals. Query success alone
 would be weaker evidence: a query could execute against a different file or lose

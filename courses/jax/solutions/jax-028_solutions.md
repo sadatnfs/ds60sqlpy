@@ -67,6 +67,6 @@ assert not np.isclose(float(wrong), -30.0)
 
 ## Scope of this evidence
 
-Check whether each quantity is a sum, mean, count, replicated global value or gathered per-participant array. The all-zero global-count case needs a declared admission policy before division. Correct mapped CPU arithmetic is not evidence of actual multi-host collective ordering or recovery.
+Check whether each quantity is a sum, mean, count, replicated global value or gathered per-participant array. The all-zero global-count case needs a declared input-validation policy before division. Correct mapped CPU arithmetic is not evidence of actual multi-host collective ordering or recovery.
 
 Translate this calculation into a proposed data-parallel training step with unequal nonpadding token counts. Explain the actual collective order and ownership evidence a multi-process implementation would need, connecting to torch-030 and tf-030.

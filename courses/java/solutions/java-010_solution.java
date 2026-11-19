@@ -21,6 +21,22 @@ public class Main {
     }
   }
 
+  sealed interface Discount permits NoDiscount, Percent, Fixed {}
+
+  record NoDiscount() implements Discount {}
+
+  record Percent(int percent) implements Discount {}
+
+  record Fixed(int cents) implements Discount {}
+
+  static int discounted(int price, Discount discount) {
+    return switch (discount) {
+      case NoDiscount() -> price;
+      case Percent(int percent) -> (price * (100 - percent)) / 100;
+      case Fixed(int cents) -> Math.max(0, price - cents);
+    };
+  }
+
   public static void main(String[] args) throws Exception {
     // Exercise 1: Call through an interface
     Pricing regular = amount -> {
@@ -37,8 +53,12 @@ public class Main {
     Pricing withFee = new Fee(half, 10);
     assert withFee.price(100) == 60;
 
-    // Exercise 3: Inspect rounding semantics
-    assert half.price(101) == 50;
+    // Exercise 3: Switch exhaustively over a sealed type
+    List<Integer> discountedPrices = new ArrayList<>();
+    for (Discount discount : List.of(new NoDiscount(), new Percent(25), new Fixed(250))) {
+      discountedPrices.add(discounted(200, discount));
+    }
+    assert discountedPrices.equals(List.of(200, 150, 0));
 
     // Exercise 4: Validate every implementation
     for (Pricing policy : List.of(regular, half, withFee)) {

@@ -27,6 +27,19 @@ Update the declared Enum and tests together. Downstream consumers need the same 
 
 Use a separate quarantine reason or deliberately evolve the vocabulary. Silently mapping it to shipped would create a false business state.
 
+```python
+import polars as pl
+
+status = pl.Enum(["new", "paid", "shipped"])
+try:
+    pl.Series(["new", "cancelled"]).cast(status)
+except pl.exceptions.InvalidOperationError:
+    rejected = True
+else:
+    rejected = False
+assert rejected
+```
+
 **Expected:** Strict conversion rejects it.
 
 ## 5. Compare sort policies
@@ -89,4 +102,4 @@ if __name__ == "__main__":
 
 ## Interpretation
 
-Move a typed table across an Arrow boundary while preserving its logical contract. Document which properties were checked and which memory claims were not measured. Use explicit category vocabularies when business order matters, and test unknown-value handling as part of schema evolution.
+Document which properties were checked and which memory claims were not measured. Use explicit category vocabularies when business order matters, and test unknown-value handling as part of schema evolution.

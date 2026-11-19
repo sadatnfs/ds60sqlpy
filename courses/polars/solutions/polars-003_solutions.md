@@ -9,11 +9,38 @@ The executable reference contains the two complete worked cases with assertions.
 
 A blank-after-trimming policy may convert it to missing. Keep an invalid_reason field so this is not confused with an unparseable nonblank token.
 
+```python
+import polars as pl
+
+raw = pl.DataFrame({"id": [1, 2, 3, 4], "units_text": ["2", "   ", None, "4"]})
+classified = raw.with_columns(
+    pl.when(pl.col("units_text").is_null())
+    .then(pl.lit("missing"))
+    .when(pl.col("units_text").str.strip_chars() == "")
+    .then(pl.lit("blank"))
+    .otherwise(pl.lit("text"))
+    .alias("category")
+)
+assert classified["category"].to_list() == ["text", "blank", "missing", "text"]
+```
+
 **Expected:** Your policy explicitly classifies it before numeric conversion.
 
 ## 2. Keep a rejection denominator
 
 The two rates have different categories. Using only accepted rows as denominator would overstate a rejection fraction.
+
+```python
+import polars as pl
+
+raw = pl.DataFrame({"id": [1, 2, 3, 4], "units_text": ["2", "bad", None, "4"]})
+parsed = raw.with_columns(pl.col("units_text").cast(pl.Int64, strict=False).alias("units"))
+shares = parsed.select(
+    (pl.col("units_text").is_not_null() & pl.col("units").is_null()).mean().alias("malformed"),
+    pl.col("units_text").is_null().mean().alias("missing"),
+)
+assert shares.row(0) == (0.25, 0.25)
+```
 
 **Expected:** Malformed share is 1/4, separately from 1/4 missing.
 
@@ -25,9 +52,9 @@ Check the quarantine height and raise a descriptive error. A successful query is
 
 ## 4. Investigate a bound
 
-The permitted interval is[-128,127]. Keep strict mode for a mandatory bound or retain null plus a rejection reason under a permissive policy.
+The permitted interval is [-128, 127]. Keep strict mode for a mandatory bound or retain null plus a rejection reason under a permissive policy.
 
-**Expected:** Only-128 and 127 are representable.
+**Expected:** Only -128 and 127 are representable.
 
 ## 5. Avoid early float conversion
 
@@ -92,4 +119,4 @@ if __name__ == "__main__":
 
 ## Interpretation
 
-Implement a parsing policy that preserves rejected evidence. Extend the fixture with one malformed token, one missing token and one out-of-range value, and reconcile every original identifier into exactly one outcome. For scientific measurements, also state approximation tolerance; for exact decimal quantities, state scale and rounding independently of display formatting.
+Extend the fixture with one malformed token, one missing token and one out-of-range value, and reconcile every original identifier into exactly one outcome. For scientific measurements, also state approximation tolerance; for exact decimal quantities, state scale and rounding independently of display formatting.

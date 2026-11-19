@@ -20,11 +20,13 @@ Choosing a collection determines which information is retained. A Set loses mult
 
 Map.set inserts or replaces a key, value pair; get returns the value or undefined; has checks membership. Map.size counts keys. Set.add returns the set itself, while has reports membership. Iterating map entries yields [key, value] pairs in insertion order. Updating an existing key does not move it to the end; deleting and reinserting does.
 
-## Exercise 1: Keep equal-looking object keys distinct
+## Exercise 1: Keep equal-looking object keys distinct: change one input
 
-Task: Create two {id: 1} objects and use them as Map keys.
+Task: Copy Example A into a scratch `main.mjs` and change `[second, 'b'],` to `[second, 'b!'],`. Before running it, predict which check fails and which value it now sees; then run it and restore the original line.
 
 Field equality does not establish object identity. A domain needing value-based keys should choose a stable canonical identifier explicitly.
+
+The unchanged code is the exercise block of Example A:
 
 ```javascript
 const first = { id: 1 };
@@ -38,15 +40,17 @@ assert.equal(map.get(first), 'a');
 assert.equal(map.get(second), 'b');
 ```
 
-**Expected:** size 2 and separate values.
+**Expected:** The changed run fails with an `AssertionError` at the check `assert.equal(map.get(second), 'b')`. Restoring the original line brings back the worked observation: size 2 and separate values.
 
-**Verify:** Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.
+**Verify:** Compare your written prediction with the reported `AssertionError`, including its actual and expected values, and name the value that made `assert.equal(map.get(second), 'b')` fail. After restoring the line, the program prints its `{"checks":1,"status":"passed"}` receipt again.
 
-## Exercise 2: Inspect Set equality
+## Exercise 2: Inspect Set equality: diagnose an edited check
 
-Task: Insert NaN twice, +0 and -0.
+Task: A careless edit changed a check in Example B so that it reads `assert.equal(values.has(-1), true);`. Run Example B with that line, explain why the edited check now fails for the same program state, and restore it.
 
 The collection equality contract differs from strict NaN comparison and Object.is signed zero behavior. Know the actual relation used by the container.
+
+The unchanged code is the exercise block of Example B:
 
 ```javascript
 const values = new Set([NaN, NaN, 0, -0]);
@@ -55,9 +59,9 @@ assert.equal(values.has(NaN), true);
 assert.equal(values.has(-0), true);
 ```
 
-**Expected:** size 2: one NaN and one zero.
+**Expected:** Before the repair the run fails with an `AssertionError` at the check `assert.equal(values.has(-0), true)`; after it the line reads `assert.equal(values.has(-0), true);` again and size 2: one NaN and one zero.
 
-**Verify:** Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.
+**Verify:** Keep the failing and the repaired runs. Explain why the edited check rejects the same program state that `assert.equal(values.has(-0), true)` accepts.
 
 ## Exercise 3: Count repeated events
 
@@ -79,7 +83,7 @@ assert.deepEqual(
 
 **Expected:** red 2, blue 1.
 
-**Verify:** Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.
+**Verify:** Keep a check equivalent to `assert.deepEqual([...counts], [['red', 2], ['blue', 1]])`. As a control, change `for (const value of ['red', 'blue', 'red']) counts.set(value, (counts.get(value) ?? 0) + 1);` to `for (const value of ['red', 'blue', 'red']) counts.set(value, (counts.get(value) ?? 0) - 1);`: the run must fail with an `AssertionError` at that check. Restore the line before continuing.
 
 ## Exercise 4: Distinguish a stored zero from absence
 
@@ -97,7 +101,7 @@ assert.equal(map.get('b'), undefined);
 
 **Expected:** a present with 0; b absent with undefined.
 
-**Verify:** Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.
+**Verify:** Keep a check equivalent to `assert.equal(map.get('a'), 0)`. As a control, change `const map = new Map([['a', 0]]);` to `const map = new Map([['a', 1]]);`: the run must fail with an `AssertionError` at that check. Restore the line before continuing.
 
 ## Exercise 5: Trace insertion order updates
 
@@ -119,7 +123,7 @@ assert.deepEqual([...map.keys()], ['b', 'a']);
 
 **Expected:** update order a, b; reinsertion order b, a.
 
-**Verify:** Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.
+**Verify:** Keep a check equivalent to `assert.deepEqual([...map.keys()], ['b', 'a'])`. As a control, change `map.delete('a'); map.set('a', 4);` to `map.delete('a!'); map.set('a', 4);`: the run must fail with an `AssertionError` at that check. Restore the line before continuing.
 
 ## Exercise 6: Deduplicate while preserving first occurrence
 
@@ -134,7 +138,7 @@ assert.deepEqual(unique, ['b', 'a', 'c']);
 
 **Expected:** b, a, c.
 
-**Verify:** Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.
+**Verify:** Keep a check equivalent to `assert.deepEqual(unique, ['b', 'a', 'c'])`. As a control, change `const unique = [...new Set(['b', 'a', 'b', 'c', 'a'])];` to `const unique = [...new Set(['b!', 'a', 'b', 'c', 'a'])];`: the run must fail with an `AssertionError` at that check. Restore the line before continuing.
 
 ## After comparison
 

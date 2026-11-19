@@ -9,15 +9,15 @@ Copy to .learning before editing. Six independent attempts belong below.
 # Expected: gradient is None.
 
 # Exercise 2: Distinguish an actual zero
-# Compute the same objective inside the tape atw2.
-# Expected: gradient is a tensor equal0.
+# Compute the same objective inside the tape at w=2.
+# Expected: gradient is a tensor equal 0.
 
 # Exercise 3: Repair two updates
-# Use x1,2,3,y2x,w0 and rate.1 for exactly2 steps.
-# Expected: weight448/225 within1e-12.
+# Use x = [1, 2, 3], y = 2x, w = 0 and rate 0.1 for exactly 2 steps.
+# Expected: weight 448/225 within 1e-12.
 
 # Exercise 4: Recompute loss after assignment
-# Compare the two-step loss with the one-step loss56/675.
+# Compare the two-step loss with the one-step loss 56/675.
 # Expected: two-step loss is smaller and nonnegative.
 
 # Exercise 5: Check gradient finiteness
@@ -26,7 +26,7 @@ Copy to .learning before editing. Six independent attempts belong below.
 
 # Exercise 6: Compare an analytic recurrence
 # Calculate both updates with plain Python and compare each state with the tape trace.
-# Expected: both recorded states match within1e-12.
+# Expected: both recorded states match within 1e-12.
 
 if __name__ == "__main__":
     print("Read the guide and implement the six exercises in your saved copy.")

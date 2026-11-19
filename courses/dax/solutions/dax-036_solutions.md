@@ -31,14 +31,14 @@ Assume the optional RetailCalendar metadata has been configured exactly as speci
 This is a reference derivation under a declared metadata assumption, not observed preview-engine output. An undefined calendar name would not be a usable external query.
 
 - The anchor belongs to RetailYear 2026 under the ending-year naming rule.
-- Its year-to-date date set begins February 1,2025.
-- S7 and S 8 contribute 20 +36 =56; January belongs to the prior retail year.
+- Its year-to-date date set begins February 1, 2025.
+- S7 and S8 contribute 20 + 36 = 56; January belongs to the prior retail year.
 
 ## Explained practice answers
 
 ### Exercise 1
 
-Predict the retail-year label for January 31,2025.
+Predict the retail-year label for January 31, 2025.
 
 It is RetailYear 2025; February 1 begins RetailYear 2026.
 

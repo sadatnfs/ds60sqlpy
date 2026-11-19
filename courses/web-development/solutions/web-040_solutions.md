@@ -1,51 +1,43 @@
 # web-040: explanatory solutions
 
-Compare after your own attempt or an explicit solution reveal. This file explains the supplied deterministic fixtures. It does not claim that a learner or a production deployment passed.
-
-## Why the mechanism works
-
-A class defines a kind of object, and an object combines state with behavior. Use an object when it makes a domain boundary clearer, not merely because the program has grown. A constructor establishes the initial state. An invariant is a condition that should remain true throughout the object's useful lifetime, such as a nonempty topic and nonnegative duration.
-
-Publicly mutable properties can let callers bypass a carefully checked constructor. A small immutable value object can preserve its contract by validating once and exposing readonly data. Readonly does not make every nested object deeply immutable, and it does not replace validation. Understand the specific language guarantee rather than treating the keyword as a complete architecture.
-
-Constructor property promotion can declare and initialize properties directly in the parameter list. Use explicit types and meaningful names. A method can derive a display label from the stored values without changing them. Prefer composition of small responsibilities over a deep inheritance hierarchy built before requirements are known.
+Open this after your own attempt. Each answer explains the lesson's synthetic fixtures; it does not show that your work or a deployment passed. The mechanism is explained in `courses/web-development/guides/web-040.md`.
 
 ## Exercise 1: Name the invariant enforced by the constructor.
 
-A successfully constructed duration cannot begin with negative minutes.
+**Expected answer:** A successfully constructed duration cannot begin with negative minutes.
 
-Trace the smallest example before editing. Name which values are source and which are observations.
+**Why:** Because the constructor throws for negative minutes and the property is readonly, every Duration object has nonnegative minutes for its whole life.
 
 ## Exercise 2: Add a method that formats the duration.
 
-Formatting derives from state without changing it.
+**Expected evidence:** Formatting derives from state without changing it.
 
-Change only the named feature. Compare with the unchanged example and explain any unaffected behavior.
+**Why:** A method that only reads state keeps the object immutable and the formatting reusable.
 
 ## Exercise 3: Build a validated study-session value object.
 
-Its topic and duration satisfy explicit constructor checks and remain readonly.
+**Expected evidence:** Its topic and duration satisfy explicit constructor checks and remain readonly.
 
-Sketch the structure or data contract first. Reuse the mechanism from the examples without copying the reference.
+**Why:** Constructor validation plus readonly properties mean invalid sessions cannot be created or changed later.
 
 ## Exercise 4: Diagnose a setter that allows invalid state after construction.
 
-Every mutation boundary must preserve the invariant, or mutation should be removed.
+**Expected answer:** Every mutation boundary must preserve the invariant, or mutation should be removed.
 
-Keep the failing input. Identify the first layer where the observed result differs from the intended contract.
+**Why:** A setter without the constructor's checks lets invalid state in later, so it must validate the same rule or be removed.
 
 ## Exercise 5: Test an empty topic and zero duration.
 
-The topic is rejected while zero follows the declared nonnegative policy.
+**Expected evidence:** The topic is rejected while zero follows the declared nonnegative policy.
 
-Predict the boundary before running it. Add an explicit check or manual observation that would detect a regression.
+**Why:** The empty topic violates the rule and throws, while zero minutes satisfies the nonnegative rule.
 
 ## Exercise 6: Explain shallow readonly versus deep immutability.
 
-A readonly property cannot be reassigned, but referenced mutable objects can have their own changing state.
+**Expected answer:** A readonly property cannot be reassigned, but referenced mutable objects can have their own changing state.
 
-Explain your choice to someone who has not seen the code. Include one limitation and the evidence needed to remove it.
+**Why:** readonly prevents reassigning the property but not mutating the object it refers to, so deep immutability needs immutable members too.
 
-## Reference comparison and limits
+## Reference comparison
 
-Read the separate executable reference, where supplied, only after retaining your attempt. Compare structure and decisions rather than matching every identifier. A different implementation is acceptable when it satisfies the same behavior, preserves accessibility and rejects the same invalid cases. The checked reference uses tiny synthetic inputs so that each transformation can be inspected. It is not a ready-to-deploy authenticated application. Server lifecycle, persistence, concurrency and security require their own integration evidence.
+Open `courses/web-development/solutions/web-040_solution.php` only after saving your attempt, and compare decisions rather than identifiers. A different implementation is acceptable when it shows the same behavior and rejects the same invalid cases. The reference checks only its named synthetic cases; server lifecycle, persistence, concurrency and security need their own integration evidence.

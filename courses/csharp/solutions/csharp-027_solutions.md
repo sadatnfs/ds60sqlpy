@@ -1,6 +1,6 @@
 # csharp-027: explanation and comparison
 
-Attempt the six guide tasks before opening this comparison. The executable reference is [csharp-027_solution.cs](csharp-027_solution.cs). Its assertions are always active under the prepared classroom compile settings.
+Attempt the six guide tasks before opening this comparison. The executable reference is [csharp-027_solution.cs](csharp-027_solution.cs). It runs both worked examples and the reference answers below, and its assertions are always active under the prepared classroom compile settings.
 
 ## Why the two examples differ
 
@@ -8,21 +8,56 @@ Attempt the six guide tasks before opening this comparison. The executable refer
 
 **Measure a fixed duration:** A fixed fixture keeps evidence independent of the host clock and locale. The elapsed duration is 90 minutes and the timestamp round-trips.
 
-## Reason through the six tasks
+## Task answers
 
-1. **Predict and explain.** Explain why the two offset timestamps compare equal.
+### Task 1: Predict and explain
 
-2. **Guided modification.** Change one instant by one minute and predict the comparison.
+Explain why the two offset timestamps compare equal.
 
-3. **Independent construction.** Build a duration report using fixed UTC timestamps.
+No separate reference answer has been written for this task. Example A is the evidence to compare with: Comparing wall-clock components would miss the offset information. The values denote the same instant despite different offsets.
 
-4. **Diagnose a defect.** Diagnose treating an offset as a complete time-zone identity.
+### Task 2: Guided modification
 
-5. **Boundary evidence.** Test intervals across midnight and reject an end before its start when the domain forbids it.
+Change one instant by one minute and predict the comparison.
 
-6. **Transfer and justify.** Design storage and display policies for appointments in a named time zone.
+No separate reference answer has been written for this task. Start from Example B: A fixed fixture keeps evidence independent of the host clock and locale. The elapsed duration is 90 minutes and the timestamp round-trips.
 
-For tasks 1 and 2, use the checked values and mechanism trace in the two examples. For task 3, choose names that expose the input and result contract and retain the same invariants. For task 4, the diagnosed mistakes below supply a concrete wrong assumption: preserve its counterexample before repairing it. Task 5 needs an explicit expected value or documented rejection at the boundary, not just successful execution. For task 6, explain what changes in the new context and which part of the original mechanism remains applicable. Several representations may satisfy this transfer task; justify the choice rather than treating this reference as the only architecture.
+### Task 3: Independent construction
+
+Build a duration report using fixed UTC timestamps.
+
+**Reference answer.** It runs as the `Task 3` block of the reference program.
+
+```csharp
+var start = new DateTimeOffset(2025, 3, 1, 22, 30, 0, TimeSpan.Zero);
+var end = new DateTimeOffset(2025, 3, 2, 1, 15, 0, TimeSpan.Zero);
+TimeSpan elapsed = end - start;
+string report = $"{elapsed.TotalMinutes} minutes";
+Check(elapsed == TimeSpan.FromMinutes(165), "across midnight");
+Check(report == "165 minutes", "invariant report");
+```
+
+**Observe:** 22:30 to 01:15 UTC is reported as 165 minutes.
+
+Fixed UTC instants make the duration independent of the machine's time zone, and subtraction handles the date change.
+
+### Task 4: Diagnose a defect
+
+Diagnose treating an offset as a complete time-zone identity.
+
+No reference answer has been written for this task yet. The wrong assumptions to look for are this lesson's pitfalls: DateTime kind and unspecified local values can introduce ambiguity. Daylight-saving transitions can produce invalid or repeated local times. Use elapsed-time clocks for performance measurement, not wall-clock timestamps.
+
+### Task 5: Boundary evidence
+
+Test intervals across midnight and reject an end before its start when the domain forbids it.
+
+No reference answer has been written for this task yet. Write the expected value or documented rejection for each boundary before running it, and compare with the checks in Example A (Different offsets, same instant) and Example B (Measure a fixed duration).
+
+### Task 6: Transfer and justify
+
+Design storage and display policies for appointments in a named time zone.
+
+No single reference answer exists: several designs can satisfy this transfer task. Justify yours against the mechanism described below and the vocabulary entry **Instant**, and state one limitation of your choice.
 
 ## Mechanism and diagnostic reasoning
 
@@ -36,4 +71,4 @@ DateTime kind and unspecified local values can introduce ambiguity. Daylight-sav
 
 ## Review before continuing
 
-The reference checks the worked scenarios, including their boundary distinctions. Your independent and transfer artifacts may have additional checks. Compare observations rather than only source text. Preserve any new regression case you discover and explain why it would reject a plausible wrong implementation. External project steps require their own build and platform evidence and are not established by a portable reference passing.
+Run the reference and confirm that it prints `csharp-027: passed`, then reconstruct one boundary case from memory and explain which check would reject a plausible wrong implementation. External project steps need their own build and platform evidence; a passing portable reference does not establish them.

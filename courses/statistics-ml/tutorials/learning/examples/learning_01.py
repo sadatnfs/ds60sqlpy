@@ -1,45 +1,40 @@
 """Complete offline worked example. See the matching tutorial for assumptions."""
 
 import numpy as np
-from scipy import stats
-
-
-def wilson_interval(successes, n, alpha=0.05):
-    p = np.asarray(successes) / n
-    z = stats.norm.ppf(1 - alpha / 2)
-    center = (p + z * z / (2 * n)) / (1 + z * z / n)
-    half = z * np.sqrt(p * (1 - p) / n + z * z / (4 * n * n)) / (1 + z * z / n)
-    return center - half, center + half
+from scipy import optimize
 
 
 def case_01():
-    n, successes = 12, 1
-    estimate = successes / n
-    score = successes / estimate - (n - successes) / (1 - estimate)
-    information = n / (estimate * (1 - estimate))
-    wald = estimate + np.array([-1, 1]) * stats.norm.ppf(0.975) / np.sqrt(information)
-    wilson = wilson_interval(successes, n)
-    assert abs(score) < 1e-10 and wald[0] < 0 and wilson[0] > 0
-    # Exact enumeration of the sampling distribution, not a Monte Carlo claim.
-    s = np.arange(n + 1)
-    true_p = 0.05
-    probability = stats.binom.pmf(s, n, true_p)
-    phat = s / n
-    half = stats.norm.ppf(0.975) * np.sqrt(phat * (1 - phat) / n)
-    wl, wu = wilson_interval(s, n)
-    wald_coverage = probability @ ((phat - half <= true_p) & (true_p <= phat + half))
-    wilson_coverage = probability @ ((wl <= true_p) & (true_p <= wu))
-    assert wilson_coverage > wald_coverage + 0.3
+    x = np.array([[1.0, 0.0], [1.0, 1.0], [1.0, 2.0]])
+    y = np.array([1.0, 2.0, 4.0])
+    beta = np.linalg.lstsq(x, y, rcond=None)[0]
+    residual = y - x @ beta
+    assert np.allclose(beta, [5 / 6, 3 / 2]) and np.allclose(x.T @ residual, 0)
+    hessian = x.T @ x
+    eigenvalues = np.linalg.eigvalsh(hessian)
+    at = np.array([0.2, 0.5])
+    analytic = x.T @ (x @ at - y)
+    difference = optimize.approx_fprime(at, lambda b: 0.5 * np.sum((x @ b - y) ** 2), 1e-7)
+    assert np.allclose(analytic, difference, atol=1e-6)
+
+    def descend(rate):
+        b = np.zeros(2)
+        for _ in range(30):
+            b -= rate * (x.T @ (x @ b - y))
+        return float(np.linalg.norm(b - beta))
+
+    stable = descend(1 / eigenvalues[-1])
+    unstable = descend(2.2 / eigenvalues[-1])
+    assert stable < unstable
     result = {
-        "mle": estimate,
-        "score_at_mle": score,
-        "information": information,
-        "wald": wald.tolist(),
-        "wilson": list(wilson),
-        "exact_wald_coverage_at_005": wald_coverage,
-        "exact_wilson_coverage_at_005": wilson_coverage,
+        "beta": beta.tolist(),
+        "residual": residual.tolist(),
+        "hessian_eigenvalues": eigenvalues.tolist(),
+        "gradient": analytic.tolist(),
+        "stable_error": stable,
+        "oversized_step_error": unstable,
     }
-    print("01 likelihood to coverage:", result)
+    print("01 geometry and optimization:", result)
     return result
 
 

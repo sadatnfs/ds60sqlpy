@@ -40,7 +40,7 @@ Three invented trials cannot estimate production tail latency. The point is to i
 
 Predict the mean if the warm 25 ms value is replaced by 40 ms.
 
-The mean becomes(20+40+21)/3 =27 ms for that revised synthetic scenario.
+The mean becomes (20 + 40 + 21)/3 = 27 ms for that revised synthetic scenario.
 
 ### Exercise 2
 

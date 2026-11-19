@@ -76,6 +76,6 @@ close(centered.sum(axis=1), jnp.zeros(3))
 
 ## Scope of this evidence
 
-A shape-correct result may still reduce the wrong population. Check a row-specific invariant and use nonsquare fixtures. Keep index admission outside transformed numerical code until the tracing rules have been taught.
+A shape-correct result may still reduce the wrong population. Check a row-specific invariant and use nonsquare fixtures. Keep index validation outside transformed numerical code until the tracing rules have been taught.
 
 Compare this value-oriented update with NumPy mutation in python-numpy-01. Explain why an implementation's possible in-place optimization does not make arbitrary Python mutation part of JAX's public array contract.

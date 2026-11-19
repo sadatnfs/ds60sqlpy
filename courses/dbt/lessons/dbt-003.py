@@ -1,4 +1,4 @@
-"""dbt-003: worked starting point; complete the guide's six changes."""
+"""dbt-003: both worked cases; complete the guide's six changes."""
 
 import json
 import os
@@ -122,8 +122,28 @@ def example_one():
         return {"dependency": "raw_orders -> staging -> customer_total", "total": 12}
 
 
+def example_two():
+    with tempfile.TemporaryDirectory() as d:
+        p = project(
+            d,
+            models={
+                "base": "{{ config(materialized='ephemeral') }} select 3 as x",
+                "answer": "select x * 14 as answer from {{ ref('base') }}",
+            },
+        )
+        invoke(p, "build")
+        assert rows(p, "select answer from answer") == [(42,)]
+        assert rows(
+            p, "select count(*) from information_schema.tables where table_name='base'"
+        ) == [(0,)]
+        compiled = (p / "target/compiled/classroom/models/answer.sql").read_text()
+        assert "__dbt__cte__base" in compiled
+        return {"inlined_dependency": True, "answer": 42}
+
+
 if __name__ == "__main__":
     print(example_one())
+    print(example_two())
 
 # TODO 1: Replace ref with a hardcoded relation name and inspect the manifest.
 # TODO 2: Switch staging from view to table and rebuild.

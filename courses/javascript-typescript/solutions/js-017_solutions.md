@@ -22,11 +22,13 @@ This lesson runs a real local HTTP server on an ephemeral port bound only to 127
 
 createServer receives request and response objects. Construct new URL(request.url, a known base) to parse the target. searchParams.getAll lets the handler check duplicate parameters. writeHead selects the status and content type; end finishes the body. server.listen(0, '127.0.0.1') asks the OS for an available local port. fetch uses AbortSignal.timeout as a waiting bound. In finally, closeAllConnections and close ensure the fixture releases its listener even if an assertion fails.
 
-## Exercise 1: Request a valid local calculation
+## Exercise 1: Request a valid local calculation: change one input
 
-Task: GET /sum with a=2 and b=3 and inspect status, content type and JSON.
+Task: Copy Example A into a scratch `main.mjs` and change `new URL('/sum?a=2&b=3', base)` to `new URL('/sum?a=3&b=3', base)`. Before running it, predict which check fails and which value it now sees; then run it and restore the original line.
 
 The checks distinguish transport completion, protocol success and representation content. An endpoint can respond successfully at one layer while violating another layer's contract.
+
+The unchanged code is the exercise block of Example A:
 
 ```javascript
 await withServer(async (base) => {
@@ -39,15 +41,17 @@ await withServer(async (base) => {
 });
 ```
 
-**Expected:** status 200; application/json; total 5.
+**Expected:** The changed run fails with an `AssertionError` at the check `assert.deepEqual(await response.json(), { total: 5 })`. Restoring the original line brings back the worked observation: status 200; application/json; total 5.
 
-**Verify:** Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.
+**Verify:** Compare your written prediction with the reported `AssertionError`, including its actual and expected values, and name the value that made `assert.deepEqual(await response.json(), { total: 5 })` fail. After restoring the line, the program prints its `{"checks":1,"status":"passed"}` receipt again.
 
-## Exercise 2: Inspect an HTTP error without expecting fetch rejection
+## Exercise 2: Inspect an HTTP error without expecting fetch rejection: diagnose an edited check
 
-Task: Request an unknown route and inspect the actual response.
+Task: A careless edit changed a check in Example B so that it reads `assert.deepEqual(await response.json(), { error: 'not_found!' });`. Run Example B with that line, explain why the edited check now fails for the same program state, and restore it.
 
 fetch rejects for failures such as network errors or aborts, not simply because the server sent a 404. A client that only catches rejection may mistakenly treat a protocol error body as success data.
+
+The unchanged code is the exercise block of Example B:
 
 ```javascript
 await withServer(async (base) => {
@@ -58,9 +62,9 @@ await withServer(async (base) => {
 });
 ```
 
-**Expected:** fetch resolves; status 404, ok false, error not_found.
+**Expected:** Before the repair the run fails with an `AssertionError` at the check `assert.deepEqual(await response.json(), { error: 'not_found' })`; after it the line reads `assert.deepEqual(await response.json(), { error: 'not_found' });` again and fetch resolves; status 404, ok false, error not_found.
 
-**Verify:** Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.
+**Verify:** Keep the failing and the repaired runs. Explain why the edited check rejects the same program state that `assert.deepEqual(await response.json(), { error: 'not_found' })` accepts.
 
 ## Exercise 3: Encode query values through the URL API
 
@@ -78,7 +82,7 @@ assert.ok(url.href.includes('%26'));
 
 **Expected:** the value round-trips as one parameter.
 
-**Verify:** Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.
+**Verify:** Keep a check equivalent to `assert.ok(url.href.includes('%26'))`. As a control, change `assert.ok(url.href.includes('%26'));` to `assert.ok(url.href.includes('%27'));` inside it: the run must fail with an `AssertionError`, which shows the check can fail. Restore it.
 
 ## Exercise 4: Reject repeated or invalid parameters
 
@@ -98,7 +102,7 @@ await withServer(async (base) => {
 
 **Expected:** both responses are 400 with invalid_parameters.
 
-**Verify:** Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.
+**Verify:** Keep a check equivalent to `assert.deepEqual(await response.json(), { error: 'invalid_parameters' })`. As a control, change `assert.deepEqual(await response.json(), { error: 'invalid_parameters' });` to `assert.deepEqual(await response.json(), { error: 'invalid_parameters!' });` inside it: the run must fail with an `AssertionError`, which shows the check can fail. Restore it.
 
 ## Exercise 5: Reject an unsupported method
 
@@ -120,7 +124,7 @@ await withServer(async (base) => {
 
 **Expected:** status 405 and Allow: GET.
 
-**Verify:** Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.
+**Verify:** Keep a check equivalent to `assert.equal(response.status, 405)`. As a control, change `new URL('/sum?a=1&b=2', base), { method: 'POST'` to `new URL('/sum?a=1&b=2', base), { method: 'POST!'`: the run must fail with an `AssertionError` at that check. Restore the line before continuing.
 
 ## Exercise 6: Guard arithmetic overflow after parsing
 
@@ -141,7 +145,7 @@ await withServer(async (base) => {
 
 **Expected:** status 400 rather than a rounded success value.
 
-**Verify:** Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.
+**Verify:** Keep a check equivalent to `assert.deepEqual(await response.json(), { error: 'unsafe_total' })`. As a control, change `url.searchParams.set('a', String(Number.MAX_SAFE_INTEGER));` to `url.searchParams.set('a!', String(Number.MAX_SAFE_INTEGER));`: the run must fail with an `AssertionError` at that check. Restore the line before continuing.
 
 ## After comparison
 

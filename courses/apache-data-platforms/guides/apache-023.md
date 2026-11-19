@@ -1,6 +1,6 @@
 # apache-023: Stages, shuffle and task placement
 
-Tutorial mode. Stage: intermediate. Direct prerequisites: `apache-021`, `apache-005`, `apache-011`.
+Tutorial mode. Stage: advanced. Direct prerequisites: `apache-021`, `apache-005`, `apache-011`.
 
 ## A stage boundary changes where intermediate state lives
 

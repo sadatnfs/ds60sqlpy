@@ -190,7 +190,7 @@ If Z is standard normal and U is independent chi-square with nu degrees of freed
 
 A normal sample's residual sum of squares divided by sigma-squared has a chi-square distribution with the appropriate residual degrees of freedom. Ratios of independent scaled chi-square quantities produce F distributions, which underlie classical variance comparisons and ANOVA. Independence, normal errors and correct degrees of freedom are doing the work; the named reference distribution is not a universal property of every ratio statistic.
 
-As degrees of freedom increase, the t distribution approaches normal behavior. But replacing t by normal in a tiny sample can drastically narrow an interval. The three-point regression example in chapter11 has only one residual degree of freedom, which explains its large t critical value even though the fitted line looks compelling.
+As degrees of freedom increase, the t distribution approaches normal behavior. But replacing t by normal in a tiny sample can drastically narrow an interval. The three-point regression example in chapter 11 has only one residual degree of freedom, which explains its large t critical value even though the fitted line looks compelling.
 
 ### Case study: mixture variation can imitate heavy tails
 

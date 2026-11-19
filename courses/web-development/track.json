@@ -18,9 +18,9 @@
         "browser",
         "server"
       ],
-      "outcome": "Trace a requested page from source to visible output.",
+      "outcome": "Build a complete document with a title, one heading and two paragraphs. Trace a requested page from source to visible output.",
       "lab": "Build a complete document with a title, one heading and two paragraphs.",
-      "verification": "The preview contains one main heading and two paragraphs in a main region."
+      "verification": "The preview contains one main heading and two paragraphs inside the body."
     },
     {
       "id": "web-002",
@@ -37,7 +37,7 @@
         "nesting",
         "character reference"
       ],
-      "outcome": "Explain escaping versus validation with a text and URL example.",
+      "outcome": "Build a notes paragraph with nested importance and literal angle brackets. Explain escaping versus validation with a text and URL example.",
       "lab": "Build a notes paragraph with nested importance and literal angle brackets.",
       "verification": "The structure remains a paragraph and the comparison is text rather than an element."
     },
@@ -57,7 +57,7 @@
         "main",
         "section"
       ],
-      "outcome": "Explain when a div is more appropriate than section.",
+      "outcome": "Build a study page with landmarks and a working skip link. Explain when a div is more appropriate than section.",
       "lab": "Build a study page with landmarks and a working skip link.",
       "verification": "Header, labeled navigation, one main and footer have meaningful content; the skip target exists."
     },
@@ -76,7 +76,7 @@
         "fragment",
         "link purpose"
       ],
-      "outcome": "Explain the difference between absolute, root-relative and document-relative paths.",
+      "outcome": "Build a contents list that navigates to three local sections. Explain the difference between absolute, root-relative and document-relative paths.",
       "lab": "Build a contents list that navigates to three local sections.",
       "verification": "Every fragment matches one unique section id and works with keyboard activation."
     },
@@ -96,7 +96,7 @@
         "quotation",
         "code"
       ],
-      "outcome": "Explain the difference between preserving whitespace and preserving meaning.",
+      "outcome": "Build a study checklist with a code example and glossary. Explain the difference between preserving whitespace and preserving meaning.",
       "lab": "Build a study checklist with a code example and glossary.",
       "verification": "The page exposes list, code and definition structures without relying on spacing."
     },
@@ -116,7 +116,7 @@
         "SVG",
         "intrinsic size"
       ],
-      "outcome": "Plan an accessible video lesson without autoplay.",
+      "outcome": "Create an offline SVG progress illustration with a textual equivalent. Plan an accessible video lesson without autoplay.",
       "lab": "Create an offline SVG progress illustration with a textual equivalent.",
       "verification": "The image has an accessible name and the numeric progress is visible as text."
     },
@@ -136,7 +136,7 @@
         "row header",
         "scope"
       ],
-      "outcome": "Explain when a chart should keep a supporting table.",
+      "outcome": "Build a three-row study table with correct header relationships. Explain when a chart should keep a supporting table.",
       "lab": "Build a three-row study table with correct header relationships.",
       "verification": "The caption, row headers and column headers identify every value."
     },
@@ -156,7 +156,7 @@
         "value",
         "fieldset"
       ],
-      "outcome": "Explain why form appearance cannot establish server validation.",
+      "outcome": "Build a study-preferences form with three native control types. Explain why form appearance cannot establish server validation.",
       "lab": "Build a study-preferences form with three native control types.",
       "verification": "Every control has a useful label, stable name and suitable type."
     },
@@ -175,7 +175,7 @@
         "minlength",
         "error message"
       ],
-      "outcome": "Separate client feedback from server-side acceptance.",
+      "outcome": "Build a bounded study-time form with linked help. Separate client feedback from server-side acceptance.",
       "lab": "Build a bounded study-time form with linked help.",
       "verification": "The user can identify the rule, enter a valid value and retain it after a failed attempt."
     },
@@ -195,7 +195,7 @@
         "specificity",
         "inheritance"
       ],
-      "outcome": "Explain why specificity alone does not describe the cascade.",
+      "outcome": "Style two note cards using one low-specificity class. Explain why specificity alone does not describe the cascade.",
       "lab": "Style two note cards using one low-specificity class.",
       "verification": "Both cards share styling without duplicate ids or inline declarations."
     },
@@ -216,7 +216,7 @@
         "box-sizing",
         "overflow"
       ],
-      "outcome": "Explain which dimensions margin does and does not affect.",
+      "outcome": "Build a readable card that contains a long identifier. Explain which dimensions margin does and does not affect.",
       "lab": "Build a readable card that contains a long identifier.",
       "verification": "The identifier wraps or scrolls locally without overflowing the page."
     },
@@ -237,7 +237,7 @@
         "font stack",
         "relative units"
       ],
-      "outcome": "Explain why ch is a useful approximation rather than a word-count guarantee.",
+      "outcome": "Build a reading page with bounded measure and scalable headings. Explain why ch is a useful approximation rather than a word-count guarantee.",
       "lab": "Build a reading page with bounded measure and scalable headings.",
       "verification": "Text stays comfortable at wide and narrow sizes without fixed-height clipping."
     },
@@ -256,7 +256,7 @@
         "state",
         "color independence"
       ],
-      "outcome": "Explain why one palette check does not qualify every interaction state.",
+      "outcome": "Build status cards whose meaning does not depend on color. Compute the contrast of #94a3b8 text on #ffffff and explain why one palette check does not qualify every interaction state.",
       "lab": "Build status cards whose meaning does not depend on color.",
       "verification": "Each card contains a clear label, readable text and visible interactive focus."
     },
@@ -276,7 +276,7 @@
         "position",
         "containing block"
       ],
-      "outcome": "Explain the containing block used by an absolute element.",
+      "outcome": "Build a card with an intentional positioned badge and flowing content. Explain the containing block used by an absolute element.",
       "lab": "Build a card with an intentional positioned badge and flowing content.",
       "verification": "Long body text expands the card while the badge stays in its reserved corner."
     },
@@ -296,7 +296,7 @@
         "flex basis",
         "wrap"
       ],
-      "outcome": "Explain when Flexbox fits better than Grid.",
+      "outcome": "Build a wrapping navigation bar and flexible card row. Explain when Flexbox fits better than Grid.",
       "lab": "Build a wrapping navigation bar and flexible card row.",
       "verification": "Long labels stay reachable at narrow widths and DOM order remains logical."
     },
@@ -316,7 +316,7 @@
         "minmax",
         "auto-fit"
       ],
-      "outcome": "Explain auto-fit versus auto-fill at a high level.",
+      "outcome": "Build an adaptive topic grid that survives a narrow container. Explain auto-fit versus auto-fill at a high level.",
       "lab": "Build an adaptive topic grid that survives a narrow container.",
       "verification": "Cards change column count while preserving reading order and avoiding page overflow."
     },
@@ -336,7 +336,7 @@
         "breakpoint",
         "mobile first"
       ],
-      "outcome": "Explain why responsive design is more than media queries.",
+      "outcome": "Build a responsive course outline with a readable article. Explain why responsive design is more than media queries.",
       "lab": "Build a responsive course outline with a readable article.",
       "verification": "The page adapts between stacked and two-column layouts without losing content."
     },
@@ -356,7 +356,7 @@
         "scope",
         "theme"
       ],
-      "outcome": "Explain a token name that survives a palette change.",
+      "outcome": "Build two themed cards using one component rule. Explain a token name that survives a palette change.",
       "lab": "Build two themed cards using one component rule.",
       "verification": "The variants preserve content labels, contrast and focus while sharing structure."
     },
@@ -375,7 +375,7 @@
         "attribute selector",
         "focus-within"
       ],
-      "outcome": "Explain why CSS state cannot authorize a server action.",
+      "outcome": "Build a preferences list whose selected state is visible and semantic. Explain why CSS state cannot authorize a server action.",
       "lab": "Build a preferences list whose selected state is visible and semantic.",
       "verification": "Native checkboxes carry the state and text styling reinforces it."
     },
@@ -394,7 +394,7 @@
         "animation",
         "reduced motion"
       ],
-      "outcome": "Explain why transform does not guarantee a fast page.",
+      "outcome": "Build a card interaction with a static reduced-motion alternative. Explain why transform does not guarantee a fast page.",
       "lab": "Build a card interaction with a static reduced-motion alternative.",
       "verification": "The card remains understandable and usable without movement."
     },
@@ -413,7 +413,7 @@
         "component",
         "fallback"
       ],
-      "outcome": "Choose between a viewport query and a container query for a sidebar card.",
+      "outcome": "Render the same component in wide and narrow slots. Choose between a viewport query and a container query for a sidebar card.",
       "lab": "Render the same component in wide and narrow slots.",
       "verification": "Each instance adapts independently while preserving its content."
     },
@@ -432,7 +432,7 @@
         "utility",
         "specificity budget"
       ],
-      "outcome": "Explain why important declarations complicate layer reasoning.",
+      "outcome": "Build a small layered stylesheet with base, component and utility rules. Explain why important declarations complicate layer reasoning.",
       "lab": "Build a small layered stylesheet with base, component and utility rules.",
       "verification": "The intended overrides work without escalating ids or important flags."
     },
@@ -451,7 +451,7 @@
         "feature query",
         "fallback"
       ],
-      "outcome": "Explain what a feature query proves and what it does not.",
+      "outcome": "Build printable study notes with a useful baseline layout. Explain what a feature query proves and what it does not.",
       "lab": "Build printable study notes with a useful baseline layout.",
       "verification": "Screen and print views preserve meaning with appropriate presentation."
     },
@@ -470,7 +470,7 @@
         "responsive audit",
         "acceptance criteria"
       ],
-      "outcome": "Explain the portal's remaining backend requirements.",
+      "outcome": "Build a complete offline portal with three paths and local destinations. Explain the portal's remaining backend requirements.",
       "lab": "Build a complete offline portal with three paths and local destinations.",
       "verification": "All cards, navigation and headings are meaningful, keyboard reachable and responsive."
     },
@@ -491,7 +491,7 @@
         "state",
         "rendering"
       ],
-      "outcome": "Explain why reading state back from formatted text is fragile.",
+      "outcome": "Build a native-button counter with a reset action and output. Explain why reading state back from formatted text is fragile.",
       "lab": "Build a native-button counter with a reset action and output.",
       "verification": "Increment and reset work by keyboard and pointer, with a visible announced result."
     },
@@ -511,7 +511,7 @@
         "expanded state",
         "native control"
       ],
-      "outcome": "Explain why a modal is inappropriate for every small message.",
+      "outcome": "Build a disclosure and a deliberately opened local dialog. Explain why a modal is inappropriate for every small message.",
       "lab": "Build a disclosure and a deliberately opened local dialog.",
       "verification": "Both are labeled, keyboard operable and can be closed without losing the task."
     },
@@ -531,7 +531,7 @@
         "recovery",
         "pure function"
       ],
-      "outcome": "Explain which validation logic must be repeated on the server.",
+      "outcome": "Build a local form with preserved input and linked validation feedback. Explain which validation logic must be repeated on the server.",
       "lab": "Build a local form with preserved input and linked validation feedback.",
       "verification": "A failed attempt identifies the problem without clearing the user's value."
     },
@@ -551,7 +551,7 @@
         "empty state",
         "visual encoding"
       ],
-      "outcome": "Explain how this table connects to D3 without changing the statistical claim.",
+      "outcome": "Build a filterable local study table with an explicit empty state. Explain how this table connects to D3 without changing the statistical claim.",
       "lab": "Build a filterable local study table with an explicit empty state.",
       "verification": "Changing the selection updates rows and count while preserving the original data."
     },
@@ -571,7 +571,7 @@
         "injection",
         "sandbox"
       ],
-      "outcome": "Explain the separate roles of escaping, validation, CSP and sandboxing.",
+      "outcome": "Build a small rendering demo that separates text handling from URL policy. Explain the separate roles of escaping, validation, CSP and sandboxing.",
       "lab": "Build a small rendering demo that separates text handling from URL policy.",
       "verification": "Plain text remains data and navigation candidates pass an explicit scheme decision."
     },
@@ -591,7 +591,7 @@
         "regression",
         "evidence"
       ],
-      "outcome": "Explain what evidence would justify a production readiness claim.",
+      "outcome": "Create a quality report for the portal from web-024. Explain what evidence would justify a production readiness claim.",
       "lab": "Create a quality report for the portal from web-024.",
       "verification": "The report records source revision, tested conditions, observations and remaining limitations."
     },
@@ -612,7 +612,7 @@
         "statement",
         "server response"
       ],
-      "outcome": "Compare the CLI lifecycle with a server request lifecycle.",
+      "outcome": "Write a PHP program that prints a study topic and computed duration. Compare the CLI lifecycle with a server request lifecycle.",
       "lab": "Write a PHP program that prints a study topic and computed duration.",
       "verification": "The program runs in the CLI worker and produces two clearly labeled values."
     },
@@ -633,7 +633,7 @@
         "null",
         "strict comparison"
       ],
-      "outcome": "Explain the limited scope of strict_types.",
+      "outcome": "Model an optional note without confusing missing, empty and null. Explain the limited scope of strict_types.",
       "lab": "Model an optional note without confusing missing, empty and null.",
       "verification": "The program documents and checks the chosen interpretation of each state."
     },
@@ -653,7 +653,7 @@
         "conversion",
         "overflow"
       ],
-      "outcome": "Explain when integer cents are insufficient.",
+      "outcome": "Implement a bounded quantity calculation and cents formatter. Explain when integer cents are insufficient.",
       "lab": "Implement a bounded quantity calculation and cents formatter.",
       "verification": "Valid quantities produce exact integer totals and two-digit fractional display."
     },
@@ -673,7 +673,7 @@
         "match",
         "termination"
       ],
-      "outcome": "Explain match versus switch for a typed mapping.",
+      "outcome": "Build a bounded weekly-duration summary with a route label. Explain match versus switch for a typed mapping.",
       "lab": "Build a bounded weekly-duration summary with a route label.",
       "verification": "The total and label follow the declared cases and terminate predictably."
     },
@@ -694,7 +694,7 @@
         "filter",
         "mapping"
       ],
-      "outcome": "Explain the risk of a lingering foreach reference.",
+      "outcome": "Filter and summarize study records without changing the originals. Explain the risk of a lingering foreach reference.",
       "lab": "Filter and summarize study records without changing the originals.",
       "verification": "The derived list contains only qualifying rows and retains consecutive indices."
     },
@@ -714,7 +714,7 @@
         "closure",
         "pure function"
       ],
-      "outcome": "Explain when a closure improves a transformation.",
+      "outcome": "Build reusable duration calculation and display functions. Explain when a closure improves a transformation.",
       "lab": "Build reusable duration calculation and display functions.",
       "verification": "Calculations can be tested without capturing output, then formatted at the boundary."
     },
@@ -734,7 +734,7 @@
         "grapheme",
         "encoding"
       ],
-      "outcome": "Explain validation, normalization and output escaping separately.",
+      "outcome": "Build a text inspection report that labels bytes honestly. Explain validation, normalization and output escaping separately.",
       "lab": "Build a text inspection report that labels bytes honestly.",
       "verification": "The program does not present strlen as a count of user-perceived characters."
     },
@@ -754,7 +754,7 @@
         "schema",
         "bounded input"
       ],
-      "outcome": "Explain why user-controlled paths need an ownership policy.",
+      "outcome": "Parse a small study record and round-trip it through a temporary stream. Explain why user-controlled paths need an ownership policy.",
       "lab": "Parse a small study record and round-trip it through a temporary stream.",
       "verification": "The field contract passes and the returned bytes match the encoded value."
     },
@@ -774,7 +774,7 @@
         "finally",
         "error boundary"
       ],
-      "outcome": "Explain the difference between learner diagnostics and public production errors.",
+      "outcome": "Build a failure-aware parser with explicit success and error paths. Explain the difference between learner diagnostics and public production errors.",
       "lab": "Build a failure-aware parser with explicit success and error paths.",
       "verification": "Valid data returns a result; invalid data produces a clear classified failure."
     },
@@ -795,7 +795,7 @@
         "invariant",
         "readonly"
       ],
-      "outcome": "Explain shallow readonly versus deep immutability.",
+      "outcome": "Build a validated study-session value object. Explain shallow readonly versus deep immutability.",
       "lab": "Build a validated study-session value object.",
       "verification": "Its topic and duration satisfy explicit constructor checks and remain readonly."
     },
@@ -814,7 +814,7 @@
         "dependency injection",
         "test double"
       ],
-      "outcome": "Explain what remains untested by an in-memory repository.",
+      "outcome": "Build a summary service with an injected repository. Explain what remains untested by an in-memory repository.",
       "lab": "Build a summary service with an injected repository.",
       "verification": "The same service works with two controlled implementations that satisfy the interface."
     },
@@ -834,7 +834,7 @@
         "lockfile",
         "dependency boundary"
       ],
-      "outcome": "Describe a deliberate dependency update and lockfile review.",
+      "outcome": "Design a small project layout with source, tests and a public entrypoint. Describe a deliberate dependency update and lockfile review.",
       "lab": "Design a small project layout with source, tests and a public entrypoint.",
       "verification": "Application code and tests stay separate from the server's public document root."
     },
@@ -854,7 +854,7 @@
         "clock",
         "duration"
       ],
-      "outcome": "Explain why a numeric offset is not a complete regional time-zone rule.",
+      "outcome": "Build a deterministic study-session time report. Explain why a numeric offset is not a complete regional time-zone rule.",
       "lab": "Build a deterministic study-session time report.",
       "verification": "The output uses explicit time zones and a fixed input suitable for repeatable tests."
     },
@@ -874,7 +874,7 @@
         "boundary",
         "regression"
       ],
-      "outcome": "Explain why a passing reference is not a bug-free guarantee.",
+      "outcome": "Create a test table for a bounded study-duration function. Explain why a passing reference is not a bug-free guarantee.",
       "lab": "Create a test table for a bounded study-duration function.",
       "verification": "Normal, zero, invalid and boundary cases have independently justified outcomes."
     },
@@ -896,7 +896,7 @@
         "URL validation",
         "XSS"
       ],
-      "outcome": "Explain why validated text still needs output escaping.",
+      "outcome": "Render a study-card template from synthetic untrusted labels. Explain why validated text still needs output escaping.",
       "lab": "Render a study-card template from synthetic untrusted labels.",
       "verification": "The structure stays fixed while labels are escaped at output."
     },
@@ -917,7 +917,7 @@
         "response body",
         "route"
       ],
-      "outcome": "Explain what a CLI response model does not prove.",
+      "outcome": "Build a pure router for health and lesson-summary requests. Explain what a CLI response model does not prove.",
       "lab": "Build a pure router for health and lesson-summary requests.",
       "verification": "Known GET routes return their declared representations and unsupported requests are rejected."
     },
@@ -937,7 +937,7 @@
         "redisplay",
         "POST redirect GET"
       ],
-      "outcome": "Explain the limits of POST redirect GET.",
+      "outcome": "Build a validator returning cleaned values and field-specific errors. Explain the limits of POST redirect GET.",
       "lab": "Build a validator returning cleaned values and field-specific errors.",
       "verification": "Valid data has a complete domain value; invalid data has actionable errors and no partial write."
     },
@@ -957,7 +957,7 @@
         "fixation",
         "lifecycle"
       ],
-      "outcome": "Describe a real HTTP session acceptance test.",
+      "outcome": "Model session activity and expiry with explicit state transitions. Describe a real HTTP session acceptance test.",
       "lab": "Model session activity and expiry with explicit state transitions.",
       "verification": "An expired session is rejected and a valid activity update preserves the declared identity."
     },
@@ -977,7 +977,7 @@
         "SameSite",
         "origin"
       ],
-      "outcome": "Explain the relationship between CSRF, SameSite and XSS.",
+      "outcome": "Build a state-change decision that checks method, token and authorization. Explain the relationship between CSRF, SameSite and XSS.",
       "lab": "Build a state-change decision that checks method, token and authorization.",
       "verification": "Only a deliberate allowed POST with matching token can reach the mutation branch."
     },
@@ -997,7 +997,7 @@
         "rehash",
         "authentication"
       ],
-      "outcome": "List the additional controls required around a real login.",
+      "outcome": "Build a password-verification demonstration without printing the hash or secret. List the additional controls required around a real login.",
       "lab": "Build a password-verification demonstration without printing the hash or secret.",
       "verification": "The output reports the test result while keeping credential-shaped values out of logs."
     },
@@ -1019,7 +1019,7 @@
         "SQL injection",
         "schema"
       ],
-      "outcome": "Explain which checks must be repeated when moving to PostgreSQL.",
+      "outcome": "Build a local PDO note store with prepared insert and lookup. Explain which checks must be repeated when moving to PostgreSQL.",
       "lab": "Build a local PDO note store with prepared insert and lookup.",
       "verification": "The expected record is retrieved and SQL-looking text remains data."
     },
@@ -1039,7 +1039,7 @@
         "rollback",
         "optimistic concurrency"
       ],
-      "outcome": "Explain the limits of the single-connection concurrency demonstration.",
+      "outcome": "Implement a version-checked update in a disposable database. Explain the limits of the single-connection concurrency demonstration.",
       "lab": "Implement a version-checked update in a disposable database.",
       "verification": "The first expected version succeeds and the repeated stale version affects zero rows."
     },
@@ -1059,7 +1059,7 @@
         "object access",
         "deny by default"
       ],
-      "outcome": "Explain why hiding an edit button is only a user-interface convenience.",
+      "outcome": "Build an object-access function with separate trusted actor and requested id inputs. Explain why hiding an edit button is only a user-interface convenience.",
       "lab": "Build an object-access function with separate trusted actor and requested id inputs.",
       "verification": "The owner can read the record and a different actor receives no record."
     },
@@ -1079,7 +1079,7 @@
         "status mapping",
         "content type"
       ],
-      "outcome": "Explain a backward-compatible versus breaking API change.",
+      "outcome": "Build a response model that maps success and validation failure consistently. Explain a backward-compatible versus breaking API change.",
       "lab": "Build a response model that maps success and validation failure consistently.",
       "verification": "Status, content type and JSON body agree with the declared contract."
     },
@@ -1100,7 +1100,7 @@
         "invalidation",
         "budget"
       ],
-      "outcome": "Explain what must be measured before claiming a faster database endpoint.",
+      "outcome": "Implement a cursor-based slice over synthetic records. Explain what must be measured before claiming a faster database endpoint.",
       "lab": "Implement a cursor-based slice over synthetic records.",
       "verification": "The second page continues after the last id and the final page can be shorter."
     },
@@ -1120,7 +1120,7 @@
         "transaction",
         "presentation boundary"
       ],
-      "outcome": "Explain the remaining work before this core becomes a deployed application.",
+      "outcome": "Build a tested planner core with validation and prepared storage. Explain the remaining work before this core becomes a deployed application.",
       "lab": "Build a tested planner core with validation and prepared storage.",
       "verification": "Accepted plans persist in the disposable database and rejected inputs create no rows."
     },
@@ -1140,7 +1140,7 @@
         "redirect",
         "persistent volume"
       ],
-      "outcome": "Explain which properties this local server has not qualified.",
+      "outcome": "Run the owned lab and create one synthetic note through the browser. Explain which properties this local server has not qualified.",
       "lab": "Run the owned lab and create one synthetic note through the browser.",
       "verification": "The note survives a page reload and appears after a successful POST-redirect-GET sequence."
     },
@@ -1161,7 +1161,7 @@
         "side effect",
         "outbox"
       ],
-      "outcome": "Explain which tests are needed before enabling uploads or email.",
+      "outcome": "Write an upload design with separate validation, storage and retrieval boundaries. Explain which tests are needed before enabling uploads or email.",
       "lab": "Write an upload design with separate validation, storage and retrieval boundaries.",
       "verification": "Files receive generated names, stay outside executable public paths and have ownership and retention rules."
     },
@@ -1182,7 +1182,7 @@
         "migration",
         "backup"
       ],
-      "outcome": "Explain what evidence is needed before publishing an image as ready.",
+      "outcome": "Design a release plan for the study planner with durable storage. Explain what evidence is needed before publishing an image as ready.",
       "lab": "Design a release plan for the study planner with durable storage.",
       "verification": "The plan covers configuration, secrets, migration, health, write/read acceptance, backup and rollback."
     },
@@ -1202,7 +1202,7 @@
         "cross-language boundary",
         "operational evidence"
       ],
-      "outcome": "Present a release-readiness review with explicit limits and next actions.",
+      "outcome": "Build and review a learner-owned extension of the supplied local lab. Present a release-readiness review with explicit limits and next actions.",
       "lab": "Build and review a learner-owned extension of the supplied local lab.",
       "verification": "The extension has coherent HTML/CSS, tested PHP behavior and a bounded reproducible setup."
     }

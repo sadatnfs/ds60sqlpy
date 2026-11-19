@@ -9,6 +9,7 @@
     "calibration error"
   ],
   "outcome": "Audit a judge using identity-aware order swaps and held-out probability calibration while keeping agreement distinct from correctness.",
+  "verification": "The order-swapped identity score for A is 0, perfect probabilities give Brier and ECE 0, maximally wrong ones give 1, a constant judge gets ECE 0 with Brier 0.25, and final labels never influence the frozen recalibration map.",
   "level": "intermediate",
   "runtime": "python-core",
   "minutes": 120,

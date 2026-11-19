@@ -20,11 +20,13 @@ The service binds only to loopback on an ephemeral port and stops when the owned
 
 A Repository port exposes an immutable row list. The pure summary function filters by group and returns count and integer total. The HTTP adapter validates exact path, method and query structure before calling the core. Since the admitted group is one uppercase ASCII letter, the fixed JSON encoder cannot be influenced by arbitrary quotes. HttpClient requests use timeouts, and every exchange, response body and server instance is closed.
 
-## Exercise 1: Verify the domain summary
+## Exercise 1: Verify the domain summary: change one input
 
-Task: Summarize group A over amounts 10,20 and group B over 5.
+Task: Copy Example A into a scratch `Main.java` and change `List.of(new Row("a1", "A", 10), new Row("a2", "A", 20), new Row("b1", "B", 5));` to `List.of(new Row("a1", "A", 10), new Row("a2", "A", 20), new Row("b1", "B", 6));`. Before running it with `java -ea Main`, predict which assertion fails and which value it now sees; then run it and restore the original line.
 
 The domain result has one object per requested group. It is checked independently of HTTP formatting and status handling.
+
+The unchanged code is the part that Example A adds:
 
 ```java
 Repository repository = () ->
@@ -33,15 +35,17 @@ assert summarize(repository, "A").equals(new Summary("A", 2, 30));
 assert summarize(repository, "B").equals(new Summary("B", 1, 5));
 ```
 
-**Expected:** A count 2, total 30; B count 1, total 5.
+**Expected:** The changed run fails with an `AssertionError` from the assertion on `summarize(repository, "B").equals(new Summary("B", 1, 5))`. Restoring the original line brings back the worked observation: A count 2, total 30; B count 1, total 5.
 
-**Verify:** Compare the program values or named exception with A count 2, total 30; B count 1, total 5. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.
+**Verify:** Compare your written prediction with the reported `AssertionError` and its stack-trace line, and name the value that made `summarize(repository, "B").equals(new Summary("B", 1, 5))` false. After restoring the line, the program completes without an `AssertionError` again.
 
-## Exercise 2: Read a successful HTTPsummary
+## Exercise 2: Read a successful HTTP summary: diagnose an edited check
 
-Task: GET/summary?group=Afromtheownedserver.
+Task: A careless edit changed the assertion that Example B adds after Example A so that it reads `\"count\":3`. Run Example B with that line, explain why the edited assertion now fails for the same program state, and restore it.
 
 The exact body check fixes the public schema and integer representation. The source counts remain independently known.
+
+The unchanged code is the part that Example B adds:
 
 ```java
 try (
@@ -54,13 +58,13 @@ try (
 }
 ```
 
-**Expected:** status 200 andexactJSONwithcount2,total 30.
+**Expected:** Before the repair the run fails with an `AssertionError` from the assertion on `response.statusCode() == 200 && response.body().equals("{\"group\":\"A\",\"count\":2,\"total\":30}")`; after it the line reads `\"count\":2` again and status 200 and exact JSON with count 2, total 30.
 
-**Verify:** Compare the program values or named exception with status 200 andexactJSONwithcount2,total 30. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.
+**Verify:** Keep the failing and the repaired runs. Explain why the edited assertion rejects the same program state that `response.statusCode() == 200 && response.body().equals("{\"group\":\"A\",\"count\":2,\"total\":30}")` accepts.
 
 ## Exercise 3: Report an unknown valid group
 
-Task: GETgroupC,which passes syntax buthasnorecords.
+Task: GET group C, which passes syntax but has no records.
 
 A valid but absent domain identity differs from malformed input. Keeping the status distinction helps clients respond appropriately.
 
@@ -74,13 +78,13 @@ try (
 }
 ```
 
-**Expected:** status404 withnot_found error.
+**Expected:** status 404 with not_found error.
 
-**Verify:** Compare the program values or named exception with status404 withnot_found error. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.
+**Verify:** Keep an assertion equivalent to `response.statusCode() == 404 && response.body().contains("not_found")`. As a control, change `var response = send(client, server.uri("/summary?group=C"), "GET");` to `var response = send(client, server.uri("/summary?group=C!"), "GET");`: the run must fail with an `AssertionError` from the assertion on `response.statusCode() == 404 && response.body().contains("not_found")`. Restore the line before continuing.
 
 ## Exercise 4: Reject ambiguous or malformed queries
 
-Task: Send duplicate group parameters andalowercasegroup.
+Task: Send duplicate group parameters and a lowercase group.
 
 The adapter refuses to guess which duplicate value wins. A broader query grammar would need an explicit parser and validation policy.
 
@@ -89,40 +93,42 @@ try (
   DataServer server = new DataServer(repository);
   var client = java.net.http.HttpClient.newHttpClient()
 ) {
-  assert send(client, server.uri("/summary?group=A&group=B"), "GET").statusCode() == 400;
-  assert send(client, server.uri("/summary?group=a"), "GET").statusCode() == 400;
+  int duplicate = send(client, server.uri("/summary?group=A&group=B"), "GET").statusCode();
+  int lowercase = send(client, server.uri("/summary?group=a"), "GET").statusCode();
+  assert duplicate == 400 && lowercase == 400;
 }
 ```
 
-**Expected:** bothstatus400.
+**Expected:** both status 400.
 
-**Verify:** Compare the program values or named exception with bothstatus400. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.
+**Verify:** Keep an assertion equivalent to `duplicate == 400 && lowercase == 400`. As a control, change `int duplicate = send(client, server.uri("/summary?group=A&group=B"), "GET").statusCode();` to `int duplicate = send(client, server.uri("/summary?group=A&group=B"), "GET!").statusCode();`: the run must fail with an `AssertionError` from the assertion on `duplicate == 400 && lowercase == 400`. Restore the line before continuing.
 
-## Exercise 5: Reject unsupported methods andpathlookalikes
+## Exercise 5: Reject unsupported methods and path lookalikes
 
-Task: POST to the summary route andGET/summary-extra.
+Task: POST to the summary route and GET /summary-extra.
 
-The underlying server uses prefix contexts,so theadaptermustenforceitsownexactpathcontract. No write operation is exposed.
+The underlying server uses prefix contexts, so the adapter must enforce its own exact path contract. No write operation is exposed.
 
 ```java
 try (
   DataServer server = new DataServer(repository);
   var client = java.net.http.HttpClient.newHttpClient()
 ) {
-  assert send(client, server.uri("/summary?group=A"), "POST").statusCode() == 405;
-  assert send(client, server.uri("/summary-extra?group=A"), "GET").statusCode() == 404;
+  int post = send(client, server.uri("/summary?group=A"), "POST").statusCode();
+  int lookalike = send(client, server.uri("/summary-extra?group=A"), "GET").statusCode();
+  assert post == 405 && lookalike == 404;
 }
 ```
 
-**Expected:** 405 and404 respectively.
+**Expected:** 405 and 404 respectively.
 
-**Verify:** Compare the program values or named exception with 405 and404 respectively. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.
+**Verify:** Keep an assertion equivalent to `post == 405 && lookalike == 404`. As a control, change `assert post == 405 && lookalike == 404;` to `assert post != 405 && lookalike == 404;` inside it: the run must fail with an `AssertionError`, which shows the assertion can fail. Restore it.
 
 ## Exercise 6: Preserve storage and close the owned listener
 
-Task: Comparetherepositorybefore/afterrequests and close the server.
+Task: Compare the repository before/after requests and close the server.
 
-The read-onlyservice should not mutate its storage. Thefixture owns the listener and does not leave a background deployment running.
+The read-only service should not mutate its storage. The fixture owns the listener and does not leave a background deployment running.
 
 ```java
 List<Row> before = repository.rows();
@@ -133,7 +139,7 @@ assert server.closed && repository.rows().equals(before) && repository.rows().si
 
 **Expected:** 3 unchanged records; closed flag true.
 
-**Verify:** Compare the program values or named exception with 3 unchanged records; closed flag true. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.
+**Verify:** Keep an assertion equivalent to `server.closed && repository.rows().equals(before) && repository.rows().size() == 3`. As a control, change `assert server.closed && repository.rows().equals(before) && repository.rows().size() == 3;` to `assert server.closed && repository.rows().equals(before) && repository.rows().size() != 3;` inside it: the run must fail with an `AssertionError`, which shows the assertion can fail. Restore it.
 
 ## After comparing the answer
 

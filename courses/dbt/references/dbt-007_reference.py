@@ -83,9 +83,9 @@ def rows(root, sql):
 def example_one():
     with tempfile.TemporaryDirectory() as d:
         macro = (
-            "{% macro safe_ratio(n, d) %} case when {{ d }} = 0 then "
-            "null else cast({{ n }} as double) / {{ d }} end {% "
-            "endmacro %}"
+            "{% macro safe_ratio(n, d) %}\n"
+            "    case when {{ d }} = 0 then null else cast({{ n }} as double) / {{ d }} end\n"
+            "{% endmacro %}"
         )
         p = project(
             d,

@@ -15,9 +15,9 @@ Reconciliation is a conservation rule: input_count equals accepted_count plus re
 
 The capstone is a pipeline with boundaries: obtain raw lines, validate each field, classify each record, aggregate accepted values, then publish a report. Each stage has a different failure policy. A malformed row contributes to rejected count; a missing input file or exceeded input budget is a fatal operation failure. Treating both as an empty successful dataset would make operational errors indistinguishable from legitimate data.
 
-The five-row fixture contains10, 0, bad, -2 and 25. Under the declared nonnegative integer grammar, three rows are accepted and two rejected. The accepted values sum to 35. The conservation equation accepted+rejected=input rows is an independent check: a correct total can still hide a dropped zero or an uncounted malformed row. Preserve all three report values rather than testing only the sum.
+The five-row fixture contains 10, 0, bad, -2 and 25. Under the declared nonnegative integer grammar, three rows are accepted and two rejected. The accepted values sum to 35. The conservation equation accepted+rejected=input rows is an independent check: a correct total can still hide a dropped zero or an uncounted malformed row. Preserve all three report values rather than testing only the sum.
 
-Parsing and aggregation should not be interleaved in a way that publishes partially trusted values. For10x, a prefix conversion may yield10, but full consumption fails and the row must not contribute. For0, optional presence is true even though the number is zero. For -2, integer parsing succeeds but the domain policy rejects negative readings. These are three different branches that the reference exercises.
+Parsing and aggregation should not be interleaved in a way that publishes partially trusted values. For 10x, a prefix conversion may yield 10, but full consumption fails and the row must not contribute. For 0, optional presence is true even though the number is zero. For -2, integer parsing succeeds but the domain policy rejects negative readings. These are three different branches that the reference exercises.
 
 The browser example uses an embedded deterministic vector. The separate executable reference also supports --input FILE for a host file-driven run. It caps row count and line length, checks open/read failures and returns status 2 for fatal errors. The ordinary successful report returns 0. A malformed row is counted under the declared report policy rather than necessarily aborting the whole file. That policy must be stated, because strict-all-or-nothing ingestion would be a different product.
 
@@ -27,7 +27,7 @@ A bounded program also needs a publication rule. The report should be emitted on
 
 ## Debugging the contract
 
-When total35 passes but counts do not, inspect zero handling and rejected-row accounting. When a missing file reports success, check the file-open guard and process exit code. When a suffix is accepted, inspect both from_chars outputs. When a large input consumes too much memory before rejection, enforce line/row budgets during reading rather than after loading the entire file. A learner should be able to explain which errors are per-record rejections and which prevent publication of any final report.
+When total 35 passes but counts do not, inspect zero handling and rejected-row accounting. When a missing file reports success, check the file-open guard and process exit code. When a suffix is accepted, inspect both from_chars outputs. When a large input consumes too much memory before rejection, enforce line/row budgets during reading rather than after loading the entire file. A learner should be able to explain which errors are per-record rejections and which prevent publication of any final report.
 <!-- depth:end -->
 
 ## Worked example 1
@@ -56,7 +56,7 @@ Write the grammar and rejection policy for the five rows.
 
 **Reasoning:** Syntax and domain checks have separate reasons.
 
-**Verify:** Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.
+**Verify:** Apply your written grammar to each of the five rows by hand and confirm it accepts exactly 10, 0 and 25 and gives a reason for rejecting `bad` and `-2`.
 
 ## Exercise 2: Implement the ledger
 
@@ -66,7 +66,7 @@ Store raw row, accepted value or rejection reason.
 
 **Reasoning:** Every source row needs an accountable outcome.
 
-**Verify:** Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.
+**Verify:** Assert the ledger has 5 entries, 3 holding a value and 2 holding a reason, and confirm each entry keeps its original raw text.
 
 ## Exercise 3: Produce the report
 
@@ -76,7 +76,7 @@ Calculate accepted count and exact total.
 
 **Reasoning:** Counts and total are independent contracts.
 
-**Verify:** Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.
+**Verify:** Compare your printed line with Worked example 1's assertion `accepted == 3 && rejected == 2 && total == 35`; the total is a `long long` and includes the accepted 0.
 
 ## Exercise 4: Inject trailing junk
 
@@ -86,7 +86,7 @@ Replace 25 with 25x.
 
 **Reasoning:** Full consumption changes the row disposition.
 
-**Verify:** Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.
+**Verify:** Change only the last row to `25x`: the original assertion now aborts, and with it updated to 2, 3 and 10 the program prints `accepted=2 rejected=3 total=10`.
 
 ## Exercise 5: Test empty input
 
@@ -96,7 +96,7 @@ Run no rows through the same pipeline.
 
 **Reasoning:** An empty valid file differs from a failed file open.
 
-**Verify:** Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.
+**Verify:** Use an empty `rows` vector and assert `accepted == 0`, `rejected == 0` and `total == 0` without adding a special case for empty input.
 
 ## Exercise 6: Hand off reproducibility
 
@@ -106,4 +106,4 @@ Package source, fixture, commands, test results and limitations.
 
 **Reasoning:** The handoff needs observed statuses, not just source inspection.
 
-**Verify:** Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.
+**Verify:** Have someone follow only your package in a fresh directory and confirm they see `accepted=3 rejected=2 total=35` and, for the `25x` case, `accepted=2 rejected=3 total=10`.

@@ -8,27 +8,31 @@ Deletion can require coordination with an external resource whose lifetime is no
 
 A finalizer is a qualified string in metadata.finalizers. The state machine first ensures the finalizer exists during normal operation, then observes deletion, performs bounded cleanup and removes its own entry. Preserve other controllers' entries. An already absent external resource can count as successful cleanup only when the ownership check and absence observation are reliable. Never remove unrelated finalizers as a generic repair shortcut.
 
-## 1. Register cleanup responsibility
+## 1. Register cleanup responsibility: predict an edited check
 
-Inspect a normal object without the controller finalizer.
+Copy worked example 1 into a scratch pad and change `check(finalAction(false, false, false, true) == "add-finalizer", "register")` to `check(finalAction(true, false, false, true) == "add-finalizer", "register")` inside its check. Before running, predict whether the check still passes and explain why; then restore it.
+
+The unchanged code is worked example 1:
 
 ```go
 check(finalAction(false, false, false, true) == "add-finalizer", "register")
 ```
 
-**Expected:** The next action is add-finalizer.
+**Expected:** The changed run panics with `register` because the edited check no longer holds. Restoring the original line brings back the worked observation: the next action is add-finalizer.
 
 Register responsibility before creating an external resource that would otherwise be orphaned during deletion.
 
-## 2. Retain a healthy object
+## 2. Retain a healthy object: diagnose an edited check
 
-Inspect a nondeleting object whose finalizer is present.
+A careless edit changed the check in worked example 2 so that it reads `check(finalAction(true, true, false, true) == "reconcile", "normal")`. Run worked example 2 with that line, explain why the edited check now fails for the same program state, and restore it.
+
+The unchanged code is worked example 2:
 
 ```go
 check(finalAction(false, true, false, true) == "reconcile", "normal")
 ```
 
-**Expected:** The action is reconcile.
+**Expected:** Before the repair the program panics with `normal`; after it the line reads `check(finalAction(false, true, false, true) == "reconcile", "normal")` again and the action is reconcile.
 
 A finalizer does not itself request deletion. Normal desired-state work continues while deletion has not begun.
 

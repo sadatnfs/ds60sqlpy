@@ -20,15 +20,13 @@ is_null and is_nan answer different questions. is_nan can itself return null for
 
 ## Run the lesson
 
-Open this subject in `/classroom`, then show its code and notes. The prepared `data-engineering` worker runs `main.py` in a fresh temporary directory. The examples use installed packages and synthetic local fixtures; no account, cloud service, network request or package download is required. Save source and notes before switching lessons. Temporary databases, project files and tracking artifacts are recreated by each complete program and removed after the job. The classroom retains the submitted source and bounded output, not an indefinitely running external service. The guide distinguishes this local execution from the deployment decisions that need an owned production environment.
-
-
+Open `polars-004` in `/classroom`. Its starter `main.py` contains both worked cases, "Two kinds of missing numeric information" and "Unknown predicates and filtering", and prints the dictionary each case returns. The prepared `data-engineering` worker runs it in a fresh temporary directory. An `AssertionError` means that an observation differs from the case's stated contract. The inputs are small literal tables. Cases that demonstrate Parquet scans write their files into a temporary directory that is removed when the case returns. No account, network request or package download is involved. Save source and notes before switching lessons.
 
 ## Worked case 1: Two kinds of missing numeric information
 
 The first case separately counts the null and NaN, proves that fill_null leaves NaN untouched, and then applies a declared two-stage conversion. The assertions force the distinction to be visible instead of relying on a printed summary that might obscure it.
 
-**Expected evidence:** One null and one NaN are identified; the chosen final values are[1,0,0,4].
+**Expected evidence:** One null and one NaN are identified; the chosen final values are [1, 0, 0, 4].
 
 ```python
 import math
@@ -50,7 +48,6 @@ def example_one():
 if __name__ == "__main__":
     print(example_one())
 ```
-
 
 ## Worked case 2: Unknown predicates and filtering
 
@@ -78,11 +75,9 @@ if __name__ == "__main__":
     print(example_two())
 ```
 
-
 ## Practice
 
-Make each requested change in a saved copy. Compare both the expected result and the deliberately changed assumption. The separate reference explains the answers.
-
+The starter contains both worked cases, so a task can change either one. Make each change in a saved copy, run it, and compare the printed result with the task's check before opening the separate explained answers.
 
 ### 1. Count valid finite values
 
@@ -92,7 +87,6 @@ Count observations that are neither null nor NaN.
 
 **Hint:** Combine the two validity conditions explicitly.
 
-
 ### 2. Keep a missingness indicator
 
 Add a flag before replacing absent values.
@@ -100,7 +94,6 @@ Add a flag before replacing absent values.
 **Check:** The flag identifies the original absent record even after filling.
 
 **Hint:** Transformation order matters.
-
 
 ### 3. Change the denominator
 
@@ -110,7 +103,6 @@ Compute the mean of the two observed finite values and compare with zero filling
 
 **Hint:** State which records contribute.
 
-
 ### 4. Retain unknown flags
 
 Filter a Boolean field under a keep-unknown policy.
@@ -118,7 +110,6 @@ Filter a Boolean field under a keep-unknown policy.
 **Check:** Ids 1 and 3 remain.
 
 **Hint:** Use fill_null(True) deliberately.
-
 
 ### 5. Predict logical outcomes
 
@@ -128,7 +119,6 @@ Evaluate false OR unknown and true OR unknown.
 
 **Hint:** Ask whether the known operand determines the result.
 
-
 ### 6. Detect invalid arithmetic
 
 Generate NaN through an invalid floating operation and keep its cause separate from absent measurement.
@@ -137,20 +127,19 @@ Generate NaN through an invalid floating operation and keep its cause separate f
 
 **Hint:** Capture validity before replacing values.
 
-
 ## Diagnose errors and misleading results
 
 A surprising row loss may be caused by an unknown predicate, not a filtering bug. Inspect null counts before and after joins and casts. If a mean becomes NaN, count NaNs separately from nulls and trace the operation that introduced them. Do not apply a universal fill-zero policy to counts, measurements, labels and timestamps; they have different semantics.
 
 ## Transfer to independent work
 
-Explain how missingness changes a specific calculation. Build a table with observed, missing and invalid values, show each inclusion policy, and state which population the resulting statistic describes. Carry that accounting into downstream feature engineering so training and serving apply the same policy.
+Build a table with observed, missing and invalid values, show each inclusion policy, and state which population the resulting statistic describes. Carry that accounting into downstream feature engineering so training and serving apply the same policy.
 
 ## Primary references
 
-- [Polars documentation: Null, NaN and three-valued logic](https://docs.pola.rs/user-guide/expressions/missing-data/)
+- [Polars user guide: Missing data](https://docs.pola.rs/user-guide/expressions/missing-data/)
 - [Polars Python API reference](https://docs.pola.rs/api/python/stable/reference/index.html)
 
 ## Tutor guidance
 
-Use the repository learning-companion skill for `polars-004`. Inspect the learner's own source and observations, ask for an explanation of the relevant data or state contract, and give a focused hint. Separate an assertion on this fixture from a claim about an external dataset or deployed service.
+Use the repository's `$guide-ds60sqlpy-learning` skill (`.agents/skills/guide-ds60sqlpy-learning/SKILL.md`) for `polars-004`. Inspect the learner's own source and printed output first. Ask for an explanation of null, NaN, boolean logic, filter policy and imputation in their own words, then give one focused hint at a time. Keep an assertion on this synthetic fixture separate from a claim about an external dataset or deployed service.

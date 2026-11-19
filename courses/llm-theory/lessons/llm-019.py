@@ -5,20 +5,20 @@ Copy to .learning before editing. Six independent attempts belong below.
 """
 
 # Exercise 1: Clone the initial state
-# Build two identical decoders with seed9 and copy one state into the other.
+# Build two identical decoders with seed 9 and copy one state into the other.
 # Expected: all parameter tensors initially equal.
 
 # Exercise 2: Run a no-update control
-# Compute the same loss5 times without backward or step.
+# Compute the same loss 5 times without backward or step.
 # Expected: all losses equal; weights unchanged.
 
 # Exercise 3: Train the repeated batch
-# Apply30 Adam(.02) updates to the other model, using the same batch each time.
+# Apply 30 Adam(0.02) updates to the other model, using the same batch each time.
 # Expected: final batch loss below its initial loss.
 
 # Exercise 4: Check the class axis
-# Inspect logits before flattening and verify vocabulary dimension16.
-# Expected: shape(1,3,16).
+# Inspect logits before flattening and verify vocabulary dimension 16.
+# Expected: shape (1, 3, 16).
 
 # Exercise 5: Verify the control stayed isolated
 # Compare control state with its original snapshot after training the other model.

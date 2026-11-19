@@ -33,7 +33,7 @@ When tau is small, all theta values must lie close to mu in the centered represe
 
 A parameterization is not a free change of scientific meaning. Priors on tau, group-level covariates and observation scales still determine the model. Adding an arbitrary lower bound to tau can remove a difficult region by changing the prior support. That may be justified by knowledge, but it should not be hidden as a convergence repair.
 
-Compare diagnostics for the parameters and derived quantities that matter. A sampler can explore one population parameter adequately while poorly estimating an extreme group effect or a new-group prediction. The two short chains here are a demonstration of these observations, not sufficient evidence for every hierarchical decision.
+Compare diagnostics for the parameters and derived quantities that matter. A sampler can explore one population parameter adequately while poorly estimating an extreme group effect or a new-group prediction. The two short chains here are a demonstration of these observations, not sufficient evidence for every hierarchical decision. Apply the same screen to each parameterization's record (R-hat below 1.01, at least 100 bulk effective draws per chain and zero divergences); with 120 retained draws per chain, either form may fail it, and a divergence in the centered fit is a geometry signal rather than noise.
 
 ## Answered scientific discussion
 

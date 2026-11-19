@@ -248,7 +248,7 @@
         "active denominator"
       ],
       "outcome": "Compute a stable masked categorical objective and verify its value and direct logit gradients.",
-      "lab": "Admit the fixture and compute its mean loss.",
+      "lab": "Validate the fixture with `admit`, then compute its mean loss.",
       "verification": "log(3), with three active targets."
     },
     {
@@ -553,7 +553,7 @@
         "framework parity"
       ],
       "outcome": "Reconstruct two small language-model mechanisms in JAX and compare values and gradients with independent shape-aware oracles.",
-      "lab": "Admit the zero-score attention fixture and calculate its outputs.",
+      "lab": "Validate the zero-score attention fixture with `admit_attention`, then calculate its outputs.",
       "verification": "[[2,0],[1,1],[8/3,8/3]]."
     },
     {
@@ -566,13 +566,13 @@
       ],
       "runtime": "jax-cpu",
       "concepts": [
-        "admission contract",
+        "input-validation contract",
         "masked objective",
         "ridge solve",
         "independent validation"
       ],
-      "outcome": "Deliver a small reusable numerical component with separate admission, mathematical, transformation and interpretation evidence.",
-      "lab": "Admit and solve the unpenalized fixture, then evaluate its gradient.",
+      "outcome": "Deliver a small reusable numerical component with separate input-validation, mathematical, transformation and interpretation evidence.",
+      "lab": "Validate the unpenalized fixture with `admit`, solve it, then evaluate its gradient.",
       "verification": "Weights [1,2], zero loss and zero gradient within tolerance."
     },
     {
@@ -605,7 +605,7 @@
       ],
       "runtime": "reading",
       "concepts": [
-        "backend admission",
+        "backend qualification",
         "device readback",
         "allocator",
         "hardware evidence"

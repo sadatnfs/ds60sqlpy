@@ -1,4 +1,13 @@
-"""mle-004: worked starting point; complete the guide's six changes."""
+"""mle-004: both worked cases; complete the guide's six changes."""
+
+import hashlib
+import json
+
+
+def digest(data):
+    return hashlib.sha256(
+        json.dumps(data, sort_keys=True, separators=(",", ":"), allow_nan=False).encode()
+    ).hexdigest()
 
 
 def example_one():
@@ -25,8 +34,22 @@ def example_one():
     }
 
 
+def example_two():
+    expected = {
+        "usage": "nonnegative float",
+        "tickets": "nonnegative integer",
+        "region": ["north", "south"],
+    }
+    approved = digest(expected)
+    changed = {**expected, "usage": "minutes instead of hours"}
+    assert digest(changed) != approved
+    assert set(expected) == set(changed)
+    return {"same_column_names": True, "semantic_contract_changed": True, "version": approved}
+
+
 if __name__ == "__main__":
     print(example_one())
+    print(example_two())
 
 # TODO 1: Define a separate outcome for unavailable usage.
 # TODO 2: Introduce a new region under a revised contract.

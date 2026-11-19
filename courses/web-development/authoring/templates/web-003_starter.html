@@ -5,15 +5,41 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Semantic structure, headings and landmarks: my attempt</title>
     <style>
-      /* Implement the lesson-specific CSS. Keep keyboard focus visible. */
+      /* Write the CSS for the exercises here. Keep keyboard focus visible. */
     </style>
   </head>
   <body>
-    <!-- web-003: Build a study page with landmarks and a working skip link. -->
-    <!-- Save your prediction, then implement the six exercises from the guide. -->
+    <!--
+      web-003 exercises. Hints are in the guide; answers are in the solutions folder.
+      1. Draw the heading outline of the first example.
+      2. Add a sibling CSS section at the correct level.
+      3. Build a study page with landmarks and a working skip link.
+      4. Replace a heading used only for large text with an appropriate element.
+      5. Check the document with CSS disabled or unavailable.
+      6. Explain when a div is more appropriate than section.
+    -->
     <main>
       <h1>Semantic structure, headings and landmarks</h1>
-      <!-- Build your own document here. The reference is separate. -->
+      <section>
+        <h2>HTML</h2>
+        <p>Structure first.</p>
+      </section>
+      <h3>Remember to save your work.</h3>
+      <!--
+        Worked example 1: A useful outline
+        <main>
+          <h1>Study notes</h1>
+          <section>
+            <h2>HTML</h2>
+            <p>Structure first.</p>
+          </section>
+        </main>
+      -->
+      <!--
+        Worked example 2: Skip repeated navigation
+        <a href="#content">Skip to content</a>
+        <main id="content" tabindex="-1"><h1>Notes</h1></main>
+      -->
     </main>
   </body>
 </html>

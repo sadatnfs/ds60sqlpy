@@ -16,21 +16,21 @@ The capstone must report what it actually establishes. A small synthetic holdout
 
 ## Reading the implementation
 
-Create X shaped(6, 3), targets shaped(6, 1), and nn.Linear(3, 1, bias=False) with zero weights. Select rows by frozen index lists. Use MSELoss and SGD with rate 0.1, zeroing gradients every step. Evaluate after the fixed budget under no_grad. Record train and holdout losses with their counts, plus model state and split identities. Do not overwrite the original split after seeing errors.
+Create X shaped (6, 3), targets shaped (6, 1), and nn.Linear(3, 1, bias=False) with zero weights. Select rows by frozen index lists. Use MSELoss and SGD 0.1, zeroing gradients every step. Evaluate after the fixed budget under no_grad. Record train and holdout losses with their counts, plus model state and split identities. Do not overwrite the original split after seeing errors.
 
 ## Derive a capstone oracle from the training design
 
-The six input rows are zero, the three coordinate basis vectors, then[1, 1, 1] and[2, 1, 1]. The target is 2 a-b+c, so the targets are[0, 2, -1, 1, 2, 4]. The first four rows are training and the last two are assessment. Input shape is(6, 3), target shape(6, 1), and the bias-free Linear stores one row of three weights. This shape contract must remain unchanged throughout fitting and evaluation.
+The six input rows are zero, the three coordinate basis vectors, then [1, 1, 1] and [2, 1, 1]. The target is 2 a-b+c, so the targets are [0, 2, -1, 1, 2, 4]. The first four rows are training and the last two are assessment. Input shape is (6, 3), target shape (6, 1), and the bias-free Linear stores one row of three weights. This shape contract must remain unchanged throughout fitting and evaluation.
 
-The training-only baseline is(0+2-1+1)/4=0.5. On assessment targets 2 and 4, its squared errors are 2.25 and 12.25, giving MSE 7.25. This baseline ignores features but uses the same assessment records and metric as the learned model. Fitting its constant to the assessment mean would invalidate that comparison.
+The training-only baseline is (0+2-1+1)/4=0.5. On assessment targets 2 and 4, its squared errors are 2.25 and 12.25, giving MSE 7.25. This baseline ignores features but uses the same assessment records and metric as the learned model. Fitting its constant to the assessment mean would invalidate that comparison.
 
 The basis-vector training design makes the optimizer trajectory independently solvable. Let the stored weight row be w=[w_a, w_b, w_c] and the intended row be w*=[2, -1, 1]. The zero input contributes a zero residual because the model has no bias. The other three rows isolate one coefficient each, so the training objective is:
 
 `L_train(w) = [(w_a-2)²+(w_b+1)²+(w_c-1)²]/4`.
 
-Its gradient is(w-w*)/2. With SGD rate 0.1, one update changes the error to 0.95(w-w*). Starting at zero, after t updates the weight is`w_t=(1-0.95^t)w*`. This oracle does not read PyTorch's gradient buffer or reuse the training-loop implementation. It follows from the declared design matrix and denominator.
+Its gradient is (w-w*)/2. With SGD rate 0.1, one update changes the error to 0.95(w-w*). Starting at zero, after t updates the weight is`w_t=(1-0.95^t)w*`. This oracle does not read PyTorch's gradient buffer or reuse the training-loop implementation. It follows from the declared design matrix and denominator.
 
-After 100 updates, the missing fraction is \(r={0.95}^{100}\), about 0.00592. The weights are approximately[1.98816, -0.99408, 0.99408]. The final training MSE is 1.5r² and the assessment MSE is 10 r², about 0.000351. The assessment formula follows because its predictions are(1-r) times targets 2 and 4, so the two squared residuals are 4 r² and 16 r². These exact symbolic quantities strengthen the capstone beyond merely observing that loss decreased or beat 7.25.
+After 100 updates, the missing fraction is \(r={0.95}^{100}\), about 0.00592. The weights are approximately [1.98816, -0.99408, 0.99408]. The final training MSE is 1.5r² and the assessment MSE is 10 r², about 0.000351. The assessment formula follows because its predictions are (1-r) times targets 2 and 4, so the two squared residuals are 4 r² and 16 r². These exact symbolic quantities strengthen the capstone beyond merely observing that loss decreased or beat 7.25.
 
 The curve records each loss before that iteration's update. Its first value is 1.5 and its last value corresponds to 99 completed updates, namely \(1.5\cdot {0.95}^{198}\). The separately recomputed final training error follows 100 updates and is \(1.5\cdot {0.95}^{200}\). Calling curve[-1] the final model's loss would create a one-step interpretation error even though every loop operation ran successfully.
 
@@ -68,7 +68,7 @@ torch.testing.assert_close(
 
 **Expected:** targets 0, 2, -1, 1, 2, 4.
 
-**Verify:** Compare the computed values or written argument with targets 0, 2, -1, 1, 2, 4.
+**Verify:** In a fresh process, the exercise checks confirm `y[:, 0]` matches `torch.tensor([0.0, 2.0, -1.0, 1.0, 2.0, 4.0], dtype=torch.float64)` exactly.
 
 ## Exercise 2: Measure the training-mean baseline
 
@@ -82,13 +82,13 @@ baseline = ((y[test] - mean) ** 2).mean()
 assert mean.item() == 0.5 and baseline.item() == 7.25
 ```
 
-**Expected:** mean.5; holdout MSE 7.25.
+**Expected:** mean 0.5; holdout MSE 7.25.
 
-**Verify:** Compare the computed values or written argument with mean.5; holdout MSE 7.25.
+**Verify:** In a fresh process, the exercise checks confirm `mean.item() == 0.5` and `baseline.item() == 7.25`.
 
 ## Exercise 3: Train a bounded linear model
 
-The question is: Initialize a bias-free 3-to-1Linear layer at zero and run 100 SGD with rate 0.1 updates.
+The question is: Initialize a bias-free 3-to-1 Linear layer at zero and run 100 SGD updates with learning rate 0.1.
 
 The fixed budget is decided before assessment. A successful decrease demonstrates fitting on exposed data, not generalization by itself.
 
@@ -113,7 +113,7 @@ np.testing.assert_allclose([curve[0], curve[-1]], [1.5, 1.5 * 0.95**198], atol=1
 
 **Expected:** 100 finite updates; training loss decreases.
 
-**Verify:** Compare the computed values or written argument with 100 finite updates; training loss decreases.
+**Verify:** In a fresh process, the exercise checks confirm `len(curve) == 100`, `np.isfinite(curve).all()`, `curve[-1] < initial`, `model.weight` matches `expected_weight` within 1e-12 and 1 further check.
 
 ## Exercise 4: Open the holdout after fitting
 
@@ -132,9 +132,9 @@ np.testing.assert_allclose(
 )
 ```
 
-**Expected:** finite errors; holdout error below 7.25on this fixture.
+**Expected:** finite errors; holdout error below 7.25 on this fixture.
 
-**Verify:** Compare the computed values or written argument with finite errors; holdout error below 7.25on this fixture.
+**Verify:** In a fresh process, the exercise checks confirm `np.isfinite([train_error, test_error]).all()`; `test_error < baseline.item()` and `[train_error, test_error]` matches `[1.5 * 0.95 ** 200, 10 * 0.95 ** 200]` within 1e-12.
 
 ## Exercise 5: Retain an independent pilot oracle
 
@@ -151,9 +151,9 @@ np.testing.assert_allclose(
 )
 ```
 
-**Expected:** w28/15and loss \(\frac{56}{675}\).
+**Expected:** w = 28/15 and loss \(\frac{56}{675}\).
 
-**Verify:** Compare the computed values or written argument with w28/15and loss \(\frac{56}{675}\).
+**Verify:** In a fresh process, the exercise checks confirm `[updated, np.mean((updated * pilot - 2 * pilot) ** 2)]` matches `[28 / 15, 56 / 675]` within 1e-12.
 
 ## Exercise 6: Write the bounded evidence report
 
@@ -175,7 +175,7 @@ assert not set(train) & set(test) and len(report["test_ids"]) == 2 and report["s
 
 **Expected:** disjoint IDs; holdout count 2; explicit limited scope.
 
-**Verify:** Compare the computed values or written argument with disjoint IDs; holdout count 2; explicit limited scope.
+**Verify:** In a fresh process, the exercise checks confirm `not set(train) & set(test)`, `len(report['test_ids']) == 2` and `report['steps'] == 100`.
 
 ## Review after comparison
 

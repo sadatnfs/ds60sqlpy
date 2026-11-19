@@ -16,8 +16,8 @@ Date year 2025/month 1; compare active OrderDate with the explicitly selected Sh
 
 The 20 difference is explained by a timing boundary, not a lost transaction or a changed revenue formula.
 
-- Orders S4,S5,S6 belong to January and total 67.
-- Shipments S4 and S 5 occur in January and total 47.
+- Orders S4, S5, S6 belong to January and total 67.
+- Shipments S4 and S5 occur in January and total 47.
 - S6's 20 moves to shipment month February.
 
 ### Case B: February absorbs the delayed shipment
@@ -30,8 +30,8 @@ Date year 2025/month 2 with the same role comparison.
 
 Monthly attribution changes while the combined-period amount reconciles. A wider window is useful for checking that a role change has not duplicated facts.
 
-- Orders S7,S8 total 56 in February.
-- Shipments include S6,S7,S8, totaling 76.
+- Orders S7, S8 total 56 in February.
+- Shipments include S6, S7, S8, totaling 76.
 - Across January and February, both date-role totals reconcile to 123.
 
 ## Explained practice answers

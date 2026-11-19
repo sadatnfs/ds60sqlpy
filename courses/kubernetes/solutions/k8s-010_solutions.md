@@ -14,13 +14,13 @@ The allowed source runs the small server with modest requests and limits. Quota 
 
 The fields describe different contracts. A request is not a measured usage value, and a limit is not a guaranteed reservation. Preserve the configured values alongside actual runtime evidence when diagnosing performance.
 
-**Expected:** 10m/16Mi requests and100m/64Mi limits in the baseline; requests influence placement, limits constrain runtime.
+**Expected:** Starter requests 100m/64Mi equal its limits; the edited source keeps limits 100m/64Mi with requests 10m/16Mi. Requests influence placement and quota; limits constrain runtime use.
 
 ## Exercise 2: Calculate the replica budget
 
 Binary memory units use powers of two. Include extra clients or rollout surge Pods in a real quota calculation. A count of desired application replicas alone can understate total namespace resource use.
 
-**Expected:** 20m CPU, 32Mi memory and67, 108, 864 bytes for64Mi.
+**Expected:** 20m CPU, 32Mi memory and 67,108,864 bytes for 64Mi.
 
 ## Exercise 3: Reject invalid source budgets
 
@@ -38,7 +38,7 @@ Quota rejection can occur before a runnable Pod exists. Scheduling failure means
 
 An exit code can have multiple causes. The reason field and contextual evidence narrow the diagnosis. The lesson does not authorize unbounded memory stress or changing node-wide settings.
 
-**Expected:** OOMKilled is specific memory-enforcement evidence; exit137 alone is insufficient to prove that cause.
+**Expected:** OOMKilled is specific memory-enforcement evidence; exit 137 alone is insufficient to prove that cause.
 
 ## Exercise 6: Plan a bounded repair
 

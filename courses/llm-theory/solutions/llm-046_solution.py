@@ -134,7 +134,7 @@ def online_attention(q, k, v, allowed, block_size):
 
 
 def verify():
-    # Exercise 1: Count cache andprojection dimensions
+    # Exercise 1: Count cache and projection dimensions
     query_heads = 4
     head_width = 2
     width = 8
@@ -187,7 +187,7 @@ def verify():
     altered, _ = online_attention(queries, keys, changed, allowed, 2)
     np.testing.assert_allclose(altered[:3], expected[:3], atol=1e-12, rtol=0)
 
-    # Exercise 6: Reject invalid grouping andempty support
+    # Exercise 6: Reject invalid grouping and empty support
     try:
         gqa(np.zeros((4, 2, 2)), np.zeros((3, 2, 2)), np.zeros((3, 2, 2)))
     except ValueError:

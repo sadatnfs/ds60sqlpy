@@ -1,4 +1,4 @@
-evidence <- data.frame(layer = c("formula", "source", "compiled model", "native numerical checks", "rpy2", "Spark integration"), status = c("derived", "authored", "separate receipt", "separate receipt", "separate receipt", "separate receipt"))
+evidence <- data.frame(layer = c("formula", "source", "compiled model", "native numerical checks", "rpy2", "Spark integration"), status = c("derived", "authored", "separate run record", "separate run record", "separate run record", "separate run record"))
 print(evidence)
 required <- c("value", "gradient", "optimizer", "uncertainty", "invalid input")
 recorded <- c("value", "gradient", "optimizer")

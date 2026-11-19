@@ -28,18 +28,18 @@ def predict(x):
 
 
 def verify():
-    # Exercise 1: Predict a valid batch
+    # Worked example A: Predict a valid batch
     x = torch.tensor([[1.0, 2.0], [3.0, 4.0]], dtype=torch.float32)
     result = predict(x)
     assert (
         result.tolist() == [0.0, 2.0] and tuple(result.shape) == (2,) and not result.requires_grad
     )
 
-    # Exercise 2: Check per-record batching parity
+    # Worked example B: Check per-record batching parity
     single = torch.cat([predict(x[i : i + 1]) for i in range(len(x))])
     torch.testing.assert_close(single, result, atol=0, rtol=0)
 
-    # Exercise 3: Reject empty and oversized batches
+    # Worked example C: Reject empty and oversized batches
     for bad in [torch.empty((0, 2)), torch.zeros((5, 2))]:
         try:
             predict(bad)
@@ -74,6 +74,27 @@ def verify():
     output = predict(x)
     output[0] = 999
     assert torch.equal(x, saved)
+
+    # Exercise 1: Predict a new valid batch
+    rows = torch.tensor([[0.0, 1.0], [2.0, 0.0], [1.0, 1.0]])
+    assert predict(rows).tolist() == [-1.0, 4.0, 1.0]
+
+    # Exercise 2: Check the batch boundary
+    assert tuple(predict(torch.ones((4, 2))).shape) == (4,)
+    try:
+        predict(torch.ones((5, 2)))
+    except ValueError:
+        pass
+    else:
+        raise AssertionError("oversized batch accepted")
+
+    # Exercise 3: Reject a float64 batch
+    try:
+        predict(rows.double())
+    except TypeError:
+        pass
+    else:
+        raise AssertionError("float64 accepted")
     return {"checks": 6, "status": "passed"}
 
 

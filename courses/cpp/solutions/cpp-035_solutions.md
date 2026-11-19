@@ -15,9 +15,9 @@ Index building has an upfront cost that can be repaid across repeated queries. A
 
 Complexity describes how work grows with input size under a stated model. A linear scan visits elements to answer a query. An index spends work and memory building a reusable structure so later queries can be cheaper. The right choice depends on the number of queries, update frequency, key distribution and required semantics, not only a big-O label.
 
-The map fixture counts occurrences of 2, 3, 2, 4. The count for2 is 2, which preserves multiplicity. A set would retain only membership and answer a different question. The index construction traverses every input and updates counts. That upfront work must be included when comparing one query with a direct scan, and can be amortized only when the index is actually reused.
+The map fixture counts occurrences of 2, 3, 2, 4. The count for 2 is 2, which preserves multiplicity. A set would retain only membership and answer a different question. The index construction traverses every input and updates counts. That upfront work must be included when comparing one query with a direct scan, and can be amortized only when the index is actually reused.
 
-map::find is an observation that does not insert a missing key. operator[] can insert a value-initialized mapped value when the key is absent. The second complete program demonstrates this difference:find(9) leaves size unchanged, while counts[9] creates a new zero entry. A read-like expression can therefore mutate the data and distort later measurements or reports.
+map::find is an observation that does not insert a missing key. operator[] can insert a value-initialized mapped value when the key is absent. The second complete program demonstrates this difference: find(9) leaves size unchanged, while counts[9] creates a new zero entry. A read-like expression can therefore mutate the data and distort later measurements or reports.
 
 Ordering is also part of the container contract. std::map maintains an ordering by its comparator, whereas unordered alternatives have different iteration and performance properties. Do not rely on unspecified order when emitting a deterministic report. If output order matters, choose or impose it deliberately rather than inheriting it accidentally from one implementation run.
 
@@ -53,7 +53,7 @@ Search four rows for key 2 once.
 
 **Reasoning:** A scan inspects every element for a complete count.
 
-**Verify:** Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.
+**Verify:** Increment a comparison counter inside the loop over `{2, 3, 2, 4}` and assert it ends at 4 with a match count of 2.
 
 ## Exercise 2: Build an index
 
@@ -63,7 +63,7 @@ Build frequency map for [2, 3, 2, 4].
 
 **Reasoning:** The representation preserves duplicate multiplicity.
 
-**Verify:** Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.
+**Verify:** Assert `counts.size() == 3`, `counts.at(2) == 2`, `counts.at(3) == 1` and `counts.at(4) == 1`, extending Worked example 1's assertion.
 
 ## Exercise 3: Compare repeated queries
 
@@ -73,7 +73,7 @@ Compare 100 full scans with one index build plus 100 lookups.
 
 **Reasoning:** Amortization depends on number of queries.
 
-**Verify:** Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.
+**Verify:** Assert both approaches return the same count for each of the 100 queries, then report the index-building work separately from the lookup work.
 
 ## Exercise 4: Repair mutating lookup
 
@@ -83,7 +83,7 @@ Use counts[9] to inspect absence, then repair with find.
 
 **Reasoning:** Read syntax can mutate a map.
 
-**Verify:** Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.
+**Verify:** Assert `counts.size()` grows by one after `counts[9]` but not after `counts.find(9) == counts.end()`, as Worked example 2 does.
 
 ## Exercise 5: Check empty data
 
@@ -93,7 +93,7 @@ Build and query an empty frequency index.
 
 **Reasoning:** Avoid accidental insertion during an absence check.
 
-**Verify:** Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.
+**Verify:** Assert `counts.empty()`, `counts.find(2) == counts.end()` and `counts.count(2) == 0` for an index built from no rows.
 
 ## Exercise 6: Transfer sorted storage
 
@@ -103,4 +103,4 @@ Compare binary search on a sorted vector with map lookup.
 
 **Reasoning:** The best choice depends on updates and query frequency.
 
-**Verify:** Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.
+**Verify:** Use `std::equal_range` on the sorted vector and assert its length for key 2 equals `counts.at(2)`, then record the one-time sort cost next to the per-query cost.

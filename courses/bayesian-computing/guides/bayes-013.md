@@ -44,7 +44,7 @@ Coefficient priors have units. A standard-normal prior on a predictor measured i
 
 Strong posterior correlation can make numerical exploration inefficient. Reparameterization, orthogonal designs or an adapted metric may help. Those computational choices should preserve the intended target density. Changing the prior merely to obtain easier diagnostics changes the statistical model and should be reported as such.
 
-Review diagnostic quantities for both individual coefficients and important contrasts. A sampler may estimate a stable prediction well while poorly characterizing a broad, scientifically relevant direction. Effective sample size and Monte Carlo error are quantity-specific, and a single average across parameters can conceal the important failure.
+Review diagnostic quantities for both individual coefficients and important contrasts. A sampler may estimate a stable prediction well while poorly characterizing a broad, scientifically relevant direction. Effective sample size and Monte Carlo error are quantity-specific, and a single average across parameters can conceal the important failure. The program reports the minimum bulk effective sample size across coefficients for that reason; a weakly identified coefficient is usually the one that falls below 100 per chain or pushes R-hat above 1.01.
 
 ## Answered scientific discussion
 
@@ -54,7 +54,7 @@ Review diagnostic quantities for both individual coefficients and important cont
 
 ## Complete reproducible program
 
-Run the complete program in the classroom's declared prepared profile. Every run starts a fresh process with tiny offline synthetic data. This is a worked tutorial, with no exam or hidden solution. Runtime: `bayesian-cpu`.
+Run the complete program in the classroom's declared prepared profile. Every run starts a fresh process with tiny offline synthetic data. This is a worked tutorial, with no exam or hidden solution. These teaching-sized chains can fail the convergence screen from `bayes-006` (R-hat below 1.01, at least 100 bulk and tail effective draws per chain, no divergences); read the printed diagnostics against it before interpreting any estimate. Runtime: `bayesian-cpu`.
 
 ```python
 """Complete bounded synthetic Bayesian investigation; no external data."""
@@ -85,8 +85,8 @@ def sample_model(model, seed):
 def diagnostics(trace, names):
     import arviz as az
 
-    rhat = np.asarray(az.rhat(trace, var_names=names).to_array(), float)
-    ess = np.asarray(az.ess(trace, var_names=names, method="bulk").to_array(), float)
+    rhat = np.asarray(az.rhat(trace, var_names=names).to_dataarray(), float)
+    ess = np.asarray(az.ess(trace, var_names=names, method="bulk").to_dataarray(), float)
 
     def finite_extreme(values, maximum):
         values = values[np.isfinite(values)]

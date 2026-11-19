@@ -3,11 +3,11 @@ package main
 import "fmt"
 
 func main() {
-	// Exercise 1: Cancel a child: Create a cancelable context and cancel it.
-	// Expected: Err returns context.Canceled.
+	// Exercise 1: Cancel a child: predict an edited check: Copy worked example 1 into a scratch pad and change `check(ctx.Err() == context.Canceled, "cancel")` to `check(ctx.Err() != context.Canceled, "cancel")` inside its check. Before running, predict whether the check still passes and explain why; then restore it.
+	// Expected: The changed run panics with `cancel` because the edited check no longer holds. Restoring the original line brings back the worked observation: err returns context.Canceled.
 
-	// Exercise 2: Propagate parent cancellation: Derive a child and cancel its parent.
-	// Expected: Both contexts become canceled.
+	// Exercise 2: Propagate parent cancellation: diagnose an edited check: A careless edit changed the check in worked example 2 so that it reads `check(parent.Err() != context.Canceled && child.Err() == context.Canceled, "tree")`. Run worked example 2 with that line, explain why the edited check now fails for the same program state, and restore it.
+	// Expected: Before the repair the program panics with `tree`; after it the line reads `check(parent.Err() == context.Canceled && child.Err() == context.Canceled, "tree")` again and both contexts become canceled.
 
 	// Exercise 3: Keep child cancellation local: Cancel a child of a live parent.
 	// Expected: The child is canceled; the parent is unchanged.

@@ -5,15 +5,48 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Responsive layouts and content-driven breakpoints: my attempt</title>
     <style>
-      /* Implement the lesson-specific CSS. Keep keyboard focus visible. */
+      /*
+        Worked example 1: A small-space baseline
+        .layout {
+          display: grid;
+          gap: 1rem;
+        }
+      */
+
+      /*
+        Worked example 2: An evidence-based enhancement
+        @media (min-width: 48rem) {
+          .layout {
+            grid-template-columns: 15rem minmax(0, 1fr);
+          }
+        }
+      */
+
+      /* Write the CSS for the exercises here. Keep keyboard focus visible. */
     </style>
   </head>
   <body>
-    <!-- web-017: Build a responsive course outline with a readable article. -->
-    <!-- Save your prediction, then implement the six exercises from the guide. -->
+    <!--
+      web-017 exercises. Hints are in the guide; answers are in the solutions folder.
+      1. Predict the base layout below the breakpoint.
+      2. Choose a breakpoint by resizing actual content.
+      3. Build a responsive course outline with a readable article.
+      4. Diagnose a mobile page rendered as a tiny desktop screenshot.
+      5. Test narrow width together with enlarged text.
+      6. Explain why responsive design is more than media queries.
+    -->
     <main>
-      <h1>Responsive layouts and content-driven breakpoints</h1>
-      <!-- Build your own document here. The reference is separate. -->
+      <h1>A responsive lesson</h1>
+      <div class="layout">
+        <nav aria-label="Lesson outline"><a href="#content">Read the article</a></nav>
+        <article id="content">
+          <h2>Content first</h2>
+          <p>
+            This article remains readable when the navigation stacks above it. The breakpoint
+            responds to available space rather than a named device.
+          </p>
+        </article>
+      </div>
     </main>
   </body>
 </html>

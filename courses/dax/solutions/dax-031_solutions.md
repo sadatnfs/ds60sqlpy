@@ -17,7 +17,7 @@ January 2025, active OrderDate relationship; observed coverage includes the full
 A sales-day average and a calendar-day average use different denominators. Neither should be called a generic daily average without that qualification.
 
 - The complete Date table contains January 1 through 31.
-- Sales occur on January 2,3 and 5.
+- Sales occur on January 2, 3 and 5.
 - The calendar count is 31 while observed event-date count is 3.
 
 ### Case B: A date exists without a sale
@@ -44,7 +44,7 @@ There are 29 unique calendar dates.
 
 ### Exercise 2
 
-Change case B to January 2,2025.
+Change case B to January 2, 2025.
 
 CalendarDates is 1, SalesRows is 1 and Revenue is 27.
 

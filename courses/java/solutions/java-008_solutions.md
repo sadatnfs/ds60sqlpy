@@ -14,28 +14,32 @@ A record is a concise carrier for a fixed set of components, with generated acce
 
 ## Reading the reference
 
-record Order(String id,List<String>items) declares component accessorsid() and items(). In a compact constructor, assign a normalized parameter such asid=id.strip(); implicit field assignment occurs afterward. List.copyOf makes an unmodifiable shallow copy, preventing later structural changes through the caller list. It also rejects null elements, which becomes part of the chosen contract.
+record Order(String id, List<String> items) declares component accessors id() and items(). In a compact constructor, assign a normalized parameter such asid=id.strip(); implicit field assignment occurs afterward. List.copyOf makes an unmodifiable shallow copy, preventing later structural changes through the caller list. It also rejects null elements, which becomes part of the chosen contract.
 
-## Exercise 1: Normalize at construction
+## Exercise 1: Normalize at construction: change one input
 
-Task: Create an Order with ID " A " and item x.
+Task: Copy Example A into a scratch `Main.java` and change `Order order = new Order(" A ", List.of("x"));` to `Order order = new Order(" A !", List.of("x"));`. Before running it with `java -ea Main`, predict which assertion fails and which value it now sees; then run it and restore the original line.
 
 Normalization occurs once at the boundary. Every later accessor sees the canonical ID, rather than requiring callers to remember to trim it.
+
+The unchanged code is the part that Example A adds:
 
 ```java
 Order order = new Order(" A ", List.of("x"));
 assert order.id().equals("A") && order.items().equals(List.of("x"));
 ```
 
-**Expected:** ID A and items[x].
+**Expected:** The changed run fails with an `AssertionError` from the assertion on `order.id().equals("A") && order.items().equals(List.of("x"))`. Restoring the original line brings back the worked observation: ID A and items[x].
 
-**Verify:** Compare the program values or named exception with ID A and items[x]. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.
+**Verify:** Compare your written prediction with the reported `AssertionError` and its stack-trace line, and name the value that made `order.id().equals("A") && order.items().equals(List.of("x"))` false. After restoring the line, the program completes without an `AssertionError` again.
 
-## Exercise 2: Copy caller-owned collections
+## Exercise 2: Copy caller-owned collections: debug a regression
 
-Task: Create an Order from a mutable list,then append to the original list.
+Task: A regression changed one token in the code that Example B adds after Example A, so one line now reads `List<String> supplied = new ArrayList<>(List.of("x!"));`. Run Example B with that line, use the failing assertion to locate the defect and repair it without changing the assertion.
 
 Without the copy, a caller could change the record observed value after construction. Final component references alone would not prevent that mutation.
+
+The unchanged code is the part that Example B adds:
 
 ```java
 List<String> supplied = new ArrayList<>(List.of("x"));
@@ -44,9 +48,9 @@ supplied.add("y");
 assert copied.items().equals(List.of("x"));
 ```
 
-**Expected:** record retains its original single item.
+**Expected:** Before the repair the run fails with an `AssertionError` from the assertion on `copied.items().equals(List.of("x"))`; after it the line reads `List<String> supplied = new ArrayList<>(List.of("x"));` again and record retains its original single item.
 
-**Verify:** Compare the program values or named exception with record retains its original single item. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.
+**Verify:** Keep the failing and the repaired runs. Explain why the changed token alters the value tested by `copied.items().equals(List.of("x"))` for this input.
 
 ## Exercise 3: Use value equality
 
@@ -59,9 +63,9 @@ Order same = new Order("A", List.of("x"));
 assert order.equals(same) && order.hashCode() == same.hashCode();
 ```
 
-**Expected:** equals true and equalhashCode.
+**Expected:** equals true and equal hashCode.
 
-**Verify:** Compare the program values or named exception with equals true and equalhashCode. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.
+**Verify:** Keep an assertion equivalent to `order.equals(same) && order.hashCode() == same.hashCode()`. As a control, change `Order same = new Order("A", List.of("x"));` to `Order same = new Order("A!", List.of("x"));`: the run must fail with an `AssertionError` from the assertion on `order.equals(same) && order.hashCode() == same.hashCode()`. Restore the line before continuing.
 
 ## Exercise 4: Reject blank identity
 
@@ -81,11 +85,11 @@ assert blank;
 
 **Expected:** IllegalArgumentException.
 
-**Verify:** Compare the program values or named exception with IllegalArgumentException. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.
+**Verify:** Keep an assertion equivalent to `blank`. As a control, change `blank = true;` to `blank = false;`: the run must fail with an `AssertionError` from the assertion on `blank`. Restore the line before continuing.
 
 ## Exercise 5: Protect the exposed collection
 
-Task: Attempt to add toorder.items().
+Task: Attempt to add to order.items().
 
 The accessor returns the owned unmodifiable list. If its elements were mutable objects, their internal state would still need separate treatment.
 
@@ -101,13 +105,13 @@ assert protectedItems;
 
 **Expected:** UnsupportedOperationException.
 
-**Verify:** Compare the program values or named exception with UnsupportedOperationException. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.
+**Verify:** Keep an assertion equivalent to `protectedItems`. As a control, change `protectedItems = true;` to `protectedItems = false;`: the run must fail with an `AssertionError` from the assertion on `protectedItems`. Restore the line before continuing.
 
 ## Exercise 6: Reject null collection members
 
 Task: Try creating an Order whose items contains null.
 
-The constructor usesList.copyOf, whose null policy is explicit. An alternative domain could allow missing items, but should encode that meaning instead of accidentally accepting null.
+The constructor uses List.copyOf, whose null policy is explicit. An alternative domain could allow missing items, but should encode that meaning instead of accidentally accepting null.
 
 ```java
 boolean nullItem = false;
@@ -121,7 +125,7 @@ assert nullItem;
 
 **Expected:** NullPointerException from the declared copy policy.
 
-**Verify:** Compare the program values or named exception with NullPointerException from the declared copy policy. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.
+**Verify:** Keep an assertion equivalent to `nullItem`. As a control, change `nullItem = true;` to `nullItem = false;`: the run must fail with an `AssertionError` from the assertion on `nullItem`. Restore the line before continuing.
 
 ## After comparing the answer
 

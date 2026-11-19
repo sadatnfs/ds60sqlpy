@@ -1,4 +1,4 @@
-"""dbt-007: worked starting point; complete the guide's six changes."""
+"""dbt-007: both worked cases; complete the guide's six changes."""
 
 import os
 import tempfile
@@ -83,9 +83,9 @@ def rows(root, sql):
 def example_one():
     with tempfile.TemporaryDirectory() as d:
         macro = (
-            "{% macro safe_ratio(n, d) %} case when {{ d }} = 0 then "
-            "null else cast({{ n }} as double) / {{ d }} end {% "
-            "endmacro %}"
+            "{% macro safe_ratio(n, d) %}\n"
+            "    case when {{ d }} = 0 then null else cast({{ n }} as double) / {{ d }} end\n"
+            "{% endmacro %}"
         )
         p = project(
             d,
@@ -106,8 +106,17 @@ def example_one():
         return {"rates": [0.25, None], "macro_expanded": True}
 
 
+def example_two():
+    with tempfile.TemporaryDirectory() as d:
+        p = project(d, models={"bad": "select {{ missing_macro('amount') }} as value"})
+        invoke(p, "compile", succeeds=False)
+        assert not (p / "target/compiled/classroom/models/bad.sql").exists()
+        return {"undefined_macro_rejected_before_model_execution": True}
+
+
 if __name__ == "__main__":
     print(example_one())
+    print(example_two())
 
 # TODO 1: Return a separate invalid-denominator flag alongside the rate.
 # TODO 2: Use 1 success and 4 trials and inspect the result type.

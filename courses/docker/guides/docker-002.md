@@ -6,7 +6,7 @@ Beginner; about 100 minutes, with additional time for the optional host experime
 
 ## Learning objectives
 
-Produce a minimal setup checklist. Explain a safe response to discovering a remote context. Explain the difference between a configuration, an observed process and evidence of the application's behavior.
+Produce a minimal setup checklist. Explain a safe response to discovering a remote context. Use Docker client, Docker engine and Docker context accurately when you explain what you observed.
 
 ## Purpose, vocabulary and mental model
 
@@ -24,11 +24,11 @@ Run these in the same Bash terminal you will use for the fixture. Do not change 
 
 ## How to use this lesson
 
-The classroom displays this guide and saves your worksheet. Its Run button does not control your Docker engine. Docker engine access is powerful host access, so the classroom deliberately receives no engine socket. Work through the supplied examples without starting anything, then use the optional host lab only in your own disposable project. Reading a command, parsing YAML and actually running the project are different forms of evidence.
+The classroom displays this guide and saves your worksheet, `courses/docker/lessons/docker-002.md`. Its Run button does not control your Docker engine. Docker engine access is powerful host access, so the classroom deliberately receives no engine socket. Work through the supplied examples without starting anything, then use the optional host lab only in your own disposable project. Reading a command, parsing YAML and actually running the project are different forms of evidence.
 
 Use Bash in Linux, macOS Terminal, or Ubuntu under WSL 2 on Windows. The supported engine runs Linux containers. The maintained fixture is `courses/docker/fixtures/compose-lab/`; its README explains copying it into a new ignored learner directory, checking the engine, building locally with visible logs, and using the fixed project name `ds60-docker-study`. The fixture uses port 18080 on host loopback. Stop if that project name or port belongs to unrelated work; choose a new project name consistently in your own copy. Never paste a command against a remote Docker context simply because it is currently selected.
 
-For Dockerfile examples, create a file named `Dockerfile` in a scratch project. YAML snippets describe a fragment unless explicitly called a complete file. Text transcripts are synthetic illustrations, not claims about your machine. Do not substitute a real password, token or private registry into a checked-in example.
+For Dockerfile examples, create a file named `Dockerfile` in a scratch project. YAML snippets describe a fragment unless explicitly called a complete file. Text transcripts are synthetic illustrations, not claims about your machine. Do not substitute a real password, token or private registry into a checked-in example. **How to use the lessons** in the [subject README](../README.md) collects these rules in one place.
 
 ## Worked example / walkthrough
 
@@ -58,58 +58,50 @@ docker info
 
 ## Six progressive exercises
 
+For each exercise, name the object involved and the phase of its lifetime before changing anything, then vary only the condition the task names. Exercises that ask you to predict, explain, compare or diagnose keep their answers in the solutions file; the others show the evidence to look for.
+
 ### Exercise 1: Predict whether docker --version proves readiness.
 
-**Expected evidence:** No; it only proves the client can run.
-
-**Hint:** Identify the object and the phase of its lifetime before changing it. Use the relevant worked example, then vary only the condition named in this task.
+**Hint:** Note which program prints the version and whether it needed to contact the engine.
 
 ### Exercise 2: Identify the selected context and endpoint.
 
-**Expected evidence:** A locally recorded context name and an intentionally local endpoint.
-
-**Hint:** Identify the object and the phase of its lifetime before changing it. Use the relevant worked example, then vary only the condition named in this task.
+**Hint:** Run docker context show, then inspect that context's endpoint.
 
 ### Exercise 3: Produce a minimal setup checklist.
 
 **Expected evidence:** Bash, local Linux engine, Compose and sufficient allocated resources.
 
-**Hint:** Identify the object and the phase of its lifetime before changing it. Use the relevant worked example, then vary only the condition named in this task.
+**Hint:** List what a lesson command needs: a shell, a reachable engine, Compose and enough memory.
 
 ### Exercise 4: Diagnose client success with daemon connection failure.
 
-**Expected evidence:** Investigate engine startup, endpoint and permission separately.
-
-**Hint:** Identify the object and the phase of its lifetime before changing it. Use the relevant worked example, then vary only the condition named in this task.
+**Hint:** Compare the Client and Server sections of docker version.
 
 ### Exercise 5: Explain where commands run on Windows.
 
-**Expected evidence:** Inside the integrated WSL 2 Ubuntu terminal.
-
-**Hint:** Identify the object and the phase of its lifetime before changing it. Use the relevant worked example, then vary only the condition named in this task.
+**Hint:** Ask which shell has the Linux paths and the engine integration the fixture expects.
 
 ### Exercise 6: Explain a safe response to discovering a remote context.
 
-**Expected evidence:** Stop before mutations and deliberately configure the owned local engine.
-
-**Hint:** Identify the object and the phase of its lifetime before changing it. Use the relevant worked example, then vary only the condition named in this task.
+**Hint:** Ask whose machine a docker compose down would affect with that context selected.
 
 ## Common mistakes and diagnosis
 
-Start with the smallest observation that separates two plausible causes. An image inspection answers questions about the packaged filesystem and configuration; container inspection adds runtime mounts, network attachment and exit status. An application request adds another layer of evidence. A healthy container can still serve the wrong application result. Preserve the original failure and the exact changed field before retrying.
+Reading a successful `docker --version` as proof that the engine is running. Running lab commands while a remote or shared context is selected. Using PowerShell paths on Windows instead of the Ubuntu shell under WSL 2.
 
-The boundary case in this chapter is: Diagnose client success with daemon connection failure. Use its expected observation, Investigate engine startup, endpoint and permission separately., to avoid treating a successful command as proof of the wrong claim. Keep source edits in your own copy. Do not make a container privileged, mount the engine socket, disable all checks or delete every volume to make an example succeed.
+Exercise 4 is this chapter's boundary case: Diagnose client success with daemon connection failure. Start with the smallest observation that separates two plausible causes. An image inspection answers questions about the packaged filesystem and configuration; container inspection adds runtime mounts, network attachment and exit status; an application request adds another layer, and a healthy container can still serve the wrong result. Preserve the original failure and the exact changed field before retrying. Keep source edits in your own copy. Do not make a container privileged, mount the engine socket, disable all checks or delete every volume to make an example succeed.
 
 ## Retrieval, transfer and next steps
 
-Close the explanations and draw the path from source files to image to container to the observation relevant here. Reconstruct the second worked example with one different value and predict what changes. Explain which state survives process restart, container recreation and image rebuild. If none of those operations applies to this mechanism, explain why.
+Close the explanations and draw the path from source files to image to container to the observation relevant here, using Docker client, Docker engine, Docker context, WSL 2 and docker info. Reconstruct worked example 2 (Distinguish client from server availability) with one different value and predict what changes. Explain which state survives process restart, container recreation and image rebuild, or why none of those operations applies to this mechanism.
 
-Before proceeding, retain six evidence records. For the optional host project, use `docker compose -p ds60-docker-study down` from the fixture copy to stop its containers and remove its ordinary network. This command preserves named volumes. Volume deletion is a separate deliberate reset of that disposable lab after a backup or export, never a general cleanup step. The fixture README describes its exact scoped reset.
+When a host session ends, run `docker compose -p ds60-docker-study down` from your fixture copy. It removes the project's containers and network but keeps named volumes; deleting a volume is a separate, deliberate reset described in the fixture README.
 
 ## Primary references
 
-- [Official reference 1](https://docs.docker.com/engine/manage-resources/contexts/)
-- [Official reference 2](https://docs.docker.com/desktop/features/wsl/)
+- [Docker contexts](https://docs.docker.com/engine/manage-resources/contexts/)
+- [Docker Desktop WSL 2 backend](https://docs.docker.com/desktop/features/wsl/)
 
 ## Ask an AI tutor about this lesson
 

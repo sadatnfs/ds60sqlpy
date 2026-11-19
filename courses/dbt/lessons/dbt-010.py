@@ -1,4 +1,4 @@
-"""dbt-010: worked starting point; complete the guide's six changes."""
+"""dbt-010: both worked cases; complete the guide's six changes."""
 
 import json
 import os
@@ -132,8 +132,13 @@ def example_one():
     return snapshot_case(False)
 
 
+def example_two():
+    return snapshot_case(True)
+
+
 if __name__ == "__main__":
     print(example_one())
+    print(example_two())
 
 # TODO 1: Query the old region and its validity endpoint.
 # TODO 2: Add another attribute to check_cols.

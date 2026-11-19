@@ -4,21 +4,23 @@ Answer-free learner worksheet. See the companion guide for worked examples.
 Copy to .learning before editing. Six independent attempts belong below.
 """
 
-# Exercise 1: Expose detachment
-# Detach (w-2)**2 before backward and inspect tracking.
-# Expected: detached loss requires_grad False; backward raises RuntimeError.
+# Exercise 1: Detect a detached intermediate
+# With Parameter w=1, compute h=(3w).detach() and loss=(h-1)**2, then inspect tracking and
+# attempt backward.
+# Expected: loss.requires_grad is False and backward raises RuntimeError.
 
-# Exercise 2: Repair two exact updates
-# Usex 1, 2, 3, y = 2x, w = 0 and two SGD.1 steps with gradient clearing.
-# Expected: weights 28/15 then 448/225.
+# Exercise 2: Trace two updates on a new target
+# Train w from 0 on x = 1, 2, 3 with y = 3x, two SGD steps with learning rate 0.1,
+# clearing gradients before each.
+# Expected: weights 2.8 then 224/75.
 
-# Exercise 3: Inspect norm clipping
-# Assign gradient 3, 4 to a parameter vector and clip to norm 1.
-# Expected: returned norm 5; new gradient approximately.6, .8.
+# Exercise 3: Clip a new gradient
+# Assign gradient [6, 8] to a parameter vector and clip it to norm 5.
+# Expected: returned norm 10; clipped gradient approximately [3, 4].
 
 # Exercise 4: Apply the clipped update
 # Use SGD with rate 0.1 after clipping and inspect the parameter.
-# Expected: approximately-.06, -.08.
+# Expected: approximately -0.06, -0.08.
 
 # Exercise 5: Reject nonfinite gradient norms
 # Assign an infinite gradient and request error_if_nonfinite True.

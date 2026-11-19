@@ -20,25 +20,29 @@ Loops need an initial state, an invariant and a termination condition. A prefix 
 
 Use if for a branch, for...of for values, and indexed for when positions matter. The expression left&&right evaluates right only when left is truthy; left||right uses right only when left is falsy. Neither necessarily returns a Boolean. The expression value??fallback preserves 0, false and empty string. A loop condition i<array.length excludes the invalid index length.
 
-## Exercise 1: Compare false and truthy containers
+## Exercise 1: Compare false and truthy containers: predict an edited check
 
-Task: Inspect Boolean conversions of 0, empty string, empty array and empty object.
+Task: Copy Example A into a scratch `main.mjs` and change `assert.deepEqual([Boolean(0), Boolean(''), Boolean([]), Boolean({})], [false, false, true, true]);` to `assert.deepEqual([Boolean(1), Boolean(''), Boolean([]), Boolean({})], [false, false, true, true]);` inside its check. Before running it, predict whether the check still passes and explain why; then restore it.
 
 An empty collection is still an object. Testing if(array) does not establish that it contains any elements.
+
+The unchanged code is the exercise block of Example A:
 
 ```javascript
 assert.deepEqual([Boolean(0), Boolean(''), Boolean([]), Boolean({})], [false, false, true, true]);
 ```
 
-**Expected:** false, false, true, true.
+**Expected:** The changed run fails with an `AssertionError` at the check `assert.deepEqual([Boolean(0), Boolean(''), Boolean([]), Boolean({})], [false, false, true, true])`. Restoring the original line brings back the worked observation: false, false, true, true.
 
-**Verify:** Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.
+**Verify:** Compare your written prediction with the reported `AssertionError`, including its actual and expected values, and explain why the edited check rejects the values that `assert.deepEqual([Boolean(0), Boolean(''), Boolean([]), Boolean({})], [false, false, true, true])` accepts. After restoring the line, the program prints its `{"checks":1,"status":"passed"}` receipt again.
 
-## Exercise 2: Preserve a valid zero with nullish fallback
+## Exercise 2: Preserve a valid zero with nullish fallback: diagnose an edited check
 
-Task: Compare 0||10 with 0??10, and null??10.
+Task: A careless edit changed a check in Example B so that it reads `assert.equal(null ?? 11, 10);`. Run Example B with that line, explain why the edited check now fails for the same program state, and restore it.
 
 The operators encode different absence policies. A valid zero count should not silently become a default because it is falsy.
+
+The unchanged code is the exercise block of Example B:
 
 ```javascript
 assert.equal(0 || 10, 10);
@@ -46,9 +50,9 @@ assert.equal(0 ?? 10, 0);
 assert.equal(null ?? 10, 10);
 ```
 
-**Expected:** 10, 0, 10.
+**Expected:** Before the repair the run fails with an `AssertionError` at the check `assert.equal(null ?? 10, 10)`; after it the line reads `assert.equal(null ?? 10, 10);` again and 10, 0, 10.
 
-**Verify:** Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.
+**Verify:** Keep the failing and the repaired runs. Explain why the edited check rejects the same program state that `assert.equal(null ?? 10, 10)` accepts.
 
 ## Exercise 3: Trace a prefix sum
 
@@ -68,7 +72,7 @@ assert.deepEqual(prefixes, [2, 6, 12]);
 
 **Expected:** prefixes 2, 6, 12.
 
-**Verify:** Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.
+**Verify:** Keep a check equivalent to `assert.deepEqual(prefixes, [2, 6, 12])`. As a control, change `sum += value;` to `sum -= value;`: the run must fail with an `AssertionError` at that check. Restore the line before continuing.
 
 ## Exercise 4: Handle an empty collection
 
@@ -89,7 +93,7 @@ assert.equal(iterations, 0);
 
 **Expected:** sum 0 and iterations 0.
 
-**Verify:** Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.
+**Verify:** Keep a check equivalent to `assert.equal(iterations, 0)`. As a control, change `let iterations = 0;` to `let iterations = 1;`: the run must fail with an `AssertionError` at that check. Restore the line before continuing.
 
 ## Exercise 5: Stop at the first match
 
@@ -111,7 +115,7 @@ assert.equal(found, 1);
 
 **Expected:** index 1.
 
-**Verify:** Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.
+**Verify:** Keep a check equivalent to `assert.equal(found, 1)`. As a control, change `if (values[index] === 8) {` to `if (values[index] !== 8) {`: the run must fail with an `AssertionError` at that check. Restore the line before continuing.
 
 ## Exercise 6: Make a wrong boundary observable
 
@@ -128,7 +132,7 @@ assert.deepEqual(observed, [7, undefined]);
 
 **Expected:** extra undefined element exposes the off-by-one.
 
-**Verify:** Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.
+**Verify:** Keep a check equivalent to `assert.deepEqual(observed, [7, undefined])`. As a control, change `for (let index = 0; index <= values.length; index += 1) observed.push(values[index]);` to `for (let index = 0; index < values.length; index += 1) observed.push(values[index]);`: the run must fail with an `AssertionError` at that check. Restore the line before continuing.
 
 ## After comparison
 

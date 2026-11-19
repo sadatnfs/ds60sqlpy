@@ -8,9 +8,11 @@ The capstone combines desired-state validation, exact identity, idempotent plann
 
 The model stores UID, desired count, current count and a write counter. reconcileCap first checks cancellation, then ownership, then input validity, and finally changes state only when needed. The ordering prevents invalid or unauthorized work from reaching mutation. A real adapter adds optimistic concurrency, API errors, status subresources and cleanup. Preserve these boundaries when replacing the in-memory store rather than moving all logic into one untestable function.
 
-## 1. Converge from a different state
+## 1. Converge from a different state: change one input
 
-Reconcile owned UID u1 from count 1 to desired 3.
+Copy worked example 1 into a scratch pad and change `err := reconcileCap(context.Background(), &s, "u1", 3)` to `err := reconcileCap(context.Background(), &s, "u1", 4)`. Before running, predict which check fails and which value it now sees; then run it and restore the original line.
+
+The unchanged code is worked example 1:
 
 ```go
 s := CapState{UID: "u1", Current: 1}
@@ -18,13 +20,15 @@ err := reconcileCap(context.Background(), &s, "u1", 3)
 check(err == nil && s.Current == 3 && s.Writes == 1, "converge")
 ```
 
-**Expected:** The count becomes 3 with one write.
+**Expected:** The changed run panics with `converge` because `err == nil && s.Current == 3 && s.Writes == 1` no longer holds. Restoring the original line brings back the worked observation: the count becomes 3 with one write.
 
 The mutation is justified by a current difference under a verified identity.
 
-## 2. Repeat without duplicate writes
+## 2. Repeat without duplicate writes: diagnose an edited check
 
-Run the same desired state twice.
+A careless edit changed the check in worked example 2 so that it reads `check(reconcileCap(context.Background(), &s, "u1", 4) == nil, "first")`. Run worked example 2 with that line, explain why the edited check now fails for the same program state, and restore it.
+
+The unchanged code is worked example 2:
 
 ```go
 s := CapState{UID: "u1", Current: 1}
@@ -32,7 +36,7 @@ check(reconcileCap(context.Background(), &s, "u1", 3) == nil, "first")
 check(reconcileCap(context.Background(), &s, "u1", 3) == nil && s.Writes == 1, "idempotent")
 ```
 
-**Expected:** Only the first call writes.
+**Expected:** Before the repair the program panics with `idempotent`; after it the line reads `check(reconcileCap(context.Background(), &s, "u1", 3) == nil, "first")` again and only the first call writes.
 
 Repeated notification is normal. Converged state should remain a no-op.
 

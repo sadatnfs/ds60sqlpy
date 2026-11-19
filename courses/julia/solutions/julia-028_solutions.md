@@ -6,11 +6,11 @@ The executable reference is `julia-028_reference.jl`. Its checks cover the state
 
 The hand-derived asymmetric case prevents a uniform-output bug from passing.
 
-**Expected observation:** The result is[0.2,0.5,0.3].
+**Expected observation:** The result is `[0.2, 0.5, 0.3]`.
 
 ## 2. Diagnose overflow
 
-Scaling by the maximum gives[1,1], then divides by 2 without overflowing.
+Scaling by the maximum gives `[1, 1]`, then divides by 2 without overflowing.
 
 **Expected observation:** The sum exceeds Float64 range.
 

@@ -291,12 +291,18 @@ add(
 Check a signal before starting work, then arrange to observe it while waiting. A listener installed without a pre-check can miss an abort that already happened. Remove listeners after either success or failure to avoid keeping closures and resources alive. A timer-backed operation must clear its timer when cancelled; merely rejecting a wrapper Promise leaves the underlying timer running.
 
 Timeouts express a waiting policy. A timeout does not establish that an external side effect failed to occur. Retrying a payment or write after a timeout requires an idempotency policy, introduced later. These examples own only small timers and trace arrays, making cancellation effects deterministic and reversible. No wall-clock speed claim is inferred from a one-millisecond delay.""",
-    """controller.abort(reason) changes signal.aborted and signal.reason. signal.throwIfAborted throws the stored reason immediately. AbortSignal.any combines signals with a first-abort policy. Node\'s timers/promises delay accepts a signal and rejects with AbortError, retaining the caller\'s reason as cause. That wrapper error and the original reason are distinct objects. A custom API should document which cancellation shape it returns.""",
+    """controller.abort(reason) changes signal.aborted and signal.reason. signal.throwIfAborted throws the stored reason immediately. AbortSignal.any combines signals with a first-abort policy. Node\'s timers/promises delay accepts a signal and rejects with AbortError, retaining the caller\'s reason as cause. That wrapper error and the original reason are distinct objects. A custom API should document which cancellation shape it returns.
+
+A using declaration binds an object whose Symbol.dispose method runs when the enclosing block exits, whether it completes or throws; await using does the same with an asynchronous Symbol.asyncDispose method. Node 24 runs both declarations natively. When several disposables share a block, they are released in reverse order of declaration.""",
     [
         ("Cooperative cancellation", "An operation checks and acts on a cancellation request."),
         ("Abort signal", "A read-only notification channel carrying abort state and reason."),
         ("Deadline", "A policy limiting how long a caller is willing to wait."),
         ("Cleanup ownership", "Responsibility for cancelling timers and removing listeners."),
+        (
+            "Disposable",
+            "An object whose Symbol.dispose or Symbol.asyncDispose method releases what it owns at block exit.",
+        ),
     ],
     [
         ex(
@@ -360,17 +366,20 @@ assert.throws(() => controller.signal.throwIfAborted(), error => error === first
         ),
         ex(
             "Combine caller and deadline signals",
-            "Combine two controllers and abort the deadline controller.",
-            "combined signal is aborted with deadline reason.",
+            "Combine a caller signal with a disposable one-second deadline, abort the caller first, then leave the block that owns the deadline.",
+            "combined signal carries the caller reason; the deadline stays unaborted and its timer is cleared once when the block ends.",
             r"""const caller = new AbortController();
-const deadline = new AbortController();
-const combined = AbortSignal.any([caller.signal, deadline.signal]);
-const reason = new Error('deadline');
-deadline.abort(reason);
-assert.equal(combined.aborted, true);
-assert.equal(combined.reason, reason);
-assert.equal(caller.signal.aborted, false);""",
-            "Combining signals observes either source without aborting the other controller. The example triggers the deadline explicitly to keep the test independent of scheduler speed.",
+const trace = [];
+const reason = new Error('caller stopped');
+{
+  using deadline = deadlineSignal(1000, trace);
+  const combined = AbortSignal.any([caller.signal, deadline.signal]);
+  caller.abort(reason);
+  assert.equal(combined.reason, reason);
+  assert.equal(deadline.signal.aborted, false);
+}
+assert.deepEqual(trace, ['deadline cleared']);""",
+            "Combining signals observes either source without aborting the other controller, so the deadline signal stays unaborted. The using declaration calls the deadline's Symbol.dispose method as soon as its block ends, so the one-second timer is cleared instead of keeping the process alive. Without it, every early exit, including an exception, would need its own clearTimeout call.",
         ),
     ],
     helper="""function cancellableValue(value, signal, trace) {
@@ -395,6 +404,17 @@ assert.equal(caller.signal.aborted, false);""",
       resolve(value);
     }, 1);
   });
+}
+function deadlineSignal(ms, trace) {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(new Error('deadline')), ms);
+  return {
+    signal: controller.signal,
+    [Symbol.dispose]() {
+      clearTimeout(timer);
+      trace.push('deadline cleared');
+    },
+  };
 }""",
     imports="import { strict as assert } from 'node:assert';\nimport { setTimeout as delay } from 'node:timers/promises';",
     source=NODE + "globals.html",
@@ -634,7 +654,7 @@ add(
 Text is encoded as bytes. UTF-8 characters can span multiple bytes, and a stream chunk can end in the middle of a character or a line. Splitting each raw chunk into lines independently can corrupt characters and split records. Node\'s stream decoder and readline interface preserve the needed partial state across chunks. We deliberately use two-byte chunks with a four-byte emoji to expose this boundary.
 
 Reading a whole small file is straightforward. Streaming allows incremental processing, but memory still grows if the application pushes every record into a result array. A maximum byte or record policy must be enforced where data enters. The fixture has a tiny known size; its decoder and line framing are reusable mechanisms, not a claim of constant memory for arbitrary records. Filesystem errors retain codes such as ENOENT and EEXIST so callers can distinguish absence, exclusive-create conflicts and other failures.""",
-    """mkdtemp allocates a unique directory under tmpdir. writeFile with flag wx rejects an existing file instead of replacing it. readFile with utf8 decodes text; without an encoding it returns bytes. createReadStream with encoding utf8 retains incomplete character sequences between chunks. createInterface with crlfDelay:Infinity treats CRLF consistently across chunks. for await consumes lines until completion, and finally closes both the interface and stream. Path containment based only on resolve does not defend against symlink races, so the lesson\'s lexical name check is scoped to files it creates itself.""",
+    """mkdtemp allocates a unique directory under tmpdir. writeFile with flag wx rejects an existing file instead of replacing it. readFile with utf8 decodes text; without an encoding it returns bytes. createReadStream with encoding utf8 retains incomplete character sequences between chunks. createInterface with crlfDelay:Infinity treats CRLF consistently across chunks. for await consumes lines until completion, and finally closes both the interface and stream. open returns a FileHandle; declaring it with await using closes it when its block ends by awaiting its Symbol.asyncDispose method, and a closed handle reports fd -1. Path containment based only on resolve does not defend against symlink races, so the lesson\'s lexical name check is scoped to files it creates itself.""",
     [
         ("Encoding", "The mapping between text characters and stored bytes."),
         (
@@ -650,17 +670,23 @@ Reading a whole small file is straightforward. Streaming allows incremental proc
     [
         ex(
             "Read a small UTF-8 file",
-            "Write one line containing an emoji, then compare text length and byte length.",
-            "text round-trips; UTF-8 byte length exceeds code-unit length.",
+            "Write one line containing an emoji, read its bytes through a file handle declared with await using, then compare byte length and text length.",
+            "text round-trips; 7 UTF-8 bytes versus 5 code units; the handle reports fd -1 after its block.",
             r"""await withDirectory(async directory => {
   const path = join(directory, 'message.txt');
   const text = 'A😀B\n';
   await writeFile(path, text, { encoding: 'utf8', flag: 'wx' });
+  let owned;
+  {
+    await using handle = await open(path, 'r');
+    owned = handle;
+    assert.equal((await handle.readFile()).length, 7);
+  }
+  assert.equal(owned.fd, -1);
   assert.equal(await readFile(path, 'utf8'), text);
-  assert.equal((await readFile(path)).length, 7);
   assert.equal(text.length, 5);
 });""",
-            "The emoji occupies four UTF-8 bytes and two UTF-16 code units. Neither byte count nor JavaScript string length is a universal count of user-perceived characters.",
+            "The emoji occupies four UTF-8 bytes and two UTF-16 code units. Neither byte count nor JavaScript string length is a universal count of user-perceived characters. The await using declaration closes the FileHandle when its block ends, even if a read throws, so no descriptor stays open; the retained reference only proves that by reporting fd -1.",
         ),
         ex(
             "Preserve characters and lines across chunks",
@@ -733,7 +759,7 @@ function fixtureName(name) {
   if (typeof name !== 'string' || !/^[A-Za-z0-9_-]+\\.txt$/u.test(name)) throw new TypeError('simple .txt filename required');
   return name;
 }""",
-    imports="import { strict as assert } from 'node:assert';\nimport { mkdtemp, writeFile, readFile, rm } from 'node:fs/promises';\nimport { createReadStream } from 'node:fs';\nimport { createInterface } from 'node:readline';\nimport { tmpdir } from 'node:os';\nimport { join } from 'node:path';",
+    imports="import { strict as assert } from 'node:assert';\nimport { mkdtemp, open, writeFile, readFile, rm } from 'node:fs/promises';\nimport { createReadStream } from 'node:fs';\nimport { createInterface } from 'node:readline';\nimport { tmpdir } from 'node:os';\nimport { join } from 'node:path';",
     source=NODE + "fs.html",
 )
 

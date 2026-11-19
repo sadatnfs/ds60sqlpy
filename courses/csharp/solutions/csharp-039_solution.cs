@@ -45,6 +45,20 @@ internal static class Program {
       }
       Check(rejected, "503 is not success");
     }
+    {
+      // Task 3: Independent construction
+      async Task<int> GetCountAsync(HttpClient client, CancellationToken ct) {
+        var address = "https://example.invalid/count";
+        using var response = await client.GetAsync(address, ct);
+        response.EnsureSuccessStatusCode();
+        string body = await response.Content.ReadAsStringAsync(ct);
+        using var json = JsonDocument.Parse(body);
+        return json.RootElement.GetProperty("count").GetInt32();
+      }
+      var handler = new FixtureHandler(HttpStatusCode.OK, "{\"count\":4}");
+      using var client = new HttpClient(handler);
+      Check(await GetCountAsync(client, CancellationToken.None) == 4, "count");
+    }
     Console.WriteLine("csharp-039: passed");
     await Task.CompletedTask;
   }

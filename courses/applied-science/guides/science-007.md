@@ -1,6 +1,6 @@
 # science-007: Forecast vintages, revision histories and overlapping origins
 
-Tutorial mode. Stage: intermediate. Direct prerequisites: `statistics-science-003`.
+Tutorial mode. Stage: intermediate. Direct prerequisites: `statistics-022`, `statistics-026`.
 
 ## A backtest is a reconstruction of historical information
 

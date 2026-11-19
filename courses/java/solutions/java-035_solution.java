@@ -102,7 +102,7 @@ public class Main {
     assert summarize(repository, "A").equals(new Summary("A", 2, 30));
     assert summarize(repository, "B").equals(new Summary("B", 1, 5));
 
-    // Exercise 2: Read a successful HTTPsummary
+    // Exercise 2: Read a successful HTTP summary
     try (
       DataServer server = new DataServer(repository);
       var client = java.net.http.HttpClient.newHttpClient()
@@ -126,17 +126,19 @@ public class Main {
       DataServer server = new DataServer(repository);
       var client = java.net.http.HttpClient.newHttpClient()
     ) {
-      assert send(client, server.uri("/summary?group=A&group=B"), "GET").statusCode() == 400;
-      assert send(client, server.uri("/summary?group=a"), "GET").statusCode() == 400;
+      int duplicate = send(client, server.uri("/summary?group=A&group=B"), "GET").statusCode();
+      int lowercase = send(client, server.uri("/summary?group=a"), "GET").statusCode();
+      assert duplicate == 400 && lowercase == 400;
     }
 
-    // Exercise 5: Reject unsupported methods andpathlookalikes
+    // Exercise 5: Reject unsupported methods and path lookalikes
     try (
       DataServer server = new DataServer(repository);
       var client = java.net.http.HttpClient.newHttpClient()
     ) {
-      assert send(client, server.uri("/summary?group=A"), "POST").statusCode() == 405;
-      assert send(client, server.uri("/summary-extra?group=A"), "GET").statusCode() == 404;
+      int post = send(client, server.uri("/summary?group=A"), "POST").statusCode();
+      int lookalike = send(client, server.uri("/summary-extra?group=A"), "GET").statusCode();
+      assert post == 405 && lookalike == 404;
     }
 
     // Exercise 6: Preserve storage and close the owned listener

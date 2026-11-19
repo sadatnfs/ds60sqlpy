@@ -4,7 +4,7 @@ Use these answers after an attempt or an explicit reveal. The reference uses the
 
 ## Mechanism review
 
-TypeScript source participates in two related dependency graphs: the compiler resolves source and declarations while checking, and Node resolves emitted JavaScript while running. Under NodeNext, a .mts source emits an ES module with a .mjs extension. Source imports name the runtime .mjs dependency; the compiler can resolve that specifier to its corresponding .mts source. A bundler may have different rules, but this route deliberately targets Node ESM.
+TypeScript source participates in two related dependency graphs: the compiler resolves source and declarations while checking, and Node resolves emitted JavaScript while running. Under NodeNext, a .mts source emits an ES module with a .mjs extension. Source imports name the runtime .mjs dependency; the compiler can resolve that specifier to its corresponding .mts source. A bundler may have different rules, but this route deliberately targets Node ESM. Node 24 can also strip types and run main.mts directly, but it never rewrites specifiers: under node main.mts an import of ./math.mjs fails with ERR_MODULE_NOT_FOUND because only math.mts exists, while ./math.mts loads. The compiler rejects a .mts specifier (TS5097) unless allowImportingTsExtensions or rewriteRelativeImportExtensions is set; the latter rewrites ./math.mts to ./math.mjs in emitted code. Stripping also skips type checking, which is why this route compiles first.
 
 Type-only imports declare dependencies needed only by the checker and disappear from emitted code. Value imports remain runtime dependencies. Successful type checking does not prove every required runtime artifact was packaged. The examples inspect emitted files and deliberately remove one owned temporary dependency to observe that distinction.
 
@@ -22,11 +22,13 @@ This reference creates tiny two-file projects in temporary directories, invokes 
 
 The prepared compiler path is /opt/typescript/node_modules/typescript/bin/tsc. DS60_TSC_JS optionally selects an already prepared development copy; it never downloads one. The adjacent @types directory supplies Node declarations. spawnSync uses fixed argument arrays, separate stdout/stderr, a timeout and output cap. Type diagnostics and runtime loader errors are checked separately. The type-only dependency test inspects emitted code instead of inferring erasure from a successful run.
 
-## Exercise 1: Compile and run a two-module project
+## Exercise 1: Compile and run a two-module project: predict an edited check
 
-Task: Compile a main module importing twice from ./math.mjs and run it.
+Task: Copy Example A into a scratch `main.mts` and change `assert.equal(await exists(join(directory, 'compiled', 'math.mjs')), true);` to `assert.equal(await exists(join(directory, 'compiled!', 'math.mjs')), true);` inside its check. Before running it, predict whether the check still passes and explain why; then restore it.
 
 The runtime specifier is .mjs even though the source file is .mts. Naming a source-only extension without a corresponding emit policy can produce a runtime failure.
+
+The unchanged code is the exercise block of Example A:
 
 ```typescript
 await withProject(
@@ -45,15 +47,17 @@ await withProject(
 );
 ```
 
-**Expected:** both processes succeed; output 8; math.mjs is emitted.
+**Expected:** The changed run fails with an `AssertionError` at the check `assert.equal(await exists(join(directory, 'compiled', 'math.mjs')), true)`. Restoring the original line brings back the worked observation: both processes succeed; output 8; math.mjs is emitted.
 
-**Verify:** Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.
+**Verify:** Compare your written prediction with the reported `AssertionError`, including its actual and expected values, and explain why the edited check rejects the values that `assert.equal(await exists(join(directory, 'compiled', 'math.mjs')), true)` accepts. After restoring the line, the program prints its `{"checks":1,"status":"passed"}` receipt again.
 
-## Exercise 2: Inspect type-only erasure
+## Exercise 2: Inspect type-only erasure: debug a regression
 
-Task: Compile a type import and inspect the emitted entry before running it.
+Task: A regression changed one token in Example B, so one line now reads `'model.mts!': 'export type Item = { id: string };',`. Run Example B with that line, use the failing check to locate the defect and repair it without changing the check.
 
 The type relation constrains source checking without becoming a value dependency. Inspecting the emitted program demonstrates this directly.
+
+The unchanged code is the exercise block of Example B:
 
 ```typescript
 await withProject(
@@ -72,9 +76,9 @@ await withProject(
 );
 ```
 
-**Expected:** no model import in emitted entry; output A.
+**Expected:** Before the repair the run fails with an `AssertionError` at the check `assert.equal(compiled.status, 0, compiled.stdout + compiled.stderr)`; after it the line reads `'model.mts': 'export type Item = { id: string };',` again and no model import in emitted entry; output A.
 
-**Verify:** Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.
+**Verify:** Keep the failing and the repaired runs. Explain why the changed token alters the value tested by `assert.equal(compiled.status, 0, compiled.stdout + compiled.stderr)` for this input.
 
 ## Exercise 3: Reject a type mismatch without output
 
@@ -96,7 +100,7 @@ await withProject(
 
 **Expected:** TS2322; nonzero compiler status; no compiled main.mjs.
 
-**Verify:** Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.
+**Verify:** Keep a check equivalent to `assert.match(compiled.stdout + compiled.stderr, /TS2322/u)`. As a control, change `{ 'main.mts': 'const count: number = \'wrong\'; console.log(count);' },` to `{ 'main.mts!': 'const count: number = \'wrong\'; console.log(count);' },`: the run must fail with an `AssertionError` at that check. Restore the line before continuing.
 
 ## Exercise 4: Require runtime-valid relative extensions
 
@@ -121,7 +125,7 @@ await withProject(
 
 **Expected:** TS2835 and no emitted entry.
 
-**Verify:** Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.
+**Verify:** Keep a check equivalent to `assert.match(compiled.stdout + compiled.stderr, /TS2835/u)`. As a control, change `'math.mts': 'export const value = 2;',` to `'math.mts!': 'export const value = 2;',`: the run must fail with an `AssertionError` at that check. Restore the line before continuing.
 
 ## Exercise 5: Observe a missing runtime artifact
 
@@ -148,7 +152,7 @@ await withProject(
 
 **Expected:** Node fails with ERR_MODULE_NOT_FOUND.
 
-**Verify:** Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.
+**Verify:** Keep a check equivalent to `assert.equal(compiled.status, 0, compiled.stdout + compiled.stderr)`. As a control, change `'value.mts': 'export const value = 3;',` to `'value.mts!': 'export const value = 3;',`: the run must fail with an `AssertionError` at that check. Restore the line before continuing.
 
 ## Exercise 6: Retain value imports beside erased type imports
 
@@ -175,7 +179,7 @@ await withProject(
 
 **Expected:** value dependency remains; runtime prints ready:A.
 
-**Verify:** Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.
+**Verify:** Keep a check equivalent to `assert.equal(compiled.status, 0, compiled.stdout + compiled.stderr)`. As a control, change `'model.mts': 'export type Item = { id: string }; export const prefix = \'ready\';',` to `'model.mts!': 'export type Item = { id: string }; export const prefix = \'ready\';',`: the run must fail with an `AssertionError` at that check. Restore the line before continuing.
 
 ## After comparison
 

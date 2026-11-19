@@ -270,7 +270,7 @@ For the supplied fixture, name the input unit, the intermediate state and the fi
 
 ## Exercises
 
-1. **Answer a supported domain definition.** Ask the public assistant forconversion_definition.
+1. **Answer a supported domain definition.** Ask the public assistant for conversion_definition.
    **Expected:** answered with metric-v1 citation and source text.
    **Verify:** Save the assertion results for exercise 1, including answered with metric-v1 citation and source text.
 

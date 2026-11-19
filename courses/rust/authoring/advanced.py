@@ -114,24 +114,26 @@ lesson(
     "Cargo, editions and reproducible release workflows",
     """Cargo describes packages, targets, dependencies and build profiles. A Rust edition selects language compatibility rules while the compiler version selects available implementations and library APIs. These are related but distinct. Pinning an edition does not pin a dependency graph or a compiler toolchain.
 
-Cargo.lock records selected dependency versions for reproducible resolution under a project policy. Locked and offline modes answer different questions: locked rejects graph changes, while offline forbids network access and requires prepared assets. The classroom bypasses per-attempt Cargo resolution by linking a reviewed read-only Arrow library. External projects use their own explicit preparation and lock review.""",
-    "Cargo.toml declares package and dependency intent. Cargo.lock records a resolved graph. cargo build --locked checks lock consistency; --offline requires cached dependencies. cargo test and cargo clippy are distinct verification tools.",
+Cargo.lock records selected dependency versions for reproducible resolution under a project policy. Locked and offline modes answer different questions: locked rejects graph changes, while offline forbids network access and requires prepared assets. The classroom bypasses per-attempt Cargo resolution by linking a reviewed read-only Arrow library. External projects use their own explicit preparation and lock review.
+
+The classroom compiles every pad with edition 2024, and editions change real language rules. Edition 2024 drops temporaries in a block's tail expression before the block's locals, iterates a Box<[T]> by value, reserves the gen keyword, requires unsafe extern blocks and treats std::env::set_var as unsafe. The two examples compile only under edition 2024; edition 2021 rejects them with E0597 and E0277.""",
+    'Cargo.toml declares package and dependency intent, including edition = "2024". Cargo.lock records a resolved graph. cargo build --locked checks lock consistency; --offline requires cached dependencies. cargo test and cargo clippy are distinct verification tools. cargo fix --edition migrates code mechanically, but the migrated code still needs review.',
     [
         ("Edition", "A language compatibility mode for a crate."),
         ("Lockfile", "A record of the selected dependency graph."),
         ("Offline build", "A build restricted to already prepared dependency assets."),
     ],
     (
-        "Keep build policy explicit",
-        'let policy = ["edition=2024", "locked", "offline-after-preparation"];\nassert!(policy.contains(&"edition=2024"));\nassert_ne!(policy[0], "compiler-version");',
-        "Edition and compiler version remain different policy fields.",
-        "This metadata kernel supports reasoning; the real Cargo fixture supplies build evidence.",
+        "Observe an edition 2024 scope rule",
+        'fn name_length() -> usize {\n    let cell = std::cell::RefCell::new(String::from("pear"));\n    cell.borrow().len()\n}\nassert_eq!(name_length(), 4);',
+        "name_length compiles and returns 4 under edition 2024; edition 2021 rejects the same function with E0597.",
+        "Edition 2024 drops a temporary in a block's tail expression before the block's local variables, so the Ref returned by borrow() no longer outlives cell. The edition selects this rule; the compiler version only has to implement it.",
     ),
     (
-        "Retain an error rather than hide a failed gate",
-        "let checks = [true, true, false];\nassert!(!checks.iter().all(|passed| *passed));\nassert_eq!(checks.iter().filter(|passed| !**passed).count(), 1);",
-        "One failed gate prevents a claimed complete release.",
-        "Release accounting should retain a failed check instead of substituting an older successful result.",
+        "Iterate a boxed slice by value",
+        'let boxed: Box<[String]> = vec![String::from("a"), String::from("b")].into_boxed_slice();\nlet owned: Vec<String> = boxed.into_iter().collect();\nassert_eq!(owned, ["a", "b"]);',
+        "into_iter on a Box<[String]> yields owned Strings under edition 2024; under edition 2021 the same call yields &String and the collect fails with E0277.",
+        "Edition 2024 changes which IntoIterator implementation a method call on Box<[T]> selects. Code can change meaning or stop compiling across editions, which is why Cargo.toml records the edition explicitly and why an upgrade deserves review.",
     ),
     [
         "Explain edition, compiler version and dependency version separately.",
@@ -520,8 +522,8 @@ Fuzzing and property-testing crates are valuable external tools, not hidden depe
     ],
     (
         "Check a bounded algebraic property",
-        "for a in 0_i32..10 { for b in 0_i32..10 { assert_eq!(a + b, b + a); } }\nassert_eq!(10 * 10, 100);",
-        "One hundred bounded pairs satisfy the addition relation.",
+        "let mut pairs = 0;\nfor a in 0_i32..10 { for b in 0_i32..10 { assert_eq!(a + b, b + a); pairs += 1; } }\nassert_eq!(pairs, 100);",
+        "All one hundred bounded pairs were checked and satisfy the addition relation.",
         "The range avoids overflow, making the mathematical property appropriate to this representation.",
     ),
     (

@@ -8,9 +8,11 @@ Undefined behavior is not a special runtime result such as a crash. It removes t
 
 unsigned char can inspect object representation bytes. memcpy copies a specified number of bytes between valid nonoverlapping regions. memmove supports overlapping ranges. _Alignof describes a type alignment requirement. A pointer conversion alone does not create an object lifetime, correct alignment or valid value representation. This lesson deliberately demonstrates defined alternatives and never executes the invalid counterpart.
 
-## Exercise 1: Copy a representation safely
+## Exercise 1: Copy a representation safely: predict an edited check
 
-Copy a float into bytes and back into a float object.
+Copy worked example 1 into a scratch pad and change `CHECK(restored == original);` to `CHECK(restored != original);` inside its CHECK. Before running, predict whether the CHECK still holds and explain why; then restore it.
+
+The unchanged code is worked example 1:
 
 ```c
 float original = 1.5f, restored = 0.0f;
@@ -20,13 +22,15 @@ memcpy(&restored, bytes, sizeof restored);
 CHECK(restored == original);
 ```
 
-**Expected:** The restored value is 1.5.
+**Expected:** The changed run stops with `Check failed` at the CHECK on `restored == original`. Restoring the original line brings back the worked observation: the restored value is 1.5.
 
 The copied bytes originated from a valid object of the same type. This does not claim arbitrary external bytes are a valid float representation.
 
-## Exercise 2: Inspect bytes without type punning
+## Exercise 2: Inspect bytes without type punning: debug a regression
 
-Read an integer representation through unsigned char.
+A regression changed one token in worked example 2, so one line now reads `sum -= bytes[i];`. Run worked example 2 with that line, use the failing CHECK to locate the defect and repair it without changing the CHECK.
+
+The unchanged code is worked example 2:
 
 ```c
 int value = 7;
@@ -34,13 +38,12 @@ const unsigned char *bytes = (const unsigned char *)&value;
 unsigned int sum = 0;
 for (size_t i = 0; i < sizeof value; i++)
   sum += bytes[i];
-CHECK(sizeof value >= 1);
-(void)sum;
+CHECK(sum == 7u);
 ```
 
-**Expected:** The byte view has exactly sizeof(int) bytes.
+**Expected:** Before the repair the run stops with `Check failed` at the CHECK on `sum == 7u`; after it the line reads `sum += bytes[i];` again and the bytes sum to 7 whatever the byte order.
 
-Character access is the appropriate representation-view mechanism. The test deliberately avoids assuming a particular byte order.
+Character access is the appropriate representation-view mechanism. The value 7 occupies one byte and the other bytes are zero in either byte order, so the sum does not depend on endianness. Reading the same storage through an incompatible pointer type would break the aliasing rule instead.
 
 ## Exercise 3: Handle overlapping moves
 

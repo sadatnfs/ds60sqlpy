@@ -1,6 +1,6 @@
 # csharp-007: explanation and comparison
 
-Attempt the six guide tasks before opening this comparison. The executable reference is [csharp-007_solution.cs](csharp-007_solution.cs). Its assertions are always active under the prepared classroom compile settings.
+Attempt the six guide tasks before opening this comparison. The executable reference is [csharp-007_solution.cs](csharp-007_solution.cs). It runs both worked examples and the reference answers below, and its assertions are always active under the prepared classroom compile settings.
 
 ## Why the two examples differ
 
@@ -8,21 +8,64 @@ Attempt the six guide tasks before opening this comparison. The executable refer
 
 **Expose rejection as part of the contract:** A precise function name and guard prevent accidental truncation from masquerading as a valid result. 12 divided by 3 returns 4; the exact-integer contract rejects 7 divided by 2.
 
-## Reason through the six tasks
+## Task answers
 
-1. **Predict and explain.** Trace the caller and parameter values through Double.
+### Task 1: Predict and explain
 
-2. **Guided modification.** Add a Triple function and test zero and a negative input.
+Trace the caller and parameter values through Double.
 
-3. **Independent construction.** Write a method computing an area from validated nonnegative dimensions.
+No separate reference answer has been written for this task. Example A is the evidence to compare with: The parameter receives a value. Returning a transformed value does not reassign the caller variable. The result is 14 and the caller still holds 7.
 
-4. **Diagnose a defect.** Diagnose a function whose name promises exact division but silently truncates.
+### Task 2: Guided modification
 
-5. **Boundary evidence.** Test zero divisors and non-divisible inputs separately.
+Add a Triple function and test zero and a negative input.
 
-6. **Transfer and justify.** Extract one computation from a larger program and state its input, output, mutation and failure contract.
+No separate reference answer has been written for this task. Start from Example B: A precise function name and guard prevent accidental truncation from masquerading as a valid result. 12 divided by 3 returns 4; the exact-integer contract rejects 7 divided by 2.
 
-For tasks 1 and 2, use the checked values and mechanism trace in the two examples. For task 3, choose names that expose the input and result contract and retain the same invariants. For task 4, the diagnosed mistakes below supply a concrete wrong assumption: preserve its counterexample before repairing it. Task 5 needs an explicit expected value or documented rejection at the boundary, not just successful execution. For task 6, explain what changes in the new context and which part of the original mechanism remains applicable. Several representations may satisfy this transfer task; justify the choice rather than treating this reference as the only architecture.
+### Task 3: Independent construction
+
+Write a method computing an area from validated nonnegative dimensions.
+
+**Reference answer.** It runs as the `Task 3` block of the reference program.
+
+```csharp
+int Area(int width, int height) {
+  if (width < 0 || height < 0) {
+    throw new ArgumentOutOfRangeException(nameof(width));
+  }
+  return checked(width * height);
+}
+Check(Area(3, 4) == 12 && Area(0, 9) == 0, "valid dimensions");
+bool rejected = false;
+try {
+  Area(-1, 2);
+} catch (ArgumentOutOfRangeException) {
+  rejected = true;
+}
+Check(rejected, "negative dimension rejected");
+```
+
+**Observe:** 3 by 4 gives 12, a zero side gives 0, and a negative side throws.
+
+Validation happens before the calculation, and checked multiplication turns an overflow into an exception instead of a wrapped area.
+
+### Task 4: Diagnose a defect
+
+Diagnose a function whose name promises exact division but silently truncates.
+
+No reference answer has been written for this task yet. The wrong assumptions to look for are this lesson's pitfalls: A method name is part of the interface. A generic catch returning zero can make rejected input indistinguishable from a valid zero result. Prefer one clear responsibility over a long list of optional switches.
+
+### Task 5: Boundary evidence
+
+Test zero divisors and non-divisible inputs separately.
+
+No reference answer has been written for this task yet. Write the expected value or documented rejection for each boundary before running it, and compare with the checks in Example A (Return a transformed value) and Example B (Expose rejection as part of the contract).
+
+### Task 6: Transfer and justify
+
+Extract one computation from a larger program and state its input, output, mutation and failure contract.
+
+No single reference answer exists: several designs can satisfy this transfer task. Justify yours against the mechanism described below and the vocabulary entry **Parameter**, and state one limitation of your choice.
 
 ## Mechanism and diagnostic reasoning
 
@@ -36,4 +79,4 @@ A method name is part of the interface. A generic catch returning zero can make 
 
 ## Review before continuing
 
-The reference checks the worked scenarios, including their boundary distinctions. Your independent and transfer artifacts may have additional checks. Compare observations rather than only source text. Preserve any new regression case you discover and explain why it would reject a plausible wrong implementation. External project steps require their own build and platform evidence and are not established by a portable reference passing.
+Run the reference and confirm that it prints `csharp-007: passed`, then reconstruct one boundary case from memory and explain which check would reject a plausible wrong implementation. External project steps need their own build and platform evidence; a passing portable reference does not establish them.

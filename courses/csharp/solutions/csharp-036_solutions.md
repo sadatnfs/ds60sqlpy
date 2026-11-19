@@ -1,6 +1,6 @@
 # csharp-036: explanation and comparison
 
-Attempt the six guide tasks before opening this comparison. The executable reference is [csharp-036_solution.cs](csharp-036_solution.cs). Its assertions are always active under the prepared classroom compile settings.
+Attempt the six guide tasks before opening this comparison. The executable reference is [csharp-036_solution.cs](csharp-036_solution.cs). It runs both worked examples and the reference answers below, and its assertions are always active under the prepared classroom compile settings.
 
 ## Why the two examples differ
 
@@ -8,21 +8,62 @@ Attempt the six guide tasks before opening this comparison. The executable refer
 
 **Release retained references deliberately:** The test checks controllable ownership, avoiding a flaky assumption about when garbage collection occurs. Clearing removes the application references without promising collection timing.
 
-## Reason through the six tasks
+## Task answers
 
-1. **Predict and explain.** Separate logical length from rented array length.
+### Task 1: Predict and explain
 
-2. **Guided modification.** Use a different requested length while initializing exactly that region.
+Separate logical length from rented array length.
 
-3. **Independent construction.** Write a pooled-buffer helper with finally-based return.
+No separate reference answer has been written for this task. Example A is the evidence to compare with: The pool guarantees minimum capacity, not exact size or zeroed contents. Only three initialized elements contribute to the total.
 
-4. **Diagnose a defect.** Diagnose reading uninitialized pooled capacity or returning the same buffer twice.
+### Task 2: Guided modification
 
-5. **Boundary evidence.** Test cleanup when the computation throws.
+Use a different requested length while initializing exactly that region.
 
-6. **Transfer and justify.** Decide whether pooling is justified using allocation measurements and a stated lifetime contract.
+No separate reference answer has been written for this task. Start from Example B: The test checks controllable ownership, avoiding a flaky assumption about when garbage collection occurs. Clearing removes the application references without promising collection timing.
 
-For tasks 1 and 2, use the checked values and mechanism trace in the two examples. For task 3, choose names that expose the input and result contract and retain the same invariants. For task 4, the diagnosed mistakes below supply a concrete wrong assumption: preserve its counterexample before repairing it. Task 5 needs an explicit expected value or documented rejection at the boundary, not just successful execution. For task 6, explain what changes in the new context and which part of the original mechanism remains applicable. Several representations may satisfy this transfer task; justify the choice rather than treating this reference as the only architecture.
+### Task 3: Independent construction
+
+Write a pooled-buffer helper with finally-based return.
+
+**Reference answer.** It runs as the `Task 3` block of the reference program.
+
+```csharp
+int SumPooled(int count) {
+  int[] buffer = ArrayPool<int>.Shared.Rent(count);
+  try {
+    for (int i = 0; i < count; i++) {
+      buffer[i] = i + 1;
+    }
+    return buffer.AsSpan(0, count).ToArray().Sum();
+  } finally {
+    ArrayPool<int>.Shared.Return(buffer, clearArray: true);
+  }
+}
+Check(SumPooled(4) == 10, "logical range only");
+```
+
+**Observe:** Summing the first four slots gives 10.
+
+The rented array may be longer than requested, so the code uses only the first count slots, and finally returns the buffer on every path.
+
+### Task 4: Diagnose a defect
+
+Diagnose reading uninitialized pooled capacity or returning the same buffer twice.
+
+No reference answer has been written for this task yet. The wrong assumptions to look for are this lesson's pitfalls: Never assert that a weak reference must disappear immediately after a collection request. Returning a buffer while asynchronous work still uses it causes data corruption. Pooling is not inherently a performance win.
+
+### Task 5: Boundary evidence
+
+Test cleanup when the computation throws.
+
+No reference answer has been written for this task yet. Write the expected value or documented rejection for each boundary before running it, and compare with the checks in Example A (Use only admitted buffer contents) and Example B (Release retained references deliberately).
+
+### Task 6: Transfer and justify
+
+Decide whether pooling is justified using allocation measurements and a stated lifetime contract.
+
+No single reference answer exists: several designs can satisfy this transfer task. Justify yours against the mechanism described below and the vocabulary entry **Reachability**, and state one limitation of your choice.
 
 ## Mechanism and diagnostic reasoning
 
@@ -36,4 +77,4 @@ Never assert that a weak reference must disappear immediately after a collection
 
 ## Review before continuing
 
-The reference checks the worked scenarios, including their boundary distinctions. Your independent and transfer artifacts may have additional checks. Compare observations rather than only source text. Preserve any new regression case you discover and explain why it would reject a plausible wrong implementation. External project steps require their own build and platform evidence and are not established by a portable reference passing.
+Run the reference and confirm that it prints `csharp-036: passed`, then reconstruct one boundary case from memory and explain which check would reject a plausible wrong implementation. External project steps need their own build and platform evidence; a passing portable reference does not establish them.

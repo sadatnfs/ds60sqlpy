@@ -4,18 +4,18 @@ Answer-free learner worksheet. See the companion guide for worked examples.
 Copy to .learning before editing. Six independent attempts belong below.
 """
 
-# Exercise 1: Create nontrivial training state
-# Take two Adam updates of a zero-weight linear model onx 1, 2 and y 2 x.
-# Expected: optimizer step 2 and positive weight.
+# Exercise 1: Predict Adam's first step
+# From a fresh make_state(), take one step with zero noise and compare the weight with the
+# learning rate 0.05.
+# Expected: weight 0.05 within 1e-6.
 
-# Exercise 2: Save the complete local contract
-# Write model, optimizer, RNG and data_position2 into an owned temporary checkpoint.
-# Expected: file exists and metadata position 2.
+# Exercise 2: Inspect the new optimizer state
+# List the state entries Adam stores for that parameter after one step.
+# Expected: keys step, exp_avg and exp_avg_sq; step equals 1.
 
-# Exercise 3: Record uninterrupted continuation
-# Draw three random values, then a small target perturbation, and perform the third
-# update.
-# Expected: finite weight, step 3, and saved three-value random probe.
+# Exercise 3: Replay a saved random state
+# Save torch.get_rng_state(), draw three values, restore the state and draw again.
+# Expected: the two draws are identical.
 
 # Exercise 4: Restore in a fresh interpreter
 # Recreate model and Adam, restore all state, repeat the same draws and update.

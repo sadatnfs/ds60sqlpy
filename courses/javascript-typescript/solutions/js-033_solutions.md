@@ -24,11 +24,13 @@ Workers share a process-level trust context and available host capabilities. The
 
 new Worker creates the thread. workerData supplies a cloned or transferred initial payload. parentPort sends the result to the parent. A transferList names the exact ArrayBuffer ownership to move. Parent code listens for result, error and premature exit, then cleans up listeners and terminates the worker. Use process and thread identifiers only as observations of the actual run, not as fixed expected numbers.
 
-## Exercise 1: Perform bounded CPU work in a real worker
+## Exercise 1: Perform bounded CPU work in a real worker: change one input
 
-Task: Sum integers 1 through 10000 in a worker and inspect its thread id.
+Task: Copy Example A into a scratch `main.mjs` and change `10000,` to `10001,`. Before running it, predict which check fails and which value it now sees; then run it and restore the original line.
 
 The result came through an actual worker message. The tiny workload illustrates mechanics and may be slower than a direct loop because startup costs dominate.
+
+The unchanged code is the exercise block of Example A:
 
 ```javascript
 const result = await runWorker(
@@ -41,15 +43,17 @@ assert.equal(result.sum, 50005000);
 assert.ok(result.threadId > 0);
 ```
 
-**Expected:** sum 50005000; worker thread id positive.
+**Expected:** The changed run fails with an `AssertionError` at the check `assert.equal(result.sum, 50005000)`. Restoring the original line brings back the worked observation: sum 50005000; worker thread id positive.
 
-**Verify:** Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.
+**Verify:** Compare your written prediction with the reported `AssertionError`, including its actual and expected values, and name the value that made `assert.equal(result.sum, 50005000)` fail. After restoring the line, the program prints its `{"checks":1,"status":"passed"}` receipt again.
 
-## Exercise 2: Transfer a buffer and observe detachment
+## Exercise 2: Transfer a buffer and observe detachment: debug a regression
 
-Task: Send an ArrayBuffer by transfer list, modify its first byte in the worker and return the bytes.
+Task: A regression changed one token in Example B, so one line now reads `const buffer = Uint8Array.from([1, 3, 3]).buffer;`. Run Example B with that line, use the failing check to locate the defect and repair it without changing the check.
 
 The sender loses access because ownership moved. Treating a detached buffer as still usable would create an invalid lifetime assumption.
+
+The unchanged code is the exercise block of Example B:
 
 ```javascript
 const buffer = Uint8Array.from([1, 2, 3]).buffer;
@@ -63,9 +67,9 @@ assert.equal(buffer.byteLength, 0);
 assert.deepEqual(result, [9, 2, 3]);
 ```
 
-**Expected:** parent byteLength 0; returned bytes 9,2,3.
+**Expected:** Before the repair the run fails with an `AssertionError` at the check `assert.deepEqual(result, [9, 2, 3])`; after it the line reads `const buffer = Uint8Array.from([1, 2, 3]).buffer;` again and parent byteLength 0; returned bytes 9,2,3.
 
-**Verify:** Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.
+**Verify:** Keep the failing and the repaired runs. Explain why the changed token alters the value tested by `assert.deepEqual(result, [9, 2, 3])` for this input.
 
 ## Exercise 3: Distinguish cloning from shared mutation
 
@@ -86,7 +90,7 @@ assert.equal(original.value, 1);
 
 **Expected:** worker returns 9; parent remains 1.
 
-**Verify:** Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.
+**Verify:** Keep a check equivalent to `assert.equal(original.value, 1)`. As a control, change `const original = { value: 1 };` to `const original = { value: 2 };`: the run must fail with an `AssertionError` at that check. Restore the line before continuing.
 
 ## Exercise 4: Propagate an actual worker exception
 
@@ -103,7 +107,7 @@ await assert.rejects(
 
 **Expected:** parent Promise rejects with worker fixture failed.
 
-**Verify:** Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.
+**Verify:** Keep a check equivalent to ``assert.rejects(runWorker(`throw new Error('worker fixture failed');`, null), /worker fixture failed/u)`` and confirm that the reference still passes. Then name an input that would make it fail and explain which value changes.
 
 ## Exercise 5: Terminate an owned worker that remains alive
 
@@ -132,7 +136,7 @@ try {
 
 **Expected:** ready observed; terminate resolves with an exit code.
 
-**Verify:** Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.
+**Verify:** Keep a check equivalent to `assert.equal(typeof code, 'number')`. As a control, change `worker.once('error', reject); }), 'ready'` to `worker.once('error', reject); }), 'ready!'` inside it: the run must fail with an `AssertionError`, which shows the check can fail. Restore it.
 
 ## Exercise 6: Reject data that cannot be cloned
 
@@ -152,7 +156,7 @@ await assert.rejects(
 
 **Expected:** DataCloneError before useful worker execution.
 
-**Verify:** Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.
+**Verify:** Keep a check equivalent to ``assert.rejects(runWorker(`const { parentPort } = require('node:worker_threads'); parentPort.postMessage('unused');`, { callback: () => 1 }), (error) => error.name === 'DataCloneError')``. As a control, change `error => error.name === 'DataCloneError'` to `error => error.name !== 'DataCloneError'` inside it: the run must fail with an `AssertionError`, which shows the check can fail. Restore it.
 
 ## After comparison
 

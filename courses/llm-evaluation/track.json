@@ -23,7 +23,7 @@
       "id": "eval-001",
       "runtime": "python-core",
       "lab": "Compute B minus A and then A minus B for one success gained by B.",
-      "verification": "The complete reference prints 'eval-001: all reference checks passed' after numerical and failure-case assertions."
+      "verification": "The reversed comparison gives +1 and -1, the reweighted improvement is 0.5, a duplicated identifier and an empty population are rejected, and observed accuracy 1 is reported beside label coverage 0.5."
     },
     {
       "title": "Evaluation data, grouping and contamination",
@@ -43,7 +43,7 @@
       "id": "eval-002",
       "runtime": "python-core",
       "lab": "Put two paraphrases from one family into train and test.",
-      "verification": "The complete reference prints 'eval-002: all reference checks passed' after numerical and failure-case assertions."
+      "verification": "Paraphrases split across partitions fail family validation, a row at the cutoff is eligible under the inclusive policy while a delayed label is excluded, normalization changes the fingerprint, and historical evaluation uses the earlier corpus version."
     },
     {
       "title": "Annotation rubrics and construct validity",
@@ -63,7 +63,7 @@
       "id": "eval-003",
       "runtime": "python-core",
       "lab": "Score one level 2 criterion and one inapplicable criterion.",
-      "verification": "The complete reference prints 'eval-003: all reference checks passed' after numerical and failure-case assertions."
+      "verification": "A response with one applicable dimension scores 1.0, a critical failure blocks admission, malformed labels and mixed rubric versions are rejected, both disagreeing labels stay in the ledger, and the proxy counterexample formats correctly while failing evidence support."
     },
     {
       "title": "Agreement, prevalence and adjudication uncertainty",
@@ -83,7 +83,7 @@
       "id": "eval-004",
       "runtime": "python-core",
       "lab": "Rebuild the table in case A by counting label pairs.",
-      "verification": "The complete reference prints 'eval-004: all reference checks passed' after numerical and failure-case assertions."
+      "verification": "The confusion table is [[2, 0], [1, 1]]; perfect agreement gives kappa 1 and complete disagreement -1; the single-category case is rejected as undefined; and the sample still has two families when the dependence unit changes."
     },
     {
       "title": "Stratified sampling and population weighting",
@@ -104,7 +104,7 @@
       "id": "eval-005",
       "runtime": "python-core",
       "lab": "Use 25% routine and 75% rare in case A.",
-      "verification": "The complete reference prints 'eval-005: all reference checks passed' after numerical and failure-case assertions."
+      "verification": "The reweighted target accuracy is 0.6; missing support and zero inclusion probability are rejected; the known-size and sampled-weight denominators give 0.2 and 1/3; concentrated weights drive the effective sample size below 1.03; both systems use identical IDs and weights."
     },
     {
       "title": "Paired comparisons and clustered uncertainty",
@@ -126,7 +126,7 @@
       "id": "eval-006",
       "runtime": "python-core",
       "lab": "Use paired differences 0,0.",
-      "verification": "The complete reference prints 'eval-006: all reference checks passed' after numerical and failure-case assertions."
+      "verification": "Vanishing differences give an exact tail of 1, four favorable pairs give 2/16 = 0.125, relabeling leaves the two-sided p-value unchanged, the two quantile conventions give about +/-0.925 and +/-1, and three families have 27 ordered bootstrap draws."
     },
     {
       "title": "Multiplicity and sequential release decisions",
@@ -146,7 +146,7 @@
       "id": "eval-007",
       "runtime": "python-core",
       "lab": "Test one valid p-value 0.05 at alpha 0.05.",
-      "verification": "The complete reference prints 'eval-007: all reference checks passed' after numerical and failure-case assertions."
+      "verification": "A single comparison at the threshold rejects the null under the declared non-strict rule, none of three equal findings crosses the Bonferroni threshold, an overspent monitoring plan and an unknown result are rejected, and significance alone does not mandate deployment."
     },
     {
       "title": "Retrieval evaluation and ranking denominators",
@@ -167,7 +167,7 @@
       "id": "eval-008",
       "runtime": "python-core",
       "lab": "Explain why case A has nDCG 1 but recall 2/3.",
-      "verification": "The complete reference prints 'eval-008: all reference checks passed' after numerical and failure-case assertions."
+      "verification": "An ideal top two still misses one relevant document, a miss scores 0 for recall, reciprocal rank and nDCG, duplicate and unjudged documents are rejected, and an empty relevant set reports missing values instead of 0 or 1."
     },
     {
       "title": "Claim support, citations and evidence provenance",
@@ -188,7 +188,7 @@
       "id": "eval-009",
       "runtime": "python-core",
       "lab": "Cite only c1 correctly among three eligible claims.",
-      "verification": "The complete reference prints 'eval-009: all reference checks passed' after numerical and failure-case assertions."
+      "verification": "One supported citation gives precision 1 and coverage 1/3, no citations gives missing precision and coverage 0, unknown relations and duplicate citations are rejected, and a newer document is ineligible for the historical reconstruction."
     },
     {
       "title": "Abstention, coverage and decision costs",
@@ -209,7 +209,7 @@
       "id": "eval-010",
       "runtime": "python-core",
       "lab": "Use threshold 0 on the development fixture.",
-      "verification": "The complete reference prints 'eval-010: all reference checks passed' after numerical and failure-case assertions."
+      "verification": "Answering everything gives coverage 1, accuracy 0.5 and cost 2.5; abstaining on everything gives coverage 0, missing accuracy and cost 0.4; the calibrated-probability cutoff is 0.92; subgroup counts, coverage and cost are reported separately."
     },
     {
       "title": "Judge calibration and presentation bias",
@@ -231,7 +231,7 @@
       "id": "eval-011",
       "runtime": "python-core",
       "lab": "Candidate A is on the right and the left answer wins.",
-      "verification": "The complete reference prints 'eval-011: all reference checks passed' after numerical and failure-case assertions."
+      "verification": "The order-swapped identity score for A is 0, perfect probabilities give Brier and ECE 0, maximally wrong ones give 1, a constant judge gets ECE 0 with Brier 0.25, and final labels never influence the frozen recalibration map."
     },
     {
       "title": "Prompt, model and seed effects",
@@ -252,7 +252,7 @@
       "id": "eval-012",
       "runtime": "python-core",
       "lab": "Calculate candidate minus baseline under each prompt.",
-      "verification": "The complete reference prints 'eval-012: all reference checks passed' after numerical and failure-case assertions."
+      "verification": "The per-prompt differences are -0.1 and +0.3, the additive reconstruction recovers every cell, equal selection budgets give development scores of 0.9, the seed variance is 0.01, and a malformed axis is rejected."
     },
     {
       "title": "Selection procedures and protected holdouts",
@@ -273,7 +273,7 @@
       "id": "eval-013",
       "runtime": "python-core",
       "lab": "Enumerate the four two-candidate noise combinations.",
-      "verification": "The complete reference prints 'eval-013: all reference checks passed' after numerical and failure-case assertions."
+      "verification": "The mean maximum of two noisy candidates is 0.05, changing only final outcomes leaves the selected IDs unchanged, ties choose the first candidate, and the optimistic same-table procedure scores 0.85 but no longer counts as a protected assessment."
     },
     {
       "title": "Robustness, access policy and adversarial evaluation",
@@ -294,7 +294,7 @@
       "id": "eval-014",
       "runtime": "python-core",
       "lab": "Change capitalization and surrounding whitespace in the query conversion.",
-      "verification": "The complete reference prints 'eval-014: all reference checks passed' after numerical and failure-case assertions."
+      "verification": "Formatting changes keep the authorized result public-guide, removing authorization returns no document, extra authority fields fail the exact schema, an unsafe intermediate action is recorded as a policy failure, and unknown cases stay unknown and go to review."
     },
     {
       "title": "Monitoring, delayed labels and online experiments",
@@ -316,7 +316,7 @@
       "id": "eval-015",
       "runtime": "python-core",
       "lab": "Evaluate the two requests at day 2.",
-      "verification": "The complete reference prints 'eval-015: all reference checks passed' after numerical and failure-case assertions."
+      "verification": "Immature labels give accuracy 1 at coverage 0.5 while the mature cohort gives accuracy 0.5 at coverage 1; identical distributions have JS divergence 0 and disjoint support log 2; an alert triggers a composition and coverage check before any degradation claim."
     },
     {
       "title": "A reproducible evaluation decision packet",
@@ -337,7 +337,7 @@
       "id": "eval-016",
       "runtime": "python-core",
       "lab": "Raise coverage to 0.9 while keeping the other authored inputs.",
-      "verification": "The complete reference prints 'eval-016: all reference checks passed' after numerical and failure-case assertions."
+      "verification": "Changing one constraint passes only the coverage gate, a missing protocol result and a critical failure each fail their gates, editing the artifact invalidates the old digest, and the memo states no-go with all four failing conditions."
     },
     {
       "title": "Preference data and Bradley-Terry reward models",
@@ -359,7 +359,7 @@
       "id": "eval-017",
       "runtime": "python-core",
       "lab": "Evaluate a positive comparison when both scores are zero.",
-      "verification": "The complete reference prints 'eval-017: all reference checks passed' after numerical and failure-case assertions."
+      "verification": "Equal scores give preference probability 0.5 and loss log 2, shifting both rewards changes neither loss nor gradient, reversed counts fit probability 0.25, all-win data has no finite estimate, the loss stays finite at 2000, and a preference cycle has no scalar ordering."
     },
     {
       "title": "Train and audit a small reward model",
@@ -380,7 +380,7 @@
       "id": "eval-018",
       "runtime": "llm-torch-cpu",
       "lab": "Compare autograd at zero weights with \\(D^{\\mathsf T}(0.5-y)/n\\).",
-      "verification": "The complete reference prints 'eval-018: all reference checks passed' after numerical and failure-case assertions."
+      "verification": "The analytic and autograd initial gradients match in float64, a reversed comparison flips the margin sign, the trained model weights length above both evidence features, and the final-state loss differs from the last pre-update loss."
     },
     {
       "title": "KL-regularized policies and reward exploitation",
@@ -401,7 +401,7 @@
       "id": "eval-019",
       "runtime": "python-core",
       "lab": "Add 100 to every action reward.",
-      "verification": "The complete reference prints 'eval-019: all reference checks passed' after numerical and failure-case assertions."
+      "verification": "Adding a reward constant or rescaling reward together with beta leaves the optimal policy unchanged, the gradient sums to approximately 0, large rewards still normalize to finite probabilities, missing support is rejected, and proxy reward rises while independent utility falls."
     },
     {
       "title": "Direct Preference Optimization from ratios to gradients",
@@ -422,7 +422,7 @@
       "id": "eval-020",
       "runtime": "python-core",
       "lab": "Set policy and reference log odds equal for any positive beta.",
-      "verification": "The complete reference prints 'eval-020: all reference checks passed' after numerical and failure-case assertions."
+      "verification": "At the reference policy the loss is log 2 with derivative -1, the preferred-action probabilities for the three beta values are 0.9, 0.75 and about 0.634, and the sequence-sum and mean-token margins have opposite signs."
     },
     {
       "title": "Temporal credit, GAE and the PPO clipped objective",
@@ -444,7 +444,7 @@
       "id": "eval-021",
       "runtime": "python-core",
       "lab": "Set lambda 0 in case A.",
-      "verification": "The complete reference prints 'eval-021: all reference checks passed' after numerical and failure-case assertions."
+      "verification": "Without the trace the advantages are the residuals 0.86 and 1.6, termination leaves the first step at 0.5, clipping gives 1.2 in the positive case and -1.5 in the negative case, and stored rollout quantities stay frozen."
     },
     {
       "title": "Actual CPU PPO updates on a finite contextual policy",
@@ -465,7 +465,7 @@
       "id": "eval-022",
       "runtime": "llm-torch-cpu",
       "lab": "Sum old-policy weights across both contexts and actions.",
-      "verification": "The complete reference prints 'eval-022: all reference checks passed' after numerical and failure-case assertions."
+      "verification": "The expectation weights sum to 1, the frozen rollout state is unchanged after updates, the learned probability rows mirror each other, and the proxy-trained policy exceeds 0.9 training reward while task utility stays below 0.1."
     },
     {
       "title": "GRPO groups, normalization and KL estimators",
@@ -486,7 +486,7 @@
       "id": "eval-023",
       "runtime": "python-core",
       "lab": "Add a common constant to 0,1,2,3.",
-      "verification": "The complete reference prints 'eval-023: all reference checks passed' after numerical and failure-case assertions."
+      "verification": "Shifting all rewards leaves the normalized advantages unchanged, a constant group yields zero advantages, response and token averaging give 0 and 1/3, the estimator differs from current-policy KL under the wrong sampling law, and its value 0 has derivative 0.5."
     },
     {
       "title": "Off-policy evaluation and the final alignment audit",
@@ -509,7 +509,7 @@
       "id": "eval-024",
       "runtime": "python-core",
       "lab": "Set the target policy equal to the behavior policy in case A.",
-      "verification": "The complete reference prints 'eval-024: all reference checks passed' after numerical and failure-case assertions."
+      "verification": "With the target equal to the behavior policy all weights are 1 and the value is 0.75; the useful target is valued at 0.9; missing behavior support is rejected; a zero outcome model reduces the doubly robust estimate to importance sampling; self-normalized and ordinary estimates differ."
     }
   ]
 }

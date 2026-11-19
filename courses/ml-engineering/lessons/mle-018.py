@@ -1,4 +1,4 @@
-"""mle-018: worked starting point; complete the guide's six changes."""
+"""mle-018: both worked cases; complete the guide's six changes."""
 
 import hashlib
 import json
@@ -223,8 +223,36 @@ def example_one():
             store.teardown()
 
 
+def example_two():
+    from ds60sqlpy.plot_artifacts import publish_report
+
+    candidate = {
+        "schema_ok": True,
+        "mature_label_coverage": 0.1,
+        "required_coverage": 0.8,
+        "artifact_hash_ok": True,
+    }
+    accepted = bool(
+        candidate["schema_ok"]
+        and candidate["artifact_hash_ok"]
+        and candidate["mature_label_coverage"] >= candidate["required_coverage"]
+    )
+    assert not accepted
+    decision = {
+        "accepted": accepted,
+        "reason": "insufficient mature-label coverage",
+        "active_version_retained": "v1",
+        "candidate": candidate,
+    }
+    publish_report(
+        decision, description="Blocked publication decision with retained accepted version"
+    )
+    return decision
+
+
 if __name__ == "__main__":
     print(example_one())
+    print(example_two())
 
 # TODO 1: Identify where the actual training values came from.
 # TODO 2: Explain why only 77 rows enter fitting.

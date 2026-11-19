@@ -8,7 +8,7 @@ A Service provides an internal backend abstraction; an ingress or gateway contro
 
 This host lab requires a preinstalled qualified Gateway controller, a host-owned Gateway named lesson-gateway, an owned Service backend and a loopback-only listener. A synthetic TLS case also needs a verified local trust chain and hostname. The normal browser adapter provides none of those cluster/controller operations and does not accept Gateway or Ingress resources.
 
-The real HTTPRoute example matches host lesson.local and path prefix /version, then forwards to hello:8080. It leaves other paths unmatched. The Ingress comparison is a separate fixture with its own ingressClassName; do not assume the two APIs are interpreted by the same controller or apply both to an unreviewed listener.
+The real HTTPRoute example matches host lesson.example.test and path prefix /version, then forwards to hello:8080. It leaves other paths unmatched. The Ingress comparison is a separate fixture with its own ingressClassName; do not assume the two APIs are interpreted by the same controller or apply both to an unreviewed listener.
 
 ## Exercise 1: Draw the ownership layers
 
@@ -20,7 +20,7 @@ The layered design lets different roles own infrastructure and application routi
 
 The route must be accepted by the intended parent and resolve its backend. Cross-namespace attachment/reference permissions are separate conditions, not implied by a familiar service name.
 
-**Expected:** lesson.local, /version, lesson-gateway, hello8080 are the declared contract.
+**Expected:** lesson.example.test, /version, lesson-gateway, hello 8080 are the declared contract.
 
 ## Exercise 3: Inspect current conditions
 

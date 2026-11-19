@@ -4,7 +4,7 @@ Compare these answers only after an attempt or an explicit solution reveal. They
 
 ## Mechanism review
 
-Annn.Module owns a model's registered parameters, buffers and child modules. Its forward method defines a computation, but the optimizer membership and training loop remain explicit. A plain tensor attribute is not automatically a Parameter. A buffer is tracked state that moves with the module and appears in state_dict without being optimized by default. This distinction is useful for fixed preprocessing statistics, running counts or nontrainable masks.
+An nn.Module owns a model's registered parameters, buffers and child modules. Its forward method defines a computation, but the optimizer membership and training loop remain explicit. A plain tensor attribute is not automatically a Parameter. A buffer is tracked state that moves with the module and appears in state_dict without being optimized by default. This distinction is useful for fixed preprocessing statistics, running counts or nontrainable masks.
 
 Calling model(x) routes through Module machinery and forward; it does not calculate a loss or apply an update. A complete loop selects parameters for an optimizer, clears gradients, computes an objective, backpropagates and steps. Replacing a Parameter after constructing an optimizer does not automatically update the optimizer object list. This lesson uses a scalar module to make ownership and membership observable before larger architectures hide them.
 
@@ -42,59 +42,60 @@ State serialization also has a boundary. state_dict supplies a mapping of regist
 
 For the paired Keras model, compare the represented function before comparing the training interface. A no-bias Dense kernel and the zero-offset scalar PyTorch model can represent the same map, but their storage layouts and construction APIs differ. Explicitly match dtype, denominator and update budget; a high-level training call can report a pre-update loss just as a retained PyTorch loss tensor can.
 
-## Exercise 1: Inspect module state
+## Exercise 1: Evaluate a module with a nonzero buffer
 
-The question is: Build Scalar Model with weight 0 and buffer offset 0.
+The question is: Build ScalarModel, set its offset buffer to 1 under no_grad and evaluate x = 1, 2, 3.
 
-The buffer is serialized and follows device/dtype conversions, but it is not an optimizer parameter. A plain attribute would not provide the same tracking contract.
-
-```python
-model = ScalarModel()
-assert set(dict(model.named_parameters())) == {"weight"} and set(dict(model.named_buffers())) == {
-    "offset"
-}
-assert set(model.state_dict()) == {"weight", "offset"}
-```
-
-**Expected:** one parameter weight; one buffer offset; both in state_dict.
-
-**Verify:** Compare the computed values or written argument with one parameter weight; one buffer offset; both in state_dict.
-
-## Exercise 2: Check a forward call
-
-The question is: Runx 1, 2, 3 through the zero-weight module.
-
-A forward call only computes the current function. Neither parameter registration nor calling the module performs training.
+With weight 0 the forward pass returns only the buffer, which participates in computation without being optimized.
 
 ```python
-x = torch.tensor([1.0, 2.0, 3.0], dtype=torch.float64)
-y = 2 * x
-assert torch.equal(model(x), torch.zeros_like(x)) and model.weight.item() == 0
+shifted = ScalarModel()
+with torch.no_grad():
+    shifted.offset.fill_(1.0)
+xs = torch.tensor([1.0, 2.0, 3.0], dtype=torch.float64)
+assert shifted(xs).tolist() == [1.0, 1.0, 1.0] and "offset" not in dict(shifted.named_parameters())
 ```
 
-**Expected:** three zero outputs; weight unchanged.
+**Expected:** outputs [1, 1, 1]; offset is a buffer, not a parameter.
 
-**Verify:** Compare the computed values or written argument with three zero outputs; weight unchanged.
+**Verify:** In a fresh process, the exercise checks confirm `shifted(xs).tolist() == [1.0, 1.0, 1.0]` and `'offset' not in dict(shifted.named_parameters())`.
 
-## Exercise 3: Run one explicit loop step
+## Exercise 2: Predict one step with the offset present
 
-The question is: Use SGD with rate 0.1 and mean squared error, clearing gradients before backward.
+The question is: Train the shifted module one SGD step with learning rate 0.1 toward y = 2x using mean squared error.
 
-The optimizer consumes only the registered Parameter. The buffer influences forward but remains fixed under this update.
+The residuals are -1, -3 and -5. The weight gradient is the mean of 2rx, -44/3, so the step adds 4.4/3; the buffer is not in the optimizer.
 
 ```python
-optimizer = torch.optim.SGD(model.parameters(), lr=0.1)
-optimizer.zero_grad(set_to_none=True)
-loss = ((model(x) - y) ** 2).mean()
-loss.backward()
-optimizer.step()
-np.testing.assert_allclose(model.weight.item(), 28 / 15, atol=1e-12, rtol=0)
-assert model.offset.item() == 0
+optimizer2 = torch.optim.SGD(shifted.parameters(), lr=0.1)
+optimizer2.zero_grad(set_to_none=True)
+loss2 = ((shifted(xs) - 2 * xs) ** 2).mean()
+loss2.backward()
+optimizer2.step()
+np.testing.assert_allclose(loss2.item(), 35 / 3, atol=1e-12, rtol=0)
+np.testing.assert_allclose(shifted.weight.item(), 22 / 15, atol=1e-12, rtol=0)
+assert shifted.offset.item() == 1
 ```
 
-**Expected:** weight \(\frac{28}{15}\); buffer still 0.
+**Expected:** initial loss 35/3; new weight 22/15; offset still 1.
 
-**Verify:** Compare the computed values or written argument with weight \(\frac{28}{15}\); buffer still 0.
+**Verify:** In a fresh process, the exercise checks confirm `loss2.item()` matches `35 / 3` within 1e-12, `shifted.weight.item()` matches `22 / 15` within 1e-12 and `shifted.offset.item() == 1`.
+
+## Exercise 3: Count state in a ModuleList
+
+The question is: Put two ScalarModel instances in nn.ModuleList and count parameters, buffers and state_dict keys.
+
+A registered container prefixes each child's state with its index, unlike a plain Python list.
+
+```python
+pair = nn.ModuleList([ScalarModel(), ScalarModel()])
+assert len(list(pair.parameters())) == 2 and len(list(pair.buffers())) == 2
+assert set(pair.state_dict()) == {"0.weight", "0.offset", "1.weight", "1.offset"}
+```
+
+**Expected:** 2 parameters, 2 buffers and keys 0.weight, 0.offset, 1.weight, 1.offset.
+
+**Verify:** In a fresh process, the exercise checks confirm `len(list(pair.parameters())) == 2`; `len(list(pair.buffers())) == 2` and `set(pair.state_dict()) == {'0.weight', '0.offset', '1.weight', '1.offset'}`.
 
 ## Exercise 4: Move dtype through registered state
 
@@ -109,7 +110,7 @@ assert model.weight.dtype == torch.float32 and model.offset.dtype == torch.float
 
 **Expected:** both float32.
 
-**Verify:** Compare the computed values or written argument with both float32.
+**Verify:** In a fresh process, the exercise checks confirm `model.weight.dtype == torch.float32` and `model.offset.dtype == torch.float32`.
 
 ## Exercise 5: Expose stale optimizer membership
 
@@ -130,7 +131,7 @@ assert (
 
 **Expected:** optimizer still holds old Parameter, not replacement.
 
-**Verify:** Compare the computed values or written argument with optimizer still holds old Parameter, not replacement.
+**Verify:** In a fresh process, the exercise checks confirm `stale.param_groups[0]['params'][0] is old` and `stale.param_groups[0]['params'][0] is not fresh.weight`.
 
 ## Exercise 6: Keep parameter count stable across calls
 
@@ -148,7 +149,7 @@ assert id(stable.weight) == identity and len(list(stable.parameters())) == 1
 
 **Expected:** same weight object and one parameter.
 
-**Verify:** Compare the computed values or written argument with same weight object and one parameter.
+**Verify:** In a fresh process, the exercise checks confirm `id(stable.weight) == identity` and `len(list(stable.parameters())) == 1`.
 
 ## Review after comparison
 

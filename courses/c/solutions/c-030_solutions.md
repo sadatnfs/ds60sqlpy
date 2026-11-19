@@ -8,29 +8,33 @@ Compiler warnings, static analysis, sanitizers and debugger traces reveal differ
 
 A prepared contributor build can add -g -O1 -fsanitize=address,undefined -fno-omit-frame-pointer to compilation and linking. Execute the same checked source under that build. The ordinary pad uses its fixed reviewed flags and does not claim sanitizer execution. Keep source, compiler command, exit status and diagnostic together. Disable neither an assertion nor a sanitizer report without explaining the actual correction.
 
-## Exercise 1: Guard a formerly unsafe index
+## Exercise 1: Guard a formerly unsafe index: change one input
 
-Use a checked accessor on the final valid index.
+Copy worked example 1 into a scratch pad and change `int values[] = {2, 4, 6}, out = 0;` to `int values[] = {2, 4, 7}, out = 0;`. Before running, predict which CHECK fails and which value it now sees; then run it and restore the original line.
+
+The unchanged code is worked example 1:
 
 ```c
 int values[] = {2, 4, 6}, out = 0;
 CHECK(at_index(values, 3, 2, &out) && out == 6);
 ```
 
-**Expected:** The value 6 is returned.
+**Expected:** The changed run stops with `Check failed` at the CHECK on `at_index(values, 3, 2, &out) && out == 6`. Restoring the original line brings back the worked observation: the value 6 is returned.
 
 The accessor proves the index is below length before reading.
 
-## Exercise 2: Reject the one-past index
+## Exercise 2: Reject the one-past index: debug a regression
 
-Request index 3 from length 3.
+A regression changed one token in worked example 2, so one line now reads `int values[] = {2, 4, 6}, out = 10;`. Run worked example 2 with that line, use the failing CHECK to locate the defect and repair it without changing the CHECK.
+
+The unchanged code is worked example 2:
 
 ```c
 int values[] = {2, 4, 6}, out = 9;
 CHECK(!at_index(values, 3, 3, &out) && out == 9);
 ```
 
-**Expected:** The operation fails and output remains 9.
+**Expected:** Before the repair the run stops with `Check failed` at the CHECK on `!at_index(values, 3, 3, &out) && out == 9`; after it the line reads `int values[] = {2, 4, 6}, out = 9;` again and the operation fails and output remains 9.
 
 The regression preserves the boundary that an unchecked implementation would access illegally.
 

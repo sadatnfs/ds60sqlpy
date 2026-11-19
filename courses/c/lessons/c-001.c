@@ -1,13 +1,22 @@
 #include <stdio.h>
 
 int main(void) {
-  /* Exercise 1: Check a first value
-     Store 2 plus 3 in an int.
-     Expected: The stored value is 5. */
+  /* Exercise 1: Check a first value: change one input
+     Copy worked example 1 into a scratch pad and change `int total = 2 + 3;` to
+     `int total = 3 + 3;`. Before running, predict which CHECK fails and which
+     value it now sees; then run it and restore the original line. Expected: The
+     changed run stops with `Check failed` at the CHECK on `total == 5`.
+     Restoring the original line brings back the worked observation: the stored
+     value is 5. */
 
-  /* Exercise 2: Format a checked result
-     Format total=5 into a bounded character buffer.
-     Expected: The result length is 7 and text is total=5. */
+  /* Exercise 2: Format a checked result: debug a regression
+     A regression changed one token in worked example 2, so one line now reads
+     `int n = snprintf(out, sizeof out, "total=%d", 6);`. Run worked example 2
+     with that line, use the failing CHECK to locate the defect and repair it
+     without changing the CHECK. Expected: Before the repair the run stops with
+     `Check failed` at the CHECK on `strcmp(out, "total=5") == 0`; after it the
+     line reads `int n = snprintf(out, sizeof out, "total=%d", 5);` again and
+     the result length is 7 and text is total=5. */
 
   /* Exercise 3: Trace statement order
      Start at 1, increment, then multiply by 3.

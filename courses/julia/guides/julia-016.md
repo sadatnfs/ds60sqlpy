@@ -8,7 +8,7 @@ Validate relational assumptions in DataFrames joins and reconcile totals before 
 
 ## Classroom execution
 
-Choose **Julia language and scientific computing** in `/classroom`, open this unit, and select its prepared `julia` runtime. The worker starts a fresh `main.jl` process with two Julia threads, a fixed package environment, no startup file and offline package settings. Both worked examples are complete under that environment. Save your current pad before replacing it. No package, model or dataset is fetched by a lesson.
+Open `julia-016` in `/classroom` with its prepared `julia` runtime. Worked case A (expose and repair fanout) and worked case B (missing-key policy) are complete programs: save your current pad, paste one of them and press Run. The learner file contains the six investigations below; the explained reference ends by printing `julia-016: all reference checks passed`. The [course overview](../README.md) describes the shared runtime: a fresh offline `main.jl` process with two threads and a fixed package environment.
 
 ## A join changes the row relationship
 
@@ -138,4 +138,4 @@ Remove duplicate output rows without reviewing their cause.
 
 ## Study companion
 
-Use the repository learning-companion skill with this lesson ID, your prediction and your actual source/output. Ask for a diagnosis of the first incorrect type, shape, state transition or assumption. Keep observed execution distinct from a timing claim, inferred mathematical result or external deployment.
+A repository-aware assistant with the learning-companion skill can review `julia-016` with you. Give it your prediction for one investigation, your source and the actual output, and ask it to find the first incorrect assumption about join grain, key uniqueness, fanout, missing keys or aggregation.

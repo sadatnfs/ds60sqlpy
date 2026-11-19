@@ -1,22 +1,22 @@
 # spark-027: Persistence lifecycle and cross-language golden tests
 
-Authored paired Scala/PySpark teaching content. The default fixtures are tiny,local and deterministic. Runtime acceptance,logical correctness and learner understanding remain separate evidence.
+Authored paired Scala/PySpark teaching content. The default fixtures are tiny, local and deterministic. Runtime acceptance, logical correctness and learner understanding remain separate evidence.
 
 ## Level and prerequisites
 
-Intermediate; approximately 120 minutes. Direct design prerequisites: `spark-026`. The prepared baseline is Spark 4.0.1,Scala binary2.13,JDK 17 and Python 3.12. Read the [execution baseline](../execution-baseline.md); a proposed future tuple is not a runtime receipt.
+Intermediate; approximately 105 minutes. Direct prerequisites: `spark-026`. The prepared baseline is Spark 4.0.1, Scala binary 2.13, JDK 17 and Python 3.12. Read the [execution baseline](../execution-baseline.md).
 
 ## How to run this lesson
 
-Open `spark-027` in the classroom and choose the Scala or PySpark implementation you understand. Prepare only its fixed `spark-local-scala` or `spark-local-python` profile,save your pad and run the complete source. Scala stages as `Main.scala` with `object Main`; Python stages as `main.py` with a main guard. Each program creates its own local[2] session,disables the UI,binds the driver to loopback and stops the session in finally. No external dataset,package download,JDBC connection or cloud service is requested.
+Open `spark-027` in the classroom and choose the Scala or PySpark implementation you understand. Prepare only its fixed `spark-local-scala` or `spark-local-python` profile, save your pad and run the complete source. Scala stages as `Main.scala` with `object Main`; Python stages as `main.py` with a main guard. Each program creates its own local[2] session, disables the UI, binds the driver to loopback and stops the session in finally. No external dataset, package download, JDBC connection or cloud service is requested.
 
 The [Scala learner](../lessons/spark-027.scala) and [PySpark learner](../lessons/spark-027.py) run two complete demonstrations and retain six explicit task stubs. Use the [explained solutions](../solutions/spark-027_solutions.md) only after an attempt or an explicit worked comparison; the [Scala reference](../solutions/spark-027_solution.scala) and [PySpark reference](../solutions/spark-027_solution.py) contain complete assertions. A bounded collect is used only for the declared tiny fixture; do not copy it onto an unbounded or large production table.
 
 ## Learning objectives
 
 - Cache only reusable work and test Scala/PySpark results with schema and bag-aware comparisons.
-- State the input and output grain,schema,NULL policy and ordering before executing a transformation.
-- Compare each language implementation with independent literal expectations,not only with the other implementation.
+- State the input and output grain, schema, NULL policy and ordering before executing a transformation.
+- Compare each language implementation with independent literal expectations, not only with the other implementation.
 
 ## Vocabulary and concepts
 
@@ -211,7 +211,7 @@ Schema is part of the product contract. A display representation can hide a type
 
 Keep rows whose amount is nonnegative or NULL, then return entity_id, segment, doubled=amount*2. Preserve duplicate occurrences and unknown values.
 
-**Expected result/shape:** Seven rows, known total 130 and oneNULL doubled value. The negative entity 6 row is excluded.
+**Expected result/shape:** Seven rows, known total 130 and one NULL doubled value. The negative entity 6 row is excluded.
 
 **Verify:** Assert population, total and unknown count, then compare with the literal golden relation in later tasks.
 
@@ -225,7 +225,7 @@ Return ordered(name, simple_type) pairs from the result schema. Compare with ent
 
 **Verify:** Assert the correct type list and a different list after the deliberate cast.
 
-**Progressive hint:** Use schema metadata rather than inferring types from formatted output or the first nonNULL row.
+**Progressive hint:** Use schema metadata rather than inferring types from formatted output or the first non-NULL row.
 
 ### Exercise 3: Compare schemas before duplicate-sensitive values
 
@@ -243,7 +243,7 @@ Persist the supplied transformed relation with MEMORY_AND_DISK, materialize via 
 
 **Expected result/shape:** Count 7, total 130, an InMemoryTableScan reuse marker, and no registered storage level after return.
 
-**Verify:** Assert result values, cache-scan evidence and post-returnStorageLevel.NONE. Do not use a timing threshold.
+**Verify:** Assert result values, cache-scan evidence and post-return StorageLevel.NONE. Do not use a timing threshold.
 
 **Progressive hint:** Registration precedes materialization; capture the reuse plan while the cache is still registered.
 
@@ -251,7 +251,7 @@ Persist the supplied transformed relation with MEMORY_AND_DISK, materialize via 
 
 Persist and materialize the relation, then raise an injected failure before a later consumer. Unpersist in finally and verify the original error reaches the caller.
 
-**Expected result/shape:** The injected_after_materialize error is observed and storage level isNONE afterward. Correct uncached output still passes the golden oracle.
+**Expected result/shape:** The injected_after_materialize error is observed and storage level is NONE afterward. Correct uncached output still passes the golden oracle.
 
 **Verify:** Assert the named failure, post-failure release and full golden equality on a subsequent computation.
 
@@ -273,11 +273,11 @@ Do not interpret persist registration as completed materialization or a cache sc
 
 ## Self-check
 
-Explain the contract of `transform` / `transform` without reading its solution. Trace the specified boundary case,then explain the final exercise's evidence and limitation. Identify where a transformation builds a plan and where an action requests execution. Retain exact values or operator evidence rather than treating a successful process exit as proof of the whole learning objective.
+Explain the contract of `transform` / `transform` without reading its solution. Trace the specified boundary case, then explain the final exercise's evidence and limitation. Identify where a transformation builds a plan and where an action requests execution. Retain exact values or operator evidence rather than treating a successful process exit as proof of the whole learning objective.
 
 ## Next step
 
-Use the [course route](../README.md) to continue. Paired-language agreement is useful only when both outputs also satisfy the independent fixture contract. Keep runtime/profile receipts separate from any cluster-performance or production-recovery claim.
+Use the [course route](../README.md) to continue. Paired-language agreement is useful only when both outputs also satisfy the independent fixture contract. A successful local run is not evidence of cluster performance or production recovery.
 
 ## Primary sources and official APIs
 
@@ -291,8 +291,8 @@ Use the [course route](../README.md) to continue. Paired-language agreement is u
 
 ```text
 Use $guide-ds60sqlpy-learning to coach me through spark-027: Persistence lifecycle and cross-language golden tests.
-Read courses/scala-spark/guides/spark-027.md and courses/scala-spark/lessons/spark-027.scala;the paired sources are courses/scala-spark/lessons/spark-027.scala and courses/scala-spark/lessons/spark-027.py.
-Direct prerequisites: spark-026. Explain the schema,row grain and new Scala/Python/Spark syntax,ask me to predict a concrete result,then inspect my attempt. Give one hint at a time,review exact result and boundary evidence,and ask retrieval questions in my own words. Do not read solutions/ until I ask or have made an honest attempt.
-Use only the prepared local[2] worker profile and owned job scratch. Do not download dependencies,start a remote service,reset existing checkpoints or alter unrelated learner work.
+Read courses/scala-spark/guides/spark-027.md and courses/scala-spark/lessons/spark-027.scala; the paired sources are courses/scala-spark/lessons/spark-027.scala and courses/scala-spark/lessons/spark-027.py.
+Direct prerequisites: spark-026. Explain the schema, row grain and new Scala/Python/Spark syntax, ask me to predict a concrete result, then inspect my attempt. Give one hint at a time, review exact result and boundary evidence, and ask retrieval questions in my own words. Do not read solutions/ until I ask or have made an honest attempt.
+Use only the prepared local[2] worker profile and owned job scratch. Do not download dependencies, start a remote service, reset existing checkpoints or alter unrelated learner work.
 Done when all six contracts have inspected evidence and I can explain the stated assumptions and a meaningful failure case.
 ```

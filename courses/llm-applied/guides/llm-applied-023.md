@@ -192,7 +192,7 @@ For the supplied fixture, name the input unit, the intermediate state and the fi
 
 ## Exercises
 
-1. **Check evidence freshness.** Use fixedUTCnow 2026-10-22 and a document published one day earlier under a two-day limit.
+1. **Check evidence freshness.** Use fixed UTC now 2026-10-22 and a document published one day earlier under a two-day limit.
    **Expected:** fresh True.
    **Verify:** Save the assertion results for exercise 1, including fresh True.
 

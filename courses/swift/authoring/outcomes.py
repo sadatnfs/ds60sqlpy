@@ -1,0 +1,58 @@
+"""Lesson outcomes for the Swift route: one observable ability per lesson.
+
+render.py requires an entry for every lesson and rejects an outcome that repeats the
+transfer task. MINUTES overrides the default duration for the capstone.
+"""
+
+OUTCOMES = {
+    1: "Compile and run a Swift program with an explicit @main entry point and check a computed value with precondition.",
+    2: "Use let and var deliberately and convert between numeric types explicitly.",
+    3: "Detect integer overflow with reporting arithmetic and use Decimal where exact decimal values matter.",
+    4: "Count and slice strings by Character and index, not by assumed byte or code unit positions.",
+    5: "Represent absence with optionals and unwrap them safely without inventing sentinel values.",
+    6: "Write exhaustive switch statements and guards that cover every case, including boundaries.",
+    7: "Write loops with safe traversal and report not-found with an optional result.",
+    8: "Write functions with clear argument labels and choose between value parameters and inout.",
+    9: "Predict copy-on-write behavior of arrays and transform them without changing the source.",
+    10: "Use dictionaries and sets for lookup and deduplication and sort them for stable output.",
+    11: "Model alternatives with enums and associated values handled by exhaustive switches.",
+    12: "Encapsulate state in structs with private(set) and mutating methods that keep invariants.",
+    13: "Choose classes for shared identity and structs for values, and predict sharing and copying.",
+    14: "Derive computed properties from one stored source of truth and use observers deliberately.",
+    15: "Write closures, control what they capture and compose transformation pipelines.",
+    16: "Build an honest inventory importer that reports sorted totals and rejected lines.",
+    17: "Program against protocols so implementations can be substituted without changing callers.",
+    18: "Write generic types and functions with the constraints their operations need.",
+    19: "Use associated types, opaque results and existentials and explain what each hides.",
+    20: "Work with collection protocols, slices and lazy sequences and reason about their cost.",
+    21: "Throw and handle typed errors and convert between throwing calls and Result values.",
+    22: "Prevent retain cycles with weak and unowned references and verify that objects are released.",
+    23: "Encode and decode with Codable and validate decoded values before trusting them.",
+    24: "Persist data in owned temporary files with Foundation URLs and remove them on every path.",
+    25: "Handle dates, calendars and elapsed time with fixed fixtures independent of the time zone.",
+    26: "Build and run a Swift package and explain its module and target boundaries.",
+    27: "Write behavior tests for the prepared package with XCTest and know where Swift Testing fits.",
+    28: "Write async functions and explain where suspension points occur.",
+    29: "Run bounded parallel work with task groups that own their child tasks.",
+    30: "Cancel asynchronous work cooperatively and clean up on every exit path.",
+    31: "Protect mutable state with actors so access is serialized by construction.",
+    32: "Build an actor-owned import ledger with idempotent operations and conflict detection.",
+    33: "Pass only Sendable values across concurrency boundaries under Swift 6 strict checking.",
+    34: "Produce and consume AsyncStreams with explicit completion and bounded buffering.",
+    35: "Keep unsafe buffer access scoped and hidden behind a safe function contract.",
+    36: "Compare algorithm costs and copy behavior with evidence rather than assumptions.",
+    37: "Write property wrappers that apply one reusable access or normalization policy.",
+    38: "Compose declarative structures with result builders, including optional parts.",
+    39: "Separate a portable domain core from the Apple app and test it on its own.",
+    40: "Manage SwiftUI state and bindings with a single source of truth.",
+    41: "Navigate by stable identity and validate deep links before acting on them.",
+    42: "Save, load and migrate app data with recoverable errors.",
+    43: "Model loading states and discard stale network results with a deterministic fake transport.",
+    44: "Make an app accessible and localizable with meaningful labels and stable identity.",
+    45: "Wrap UIKit and AppKit views at clear integration boundaries.",
+    46: "Run app tests on simulators or macOS destinations and explain signing requirements.",
+    47: "Separate portable and platform-specific code and state each platform's deployment contract.",
+    48: "Build and test a complete offline-first study planner across the portable core and the Apple app.",
+}
+
+MINUTES = {48: 180}

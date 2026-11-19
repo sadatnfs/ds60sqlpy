@@ -15,7 +15,7 @@ The getline expression reads before the body. With 10-newline-20-newline it succ
 
 A stream has both data and state. getline attempts to extract the next line and reports whether that extraction succeeded. The loop condition must test the result of the read before using the line. The pattern while(!input.eof()) checks a state that may not become true until a read attempts to go beyond the available input, so it can process a stale or failed buffer on the final iteration.
 
-A newline is a separator, not necessarily a required terminator for the final record. The first complete program reads10 and 20 from a string containing two newline separators. The second reads30 from a final line with no trailing newline. Both are successful line extractions. A completely empty stream yields no line, while a stream containing one newline yields one empty line. Your data grammar must decide whether an empty record is valid or rejected.
+A newline is a separator, not necessarily a required terminator for the final record. The first complete program reads 10 and 20 from a string containing two newline separators. The second reads 30 from a final line with no trailing newline. Both are successful line extractions. A completely empty stream yields no line, while a stream containing one newline yields one empty line. Your data grammar must decide whether an empty record is valid or rejected.
 
 EOF and bad I/O are different conditions. Reaching the end of an otherwise valid input is expected. A device or stream-buffer failure needs an error path. The reference checks bad() after the loop to distinguish that failure from ordinary exhaustion. A file reader must also check whether opening the file succeeded before treating it as a useful source; an unopened stream should not be reported as a valid empty dataset.
 
@@ -54,7 +54,7 @@ Read the literal 10-newline-20-newline fixture.
 
 **Reasoning:** getline determines whether a record exists.
 
-**Verify:** Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.
+**Verify:** Assert `read_lines` on the fixture returns exactly `{"10", "20"}`; the final newline must not create a third, empty record.
 
 ## Exercise 2: Handle empty input
 
@@ -64,7 +64,7 @@ Run read_lines on an empty string stream.
 
 **Reasoning:** Empty input is not automatically an I/O device error.
 
-**Verify:** Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.
+**Verify:** Assert `read_lines(input).empty()` for an empty `std::istringstream` and that no `std::runtime_error` is thrown, because end of input without `bad()` is not a read failure.
 
 ## Exercise 3: Write an owned file
 
@@ -74,7 +74,7 @@ In a new scratch directory write two lines, close, reopen and read.
 
 **Reasoning:** Close or flush before reading through a second stream.
 
-**Verify:** Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.
+**Verify:** After closing the `std::ofstream`, read the file back through `read_lines` and assert the result is `{"10", "20"}`; any other size means the write was not flushed or was appended twice.
 
 ## Exercise 4: Repair eof-first looping
 
@@ -84,7 +84,7 @@ Compare while(!eof()) with the supplied successful-read loop.
 
 **Reasoning:** EOF becomes known only after a read attempts the boundary.
 
-**Verify:** Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.
+**Verify:** Run both loops on the 10-newline-20-newline fixture: the eof-first loop records a third, empty line, while the `getline` loop must produce exactly two records.
 
 ## Exercise 5: Check open failure
 
@@ -94,7 +94,7 @@ Open missing-file.txt for input in a new empty scratch directory.
 
 **Reasoning:** A missing file must not silently become an empty successful report.
 
-**Verify:** Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.
+**Verify:** Assert `!std::ifstream("missing-file.txt").is_open()`, and check that your error message names `missing-file.txt` and that no record is processed afterward.
 
 ## Exercise 6: Transfer the path contract
 
@@ -104,4 +104,4 @@ Run from two working directories with the same relative filename.
 
 **Reasoning:** The current directory, not main.cpp location, anchors relative paths.
 
-**Verify:** Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.
+**Verify:** Print `std::filesystem::absolute("input.txt")` from each working directory and confirm the two paths differ, then pass one absolute path explicitly and confirm both runs read the same file.

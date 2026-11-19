@@ -1,7 +1,7 @@
 {
   "language": "markdown",
   "runtime": "reading",
-  "level": "intermediate",
+  "level": "advanced",
   "minutes": 75,
   "prerequisites": ["apache-021", "apache-005", "apache-011"],
   "concepts": ["stages", "shuffle", "partial aggregates", "skew"],

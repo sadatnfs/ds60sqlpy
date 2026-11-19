@@ -11,10 +11,14 @@ struct LessonMain {
     }
 
     do {
-      let identity = "lesson-one"
       let titles = ["en": "Read", "fr": "Lire"]
-      precondition(titles["en"] != titles["fr"])
-      precondition(identity == "lesson-one")
+      let saved: [String: Bool] = ["lesson-one": true]
+      func row(id: String, language: String) -> String {
+        let state = saved[id] == true ? "complete" : "incomplete"
+        return "\(titles[language] ?? id): \(state)"
+      }
+      precondition(row(id: "lesson-one", language: "en") == "Read: complete")
+      precondition(row(id: "lesson-one", language: "fr") == "Lire: complete")
     }
     print("swift-044: passed")
   }

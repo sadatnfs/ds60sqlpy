@@ -22,11 +22,13 @@ Validation depth and resource budgets must be chosen together. An arbitrary recu
 
 A record guard checks typeof object, non-null and non-array before exposing string-key access as unknown. Domain checks then establish primitive types and bounds. The success branch carries an Order value; the failure branch carries a code, path and message. The JSON wrapper separates parse failure from schema failure. When validating an array, check each element and build a new typed output; do not cast the entire array after inspecting only the first row.
 
-## Exercise 1: Validate and copy a complete order
+## Exercise 1: Validate and copy a complete order: change one input
 
-Task: Parse an order with two line items and inspect the typed success.
+Task: Copy Example A into a scratch `main.mts` and change `{ sku: 'X', quantity: 2 },` to `{ sku: 'X', quantity: 3 },`. Before running it, predict which check fails and which value it now sees; then run it and restore the original line.
 
 The successful branch provides a typed value only after all fields pass. The result contains new objects, separating validation from later mutation of the input graph.
+
+The unchanged code is the exercise block of Example A:
 
 ```typescript
 const raw: unknown = {
@@ -46,15 +48,17 @@ assert.equal(
 assert.notEqual(result.value, raw);
 ```
 
-**Expected:** success with total quantity 5; independent copied item records.
+**Expected:** The changed run fails with an `AssertionError` at the check `assert.equal(result.value.items.reduce((sum, item) => sum + item.quantity, 0), 5)`. Restoring the original line brings back the worked observation: success with total quantity 5; independent copied item records.
 
-**Verify:** Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.
+**Verify:** Compare your written prediction with the reported `AssertionError`, including its actual and expected values, and name the value that made `assert.equal(result.value.items.reduce((sum, item) => sum + item.quantity, 0), 5)` fail. After restoring the line, the program prints its `{"checks":1,"status":"passed"}` receipt again.
 
-## Exercise 2: Report a nested domain failure precisely
+## Exercise 2: Report a nested domain failure precisely: debug a regression
 
-Task: Validate a second item with quantity zero.
+Task: A regression changed one token in Example B, so one line now reads `{ sku: 'Y', quantity: 1 },`. Run Example B with that line, use the failing check to locate the defect and repair it without changing the check.
 
 Checking every element prevents a valid first row from legitimizing invalid later rows. A stable path is more useful to the caller than a generic invalid input message.
+
+The unchanged code is the exercise block of Example B:
 
 ```typescript
 const result = validateOrder({
@@ -70,9 +74,9 @@ assert.equal(result.code, 'schema');
 assert.equal(result.path, 'items[1].quantity');
 ```
 
-**Expected:** failure code schema and path items[1].quantity.
+**Expected:** Before the repair the run fails with an `AssertionError` at the check `assert.equal(result.ok, false)`; after it the line reads `{ sku: 'Y', quantity: 0 },` again and failure code schema and path items[1].quantity.
 
-**Verify:** Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.
+**Verify:** Keep the failing and the repaired runs. Explain why the changed token alters the value tested by `assert.equal(result.ok, false)` for this input.
 
 ## Exercise 3: Separate JSON syntax failure from schema failure
 
@@ -92,7 +96,7 @@ assert.equal(wrongShape.code, 'schema');
 
 **Expected:** codes json and schema respectively.
 
-**Verify:** Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.
+**Verify:** Keep a check equivalent to `assert.equal(wrongShape.code, 'schema')`. As a control, change `const wrongShape = parseOrder('null');` to `const wrongShape = parseOrder('null!');`: the run must fail with an `AssertionError` at that check. Restore the line before continuing.
 
 ## Exercise 4: Reject unknown fields and excessive item counts
 
@@ -115,7 +119,7 @@ assert.equal(tooMany.path, 'items');
 
 **Expected:** paths $ and items respectively.
 
-**Verify:** Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.
+**Verify:** Keep a check equivalent to `assert.equal(tooMany.path, 'items')` and confirm that the reference still passes. Then name an input that would make it fail and explain which value changes.
 
 ## Exercise 5: Preserve the validated value after input mutation
 
@@ -134,7 +138,7 @@ assert.equal(raw.items[0].quantity, 9);
 
 **Expected:** validated quantity stays 2 while input becomes 9.
 
-**Verify:** Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.
+**Verify:** Keep a check equivalent to `assert.equal(raw.items[0].quantity, 9)`. As a control, change `raw.items[0].quantity = 9;` to `raw.items[0].quantity = 10;`: the run must fail with an `AssertionError` at that check. Restore the line before continuing.
 
 ## Exercise 6: Exercise numeric and string boundaries
 
@@ -153,7 +157,7 @@ assert.equal(validateOrder({ id: 'A', items: [] }).ok, true);
 
 **Expected:** every malformed fixture is rejected; an empty items array remains valid.
 
-**Verify:** Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.
+**Verify:** Keep a check equivalent to `assert.equal(validateOrder({ id: 'A', items: [{ sku: 'X', quantity }] }).ok, false)`. As a control, change `for (const quantity of [NaN, 1.5, Number.MAX_SAFE_INTEGER + 1]) {` to `for (const quantity of [NaN, 1.5, Number.MAX_SAFE_INTEGER - 1]) {`: the run must fail with an `AssertionError` at that check. Restore the line before continuing.
 
 ## After comparison
 

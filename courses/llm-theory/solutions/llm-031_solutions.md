@@ -18,9 +18,9 @@ Use a sequence with two prompt tokens followed by three answer tokens. Shift to 
 
 ## Exercise 1: Align the target mask
 
-The question is: Use sequence[1,2,5,6,3], where1,2 are prompt and5,6,3 answer.
+The question is: Use sequence [1, 2, 5, 6, 3], where 1, 2 are prompt and 5, 6, 3 answer.
 
-The first answer token5 is a target at position1 in the shifted array. Masking by unshifted input positions would introduce an off-by-one error.
+The first answer token 5 is a target at position 1 in the shifted array. Masking by unshifted input positions would introduce an off-by-one error.
 
 ```python
 sequence = torch.tensor([[1, 2, 5, 6, 3]])
@@ -29,15 +29,15 @@ answer = torch.tensor([[False, True, True, True]])
 assert targets.tolist() == [[2, 5, 6, 3]] and int(answer.sum()) == 3
 ```
 
-**Expected:** targets[2,5,6,3];mask[False,True,True,True].
+**Expected:** targets [2, 5, 6, 3]; mask [False, True, True, True].
 
-**Verify:** Compare the computed values or written argument with targets[2,5,6,3];mask[False,True,True,True].
+**Verify:** In a fresh process, the exercise checks confirm `targets.tolist() == [[2, 5, 6, 3]]` and `int(answer.sum()) == 3`.
 
 ## Exercise 2: Compute answer-only loss
 
-The question is: Use zero vocabulary8 logits and replace prompt targets with -100.
+The question is: Use zero vocabulary 8 logits and replace prompt targets with -100.
 
-Uniform logits make each target loss identical. The mean stayslog8, but the active count differs from full-sequence training and affects summed objectives.
+Uniform logits make each target loss identical. The mean stays \(\log 8\), but the active count differs from full-sequence training and affects summed objectives.
 
 ```python
 logits = torch.zeros((1, 4, 8))
@@ -46,9 +46,9 @@ loss = F.cross_entropy(logits.reshape(-1, 8), masked.reshape(-1), ignore_index=-
 np.testing.assert_allclose(loss.item(), np.log(8), atol=1e-6, rtol=0)
 ```
 
-**Expected:** 3 active targets;meanlog8.
+**Expected:** 3 active targets; mean \(\log 8\).
 
-**Verify:** Compare the computed values or written argument with 3 active targets;meanlog8.
+**Verify:** In a fresh process, the exercise checks confirm `loss.item()` matches `np.log(8)` within 1e-6.
 
 ## Exercise 3: Compare loss sums
 
@@ -66,9 +66,9 @@ np.testing.assert_allclose(
 )
 ```
 
-**Expected:** 4log8 versus3log8.
+**Expected:** 4 log 8 versus 3 log 8.
 
-**Verify:** Compare the computed values or written argument with 4log8 versus3log8.
+**Verify:** In a fresh process, the exercise checks confirm `[full.item(), answer_sum.item()]` matches `[4 * np.log(8), 3 * np.log(8)]` within 1e-6.
 
 ## Exercise 4: Inspect ignored gradients
 
@@ -84,13 +84,13 @@ assert (
 )
 ```
 
-**Expected:** first-position gradient all zero;answer gradients nonzero.
+**Expected:** first-position gradient all zero; answer gradients nonzero.
 
-**Verify:** Compare the computed values or written argument with first-position gradient all zero;answer gradients nonzero.
+**Verify:** In a fresh process, the exercise checks confirm `torch.count_nonzero(v.grad[:, 0]).item() == 0` and `torch.count_nonzero(v.grad[:, 1:]).item() > 0`.
 
 ## Exercise 5: Detect template leakage
 
-The question is: Assign two paraphrased prompts to familyT and split them across train/test.
+The question is: Assign two paraphrased prompts to family T and split them across train/test.
 
 Different surface wording can preserve the same task template. Grouped evaluation tests transfer beyond that family rather than rewarding memorization of a familiar form.
 
@@ -99,9 +99,9 @@ family = {"p1": "T", "p2": "T"}
 assert {family["p1"]} & {family["p2"]} == {"T"}
 ```
 
-**Expected:** family intersectionT.
+**Expected:** family intersection T.
 
-**Verify:** Compare the computed values or written argument with family intersectionT.
+**Verify:** In a fresh process, the exercise checks confirm `{family['p1']} & {family['p2']} == {'T'}`.
 
 ## Exercise 6: Refuse missing answers
 
@@ -120,9 +120,9 @@ else:
     raise AssertionError("empty answer accepted")
 ```
 
-**Expected:** no active answer targets; explicitValueError.
+**Expected:** no active answer targets; explicit ValueError.
 
-**Verify:** Compare the computed values or written argument with no active answer targets; explicitValueError.
+**Verify:** In a fresh process, the exercise checks confirm `int(empty.sum()) != 0`.
 
 ## Review after comparison
 

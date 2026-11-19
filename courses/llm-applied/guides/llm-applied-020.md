@@ -171,7 +171,7 @@ For the supplied fixture, name the input unit, the intermediate state and the fi
 
 ## Exercises
 
-1. **Construct paired retrieval features.** Use queries and documents equal to the 2x2identity matrix, with positive labels 0, 1.
+1. **Construct paired retrieval features.** Use queries and documents equal to the 2-by-2 identity matrix, with positive labels 0, 1.
    **Expected:** score shape(2, 2); one positive per query.
    **Verify:** Save the assertion results for exercise 1, including score shape(2, 2); one positive per query.
 

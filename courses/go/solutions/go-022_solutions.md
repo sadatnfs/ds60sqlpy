@@ -8,9 +8,11 @@ HTTP separates method, target, headers, status and body. A handler implements a 
 
 http.HandlerFunc adapts a function with ResponseWriter and *Request parameters. httptest.NewRequest creates an inbound request, and httptest.NewRecorder captures status, headers and body. Header().Set changes response metadata before writing. http.Error writes an error response. A handler should return after rejecting a request so it does not accidentally continue into a success path.
 
-## 1. Serve a health request
+## 1. Serve a health request: change one input
 
-Send GET /health to the handler.
+Copy worked example 1 into a scratch pad and change `health(r, httptest.NewRequest("GET", "/health", nil))` to `health(r, httptest.NewRequest("GET!", "/health", nil))`. Before running, predict which check fails and which value it now sees; then run it and restore the original line.
+
+The unchanged code is worked example 1:
 
 ```go
 r := httptest.NewRecorder()
@@ -18,13 +20,15 @@ health(r, httptest.NewRequest("GET", "/health", nil))
 check(r.Code == 200 && r.Body.String() == "ok\n", "health")
 ```
 
-**Expected:** The status is 200 and the body is ok plus a newline.
+**Expected:** The changed run panics with `health` because `r.Code == 200 && r.Body.String() == "ok\n"` no longer holds. Restoring the original line brings back the worked observation: the status is 200 and the body is ok plus a newline.
 
 The recorder runs the handler directly. This proves the handler contract without making any network availability claim.
 
-## 2. Reject an unsupported method
+## 2. Reject an unsupported method: debug a regression
 
-Send POST /health.
+A regression changed one token in worked example 2, so one line now reads `health(r, httptest.NewRequest("POST", "/health!", nil))`. Run worked example 2 with that line, use the failure to locate the defect and repair it without changing the check.
+
+The unchanged code is worked example 2:
 
 ```go
 r := httptest.NewRecorder()
@@ -32,7 +36,7 @@ health(r, httptest.NewRequest("POST", "/health", nil))
 check(r.Code == 405 && r.Header().Get("Allow") == "GET", "method")
 ```
 
-**Expected:** The status is 405 and Allow is GET.
+**Expected:** Before the repair the program panics with `method`; after it the line reads `health(r, httptest.NewRequest("POST", "/health", nil))` again and the status is 405 and Allow is GET.
 
 The method boundary is explicit. Returning after the error prevents success text from being appended to an already rejected response.
 

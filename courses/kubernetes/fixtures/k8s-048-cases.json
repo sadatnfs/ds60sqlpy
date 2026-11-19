@@ -25,7 +25,7 @@
     {
       "exercise": 5,
       "task": "Explain stale behavior after endpoint changes.",
-      "expected": "Caching or existing connections can delay fresh destination use."
+      "expected": "For a ClusterIP Service, existing connections keep their old backend because the name still resolves to the same virtual IP; for a headless Service, cached Pod address records can also send new connections to a removed Pod."
     },
     {
       "exercise": 6,

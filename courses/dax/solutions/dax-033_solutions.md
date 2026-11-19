@@ -16,13 +16,13 @@ Full January 2025 versus the shifted January 2024 date set; both periods are wit
 
 That is approximately 4.69 percent growth for this defined monthly population, not a universal growth rate across every date role.
 
-- Current January contains S4,S5,S6, totaling 67.
-- Prior January contains S1,S2,S3, totaling 64.
+- Current January contains S4, S5, S6, totaling 67.
+- Prior January contains S1, S2, S3, totaling 64.
 - The difference 3 divided by prior 64 is 0.046875.
 
 ### Case B: An explicit as-of comparison
 
-January 1..3,2025 compared with January 1..3,2024; explicitly as-of rather than full-month.
+January 1 to 3, 2025 compared with January 1 to 3, 2024; explicitly as-of rather than full-month.
 
 | Current | Prior | Growth |
 | --- | --- | --- |
@@ -32,13 +32,13 @@ The changed result is explained by the period definition. Do not repair it by ch
 
 - The current interval excludes S6 on January 5, leaving 47.
 - The prior interval still contains all three prior-year fixture lines, totaling 64.
-- The difference-17 divided by 64 is-0.265625.
+- The difference -17 divided by 64 is -0.265625.
 
 ## Explained practice answers
 
 ### Exercise 1
 
-Predict current revenue through January 5,2025.
+Predict current revenue through January 5, 2025.
 
 It is 67; the selected current interval now contains all January fixture sales.
 

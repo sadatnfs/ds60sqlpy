@@ -18,7 +18,7 @@
     {
       "title": "Recover the known model",
       "task": "Fit the exact line without a penalty.",
-      "expected": "The coefficients are approximately[1,2].",
+      "expected": "The coefficients are approximately `[1, 2]`.",
       "hint": "Use the authored equation as an independent reference.",
       "answer": "A correct numerical recovery validates this fixture, not a population inference."
     },

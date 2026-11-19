@@ -1,6 +1,6 @@
 # swift-038: explanation and comparison
 
-Attempt the six guide tasks before opening this comparison. The executable reference is [swift-038_solution.swift](swift-038_solution.swift). Its assertions are always active under the prepared classroom compile settings.
+Attempt the six guide tasks before opening this comparison. The executable reference is [swift-038_solution.swift](swift-038_solution.swift). It runs both worked examples and the reference answers below, and its assertions are always active under the prepared classroom compile settings.
 
 ## Why the two examples differ
 
@@ -8,21 +8,57 @@ Attempt the six guide tasks before opening this comparison. The executable refer
 
 **Include a conditional section:** The buildOptional method gives the conditional branch an explicit combination rule. The conditional contributes its section when true.
 
-## Reason through the six tasks
+## Task answers
 
-1. **Predict and explain.** Translate the first block into its builder calls.
+### Task 1: Predict and explain
 
-2. **Guided modification.** Set include to false and predict the result.
+Translate the first block into its builder calls.
 
-3. **Independent construction.** Build a small report declaration using the existing builder.
+No separate reference answer has been written for this task. Example A is the evidence to compare with: The builder supplies the combining mechanism; the block supplies domain content. Two expressions become an ordered array of sections.
 
-4. **Diagnose a defect.** Diagnose a loop in a builder that lacks buildArray support.
+### Task 2: Guided modification
 
-5. **Boundary evidence.** Test an empty block and a false optional section.
+Set include to false and predict the result.
 
-6. **Transfer and justify.** Explain why a domain-specific builder may be clearer or less clear than an ordinary array literal.
+No separate reference answer has been written for this task. Start from Example B: The buildOptional method gives the conditional branch an explicit combination rule. The conditional contributes its section when true.
 
-For tasks 1 and 2, use the checked values and mechanism trace in the two examples. For task 3, choose names that expose the input and result contract and retain the same invariants. For task 4, the diagnosed mistakes below supply a concrete wrong assumption: preserve its counterexample before repairing it. Task 5 needs an explicit expected value or documented rejection at the boundary, not just successful execution. For task 6, explain what changes in the new context and which part of the original mechanism remains applicable. Several representations may satisfy this transfer task; justify the choice rather than treating this reference as the only architecture.
+### Task 3: Independent construction
+
+Build a small report declaration using the existing builder.
+
+**Reference answer.** It runs as the `Task 3` block of the reference program.
+
+```swift
+let hasWarnings = false
+let report = sections {
+  "Summary"
+  "Totals"
+  if hasWarnings { "Warnings" }
+}
+precondition(report == ["Summary", "Totals"])
+```
+
+**Observe:** The report contains Summary and Totals; the Warnings section is omitted.
+
+The builder turns each expression into a section and the if statement into an optional component, so the declaration reads like the report it builds.
+
+### Task 4: Diagnose a defect
+
+Diagnose a loop in a builder that lacks buildArray support.
+
+No reference answer has been written for this task yet. The wrong assumptions to look for are this lesson's pitfalls: A result builder is not runtime reflection or arbitrary syntax parsing. Type errors can surface inside generated combinations, so reduce the block to a small failing expression. Do not reinvent SwiftUI ViewBuilder for ordinary views.
+
+### Task 5: Boundary evidence
+
+Test an empty block and a false optional section.
+
+No reference answer has been written for this task yet. Write the expected value or documented rejection for each boundary before running it, and compare with the checks in Example A (Compose report sections) and Example B (Include a conditional section).
+
+### Task 6: Transfer and justify
+
+Explain why a domain-specific builder may be clearer or less clear than an ordinary array literal.
+
+No single reference answer exists: several designs can satisfy this transfer task. Justify yours against the mechanism described below and the vocabulary entry **Result builder**, and state one limitation of your choice.
 
 ## Mechanism and diagnostic reasoning
 
@@ -36,4 +72,4 @@ A result builder is not runtime reflection or arbitrary syntax parsing. Type err
 
 ## Review before continuing
 
-The reference checks the worked scenarios, including their boundary distinctions. Your independent and transfer artifacts may have additional checks. Compare observations rather than only source text. Preserve any new regression case you discover and explain why it would reject a plausible wrong implementation. External project steps require their own build and platform evidence and are not established by a portable reference passing.
+Run the reference and confirm that it prints `swift-038: passed`, then reconstruct one boundary case from memory and explain which check would reject a plausible wrong implementation. External project steps need their own build and platform evidence; a passing portable reference does not establish them.

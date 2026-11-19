@@ -8,27 +8,31 @@ Labels attach identity and grouping information to objects. A selector expresses
 
 A map of required label pairs represents an AND of equality tests in this small model. Missing and empty-valued labels must be distinguished with comma-ok. Kubernetes additionally supports set-based selectors and API-specific selector forms. Stable application identity should be separate from rollout-specific labels when a Service must survive Deployment replacement. Never use label matching alone as permission to delete an object.
 
-## 1. Match all required labels
+## 1. Match all required labels: predict an edited check
 
-Match app=web and tier=frontend against a Pod containing both.
+Copy worked example 1 into a scratch pad and change `matches(map[string]string{"app": "web", "tier": "frontend"}, map[string]string{"app": "web", "tier": "frontend"})` to `matches(map[string]string{"app!": "web", "tier": "frontend"}, map[string]string{"app": "web", "tier": "frontend"})` inside its check. Before running, predict whether the check still passes and explain why; then restore it.
+
+The unchanged code is worked example 1:
 
 ```go
 check(matches(map[string]string{"app": "web", "tier": "frontend"}, map[string]string{"app": "web", "tier": "frontend"}), "match")
 ```
 
-**Expected:** The selector matches.
+**Expected:** The changed run panics with `match` because the edited check no longer holds. Restoring the original line brings back the worked observation: the selector matches.
 
 All selector pairs must match. Treating the requirements as OR would admit unintended workloads.
 
-## 2. Reject a missing label
+## 2. Reject a missing label: diagnose an edited check
 
-Require tier when the Pod has only app.
+A careless edit changed the check in worked example 2 so that it reads `matches(map[string]string{"app": "web"}, map[string]string{"app": "web", "tier": "frontend"})`. Run worked example 2 with that line, explain why the edited check now fails for the same program state, and restore it.
+
+The unchanged code is worked example 2:
 
 ```go
 check(!matches(map[string]string{"app": "web"}, map[string]string{"app": "web", "tier": "frontend"}), "missing")
 ```
 
-**Expected:** The selector does not match.
+**Expected:** Before the repair the program panics with `missing`; after it the line reads `!matches(map[string]string{"app": "web"}, map[string]string{"app": "web", "tier": "frontend"})` again and the selector does not match.
 
 A missing required key is not a wildcard. Presence is part of the equality contract.
 

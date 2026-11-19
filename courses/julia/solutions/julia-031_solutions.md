@@ -6,7 +6,7 @@ The executable reference is `julia-031_reference.jl`. Its checks cover the state
 
 The representation describes a call; this inspection does not evaluate arbitrary input.
 
-**Expected observation:** The head is:call and the function symbol is:+.
+**Expected observation:** The head is `:call` and the function symbol is `:+`.
 
 ## 2. Detect duplicate evaluation
 

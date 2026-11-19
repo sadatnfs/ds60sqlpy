@@ -8,9 +8,11 @@ Security starts by identifying untrusted inputs and operations carrying authorit
 
 html/template escapes according to HTML context; text/template does not supply that protection. url.QueryEscape encodes one query value rather than an entire URL. filepath.IsLocal checks a lexical property but does not resolve symlinks. subtle.ConstantTimeCompare compares equal-length byte sequences without value-dependent comparison time. Protocol design must still handle length, storage and cryptographic choices.
 
-## 1. Escape HTML data
+## 1. Escape HTML data: predict an edited check
 
-Render script-like text with html/template.
+Copy worked example 1 into a scratch pad and change `check(t.Execute(&b, "<script>alert(1)</script>") == nil, "render")` to `check(t.Execute(&b, "<script>alert(1)</script>") != nil, "render")` inside its check. Before running, predict whether the check still passes and explain why; then restore it.
+
+The unchanged code is worked example 1:
 
 ```go
 var b bytes.Buffer
@@ -19,13 +21,15 @@ check(t.Execute(&b, "<script>alert(1)</script>") == nil, "render")
 check(strings.Contains(b.String(), "&lt;script&gt;"), "escape")
 ```
 
-**Expected:** Angle brackets become escaped text.
+**Expected:** The changed run panics with `render` because the edited check no longer holds. Restoring the original line brings back the worked observation: angle brackets become escaped text.
 
 Marking untrusted input as template.HTML would bypass this boundary. Keep data as data.
 
-## 2. Encode a query value
+## 2. Encode a query value: diagnose an edited check
 
-Encode a value containing ampersand and equals characters.
+A careless edit changed the check in worked example 2 so that it reads `check(err != nil && decoded == original && encoded != original, "query")`. Run worked example 2 with that line, explain why the edited check now fails for the same program state, and restore it.
+
+The unchanged code is worked example 2:
 
 ```go
 original := "a&role=admin"
@@ -34,7 +38,7 @@ decoded, err := url.QueryUnescape(encoded)
 check(err == nil && decoded == original && encoded != original, "query")
 ```
 
-**Expected:** Decoding recovers the original string.
+**Expected:** Before the repair the program panics with `query`; after it the line reads `check(err == nil && decoded == original && encoded != original, "query")` again and decoding recovers the original string.
 
 Encoding prevents data from being interpreted as new query syntax. It does not authorize the resulting request.
 

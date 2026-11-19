@@ -17,7 +17,7 @@ A build configuration selects compiler options and dependency relationships. CMa
 
 Debug and Release commonly differ in optimization and assertion configuration, but those names alone are not a universal specification. Inspect the actual flags. The standard assert macro can be removed when NDEBUG is defined. Any expression inside assert can then disappear, including side effects. A validation step that must happen in every build should use an ordinary condition and explicit failure result rather than relying on assert.
 
-The first complete example uses if to return failure when twice(3) is wrong. It remains active under NDEBUG. The second deliberately increments a counter inside assert to expose the macro behavior: without NDEBUG the counter reaches1; with NDEBUG it stays0. This is a teaching negative pattern, not a recommendation. It explains why tests should not initialize data or perform required work solely inside assert.
+The first complete example uses if to return failure when twice(3) is wrong. It remains active under NDEBUG. The second deliberately increments a counter inside assert to expose the macro behavior: without NDEBUG the counter reaches 1; with NDEBUG it stays 0. This is a teaching negative pattern, not a recommendation. It explains why tests should not initialize data or perform required work solely inside assert.
 
 CMake target properties express requirements for one executable or library. A language standard requirement belongs to the target, and include/link dependencies should be scoped according to whether consumers need them. Global flags copied into every directory can accidentally couple unrelated targets and hide missing public dependencies. The real multifile fixture is the appropriate place to inspect this behavior.
 
@@ -55,7 +55,7 @@ Explain -std=c++20, -Wall, -Wextra and -Wpedantic.
 
 **Reasoning:** Warnings are feedback rather than successful tests.
 
-**Verify:** Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.
+**Verify:** Check that your explanation assigns `-std=c++20` to choosing the language standard and gives `-Wall`, `-Wextra` and `-Wpedantic` three different roles; `-Wall` does not enable every warning.
 
 ## Exercise 2: Run named tests
 
@@ -65,7 +65,7 @@ Use the supplied CMake project and ctest --output-on-failure.
 
 **Reasoning:** Configure/build/test are three phases.
 
-**Verify:** Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.
+**Verify:** Read the ctest summary line and record the number of tests run and passed; a summary of zero tests means nothing was registered, not that the code is correct.
 
 ## Exercise 3: Create a failing check
 
@@ -75,7 +75,7 @@ Change the expected twice(3) result to 7 in a scratch copy.
 
 **Reasoning:** A failed assertion needs to be observable outside the process.
 
-**Verify:** Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.
+**Verify:** Build the scratch copy, run it, and confirm `echo $?` prints 1 and the `always-active check passed` line is missing; ctest must also mark the test as failed.
 
 ## Exercise 4: Repair a disabled test
 
@@ -85,7 +85,7 @@ Build a scratch assert-only test with -DNDEBUG.
 
 **Reasoning:** Do not use disabled assertions as the only release oracle.
 
-**Verify:** Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.
+**Verify:** Build the scratch file with `-DNDEBUG` and confirm the wrong `assert` no longer stops the program while the `if`-based check still returns 1; without `-DNDEBUG` the `assert` aborts first.
 
 ## Exercise 5: Test zero
 
@@ -95,7 +95,7 @@ Keep the always-active twice(0)==0 check.
 
 **Reasoning:** Boundary behavior is a separate test input.
 
-**Verify:** Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.
+**Verify:** Add `if (twice(0) != 0) return 1;` next to the existing check, build with `-DNDEBUG`, and confirm the exit status is still 0.
 
 ## Exercise 6: Transfer a regression
 
@@ -105,4 +105,4 @@ Break twice to x+x+1, run both tests, then restore.
 
 **Reasoning:** A test suite earns confidence by detecting a plausible defect.
 
-**Verify:** Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.
+**Verify:** With `x + x + 1`, confirm `twice(3)` gives 7 and `twice(0)` gives 1 so both checks return 1; after restoring `x * 2`, both must pass again.

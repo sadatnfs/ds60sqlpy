@@ -650,7 +650,7 @@ LESSONS = [
                 "Write a query returning three rows in descending SaleID order.",
                 "Selection and final ordering both need a direction.",
                 (
-                    "TOPN(3,Sales,Sales[SaleID],DESC) chooses S8,S7,S6; an "
+                    "TOPN(3,Sales,Sales[SaleID],DESC) chooses S8, S7, S6; an "
                     "outer ORDER BY makes that display order explicit."
                 ),
             ),

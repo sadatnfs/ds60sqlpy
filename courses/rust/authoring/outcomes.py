@@ -1,0 +1,58 @@
+"""Lesson outcomes for the Rust route: one observable ability per lesson.
+
+render.py requires an entry for every lesson and rejects an outcome that repeats the
+transfer task. MINUTES overrides the default duration for the capstone.
+"""
+
+OUTCOMES = {
+    1: "Compile and run a Rust program and check a computed value with assert_eq! instead of trusting printed text.",
+    2: "Use immutable and mutable bindings deliberately and read the types the compiler infers.",
+    3: "Choose checked, wrapping or saturating integer arithmetic on purpose and handle overflow explicitly.",
+    4: "Work with owned String and borrowed &str and index UTF-8 text only at valid boundaries.",
+    5: "Write exhaustive match and if expressions that cover every case, including boundaries.",
+    6: "Write loops and iterator searches that terminate and report not-found with Option.",
+    7: "Write pure functions with documented valid ranges and checks for them.",
+    8: "Predict moves and clones and transfer ownership into and out of functions.",
+    9: "Write functions that borrow shared data and return slices tied to their input.",
+    10: "Mutate data through exclusive borrows, including split borrows of one slice.",
+    11: "Accept slices instead of owned collections and handle empty input explicitly.",
+    12: "Encapsulate state in structs with private fields and methods that keep invariants.",
+    13: "Model states with enums whose variants carry only their own data, handled by exhaustive matches.",
+    14: "Represent missing values with Option and transform them without losing absence.",
+    15: "Propagate recoverable errors with Result and ? while keeping each failure meaningful.",
+    16: "Build a validated inventory importer that reports sorted totals and rejected rows.",
+    17: "Define traits as behavioral contracts and use them through generics and trait objects.",
+    18: "Write generic functions and types with the trait bounds they actually need.",
+    19: "Design borrowed APIs with the narrowest lifetime relationships the compiler can check.",
+    20: "Build lazy iterator pipelines and know when consumption happens.",
+    21: "Write closures and choose Fn, FnMut or FnOnce bounds by what the closure does.",
+    22: "Define custom error types that keep their causes reachable through source.",
+    23: "Organize code into modules with a small, stable public surface.",
+    24: "Write table-driven tests whose counterexamples reject plausible wrong implementations.",
+    25: "Write and read files as bytes or UTF-8 and remove owned temporary files on every path.",
+    26: "Choose BTreeMap, HashMap and sets for deterministic output and predictable cost.",
+    27: "Run work on scoped threads that borrow local data and join results back to the parent.",
+    28: "Share state across threads with Arc and Mutex while protecting compound invariants.",
+    29: "Connect threads with bounded channels and finish pipelines by dropping senders.",
+    30: "Use Send and Sync to explain which types the compiler lets cross thread boundaries.",
+    31: "Build recursive and shared structures with Box, Rc and Weak without reference cycles.",
+    32: "Build and test a reusable library crate through its documented Cargo commands.",
+    33: "Explain how futures are polled and woken and what an executor owns.",
+    34: "Write a safety argument before any unsafe code and keep unsafe behind a safe API.",
+    35: "Measure memory and performance with evidence instead of assumptions about allocation.",
+    36: "Explain editions, lockfiles and offline builds, and show an edition 2024 rule that changes compilation.",
+    37: "Build typed Arrow arrays and read values through the Array trait.",
+    38: "Distinguish null, NaN and valid values in Arrow arrays.",
+    39: "Build RecordBatches whose schema and column lengths are checked at construction.",
+    40: "Filter and take Arrow rows with compute kernels so every column stays aligned.",
+    41: "Build nested and variable-width Arrow columns and slice them without copying.",
+    42: "Round-trip RecordBatches through Arrow IPC streams with explicit completion.",
+    43: "Read CSV and JSON into Arrow with an explicit schema and validate domain rules afterward.",
+    44: "Record units, decimal scale and timestamp precision in Arrow schemas for other languages.",
+    45: "Process data in bounded batches while accounting for every accepted and rejected row.",
+    46: "Emit safe diagnostic events and enforce allowlisted permissions at trust boundaries.",
+    47: "Design property tests and regression checks that would fail for a broken implementation.",
+    48: "Build a validated Arrow report with honest accounting and round-trip it through IPC.",
+}
+
+MINUTES = {48: 180}

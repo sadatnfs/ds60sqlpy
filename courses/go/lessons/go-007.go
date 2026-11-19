@@ -3,11 +3,11 @@ package main
 import "fmt"
 
 func main() {
-	// Exercise 1: Count two units: Inspect A followed by a smiling face.
-	// Expected: There are 5 bytes and 2 runes.
+	// Exercise 1: Count two units: change one input: Copy worked example 1 into a scratch pad and change `text := "A🙂"` to `text := "A🙂!"`. Before running, predict which check fails and which value it now sees; then run it and restore the original line.
+	// Expected: The changed run panics with `text units` because `len(text) == 5 && utf8.RuneCountInString(text) == 2` no longer holds. Restoring the original line brings back the worked observation: there are 5 bytes and 2 runes.
 
-	// Exercise 2: Edit a copied byte slice: Convert cat to bytes, replace c with b and retain the original.
-	// Expected: The original is cat and the new string is bat.
+	// Exercise 2: Edit a copied byte slice: debug a regression: A regression changed one token in worked example 2, so one line now reads `data[1] = 'b'`. Run worked example 2 with that line, use the failure to locate the defect and repair it without changing the check.
+	// Expected: Before the repair the program panics with `copy edit`; after it the line reads `data[0] = 'b'` again and the original is cat and the new string is bat.
 
 	// Exercise 3: Reject malformed encoding: Build a string from the single byte 0xff.
 	// Expected: UTF-8 validation returns false.

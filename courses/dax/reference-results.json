@@ -1337,7 +1337,7 @@
           "context": "Paper, Blue and North selected; remove Product filters only in the denominator.",
           "trace": [
             "North Notebook sales are S1 and S4: 47.",
-            "Removing Product restrictions admits North Pen 24? In North Pen contributes S2 4 plus S5 20, totaling 24, and Mug contributes 36.",
+            "Removing Product restrictions admits the other North products: Pen contributes S2 4 plus S5 20, totaling 24, and Mug contributes S8 36.",
             "The retained North population totals 47 + 24 + 36 = 107; share is 47/107."
           ],
           "columns": [
@@ -1746,7 +1746,7 @@
           "title": "Extend every candidate key",
           "context": "All four clean-model Product keys; retain every input row while adding revenue.",
           "trace": [
-            "VALUES supplies keys 1,2,3,4.",
+            "VALUES supplies keys 1, 2, 3, 4.",
             "ADDCOLUMNS computes one revenue result per input key.",
             "Bag's blank measure does not remove key 4 from this projected table."
           ],
@@ -1787,7 +1787,7 @@
           "trace": [
             "The four candidate keys form groups.",
             "Key 4 has BLANK for every supplied expression.",
-            "That all-blank group is omitted; keys 1,2,3 remain."
+            "That all-blank group is omitted; keys 1, 2, 3 remain."
           ],
           "columns": [
             {
@@ -1884,7 +1884,7 @@
     {
       "lesson_id": "dax-028",
       "reference_path": "courses/dax/solutions/dax-028_reference.dax",
-      "source_sha256": "c2326bcfd432b266b8d909e343501d42313133b3b7d053ee05da9ed0dd1c51e7",
+      "source_sha256": "c1a5e57687a77482838f5a8c2e4cac9aefe4ff24547b62f0c7817fcf725c25f8",
       "model_path": "courses/dax/models/retail/model.json",
       "model_sha256": "787cf08a4b834c73b38099c3ce191e86de8cec44973219de03c8251dc0be1a7e",
       "evidence": "hand-derived",
@@ -1892,7 +1892,7 @@
         {
           "id": "dax-028-a",
           "title": "Intersection and one-sided difference",
-          "context": "Distinct Paper keys{1,2} and Blue keys{1,3} from the clean model.",
+          "context": "Distinct Paper keys {1,2} and Blue keys {1,3} from the clean model.",
           "trace": [
             "The shared key is 1, so the intersection has one row.",
             "Key 2 belongs to Paper but not Blue.",
@@ -1922,7 +1922,7 @@
           "context": "Concatenate the two two-row key tables; key 1 occurs in each input.",
           "trace": [
             "UNION produces four rows, including key 1 twice.",
-            "DISTINCT removes repeated key rows, leaving 1,2,3.",
+            "DISTINCT removes repeated key rows, leaving 1, 2, 3.",
             "The two counts represent memberships versus unique product identities."
           ],
           "columns": [
@@ -1958,8 +1958,8 @@
           "title": "January order versus shipment attribution",
           "context": "Date year 2025/month 1; compare active OrderDate with the explicitly selected ShipDate relationship.",
           "trace": [
-            "Orders S4,S5,S6 belong to January and total 67.",
-            "Shipments S4 and S 5 occur in January and total 47.",
+            "Orders S4, S5, S6 belong to January and total 67.",
+            "Shipments S4 and S5 occur in January and total 47.",
             "S6's 20 moves to shipment month February."
           ],
           "columns": [
@@ -1985,8 +1985,8 @@
           "title": "February absorbs the delayed shipment",
           "context": "Date year 2025/month 2 with the same role comparison.",
           "trace": [
-            "Orders S7,S8 total 56 in February.",
-            "Shipments include S6,S7,S8, totaling 76.",
+            "Orders S7, S8 total 56 in February.",
+            "Shipments include S6, S7, S8, totaling 76.",
             "Across January and February, both date-role totals reconcile to 123."
           ],
           "columns": [
@@ -2087,7 +2087,7 @@
           "context": "January 2025, active OrderDate relationship; observed coverage includes the full month.",
           "trace": [
             "The complete Date table contains January 1 through 31.",
-            "Sales occur on January 2,3 and 5.",
+            "Sales occur on January 2, 3 and 5.",
             "The calendar count is 31 while observed event-date count is 3."
           ],
           "columns": [
@@ -2157,7 +2157,7 @@
           "trace": [
             "The current date contains S5 and revenue 20.",
             "The YTD set begins January 1 and ends January 3.",
-            "S4 and S 5 contribute 27 +20 =47."
+            "S4 and S5 contribute 27 + 20 = 47."
           ],
           "columns": [
             {
@@ -2184,7 +2184,7 @@
           "trace": [
             "S8 contributes 36 on the current day.",
             "The YTD set includes January plus February 1 through 3.",
-            "S4..S8 sum 27 +20 +20 +20 +36 =123."
+            "S4..S8 sum 27 + 20 + 20 + 20 + 36 = 123."
           ],
           "columns": [
             {
@@ -2209,7 +2209,7 @@
     {
       "lesson_id": "dax-033",
       "reference_path": "courses/dax/solutions/dax-033_reference.dax",
-      "source_sha256": "5068c241632c375500615816fb92daab743d715f7335c86e32c64578ec6cf39c",
+      "source_sha256": "e17db6720112e2774c757001b24a5a975eb4f4fd356ec87f535c18c603086ad4",
       "model_path": "courses/dax/models/retail/model.json",
       "model_sha256": "787cf08a4b834c73b38099c3ce191e86de8cec44973219de03c8251dc0be1a7e",
       "evidence": "hand-derived",
@@ -2219,8 +2219,8 @@
           "title": "Completed January versus completed January",
           "context": "Full January 2025 versus the shifted January 2024 date set; both periods are within available data.",
           "trace": [
-            "Current January contains S4,S5,S6, totaling 67.",
-            "Prior January contains S1,S2,S3, totaling 64.",
+            "Current January contains S4, S5, S6, totaling 67.",
+            "Prior January contains S1, S2, S3, totaling 64.",
             "The difference 3 divided by prior 64 is 0.046875."
           ],
           "columns": [
@@ -2249,11 +2249,11 @@
         {
           "id": "dax-033-b",
           "title": "An explicit as-of comparison",
-          "context": "January 1..3,2025 compared with January 1..3,2024; explicitly as-of rather than full-month.",
+          "context": "January 1 to 3, 2025 compared with January 1 to 3, 2024; explicitly as-of rather than full-month.",
           "trace": [
             "The current interval excludes S6 on January 5, leaving 47.",
             "The prior interval still contains all three prior-year fixture lines, totaling 64.",
-            "The difference-17 divided by 64 is-0.265625."
+            "The difference -17 divided by 64 is -0.265625."
           ],
           "columns": [
             {
@@ -2283,7 +2283,7 @@
     {
       "lesson_id": "dax-034",
       "reference_path": "courses/dax/solutions/dax-034_reference.dax",
-      "source_sha256": "a190cbaa979f1ef0ad38de3d4a40b2fec817b1732d94d3140d8aaade3c0d0f9f",
+      "source_sha256": "e3ffc89fe153bbb94942857058c8e2ec19564134e5bb0c6bf0763aa4c23b161f",
       "model_path": "courses/dax/models/retail/model.json",
       "model_sha256": "787cf08a4b834c73b38099c3ce191e86de8cec44973219de03c8251dc0be1a7e",
       "evidence": "hand-derived",
@@ -2291,7 +2291,7 @@
         {
           "id": "dax-034-a",
           "title": "A three-calendar-day denominator",
-          "context": "AnchorFebruary 3,2025; included calendar days February 1,2,3; all observed.",
+          "context": "Anchor February 3, 2025; included calendar days February 1, 2 and 3; all observed.",
           "trace": [
             "February 1 has no order, February 2 contributes 20 and February 3 contributes 36.",
             "Window revenue is 56 and the Date table supplies three eligible dates.",
@@ -2325,9 +2325,9 @@
           "title": "Two different averages over the same window",
           "context": "Same three observed calendar dates; contrast exclusion of BLANK with an explicit zero policy.",
           "trace": [
-            "The unfilled values are BLANK,20,36.",
-            "The blank-excluding average is 56/2 =28.",
-            "The zero-filled observed-calendar values 0,20,36 average 56/3."
+            "The unfilled values are BLANK, 20, 36.",
+            "The blank-excluding average is 56/2 = 28.",
+            "The zero-filled observed-calendar values 0, 20, 36 average 56/3."
           ],
           "columns": [
             {
@@ -2393,8 +2393,8 @@
           "title": "Available fiscal-year-to-date revenue",
           "context": "FY 2025 under the July-start convention, observed only through 2025-02-28; active OrderDate.",
           "trace": [
-            "The fiscal interval starts July 1,2024.",
-            "The as-of boundary stops at February 28,2025, not June 30.",
+            "The fiscal interval starts July 1, 2024.",
+            "The as-of boundary stops at February 28, 2025, not June 30.",
             "The available matching sales are S4..S8, totaling 123."
           ],
           "columns": [
@@ -2448,8 +2448,8 @@
           "context": "Assume the optional RetailCalendar metadata has been configured exactly as specified; RetailYear starts February 1.",
           "trace": [
             "The anchor belongs to RetailYear 2026 under the ending-year naming rule.",
-            "Its year-to-date date set begins February 1,2025.",
-            "S7 and S 8 contribute 20 +36 =56; January belongs to the prior retail year."
+            "Its year-to-date date set begins February 1, 2025.",
+            "S7 and S8 contribute 20 + 36 = 56; January belongs to the prior retail year."
           ],
           "columns": [
             {
@@ -2571,7 +2571,7 @@
           "title": "First two positions",
           "context": "Whole clean-model Sales relation ordered by unique SaleID; absolute positions 1 through 2.",
           "trace": [
-            "The first two keys are S1 and S 2.",
+            "The first two keys are S1 and S2.",
             "Both rows belong to order 101 and date 2024-01-02.",
             "The window contains two lines, not two distinct dates; amounts are 20 and 4."
           ],
@@ -2602,7 +2602,7 @@
           "title": "Last two positions",
           "context": "Same explicit relation and ordering; last two absolute positions.",
           "trace": [
-            "Position-1 identifies S8; position-2 identifies S7.",
+            "Position -1 identifies S8; position -2 identifies S7.",
             "The inclusive window includes both rows.",
             "Their amounts total 56, but the relation contract remains line-based."
           ],
@@ -2692,8 +2692,8 @@
           "title": "Two states are not one closing balance",
           "context": "Analytics model; January and February 2025; all products; complete snapshots on January 31 and February 28.",
           "trace": [
-            "January 31 has 10 +20 +5 =35 units.",
-            "February 28 has 8 +15 +7 =30 units.",
+            "January 31 has 10 + 20 + 5 = 35 units.",
+            "February 28 has 8 + 15 + 7 = 30 units.",
             "All snapshot rows sum to 65; the closing selected-date balance is 30."
           ],
           "columns": [
@@ -2836,8 +2836,8 @@
           "context": "FullJanuary 2025 and Paper category; Budget is monthly/category-grained and disconnected.",
           "trace": [
             "January has 31 selected dates, satisfying the complete single-month guard.",
-            "Paper actuals are S 4 and S 5:27 +20 =47.",
-            "The mapped budget is 60, so actual minus budget is-13."
+            "Paper actuals are S4 and S5: 27 + 20 = 47.",
+            "The mapped budget is 60, so actual minus budget is -13."
           ],
           "columns": [
             {
@@ -2927,7 +2927,7 @@
           "context": "EUR-only transactions; contrast transaction-date rates with one selected maximum rate in this tiny increasing-rate fixture.",
           "trace": [
             "The local EUR amounts sum to 150.",
-            "Transaction-date conversion gives 110 +60 =170 USD.",
+            "Transaction-date conversion gives 110 + 60 = 170 USD.",
             "Multiplying 150 by 1.2 gives 180 USD, ten more than the stated policy."
           ],
           "columns": [
@@ -2968,8 +2968,8 @@
           "title": "Whole-model profit graph",
           "context": "Clean retail model; current UnitCost is explicitly constant per product; all amounts USD.",
           "trace": [
-            "Line costs are 4,1,10,6,4,5,4,10, totaling 44.",
-            "Profit is 187 -44 =143.",
+            "Line costs are 4, 1, 10, 6, 4, 5, 4, 10, totaling 44.",
+            "Profit is 187 - 44 = 143.",
             "Margin is 143/187, evaluated from the same all-row population."
           ],
           "columns": [
@@ -3117,7 +3117,7 @@
           "context": "Specified items: AddTen = SELECTEDMEASURE()+10 at lower precedence; Scale = SELECTEDMEASURE()*0.9 at higher precedence.",
           "trace": [
             "The outer Scale expression receives the lower-precedence AddTen expression.",
-            "The expansion is(187 +10)*0.9.",
+            "The expansion is (187 + 10)*0.9.",
             "197 multiplied by 0.9 is 177.3."
           ],
           "columns": [
@@ -3138,7 +3138,7 @@
           "title": "Addition has higher precedence",
           "context": "The same two item definitions with AddTen as the higher-precedence outer expression.",
           "trace": [
-            "The expansion is(187*0.9)+10.",
+            "The expansion is (187*0.9)+10.",
             "The scale first yields 168.3.",
             "Adding 10 gives 178.3, one more than the other order."
           ],
@@ -3432,7 +3432,7 @@
           "context": "Product dimension, including the unsold Bag member.",
           "trace": [
             "Four product rows describe four catalog keys.",
-            "Categories are Paper,Home,Travel and colors are Blue,Red,Green.",
+            "Categories are Paper, Home, Travel and colors are Blue, Red, Green.",
             "The dimension's domain includes valid attributes absent from current sales."
           ],
           "columns": [
@@ -3473,8 +3473,8 @@
           "title": "Possible customer/product pairs",
           "context": "No filters; dimension population 4 products by 4 customers; observed pair grain from Sales.",
           "trace": [
-            "The full dimension product is 4 times 4 =16 pairs.",
-            "Observed pairs are(1,10),(2,10),(3,20),(2,30),(1,20),(3,30).",
+            "The full dimension product is 4 times 4 = 16 pairs.",
+            "Observed pairs are (1, 10), (2, 10), (3, 20), (2, 30), (1, 20), (3, 30).",
             "Repeated purchases of the same pair do not add a new pair, leaving six observed groups."
           ],
           "columns": [
@@ -3500,7 +3500,7 @@
           "title": "Adding a complete calendar dimension",
           "context": "Whole two-year Date dimension has 731 days; compare possible versus observed product/customer/date cells.",
           "trace": [
-            "The possible-cell count is 4 *4 *731 =11696.",
+            "The possible-cell count is 4 * 4 * 731 = 11696.",
             "Each of the eight sales lines has a distinct product/customer/order-date combination in this fixture.",
             "The observed grouping therefore has eight cells."
           ],
@@ -3537,7 +3537,7 @@
           "title": "An unfiltered agreement case",
           "context": "No existing Quantity filter; all three forms select quantity at least two.",
           "trace": [
-            "S2 and S 6 have quantity 1 and contribute 4 +20 =24.",
+            "S2 and S6 have quantity 1 and contribute 4 + 20 = 24.",
             "Removing those lines from 187 leaves 163.",
             "The three forms agree in this incoming context."
           ],
@@ -3569,7 +3569,7 @@
           "title": "The same-column selection exposes a difference",
           "context": "Incoming Sales.Quantity=1; compare filtering current rows with replacing or intersecting that column selection.",
           "trace": [
-            "The incoming visible fact rows are S2 and S 6, both quantity 1.",
+            "The incoming visible fact rows are S2 and S6, both quantity 1.",
             "FILTER over those rows finds no quantity>=2 line, while the plain Boolean predicate replaces the original selection.",
             "KEEPFILTERS intersects incompatible quantity conditions and also yields BLANK."
           ],
@@ -3765,7 +3765,7 @@
           "context": "Clean retail model; UnitCost is constant per product and unique on ProductKey.",
           "trace": [
             "Notebook has 7 units at 2, Pen 5 units at 1 and Mug 5 units at 5.",
-            "Grouped costs are 14,5 and 25, totaling 44.",
+            "Grouped costs are 14, 5 and 25, totaling 44.",
             "The eight line-level costs independently sum to the same 44."
           ],
           "columns": [
@@ -3791,9 +3791,9 @@
           "title": "Parity under a region and year selection",
           "context": "North and order year 2025 remain active while the grouped expression iterates product keys.",
           "trace": [
-            "S4,S5,S8 are the eligible lines.",
-            "Their costs are 6,4 and 10.",
-            "The grouped quantities 3,4,2 at rates 2,1,5 also yield 20."
+            "S4, S5, S8 are the eligible lines.",
+            "Their costs are 6, 4 and 10.",
+            "The grouped quantities 3, 4, 2 at rates 2, 1, 5 also yield 20."
           ],
           "columns": [
             {
@@ -3920,7 +3920,7 @@
           "context": "Assume a role-restricted Viewer with the declared NorthViewer RLS policy enforced by a compatible engine; no ordinary Customer filter is needed.",
           "trace": [
             "The security policy permits Customer 10 and 30 only.",
-            "The expected fact population totals 51 +56 =107.",
+            "The expected fact population totals 51 + 56 = 107.",
             "Removing ordinary Customer filters must not remove the security restriction."
           ],
           "columns": [
@@ -4027,7 +4027,7 @@
           "trace": [
             "Core line discounts are already included in NetAmount, whose total is 187.",
             "Refunds 4 and 9 total 13; adjusted core revenue is 174.",
-            "Foreign amounts convert to 100 +110 +60 =270 USD under their separate policy."
+            "Foreign amounts convert to 100 + 110 + 60 = 270 USD under their separate policy."
           ],
           "columns": [
             {
@@ -4063,8 +4063,8 @@
           "context": "FullJanuary/February 2025, Paper/Home core sales, refunds attributed to original sale dates; Budget covers exactly that month/category scope.",
           "trace": [
             "Core 2025 sales in these months total 123.",
-            "Only the refund linked to S 4 belongs to that sale-date population, subtracting 9.",
-            "The four compatible budget rows total 165;114 -165 =-51."
+            "Only the refund linked to S4 belongs to that sale-date population, subtracting 9.",
+            "The four compatible budget rows total 165; 114 - 165 = -51."
           ],
           "columns": [
             {
@@ -4222,8 +4222,8 @@
           "title": "Expected NorthViewer regression row",
           "context": "Assume enforced NorthViewer policy on the analytical model; all available dates; constant UnitCost per product.",
           "trace": [
-            "North permits Ada and Cy, giving revenue 51 +56 =107.",
-            "Their product quantities are 5 Notebook,5 Pen and 2 Mug, costing 10 +5 +10 =25.",
+            "North permits Ada and Cy, giving revenue 51 + 56 = 107.",
+            "Their product quantities are 5 Notebook,5 Pen and 2 Mug, costing 10 + 5 + 10 = 25.",
             "Both cost forms agree; a real security restriction must remain after ordinary Customer-filter removal."
           ],
           "columns": [

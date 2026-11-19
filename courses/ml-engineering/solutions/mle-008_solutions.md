@@ -9,6 +9,18 @@ The executable reference contains the two complete worked cases with assertions.
 
 Use explicit named selections or validate a positional interface carefully. A raw array without a recorded order is easy to misuse.
 
+```python
+# Uses pd, dataset() and fit_pipeline() from main.py.
+frame = dataset()
+model = fit_pipeline(frame[frame.label_available_at <= 180])
+declared_order = {"usage": 20.0, "tickets": 2, "region": "north"}
+other_order = {"region": "north", "tickets": 2, "usage": 20.0}
+first = model.predict_proba(pd.DataFrame([declared_order]))[0, 1]
+# The ColumnTransformer selects columns by name, so dictionary order does not matter.
+second = model.predict_proba(pd.DataFrame([other_order]))[0, 1]
+assert first == second
+```
+
 **Expected:** The named-column pipeline preserves the intended values.
 
 ## 2. Add a missing numeric value
@@ -141,4 +153,4 @@ if __name__ == "__main__":
 
 ## Interpretation
 
-Package and use a single fitted preprocessing/model interface. Verify parity on contrasting request fixtures and retain the training population that estimated its state. Then evaluate predictive quality separately under the intended deployment design.
+Verify parity on contrasting request fixtures and retain the training population that estimated its state. Then evaluate predictive quality separately under the intended deployment design.

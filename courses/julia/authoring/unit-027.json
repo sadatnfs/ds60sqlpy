@@ -15,8 +15,8 @@
   "exercises": [
     {
       "title": "Use qualified access",
-      "task": "Call LocalStats.center on[2,4].",
-      "expected": "The result is[-1,1].",
+      "task": "Call `LocalStats.center` on `[2, 4]`.",
+      "expected": "The result is `[-1, 1]`.",
       "hint": "The module owns the name.",
       "answer": "Qualified access works even without bringing the export into the caller namespace."
     },

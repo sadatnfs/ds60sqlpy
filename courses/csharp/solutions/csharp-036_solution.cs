@@ -39,6 +39,21 @@ internal static class Program {
       retained.Clear();
       Check(retained.Count == 0, "application releases references");
     }
+    {
+      // Task 3: Independent construction
+      int SumPooled(int count) {
+        int[] buffer = ArrayPool<int>.Shared.Rent(count);
+        try {
+          for (int i = 0; i < count; i++) {
+            buffer[i] = i + 1;
+          }
+          return buffer.AsSpan(0, count).ToArray().Sum();
+        } finally {
+          ArrayPool<int>.Shared.Return(buffer, clearArray: true);
+        }
+      }
+      Check(SumPooled(4) == 10, "logical range only");
+    }
     Console.WriteLine("csharp-036: passed");
     await Task.CompletedTask;
   }

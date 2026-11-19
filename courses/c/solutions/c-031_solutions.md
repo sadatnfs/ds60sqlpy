@@ -8,29 +8,33 @@ Integer overflow is often a memory-safety defect in disguise. A wrapped allocati
 
 For a positive addend b, a+b fits int only when a<=INT_MAX-b. For a negative b, require a>=INT_MIN-b. For size_t multiplication, if b is nonzero require a<=SIZE_MAX/b. Check output pointers before writing. These preconditions avoid evaluating the dangerous expression until its validity is established. A zero multiplier is a valid mathematical case, even when an allocator wrapper later rejects zero-sized storage by policy.
 
-## Exercise 1: Add ordinary values
+## Exercise 1: Add ordinary values: predict an edited check
 
-Add 7 and 5 through the checked helper.
+Copy worked example 1 into a scratch pad and change `CHECK(add_checked(7, 5, &out) && out == 12);` to `CHECK(add_checked(8, 5, &out) && out == 12);` inside its CHECK. Before running, predict whether the CHECK still holds and explain why; then restore it.
+
+The unchanged code is worked example 1:
 
 ```c
 int out = 0;
 CHECK(add_checked(7, 5, &out) && out == 12);
 ```
 
-**Expected:** The result is 12.
+**Expected:** The changed run stops with `Check failed` at the CHECK on `add_checked(7, 5, &out) && out == 12`. Restoring the original line brings back the worked observation: the result is 12.
 
 The normal case uses the same guarded path as boundary cases.
 
-## Exercise 2: Reject positive overflow
+## Exercise 2: Reject positive overflow: debug a regression
 
-Add one to INT_MAX.
+A regression changed one token in worked example 2, so one line now reads `int out = 10;`. Run worked example 2 with that line, use the failing CHECK to locate the defect and repair it without changing the CHECK.
+
+The unchanged code is worked example 2:
 
 ```c
 int out = 9;
 CHECK(!add_checked(INT_MAX, 1, &out) && out == 9);
 ```
 
-**Expected:** The operation fails and preserves output.
+**Expected:** Before the repair the run stops with `Check failed` at the CHECK on `!add_checked(INT_MAX, 1, &out) && out == 9`; after it the line reads `int out = 9;` again and the operation fails and preserves output.
 
 The addition itself is never evaluated after the precondition fails.
 

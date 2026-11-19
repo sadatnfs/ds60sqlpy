@@ -4,7 +4,7 @@ Authored tutorial and practice content. The prepared Scala/JVM worker executes a
 
 ## Level and prerequisites
 
-Beginner; approximately 105 minutes. Direct design prerequisites: `spark-005`. The lesson uses Scala 2.13 syntax and the prepared JDK 17 worker. The older design document proposed a different Spark/JDK tuple; use the current [execution baseline](../execution-baseline.md) for this authored material.
+Beginner; approximately 75 minutes. Direct prerequisites: `spark-005`. The lesson uses Scala 2.13 syntax and the prepared JDK 17 worker. The [execution baseline](../execution-baseline.md) lists the exact Scala, JDK and Spark versions.
 
 ## How to run this lesson
 
@@ -97,7 +97,7 @@ Return paid, voided or refunded through an exhaustive pattern match. Include Ref
 
 Return positive cents for Paid, negative cents for Refunded, and zero for Voided. Stored payment/refund magnitudes must remain within constructor bounds. Test observed zero and a rejected negative magnitude.
 
-**Expected result/shape:** The fixture contributes 100,100,0,-25. Refunded(r0,0) contributes 0 but remains refunded; Paid with-1 cents is rejected.
+**Expected result/shape:** The fixture contributes 100, 100, 0, -25. Refunded(r0,0) contributes 0 but remains refunded; Paid with -1 cents is rejected.
 
 **Verify:** Assert exact signed contributions, zero-refund behavior and the constructor failure for a negative paid amount.
 
@@ -127,7 +127,7 @@ Compute the checked Long sum of signedCents for every event. Empty input returns
 
 Reject repeated event IDs, then return IDs in source order, net total, and counts for paid/voided/refunded including zero categories. Do not deduplicate equal monetary amounts.
 
-**Expected result/shape:** The fixture returns IDs[p1, p2, v1, r1], net 175 and counts paid 2, voided 1, refunded 1. Repeated ID same is rejected even if both amounts agree.
+**Expected result/shape:** The fixture returns IDs [p1, p2, v1, r1], net 175 and counts paid 2, voided 1, refunded 1. Repeated ID same is rejected even if both amounts agree.
 
 **Verify:** Assert the full result and count sum 4, then demonstrate that two equal-ID Paid records fail instead of being silently collapsed.
 

@@ -7,7 +7,7 @@ from torch.nn import functional as F
 
 
 def verify():
-    # Exercise 1: Update a running mean
+    # Worked example A: Update a running mean
     bn = nn.BatchNorm1d(2, momentum=0.5)
     x = torch.tensor([[1.0, 3.0], [3.0, 5.0]])
     bn.train()
@@ -15,14 +15,14 @@ def verify():
     torch.testing.assert_close(bn.running_mean, torch.tensor([1.0, 2.0]), atol=1e-6, rtol=0)
     assert bn.num_batches_tracked.item() == 1
 
-    # Exercise 2: Freeze state during evaluation
+    # Worked example B: Freeze state during evaluation
     before = bn.running_mean.clone()
     count = bn.num_batches_tracked.clone()
     bn.eval()
     bn(torch.tensor([[100.0, 200.0]]))
     assert torch.equal(before, bn.running_mean) and torch.equal(count, bn.num_batches_tracked)
 
-    # Exercise 3: Check LayerNorm row independence
+    # Worked example C: Check LayerNorm row independence
     ln = nn.LayerNorm(2)
     alone = ln(torch.tensor([[1.0, 3.0]]))
     together = ln(torch.tensor([[1.0, 3.0], [100.0, 200.0]]))
@@ -45,6 +45,24 @@ def verify():
     constant = ln(torch.tensor([[5.0, 5.0]]))
     assert torch.isfinite(constant).all()
     torch.testing.assert_close(constant, torch.zeros((1, 2)), atol=1e-6, rtol=0)
+
+    # Exercise 1: Predict a running mean with momentum 0.25
+    quarter_bn = nn.BatchNorm1d(2, momentum=0.25)
+    quarter_bn.train()
+    quarter_bn(torch.tensor([[2.0, 4.0], [6.0, 8.0]]))
+    torch.testing.assert_close(quarter_bn.running_mean, torch.tensor([1.0, 1.5]), atol=1e-6, rtol=0)
+
+    # Exercise 2: Predict the running variance
+    torch.testing.assert_close(
+        quarter_bn.running_var, torch.tensor([2.75, 2.75]), atol=1e-6, rtol=0
+    )
+
+    # Exercise 3: Normalize a new LayerNorm row
+    ln3 = nn.LayerNorm(3)
+    row = ln3(torch.tensor([[1.0, 2.0, 3.0]]))
+    torch.testing.assert_close(
+        row, torch.tensor([[-1.0, 0.0, 1.0]]) / (2 / 3 + 1e-5) ** 0.5, atol=1e-5, rtol=0
+    )
     return {"checks": 6, "status": "passed"}
 
 

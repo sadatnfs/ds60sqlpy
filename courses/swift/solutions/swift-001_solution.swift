@@ -16,6 +16,14 @@ struct LessonMain {
       precondition(seats == 24)
       precondition(seats != rows + seatsPerRow)
     }
+
+    do {
+      // Task 3: Independent construction
+      let shelves = 3
+      let booksPerShelf = 8
+      let capacity = shelves * booksPerShelf
+      precondition(capacity == 24)
+    }
     print("swift-001: passed")
   }
 }

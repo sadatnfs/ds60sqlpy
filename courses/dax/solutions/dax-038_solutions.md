@@ -17,7 +17,7 @@ Whole clean-model Sales relation ordered by unique SaleID; absolute positions 1 
 
 A two-row average here would average order lines. It would not represent average revenue for two calendar days.
 
-- The first two keys are S1 and S 2.
+- The first two keys are S1 and S2.
 - Both rows belong to order 101 and date 2024-01-02.
 - The window contains two lines, not two distinct dates; amounts are 20 and 4.
 
@@ -32,7 +32,7 @@ Same explicit relation and ordering; last two absolute positions.
 
 The result happens to align with two successive sale dates. That coincidence does not make the operator a date-window function.
 
-- Position-1 identifies S8; position-2 identifies S7.
+- Position -1 identifies S8; position -2 identifies S7.
 - The inclusive window includes both rows.
 - Their amounts total 56, but the relation contract remains line-based.
 

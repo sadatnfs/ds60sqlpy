@@ -16,8 +16,8 @@ Clean retail model; current UnitCost is explicitly constant per product; all amo
 
 The margin is a numeric ratio, not the text produced by a percent formatter. Its meaning would change if costs and revenues used different filters.
 
-- Line costs are 4,1,10,6,4,5,4,10, totaling 44.
-- Profit is 187 -44 =143.
+- Line costs are 4, 1, 10, 6, 4, 5, 4, 10, totaling 44.
+- Profit is 187 - 44 = 143.
 - Margin is 143/187, evaluated from the same all-row population.
 
 ### Case B: The same family under Blue

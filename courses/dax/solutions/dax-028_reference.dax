@@ -4,7 +4,7 @@
 // Result cases and source/model hashes: courses/dax/reference-results.json
 
 // dax-028-a: Intersection and one-sided difference
-// Context: Distinct Paper keys{1,2} and Blue keys{1,3} from the clean model.
+// Context: Distinct Paper keys {1,2} and Blue keys {1,3} from the clean model.
 EVALUATE
 VAR PaperKeys = CALCULATETABLE ( VALUES ( Product[ProductKey] ), Product[Category] = "Paper" )
 VAR BlueKeys = CALCULATETABLE ( VALUES ( Product[ProductKey] ), Product[Color] = "Blue" )

@@ -8,7 +8,7 @@ Differentiate supported numerical functions and validate derivatives while prese
 
 ## Classroom execution
 
-Choose **Julia language and scientific computing** in `/classroom`, open this unit, and select its prepared `julia` runtime. The worker starts a fresh `main.jl` process with two Julia threads, a fixed package environment, no startup file and offline package settings. Both worked examples are complete under that environment. Save your current pad before replacing it. No package, model or dataset is fetched by a lesson.
+Open `julia-022` in `/classroom` with its prepared `julia` runtime. Worked case A (independent analytic derivatives) and worked case B (a storage mistake blocks differentiation) are complete programs: save your current pad, paste one of them and press Run. The learner file contains the six investigations below; the explained reference ends by printing `julia-022: all reference checks passed`. The [course overview](../README.md) describes the shared runtime: a fresh offline `main.jl` process with two threads and a fixed package environment.
 
 ## Automatic differentiation follows the implemented computation
 
@@ -110,9 +110,9 @@ The reference uses small CPU functions with prepared ForwardDiff. It does not qu
 
 ### 1. Differentiate analytically
 
-Compute the gradient of x1 squared plus 3x2 squared at[2,3].
+Compute the gradient of x1 squared plus 3x2 squared at `[2, 3]`.
 
-**Expected:** The result is[4,18].
+**Expected:** The result is `[4, 18]`.
 
 **Hint:** Differentiate each coordinate separately.
 
@@ -126,7 +126,7 @@ Differentiate the vector-valued function.
 
 ### 3. Preserve numeric types
 
-Replace a hardcoded Float64 buffer with similar(x).
+Replace a hardcoded Float64 buffer with `similar(x)`.
 
 **Expected:** The dual-number path can retain derivative information.
 
@@ -136,7 +136,7 @@ Replace a hardcoded Float64 buffer with similar(x).
 
 Differentiate a sum and a mean of two inputs.
 
-**Expected:** Gradients are[1,1] and[0.5,0.5].
+**Expected:** Gradients are `[1, 1]` and `[0.5, 0.5]`.
 
 **Hint:** The denominator is part of the objective.
 
@@ -163,4 +163,4 @@ Compare analytic or finite-difference directional behavior at several valid inpu
 
 ## Study companion
 
-Use the repository learning-companion skill with this lesson ID, your prediction and your actual source/output. Ask for a diagnosis of the first incorrect type, shape, state transition or assumption. Keep observed execution distinct from a timing claim, inferred mathematical result or external deployment.
+A repository-aware assistant with the learning-companion skill can review `julia-022` with you. Give it your prediction for one investigation, your source and the actual output, and ask it to find the first incorrect assumption about ForwardDiff, dual number, gradient, Jacobian or generic storage.

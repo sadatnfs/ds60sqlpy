@@ -17,8 +17,8 @@ Copy to .learning before editing. Six independent attempts belong below.
 # Expected: same permutation; all five IDs retained.
 
 # Exercise 4: Collate variable-length sequences
-# Pad sequences[2, 3] and[4] with zero while keeping lengths.
-# Expected: batch[[2, 3], [4, 0]] and lengths 2, 1.
+# Pad sequences [2, 3] and [4] with zero while keeping lengths.
+# Expected: batch [[2, 3], [4, 0]] and lengths 2, 1.
 
 # Exercise 5: Preserve pairing after shuffle
 # Load values=2*IDs with shuffling and check each batch.

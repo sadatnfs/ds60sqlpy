@@ -1,6 +1,6 @@
 # csharp-037: explanation and comparison
 
-Attempt the six guide tasks before opening this comparison. The executable reference is [csharp-037_solution.cs](csharp-037_solution.cs). Its assertions are always active under the prepared classroom compile settings.
+Attempt the six guide tasks before opening this comparison. The executable reference is [csharp-037_solution.cs](csharp-037_solution.cs). It runs both worked examples and the reference answers below, and its assertions are always active under the prepared classroom compile settings.
 
 ## Why the two examples differ
 
@@ -8,21 +8,58 @@ Attempt the six guide tasks before opening this comparison. The executable refer
 
 **Trade memory for repeated membership:** Building and retaining the index has a cost that should be amortized across enough queries. The index answers membership while storing four identities.
 
-## Reason through the six tasks
+## Task answers
 
-1. **Predict and explain.** Count comparisons for first, last and absent targets.
+### Task 1: Predict and explain
 
-2. **Guided modification.** Double the input size and predict worst-case linear comparisons.
+Count comparisons for first, last and absent targets.
 
-3. **Independent construction.** Compare repeated list scans with one built index while preserving equality policy.
+No separate reference answer has been written for this task. Example A is the evidence to compare with: The deterministic count illustrates the algorithm independently of machine speed. Finding the last element needs four comparisons.
 
-4. **Diagnose a defect.** Diagnose a benchmark that excludes index construction from a one-shot workload.
+### Task 2: Guided modification
 
-5. **Boundary evidence.** Test duplicate inputs and empty queries.
+Double the input size and predict worst-case linear comparisons.
 
-6. **Transfer and justify.** Write a benchmark plan specifying workload, correctness checks, warmup and allocation measurements.
+No separate reference answer has been written for this task. Start from Example B: Building and retaining the index has a cost that should be amortized across enough queries. The index answers membership while storing four identities.
 
-For tasks 1 and 2, use the checked values and mechanism trace in the two examples. For task 3, choose names that expose the input and result contract and retain the same invariants. For task 4, the diagnosed mistakes below supply a concrete wrong assumption: preserve its counterexample before repairing it. Task 5 needs an explicit expected value or documented rejection at the boundary, not just successful execution. For task 6, explain what changes in the new context and which part of the original mechanism remains applicable. Several representations may satisfy this transfer task; justify the choice rather than treating this reference as the only architecture.
+### Task 3: Independent construction
+
+Compare repeated list scans with one built index while preserving equality policy.
+
+**Reference answer.** It runs as the `Task 3` block of the reference program.
+
+```csharp
+string[] names = { "Pear", "apple", "Fig" };
+string[] queries = { "PEAR", "fig", "kiwi" };
+var policy = StringComparison.OrdinalIgnoreCase;
+bool Scan(string q) => names.Any(n => string.Equals(n, q, policy));
+int scanHits = queries.Count(Scan);
+var index = new HashSet<string>(names, StringComparer.OrdinalIgnoreCase);
+int indexHits = queries.Count(index.Contains);
+Check(scanHits == 2 && indexHits == scanHits, "same answers");
+```
+
+**Observe:** Both approaches find 2 of the 3 queries.
+
+The index uses the same OrdinalIgnoreCase policy as the scan, so it answers identically while replacing a linear search per query with one hash lookup.
+
+### Task 4: Diagnose a defect
+
+Diagnose a benchmark that excludes index construction from a one-shot workload.
+
+No reference answer has been written for this task yet. The wrong assumptions to look for are this lesson's pitfalls: A single stopwatch sample is not reliable evidence. Expected hash lookup cost depends on hashing behavior. Do not optimize a micro-operation before identifying the dominant algorithm or I/O cost.
+
+### Task 5: Boundary evidence
+
+Test duplicate inputs and empty queries.
+
+No reference answer has been written for this task yet. Write the expected value or documented rejection for each boundary before running it, and compare with the checks in Example A (Count a linear search) and Example B (Trade memory for repeated membership).
+
+### Task 6: Transfer and justify
+
+Write a benchmark plan specifying workload, correctness checks, warmup and allocation measurements.
+
+No single reference answer exists: several designs can satisfy this transfer task. Justify yours against the mechanism described below and the vocabulary entry **Complexity**, and state one limitation of your choice.
 
 ## Mechanism and diagnostic reasoning
 
@@ -36,4 +73,4 @@ A single stopwatch sample is not reliable evidence. Expected hash lookup cost de
 
 ## Review before continuing
 
-The reference checks the worked scenarios, including their boundary distinctions. Your independent and transfer artifacts may have additional checks. Compare observations rather than only source text. Preserve any new regression case you discover and explain why it would reject a plausible wrong implementation. External project steps require their own build and platform evidence and are not established by a portable reference passing.
+Run the reference and confirm that it prints `csharp-037: passed`, then reconstruct one boundary case from memory and explain which check would reject a plausible wrong implementation. External project steps need their own build and platform evidence; a passing portable reference does not establish them.

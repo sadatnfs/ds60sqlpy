@@ -9,6 +9,7 @@
     "independent utility"
   ],
   "outcome": "Evaluate a changed finite policy from logged actions with explicit propensity/support assumptions, and connect the result to an independent alignment decision.",
+  "verification": "With the target equal to the behavior policy all weights are 1 and the value is 0.75; the useful target is valued at 0.9; missing behavior support is rejected; a zero outcome model reduces the doubly robust estimate to importance sampling; self-normalized and ordinary estimates differ.",
   "level": "advanced",
   "runtime": "python-core",
   "minutes": 120,

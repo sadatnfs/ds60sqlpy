@@ -6,19 +6,19 @@ Compare these answers after an attempt at the [worksheet](../lessons/spark-040.m
 
 ### Exercise 1: Define grain, population and bounded read scope
 
-**Expected:** One row per event_id within one immutable export_id;at most 5000 rows and no unbounded collect.
+**Expected:** One row per event_id within one immutable export_id; at most 5000 rows and no unbounded collect.
 
 The approved input is an immutable export identified by demo-2026, with a unique event_id and a known maximum of 5000 rows. The reader selects only the five reviewed columns. A count and countDistinct(event_id) check must agree with the manifest for that same immutable export. A bounded sample can help diagnose types, but it cannot substitute for population checks.
 
-The contract should also state who produced the export, its capture cutoff, schema and digest or equivalent lineage identifier. A new export is a new input identity rather than an in-place update of a file being read. Driver collection is limited to small validated summaries or a declared tiny teaching sample;the existence of 5000 as a source budget does not authorize collecting an unknown production table. No connection is opened by this worksheet.
+The contract should also state who produced the export, its capture cutoff, schema and digest or equivalent lineage identifier. A new export is a new input identity rather than an in-place update of a file being read. Driver collection is limited to small validated summaries or a declared tiny teaching sample; the existence of 5000 as a source budget does not authorize collecting an unknown production table. No connection is opened by this worksheet.
 
 **Verification evidence:** Write the row-grain and population contract, plus the count/uniqueness/readback checks that would reject an oversized or duplicate export.
 
 ### Exercise 2: Map four tricky SQL values without losing meaning
 
-**Expected:** LongType 125;DecimalType(10,2)12345678.90;the same instant rendered 19:00:00UTC under the baseline;NULL remains missing, not an empty string.
+**Expected:** LongType 125;DecimalType(10,2)12345678.90;the same instant rendered 19:00:00UTC under the baseline; NULL remains missing, not an empty string.
 
-bigint cents maps to a signed 64-bit integer representation when the qualified connector schema confirms it;the unit remains cents, so 125 is not automatically 125 currency units. numeric(10,2) can hold the supplied eight-digit integer part and two fractional digits. Preserve DecimalType(10,2), not a binary float whose rounding may change exact decimal comparisons. A value outside precision 10 must fail or follow an explicitly chosen error policy, not be silently truncated.
+bigint cents maps to a signed 64-bit integer representation when the qualified connector schema confirms it; the unit remains cents, so 125 is not automatically 125 currency units. numeric(10,2) can hold the supplied eight-digit integer part and two fractional digits. Preserve DecimalType(10,2), not a binary float whose rounding may change exact decimal comparisons. A value outside precision 10 must fail or follow an explicitly chosen error policy, not be silently truncated.
 
 The timestamp with time zone value denotes an instant. PostgreSQL does not preserve the original named zone/offset as a separate semantic field merely because it used that spelling at input. Under Spark's declared UTC session, the instant renders 2026-10-23T19:00:00Z. A timestamp without time zone instead represents local wall-clock fields and needs a separate zone/NTZ policy. JDBC options and driver mappings can affect the inferred Spark timestamp type, so inspect the actual schema in a future qualification.
 
@@ -28,9 +28,9 @@ SQLNULL note stays a nullable missing value. Converting it to an empty string ch
 
 ### Exercise 3: Reject the lowerBound/upperBound filter misconception
 
-**Expected:** All 6 supplied rows can be read. Bounds choose partition stride, not a WHERE filter restricting IDs to[0,10).
+**Expected:** All 6 supplied rows can be read. Bounds choose partition stride, not a WHERE filter restricting IDs to [0,10).
 
-The first illustrative partition contains -10,0 and NULL;the second contains 5,10 and 99. The lower/upper options determine how Spark divides read work, not which rows belong to the dataset. Assuming they filter would silently widen the read and potentially include data outside the intended population.
+The first illustrative partition contains -10,0 and NULL; the second contains 5,10 and 99. The lower/upper options determine how Spark divides read work, not which rows belong to the dataset. Assuming they filter would silently widen the read and potentially include data outside the intended population.
 
 If the authorized population is 0<=id<10, the SQL source itself needs that predicate, with an explicit NULL policy. A fixed reviewed dbtable subquery with an alias can express a filtered source while partitioning its numeric/date/timestamp column. The query option cannot simply be combined with partitionColumn under Spark's documented option constraints. Predicate pushdown is an execution optimization to verify, not authorization to request extra columns or rows.
 
@@ -50,7 +50,7 @@ A live alternative could use a deliberately coordinated PostgreSQL snapshot expo
 
 ### Exercise 5: Remove credentials from source and evidence
 
-**Expected:** No password, user, URL or credential-bearing connection string in the saved source/evidence;only approved operational settings are retained.
+**Expected:** No password, user, URL or credential-bearing connection string in the saved source/evidence; only approved operational settings are retained.
 
 A suitable sanitized diagnostic object is {"numPartitions":2,"fetchsize":1000,"queryTimeout":30}. The full URL, user and password are omitted from the portable packet. The dummy value is a teaching marker, not a credential to try. A real runtime would obtain identity through the approved host mechanism and keep it out of checked-in source, process arguments, logs and portable progress.
 

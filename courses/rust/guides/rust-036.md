@@ -6,13 +6,15 @@ Advanced, approximately 120 minutes. Prerequisites: `rust-035`
 
 ## Learning objectives
 
-Run its tests and inspect a deliberately changed public contract. Then design a dependency upgrade review including lock diff, licenses, compile tests and runtime evidence.
+Explain editions, lockfiles and offline builds, and show an edition 2024 rule that changes compilation. The central exercise is task 3: Run its tests and inspect a deliberately changed public contract.
 
 ## Purpose and mental model
 
 Cargo describes packages, targets, dependencies and build profiles. A Rust edition selects language compatibility rules while the compiler version selects available implementations and library APIs. These are related but distinct. Pinning an edition does not pin a dependency graph or a compiler toolchain.
 
 Cargo.lock records selected dependency versions for reproducible resolution under a project policy. Locked and offline modes answer different questions: locked rejects graph changes, while offline forbids network access and requires prepared assets. The classroom bypasses per-attempt Cargo resolution by linking a reviewed read-only Arrow library. External projects use their own explicit preparation and lock review.
+
+The classroom compiles every pad with edition 2024, and editions change real language rules. Edition 2024 drops temporaries in a block's tail expression before the block's locals, iterates a Box<[T]> by value, reserves the gen keyword, requires unsafe extern blocks and treats std::env::set_var as unsafe. The two examples compile only under edition 2024; edition 2021 rejects them with E0597 and E0277.
 
 ## Vocabulary and concepts
 
@@ -32,47 +34,49 @@ The complete [InventoryLab](../fixtures/InventoryLab/README.md) demonstrates Car
 
 ## Syntax anatomy and execution trace
 
-Cargo.toml declares package and dependency intent. Cargo.lock records a resolved graph. cargo build --locked checks lock consistency; --offline requires cached dependencies. cargo test and cargo clippy are distinct verification tools.
+Cargo.toml declares package and dependency intent, including edition = "2024". Cargo.lock records a resolved graph. cargo build --locked checks lock consistency; --offline requires cached dependencies. cargo test and cargo clippy are distinct verification tools. cargo fix --edition migrates code mechanically, but the migrated code still needs review.
 
 Read the operations in dependency order. Record which values exist before each line, which expression produces a new value, and which operation changes shared state. When the compiler rejects source, no later runtime observation exists. When a check fails during execution, preserve the first incorrect value and the smallest input that produced it. These two situations need different repairs.
 
 ## Worked example / walkthrough
 
-### Example A: Keep build policy explicit
+### Example A: Observe an edition 2024 scope rule
 
-This metadata kernel supports reasoning; the real Cargo fixture supplies build evidence.
+Edition 2024 drops a temporary in a block's tail expression before the block's local variables, so the Ref returned by borrow() no longer outlives cell. The edition selects this rule; the compiler version only has to implement it.
 
 ```rust
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     {
-        let policy = ["edition=2024", "locked", "offline-after-preparation"];
-        assert!(policy.contains(&"edition=2024"));
-        assert_ne!(policy[0], "compiler-version");
+        fn name_length() -> usize {
+            let cell = std::cell::RefCell::new(String::from("pear"));
+            cell.borrow().len()
+        }
+        assert_eq!(name_length(), 4);
     }
     println!("rust-036: passed");
     Ok(())
 }
 ```
 
-**Observe:** Edition and compiler version remain different policy fields.
+**Observe:** name_length compiles and returns 4 under edition 2024; edition 2021 rejects the same function with E0597.
 
-### Example B: Retain an error rather than hide a failed gate
+### Example B: Iterate a boxed slice by value
 
-Release accounting should retain a failed check instead of substituting an older successful result.
+Edition 2024 changes which IntoIterator implementation a method call on Box<[T]> selects. Code can change meaning or stop compiling across editions, which is why Cargo.toml records the edition explicitly and why an upgrade deserves review.
 
 ```rust
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     {
-        let checks = [true, true, false];
-        assert!(!checks.iter().all(|passed| *passed));
-        assert_eq!(checks.iter().filter(|passed| !**passed).count(), 1);
+        let boxed: Box<[String]> = vec![String::from("a"), String::from("b")].into_boxed_slice();
+        let owned: Vec<String> = boxed.into_iter().collect();
+        assert_eq!(owned, ["a", "b"]);
     }
     println!("rust-036: passed");
     Ok(())
 }
 ```
 
-**Observe:** One failed gate prevents a claimed complete release.
+**Observe:** into_iter on a Box<[String]> yields owned Strings under edition 2024; under edition 2021 the same call yields &String and the collect fails with E0277.
 
 ## Exercises
 
@@ -88,7 +92,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
 6. **Transfer and justify.** Design a dependency upgrade review including lock diff, licenses, compile tests and runtime evidence.
 
-For each task, keep a short evidence table: input or initial state, prediction, observed value or diagnostic, and the rule that explains it. The guided examples establish mechanisms; the independent and transfer tasks require your own representation and explanation. Use the separate solution after attempting the task, then close it and reconstruct one boundary case.
+For each task, keep a short evidence table: input or initial state, prediction, observed value or diagnostic, and the rule that explains it. The guided examples establish mechanisms; the independent and transfer tasks require your own representation and explanation. The separate explanation gives an executed reference answer where one has been written and says plainly where none exists yet. Open it only after your own attempt, then close it and reconstruct one boundary case.
 
 ## Common pitfalls and diagnosis
 
@@ -98,9 +102,9 @@ A useful regression case distinguishes the intended rule from the tempting wrong
 
 ## Progressive hints
 
-1. Name the input, output and invariant using the vocabulary above. Reproduce Example A before changing two things at once.
-2. Compare the changed condition in Example B. Identify the first line whose behavior differs and state why.
-3. Reduce your independent task to a normal case, an empty or boundary case, and an invalid case. Write expected observations before inspecting the reference.
+1. Reproduce Example A (Observe an edition 2024 scope rule) before changing anything, and confirm its observation: name_length compiles and returns 4 under edition 2024; edition 2021 rejects the same function with E0597.
+2. Compare Example B (Iterate a boxed slice by value) with Example A and name the first line whose behavior differs. Its observation is: into_iter on a Box<[String]> yields owned Strings under edition 2024; under edition 2021 the same call yields &String and the collect fails with E0277.
+3. Before opening the explanation, test your task 3 attempt against this lesson's main pitfall: A successful dependency download is not successful compilation.
 
 ## Self-check and next step
 
@@ -108,7 +112,7 @@ Explain Edition, Lockfile, Offline build without reading the definitions. Recons
 
 ## Sources and execution boundary
 
-[Official language or framework documentation](https://doc.rust-lang.org/cargo/guide/). The prose, small fixtures and task designs in this chapter are original. Documentation links provide additional API detail, not a dependency fetched by the classroom. Runtime qualification is recorded separately by the repository validation workflow. Reading a guide, compiling a reference, running its assertions and completing an external project are distinct achievements.
+[Official language or framework documentation](https://doc.rust-lang.org/cargo/guide/). The prose, small fixtures and task designs in this chapter are original. Documentation links provide additional API detail, not a dependency fetched by the classroom. Reading a guide, compiling a reference, running its assertions and completing an external project are distinct achievements.
 
 ## Ask an AI tutor about this lesson
 

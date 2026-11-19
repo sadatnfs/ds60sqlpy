@@ -15,6 +15,23 @@ State eligibility, time, treatment of missingness and duplicate policy before wr
 
 A mean of cohort rates would give equal cohort weight and a different target. Choose the weighting unit from the question.
 
+```python
+# Uses the tempfile import and the project(), invoke() and rows() helpers in main.py.
+with tempfile.TemporaryDirectory() as d:
+    p = project(
+        d,
+        models={
+            "overall": (
+                "select sum(successes)::double / nullif(sum(trials), 0) as rate, "
+                "sum(trials) as denominator from {{ ref('counts') }}"
+            )
+        },
+        seeds={"counts": "cohort,successes,trials\nA,1,1\nA,9,99\nB,1,2\n"},
+    )
+    invoke(p, "build")
+    assert rows(p, "select rate, denominator from overall") == [(11 / 102, 102)]
+```
+
 **Expected:** The rate is 11/102.
 
 ## 3. Test empty evidence
@@ -132,9 +149,10 @@ def example_one():
             d,
             models={
                 "metrics": (
-                    "select cohort, sum(successes)::double/nullif(sum(trials),0"
-                    ") as rate, sum(trials) as denominator from {{ "
-                    "ref('counts') }} group by cohort"
+                    "select cohort, sum(successes)::double / nullif(sum(trials), 0) as rate, "
+                    "sum(trials) as denominator\n"
+                    "from {{ ref('counts') }}\n"
+                    "group by cohort"
                 )
             },
             seeds={"counts": "cohort,successes,trials\nA,1,1\nA,9,99\nB,1,2\n"},
@@ -152,7 +170,7 @@ def example_two():
         p = project(
             d,
             models={
-                "wrong": "select avg(successes::double/trials) as rate from {{ ref('counts') }}"
+                "wrong": "select avg(successes::double / trials) as rate from {{ ref('counts') }}"
             },
             seeds={"counts": "successes,trials\n1,1\n9,99\n"},
         )
@@ -174,4 +192,4 @@ if __name__ == "__main__":
 
 ## Interpretation
 
-Publish a metric with a complete numerator/denominator contract and an independent check. Carry it across SQL, Polars and downstream model dashboards without changing its meaning. Treat semantic-layer adoption as an additional implementation to qualify against that contract.
+Carry it across SQL, Polars and downstream model dashboards without changing its meaning. Treat semantic-layer adoption as an additional implementation to qualify against that contract.

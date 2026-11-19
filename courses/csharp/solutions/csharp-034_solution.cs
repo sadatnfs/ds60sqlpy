@@ -37,6 +37,15 @@ internal static class Program {
                             "a", 1, (_, previous) => previous + 1))));
       Check(counts["a"] == 20, "concurrent key updates");
     }
+    {
+      // Task 3: Independent construction
+      var counts = new ConcurrentDictionary<string, int>();
+      string[] words = { "a", "b", "a", "a" };
+      int Next(string key, int before) => before + 1;
+      Task Add(string w) => Task.Run(() => counts.AddOrUpdate(w, 1, Next));
+      await Task.WhenAll(words.Select(Add));
+      Check(counts["a"] == 3 && counts["b"] == 1, "concurrent frequencies");
+    }
     Console.WriteLine("csharp-034: passed");
     await Task.CompletedTask;
   }

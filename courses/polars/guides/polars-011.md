@@ -20,9 +20,7 @@ write_parquet emits typed columnar data, scan_parquet builds a lazy source, and 
 
 ## Run the lesson
 
-Open this subject in `/classroom`, then show its code and notes. The prepared `data-engineering` worker runs `main.py` in a fresh temporary directory. The examples use installed packages and synthetic local fixtures; no account, cloud service, network request or package download is required. Save source and notes before switching lessons. Temporary databases, project files and tracking artifacts are recreated by each complete program and removed after the job. The classroom retains the submitted source and bounded output, not an indefinitely running external service. The guide distinguishes this local execution from the deployment decisions that need an owned production environment.
-
-
+Open `polars-011` in `/classroom`. Its starter `main.py` contains both worked cases, "Combine typed parts and verify readback" and "Quarantine malformed CSV text", and prints the dictionary each case returns. The prepared `data-engineering` worker runs it in a fresh temporary directory. An `AssertionError` means that an observation differs from the case's stated contract. The inputs are small literal tables. Cases that demonstrate Parquet scans write their files into a temporary directory that is removed when the case returns. No account, network request or package download is involved. Save source and notes before switching lessons.
 
 ## Worked case 1: Combine typed parts and verify readback
 
@@ -54,7 +52,6 @@ if __name__ == "__main__":
     print(example_one())
 ```
 
-
 ## Worked case 2: Quarantine malformed CSV text
 
 The CSV fixture includes a nonnumeric token. The program reads the field as text, derives a numeric value and identifies the rejected record. It keeps the raw token in the quarantine output so the cause can be explained.
@@ -84,11 +81,9 @@ if __name__ == "__main__":
     print(example_two())
 ```
 
-
 ## Practice
 
-Make each requested change in a saved copy. Compare both the expected result and the deliberately changed assumption. The separate reference explains the answers.
-
+The starter contains both worked cases, so a task can change either one. Make each change in a saved copy, run it, and compare the printed result with the task's check before opening the separate explained answers.
 
 ### 1. Change input order
 
@@ -98,7 +93,6 @@ Rename the input parts so their lexical order changes.
 
 **Hint:** File order is not row identity.
 
-
 ### 2. Prevent self-ingestion
 
 Explain why combined.parquet is outside part-*.parquet.
@@ -106,7 +100,6 @@ Explain why combined.parquet is outside part-*.parquet.
 **Check:** A rerun does not read its prior combined output.
 
 **Hint:** Inspect the input pattern.
-
 
 ### 3. Validate the output key
 
@@ -116,7 +109,6 @@ Check output id uniqueness after combining parts.
 
 **Hint:** Parts can overlap.
 
-
 ### 4. Track rejected coverage
 
 Report accepted and rejected CSV counts.
@@ -124,7 +116,6 @@ Report accepted and rejected CSV counts.
 **Check:** Two accepted plus one rejected equals three source rows.
 
 **Hint:** Every source row needs an outcome.
-
 
 ### 5. Test a schema change
 
@@ -134,7 +125,6 @@ Change one part from numeric values to incompatible text.
 
 **Hint:** Do not rely on accidental coercion.
 
-
 ### 6. Verify an artifact
 
 Read the written Parquet file and compare its schema and values.
@@ -143,20 +133,19 @@ Read the written Parquet file and compare its schema and values.
 
 **Hint:** The write return value is not the result itself.
 
-
 ## Diagnose errors and misleading results
 
 A glob that includes an output directory can inflate every subsequent run. A CSV inference error can originate from a late malformed token rather than a completely wrong delimiter. Inspect selected paths, schemas and row accounting before adding broad ignore_errors behavior. Keep the example's temporary paths distinct from a learner's valuable files.
 
 ## Transfer to independent work
 
-Publish a small typed artifact with independently checked readback. Extend it to multiple input parts, a deliberate overlap and one malformed value. Describe which failures stop publication and which produce an explicit quarantine artifact; that decision becomes a testable contract in analytics engineering.
+Extend it to multiple input parts, a deliberate overlap and one malformed value. Describe which failures stop publication and which produce an explicit quarantine artifact; that decision becomes a testable contract in analytics engineering.
 
 ## Primary references
 
-- [Polars documentation: Files, schema boundaries and columnar artifacts](https://docs.pola.rs/user-guide/io/parquet/)
+- [Polars user guide: Parquet](https://docs.pola.rs/user-guide/io/parquet/)
 - [Polars Python API reference](https://docs.pola.rs/api/python/stable/reference/index.html)
 
 ## Tutor guidance
 
-Use the repository learning-companion skill for `polars-011`. Inspect the learner's own source and observations, ask for an explanation of the relevant data or state contract, and give a focused hint. Separate an assertion on this fixture from a claim about an external dataset or deployed service.
+Use the repository's `$guide-ds60sqlpy-learning` skill (`.agents/skills/guide-ds60sqlpy-learning/SKILL.md`) for `polars-011`. Inspect the learner's own source and printed output first. Ask for an explanation of CSV, Parquet, scan, sink, schema and quarantine in their own words, then give one focused hint at a time. Keep an assertion on this synthetic fixture separate from a claim about an external dataset or deployed service.

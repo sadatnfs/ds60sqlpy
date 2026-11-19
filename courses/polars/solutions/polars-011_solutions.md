@@ -21,11 +21,41 @@ Separate source and output namespaces or use an explicit input manifest. A broad
 
 Add a duplicate id across two files to demonstrate the need for a global contract. Per-file uniqueness is insufficient.
 
+```python
+import tempfile
+from pathlib import Path
+
+import polars as pl
+
+with tempfile.TemporaryDirectory() as d:
+    root = Path(d)
+    pl.DataFrame({"id": [1, 2], "value": [2.5, 3.5]}).write_parquet(root / "part-a.parquet")
+    pl.DataFrame({"id": [3], "value": [4.5]}).write_parquet(root / "part-b.parquet")
+    combined = pl.scan_parquet(str(root / "part-*.parquet")).collect()
+    assert combined["id"].n_unique() == combined.height == 3
+```
+
 **Expected:** n_unique equals height for the valid fixture.
 
 ## 4. Track rejected coverage
 
 Keep raw identifiers and reasons, then reconcile counts. If a policy imputes a value instead, record that category separately.
+
+```python
+import tempfile
+from pathlib import Path
+
+import polars as pl
+
+with tempfile.TemporaryDirectory() as d:
+    path = Path(d) / "raw.csv"
+    path.write_text("id,amount\n1,2\n2,broken\n3,4\n")
+    raw = pl.read_csv(path, schema_overrides={"amount": pl.String})
+    parsed = raw.with_columns(pl.col("amount").cast(pl.Int64, strict=False).alias("parsed"))
+    accepted = parsed.filter(pl.col("parsed").is_not_null()).height
+    rejected = parsed.filter(pl.col("parsed").is_null()).height
+    assert (accepted, rejected, raw.height) == (2, 1, 3)
+```
 
 **Expected:** Two accepted plus one rejected equals three source rows.
 
@@ -89,4 +119,4 @@ if __name__ == "__main__":
 
 ## Interpretation
 
-Publish a small typed artifact with independently checked readback. Extend it to multiple input parts, a deliberate overlap and one malformed value. Describe which failures stop publication and which produce an explicit quarantine artifact; that decision becomes a testable contract in analytics engineering.
+Extend it to multiple input parts, a deliberate overlap and one malformed value. Describe which failures stop publication and which produce an explicit quarantine artifact; that decision becomes a testable contract in analytics engineering.

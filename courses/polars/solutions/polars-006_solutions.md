@@ -21,11 +21,34 @@ Keep both row and amount checks: some duplicated or dropped zero-valued records 
 
 A semi join expresses existence directly. Joining and dropping columns afterward still permits fanout.
 
+```python
+import polars as pl
+
+facts = pl.DataFrame({"order_id": [1, 2, 3], "customer": [10, 10, 20], "amount": [5, 7, 9]})
+dimension = pl.DataFrame({"customer": [10, 20], "region": ["N", "S"]})
+known = facts.join(dimension, on="customer", how="semi")
+assert known.columns == ["order_id", "customer", "amount"]
+assert known.sort("order_id")["order_id"].to_list() == [1, 2, 3]
+duplicated = pl.concat([dimension, dimension.head(1)])
+assert facts.join(duplicated, on="customer", how="semi").height == 3
+```
+
 **Expected:** Each matching order appears once.
 
 ## 4. Audit unmatched rows
 
 The anti join produces a reviewable quarantine set. Decide whether the missing dimension is late, invalid or genuinely outside the domain.
+
+```python
+import polars as pl
+
+facts = pl.DataFrame(
+    {"order_id": [1, 2, 3, 4], "customer": [10, 10, 20, 30], "amount": [5, 7, 9, 6]}
+)
+dimension = pl.DataFrame({"customer": [10, 20], "region": ["N", "S"]})
+orphans = facts.join(dimension, on="customer", how="anti")
+assert orphans.to_dicts() == [{"order_id": 4, "customer": 30, "amount": 6}]
+```
 
 **Expected:** The new order is explicitly listed.
 
@@ -91,4 +114,4 @@ if __name__ == "__main__":
 
 ## Interpretation
 
-Enrich a fact table while proving its grain and totals remain valid. Extend the exercise with a legitimate historical dimension, then document the additional temporal rule required. Carry the same reconciliation into dbt tests and ML feature pipelines, where silent fanout can contaminate both training labels and online metrics.
+Extend the exercise with a legitimate historical dimension, then document the additional temporal rule required. Carry the same reconciliation into dbt tests and ML feature pipelines, where silent fanout can contaminate both training labels and online metrics.

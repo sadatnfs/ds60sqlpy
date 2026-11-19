@@ -20,11 +20,13 @@ An immutable transformation means preserving the prior value needed by the appli
 
 map receives value, index and array; avoid passing a callback that unintentionally interprets the extra arguments. filter keeps elements whose predicate is truthy. reduce needs an identity for an empty input unless absence is handled separately. Use (a, b)=>a-b for numeric ordering. Spread or slice copies the outer array only; copy nested records deliberately when they will be edited.
 
-## Exercise 1: Map and filter without changing input
+## Exercise 1: Map and filter without changing input: change one input
 
-Task: Double 1, 2, 3, 4 and keep results above 4.
+Task: Copy Example A into a scratch `main.mjs` and change `const original = [1, 2, 3, 4];` to `const original = [2, 2, 3, 4];`. Before running it, predict which check fails and which value it now sees; then run it and restore the original line.
 
 The pipeline returns new arrays while retaining the original numeric fixture. Object-valued elements would need an additional ownership analysis.
+
+The unchanged code is the exercise block of Example A:
 
 ```javascript
 const original = [1, 2, 3, 4];
@@ -33,15 +35,17 @@ assert.deepEqual(result, [6, 8]);
 assert.deepEqual(original, [1, 2, 3, 4]);
 ```
 
-**Expected:** 6, 8; original array unchanged.
+**Expected:** The changed run fails with an `AssertionError` at the check `assert.deepEqual(original, [1, 2, 3, 4])`. Restoring the original line brings back the worked observation: 6, 8; original array unchanged.
 
-**Verify:** Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.
+**Verify:** Compare your written prediction with the reported `AssertionError`, including its actual and expected values, and name the value that made `assert.deepEqual(original, [1, 2, 3, 4])` fail. After restoring the line, the program prints its `{"checks":1,"status":"passed"}` receipt again.
 
-## Exercise 2: Supply a reduction identity
+## Exercise 2: Supply a reduction identity: diagnose an edited check
 
-Task: Sum an empty array and 1, 2, 3 using initial 0.
+Task: A careless edit changed a check in Example B so that it reads `assert.equal([1, 2, 3].reduce((sum, value) => sum - value, 0), 6);`. Run Example B with that line, explain why the edited check now fails for the same program state, and restore it.
 
 The identity defines the empty case. Omitting it would make an empty array throw and change the callback's initial state.
+
+The unchanged code is the exercise block of Example B:
 
 ```javascript
 assert.equal(
@@ -54,9 +58,9 @@ assert.equal(
 );
 ```
 
-**Expected:** 0 and 6.
+**Expected:** Before the repair the run fails with an `AssertionError` at the check `assert.equal([1, 2, 3].reduce((sum, value) => sum + value, 0), 6)`; after it the line reads `assert.equal([1, 2, 3].reduce((sum, value) => sum + value, 0), 6);` again and 0 and 6.
 
-**Verify:** Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.
+**Verify:** Keep the failing and the repaired runs. Explain why the edited check rejects the same program state that `assert.equal([1, 2, 3].reduce((sum, value) => sum + value, 0), 6)` accepts.
 
 ## Exercise 3: Expose default sort coercion
 
@@ -74,7 +78,7 @@ assert.deepEqual(
 
 **Expected:** default 1, 10, 2; numeric 1, 2, 10.
 
-**Verify:** Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.
+**Verify:** Keep a check equivalent to `assert.deepEqual([10, 2, 1].sort((a, b) => a - b), [1, 2, 10])`. As a control, change `[10, 2, 1].sort((a, b) => a - b),` to `[10, 2, 1].sort((a, b) => a + b),` inside it: the run must fail with an `AssertionError`, which shows the check can fail. Restore it.
 
 ## Exercise 4: Preserve an array while sorting
 
@@ -91,7 +95,7 @@ assert.deepEqual(original, [3, 1, 2]);
 
 **Expected:** sorted 1, 2, 3; original 3, 1, 2.
 
-**Verify:** Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.
+**Verify:** Keep a check equivalent to `assert.deepEqual(sorted, [1, 2, 3])`. As a control, change `const sorted = original.toSorted((a, b) => a - b);` to `const sorted = original.toSorted((a, b) => a + b);`: the run must fail with an `AssertionError` at that check. Restore the line before continuing.
 
 ## Exercise 5: Expose a shallow copy alias
 
@@ -109,7 +113,7 @@ assert.notEqual(copy, original);
 
 **Expected:** original nested value also changes.
 
-**Verify:** Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.
+**Verify:** Keep a check equivalent to `assert.equal(original[0].value, 9)`. As a control, change `copy[0].value = 9;` to `copy[0].value = 10;`: the run must fail with an `AssertionError` at that check. Restore the line before continuing.
 
 ## Exercise 6: Copy records for a specific edit
 
@@ -127,7 +131,7 @@ assert.equal(copy[0].value, 9);
 
 **Expected:** edited record changes; original record stays 1.
 
-**Verify:** Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.
+**Verify:** Keep a check equivalent to `assert.equal(copy[0].value, 9)`. As a control, change `copy[0].value = 9;` to `copy[0].value = 10;`: the run must fail with an `AssertionError` at that check. Restore the line before continuing.
 
 ## After comparison
 

@@ -22,8 +22,8 @@
         "action"
       ],
       "outcome": "Trace one objective evaluation across the driver and partitions and show that repartitioning does not redefine the model.",
-      "lab": "Read the two complete worked cases, reproduce their evidence and compare their assumptions.",
-      "verification": "Complete source-bound asm-001 investigation with explicit numerical or execution diagnostics; no mastery grade."
+      "lab": "Run the complete program and check the worked cases \"one objective action\" and \"change placement, keep the estimand\" against the values and diagnostics the chapter states.",
+      "verification": "Run `asm-001.py` on the `spark-local-python` profile and confirm the printed values and diagnostics that both worked cases state."
     },
     {
       "id": "asm-002",
@@ -42,13 +42,13 @@
         "gradient"
       ],
       "outcome": "Derive and check a partition-additive objective and identify a shared latent variable that invalidates a naive split.",
-      "lab": "Read the two complete worked cases, reproduce their evidence and compare their assumptions.",
-      "verification": "Complete source-bound asm-002 investigation with explicit numerical or execution diagnostics; no mastery grade."
+      "lab": "Run the complete program and check the worked cases \"normalized Gaussian contributions\" and \"integrate one shared random intercept\" against the values and diagnostics the chapter states.",
+      "verification": "Run `asm-002.py` on the `spark-local-python` profile and confirm the printed values and diagnostics that both worked cases state."
     },
     {
       "id": "asm-003",
       "title": "Independent group fits and one shared model",
-      "level": "beginner",
+      "level": "intermediate",
       "minutes": 75,
       "prerequisites": [
         "asm-002",
@@ -63,13 +63,13 @@
         "statistics"
       ],
       "outcome": "Fit separate Gaussian means and distinguish them from the pooled maximum-likelihood estimate when group sizes differ.",
-      "lab": "Read the two complete worked cases, reproduce their evidence and compare their assumptions.",
-      "verification": "Complete source-bound asm-003 investigation with explicit numerical or execution diagnostics; no mastery grade."
+      "lab": "Run the complete program and check the worked cases \"unequal groups\" and \"change the amount of data, not the formula\" against the values and diagnostics the chapter states.",
+      "verification": "Run `asm-003.py` on the `spark-local-python` profile and confirm the printed values and diagnostics that both worked cases state."
     },
     {
       "id": "asm-004",
       "title": "Whole-group memory, shuffle and skew",
-      "level": "beginner",
+      "level": "intermediate",
       "minutes": 75,
       "prerequisites": [
         "asm-003",
@@ -84,8 +84,8 @@
         "memory"
       ],
       "outcome": "Measure group sizes before an independent fit and replace unsafe group materialization with bounded sufficient statistics.",
-      "lab": "Read the two complete worked cases, reproduce their evidence and compare their assumptions.",
-      "verification": "Complete source-bound asm-004 investigation with explicit numerical or execution diagnostics; no mastery grade."
+      "lab": "Run the complete program and check the worked cases \"a hot group remains hot\" and \"replace materialization with sufficient statistics\" against the values and diagnostics the chapter states.",
+      "verification": "Run `asm-004.py` on the `spark-local-python` profile and confirm the printed values and diagnostics that both worked cases state."
     },
     {
       "id": "asm-005",
@@ -104,8 +104,8 @@
         "weights"
       ],
       "outcome": "Evaluate a stable normalized logistic objective with Spark SQL and compare extreme-score and imbalance cases to a serial oracle.",
-      "lab": "Read the two complete worked cases, reproduce their evidence and compare their assumptions.",
-      "verification": "Complete source-bound asm-005 investigation with explicit numerical or execution diagnostics; no mastery grade."
+      "lab": "Run the complete program and check the worked cases \"confident, correctly classified extremes\" and \"weights change the target\" against the values and diagnostics the chapter states.",
+      "verification": "Run `asm-005.py` on the `spark-local-python` profile and confirm the printed values and diagnostics that both worked cases state."
     },
     {
       "id": "asm-006",
@@ -125,13 +125,13 @@
         "aggregation"
       ],
       "outcome": "Compute correctly ordered logistic loss and gradient summaries and detect invalid feature or label contracts.",
-      "lab": "Read the two complete worked cases, reproduce their evidence and compare their assumptions.",
-      "verification": "Complete source-bound asm-006 investigation with explicit numerical or execution diagnostics; no mastery grade."
+      "lab": "Run the complete program and check the worked cases \"a two-parameter objective\" and \"a finite-difference oracle catches ordering errors\" against the values and diagnostics the chapter states.",
+      "verification": "Run `asm-006.py` on the `spark-local-python` profile and confirm the printed values and diagnostics that both worked cases state."
     },
     {
       "id": "asm-007",
       "title": "A driver optimizer over distributed passes",
-      "level": "intermediate",
+      "level": "advanced",
       "minutes": 100,
       "prerequisites": [
         "asm-006",
@@ -146,13 +146,13 @@
         "broadcast"
       ],
       "outcome": "Fit a small shared logistic model through repeated Spark actions and explain why a stale expression cannot supply the next gradient.",
-      "lab": "Read the two complete worked cases, reproduce their evidence and compare their assumptions.",
-      "verification": "Complete source-bound asm-007 investigation with explicit numerical or execution diagnostics; no mastery grade."
+      "lab": "Run the complete program and check the worked cases \"three successes out of five\" and \"one success out of five\" against the values and diagnostics the chapter states.",
+      "verification": "Run `asm-007.py` on the `spark-local-python` profile and confirm the printed values and diagnostics that both worked cases state."
     },
     {
       "id": "asm-008",
       "title": "Merge precision, unequal partitions and one penalty",
-      "level": "intermediate",
+      "level": "advanced",
       "minutes": 100,
       "prerequisites": [
         "asm-007",
@@ -167,13 +167,13 @@
         "regularization"
       ],
       "outcome": "Prove the difference between global sums and averages of partition means and apply a model penalty exactly once.",
-      "lab": "Read the two complete worked cases, reproduce their evidence and compare their assumptions.",
-      "verification": "Complete source-bound asm-008 investigation with explicit numerical or execution diagnostics; no mastery grade."
+      "lab": "Run the complete program and check the worked cases \"one row versus three\" and \"arithmetic order changes the last bits\" against the values and diagnostics the chapter states.",
+      "verification": "Run `asm-008.py` on the `spark-local-python` profile and confirm the printed values and diagnostics that both worked cases state."
     },
     {
       "id": "asm-009",
       "title": "Retry-safe evaluation and external side effects",
-      "level": "intermediate",
+      "level": "advanced",
       "minutes": 100,
       "prerequisites": [
         "asm-008",
@@ -189,13 +189,13 @@
         "effects"
       ],
       "outcome": "Separate Spark result aggregation from external writes and construct a retry-safe summary contract.",
-      "lab": "Read the two complete worked cases, reproduce their evidence and compare their assumptions.",
-      "verification": "Complete source-bound asm-009 investigation with explicit numerical or execution diagnostics; no mastery grade."
+      "lab": "Run the complete program and check the worked cases \"repeated pure evaluation\" and \"duplicated and conflicting deliveries\" against the values and diagnostics the chapter states.",
+      "verification": "Run `asm-009.py` on the `spark-local-python` profile and confirm the printed values and diagnostics that both worked cases state."
     },
     {
       "id": "asm-010",
       "title": "Nonlinear global maximum likelihood",
-      "level": "intermediate",
+      "level": "advanced",
       "minutes": 100,
       "prerequisites": [
         "asm-007",
@@ -211,13 +211,13 @@
         "transforms"
       ],
       "outcome": "Fit a shared exponential-decay model with explicit scale, analytic gradients and distributed objective evaluations.",
-      "lab": "Read the two complete worked cases, reproduce their evidence and compare their assumptions.",
-      "verification": "Complete source-bound asm-010 investigation with explicit numerical or execution diagnostics; no mastery grade."
+      "lab": "Run the complete program and check the worked cases \"recovering a decay curve\" and \"nonidentifiability at one time\" against the values and diagnostics the chapter states.",
+      "verification": "Run `asm-010.py` on the `spark-local-python` profile and confirm the printed values and diagnostics that both worked cases state."
     },
     {
       "id": "asm-011",
       "title": "When a likelihood is not separable",
-      "level": "intermediate",
+      "level": "advanced",
       "minutes": 100,
       "prerequisites": [
         "asm-010",
@@ -232,13 +232,13 @@
         "determinant"
       ],
       "outcome": "Calculate the omitted covariance and normalization terms in an invalid independent partition approximation.",
-      "lab": "Read the two complete worked cases, reproduce their evidence and compare their assumptions.",
-      "verification": "Complete source-bound asm-011 investigation with explicit numerical or execution diagnostics; no mastery grade."
+      "lab": "Run the complete program and check the worked cases \"zero correlation recovers independence\" and \"correlation 0.8 changes the answer\" against the values and diagnostics the chapter states.",
+      "verification": "Run `asm-011.py` on the `spark-local-python` profile and confirm the printed values and diagnostics that both worked cases state."
     },
     {
       "id": "asm-012",
       "title": "State-space boundaries and complete-series ownership",
-      "level": "intermediate",
+      "level": "advanced",
       "minutes": 100,
       "prerequisites": [
         "asm-011",
@@ -253,8 +253,8 @@
         "density"
       ],
       "outcome": "Preserve every lag edge and initial-state term when evaluating an AR1 likelihood across data partitions.",
-      "lab": "Read the two complete worked cases, reproduce their evidence and compare their assumptions.",
-      "verification": "Complete source-bound asm-012 investigation with explicit numerical or execution diagnostics; no mastery grade."
+      "lab": "Run the complete program and check the worked cases \"two complete series\" and \"resetting every chunk is a different model\" against the values and diagnostics the chapter states.",
+      "verification": "Run `asm-012.py` on the `spark-local-python` profile and confirm the printed values and diagnostics that both worked cases state."
     },
     {
       "id": "asm-013",
@@ -274,8 +274,8 @@
         "moments"
       ],
       "outcome": "Implement a typed weighted-statistics Aggregator and verify zero, merge and partition invariance with an empty-input policy.",
-      "lab": "Read the two complete worked cases, reproduce their evidence and compare their assumptions.",
-      "verification": "Complete source-bound asm-013 investigation with explicit numerical or execution diagnostics; no mastery grade."
+      "lab": "Run the complete program and check the worked cases \"merge unequal partitions correctly\" and \"empty input has a valid summary\" against the values and diagnostics the chapter states.",
+      "verification": "Run `asm-013.scala` on the `spark-local-scala` profile and confirm the printed values and diagnostics that both worked cases state."
     },
     {
       "id": "asm-014",
@@ -295,8 +295,8 @@
         "encoders"
       ],
       "outcome": "Register a typed aggregate for SQL and test its null, invalid-weight and zero-weight behavior against built-in sums.",
-      "lab": "Read the two complete worked cases, reproduce their evidence and compare their assumptions.",
-      "verification": "Complete source-bound asm-014 investigation with explicit numerical or execution diagnostics; no mastery grade."
+      "lab": "Run the complete program and check the worked cases \"valid and invalid rows together\" and \"no valid denominator\" against the values and diagnostics the chapter states.",
+      "verification": "Run `asm-014.scala` on the `spark-local-scala` profile and confirm the printed values and diagnostics that both worked cases state."
     },
     {
       "id": "asm-015",
@@ -316,8 +316,8 @@
         "softplus"
       ],
       "outcome": "Implement equivalent stable likelihood contributions with SQL expressions and a typed Scala UDF and interpret their plans.",
-      "lab": "Read the two complete worked cases, reproduce their evidence and compare their assumptions.",
-      "verification": "Complete source-bound asm-015 investigation with explicit numerical or execution diagnostics; no mastery grade."
+      "lab": "Run the complete program and check the worked cases \"null-aware square parity\" and \"avoid a UDF for a known expression\" against the values and diagnostics the chapter states.",
+      "verification": "Run `asm-015.scala` on the `spark-local-scala` profile and confirm the printed values and diagnostics that both worked cases state."
     },
     {
       "id": "asm-016",
@@ -336,8 +336,8 @@
         "schema"
       ],
       "outcome": "Build a schema-checked feature Transformer whose declared parameters survive a save and fresh load.",
-      "lab": "Read the two complete worked cases, reproduce their evidence and compare their assumptions.",
-      "verification": "Complete source-bound asm-016 investigation with explicit numerical or execution diagnostics; no mastery grade."
+      "lab": "Run the complete program and check the worked cases \"save and restore an offset\" and \"reject accidental replacement\" against the values and diagnostics the chapter states.",
+      "verification": "Run `asm-016.scala` on the `spark-local-scala` profile and confirm the printed values and diagnostics that both worked cases state."
     },
     {
       "id": "asm-017",
@@ -357,8 +357,8 @@
         "leakage"
       ],
       "outcome": "Implement a training-only mean Estimator and evaluate its immutable fitted Model on held-out data.",
-      "lab": "Read the two complete worked cases, reproduce their evidence and compare their assumptions.",
-      "verification": "Complete source-bound asm-017 investigation with explicit numerical or execution diagnostics; no mastery grade."
+      "lab": "Run the complete program and check the worked cases \"training and test distributions differ\" and \"refitting on test data hides the shift\" against the values and diagnostics the chapter states.",
+      "verification": "Run `asm-017.scala` on the `spark-local-scala` profile and confirm the printed values and diagnostics that both worked cases state."
     },
     {
       "id": "asm-018",
@@ -378,8 +378,8 @@
         "null"
       ],
       "outcome": "Use an explicitly prepared mapInPandas project and audit batch-size invariance without mistaking a batch for a group.",
-      "lab": "Read the two complete worked cases, reproduce their evidence and compare their assumptions.",
-      "verification": "Complete source-bound asm-018 investigation with explicit numerical or execution diagnostics; no mastery grade."
+      "lab": "Read the worked cases \"change batch size without changing the objective\" and \"a model group crosses batches\", run the linked project only through its own documented entrypoint, and compare its recorded observations with the chapter.",
+      "verification": "Compare the project's recorded observations with the values and failure cases each worked case states; a command reference or hand calculation does not show that the project ran."
     },
     {
       "id": "asm-019",
@@ -398,8 +398,8 @@
         "semantics"
       ],
       "outcome": "Capture all three planning layers and prove result equivalence before interpreting an optimizer or AQE change.",
-      "lab": "Read the two complete worked cases, reproduce their evidence and compare their assumptions.",
-      "verification": "Complete source-bound asm-019 investigation with explicit numerical or execution diagnostics; no mastery grade."
+      "lab": "Run the complete program and check the worked cases \"filter and project a range\" and \"replace arithmetic with a UDF\" against the values and diagnostics the chapter states.",
+      "verification": "Run `asm-019.scala` on the `spark-local-scala` profile and confirm the printed values and diagnostics that both worked cases state."
     },
     {
       "id": "asm-020",
@@ -419,8 +419,8 @@
         "interpreted"
       ],
       "outcome": "Inspect code-generation boundaries and verify that codegen settings preserve the same null-aware numerical result.",
-      "lab": "Read the two complete worked cases, reproduce their evidence and compare their assumptions.",
-      "verification": "Complete source-bound asm-020 investigation with explicit numerical or execution diagnostics; no mastery grade."
+      "lab": "Run the complete program and check the worked cases \"square plus one\" and \"turn fusion off and compare\" against the values and diagnostics the chapter states.",
+      "verification": "Run `asm-020.scala` on the `spark-local-scala` profile and confirm the printed values and diagnostics that both worked cases state."
     },
     {
       "id": "asm-021",
@@ -438,8 +438,8 @@
         "lifecycle"
       ],
       "outcome": "Compile an owned Spark4.0.1 extension and prove that it is installed when the session is constructed.",
-      "lab": "Read the two complete worked cases, reproduce their evidence and compare their assumptions.",
-      "verification": "Complete source-bound asm-021 investigation with explicit numerical or execution diagnostics; no mastery grade."
+      "lab": "Read the worked cases \"register and resolve a valid function\" and \"distinguish arity from type failures\", run the linked project only through its own documented entrypoint, and compare its recorded observations with the chapter.",
+      "verification": "Compare the project's recorded observations with the values and failure cases each worked case states; a command reference or hand calculation does not show that the project ran."
     },
     {
       "id": "asm-022",
@@ -459,8 +459,8 @@
         "check"
       ],
       "outcome": "Implement a stable softplus expression with matching interpreted and generated-code behavior, type and null checks.",
-      "lab": "Read the two complete worked cases, reproduce their evidence and compare their assumptions.",
-      "verification": "Complete source-bound asm-022 investigation with explicit numerical or execution diagnostics; no mastery grade."
+      "lab": "Read the worked cases \"finite extremes and the origin\" and \"rejection is part of correctness\", run the linked project only through its own documented entrypoint, and compare its recorded observations with the chapter.",
+      "verification": "Compare the project's recorded observations with the values and failure cases each worked case states; a command reference or hand calculation does not show that the project ran."
     },
     {
       "id": "asm-023",
@@ -480,8 +480,8 @@
         "idempotence"
       ],
       "outcome": "Prove and test one narrow idempotent integer rewrite while rejecting unsafe rewrites involving randomness or floating arithmetic.",
-      "lab": "Read the two complete worked cases, reproduce their evidence and compare their assumptions.",
-      "verification": "Complete source-bound asm-023 investigation with explicit numerical or execution diagnostics; no mastery grade."
+      "lab": "Read the worked cases \"observe the actual tree change\" and \"boundaries, null and a dangerous alternative\", run the linked project only through its own documented entrypoint, and compare its recorded observations with the chapter.",
+      "verification": "Compare the project's recorded observations with the values and failure cases each worked case states; a command reference or hand calculation does not show that the project ran."
     },
     {
       "id": "asm-024",
@@ -502,8 +502,8 @@
         "rule"
       ],
       "outcome": "Propagate a scalar derivative through a tiny original dual-number algebra and aggregate it against an analytic gradient.",
-      "lab": "Read the two complete worked cases, reproduce their evidence and compare their assumptions.",
-      "verification": "Complete source-bound asm-024 investigation with explicit numerical or execution diagnostics; no mastery grade."
+      "lab": "Run the complete program and check the worked cases \"differentiate three observations on executors\" and \"a non-unit direction\" against the values and diagnostics the chapter states.",
+      "verification": "Run `asm-024.scala` on the `spark-local-scala` profile and confirm the printed values and diagnostics that both worked cases state."
     },
     {
       "id": "asm-025",
@@ -524,8 +524,8 @@
         "adjoint"
       ],
       "outcome": "Use join multiplicity to show that a row derivative needs relational semantics and that Catalyst supplies no general global reverse-mode tape.",
-      "lab": "Read the two complete worked cases, reproduce their evidence and compare their assumptions.",
-      "verification": "Complete source-bound asm-025 investigation with explicit numerical or execution diagnostics; no mastery grade."
+      "lab": "Run the complete program and check the worked cases \"compare an aggregate gradient with a serial difference\" and \"materialization freezes an evaluation\" against the values and diagnostics the chapter states.",
+      "verification": "Run `asm-025.scala` on the `spark-local-scala` profile and confirm the printed values and diagnostics that both worked cases state."
     },
     {
       "id": "asm-026",
@@ -546,8 +546,8 @@
         "environment"
       ],
       "outcome": "Verify a combined project environment and make process, package, data and memory boundaries explicit before training.",
-      "lab": "Read the two complete worked cases, reproduce their evidence and compare their assumptions.",
-      "verification": "Complete source-bound asm-026 investigation with explicit numerical or execution diagnostics; no mastery grade."
+      "lab": "Read the worked cases \"additive logistic likelihood\" and \"nonlinear Gaussian and independent groups\", run the linked project only through its own documented entrypoint, and compare its recorded observations with the chapter.",
+      "verification": "Compare the project's recorded observations with the values and failure cases each worked case states; a command reference or hand calculation does not show that the project ran."
     },
     {
       "id": "asm-027",
@@ -566,8 +566,8 @@
         "process"
       ],
       "outcome": "Launch a fixed CPU function through the pinned public TorchDistributor.run interface and retain actual rank and result evidence.",
-      "lab": "Read the two complete worked cases, reproduce their evidence and compare their assumptions.",
-      "verification": "Complete source-bound asm-027 investigation with explicit numerical or execution diagnostics; no mastery grade."
+      "lab": "Read the worked cases \"one process establishes the training contract\" and \"data must be delivered deliberately\", run the linked project only through its own documented entrypoint, and compare its recorded observations with the chapter.",
+      "verification": "Compare the project's recorded observations with the values and failure cases each worked case states; a command reference or hand calculation does not show that the project ran."
     },
     {
       "id": "asm-028",
@@ -587,8 +587,8 @@
         "sampler"
       ],
       "outcome": "Derive the correct DDP reduction scale for uneven row counts and require an exact no-duplicate/no-drop data audit.",
-      "lab": "Read the two complete worked cases, reproduce their evidence and compare their assumptions.",
-      "verification": "Complete source-bound asm-028 investigation with explicit numerical or execution diagnostics; no mastery grade."
+      "lab": "Read the worked cases \"unequal local counts\" and \"sampler padding changes coverage\", run the linked project only through its own documented entrypoint, and compare its recorded observations with the chapter.",
+      "verification": "Compare the project's recorded observations with the values and failure cases each worked case states; a command reference or hand calculation does not show that the project ran."
     },
     {
       "id": "asm-029",
@@ -607,8 +607,8 @@
         "checkpoint"
       ],
       "outcome": "Compare Lightning and plain Torch on the same objective, initialization, shard policy and optimizer-step definition.",
-      "lab": "Read the two complete worked cases, reproduce their evidence and compare their assumptions.",
-      "verification": "Complete source-bound asm-029 investigation with explicit numerical or execution diagnostics; no mastery grade."
+      "lab": "Read the worked cases \"a custom likelihood in a Lightning step\" and \"duplicated topology is a design failure\", run the linked project only through its own documented entrypoint, and compare its recorded observations with the chapter.",
+      "verification": "Compare the project's recorded observations with the values and failure cases each worked case states; a command reference or hand calculation does not show that the project ran."
     },
     {
       "id": "asm-030",
@@ -627,8 +627,8 @@
         "epoch"
       ],
       "outcome": "Design a bounded restart contract that preserves sample identity, optimizer state and epoch reshuffling without silent data replay.",
-      "lab": "Read the two complete worked cases, reproduce their evidence and compare their assumptions.",
-      "verification": "Complete source-bound asm-030 investigation with explicit numerical or execution diagnostics; no mastery grade."
+      "lab": "Read the worked cases \"five IDs and two ranks\" and \"checkpoint between epochs\", run the linked project only through its own documented entrypoint, and compare its recorded observations with the chapter.",
+      "verification": "Compare the project's recorded observations with the values and failure cases each worked case states; a command reference or hand calculation does not show that the project ran."
     },
     {
       "id": "asm-031",
@@ -648,8 +648,8 @@
         "isolation"
       ],
       "outcome": "Dispatch independent TMB fits for whole groups with bounded process isolation and compare each result to a serial fit.",
-      "lab": "Read the two complete worked cases, reproduce their evidence and compare their assumptions.",
-      "verification": "Complete source-bound asm-031 investigation with explicit numerical or execution diagnostics; no mastery grade."
+      "lab": "Read the worked cases \"two independent means\" and \"one shared mean is a different computation\", run the linked project only through its own documented entrypoint, and compare its recorded observations with the chapter.",
+      "verification": "Compare the project's recorded observations with the values and failure cases each worked case states; a command reference or hand calculation does not show that the project ran."
     },
     {
       "id": "asm-032",
@@ -669,8 +669,8 @@
         "artifact"
       ],
       "outcome": "Bind a compiled model to its C++ source, architecture and R/TMB ABI and reject stale or incompatible libraries before fitting.",
-      "lab": "Read the two complete worked cases, reproduce their evidence and compare their assumptions.",
-      "verification": "Complete source-bound asm-032 investigation with explicit numerical or execution diagnostics; no mastery grade."
+      "lab": "Read the worked cases \"prepare once, construct state per process\" and \"reject a mismatched artifact\", run the linked project only through its own documented entrypoint, and compare its recorded observations with the chapter.",
+      "verification": "Compare the project's recorded observations with the values and failure cases each worked case states; a command reference or hand calculation does not show that the project ran."
     },
     {
       "id": "asm-033",
@@ -690,8 +690,8 @@
         "effects"
       ],
       "outcome": "Derive when integrated group likelihoods can be summed and verify the block-diagonal Hessian condition.",
-      "lab": "Read the two complete worked cases, reproduce their evidence and compare their assumptions.",
-      "verification": "Complete source-bound asm-033 investigation with explicit numerical or execution diagnostics; no mastery grade."
+      "lab": "Read the worked cases \"independent random intercepts\" and \"shared hyperparameters still need a global optimizer\", run the linked project only through its own documented entrypoint, and compare its recorded observations with the chapter.",
+      "verification": "Compare the project's recorded observations with the values and failure cases each worked case states; a command reference or hand calculation does not show that the project ran."
     },
     {
       "id": "asm-034",
@@ -711,8 +711,8 @@
         "tape"
       ],
       "outcome": "Evaluate every partition at the same parameter vector, merge pure TMB summaries and optimize the original shared objective.",
-      "lab": "Read the two complete worked cases, reproduce their evidence and compare their assumptions.",
-      "verification": "Complete source-bound asm-034 investigation with explicit numerical or execution diagnostics; no mastery grade."
+      "lab": "Read the worked cases \"recover a global normal mean\" and \"Python DataFrame to R without silent schema changes\", run the linked project only through its own documented entrypoint, and compare its recorded observations with the chapter.",
+      "verification": "Compare the project's recorded observations with the values and failure cases each worked case states; a command reference or hand calculation does not show that the project ran."
     },
     {
       "id": "asm-035",
@@ -732,8 +732,8 @@
         "determinant"
       ],
       "outcome": "Show quantitatively how an off-block latent dependence changes a Laplace approximation and forbids an independent-group decomposition.",
-      "lab": "Read the two complete worked cases, reproduce their evidence and compare their assumptions.",
-      "verification": "Complete source-bound asm-035 investigation with explicit numerical or execution diagnostics; no mastery grade."
+      "lab": "Read the worked cases \"a two-by-two determinant\" and \"a spatial field crossing partitions\", run the linked project only through its own documented entrypoint, and compare its recorded observations with the chapter.",
+      "verification": "Compare the project's recorded observations with the values and failure cases each worked case states; a command reference or hand calculation does not show that the project ran."
     },
     {
       "id": "asm-036",
@@ -752,8 +752,8 @@
         "uncertainty"
       ],
       "outcome": "Compare estimation targets and uncertainty for one shared model without treating optimizer output and posterior draws as equivalent.",
-      "lab": "Read the two complete worked cases, reproduce their evidence and compare their assumptions.",
-      "verification": "Complete source-bound asm-036 investigation with explicit numerical or execution diagnostics; no mastery grade."
+      "lab": "Read the worked cases \"normal mean with a conjugate prior\" and \"a non-Gaussian latent model\", run the linked project only through its own documented entrypoint, and compare its recorded observations with the chapter.",
+      "verification": "Compare the project's recorded observations with the values and failure cases each worked case states; a command reference or hand calculation does not show that the project ran."
     },
     {
       "id": "asm-037",
@@ -773,8 +773,8 @@
         "even"
       ],
       "outcome": "Build a reproducible cost decomposition and decide when distributed likelihood evaluation is justified by measured work.",
-      "lab": "Read the two complete worked cases, reproduce their evidence and compare their assumptions.",
-      "verification": "Complete source-bound asm-037 investigation with explicit numerical or execution diagnostics; no mastery grade."
+      "lab": "Read the worked cases \"small data favors a compiled serial fit\" and \"skew defeats nominal parallelism\", run the linked project only through its own documented entrypoint, and compare its recorded observations with the chapter.",
+      "verification": "Compare the project's recorded observations with the values and failure cases each worked case states; a command reference or hand calculation does not show that the project ran."
     },
     {
       "id": "asm-038",
@@ -794,8 +794,8 @@
         "inference"
       ],
       "outcome": "Choose and defend independent fitting, additive global MLE, DDP or a coupled-model alternative for four concrete modeling cases.",
-      "lab": "Read the two complete worked cases, reproduce their evidence and compare their assumptions.",
-      "verification": "Complete source-bound asm-038 investigation with explicit numerical or execution diagnostics; no mastery grade."
+      "lab": "Read the worked cases \"a global nonlinear Gaussian fit\" and \"a hierarchical spatial model\", run the linked project only through its own documented entrypoint, and compare its recorded observations with the chapter.",
+      "verification": "Compare the project's recorded observations with the values and failure cases each worked case states; a command reference or hand calculation does not show that the project ran."
     }
   ]
 }

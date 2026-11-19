@@ -44,7 +44,7 @@ concurrent writers rather than a directory overwrite.
 
 ## Worked case B: a correction creates a new observation boundary
 
-Append a fourth west order with amount2 and capture the new snapshot. The old
+Append a fourth west order with amount 2 and capture the new snapshot. The old
 version-pinned scan remains three rows and west 9; the new scan contains four rows
 and west 11. The previously registered DataFusion Arrow relation remains bound
 to its materialized state until explicitly refreshed. Require all three
@@ -94,8 +94,8 @@ Run the actual bounded PyIceberg/Arrow/DataFusion program in the prepared Python
 - Cleanup/evidence-storage result and any separate prepared or unavailable feature.
 
 For the common three-order fixture, require IDs 1/2/3 with amounts 4/9/7, total 20,
-east 11 and west 9. A later fourth west order of2changes current total to22 and west
-to11while an earlier pinned snapshot remains unchanged. Do not use this simple
+east 11 and west 9. A later fourth west order of 2 changes the current total to 22 and west
+to 11 while an earlier pinned snapshot remains unchanged. Do not use this simple
 oracle to claim correctness for a different pipeline without defining its
 deduplication, correction and visibility semantics.
 

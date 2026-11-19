@@ -1,6 +1,6 @@
 # science-022: Survey inclusion weights, clustering and population targets
 
-Tutorial mode. Stage: advanced. Direct prerequisites: `statistics-003`, `statistics-008`.
+Tutorial mode. Stage: advanced. Direct prerequisites: `statistics-005`, `statistics-008`.
 
 ## Sampling weights describe a design
 

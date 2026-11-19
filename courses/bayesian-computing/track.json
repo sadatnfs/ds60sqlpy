@@ -19,9 +19,9 @@
         "conditioning",
         "likelihood ratio"
       ],
-      "outcome": "Explain and reproduce generative questions, conditioning and repeated evidence, with explicit computational and scientific limits.",
-      "lab": "Read the two complete worked cases, reproduce their evidence and compare their assumptions.",
-      "verification": "Complete source-bound bayes-001 investigation with explicit numerical or sampler diagnostics; no mastery grade."
+      "outcome": "Condition a fault hypothesis on detector signals with Bayes' rule and show why a perfectly repeated signal is not independent new evidence.",
+      "lab": "Update the fault probability after one signal, then compare a perfectly repeated reading with two conditionally independent signals.",
+      "verification": "Reproduce posterior fault probability 0.692 (odds 2.25) after one signal, the same 0.692 for a duplicated reading and 0.953 for two independent signals."
     },
     {
       "id": "bayes-002",
@@ -37,9 +37,9 @@
         "normalization",
         "quadrature"
       ],
-      "outcome": "Explain and reproduce log densities, normalization and exact numerical oracles, with explicit computational and scientific limits.",
-      "lab": "Read the two complete worked cases, reproduce their evidence and compare their assumptions.",
-      "verification": "Complete source-bound bayes-002 investigation with explicit numerical or sampler diagnostics; no mastery grade."
+      "outcome": "Normalize posterior weights on the log scale, check grid integration against an exact posterior and recover ratios from log densities that underflow.",
+      "lab": "Compare grid-integrated posterior moments with their analytic values, then normalize extreme log weights with log-sum-exp.",
+      "verification": "Grid mean and variance match the analytic 1.846 and 0.308, and the stable weights for the extreme log densities are about 0.665, 0.245 and 0.090."
     },
     {
       "id": "bayes-003",
@@ -55,9 +55,9 @@
         "beta-binomial",
         "predictive variance"
       ],
-      "outcome": "Explain and reproduce conjugacy, posterior prediction and duplicated observations, with explicit computational and scientific limits.",
-      "lab": "Read the two complete worked cases, reproduce their evidence and compare their assumptions.",
-      "verification": "Complete source-bound bayes-003 investigation with explicit numerical or sampler diagnostics; no mastery grade."
+      "outcome": "Derive a beta-binomial posterior predictive distribution, separate parameter uncertainty from outcome variance and show how duplicated records overstate certainty.",
+      "lab": "Derive the predictive probabilities for five future trials, then duplicate the observed batch and compare posterior variances.",
+      "verification": "Posterior mean 0.714 and predictive variance 1.293 against a plug-in 1.020; duplicating the batch shrinks the parameter variance from 0.0136 to 0.0075."
     },
     {
       "id": "bayes-004",
@@ -73,9 +73,9 @@
         "constraint",
         "density"
       ],
-      "outcome": "Explain and reproduce probability transformations and jacobian accounting, with explicit computational and scientific limits.",
-      "lab": "Read the two complete worked cases, reproduce their evidence and compare their assumptions.",
-      "verification": "Complete source-bound bayes-004 investigation with explicit numerical or sampler diagnostics; no mastery grade."
+      "outcome": "Change variables in a density with the correct Jacobian and detect the moment error caused by omitting it.",
+      "lab": "Verify that a transformed beta density integrates to one, then omit the Jacobian and compare second moments.",
+      "verification": "With the Jacobian the transformed density integrates to 1.000 and the second moment is 0.300; omitting it gives 0.333."
     },
     {
       "id": "bayes-005",
@@ -92,9 +92,9 @@
         "posterior risk",
         "regret"
       ],
-      "outcome": "Explain and reproduce posterior decisions, loss and regret, with explicit computational and scientific limits.",
-      "lab": "Read the two complete worked cases, reproduce their evidence and compare their assumptions.",
-      "verification": "Complete source-bound bayes-005 investigation with explicit numerical or sampler diagnostics; no mastery grade."
+      "outcome": "Choose an action by posterior expected utility, contrast it with the posterior probability of benefit and compute each action's expected regret.",
+      "lab": "Compute expected net benefit and the probability of positive benefit, then the posterior expected regret of treating and of waiting.",
+      "verification": "Expected net benefit 0.714 and probability of benefit 0.781; expected regret 0.137 for treating against 0.852 for waiting selects treatment under the stated utility."
     },
     {
       "id": "bayes-006",
@@ -110,9 +110,9 @@
         "autocorrelation",
         "ESS"
       ],
-      "outcome": "Explain and reproduce markov chains, autocorrelation and deceptive acceptance rates, with explicit computational and scientific limits.",
-      "lab": "Read the two complete worked cases, reproduce their evidence and compare their assumptions.",
-      "verification": "Complete source-bound bayes-006 investigation with explicit numerical or sampler diagnostics; no mastery grade."
+      "outcome": "Run a Metropolis sampler, estimate an autocorrelation-adjusted effective sample size and show why 100% acceptance can mean no exploration.",
+      "lab": "Run a random-walk Metropolis chain on a standard normal target, then set the proposal scale to zero and compare acceptance, mean and variance.",
+      "verification": "The working chain has acceptance about 0.70, lag-one correlation 0.78, an AR(1) effective sample size near 300 and variance near 1; the zero-scale chain accepts every move and has variance 0."
     },
     {
       "id": "bayes-007",
@@ -129,9 +129,9 @@
         "leapfrog",
         "NUTS"
       ],
-      "outcome": "Explain and reproduce hamiltonian geometry, integration and nuts motivation, with explicit computational and scientific limits.",
-      "lab": "Read the two complete worked cases, reproduce their evidence and compare their assumptions.",
-      "verification": "Complete source-bound bayes-007 investigation with explicit numerical or sampler diagnostics; no mastery grade."
+      "outcome": "Implement leapfrog integration for Hamiltonian Monte Carlo, verify reversibility and energy error, and show how an oversized step destroys acceptance.",
+      "lab": "Check leapfrog reversibility and energy error at a small step size, then enlarge the step until the integrator becomes unstable.",
+      "verification": "Reversibility error 0 and an energy error near -0.0003 at the small step; the large step produces an enormous energy error and acceptance 0."
     },
     {
       "id": "bayes-008",
@@ -148,9 +148,9 @@
         "rank",
         "conditional validation"
       ],
-      "outcome": "Explain and reproduce simulation-based calibration and tests that can miss errors, with explicit computational and scientific limits.",
-      "lab": "Read the two complete worked cases, reproduce their evidence and compare their assumptions.",
-      "verification": "Complete source-bound bayes-008 investigation with explicit numerical or sampler diagnostics; no mastery grade."
+      "outcome": "Run simulation-based calibration on a conjugate normal model, detect a shifted posterior from its ranks and show that a prior-only algorithm can still pass a rank check.",
+      "lab": "Compare rank means for correct, shifted and prior-only inference with 64 posterior draws, then compare their conditional errors.",
+      "verification": "Rank means stay near the uniform value 32 for correct (33.0) and prior-only (31.9) inference but fall to 10.6 when shifted; conditional error 0.009 against 0.555 exposes the prior-only algorithm."
     },
     {
       "id": "bayes-009",
@@ -167,9 +167,9 @@
         "InferenceData",
         "posterior predictive"
       ],
-      "outcome": "Explain and reproduce an actual pymc regression and its diagnostic record, with explicit computational and scientific limits.",
-      "lab": "Read the two complete worked cases, reproduce their evidence and compare their assumptions.",
-      "verification": "Complete source-bound bayes-009 investigation with explicit numerical or sampler diagnostics; no mastery grade."
+      "outcome": "Fit a small PyMC regression, read its R-hat, bulk effective sample size and divergence record against the conventional screen and generate posterior predictive observations.",
+      "lab": "Fit the 16-point regression with two short chains, compare the printed diagnostics with the screen, then sample posterior predictive outcomes.",
+      "verification": "Intercept and slope means fall within 0.15 and 0.2 of 0.5 and 1.3, the predictive array has shape (2, 120, 16), and rhat_max, bulk_ess_min and divergences are compared with 1.01, 100 per chain and 0."
     },
     {
       "id": "bayes-010",
@@ -185,9 +185,9 @@
         "noncentered",
         "funnel"
       ],
-      "outcome": "Explain and reproduce centered and noncentered hierarchical computation, with explicit computational and scientific limits.",
-      "lab": "Read the two complete worked cases, reproduce their evidence and compare their assumptions.",
-      "verification": "Complete source-bound bayes-010 investigation with explicit numerical or sampler diagnostics; no mastery grade."
+      "outcome": "Fit centered and noncentered forms of one hierarchy, check group means against a known-hyperparameter shrinkage oracle and compare their diagnostic records.",
+      "lab": "Derive the conditional shrinkage oracle, then fit both parameterizations and compare group means, divergences and effective sample sizes.",
+      "verification": "The density identity centered + 3 log(tau) = noncentered holds, both fits return finite group means to compare with the oracle (-1.667, 0, 0.962), and each diagnostic record is read against the screen."
     },
     {
       "id": "bayes-011",
@@ -203,9 +203,9 @@
         "outlier",
         "robustness"
       ],
-      "outcome": "Explain and reproduce robust likelihoods and predictive criticism, with explicit computational and scientific limits.",
-      "lab": "Read the two complete worked cases, reproduce their evidence and compare their assumptions.",
-      "verification": "Complete source-bound bayes-011 investigation with explicit numerical or sampler diagnostics; no mastery grade."
+      "outcome": "Compare normal and Student-t likelihoods on data with one outlier and show how the tail penalty moves the posterior location.",
+      "lab": "Fit both likelihoods to eight central points plus an outlier at 8, then compare posterior locations and each model's log-density penalty for the outlier.",
+      "verification": "The Student-t posterior location is closer to zero than the normal one; the outlier costs -32.0 log units under the normal against -7.08 under a Student-t with 4 degrees of freedom."
     },
     {
       "id": "bayes-012",
@@ -221,9 +221,9 @@
         "exposure",
         "negative binomial"
       ],
-      "outcome": "Explain and reproduce count models, exposure and overdispersion, with explicit computational and scientific limits.",
-      "lab": "Read the two complete worked cases, reproduce their evidence and compare their assumptions.",
-      "verification": "Complete source-bound bayes-012 investigation with explicit numerical or sampler diagnostics; no mastery grade."
+      "outcome": "Fit Poisson and negative-binomial count models, compare predictive dispersion with the observed counts and separate an event rate from its exposure.",
+      "lab": "Compare predictive means and variances of both models with the observed counts, then check that rate times exposure determines the Poisson mass.",
+      "verification": "Observed mean 4.5 and variance 34.1; the negative-binomial predictive variance exceeds the Poisson one, and rate 2 over exposure 3 gives the same log mass for 4 events as rate 4 over exposure 1.5."
     },
     {
       "id": "bayes-013",
@@ -240,9 +240,9 @@
         "identification",
         "correlated predictors"
       ],
-      "outcome": "Explain and reproduce posterior geometry with weakly identified predictors, with explicit computational and scientific limits.",
-      "lab": "Read the two complete worked cases, reproduce their evidence and compare their assumptions.",
-      "verification": "Complete source-bound bayes-013 investigation with explicit numerical or sampler diagnostics; no mastery grade."
+      "outcome": "Derive the exact normal posterior for nearly collinear predictors, compare PyMC coefficient means with it and show that a coefficient sum is far better determined than either coefficient.",
+      "lab": "Compute the analytic posterior, fit the same model in PyMC and compare individual coefficient uncertainty with the uncertainty of their sum.",
+      "verification": "Sampled coefficient means lie within 0.5 of the analytic posterior; the coefficient correlation is about -0.997 and the posterior SD of the sum (0.037) is far below the individual SDs (about 0.48)."
     },
     {
       "id": "bayes-014",
@@ -259,9 +259,9 @@
         "Pareto k",
         "evaluation unit"
       ],
-      "outcome": "Explain and reproduce pointwise predictive evaluation, psis and the held-out unit, with explicit computational and scientific limits.",
-      "lab": "Read the two complete worked cases, reproduce their evidence and compare their assumptions.",
-      "verification": "Complete source-bound bayes-014 investigation with explicit numerical or sampler diagnostics; no mastery grade."
+      "outcome": "Estimate leave-one-out predictive accuracy with PSIS, compare it with exact refitting and interpret Pareto k against the ArviZ sample-size cutoff.",
+      "lab": "Compare PSIS-LOO with exact conjugate refits for a constant and a linear model, then change the predictive unit from single to paired observations.",
+      "verification": "Exact LOO favors the linear model, each PSIS error is reported against the exact value, pareto_k_max is compared with the 0.58 cutoff for 240 draws, and the joint two-observation log prediction differs from the product of marginals."
     },
     {
       "id": "bayes-015",
@@ -278,9 +278,9 @@
         "predictive uncertainty",
         "Monte Carlo"
       ],
-      "outcome": "Explain and reproduce bayesian resource decisions and monte carlo uncertainty, with explicit computational and scientific limits.",
-      "lab": "Read the two complete worked cases, reproduce their evidence and compare their assumptions.",
-      "verification": "Complete source-bound bayes-015 investigation with explicit numerical or sampler diagnostics; no mastery grade."
+      "outcome": "Choose an order quantity from a posterior predictive cost, compare a short-chain simulation decision with the exact oracle and report its Monte Carlo regret.",
+      "lab": "Optimize the exact negative-binomial predictive cost, then repeat the decision from sampled rates and simulated demand.",
+      "verification": "The analytic posterior rate is 3.0 and the exact cost-minimizing quantity is 4 (expected cost 2.866); the simulated choice is within one unit and its regret and maximum cost error are reported."
     },
     {
       "id": "bayes-016",
@@ -289,7 +289,7 @@
       "minutes": 120,
       "prerequisites": [
         "bayes-009",
-        "statistics-026"
+        "statistics-018"
       ],
       "runtime": "bayesian-cpu",
       "concepts": [
@@ -297,9 +297,9 @@
         "kernel",
         "total variance"
       ],
-      "outcome": "Explain and reproduce gaussian processes and conditional versus integrated uncertainty, with explicit computational and scientific limits.",
-      "lab": "Read the two complete worked cases, reproduce their evidence and compare their assumptions.",
-      "verification": "Complete source-bound bayes-016 investigation with explicit numerical or sampler diagnostics; no mastery grade."
+      "outcome": "Match PyMC Gaussian-process predictions with a direct covariance calculation and show how integrating over hyperparameters adds between-component variance.",
+      "lab": "Compare the PyMC conditional GP mean and covariance with closed-form kernel algebra, then mix two hyperparameter settings.",
+      "verification": "PyMC predictions match the direct calculation within 1e-6, and mixing components with means 0 and 2 and variance 0.1 gives total variance 1.1 rather than the conditional 0.1."
     },
     {
       "id": "bayes-017",
@@ -316,9 +316,9 @@
         "normal-normal",
         "generated quantities"
       ],
-      "outcome": "Explain and reproduce stan blocks and a conjugate reference model, with explicit computational and scientific limits.",
-      "lab": "Read the two complete worked cases, reproduce their evidence and compare their assumptions.",
-      "verification": "Complete source-bound bayes-017 investigation with explicit numerical or sampler diagnostics; no mastery grade."
+      "outcome": "Read the blocks of a Stan program, connect its sampled mean to the conjugate normal posterior and interpret constant versus sampled diagnostic rows.",
+      "lab": "Compile and sample the normal-mean model, compare mu with the generated analytic posterior and read the summary rows for constants and for mu.",
+      "verification": "posterior_mean 1.905 and posterior_variance 0.190 are constant generated quantities to compare with the sampled mu; mu's R_hat, ESS_bulk and ESS_tail are read against 1.01 and 100 per chain."
     },
     {
       "id": "bayes-018",
@@ -335,9 +335,9 @@
         "type",
         "posterior prediction"
       ],
-      "outcome": "Explain and reproduce stan matrix regression and typed shape contracts, with explicit computational and scientific limits.",
-      "lab": "Read the two complete worked cases, reproduce their evidence and compare their assumptions.",
-      "verification": "Complete source-bound bayes-018 investigation with explicit numerical or sampler diagnostics; no mastery grade."
+      "outcome": "Write a Stan regression with a typed design matrix, follow one observation through the linear predictor and distinguish a new mean from a new outcome.",
+      "lab": "Trace one observation through X * beta and the likelihood, then compare the generated new_mean with new_outcome at x = 0.5.",
+      "verification": "X has an intercept column and centered x values from -2 to 2, log_lik has one entry per observation, and new_outcome is more dispersed than new_mean because it adds sigma."
     },
     {
       "id": "bayes-019",
@@ -354,9 +354,9 @@
         "Jacobian",
         "Poisson"
       ],
-      "outcome": "Explain and reproduce stan constraints, log-rate transformations and jacobians, with explicit computational and scientific limits.",
-      "lab": "Read the two complete worked cases, reproduce their evidence and compare their assumptions.",
-      "verification": "Complete source-bound bayes-019 investigation with explicit numerical or sampler diagnostics; no mastery grade."
+      "outcome": "Compare a declared positive Poisson rate with a manual log-rate parameterization and add the Jacobian that the manual transform needs.",
+      "lab": "Sample lambda and z = log(lambda) in one program, then compare both with the exact gamma posterior.",
+      "verification": "Both lambda and lambda_from_z should agree with the exact posterior mean 1.333 and variance 0.222 from generated quantities; removing the + z Jacobian term would shift lambda_from_z."
     },
     {
       "id": "bayes-020",
@@ -373,9 +373,9 @@
         "noncentered",
         "new group"
       ],
-      "outcome": "Explain and reproduce stan noncentered hierarchies and prediction targets, with explicit computational and scientific limits.",
-      "lab": "Read the two complete worked cases, reproduce their evidence and compare their assumptions.",
-      "verification": "Complete source-bound bayes-020 investigation with explicit numerical or sampler diagnostics; no mastery grade."
+      "outcome": "Write a noncentered Stan hierarchy with typed group indices and distinguish predictions for an existing group from predictions for a new group.",
+      "lab": "Sample the three-group model, then compare known_group_outcome for group 1 with new_group_mean drawn from the population distribution.",
+      "verification": "theta equals mu + tau * z in every draw, draws of new_group_mean are more dispersed than draws of theta[1], and tau, mu and theta are read against the diagnostic screen."
     },
     {
       "id": "bayes-021",
@@ -392,9 +392,9 @@
         "separation",
         "prior"
       ],
-      "outcome": "Explain and reproduce stan logistic likelihoods and separation-aware priors, with explicit computational and scientific limits.",
-      "lab": "Read the two complete worked cases, reproduce their evidence and compare their assumptions.",
-      "verification": "Complete source-bound bayes-021 investigation with explicit numerical or sampler diagnostics; no mastery grade."
+      "outcome": "Fit a Stan Bernoulli-logit model, follow likelihood, fitted probabilities and replicated outcomes, and explain why priors keep coefficients finite under complete separation.",
+      "lab": "Sample alpha and beta for the eight-point fixture, read probability, y_rep and probability_at_zero, then reason through a completely separated variant.",
+      "verification": "Fitted probabilities rise with x, probability_at_zero equals inv_logit(alpha) in every draw, y_rep holds one binary draw per observation, and beta is read against the diagnostic screen."
     },
     {
       "id": "bayes-022",
@@ -411,9 +411,9 @@
         "log_mix",
         "label switching"
       ],
-      "outcome": "Explain and reproduce stan marginalized mixtures and label conventions, with explicit computational and scientific limits.",
-      "lab": "Read the two complete worked cases, reproduce their evidence and compare their assumptions.",
-      "verification": "Complete source-bound bayes-022 investigation with explicit numerical or sampler diagnostics; no mastery grade."
+      "outcome": "Fit a marginalized two-component normal mixture in Stan with log_mix, fix the label convention with ordered means and compute observation responsibilities.",
+      "lab": "Sample the ordered mixture, then compute each observation's responsibility for the first component and replicate observations.",
+      "verification": "mu[1] is below mu[2] by construction, the five negative observations have first-component responsibility near 1 and the five positive ones near 0, and log_lik uses log_mix for every observation."
     },
     {
       "id": "bayes-023",
@@ -430,9 +430,9 @@
         "stationarity",
         "forecast"
       ],
-      "outcome": "Explain and reproduce stan stationary dynamics and multi-step prediction, with explicit computational and scientific limits.",
-      "lab": "Read the two complete worked cases, reproduce their evidence and compare their assumptions.",
-      "verification": "Complete source-bound bayes-023 investigation with explicit numerical or sampler diagnostics; no mastery grade."
+      "outcome": "Fit a stationary AR(1) model in Stan including the initial-state distribution and propagate parameter and innovation uncertainty to a three-step forecast.",
+      "lab": "Sample mu, phi and sigma, then compare the generated one-step and three-step forecast means, variances and outcomes.",
+      "verification": "phi stays inside (-1, 1), horizon_three_variance equals sigma^2 (1 + phi^2 + phi^4) in every draw, and three-step outcomes are more dispersed than one-step outcomes."
     },
     {
       "id": "bayes-024",
@@ -452,9 +452,9 @@
         "left truncation",
         "Weibull AFT"
       ],
-      "outcome": "Explain and reproduce stan censored survival workflow and decision dossier, with explicit computational and scientific limits.",
-      "lab": "Read the two complete worked cases, reproduce their evidence and compare their assumptions.",
-      "verification": "Complete source-bound bayes-024 investigation with explicit numerical or sampler diagnostics; no mastery grade."
+      "outcome": "Write censored and left-truncated Weibull AFT likelihood contributions in Stan and report the acceleration factor, hazard ratio, control median and survival at time six.",
+      "lab": "Sample the eight-subject censored survival model, then derive the AFT and hazard interpretations of the covariate coefficient.",
+      "verification": "acceleration_factor equals exp(beta[2]) and hazard_ratio equals exp(-shape * beta[2]) in every draw; censored rows contribute survival terms and delayed entries condition on survival to entry."
     }
   ]
 }

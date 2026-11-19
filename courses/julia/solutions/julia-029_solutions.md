@@ -12,7 +12,7 @@ The consumer drains a value, allowing the producer to continue without unbounded
 
 Squares are emitted into the result in channel-consumption order; broader parallel pipelines need explicit ordering.
 
-**Expected observation:** The result is[4,0,9].
+**Expected observation:** The result is `[4, 0, 9]`.
 
 ## 3. Inject a failure
 

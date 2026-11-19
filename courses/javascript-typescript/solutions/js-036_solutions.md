@@ -24,11 +24,13 @@ The examples create a public entry, an explicit subpath and a private implementa
 
 package.json type:module selects ESM for .js files in its package scope, while .mjs is explicit independently. exports maps package entry and subpath names to intended files. Bare package imports resolve from the importing module's location. A child main.mjs in the temporary project imports the authored package through node_modules, exercising the real loader. The helper captures exit status and stderr, cleans up its directory and never runs a shell or package installation.
 
-## Exercise 1: Import the public package entry
+## Exercise 1: Import the public package entry: predict an edited check
 
-Task: Create a package with exports pointing at index.mjs and import its version value.
+Task: Copy Example A into a scratch `main.mjs` and change `assert.equal(result.stdout.trim(), '1');` to `assert.equal(result.stdout.trim(), '2');` inside its check. Before running it, predict whether the check still passes and explain why; then restore it.
 
 The import uses normal package-name resolution from the temporary main module. It does not bypass the exports map with an absolute file URL.
+
+The unchanged code is the exercise block of Example A:
 
 ```javascript
 await withPackage(async (directory) => {
@@ -41,15 +43,17 @@ await withPackage(async (directory) => {
 });
 ```
 
-**Expected:** actual child prints 1.
+**Expected:** The changed run fails with an `AssertionError` at the check `assert.equal(result.stdout.trim(), '1')`. Restoring the original line brings back the worked observation: actual child prints 1.
 
-**Verify:** Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.
+**Verify:** Compare your written prediction with the reported `AssertionError`, including its actual and expected values, and explain why the edited check rejects the values that `assert.equal(result.stdout.trim(), '1')` accepts. After restoring the line, the program prints its `{"checks":1,"status":"passed"}` receipt again.
 
-## Exercise 2: Use an explicitly exported subpath
+## Exercise 2: Use an explicitly exported subpath: debug a regression
 
-Task: Import twice from course-fixture/math.
+Task: A regression changed one token in Example B, so one line now reads `console.log(twice(4));`. Run Example B with that line, use the failing check to locate the defect and repair it without changing the check.
 
 A public subpath is part of the package interface. Its name can remain stable even if the internal file layout later changes.
+
+The unchanged code is the exercise block of Example B:
 
 ```javascript
 await withPackage(async (directory) => {
@@ -62,9 +66,9 @@ await withPackage(async (directory) => {
 });
 ```
 
-**Expected:** actual child prints 6.
+**Expected:** Before the repair the run fails with an `AssertionError` at the check `assert.equal(result.stdout.trim(), '6')`; after it the line reads `console.log(twice(3));` again and actual child prints 6.
 
-**Verify:** Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.
+**Verify:** Keep the failing and the repaired runs. Explain why the changed token alters the value tested by `assert.equal(result.stdout.trim(), '6')` for this input.
 
 ## Exercise 3: Reject an undeclared private path
 
@@ -82,7 +86,7 @@ await withPackage(async (directory) => {
 
 **Expected:** nonzero child status with ERR_PACKAGE_PATH_NOT_EXPORTED.
 
-**Verify:** Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.
+**Verify:** Keep a check equivalent to `assert.match(result.stderr, /ERR_PACKAGE_PATH_NOT_EXPORTED/u)`. As a control, change `const result = runImport(directory, 'import \'course-fixture/private.mjs\';');` to `const result = runImport(directory, 'import \'course-fixture/private.mjs\';!');`: the run must fail with an `AssertionError` at that check. Restore the line before continuing.
 
 ## Exercise 4: Observe that engines is metadata rather than a loader gate
 
@@ -103,7 +107,7 @@ await withPackage(async (directory) => {
 
 **Expected:** metadata says >=99; ordinary import still succeeds.
 
-**Verify:** Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.
+**Verify:** Keep a check equivalent to `assert.equal(runImport(directory, 'import \'course-fixture\';').status, 0)`. As a control, change `assert.equal(runImport(directory, 'import \'course-fixture\';').status, 0);` to `assert.equal(runImport(directory, 'import \'course-fixture\';!').status, 0);` inside it: the run must fail with an `AssertionError`, which shows the check can fail. Restore it.
 
 ## Exercise 5: Detect exact source tampering through a digest
 
@@ -124,7 +128,7 @@ await withPackage(async (directory) => {
 
 **Expected:** digest changes after modification.
 
-**Verify:** Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.
+**Verify:** Keep a check equivalent to `assert.equal(before.length, 64)`. As a control, change `assert.equal(before.length, 64);` to `assert.equal(before.length, 65);` inside it: the run must fail with an `AssertionError`, which shows the check can fail. Restore it.
 
 ## Exercise 6: Preserve a versioned behavior contract
 
@@ -144,7 +148,7 @@ await withPackage(async (directory) => {
 
 **Expected:** child exits successfully for twice(0)=0 and twice(-2)=-4.
 
-**Verify:** Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.
+**Verify:** Keep a check equivalent to `assert.equal(result.status, 0, result.stderr)`. As a control, change `assert.equal(twice(0)` to `assert.equal(twice(1)`: the run must fail with an `AssertionError` at that check. Restore the line before continuing.
 
 ## After comparison
 

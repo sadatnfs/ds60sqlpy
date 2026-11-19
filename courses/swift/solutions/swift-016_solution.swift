@@ -29,6 +29,14 @@ struct LessonMain {
       precondition(result.rejected == 3)
       precondition(importRows([]).counts.isEmpty)
     }
+
+    do {
+      // Task 3: Independent construction
+      let result = importRows(["pear,2", "apple,3", "bad", "pear,1"])
+      var lines = result.counts.keys.sorted().map { "\($0): \(result.counts[$0]!)" }
+      lines.append("rejected: \(result.rejected)")
+      precondition(lines.joined(separator: "\n") == "apple: 3\npear: 3\nrejected: 1")
+    }
     print("swift-016: passed")
   }
 }

@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import argparse
+import ast
 import json
 import subprocess
 import sys
@@ -69,17 +70,113 @@ def units() -> list[Unit]:
     return result
 
 
+def _bound_names(node: ast.stmt) -> set[str]:
+    """Names a top-level setup statement binds."""
+    if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef)):
+        return {node.name}
+    if isinstance(node, (ast.Import, ast.ImportFrom)):
+        return {(alias.asname or alias.name).split(".")[0] for alias in node.names}
+    targets = []
+    if isinstance(node, ast.Assign):
+        targets = node.targets
+    elif isinstance(node, (ast.AnnAssign, ast.AugAssign)):
+        targets = [node.target]
+    return {
+        name.id
+        for target in targets
+        for name in ast.walk(target)
+        if isinstance(name, ast.Name) and isinstance(name.ctx, ast.Store)
+    }
+
+
+def _used_names(source: str) -> set[str]:
+    return {node.id for node in ast.walk(ast.parse(source)) if isinstance(node, ast.Name)}
+
+
+def used_setup(setup: str, codes: list[str]) -> str:
+    """Keep only setup statements that the selected cases need, in their original order.
+
+    Statements that bind no name (for example a configuration call) are always kept.
+    """
+    if not setup.strip():
+        return ""
+    tree = ast.parse(setup)
+    lines = setup.splitlines()
+    statements = [(node, _bound_names(node)) for node in tree.body]
+    keep = [not bound for _, bound in statements]
+    required = set().union(*(_used_names(code) for code in codes))
+    for index, (node, _) in enumerate(statements):
+        if keep[index]:
+            required |= {n.id for n in ast.walk(node) if isinstance(n, ast.Name)}
+    setup_bound = set().union(*(bound for _, bound in statements))
+
+    def registers_on_kept(node: ast.stmt) -> bool:
+        # A decorator such as @function.defjvp registers a rule on a kept setup object.
+        kept_bound = set().union(*(b for (_, b), k in zip(statements, keep, strict=True) if k))
+        roots = {
+            name.id
+            for decorator in getattr(node, "decorator_list", [])
+            for name in ast.walk(decorator)
+            if isinstance(name, ast.Name)
+        }
+        return bool(roots & setup_bound & kept_bound)
+
+    changed = True
+    while changed:
+        changed = False
+        for index, (node, bound) in enumerate(statements):
+            if not keep[index] and (bound & required or registers_on_kept(node)):
+                keep[index] = changed = True
+                required |= {n.id for n in ast.walk(node) if isinstance(n, ast.Name)}
+
+    def span(index: int) -> tuple[int, int]:
+        node = statements[index][0]
+        decorators = getattr(node, "decorator_list", [])
+        return min([node.lineno, *(item.lineno for item in decorators)]) - 1, node.end_lineno
+
+    output: list[str] = []
+    previous = None
+    for index, kept in enumerate(keep):
+        if not kept:
+            continue
+        first, last = span(index)
+        if previous is not None and index == previous + 1:
+            # Adjacent statements keep the original blank lines and comments between them.
+            output += lines[span(previous)[1] : last]
+        else:
+            while first > 0 and lines[first - 1].lstrip().startswith("#"):
+                first -= 1
+            output += ["", ""] if output else []
+            output += lines[first:last]
+        previous = index
+    return "\n".join(output)
+
+
 def program(unit: Unit, cases: tuple[Case, ...]) -> str:
     setup_lines = unit.setup.strip().splitlines()
     extra_imports = [line for line in setup_lines if line.startswith(("import ", "from "))]
     setup = "\n".join(line for line in setup_lines if line not in extra_imports).strip()
+    codes = [item.code for item in cases]
+    setup = used_setup(setup, codes)
+    used = set().union(*(_used_names(code) for code in [*codes, setup or "pass"]))
+    extra_imports = [line for line in extra_imports if _bound_names(ast.parse(line).body[0]) & used]
     header = HEADER.replace(
         "# Choose precision", "\n".join(extra_imports) + "\n\n# Choose precision"
     )
+    if "math" not in used:
+        header = header.replace("import math\n", "", 1)
+    if "jnp" not in used:
+        header = header.replace("import jax.numpy as jnp\n", "", 1)
+    if "close" not in used:
+        start = header.index("\n\ndef close(")
+        header = header[:start] + "\n"
+        if "np" not in used:
+            header = header.replace("import numpy as np\n", "", 1)
     body = []
     for index, item in enumerate(cases, 1):
         body.append(f"# Case {index}: {item.title}\n{item.code}")
-    body.append(f"print({unit.id!r} + ': {len(cases)} asserted cases passed')")
+    noun = "case" if len(cases) == 1 else "cases"
+    body.append(f'print("{unit.id}: {len(cases)} asserted {noun} passed")')
     return (
         header
         + setup
@@ -87,6 +184,119 @@ def program(unit: Unit, cases: tuple[Case, ...]) -> str:
         + indent("\n\n".join(body), "    ")
         + '\n\n\nif __name__ == "__main__":\n    main()\n'
     )
+
+
+# Calls that construct or compare literals; naming them would not help a learner.
+ROUTINE_CALLS = {
+    "AssertionError",
+    "Path",
+    "abs",
+    "all",
+    "any",
+    "bool",
+    "close",
+    "compare",
+    "dict",
+    "enumerate",
+    "float",
+    "int",
+    "isinstance",
+    "jnp.array",
+    "jnp.asarray",
+    "len",
+    "list",
+    "max",
+    "min",
+    "np.allclose",
+    "np.array",
+    "np.asarray",
+    "np.isclose",
+    "np.testing.assert_allclose",
+    "print",
+    "range",
+    "repr",
+    "round",
+    "set",
+    "sorted",
+    "str",
+    "sum",
+    "tuple",
+    "type",
+    "zip",
+}
+
+
+def _call_name(func: ast.expr) -> str | None:
+    parts = []
+    node = func
+    while isinstance(node, ast.Attribute):
+        parts.append(node.attr)
+        node = node.value
+    if isinstance(node, ast.Name):
+        name = ".".join([node.id, *reversed(parts)])
+        if node.id in {"jax", "jnp", "lax", "np", "math", "tempfile"} or not parts:
+            return name
+        return "." + parts[0]
+    if isinstance(func, ast.Attribute):
+        inner = func.value
+        if isinstance(inner, ast.Subscript) and isinstance(inner.value, ast.Attribute):
+            return f".{inner.value.attr}[...].{func.attr}"
+        return "." + func.attr
+    return None
+
+
+def _quoted_list(items: list[str]) -> str:
+    quoted = [f"`{item}`" for item in items]
+    return quoted[0] if len(quoted) == 1 else ", ".join(quoted[:-1]) + " and " + quoted[-1]
+
+
+def second_hint(item: Case) -> str:
+    """A second, more specific hint derived from the exercise's own reference code."""
+    tree = ast.parse(item.code)
+    nodes = sorted(
+        (node for node in ast.walk(tree) if hasattr(node, "lineno")),
+        key=lambda node: (node.lineno, node.col_offset),
+    )
+    calls: list[str] = []
+    errors: list[str] = []
+    checks = 0
+    # Names the reference binds itself (for example a compiled function) are not hints.
+    local = {
+        node.id
+        for node in ast.walk(tree)
+        if isinstance(node, ast.Name) and isinstance(node.ctx, ast.Store)
+    }
+    for node in nodes:
+        if isinstance(node, ast.Call):
+            name = _call_name(node.func)
+            if name in {"close", "compare"}:
+                checks += 1
+            elif name and name not in ROUTINE_CALLS | local and name not in calls:
+                calls.append(name)
+        elif isinstance(node, ast.Assert):
+            checks += 1
+        elif isinstance(node, ast.ExceptHandler) and isinstance(
+            node.type, (ast.Name, ast.Attribute)
+        ):
+            error = _call_name(node.type) or ""
+            if error and error not in errors:
+                errors.append(error)
+    parts = []
+    if calls:
+        parts.append(f"The reference solution calls {_quoted_list(calls[:5])}")
+    else:
+        parts.append(
+            "The reference solution needs no new function: it combines arrays from the setup "
+            "with arithmetic, indexing or broadcasting"
+        )
+    if errors:
+        parts.append(
+            f"and treats {_quoted_list(errors)} as the passing outcome, failing if the call returns"
+        )
+    elif checks:
+        noun = "assertion" if checks == 1 else "assertions"
+        parts.append(f"and then makes {checks} {noun} against the expected observation")
+    return " ".join(parts) + "."
 
 
 def render(unit: Unit) -> dict[str, str]:
@@ -108,17 +318,20 @@ def render(unit: Unit) -> dict[str, str]:
             "Any external execution needs the explicit preparation and evidence described below."
         )
     else:
+        first, second = unit.worked
         sections.append(
-            "## Run this investigation\n\nUse the **JAX** subject in the shared `/classroom` "
-            "interface and its prepared `jax-cpu` profile. A Run starts a fresh Python process; "
-            "save source and notes before replacing an attempt. The examples below are each "
-            "complete programs, including their setup. They use tiny offline fixtures and deliberately "
-            "enable 64-bit arithmetic before constructing arrays. This is a course precision choice, "
-            "not the usual JAX default. No packages, models or data are downloaded.\n\n"
-            f"Learner source: `{prefix}lessons/{key}.py`. Guide: `{prefix}guides/{key}.md`. "
-            "Predict the value and failure behavior before running. A passing assertion supports "
-            "that particular contract; it does not establish statistical validity, mastery or "
-            "accelerator performance."
+            "## Run this investigation\n\n"
+            f"Open `{key}` under the **JAX** subject in `/classroom` with its prepared `jax-cpu` "
+            f"profile. Worked example 1, *{first.title}*, and worked example 2, *{second.title}*, "
+            "are complete programs that include only the setup they use and each print "
+            f"`{key}: 1 asserted case passed`. The learner file `{prefix}lessons/{key}.py` leaves "
+            f"the six exercises, from *{unit.practice[0].title}* to *{unit.practice[-1].title}*, "
+            f"for you to implement; the complete reference prints `{key}: 8 asserted cases "
+            "passed`. Every program enables 64-bit arithmetic before creating arrays, a course "
+            "choice since JAX defaults to 32 bit, and every Run is a fresh Python process, so "
+            "save source and notes before replacing an attempt. A passing assertion supports "
+            "its stated contract only, not statistical validity, mastery or accelerator "
+            "performance."
         )
     sections.append("## Worked investigations")
     for number, item in enumerate(unit.worked, 1):
@@ -135,10 +348,12 @@ def render(unit: Unit) -> dict[str, str]:
     for number, item in enumerate(unit.practice, 1):
         sections.append(
             f"### Exercise {number}: {item.title}\n\n{item.task}\n\n"
-            f"**Expected:** {item.expected}\n\n**Verify:** Retain the relevant inputs, intermediate "
-            f"calculation and observation. {item.explanation}\n\n**Hint 1:** {item.hint}\n\n"
-            "**Hint 2:** Revisit the worked case that changes the same assumption, then close "
-            "the reference and reconstruct the result from the stated contract."
+            f"**Expected:** {item.expected}\n\n**Verify:** {item.explanation}\n\n"
+            + (
+                f"**Hint:** {item.hint}"
+                if unit.runtime == "reading"
+                else f"**Hint 1:** {item.hint}\n\n**Hint 2:** {second_hint(item)}"
+            )
         )
     sections.extend(
         [
@@ -147,11 +362,12 @@ def render(unit: Unit) -> dict[str, str]:
             "## Primary references\n\n"
             + "\n".join(f"- [{title}]({url})" for title, url in unit.sources),
             "## Ask an AI tutor about this lesson\n\n"
-            f"Use the checked-in $guide-ds60sqlpy-learning skill for `{key}`. Start with my own "
-            "prediction and source. Ask me to explain one intermediate shape, derivative or state "
-            "transition, then give a progressive hint for the first incorrect assumption. Distinguish "
-            "authored examples, my actual receipt and any hardware or population claim requiring "
-            "additional evidence.",
+            f"Use the checked-in $guide-ds60sqlpy-learning skill for `{key}` ({unit.title}), "
+            f"focusing on {', '.join(unit.concepts)}. Start with my own prediction and source "
+            f"for one exercise, such as *{unit.practice[2].title}*. Ask me to explain one "
+            "intermediate shape, derivative or state transition, then give a progressive hint "
+            "for the first incorrect assumption. Distinguish authored examples, my actual saved "
+            "run output and any hardware or population claim requiring additional evidence.",
         ]
     )
     explanation = [f"# {key}: explained reference\n\n" + unit.derivation]

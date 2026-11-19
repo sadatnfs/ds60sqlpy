@@ -21,7 +21,7 @@
     },
     {
       "exercise": 4,
-      "task": "Evaluate reviewer,reviewer,ERROR,reviewer against the four-response gate.",
+      "task": "Evaluate reviewer, reviewer, ERROR, reviewer against the four-response gate.",
       "expected": "Failure with one error; do not proceed to promotion."
     },
     {

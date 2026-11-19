@@ -28,19 +28,19 @@ def exercise_2():
 
 
 # Exercise 3: Reject an empty population
-# Admit a completely false mask.
+# Pass a completely false mask to `admit`.
 def exercise_3():
     raise NotImplementedError("Reject an empty population")
 
 
 # Exercise 4: Reject an invalid penalty
-# Admit a negative ridge penalty.
+# Pass a negative ridge penalty to `admit`.
 def exercise_4():
     raise NotImplementedError("Reject an invalid penalty")
 
 
 # Exercise 5: Check transformation parity
-# Compile the solve on admitted inputs and compare with the eager result.
+# Compile the solve on validated inputs and compare with the eager result.
 def exercise_5():
     raise NotImplementedError("Check transformation parity")
 

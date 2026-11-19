@@ -4,9 +4,9 @@ Open after an attempt or an explicit solution reveal. The executable reference r
 
 ## Mechanism review
 
-Synchronization protects a state transition,not merely a variable name. A synchronized block uses a monitor and provides mutual exclusion plus visibility when all participants follow the same locking policy. AtomicInteger supports individual atomic operations such as increment and compare-and-set. ConcurrentHashMap provides thread-safe operations,but a separate get followed by put is still a compound sequence unless a method such as compute or merge makes it atomic for a key.
+Synchronization protects a state transition, not merely a variable name. A synchronized block uses a monitor and provides mutual exclusion plus visibility when all participants follow the same locking policy. AtomicInteger supports individual atomic operations such as increment and compare-and-set. ConcurrentHashMap provides thread-safe operations, but a separate get followed by put is still a compound sequence unless a method such as compute or merge makes it atomic for a key.
 
-Locks also create lifetime and ordering obligations. Always release an explicit lock in finally. Acquiring multiple locks in inconsistent order can deadlock;using one global order removes that cycle for the declared lock set. A timed tryLock can make contention a bounded outcome rather than an indefinite wait. This lesson tests exact counts and controlled contention,not a universal concurrency performance claim.
+Locks also create lifetime and ordering obligations. Always release an explicit lock in finally. Acquiring multiple locks in inconsistent order can deadlock; using one global order removes that cycle for the declared lock set. A timed tryLock can make contention a bounded outcome rather than an indefinite wait. This lesson tests exact counts and controlled contention, not a universal concurrency performance claim.
 
 **Critical section:** The state transition protected by one mutual-exclusion policy.
 
@@ -16,13 +16,15 @@ Locks also create lifetime and ordering obligations. Always release an explicit 
 
 ## Reading the reference
 
-Use synchronized around the entire read-modify-write. AtomicInteger.incrementAndGet performs one atomic increment. compareAndSet succeeds only when the current value matches the expected value. ConcurrentHashMap.merge combines updates atomically for a key. ReentrantLock.tryLock(timeout,unit) returns false on bounded contention;unlock belongs in finally after a successful acquisition.
+Use synchronized around the entire read-modify-write. AtomicInteger.incrementAndGet performs one atomic increment. compareAndSet succeeds only when the current value matches the expected value. ConcurrentHashMap.merge combines updates atomically for a key. ReentrantLock.tryLock(timeout, unit) returns false on bounded contention; unlock belongs in finally after a successful acquisition.
 
-## Exercise 1: Protect a compound counter
+## Exercise 1: Protect a compound counter: change one input
 
-Task: Run two workers making 1000 synchronized increments each.
+Task: Copy Example A into a scratch `Main.java` and change `for (int i = 0; i < 1000; i++) counter.increment();` to `for (int i = 1; i < 1000; i++) counter.increment();`. Before running it with `java -ea Main`, predict which assertion fails and which value it now sees; then run it and restore the original line.
 
 The lock covers the complete increment. Synchronizing only a read or only a write would still permit lost updates.
+
+The unchanged code is the part that Example A adds:
 
 ```java
 Counter counter = new Counter();
@@ -32,15 +34,17 @@ runTwo(() -> {
 assert counter.value() == 2000;
 ```
 
-**Expected:** counter 2000.
+**Expected:** The changed run fails with an `AssertionError` from the assertion on `counter.value() == 2000`. Restoring the original line brings back the worked observation: counter 2000.
 
-**Verify:** Compare the program values or named exception with counter 2000. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.
+**Verify:** Compare your written prediction with the reported `AssertionError` and its stack-trace line, and name the value that made `counter.value() == 2000` false. After restoring the line, the program completes without an `AssertionError` again.
 
-## Exercise 2: Use an atomic increment
+## Exercise 2: Use an atomic increment: debug a regression
 
-Task: Repeat the workload withAtomicInteger.incrementAndGet.
+Task: A regression changed one token in the code that Example B adds after Example A, so one line now reads `for (int i = 0; i <= 1000; i++) atomic.incrementAndGet();`. Run Example B with that line, use the failing assertion to locate the defect and repair it without changing the assertion.
 
 The atomic operation matches this simple counter contract. More complex multi-field invariants may still require a larger critical section.
+
+The unchanged code is the part that Example B adds:
 
 ```java
 var atomic = new java.util.concurrent.atomic.AtomicInteger();
@@ -50,30 +54,30 @@ runTwo(() -> {
 assert atomic.get() == 2000;
 ```
 
-**Expected:** value2000.
+**Expected:** Before the repair the run fails with an `AssertionError` from the assertion on `atomic.get() == 2000`; after it the line reads `for (int i = 0; i < 1000; i++) atomic.incrementAndGet();` again and value 2000.
 
-**Verify:** Compare the program values or named exception with value2000. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.
+**Verify:** Keep the failing and the repaired runs. Explain why the changed token alters the value tested by `atomic.get() == 2000` for this input.
 
 ## Exercise 3: Inspect compare-and-set
 
-Task: Change0to1 with CAS,then retry expecting0.
+Task: Change 0 to 1 with CAS, then retry expecting 0.
 
 CAS reports whether its expected-state condition held. A failed attempt must be handled according to the algorithm rather than assumed to have updated.
 
 ```java
 var state = new java.util.concurrent.atomic.AtomicInteger();
-assert state.compareAndSet(0, 1);
-assert !state.compareAndSet(0, 2);
-assert state.get() == 1;
+boolean firstSwap = state.compareAndSet(0, 1);
+boolean staleSwap = state.compareAndSet(0, 2);
+assert firstSwap && !staleSwap && state.get() == 1;
 ```
 
-**Expected:** first true;second false;value1.
+**Expected:** first true; second false; value 1.
 
-**Verify:** Compare the program values or named exception with first true;second false;value1. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.
+**Verify:** Keep an assertion equivalent to `firstSwap && !staleSwap && state.get() == 1`. As a control, change `boolean firstSwap = state.compareAndSet(0, 1);` to `boolean firstSwap = state.compareAndSet(1, 1);`: the run must fail with an `AssertionError` from the assertion on `firstSwap && !staleSwap && state.get() == 1`. Restore the line before continuing.
 
 ## Exercise 4: Combine map updates atomically
 
-Task: UseConcurrentHashMap.merge for2000 total increments ofkeyx.
+Task: Use ConcurrentHashMap.merge for 2000 total increments ofkeyx.
 
 The map operation covers the per-key combination. Thread safety of the container would not make an arbitrary get-plus-put sequence atomic.
 
@@ -85,15 +89,15 @@ runTwo(() -> {
 assert counts.get("x") == 2000;
 ```
 
-**Expected:** stored count2000.
+**Expected:** stored count 2000.
 
-**Verify:** Compare the program values or named exception with stored count2000. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.
+**Verify:** Keep an assertion equivalent to `counts.get("x") == 2000`. As a control, change `for (int i = 0; i < 1000; i++) counts.merge("x", 1, Integer::sum);` to `for (int i = 0; i <= 1000; i++) counts.merge("x", 1, Integer::sum);`: the run must fail with an `AssertionError` from the assertion on `counts.get("x") == 2000`. Restore the line before continuing.
 
 ## Exercise 5: Bound lock contention
 
 Task: Hold a ReentrantLock in the caller while a worker tries to acquire it with a short timeout.
 
-The owner deliberately retains the lock until the timed attempt ends. The result is a controlled contention outcome,not a race-dependent timing guess.
+The owner deliberately retains the lock until the timed attempt ends. The result is a controlled contention outcome, not a race-dependent timing guess.
 
 ```java
 var lock = new java.util.concurrent.locks.ReentrantLock();
@@ -117,9 +121,9 @@ try {
 assert !lock.isLocked();
 ```
 
-**Expected:** worker returns false;lock released in finally.
+**Expected:** worker returns false; lock released in finally.
 
-**Verify:** Compare the program values or named exception with worker returns false;lock released in finally. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.
+**Verify:** Keep an assertion equivalent to `!lock.isLocked()`. As a control, change `assert !lock.isLocked();` to `assert lock.isLocked();` inside it: the run must fail with an `AssertionError`, which shows the assertion can fail. Restore it.
 
 ## Exercise 6: Use one global order for two locks
 
@@ -145,7 +149,7 @@ assert total[0] == 2000;
 
 **Expected:** 2000 increments and no blocked worker after bounded joins.
 
-**Verify:** Compare the program values or named exception with 2000 increments and no blocked worker after bounded joins. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.
+**Verify:** Keep an assertion equivalent to `total[0] == 2000`. As a control, change `for (int i = 0; i < 1000; i++) {` to `for (int i = 0; i <= 1000; i++) {`: the run must fail with an `AssertionError` from the assertion on `total[0] == 2000`. Restore the line before continuing.
 
 ## After comparing the answer
 

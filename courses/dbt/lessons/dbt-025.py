@@ -1,4 +1,4 @@
-"""dbt-025: worked starting point; complete the guide's six changes."""
+"""dbt-025: both worked cases; complete the guide's six changes."""
 
 import os
 import tempfile
@@ -75,6 +75,11 @@ def invoke(root, *arguments, succeeds=True):
     return result
 
 
+def rows(root, sql):
+    with duckdb.connect(str(root / "warehouse.duckdb"), read_only=False) as connection:
+        return connection.execute(sql).fetchall()
+
+
 def example_one():
     with tempfile.TemporaryDirectory() as d:
         p = project(
@@ -105,8 +110,31 @@ def example_one():
         return {"transactional_pointer_rollback": True, "retained_release": [1, 42]}
 
 
+def example_two():
+    with tempfile.TemporaryDirectory() as d:
+        p = project(
+            d,
+            models={"candidate": "{{ config(materialized='table') }} select 1 as id, 42 as value"},
+        )
+        invoke(p, "build")
+        with duckdb.connect(str(p / "warehouse.duckdb")) as c:
+            c.execute("create table accepted_release as select * from candidate")
+        (p / "models/candidate.sql").write_text(
+            "{{ config(materialized='table') }} select 1 as id, 99 as value"
+        )
+        (p / "tests").mkdir()
+        (p / "tests/value_policy.sql").write_text(
+            "select * from {{ ref('candidate') }} where value > 50"
+        )
+        invoke(p, "build", succeeds=False)
+        assert rows(p, "select value from candidate") == [(99,)]
+        assert rows(p, "select value from accepted_release") == [(42,)]
+        return {"candidate_rejected": 99, "accepted_release_unchanged": 42}
+
+
 if __name__ == "__main__":
     print(example_one())
+    print(example_two())
 
 # TODO 1: Query candidate and accepted relations after failure.
 # TODO 2: Repeat the pointer transaction under a valid policy and commit it.

@@ -60,7 +60,7 @@ The branch order preserves source provenance. If parsed NULL were checked first,
 
 Retain valid and missing statuses, then return event_id and parsed_amount aliased as amount_cents. Reject only malformed/overflowing nonnull tokens at this stage.
 
-**Expected:** IDs[1,2,3,4,7,8] remain with amounts[100,0,25, NULL,-5,50]. There are 6 rows,5 known values and total 170.
+**Expected:** IDs [1, 2, 3, 4, 7, 8] remain with amounts [100,0,25, NULL,-5,50]. There are 6 rows,5 known values and total 170.
 
 ```scala
 def acceptedProjection(frame: DataFrame): DataFrame = {
@@ -135,7 +135,7 @@ The valid subset demonstrates that strict casting is not blanket rejection. The 
 
 From parse-accepted rows, retain unknown amounts and known nonnegative amounts. Return event_id, amount_cents and report the separate negative-domain rejection at ID 7 in the checks.
 
-**Expected:** Final IDs[1,2,3,4,8] have 5 rows,4 known values, total 175. The full source reconciles as 5 final accepted+2 parse rejected+1 negative-domain rejected.
+**Expected:** Final IDs [1, 2, 3, 4, 8] have 5 rows,4 known values, total 175. The full source reconciles as 5 final accepted+2 parse rejected+1 negative-domain rejected.
 
 ```scala
 def nonnegativeAmounts(frame: DataFrame): DataFrame = {
@@ -156,4 +156,4 @@ The domain rule is applied after conversion and retains its own rejected populat
 
 ## Execution and interpretation
 
-Run the complete reference in its prepared fixed worker. The small fixture is constructed inside the program,so opening a lesson does not fetch data. A final success line is printed only after the reference assertions complete. Plan observations,partition evidence and resource measurements apply to the actual local configuration; they do not establish cluster-scale performance. Session cleanup is explicit,and any additional owned file/query lifecycle is described in the lesson.
+Run the complete reference in its prepared fixed worker. The small fixture is constructed inside the program, so opening a lesson does not fetch data. A final success line is printed only after the reference assertions complete. Plan observations, partition evidence and resource measurements apply to the actual local configuration; they do not establish cluster-scale performance. Session cleanup is explicit, and any additional owned file/query lifecycle is described in the lesson.

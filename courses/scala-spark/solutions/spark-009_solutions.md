@@ -63,7 +63,7 @@ Seq("local[*]", "spark://example:7077", null).foreach(value =>
 
 Return a multiplier closure that copies only owner.factor into a local immutable value. Require factor and input magnitude at most 1000000 so multiplication is within Long range. Do not retain owner or its nonserializable resource.
 
-**Expected:** Owner factor 3 produces 7->21 and-2->-6. An input outside the bounded domain is rejected. The function is suitable for the later serialization check.
+**Expected:** Owner factor 3 produces 7->21 and -2->-6. An input outside the bounded domain is rejected. The function is suitable for the later serialization check.
 
 ```scala
 def captureValue(owner: Owner): Long => Long = {

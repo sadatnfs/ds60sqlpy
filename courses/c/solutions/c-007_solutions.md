@@ -8,22 +8,26 @@ A C string is a character sequence terminated by a null character. The terminato
 
 char word[] = "cat" creates four characters including the terminator. strlen counts bytes before that terminator. sizeof word counts the array storage in this scope. strcmp compares string content; pointer equality compares addresses instead. snprintf limits writes and reports the required length, allowing truncation detection. Reserve capacity for the terminating null byte and never repair a missing bound by hoping the next memory byte is zero.
 
-## Exercise 1: Compare length and storage
+## Exercise 1: Compare length and storage: change one input
 
-Create the writable string cat.
+Copy worked example 1 into a scratch pad and change `char word[] = "cat";` to `char word[] = "cat!";`. Before running, predict which CHECK fails and which value it now sees; then run it and restore the original line.
+
+The unchanged code is worked example 1:
 
 ```c
 char word[] = "cat";
 CHECK(strlen(word) == 3 && sizeof word == 4);
 ```
 
-**Expected:** strlen is 3 while array size is 4.
+**Expected:** The changed run stops with `Check failed` at the CHECK on `strlen(word) == 3 && sizeof word == 4`. Restoring the original line brings back the worked observation: strlen is 3 while array size is 4.
 
 The fourth byte is the terminator. Forgetting it when allocating an output creates a one-byte overflow risk.
 
-## Exercise 2: Modify owned text
+## Exercise 2: Modify owned text: debug a regression
 
-Change the first character of a writable cat array.
+A regression changed one token in worked example 2, so one line now reads `word[1] = 'b';`. Run worked example 2 with that line, use the failing CHECK to locate the defect and repair it without changing the CHECK.
+
+The unchanged code is worked example 2:
 
 ```c
 char word[] = "cat";
@@ -31,7 +35,7 @@ word[0] = 'b';
 CHECK(strcmp(word, "bat") == 0);
 ```
 
-**Expected:** The result is bat.
+**Expected:** Before the repair the run stops with `Check failed` at the CHECK on `strcmp(word, "bat") == 0`; after it the line reads `word[0] = 'b';` again and the result is bat.
 
 The array is writable. Performing the same assignment through a pointer to a string literal would be undefined behavior.
 

@@ -8,9 +8,11 @@ A thread executes concurrently within the process and shares its address space. 
 
 pthread_create takes a pointer to a pthread_t, optional attributes, a function void *(*)(void *) and an argument pointer. The worker converts that argument back to its actual type. pthread_join waits for termination and can retrieve a returned pointer, whose lifetime still needs justification. POSIX pthread functions generally return an error number directly rather than setting errno in the same way as read or write.
 
-## Exercise 1: Join one calculation
+## Exercise 1: Join one calculation: change one input
 
-Start a thread squaring input 7 and join it.
+Copy worked example 1 into a scratch pad and change `struct Work work = {.input = 7, .output = 0};` to `struct Work work = {.input = 8, .output = 0};`. Before running, predict which CHECK fails and which value it now sees; then run it and restore the original line.
+
+The unchanged code is worked example 1:
 
 ```c
 struct Work work = {.input = 7, .output = 0};
@@ -20,13 +22,15 @@ CHECK(pthread_join(thread, NULL) == 0);
 CHECK(work.output == 49);
 ```
 
-**Expected:** The retained result is 49.
+**Expected:** The changed run stops with `Check failed` at the CHECK on `work.output == 49`. Restoring the original line brings back the worked observation: the retained result is 49.
 
 The stack argument remains alive until after join. Reading output before synchronization would not have this contract.
 
-## Exercise 2: Keep separate arguments
+## Exercise 2: Keep separate arguments: debug a regression
 
-Start two workers with inputs 2 and 3.
+A regression changed one token in worked example 2, so one line now reads `struct Work work[2] = {{3, 0}, {3, 0}};`. Run worked example 2 with that line, use the failing CHECK to locate the defect and repair it without changing the CHECK.
+
+The unchanged code is worked example 2:
 
 ```c
 struct Work work[2] = {{2, 0}, {3, 0}};
@@ -38,7 +42,7 @@ for (size_t i = 0; i < 2; i++)
 CHECK(work[0].output == 4 && work[1].output == 9);
 ```
 
-**Expected:** Their independent outputs are 4 and 9.
+**Expected:** Before the repair the run stops with `Check failed` at the CHECK on `work[0].output == 4 && work[1].output == 9`; after it the line reads `struct Work work[2] = {{2, 0}, {3, 0}};` again and their independent outputs are 4 and 9.
 
 Each worker receives its own stable object rather than the address of one changing loop variable.
 

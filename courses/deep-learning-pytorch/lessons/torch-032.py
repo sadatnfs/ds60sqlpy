@@ -4,18 +4,19 @@ Answer-free learner worksheet. See the companion guide for worked examples.
 Copy to .learning before editing. Six independent attempts belong below.
 """
 
-# Exercise 1: Create a known inference model
-# Set a 2-to-1 bias-free Linear weight to[2, -1] and predict rows 1, 2 and 3, 4.
-# Expected: outputs 0, 2.
+# Exercise 1: Predict a new inference output
+# Set a bias-free 2-to-1 Linear weight to [1, 3] and predict the rows [1, 2] and [3, 4].
+# Expected: outputs [[7], [15]].
 
-# Exercise 2: Round-trip named state
-# Save state_dict to an owned temporary file, reconstruct the architecture and load
-# weights_only.
-# Expected: restored predictions match within 1e-6.
+# Exercise 2: Load state into matching and mismatched modules
+# Load the model's state_dict into a fresh bias-free Linear(2, 1) and into a Linear(2, 1)
+# that has a bias.
+# Expected: the matching module reproduces the outputs; the module with a bias raises RuntimeError for the missing key.
 
-# Exercise 3: Save an exported program
-# Export the fixed batch program, save it, and load its module.
-# Expected: exported predictions match within 1e-6.
+# Exercise 3: Export the new model in memory
+# Export the new model for the two-row input and compare the exported module's
+# predictions.
+# Expected: exported predictions match [[7], [15]] within 1e-6.
 
 # Exercise 4: Check both artifacts in a fresh process
 # Load the state and exported program in a new interpreter and compare outputs.

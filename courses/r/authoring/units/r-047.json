@@ -3,7 +3,7 @@
   "title": "Decision trees, complexity and held-out decisions",
   "level": "advanced",
   "minutes": 140,
-  "prerequisites": ["r-046"],
+  "prerequisites": ["r-045"],
   "concepts": [
     "recursive partitioning",
     "leaf",

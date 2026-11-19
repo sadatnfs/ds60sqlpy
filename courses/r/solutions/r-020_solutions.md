@@ -16,15 +16,11 @@ Derive the weighted mean of 10 and 20 with weights 1 and 3.
 
 The result is 17.5.
 
-**Expected evidence:** The result is 17.5.
-
 ### Exercise 2
 
 Multiply every weight by five.
 
 The weighted mean stays 17.5.
-
-**Expected evidence:** The weighted mean stays 17.5.
 
 ### Exercise 3
 
@@ -32,15 +28,11 @@ Add tests for mismatched lengths and zero total weight.
 
 Both should be rejected explicitly.
 
-**Expected evidence:** Both should be rejected explicitly.
-
 ### Exercise 4
 
 Diagnose a test comparing a function with the same copied formula.
 
 Add independently derived fixtures and invariants.
-
-**Expected evidence:** Add independently derived fixtures and invariants.
 
 ### Exercise 5
 
@@ -48,16 +40,12 @@ Repeat a random draw under the same seed.
 
 The vectors match within the declared environment/generator configuration.
 
-**Expected evidence:** The vectors match within the declared environment/generator configuration.
-
 ### Exercise 6
 
 Write a useful bug report for a dropped matrix dimension.
 
 A reviewer can reproduce the failure without the original private data or hidden session.
 
-**Expected evidence:** A reviewer can reproduce the failure without the original private data or hidden session.
-
 ## What the checks establish
 
-The reference contains explicit behavioral assertions for its small synthetic inputs. A passing run establishes those assertions in the reported environment. It does not prove correctness for every input, statistical validity for an unrelated population, or compatibility with untested package versions.
+The reference makes 7 `stopifnot()` checks on its small synthetic inputs. A passing run establishes those assertions in the reported environment. It does not prove correctness for every input, statistical validity for an unrelated population, or compatibility with untested package versions.

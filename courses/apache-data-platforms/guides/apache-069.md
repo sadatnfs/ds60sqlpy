@@ -27,8 +27,54 @@ owned native server. This distinction remains visible throughout these chapters.
 
 The client derives a unique type prefix from a saved random owner and defines
 a dataset subtype of DataSet plus a process subtype of Process. It also defines
-one owned classification. The payload carries typeVersion1.0 and a deliberate
-set of supertypes. Inspect it before submitting it to a real server. Existing
+one owned classification. The payload carries `typeVersion` 1.0 and a deliberate
+set of supertypes. Inspect it before submitting it to a real server. `bash run.sh
+plan` prints exactly what this function returns, with no server involved:
+
+From [`projects/atlas/client.py`](../projects/atlas/client.py):
+
+```python
+def payloads():
+    types = {
+        "entityDefs": [
+            {"name": DATASET, "superTypes": ["DataSet"], "typeVersion": "1.0", "attributeDefs": []},
+            {"name": PROCESS, "superTypes": ["Process"], "typeVersion": "1.0", "attributeDefs": []},
+        ],
+        "classificationDefs": [
+            {"name": LABEL, "superTypes": [], "typeVersion": "1.0", "attributeDefs": []}
+        ],
+    }
+    entities = []
+    for number, key in enumerate(["raw", "curated", "unrecorded"], 1):
+        entity = {
+            "guid": str(-number),
+            "typeName": DATASET,
+            "attributes": {
+                "qualifiedName": NAMES[key],
+                "name": key,
+                "description": "Synthetic owned Atlas tutorial asset",
+            },
+        }
+        if key == "curated":
+            entity["classifications"] = [{"typeName": LABEL}]
+        entities.append(entity)
+    entities.append(
+        {
+            "guid": "-4",
+            "typeName": PROCESS,
+            "attributes": {
+                "qualifiedName": NAMES["transform"],
+                "name": "transform",
+                "inputs": [{"guid": "-1", "typeName": DATASET}],
+                "outputs": [{"guid": "-2", "typeName": DATASET}],
+            },
+        }
+    )
+    return {"types": types, "entities": {"entities": entities}}
+```
+
+Negative `guid` values such as `"-1"` are placeholders that let one request refer
+to entities it is creating; the server replaces them with real GUIDs. Existing
 incompatible definitions are rejected rather than automatically migrated.
 
 Next create raw and curated dataset instances and one transform process. Their
@@ -45,7 +91,9 @@ permissions.
 
 ## Worked case B: update one asset while retaining its identity
 
-Repeat the same intended asset ingestion using its stable qualified name. Read
+This case needs a separately prepared Atlas server, which the repository does not
+provide; the GUID comparison below is what to record on such a server, not a result
+reproduced here. Repeat the same intended asset ingestion using its stable qualified name. Read
 back the actual GUID before and after. The expected contract is one updated
 asset, not a new independent asset for each delivery attempt. A changed display
 name or description should not automatically change the qualified-name identity

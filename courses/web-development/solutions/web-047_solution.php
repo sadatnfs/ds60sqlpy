@@ -9,12 +9,20 @@ function check(bool $condition, string $message): void
   }
 }
 
+enum Topic: string
+{
+  case Html = "HTML";
+  case Css = "CSS";
+  case Php = "PHP";
+}
+
 function validatePlan(array $input): array
 {
   $errors = [];
   $topic = $input["topic"] ?? null;
   $minutes = $input["minutes"] ?? null;
-  if (!is_string($topic) || !in_array($topic, ["HTML", "CSS", "PHP"], true)) {
+  $choice = is_string($topic) ? Topic::tryFrom($topic) : null;
+  if ($choice === null) {
     $errors["topic"] = "Choose HTML, CSS or PHP.";
   }
   if (
@@ -26,7 +34,7 @@ function validatePlan(array $input): array
     $errors["minutes"] = "Use 5 to 120 whole minutes.";
   }
   return [
-    "value" => $errors ? null : ["topic" => $topic, "minutes" => (int) $minutes],
+    "value" => $errors ? null : ["topic" => $choice->value, "minutes" => (int) $minutes],
     "errors" => $errors,
   ];
 }
@@ -39,6 +47,10 @@ check(
   "Array input accepted",
 );
 check(validatePlan([])["value"] === null, "Missing input accepted");
+check(
+  validatePlan(["topic" => "html", "minutes" => "30"])["value"] === null,
+  "Unknown topic accepted",
+);
 echo json_encode(validatePlan(["topic" => "CSS", "minutes" => "121"]), JSON_THROW_ON_ERROR) . "\n";
 
 echo "web-047 reference checks passed\n";

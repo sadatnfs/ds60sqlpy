@@ -42,6 +42,21 @@ internal static class Program {
             "nested name is not a leaf");
       Check(Path.GetExtension(fileName) == ".csv", "extension classification");
     }
+    {
+      // Task 3: Independent construction
+      string name = "inventory-" + Guid.NewGuid().ToString("N");
+      string folder = Path.Combine(Path.GetTempPath(), name);
+      Directory.CreateDirectory(folder);
+      try {
+        string path = Path.Combine(folder, "report.txt");
+        string report = "pear: 3\napple: 5";
+        File.WriteAllText(path, report, Encoding.UTF8);
+        Check(File.ReadAllText(path, Encoding.UTF8) == report, "round trip");
+      } finally {
+        Directory.Delete(folder, true);
+      }
+      Check(!Directory.Exists(folder), "temporary folder removed");
+    }
     Console.WriteLine("csharp-025: passed");
     await Task.CompletedTask;
   }

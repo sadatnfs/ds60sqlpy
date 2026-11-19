@@ -8,7 +8,7 @@ Combine hand-derived cases, generated inputs and invariants so that a plausible 
 
 ## Classroom execution
 
-Choose **Julia language and scientific computing** in `/classroom`, open this unit, and select its prepared `julia` runtime. The worker starts a fresh `main.jl` process with two Julia threads, a fixed package environment, no startup file and offline package settings. Both worked examples are complete under that environment. Save your current pad before replacing it. No package, model or dataset is fetched by a lesson.
+Open `julia-028` in `/classroom` with its prepared `julia` runtime. Worked case A (hand-derived and extreme cases) and worked case B (generated metamorphic checks) are complete programs: save your current pad, paste one of them and press Run. The learner file contains the six investigations below; the explained reference ends by printing `julia-028: all reference checks passed`. The [course overview](../README.md) describes the shared runtime: a fresh offline `main.jl` process with two threads and a fixed package environment.
 
 ## Independent evidence starts with a specification
 
@@ -24,7 +24,7 @@ Validate empty input, negative weights and nonfinite values before normalization
 
 ### Worked case A: hand-derived and extreme cases
 
-The first program tests weights[1,2,1], whose probabilities are exactly[0.25,0.5,0.25], and two enormous equal weights. The latter case exposes an overflow bug that ordinary small examples would miss.
+The first program tests weights `[1, 2, 1]`, whose probabilities are exactly `[0.25, 0.5, 0.25]`, and two enormous equal weights. The latter case exposes an overflow bug that ordinary small examples would miss.
 
 ```julia
 using Test
@@ -75,7 +75,7 @@ function probabilities(weights)
 end
 
 function worked_b()
-    generator = MersenneTwister(140)
+    generator = Xoshiro(140)
     for count = 1:20
         values = rand(generator, count) .+ 0.01
         result = probabilities(values)
@@ -102,22 +102,22 @@ Random seeds are provenance, not an independence guarantee. Two tests that reuse
 
 Record code identity, input construction, package versions, numerical tolerances and the reasoning behind each tolerance. A tolerance should reflect floating error or a declared approximation, not be enlarged until the test passes. Statistical simulations need sampling-error arguments in addition to deterministic numerical checks.
 
-Use `@test_throws` for deliberate contract violations and ordinary assertions for values, shapes and storage. Group related checks with `@testset` when a larger package needs readable failure reports. Keep end-to-end worker execution separate from source tests: a correct mathematical function is not evidence that the browser delivered the intended source, preserved its receipt or rendered its figure. The capstone ties these layers together while retaining each layer's limits.
+Use `@test_throws` for deliberate contract violations and ordinary assertions for values, shapes and storage. Group related checks with `@testset` when a larger package needs readable failure reports. Keep end-to-end worker execution separate from source tests: a correct mathematical function is not evidence that the browser delivered the intended source, saved its run output or rendered its figure. The capstone ties these layers together while retaining each layer's limits.
 
 
 ## Six investigations
 
 ### 1. Derive an oracle
 
-Compute probabilities for[2,5,3] by hand.
+Compute probabilities for weights `[2, 5, 3]` by hand.
 
-**Expected:** The result is[0.2,0.5,0.3].
+**Expected:** The result is `[0.2, 0.5, 0.3]`.
 
 **Hint:** The total is 10.
 
 ### 2. Diagnose overflow
 
-Explain why direct sum([1e308,1e308]) is dangerous.
+Explain why direct `sum([1e308, 1e308])` is dangerous.
 
 **Expected:** The sum exceeds Float64 range.
 
@@ -162,4 +162,4 @@ Propose properties for predictions from a fitted exact line.
 
 ## Study companion
 
-Use the repository learning-companion skill with this lesson ID, your prediction and your actual source/output. Ask for a diagnosis of the first incorrect type, shape, state transition or assumption. Keep observed execution distinct from a timing claim, inferred mathematical result or external deployment.
+A repository-aware assistant with the learning-companion skill can review `julia-028` with you. Give it your prediction for one investigation, your source and the actual output, and ask it to find the first incorrect assumption about Test, properties, metamorphic checks, random seeds or invariants.

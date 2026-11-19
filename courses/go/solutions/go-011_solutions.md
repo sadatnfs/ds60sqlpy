@@ -8,22 +8,26 @@ Errors describe unsuccessful operations without forcing every failure into panic
 
 errors.New constructs an error value. fmt.Errorf("read: %w", err) wraps an existing cause. errors.Is follows supported wrapping relationships to compare a sentinel; errors.As finds an error assignable to a target type. Return nil for a successful error result, not an interface containing a typed nil pointer. Avoid logging and returning the same error at every layer because repeated messages can obscure the causal chain.
 
-## 1. Preserve a cause
+## 1. Preserve a cause: change one input
 
-Wrap ErrMissing with a record-reading context.
+Copy worked example 1 into a scratch pad and change `err := fmt.Errorf("read record: %w", ErrMissing)` to `err := fmt.Errorf("read record: %v", ErrMissing)`. Before running, predict which check fails and which value it now sees; then run it and restore the original line.
+
+The unchanged code is worked example 1:
 
 ```go
 err := fmt.Errorf("read record: %w", ErrMissing)
 check(errors.Is(err, ErrMissing), "wrapped cause")
 ```
 
-**Expected:** errors.Is still recognizes ErrMissing.
+**Expected:** The changed run panics with `wrapped cause` because `errors.Is(err, ErrMissing)` no longer holds. Restoring the original line brings back the worked observation: errors.Is still recognizes ErrMissing.
 
 %w exposes the cause to the error-inspection protocol. Replacing it with %v would format the cause as text but lose that wrapping relationship.
 
-## 2. Reject text equality
+## 2. Reject text equality: diagnose an edited check
 
-Construct two separate errors with the same wording.
+A careless edit changed the check in worked example 2 so that it reads `check(errors.Is(a, b), "identity not text")`. Run worked example 2 with that line, explain why the edited check now fails for the same program state, and restore it.
+
+The unchanged code is worked example 2:
 
 ```go
 a := errors.New("missing")
@@ -31,7 +35,7 @@ b := errors.New("missing")
 check(!errors.Is(a, b), "identity not text")
 ```
 
-**Expected:** Their identities differ.
+**Expected:** Before the repair the program panics with `identity not text`; after it the line reads `check(!errors.Is(a, b), "identity not text")` again and their identities differ.
 
 A matching message does not establish the same error contract. Use an exported sentinel or typed error only when callers should rely on that distinction.
 

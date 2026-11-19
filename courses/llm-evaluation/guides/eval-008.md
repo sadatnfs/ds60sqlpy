@@ -183,6 +183,16 @@ Compare equal-query and traffic-weighted averages.
 - [RAG evaluation dimensions](https://arxiv.org/abs/2309.15217)
 - [scikit-learn nDCG definition](https://scikit-learn.org/stable/modules/generated/sklearn.metrics.ndcg_score.html)
 
-## Study companion
+## Ask an AI tutor about this lesson
 
-Use the repository learning-companion skill with this lesson ID and your own source/output. Ask for clarification of the estimand, probability distribution, data split or gradient before a hint. Keep claims about the authored fixture separate from claims requiring real population or model evidence.
+```text
+Use the checked-in $guide-ds60sqlpy-learning skill for eval-008, Retrieval evaluation and ranking denominators.
+Read courses/llm-evaluation/guides/eval-008.md and courses/llm-evaluation/lessons/eval-008.py. Direct prerequisites: eval-005, eval-006.
+Ask me to state the estimand, probability distribution, data split or gradient
+before giving a hint. Review my attempt at the six investigations one at a time,
+give one hint, and ask for the printed evidence.
+Keep courses/llm-evaluation/solutions/ closed until I attempt or explicitly request comparison.
+Keep claims about the authored fixture separate from claims that need real
+population or model evidence. Done when I can reproduce both worked programs,
+pass the six investigations and explain one failure case.
+```

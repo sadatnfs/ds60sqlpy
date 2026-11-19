@@ -1,6 +1,7 @@
-"""mle-011: worked starting point; complete the guide's six changes."""
+"""mle-011: both worked cases; complete the guide's six changes."""
 
 import hashlib
+import json
 import os
 import tempfile
 from pathlib import Path
@@ -17,6 +18,12 @@ def configure_local_tools():
         MLFLOW_DISABLE_AGENT_HINT="1",
         DBT_SEND_ANONYMOUS_USAGE_STATS="false",
     )
+
+
+def digest(data):
+    return hashlib.sha256(
+        json.dumps(data, sort_keys=True, separators=(",", ":"), allow_nan=False).encode()
+    ).hexdigest()
 
 
 def dataset():
@@ -121,8 +128,23 @@ def example_one():
         }
 
 
+def example_two():
+    contract = {"features": ["usage", "tickets", "region"], "unit": "hours", "version": 1}
+    incompatible = {**contract, "unit": "minutes", "version": 2}
+    assert digest(contract) != digest(incompatible)
+    payload = b"accepted model"
+    expected = hashlib.sha256(payload).hexdigest()
+    changed = payload + b"changed"
+    assert hashlib.sha256(changed).hexdigest() != expected
+    return {
+        "same_names_do_not_prove_semantic_compatibility": True,
+        "tamper_detected_before_deserialization": True,
+    }
+
+
 if __name__ == "__main__":
     print(example_one())
+    print(example_two())
 
 # TODO 1: Keep the input field sequence with the artifact.
 # TODO 2: Modify the saved model after recording its hash.

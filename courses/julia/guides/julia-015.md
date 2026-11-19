@@ -8,7 +8,7 @@ Transform a typed table and compute grouped summaries while preserving names, mi
 
 ## Classroom execution
 
-Choose **Julia language and scientific computing** in `/classroom`, open this unit, and select its prepared `julia` runtime. The worker starts a fresh `main.jl` process with two Julia threads, a fixed package environment, no startup file and offline package settings. Both worked examples are complete under that environment. Save your current pad before replacing it. No package, model or dataset is fetched by a lesson.
+Open `julia-015` in `/classroom` with its prepared `julia` runtime. Worked case A (select and transform named columns) and worked case B (summarize with missingness counts) are complete programs: save your current pad, paste one of them and press Run. The learner file contains the six investigations below; the explained reference ends by printing `julia-015: all reference checks passed`. The [course overview](../README.md) describes the shared runtime: a fresh offline `main.jl` process with two threads and a fixed package environment.
 
 ## A table needs a schema and a grain
 
@@ -103,13 +103,13 @@ The examples use the prepared DataFrames package and small literal tables. No ex
 
 Scale the score column by 10 using ByRow.
 
-**Expected:** The output column contains 1,2,3 under the explicit name scaled.
+**Expected:** The output column contains 1, 2 and 3 under the explicit name `scaled`.
 
 **Hint:** Choose row-wise application deliberately.
 
 ### 2. Observe a shared column
 
-Mutate input[!, :score].
+Mutate `input[!, :score]`.
 
 **Expected:** The source DataFrame changes.
 
@@ -127,7 +127,7 @@ Copy the column before later source mutation.
 
 Summarize the group containing one missing score.
 
-**Expected:** It reports 2 rows,1 observed score and mean 1.
+**Expected:** It reports 2 rows, 1 observed score and mean 1.
 
 **Hint:** A mean alone hides the denominator.
 
@@ -154,4 +154,4 @@ Average the two group means with and without count weights.
 
 ## Study companion
 
-Use the repository learning-companion skill with this lesson ID, your prediction and your actual source/output. Ask for a diagnosis of the first incorrect type, shape, state transition or assumption. Keep observed execution distinct from a timing claim, inferred mathematical result or external deployment.
+A repository-aware assistant with the learning-companion skill can review `julia-015` with you. Give it your prediction for one investigation, your source and the actual output, and ask it to find the first incorrect assumption about DataFrames, column selection, ByRow, groupby or row accounting.

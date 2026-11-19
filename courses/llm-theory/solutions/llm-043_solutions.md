@@ -18,7 +18,7 @@ This lesson implements the three attention information patterns on literal vecto
 
 **Teacher forcing:** Using observed prior target tokens as decoder input during supervised training.
 
-**Objective mask:** The target positions included in the loss,distinct from the attention access mask.
+**Objective mask:** The target positions included in the loss, distinct from the attention access mask.
 
 ## Reading the implementation
 
@@ -26,7 +26,7 @@ The attention helper accepts Q shaped(Tq, d), K shaped(Tk, d), V shaped(Tk, dv) 
 
 ## Exercise 1: Compare bidirectional and causal mixtures
 
-The question is: Use zero queries/keys and values[[2, 0], [0, 2], [6, 6]] under all-allowed and causal masks.
+The question is: Use zero queries and keys with values [[2, 0], [0, 2], [6, 6]] under all-allowed and causal masks.
 
 The score arithmetic is identical; the allowed information differs. A future source change may affect an encoder output when the whole source is available, while a future target change must not affect an earlier causal output.
 
@@ -39,9 +39,9 @@ np.testing.assert_allclose(encoder, np.tile([8 / 3, 8 / 3], (3, 1)), atol=1e-12,
 np.testing.assert_allclose(decoder, [[2, 0], [1, 1], [8 / 3, 8 / 3]], atol=1e-12, rtol=0)
 ```
 
-**Expected:** encoder rows all[8/3, 8/3]; decoder rows[2, 0], [1, 1], [8/3, 8/3].
+**Expected:** encoder rows all [8/3, 8/3]; decoder rows [2, 0], [1, 1], [8/3, 8/3].
 
-**Verify:** Compare the computed values or written argument with encoder rows all[8/3, 8/3]; decoder rows[2, 0], [1, 1], [8/3, 8/3].
+**Verify:** In a fresh process, the exercise checks confirm `encoder` matches `np.tile([8 / 3, 8 / 3], (3, 1))` within 1e-12 and `decoder` matches `[[2, 0], [1, 1], [8 / 3, 8 / 3]]` within 1e-12.
 
 ## Exercise 2: Trace rectangular cross-attention
 
@@ -57,13 +57,13 @@ assert weights.shape == (2, 3) and cross.shape == (2, 2)
 np.testing.assert_allclose(cross, np.tile([8 / 3, 8 / 3], (2, 1)), atol=1e-12, rtol=0)
 ```
 
-**Expected:** score/weight shape(2, 3); output shape(2, 2); both outputs[8/3, 8/3].
+**Expected:** score and weight shape (2, 3); output shape (2, 2); both outputs [8/3, 8/3].
 
-**Verify:** Compare the computed values or written argument with score/weight shape(2, 3); output shape(2, 2); both outputs[8/3, 8/3].
+**Verify:** In a fresh process, the exercise checks confirm `weights.shape == (2, 3)`; `cross.shape == (2, 2)` and `cross` matches `np.tile([8 / 3, 8 / 3], (2, 1))` within 1e-12.
 
 ## Exercise 3: Build shifted decoder targets
 
-The question is: For target IDs[5, 7, 3], prepend BOS 1 and form input/label pairs.
+The question is: For target IDs [5, 7, 3], prepend BOS 1 and form input/label pairs.
 
 The current decoder input is the previous target under this shifted convention. Allowing the diagonal is compatible with causality; copying the current answer into the same input position would not be.
 
@@ -77,13 +77,13 @@ np.testing.assert_array_equal(labels, [5, 7, 3])
 assert mask[0, 0] and not mask[0, 1]
 ```
 
-**Expected:** inputs[1, 5, 7]; labels[5, 7, 3]; diagonal allowed without seeing the target itself.
+**Expected:** inputs [1, 5, 7]; labels [5, 7, 3]; the diagonal is allowed without seeing the target itself.
 
-**Verify:** Compare the computed values or written argument with inputs[1, 5, 7]; labels[5, 7, 3]; diagonal allowed without seeing the target itself.
+**Verify:** In a fresh process, the exercise checks confirm `inputs` equals `[1, 5, 7]`; `labels` equals `[5, 7, 3]`; `mask[0, 0]` and `not mask[0, 1]`.
 
 ## Exercise 4: Separate masked-token supervision
 
-The question is: Corrupt source[2, 5, 7] at the middle position with MASK 0 and supervise only that original token.
+The question is: Corrupt source [2, 5, 7] at the middle position with MASK 0 and supervise only that original token.
 
 The source attention mask and the loss participation mask have different shapes and purposes. A masked-language objective does not require a causal triangle over the complete source.
 
@@ -97,9 +97,9 @@ assert original[active].tolist() == [5]
 assert np.ones((3, 3), dtype=bool)[1].all()
 ```
 
-**Expected:** input[2, 0, 7]; one active label 5; bidirectional context remains allowed.
+**Expected:** input [2, 0, 7]; one active label 5; bidirectional context remains allowed.
 
-**Verify:** Compare the computed values or written argument with input[2, 0, 7]; one active label 5; bidirectional context remains allowed.
+**Verify:** In a fresh process, the exercise checks confirm `corrupted` equals `[2, 0, 7]`; `original[active].tolist() == [5]` and `np.ones((3, 3), dtype=bool)[1].all()`.
 
 ## Exercise 5: Perturb future target values
 
@@ -118,7 +118,7 @@ np.testing.assert_allclose(new_decoder[:2], decoder[:2], atol=1e-12, rtol=0)
 
 **Expected:** encoder prefix changes; causal decoder prefix stays fixed.
 
-**Verify:** Compare the computed values or written argument with encoder prefix changes; causal decoder prefix stays fixed.
+**Verify:** In a fresh process, the exercise checks confirm `not np.allclose(new_encoder[:2], encoder[:2])` and `new_decoder[:2]` matches `decoder[:2]` within 1e-12.
 
 ## Exercise 6: Combine source padding with cross-attention
 
@@ -133,9 +133,9 @@ np.testing.assert_allclose(masked, [[1, 1], [1, 1]], atol=1e-12, rtol=0)
 np.testing.assert_array_equal(weights[:, 2], [0, 0])
 ```
 
-**Expected:** both cross outputs[1, 1]; padded source weight 0.
+**Expected:** both cross outputs [1, 1]; padded source weight 0.
 
-**Verify:** Compare the computed values or written argument with both cross outputs[1, 1]; padded source weight 0.
+**Verify:** In a fresh process, the exercise checks confirm `masked` matches `[[1, 1], [1, 1]]` within 1e-12 and `weights[:, 2]` equals `[0, 0]`.
 
 ## Review after comparison
 

@@ -14,13 +14,15 @@ Exceptions separate normal return values from failure. A checked exception is de
 
 ## Reading the reference
 
-A try(resource declarations) block owns the declared resources until control exits. AutoCloseable.close may throwException. getSuppressed exposes secondary close failures. Use a specific catch when a failure is expected, and preserve the original cause when translating to a domain exception. A finally block is useful for cleanup patterns not covered by resources, but throwing from finally can replace an important earlier failure.
+A try(resource declarations) block owns the declared resources until control exits. AutoCloseable.close may throw Exception. getSuppressed exposes secondary close failures. Use a specific catch when a failure is expected, and preserve the original cause when translating to a domain exception. A finally block is useful for cleanup patterns not covered by resources, but throwing from finally can replace an important earlier failure.
 
-## Exercise 1: Close on normal completion
+## Exercise 1: Close on normal completion: change one input
 
-Task: Open a Probe resource, record body, then inspect closure order.
+Task: Copy Example A into a scratch `Main.java` and change `try (Probe resource = new Probe("A", events, false)) {` to `try (Probe resource = new Probe("A!", events, false)) {`. Before running it with `java -ea Main`, predict which assertion fails and which value it now sees; then run it and restore the original line.
 
 Leaving the block triggers close even without an explicit call in the body. Ownership is visible in the block structure.
+
+The unchanged code is the part that Example A adds:
 
 ```java
 List<String> events = new ArrayList<>();
@@ -30,15 +32,17 @@ try (Probe resource = new Probe("A", events, false)) {
 assert events.equals(List.of("body", "closeA"));
 ```
 
-**Expected:** events body, close A.
+**Expected:** The changed run fails with an `AssertionError` from the assertion on `events.equals(List.of("body", "closeA"))`. Restoring the original line brings back the worked observation: events body, close A.
 
-**Verify:** Compare the program values or named exception with events body, close A. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.
+**Verify:** Compare your written prediction with the reported `AssertionError` and its stack-trace line, and name the value that made `events.equals(List.of("body", "closeA"))` false. After restoring the line, the program completes without an `AssertionError` again.
 
-## Exercise 2: Close in reverse order
+## Exercise 2: Close in reverse order: debug a regression
 
-Task: Declare resourcesA thenB and leave the block.
+Task: A regression changed one token in the code that Example B adds after Example A, so one line now reads `try (Probe a = new Probe("A!", events, false); Probe b = new Probe("B", events, false)) {`. Run Example B with that line, use the failing assertion to locate the defect and repair it without changing the assertion.
 
 Later resources often depend on earlier ones, so reverse closure is deliberate. The event trace proves the actual order for this fixture.
+
+The unchanged code is the part that Example B adds:
 
 ```java
 events.clear();
@@ -48,9 +52,9 @@ try (Probe a = new Probe("A", events, false); Probe b = new Probe("B", events, f
 assert events.equals(List.of("body", "closeB", "closeA"));
 ```
 
-**Expected:** closeB beforecloseA.
+**Expected:** Before the repair the run fails with an `AssertionError` from the assertion on `events.equals(List.of("body", "closeB", "closeA"))`; after it the line reads `try (Probe a = new Probe("A", events, false); Probe b = new Probe("B", events, false)) {` again and closeB before close A.
 
-**Verify:** Compare the program values or named exception with closeB beforecloseA. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.
+**Verify:** Keep the failing and the repaired runs. Explain why the changed token alters the value tested by `events.equals(List.of("body", "closeB", "closeA"))` for this input.
 
 ## Exercise 3: Close after body failure
 
@@ -71,7 +75,7 @@ assert bodyFailed && events.equals(List.of("closeA"));
 
 **Expected:** close A still recorded.
 
-**Verify:** Compare the program values or named exception with close A still recorded. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.
+**Verify:** Keep an assertion equivalent to `bodyFailed && events.equals(List.of("closeA"))`. As a control, change `bodyFailed = true;` to `bodyFailed = false;`: the run must fail with an `AssertionError` from the assertion on `bodyFailed && events.equals(List.of("closeA"))`. Restore the line before continuing.
 
 ## Exercise 4: Preserve suppressed close failure
 
@@ -90,13 +94,13 @@ try (Probe a = new Probe("A", events, true)) {
 }
 ```
 
-**Expected:** primary message body;one suppressed exceptioncloseA.
+**Expected:** primary message body; one suppressed exception close A.
 
-**Verify:** Compare the program values or named exception with primary message body;one suppressed exceptioncloseA. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.
+**Verify:** Keep an assertion equivalent to `expected.getSuppressed()[0].getMessage().equals("closeA")`. As a control, change `try (Probe a = new Probe("A", events, true)) {` to `try (Probe a = new Probe("A!", events, true)) {`: the run must fail with an `AssertionError` from the assertion on `expected.getSuppressed()[0].getMessage().equals("closeA")`. Restore the line before continuing.
 
 ## Exercise 5: Observe close-only failure
 
-Task: Let the body succeed but close throwIOException.
+Task: Let the body succeed but close throw IOException.
 
 When there is no body exception, a close failure becomes the primary failure. Resource cleanup is part of the operation outcome.
 
@@ -108,9 +112,9 @@ try (Probe a = new Probe("A", events, true)) {} catch (java.io.IOException expec
 assert closeFailed;
 ```
 
-**Expected:** IOExceptioncloseA is primary.
+**Expected:** IOException close A is primary.
 
-**Verify:** Compare the program values or named exception with IOExceptioncloseA is primary. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.
+**Verify:** Keep an assertion equivalent to `closeFailed`. As a control, change `try (Probe a = new Probe("A", events, true)) {} catch (java.io.IOException expected) {` to `try (Probe a = new Probe("A", events, false)) {} catch (java.io.IOException expected) {`: the run must fail with an `AssertionError` from the assertion on `closeFailed`. Restore the line before continuing.
 
 ## Exercise 6: Retain a translated cause
 
@@ -126,7 +130,7 @@ assert translated.getCause() == original && translated.getMessage().contains("fi
 
 **Expected:** cause remains the original IOException.
 
-**Verify:** Compare the program values or named exception with cause remains the original IOException. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.
+**Verify:** Keep an assertion equivalent to `translated.getCause() == original && translated.getMessage().contains("fixture")`. As a control, change `assert translated.getCause() == original && translated.getMessage().contains("fixture");` to `assert translated.getCause() == original && translated.getMessage().contains("fixture!");` inside it: the run must fail with an `AssertionError`, which shows the assertion can fail. Restore it.
 
 ## After comparing the answer
 

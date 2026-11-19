@@ -7,17 +7,17 @@ from torch.nn import functional as F
 
 
 def verify():
-    # Exercise 1: Calculate two penalties
+    # Worked example A: Calculate two penalties
     w = torch.tensor([1.0, -2.0])
     assert w.abs().sum().item() == 3 and w.square().sum().item() == 5
 
-    # Exercise 2: Check evaluation dropout
+    # Worked example B: Check evaluation dropout
     drop = nn.Dropout(0.5)
     drop.eval()
     x = torch.ones((4, 8))
     assert torch.equal(drop(x), x) and torch.equal(drop(x), x)
 
-    # Exercise 3: Check training invariants
+    # Worked example C: Check training invariants
     drop.train()
     sampled = drop(x)
     assert tuple(sampled.shape) == (4, 8) and set(sampled.unique().tolist()) <= {0.0, 2.0}
@@ -38,6 +38,22 @@ def verify():
     observed = drop(differentiable)
     observed.sum().backward()
     assert observed.requires_grad and torch.equal(differentiable.grad, torch.ones(3))
+
+    # Exercise 1: Compute penalties for a new vector
+    penalized = torch.tensor([3.0, -4.0, 0.0])
+    assert penalized.abs().sum().item() == 7 and penalized.square().sum().item() == 25
+
+    # Exercise 2: Predict train-mode values for p=0.25
+    quarter = nn.Dropout(0.25)
+    quarter.train()
+    kept = quarter(torch.ones((3, 5)))
+    assert tuple(kept.shape) == (3, 5) and all(
+        value == 0 or abs(value - 4 / 3) < 1e-6 for value in kept.flatten().tolist()
+    )
+
+    # Exercise 3: Confirm eval disables the new rate
+    quarter.eval()
+    assert torch.equal(quarter(torch.ones((3, 5))), torch.ones((3, 5)))
     return {"checks": 6, "status": "passed"}
 
 

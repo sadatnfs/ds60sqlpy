@@ -6,22 +6,22 @@
   "cases": [
     {
       "exercise": 1,
-      "task": "List metadata,values,schema,template and expected output.",
-      "expected": "One local template,no dependencies/plugins/hooks/CRDs."
+      "task": "List metadata, values, schema, template and expected output.",
+      "expected": "One local template, no dependencies/plugins/hooks/CRDs."
     },
     {
       "exercise": 2,
       "task": "Use already prepared pinned Helm and compare output with expected-default.json.",
-      "expected": "One Deployment with replicas1 and approved image;record actual renderer receipt or unavailable status."
+      "expected": "One Deployment with replicas 1 and approved image; record actual renderer receipt or unavailable status."
     },
     {
       "exercise": 3,
-      "task": "Render replicas2 and diff the full object.",
+      "task": "Render replicas 2 and diff the full object.",
       "expected": "Only spec.replicas changes."
     },
     {
       "exercise": 4,
-      "task": "Try replicas3,an unapproved image or an extra unknown key in a scratch values file.",
+      "task": "Try replicas 3, an unapproved image or an extra unknown key in a scratch values file.",
       "expected": "Schema/review rejection before any cluster operation."
     },
     {
@@ -31,7 +31,7 @@
     },
     {
       "exercise": 6,
-      "task": "Record chart/values hashes,renderer version,full diff and separate apply/application acceptance.",
+      "task": "Record chart/values hashes, renderer version, full diff and separate apply/application acceptance.",
       "expected": "A reviewer can reproduce the local render and identify the exact owned runtime boundary."
     }
   ]

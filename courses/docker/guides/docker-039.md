@@ -6,7 +6,7 @@ Advanced; about 120 minutes, with additional time for the optional host experime
 
 ## Learning objectives
 
-Draw the client-to-process runtime chain. Describe the shared-kernel security implication. Explain the difference between a configuration, an observed process and evidence of the application's behavior.
+Draw the client-to-process runtime chain. Describe the shared-kernel security implication. Use namespaces, cgroups and OCI runtime accurately when you explain what you observed.
 
 ## Purpose, vocabulary and mental model
 
@@ -24,11 +24,11 @@ Use read-only observations in the fixture. `/proc/self/status` can show process 
 
 ## How to use this lesson
 
-The classroom displays this guide and saves your worksheet. Its Run button does not control your Docker engine. Docker engine access is powerful host access, so the classroom deliberately receives no engine socket. Work through the supplied examples without starting anything, then use the optional host lab only in your own disposable project. Reading a command, parsing YAML and actually running the project are different forms of evidence.
+The classroom displays this guide and saves your worksheet, `courses/docker/lessons/docker-039.md`. Its Run button does not control your Docker engine. Docker engine access is powerful host access, so the classroom deliberately receives no engine socket. Work through the supplied examples without starting anything, then use the optional host lab only in your own disposable project. Reading a command, parsing YAML and actually running the project are different forms of evidence.
 
 Use Bash in Linux, macOS Terminal, or Ubuntu under WSL 2 on Windows. The supported engine runs Linux containers. The maintained fixture is `courses/docker/fixtures/compose-lab/`; its README explains copying it into a new ignored learner directory, checking the engine, building locally with visible logs, and using the fixed project name `ds60-docker-study`. The fixture uses port 18080 on host loopback. Stop if that project name or port belongs to unrelated work; choose a new project name consistently in your own copy. Never paste a command against a remote Docker context simply because it is currently selected.
 
-For Dockerfile examples, create a file named `Dockerfile` in a scratch project. YAML snippets describe a fragment unless explicitly called a complete file. Text transcripts are synthetic illustrations, not claims about your machine. Do not substitute a real password, token or private registry into a checked-in example.
+For Dockerfile examples, create a file named `Dockerfile` in a scratch project. YAML snippets describe a fragment unless explicitly called a complete file. Text transcripts are synthetic illustrations, not claims about your machine. Do not substitute a real password, token or private registry into a checked-in example. **How to use the lessons** in the [subject README](../README.md) collects these rules in one place.
 
 ## Worked example / walkthrough
 
@@ -57,59 +57,49 @@ OCI runtime -> applies a prepared runtime configuration
 
 ## Six progressive exercises
 
+For each exercise, name the object involved and the phase of its lifetime before changing anything, then vary only the condition the task names. Exercises that ask you to predict, explain, compare or diagnose keep their answers in the solutions file; the others show the evidence to look for.
+
 ### Exercise 1: Distinguish namespace and cgroup.
 
-**Expected evidence:** Object visibility versus grouping and resource controls.
-
-**Hint:** Identify the object and the phase of its lifetime before changing it. Use the relevant worked example, then vary only the condition named in this task.
+**Hint:** Ask which one hides objects and which one limits resource use.
 
 ### Exercise 2: Predict whether the container has its own kernel.
 
-**Expected evidence:** Ordinary Linux containers share the engine environment kernel.
-
-**Hint:** Identify the object and the phase of its lifetime before changing it. Use the relevant worked example, then vary only the condition named in this task.
+**Hint:** Compare uname -r inside a container with the engine host.
 
 ### Exercise 3: Draw the client-to-process runtime chain.
 
-**Expected evidence:** Client, engine, runtime setup, mounts and application process.
-
-**Hint:** Identify the object and the phase of its lifetime before changing it. Use the relevant worked example, then vary only the condition named in this task.
+**Hint:** Follow a docker run from the CLI to the engine to the OCI runtime.
 
 ### Exercise 4: Diagnose a missing cgroup path from an example.
 
-**Expected evidence:** Inspect host and cgroup-version differences without changing kernel settings.
-
-**Hint:** Identify the object and the phase of its lifetime before changing it. Use the relevant worked example, then vary only the condition named in this task.
+**Hint:** Check whether the host uses cgroup v1 or v2.
 
 ### Exercise 5: Explain OCI interoperability limits.
 
-**Expected evidence:** A shared specification does not guarantee every platform or feature is identical.
-
-**Hint:** Identify the object and the phase of its lifetime before changing it. Use the relevant worked example, then vary only the condition named in this task.
+**Hint:** Ask what the OCI specification standardizes and what it leaves to implementations.
 
 ### Exercise 6: Describe the shared-kernel security implication.
 
-**Expected evidence:** Least privilege and patching remain necessary parts of the trust model.
-
-**Hint:** Identify the object and the phase of its lifetime before changing it. Use the relevant worked example, then vary only the condition named in this task.
+**Hint:** Ask what a kernel vulnerability means for every container on the host.
 
 ## Common mistakes and diagnosis
 
-Start with the smallest observation that separates two plausible causes. An image inspection answers questions about the packaged filesystem and configuration; container inspection adds runtime mounts, network attachment and exit status. An application request adds another layer of evidence. A healthy container can still serve the wrong application result. Preserve the original failure and the exact changed field before retrying.
+Believing each container has its own kernel. Changing kernel or cgroup settings to match an example. Assuming every OCI runtime behaves identically.
 
-The boundary case in this chapter is: Diagnose a missing cgroup path from an example. Use its expected observation, Inspect host and cgroup-version differences without changing kernel settings., to avoid treating a successful command as proof of the wrong claim. Keep source edits in your own copy. Do not make a container privileged, mount the engine socket, disable all checks or delete every volume to make an example succeed.
+Exercise 4 is this chapter's boundary case: Diagnose a missing cgroup path from an example. Start with the smallest observation that separates two plausible causes. An image inspection answers questions about the packaged filesystem and configuration; container inspection adds runtime mounts, network attachment and exit status; an application request adds another layer, and a healthy container can still serve the wrong result. Preserve the original failure and the exact changed field before retrying. Keep source edits in your own copy. Do not make a container privileged, mount the engine socket, disable all checks or delete every volume to make an example succeed.
 
 ## Retrieval, transfer and next steps
 
-Close the explanations and draw the path from source files to image to container to the observation relevant here. Reconstruct the second worked example with one different value and predict what changes. Explain which state survives process restart, container recreation and image rebuild. If none of those operations applies to this mechanism, explain why.
+Close the explanations and draw the path from source files to image to container to the observation relevant here, using namespaces, cgroups, OCI runtime and container runtime. Reconstruct worked example 2 (Separate isolation and accounting) with one different value and predict what changes. Explain which state survives process restart, container recreation and image rebuild, or why none of those operations applies to this mechanism.
 
-Before proceeding, retain six evidence records. For the optional host project, use `docker compose -p ds60-docker-study down` from the fixture copy to stop its containers and remove its ordinary network. This command preserves named volumes. Volume deletion is a separate deliberate reset of that disposable lab after a backup or export, never a general cleanup step. The fixture README describes its exact scoped reset.
+When a host session ends, run `docker compose -p ds60-docker-study down` from your fixture copy. It removes the project's containers and network but keeps named volumes; deleting a volume is a separate, deliberate reset described in the fixture README.
 
 ## Primary references
 
-- [Official reference 1](https://opencontainers.org/)
-- [Official reference 2](https://docs.docker.com/engine/security/#kernel-namespaces)
-- [Official reference 3](https://docs.docker.com/engine/security/#control-groups)
+- [Open Container Initiative](https://opencontainers.org/)
+- [Docker Engine security: kernel namespaces](https://docs.docker.com/engine/security/#kernel-namespaces)
+- [Docker Engine security: control groups](https://docs.docker.com/engine/security/#control-groups)
 
 ## Ask an AI tutor about this lesson
 

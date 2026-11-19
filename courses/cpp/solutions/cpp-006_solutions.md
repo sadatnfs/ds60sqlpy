@@ -15,7 +15,7 @@ For 12x, from_chars can store 12 and report no conversion error, yet its pointer
 
 Parsing converts a sequence of characters into a value under a grammar. The grammar here is deliberately strict: an optional minus sign followed by decimal digits represent an int, with no surrounding whitespace, plus sign or trailing suffix accepted by this wrapper. The raw string remains evidence until the entire field is accepted. A useful parser does not publish a partially parsed prefix as a trusted record.
 
-from_chars returns two pieces of information. The error code tells whether conversion was possible and within range. The pointer identifies where conversion stopped. For42, the pointer reaches the end. For12x, conversion can succeed for12 while the pointer stops before x. The wrapper requires both success and full consumption. This is why checking only the error code admits a malformed business field.
+from_chars returns two pieces of information. The error code tells whether conversion was possible and within range. The pointer identifies where conversion stopped. For 42, the pointer reaches the end. For 12x, conversion can succeed for 12 while the pointer stops before x. The wrapper requires both success and full consumption. This is why checking only the error code admits a malformed business field.
 
 optional<int> separates absence from a present number. A present zero is valid and must not be confused with rejection. Test the optional itself for presence, then read its value. Testing `*result != 0` as though it meant success changes the input policy and loses legitimate zero records. Dereferencing an absent optional is also outside the intended contract, so branch on presence first.
 
@@ -52,7 +52,7 @@ Parse 42 and 12x and inspect pointer distance.
 
 **Reasoning:** Conversion success alone is insufficient.
 
-**Verify:** Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.
+**Verify:** Print `ptr - s.data()` for both inputs (2 and 2) next to `s.size()` (2 and 3); only the input whose distance equals its size may be accepted.
 
 ## Exercise 2: Retain zero
 
@@ -62,7 +62,7 @@ Parse 0 and -7 through optional<int>.
 
 **Reasoning:** A zero value is not an absent optional.
 
-**Verify:** Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.
+**Verify:** Assert `parse_int("0") == 0` and `parse_int("-7") == -7`; checking `has_value()` alone would not catch a wrong value.
 
 ## Exercise 3: Build a ledger
 
@@ -72,7 +72,7 @@ Classify [12, 12x, empty, 0] as raw strings.
 
 **Reasoning:** Preserve rejected raw input and reason.
 
-**Verify:** Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.
+**Verify:** Collect accepted values into a vector and count rejections, then assert the vector equals `{12, 0}` and the rejected count is 2, with the empty string among the rejected.
 
 ## Exercise 4: Repair prefix acceptance
 
@@ -82,7 +82,7 @@ Change the condition to check only ec in a scratch copy.
 
 **Reasoning:** Inspect the unconsumed suffix.
 
-**Verify:** Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.
+**Verify:** In the scratch copy, Worked example 2's `assert(!parse_int("12x"))` must abort; restoring the `ptr` comparison must make it pass again.
 
 ## Exercise 5: Reject overflow
 
@@ -92,7 +92,7 @@ Parse 21 decimal nines.
 
 **Reasoning:** The range error occurs before publishing a trusted value.
 
-**Verify:** Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.
+**Verify:** Assert `!parse_int(std::string(21, '9'))`, and in a scratch copy check that `ec == std::errc::result_out_of_range` to confirm the reason.
 
 ## Exercise 6: Define whitespace policy
 
@@ -102,4 +102,4 @@ Compare literal space-42-space with a deliberately trimmed copy.
 
 **Reasoning:** Trimming is an input policy that belongs before parsing.
 
-**Verify:** Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.
+**Verify:** Assert `!parse_int(" 42 ")` and `parse_int(trimmed) == 42`, where `trimmed` is produced by your trim step rather than typed by hand.

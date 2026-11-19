@@ -110,9 +110,9 @@ def example_two():
             d,
             models={
                 "clean": (
-                    "select id::integer as id, try_cast(amount as integer) as "
-                    "amount from {{ ref('raw_orders') }} where try_cast(amount "
-                    "as integer) is not null"
+                    "select id::integer as id, try_cast(amount as integer) as amount\n"
+                    "from {{ ref('raw_orders') }}\n"
+                    "where try_cast(amount as integer) is not null"
                 )
             },
             seeds={"raw_orders": "id,amount\n1,5\n2,bad\n3,9\n"},

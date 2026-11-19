@@ -10,7 +10,7 @@
     {
       "exercise": 2,
       "task": "Identify why proxy-mode advice is version-sensitive.",
-      "expected": "Support and behavior change with Kubernetes and kernel releases."
+      "expected": "In Kubernetes 1.37 iptables is the default, nftables has been GA since 1.33 and needs kernel 5.13 or later, and IPVS has been deprecated since 1.35 with removal scheduled, so advice depends on the release and the node kernel."
     },
     {
       "exercise": 3,

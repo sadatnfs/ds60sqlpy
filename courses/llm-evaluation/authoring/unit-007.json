@@ -9,6 +9,7 @@
     "decision rule"
   ],
   "outcome": "Prespecify a family of comparisons and monitoring times, calculate conservative error control, and separate statistical evidence from release policy.",
+  "verification": "A single comparison at the threshold rejects the null under the declared non-strict rule, none of three equal findings crosses the Bonferroni threshold, an overspent monitoring plan and an unknown result are rejected, and significance alone does not mandate deployment.",
   "level": "intermediate",
   "runtime": "python-core",
   "minutes": 120,
@@ -40,7 +41,7 @@
       "task": "Explain whether the union bound requires independent tests.",
       "expected": "It does not; individual error bounds still need to hold.",
       "hint": "Separate the bound from the illustrative independent calculation.",
-      "answer": "The formula 1-(1-alpha)^m uses independence; the union-bound inequality does not."
+      "answer": "The formula \\(1-(1-\\alpha)^m\\) uses independence; the union-bound inequality does not."
     },
     {
       "title": "Unknown result",

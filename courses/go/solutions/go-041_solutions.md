@@ -8,27 +8,31 @@ client-go provides typed Kubernetes clients, discovery, watches, caches and work
 
 The prepared project uses clientcmd loading rules with one explicit kubeconfig path and a named context override, then kubernetes.NewForConfig. CoreV1().Pods(namespace).List(ctx, metav1.ListOptions{Limit:...}) invokes a typed resource client. Context and request timeout bound work; pagination must be handled rather than assuming one list is complete. The project is read-only and still requires exact disposable target identification, minimal RBAC and deliberate execution.
 
-## 1. Accept explicit secure configuration
+## 1. Accept explicit secure configuration: predict an edited check
 
-Validate an HTTPS endpoint, lesson namespace and explicit context name.
+Copy worked example 1 into a scratch pad and change `check(validateTarget("https://cluster.invalid:6443", "lesson", "owned-lesson") == nil, "target")` to `check(validateTarget("https://cluster.invalid:6443!", "lesson", "owned-lesson") == nil, "target")` inside its check. Before running, predict whether the check still passes and explain why; then restore it.
+
+The unchanged code is worked example 1:
 
 ```go
 check(validateTarget("https://cluster.invalid:6443", "lesson", "owned-lesson") == nil, "target")
 ```
 
-**Expected:** The configuration is accepted.
+**Expected:** The changed run panics with `target` because the edited check no longer holds. Restoring the original line brings back the worked observation: the configuration is accepted.
 
 The hostname is a nonresolving fixture and no request is sent. Real target ownership requires stronger runtime evidence than these syntax checks.
 
-## 2. Reject insecure transport
+## 2. Reject insecure transport: diagnose an edited check
 
-Validate an HTTP endpoint.
+A careless edit changed the check in worked example 2 so that it reads `check(validateTarget("http://cluster.invalid", "lesson", "owned-lesson") == nil, "TLS")`. Run worked example 2 with that line, explain why the edited check now fails for the same program state, and restore it.
+
+The unchanged code is worked example 2:
 
 ```go
 check(validateTarget("http://cluster.invalid", "lesson", "owned-lesson") != nil, "TLS")
 ```
 
-**Expected:** The configuration is rejected.
+**Expected:** Before the repair the program panics with `TLS`; after it the line reads `check(validateTarget("http://cluster.invalid", "lesson", "owned-lesson") != nil, "TLS")` again and the configuration is rejected.
 
 TLS policy protects transport identity. Disabling certificate verification is not a reasonable response to a configuration error.
 

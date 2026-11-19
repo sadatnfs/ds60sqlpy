@@ -20,15 +20,13 @@ map_elements calls a Python function for values and should declare return_dtype.
 
 ## Run the lesson
 
-Open this subject in `/classroom`, then show its code and notes. The prepared `data-engineering` worker runs `main.py` in a fresh temporary directory. The examples use installed packages and synthetic local fixtures; no account, cloud service, network request or package download is required. Save source and notes before switching lessons. Temporary databases, project files and tracking artifacts are recreated by each complete program and removed after the job. The classroom retains the submitted source and bounded output, not an indefinitely running external service. The guide distinguishes this local execution from the deployment decisions that need an owned production environment.
-
-
+Open `polars-016` in `/classroom`. Its starter `main.py` contains both worked cases, "Compare equivalent native and Python functions" and "Show a non-streamable transformation", and prints the dictionary each case returns. The prepared `data-engineering` worker runs it in a fresh temporary directory. An `AssertionError` means that an observation differs from the case's stated contract. The inputs are small literal tables. Cases that demonstrate Parquet scans write their files into a temporary directory that is removed when the case returns. No account, network request or package download is involved. Save source and notes before switching lessons.
 
 ## Worked case 1: Compare equivalent native and Python functions
 
 Squaring values has a direct native expression. The Python UDF is included to compare the result and inspect the library warning, not to recommend a slower spelling for ordinary arithmetic. Equality is established on the fixture before discussing cost.
 
-**Expected evidence:** Both implementations return [1,4,9].
+**Expected evidence:** Both implementations return [1, 4, 9].
 
 ```python
 import polars as pl
@@ -49,12 +47,11 @@ if __name__ == "__main__":
     print(example_one())
 ```
 
-
 ## Worked case 2: Show a non-streamable transformation
 
 The second case centers four values once globally and once within two batches. Both outputs sum to zero, so that aggregate check alone would miss the error. The individual values demonstrate the different transformation.
 
-**Expected evidence:** Global values are [-3,-2,-1,6]; batch-centered values are [-0.5,0.5,-3.5,3.5].
+**Expected evidence:** Global values are [-3, -2, -1, 6]; batch-centered values are [-0.5, 0.5, -3.5, 3.5].
 
 ```python
 def example_two():
@@ -75,20 +72,17 @@ if __name__ == "__main__":
     print(example_two())
 ```
 
-
 ## Practice
 
-Make each requested change in a saved copy. Compare both the expected result and the deliberately changed assumption. The separate reference explains the answers.
-
+The starter contains both worked cases, so a task can change either one. Make each change in a saved copy, run it, and compare the printed result with the task's check before opening the separate explained answers.
 
 ### 1. Replace the UDF
 
 Write the square operation using column expressions only.
 
-**Check:** The values remain [1,4,9].
+**Check:** The values remain [1, 4, 9].
 
 **Hint:** Use multiplication on the selected column.
-
 
 ### 2. State a return type
 
@@ -98,15 +92,13 @@ Explain what a UDF returning integers should declare.
 
 **Hint:** Schema inference is not a domain specification.
 
-
 ### 3. Change batch boundaries
 
-Center [1,2,3,10] in a different partition.
+Center [1, 2, 3, 10] in a different partition.
 
 **Check:** The batchwise answer changes while the global answer does not.
 
 **Hint:** Try three values in the first batch.
-
 
 ### 4. Find a weak check
 
@@ -116,7 +108,6 @@ Explain why a zero-sum check misses the centering defect.
 
 **Hint:** Check identified intermediate values.
 
-
 ### 5. Introduce hidden state
 
 Describe the risk of incrementing a global counter inside a UDF.
@@ -124,7 +115,6 @@ Describe the risk of incrementing a global counter inside a UDF.
 **Check:** Output can depend on evaluation order or batching.
 
 **Hint:** The engine controls evaluation strategy.
-
 
 ### 6. Design a valid two-pass method
 
@@ -134,20 +124,19 @@ Explain how to perform global centering in bounded stages.
 
 **Hint:** Separate estimation from application.
 
-
 ## Diagnose errors and misleading results
 
 An inefficient-map warning is useful evidence that a native operation may exist. It is not proof that every UDF is wrong. A changed answer under batching is more serious: inspect hidden state, global reductions and schema promises. Do not disable validation flags solely to make a query execute.
 
 ## Transfer to independent work
 
-Use a Python UDF only with an explicit value, type and batching contract. Demonstrate equivalence to a trusted result on contrasting fixtures and identify which optimization claims are justified. Preserve a native implementation whenever it is clearer and semantically equivalent.
+Demonstrate equivalence to a trusted result on contrasting fixtures and identify which optimization claims are justified. Preserve a native implementation whenever it is clearer and semantically equivalent.
 
 ## Primary references
 
-- [Polars documentation: Native expressions and the boundary of Python UDFs](https://docs.pola.rs/user-guide/expressions/user-defined-python-functions/)
+- [Polars user guide: User-defined Python functions](https://docs.pola.rs/user-guide/expressions/user-defined-python-functions/)
 - [Polars Python API reference](https://docs.pola.rs/api/python/stable/reference/index.html)
 
 ## Tutor guidance
 
-Use the repository learning-companion skill for `polars-016`. Inspect the learner's own source and observations, ask for an explanation of the relevant data or state contract, and give a focused hint. Separate an assertion on this fixture from a claim about an external dataset or deployed service.
+Use the repository's `$guide-ds60sqlpy-learning` skill (`.agents/skills/guide-ds60sqlpy-learning/SKILL.md`) for `polars-016`. Inspect the learner's own source and printed output first. Ask for an explanation of UDF, purity, return dtype, batch equivalence and optimizer contract in their own words, then give one focused hint at a time. Keep an assertion on this synthetic fixture separate from a claim about an external dataset or deployed service.

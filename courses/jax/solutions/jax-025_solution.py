@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import math
 import numpy as np
 import jax
 import jax.numpy as jnp
@@ -88,7 +87,7 @@ def main():
     assert jax.default_backend() == "cpu"
     assert all(device.platform == "cpu" for device in result.devices())
 
-    print("jax-025" + ": 8 asserted cases passed")
+    print("jax-025: 8 asserted cases passed")
 
 
 if __name__ == "__main__":

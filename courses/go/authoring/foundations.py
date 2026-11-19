@@ -707,7 +707,7 @@ func scopedCleanup(count *int) { defer func(){*count=*count+1}() }""",
 add(
     "Packages, modules and reproducible project boundaries",
     """A package is a compilation and visibility boundary; a module is a versioned collection of packages described by go.mod. An import path identifies a package, not an operating-system filename. Capitalized declarations are exported to other packages. The main package creates an executable, while reusable packages expose focused APIs. go.sum records module-content checksums but is not a substitute for reviewing dependency changes. An offline classroom pad cannot become a multi-file dependency project by containing a go.mod string. This lesson executes standard-library boundary examples and separately teaches the real project layout. Keep generated outputs, dependency selection and application source under distinct review.""",
-    """The standard library already contains packages such as path, strings and strconv. An alias in an import declaration changes the local selector name, not the dependency\'s identity. For a real project, run go mod init example.org/learning/report in a prepared directory, place reusable code under a package folder, and use go test ./... plus go build ./cmd/report. Pin reviewed dependency versions with go get and commit go.mod and go.sum. Dependency retrieval is explicit setup, never a side effect of opening a lesson.""",
+    """The standard library already contains packages such as path, strings and strconv. An alias in an import declaration changes the local selector name, not the dependency\'s identity. For a real project, run go mod init example.org/learning/report in a prepared directory, place reusable code under a package folder, and use go test ./... plus go build ./cmd/report. Pin reviewed dependency versions with go get and commit go.mod and go.sum. Dependency retrieval is explicit setup, never a side effect of opening a lesson. A go.mod file starts with the module path, then a go line such as go 1.27 that states the minimum Go version the module needs, and optionally a toolchain line such as toolchain go1.27.3 that names a suggested newer toolchain. The GOTOOLCHAIN environment variable decides whether the go command may switch to another toolchain; local means it never does.""",
     [
         ("Module", "A versioned group of Go packages rooted at go.mod."),
         (
@@ -733,17 +733,17 @@ add(
         ),
         E(
             "Inspect exported spelling",
-            "Compare a public API spelling with its lower-case variant as identifiers in a naming check.",
-            "The public spelling begins with an uppercase rune.",
-            r"""name:="ParseInt"; check(unicode.IsUpper([]rune(name)[0]),"export convention")""",
-            "This checks the naming convention rather than trying to access an unexported symbol. Actual visibility is enforced by the compiler across package boundaries.",
+            "Classify ParseInt, parseInt and an empty name with one rule: a name is exported when its first rune is an uppercase letter.",
+            "Only ParseInt is exported.",
+            r"""exported:=func(name string)bool{return name!=""&&unicode.IsUpper([]rune(name)[0])}; check(exported("ParseInt")&&!exported("parseInt")&&!exported(""),"export convention")""",
+            "The rule is applied to three spellings instead of re-reading one literal. Actual visibility is enforced by the compiler across package boundaries: another package can call strconv.ParseInt, while a lower-case declaration stays private to its own package.",
         ),
         E(
-            "Keep logical imports separate",
-            "Clean a logical path containing a parent component.",
-            "reports/tmp/../daily becomes reports/daily.",
-            r"""check(path.Clean("reports/tmp/../daily")=="reports/daily","logical clean")""",
-            "Cleaning a path is not authorization to access it. Real filesystem access needs confinement and symlink-aware policy, taught later.",
+            "Read the go and toolchain directives",
+            "Extract the module, go and toolchain lines from a small go.mod text.",
+            "The module requires Go 1.27 and suggests toolchain go1.27.3.",
+            r"""mod:="module example.org/learning/report\n\ngo 1.27\n\ntoolchain go1.27.3\n"; directives:=map[string]string{}; for _,line:=range strings.Split(mod,"\n"){fields:=strings.Fields(line); if len(fields)==2{directives[fields[0]]=fields[1]}}; check(directives["module"]=="example.org/learning/report"&&directives["go"]=="1.27"&&directives["toolchain"]=="go1.27.3","directives")""",
+            "The go line is the minimum Go version the module requires. Since Go 1.21 an older go command does not build such a module with its own toolchain: it switches to a newer toolchain when GOTOOLCHAIN allows that, or stops with an error. The toolchain line suggests a specific newer toolchain for work inside this module. The classroom worker sets GOTOOLCHAIN=local, so a module that asks for a newer version fails with an explicit error instead of downloading anything.",
         ),
         E(
             "Reject malformed input at an API boundary",
@@ -889,11 +889,12 @@ func sumInts[T Integer](items []T) T {var out T;for _,x:=range items {out+=x};re
 add(
     "Closures, callbacks and controlled iteration",
     """A function value can be stored, passed and called like other values. A closure also refers to variables from its surrounding scope. That makes callbacks concise, but it makes lifetime and mutation worth tracing explicitly. Two closures can intentionally share one variable; two independent constructor calls can create separate state. A callback contract should describe when it is called, whether it may stop iteration and whether it can retain supplied values. Iterator-style APIs can avoid allocating intermediate slices, but early termination and cleanup must still be well defined. Do not confuse deferred execution with concurrent execution: a closure is not a goroutine by itself.""",
-    """func(int) int is a function type. An anonymous func literal creates a function value. Returning a closure from makeCounter retains access to its captured count. A visitor returning bool can stop a traversal when false. Passing a function as a parameter makes selection policy explicit without an interface type when only one operation is needed.""",
+    """func(int) int is a function type. An anonymous func literal creates a function value. Returning a closure from makeCounter retains access to its captured count. A visitor returning bool can stop a traversal when false. Passing a function as a parameter makes selection policy explicit without an interface type when only one operation is needed. The iter package names this visitor shape: iter.Seq[V] is func(yield func(V) bool), and for x := range seq runs the loop body as the yield callback, so break, continue and return keep their ordinary meaning.""",
     [
         ("Closure", "A function value that refers to surrounding variables."),
         ("Callback", "A function supplied for another operation to invoke."),
         ("Early termination", "Ending traversal once the caller has enough evidence."),
+        ("Iterator function", "A function of type iter.Seq that a for range loop can traverse."),
     ],
     [
         E(
@@ -932,14 +933,16 @@ add(
             "A caller should not need a fabricated sentinel callback to learn that there were no values. Empty behavior belongs in the traversal contract.",
         ),
         E(
-            "Transfer explicit state",
-            "Collect only even values from a bounded visitor.",
-            "The collected values are 2 and 4.",
-            r"""out:=[]int{};visit(4,func(x int)bool{if x%2==0{out=append(out,x)};return true});check(len(out)==2&&out[0]==2&&out[1]==4,"collector")""",
-            "The closure intentionally mutates caller-owned collection state. Concurrent invocation would require a different synchronization contract; this visitor is sequential.",
+            "Transfer the visitor to a range-over-func iterator",
+            "Range over an iter.Seq[int] that yields 1 through 5, append each value, and break after 2.",
+            "The loop collects 1 and 2, and the iterator produces exactly two values.",
+            r"""produced:=0; got:=[]int{}; for x:=range countTo(5,&produced){got=append(got,x); if x==2{break}}; check(len(got)==2&&got[0]==1&&got[1]==2&&produced==2,"range over func")""",
+            "Since Go 1.23 a for statement can range over a function with the iter.Seq shape func(yield func(int) bool). The loop body becomes the yield callback: break makes yield return false, and the iterator must return at once. Calling yield again after it has returned false makes the program panic. The visit helper above already had this shape, so the same early-termination contract now works with ordinary for, break and continue.",
         ),
     ],
+    imports="iter",
     helper=r"""func makeCounter() func() int {n:=0;return func()int{n++;return n}}
 func mapInts(items []int,f func(int)int) []int {out:=make([]int,len(items));for i,x:=range items{out[i]=f(x)};return out}
-func visit(limit int,f func(int)bool){for i:=1;i<=limit;i++{if !f(i){return}}}""",
+func visit(limit int,f func(int)bool){for i:=1;i<=limit;i++{if !f(i){return}}}
+func countTo(limit int,produced *int) iter.Seq[int] {return func(yield func(int) bool){for i:=1;i<=limit;i++{*produced++;if !yield(i){return}}}}""",
 )

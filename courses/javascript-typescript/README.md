@@ -23,7 +23,7 @@ Start with [JavaScript, Node and the browser](guides/js-001.md). Predict the wor
 
 ## Execution contracts
 
-The route contains 26 Node JavaScript references, 13 TypeScript references, three original browser reading lessons and 24 D3 browser-preview lessons. JavaScript uses prepared Node 24.22.1. TypeScript uses 5.9.3 with strict NodeNext checking and noEmitOnError, then runs emitted JavaScript on Node. Type annotations are erased and do not replace runtime validation.
+The route contains 26 Node JavaScript references, 13 TypeScript references, three original browser reading lessons and 24 D3 browser-preview lessons. JavaScript uses prepared Node 24.22.3. TypeScript uses 5.9.3 with strict NodeNext checking and noEmitOnError, then runs emitted JavaScript on Node. Type annotations are erased and do not replace runtime validation.
 
 The original js-029 through js-031 browser chapters use separate real HTML files. Their READMEs make Docker-only static serving the main route: a prepared image, new learner-owned copy, read-only mount and a dedicated loopback origin outside the authenticated classroom. Node does not execute their DOM interactions. No default lesson installs packages, calls a paid API or downloads assets.
 

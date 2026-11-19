@@ -8,9 +8,11 @@ Scope determines where a name is visible; lifetime determines when its object ex
 
 A block can shadow an outer variable with the same name. static inside a function preserves one object across calls and zero-initializes it before execution. A file-scope static declaration also restricts linkage to the translation unit. These are different uses of the same keyword. Keep automatic variables explicitly initialized before reading them. Do not use the value of a pointer after its target lifetime has ended.
 
-## Exercise 1: Trace block shadowing
+## Exercise 1: Trace block shadowing: change one input
 
-Declare an outer value 3 and a separate inner value 7.
+Copy worked example 1 into a scratch pad and change `int value = 3;` to `int value = 4;`. Before running, predict which CHECK fails and which value it now sees; then run it and restore the original line.
+
+The unchanged code is worked example 1:
 
 ```c
 int value = 3;
@@ -21,20 +23,22 @@ int value = 3;
 CHECK(value == 3);
 ```
 
-**Expected:** After the inner block, the outer remains 3.
+**Expected:** The changed run stops with `Check failed` at the CHECK on `value == 3`. Restoring the original line brings back the worked observation: after the inner block, the outer remains 3.
 
 The names are the same but designate distinct objects. Shadowing can be legal while still reducing readability.
 
-## Exercise 2: Retain static state
+## Exercise 2: Retain static state: diagnose an edited check
 
-Call a function with one static counter twice.
+A careless edit changed the CHECK in worked example 2 so that it reads `CHECK(next_count() != 2);`. Run worked example 2 with that line, explain why the edited CHECK now fails for the same program state, and restore it.
+
+The unchanged code is worked example 2:
 
 ```c
 CHECK(next_count() == 1);
 CHECK(next_count() == 2);
 ```
 
-**Expected:** It returns 1 and then 2.
+**Expected:** Before the repair the run stops with `Check failed` at the CHECK on `next_count() == 2`; after it the line reads `CHECK(next_count() == 2);` again and it returns 1 and then 2.
 
 The counter is initialized once and survives function returns. This shared state would require synchronization if called concurrently.
 

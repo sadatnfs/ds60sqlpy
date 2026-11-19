@@ -182,4 +182,4 @@ if __name__ == "__main__":
 
 ## Interpretation
 
-Qualify a real feature-store retrieval against independent temporal and coverage checks. Preserve every requested decision, retain unavailable values explicitly and distinguish local API execution from external production guarantees.
+Preserve every requested decision, retain unavailable values explicitly and distinguish local API execution from external production guarantees.

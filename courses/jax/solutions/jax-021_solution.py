@@ -68,7 +68,7 @@ def main():
     close(again, noise)
     close(sample_objective(2.0, 3.0, again), sample_objective(2.0, 3.0, noise))
 
-    print("jax-021" + ": 8 asserted cases passed")
+    print("jax-021: 8 asserted cases passed")
 
 
 if __name__ == "__main__":

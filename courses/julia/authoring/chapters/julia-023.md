@@ -8,7 +8,7 @@ A convergence flag is a diagnostic under an algorithm's stopping criteria. It is
 
 ## Worked case A: minimize a convex quadratic
 
-The first objective has a unique known minimum at[1,-2]. Its gradient is supplied through ForwardDiff using an in-place callback. The program checks the returned point, objective value and gradient norm independently of the optimizer's status flag. The small convex construction makes a global conclusion possible because of its mathematical structure, not because the method is named BFGS.
+The first objective has a unique known minimum at `[1, -2]`. Its gradient is supplied through ForwardDiff using an in-place callback. The program checks the returned point, objective value and gradient norm independently of the optimizer's status flag. The small convex construction makes a global conclusion possible because of its mathematical structure, not because the method is named BFGS.
 
 {{WORKED_A}}
 

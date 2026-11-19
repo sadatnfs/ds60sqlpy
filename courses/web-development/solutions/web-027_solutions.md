@@ -1,51 +1,43 @@
 # web-027: explanatory solutions
 
-Compare after your own attempt or an explicit solution reveal. This file explains the supplied deterministic fixtures. It does not claim that a learner or a production deployment passed.
-
-## Why the mechanism works
-
-Validation becomes easier to test when a pure function receives data and returns errors without touching the document. The browser layer then displays those errors and moves focus only when it helps recovery. This separation lets the same input contract be tested with normal, missing and boundary values before considering visual presentation. It does not remove the need for backend validation.
-
-An error summary gives a user an overview after an attempted action. Field-level messages explain how to repair specific values. Connect those messages to controls and preserve entered values. Avoid announcing a long stream of errors on every keystroke. The timing of feedback is a product decision that should reduce confusion rather than punish incomplete typing.
-
-The reference uses a button to validate local values without submitting a form. Convert the input string carefully, reject empty strings before Number conversion and check Number.isFinite. Return an error list, then render it with textContent. Set aria-invalid only after a failed check. A valid result is a local observation, not a stored request.
+Open this after your own attempt. Each answer explains the lesson's synthetic fixtures; it does not show that your work or a deployment passed. The mechanism is explained in `courses/web-development/guides/web-027.md`.
 
 ## Exercise 1: Predict Number('') and explain the validation hazard.
 
-It produces zero, so an explicit empty-input check prevents misleading acceptance or errors.
+**Expected answer:** It produces zero, so an explicit empty-input check prevents misleading acceptance or errors.
 
-Trace the smallest example before editing. Name which values are source and which are observations.
+**Why:** Number('') returns 0, a finite number, so without an explicit empty check a blank field reaches the range check and gets the wrong message.
 
 ## Exercise 2: Add the upper-bound case to a validation table.
 
-120 is accepted and 121 is rejected under the declared inclusive bounds.
+**Expected evidence:** 120 is accepted and 121 is rejected under the declared inclusive bounds.
 
-Change only the named feature. Compare with the unchanged example and explain any unaffected behavior.
+**Why:** Inclusive bounds accept the boundary value, so 120 passes and 121 fails; testing both sides catches off-by-one errors.
 
 ## Exercise 3: Build a local form with preserved input and linked validation feedback.
 
-A failed attempt identifies the problem without clearing the user's value.
+**Expected evidence:** A failed attempt identifies the problem without clearing the user's value.
 
-Sketch the structure or data contract first. Reuse the mechanism from the examples without copying the reference.
+**Why:** Keeping the value lets the user correct the mistake, and a linked message explains what to change.
 
 ## Exercise 4: Diagnose a message shown visually but not associated with its control.
 
-Use a stable message id and aria-describedby on the input.
+**Expected answer:** Use a stable message id and aria-describedby on the input.
 
-Keep the failing input. Identify the first layer where the observed result differs from the intended contract.
+**Why:** aria-describedby makes the message part of the input's accessible description, so it is announced with the field.
 
-## Exercise 5: Test empty, whitespace, negative, nonnumeric and valid values.
+## Exercise 5: Test empty, whitespace, negative, nonnumeric, hexadecimal (0x1e), exponent (1e2), fractional (7.5) and valid values.
 
-Each produces the declared result with no uncaught exception.
+**Expected evidence:** Each produces the declared result with no uncaught exception.
 
-Predict the boundary before running it. Add an explicit check or manual observation that would detect a regression.
+**Why:** Number accepts 0x1e, 1e2 and 7.5, so only the digits-only check rejects them; a loop shows that every case returns a message instead of throwing.
 
 ## Exercise 6: Explain which validation logic must be repeated on the server.
 
-All acceptance and authorization rules must be enforced independently of client behavior.
+**Expected answer:** All acceptance and authorization rules must be enforced independently of client behavior.
 
-Explain your choice to someone who has not seen the code. Include one limitation and the evidence needed to remove it.
+**Why:** Any client can send data without running this script, so the server must repeat every acceptance and authorization rule.
 
-## Reference comparison and limits
+## Reference comparison
 
-Read the separate executable reference, where supplied, only after retaining your attempt. Compare structure and decisions rather than matching every identifier. A different implementation is acceptable when it satisfies the same behavior, preserves accessibility and rejects the same invalid cases. The checked reference uses tiny synthetic inputs so that each transformation can be inspected. It is not a ready-to-deploy authenticated application. Server lifecycle, persistence, concurrency and security require their own integration evidence.
+Open `courses/web-development/solutions/web-027_solution.html` only after saving your attempt, and compare decisions rather than identifiers. A different implementation is acceptable when it shows the same behavior and rejects the same invalid cases. The reference checks only its named synthetic cases; its success message is not an accessibility audit or proof of responsive behavior at every size.

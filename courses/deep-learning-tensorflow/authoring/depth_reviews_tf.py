@@ -40,7 +40,7 @@ Do not repair a dropped remainder by silently pretending it was observed.""",
 
 Training and validation are roles assigned to observations. Preprocessing
 must respect those roles too. In the supplied fixture the training mean is 4,
-so validation values 20,22,30 and 32 become 16,18,26 and 28. A future value 1000
+so validation values 20, 22, 30 and 32 become 16, 18, 26 and 28. A future value 1000
 becomes 996. Its extremeness does not authorize refitting the mean: doing so
 would make the supposedly frozen transformation depend on evaluation data.
 
@@ -86,8 +86,8 @@ A smooth training curve alone would not distinguish an unintended sum loss
 from the intended mean loss.
 
 Keep predictions and targets explicitly shaped as one output per row. A
-prediction shaped (B,1) and a raw target shaped (B,) can broadcast to a
-(B,B) matrix in a manually written subtraction. That would compare each
+prediction shaped (B, 1) and a raw target shaped (B,) can broadcast to a
+(B, B) matrix in a manually written subtraction. That would compare each
 prediction with several targets instead of its paired target. Inspect shapes
 before reducing; reduction can hide the accidental extra axis.
 
@@ -96,7 +96,27 @@ one to two. The intercept is useful when the relationship need not pass
 through the origin, but it changes the hand calculation and the optimization
 problem. Evaluation should read the current parameters without performing a
 training update; distinguish that property from any layer-specific moving
-state introduced later.""",
+state introduced later.
+
+## Keras 3 behind tf.keras
+
+In TensorFlow 2.16 and later, `tf.keras` resolves to Keras 3; this classroom
+pins TensorFlow 2.20 with Keras 3.15.1. Keras 3 can run the same layers and
+models on the TensorFlow, JAX or PyTorch backend, chosen with the
+`KERAS_BACKEND` environment variable before `keras` is imported. This course
+uses the TensorFlow backend because its lessons also use `tf.GradientTape` and
+`tf.data`; backend-neutral numerical code would use `keras.ops` instead.
+Tutorials written for Keras 2 can mislead: `model.save()` now requires a
+`.keras` (or legacy `.h5`) file name, and a SavedModel inference artifact comes
+from `model.export()`. The separate `tf_keras` package with
+`TF_USE_LEGACY_KERAS=1` exists only for migrating Keras 2 code.
+
+`model.fit` is the standard Keras training loop. With `batch_size=3`, one
+epoch over these three rows is a single full-batch step, so it must reproduce
+the kernel 28/15 derived above. `shuffle=False` keeps the batch order fixed;
+with several batches per epoch the default `shuffle=True` would change which
+rows share an update. The returned History reports the loss measured while
+each epoch ran, not a fresh evaluation after the final update.""",
         """A wrong first kernel value points to learning rate, reduction,
 initialization or target shape before it points to an optimizer mystery.
 Print the unreduced error shape and the parameter count. If evaluation changes
@@ -186,8 +206,8 @@ softmax would force labels to compete and change the modeling assumptions.
 
 Target shapes encode part of this distinction. Sparse categorical targets
 use one class index per example, often shape (B,). A multilabel target uses
-one indicator for each example-label pair, shape (B,C). A categorical one-hot
-target also has shape (B,C), so shape alone cannot identify the task: its row
+one indicator for each example-label pair, shape (B, C). A categorical one-hot
+target also has shape (B, C), so shape alone cannot identify the task: its row
 constraints and intended probability distribution must agree too.
 
 Reduction defines the reported unit. For two examples and three independent
@@ -206,7 +226,7 @@ or active example-label pairs.""",
 
 A pipeline describes a traversal, not just a collection of arrays. Mapping,
 shuffling, batching, caching and repeating have different effects depending
-on their order. Batching five records by two gives sizes 2,2,1. Adding an
+on their order. Batching five records by two gives sizes 2, 2, 1. Adding an
 explicit drop-remainder policy changes the observed sample to four records.
 The absent record should remain visible in the ID ledger.
 
@@ -280,7 +300,7 @@ would produce a different coefficient.
 
 The training objective can include data loss plus regularization, while a
 reported prediction metric may intentionally include only data loss. In the
-fixture, data loss 2 and penalty0.5 give total objective2.5. State which
+fixture, data loss 2 and penalty 0.5 give total objective 2.5. State which
 quantity is being compared across experiments; a lower penalized objective
 and a lower held-out prediction error are different observations.
 
@@ -336,7 +356,7 @@ containing that pixel before assuming weight sharing means global mixing.""",
     "tf-020": (
         """## Ask what information a transformation discards
 
-For the patch with values 1,3,2 and 4, max pooling returns 4 while average pooling
+For the patch with values 1, 3, 2 and 4, max pooling returns 4 while average pooling
 returns 2.5. Changing the smallest value from 1 to 0 leaves the maximum unchanged
 but changes the average to 2.25. This is a direct demonstration of two different
 summaries. Neither retains the full spatial arrangement or every input value.
@@ -382,7 +402,7 @@ automatically ignores those positions or that row zero must be a zero vector.
 Inspect mask handling at each custom layer or loss boundary.
 
 Selecting a sequence summary also needs a length contract. The element at
-length-1 is the last valid position only when valid tokens form a contiguous
+index length - 1 is the last valid position only when valid tokens form a contiguous
 prefix followed by right padding. If the mask can contain holes, count-minus-one
 can select a padded position. Use the actual valid indices or reject layouts
 outside the declared contract.

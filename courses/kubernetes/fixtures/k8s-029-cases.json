@@ -12,12 +12,12 @@
     {
       "exercise": 2,
       "task": "Connect group, version, kind, plural and metadata.name.",
-      "expected": "learning.ds60sqlpy/v1, LessonReport, lessonreports and hello-report are distinct fields."
+      "expected": "learning.ds60sqlpy/v1, LessonReport, `lessonreports` and hello-report are distinct fields."
     },
     {
       "exercise": 3,
-      "task": "Compare replicas1, string2, integer3 and a missing message.",
-      "expected": "Only integer1 with a present allowed message passes the stated complete spec."
+      "task": "Compare replicas 1, string 2, integer 3 and a missing message.",
+      "expected": "Only integer 1 with a present allowed message passes the stated complete spec."
     },
     {
       "exercise": 4,
@@ -26,8 +26,8 @@
     },
     {
       "exercise": 5,
-      "task": "Compare spec generation7 with status observedGeneration6 and ready true.",
-      "expected": "Current generation7 is not yet proven reconciled by that status."
+      "task": "Compare spec generation 7 with status observedGeneration 6 and ready true.",
+      "expected": "Current generation 7 is not yet proven reconciled by that status."
     },
     {
       "exercise": 6,

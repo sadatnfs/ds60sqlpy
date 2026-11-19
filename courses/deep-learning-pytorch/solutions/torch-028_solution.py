@@ -24,7 +24,7 @@ def step(model, optimizer, noise):
 
 
 def verify():
-    # Exercise 1: Create nontrivial training state
+    # Worked example A: Create nontrivial training state
     torch.manual_seed(7)
     model, optimizer = make_state()
     for _ in range(2):
@@ -32,7 +32,7 @@ def verify():
     parameter = next(model.parameters())
     assert optimizer.state[parameter]["step"].item() == 2 and parameter.item() > 0
 
-    # Exercise 2: Save the complete local contract
+    # Worked example B: Save the complete local contract
     temporary = tempfile.TemporaryDirectory()
     folder = Path(temporary.name)
     path = folder / "checkpoint.pt"
@@ -45,7 +45,7 @@ def verify():
     torch.save(checkpoint, path)
     assert path.is_file() and checkpoint["data_position"] == 2
 
-    # Exercise 3: Record uninterrupted continuation
+    # Worked example C: Record uninterrupted continuation
     probe = torch.rand(3)
     noise = torch.rand((2, 1)) * 0.01
     step(model, optimizer, noise)
@@ -98,6 +98,24 @@ def verify():
         "distributed_restart_verified": False,
     }
     assert receipt["cpu_next_step_checked"] and not receipt["distributed_restart_verified"]
+
+    # Exercise 1: Predict Adam's first step
+    fresh_model, fresh_adam = make_state()
+    step(fresh_model, fresh_adam, torch.zeros((2, 1)))
+    np.testing.assert_allclose(fresh_model.weight.item(), 0.05, atol=1e-6, rtol=0)
+
+    # Exercise 2: Inspect the new optimizer state
+    fresh_param = next(fresh_model.parameters())
+    assert (
+        set(fresh_adam.state[fresh_param]) == {"step", "exp_avg", "exp_avg_sq"}
+        and fresh_adam.state[fresh_param]["step"].item() == 1
+    )
+
+    # Exercise 3: Replay a saved random state
+    saved_rng = torch.get_rng_state()
+    first_draw = torch.rand(3)
+    torch.set_rng_state(saved_rng)
+    assert torch.equal(torch.rand(3), first_draw)
     return {"checks": 6, "status": "passed"}
 
 

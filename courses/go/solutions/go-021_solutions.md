@@ -8,29 +8,33 @@ A command-line interface translates external strings into validated application 
 
 flag.NewFlagSet with ContinueOnError returns parse failures instead of exiting the process. IntVar binds a flag to storage, Parse accepts a []string and Args returns positional leftovers. SetOutput can redirect diagnostics to a buffer for tests. Do not call os.Exit from a library helper, because it prevents its caller from controlling cleanup and testing. Validate ranges after parsing: the parser can accept a negative integer even if the domain forbids it.
 
-## 1. Apply an explicit flag
+## 1. Apply an explicit flag: change one input
 
-Parse -count=3 with a default of 1.
+Copy worked example 1 into a scratch pad and change `n, args, err := parseArgs([]string{"-count=3"})` to `n, args, err := parseArgs([]string{"-count=4"})`. Before running, predict which check fails and which value it now sees; then run it and restore the original line.
+
+The unchanged code is worked example 1:
 
 ```go
 n, args, err := parseArgs([]string{"-count=3"})
 check(err == nil && n == 3 && len(args) == 0, "flag")
 ```
 
-**Expected:** The resulting count is 3.
+**Expected:** The changed run panics with `flag` because `err == nil && n == 3 && len(args) == 0` no longer holds. Restoring the original line brings back the worked observation: the resulting count is 3.
 
 The synthetic argument slice tests the actual parser while remaining independent of the classroom process arguments.
 
-## 2. Retain a default
+## 2. Retain a default: diagnose an edited check
 
-Parse no arguments.
+A careless edit changed the check in worked example 2 so that it reads `check(err != nil && n == 1, "default")`. Run worked example 2 with that line, explain why the edited check now fails for the same program state, and restore it.
+
+The unchanged code is worked example 2:
 
 ```go
 n, _, err := parseArgs(nil)
 check(err == nil && n == 1, "default")
 ```
 
-**Expected:** The count remains 1.
+**Expected:** Before the repair the program panics with `default`; after it the line reads `check(err == nil && n == 1, "default")` again and the count remains 1.
 
 A default is an intentional contract, not an accidental zero value. Changing it can alter existing workflows even when parsing code is unchanged.
 

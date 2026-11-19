@@ -14,11 +14,11 @@ An embedding objective encourages relationships between representations. Dot pro
 
 ## Reading the implementation
 
-reduce_sum(a*b) is a dot product for equal-length vectors. Divide by norm(a)*norm(b) for cosine and reject a zero norm. A two-candidate contrastive loss can be written as sparse softmax cross entropy with target index0. Temperature divides scores before normalization. It changes the sharpness of probabilities and the scale of gradients, not which candidate initially ranks first.
+reduce_sum(a*b) is a dot product for equal-length vectors. Divide by norm(a)*norm(b) for cosine and reject a zero norm. A two-candidate contrastive loss can be written as sparse softmax cross entropy with target index 0. Temperature divides scores before normalization. It changes the sharpness of probabilities and the scale of gradients, not which candidate initially ranks first.
 
 ## Exercise 1: Compare similarity measures
 
-The question is: Use anchor[1,0],positive[1,1],negative[0,1]; compute dots and cosines.
+The question is: Use anchor [1, 0], positive [1, 1], negative [0, 1]; compute dots and cosines.
 
 The positive is not parallel to the anchor, so its cosine is below one despite a dot product of one. Magnitudes and directions should not be conflated.
 
@@ -35,13 +35,13 @@ np.testing.assert_allclose(
 )
 ```
 
-**Expected:** dots1,0; cosines1/sqrt2,0.
+**Expected:** dots 1, 0; cosines \(1/\sqrt{2}\), 0.
 
-**Verify:** Compare the computed values or written argument with dots1,0; cosines1/sqrt2,0.
+**Verify:** In a fresh process, the exercise checks confirm `(a @ pos, a @ neg) == (1, 0)` and `[a @ pos / (np.linalg.norm(a) * np.linalg.norm(pos)), a @ neg]` matches `[1 / np.sqrt(2), 0]` within 1e-12.
 
 ## Exercise 2: Scale a candidate
 
-The question is: Multiply the positive vector by10 and compare dot product and cosine.
+The question is: Multiply the positive vector by 10 and compare dot product and cosine.
 
 Scaling changes the unnormalized score but leaves direction unchanged. This demonstrates why normalization is a modeling choice with consequences for retrieval rankings.
 
@@ -53,13 +53,13 @@ np.testing.assert_allclose(
 )
 ```
 
-**Expected:** dot10; cosine unchanged.
+**Expected:** dot 10; cosine unchanged.
 
-**Verify:** Compare the computed values or written argument with dot10; cosine unchanged.
+**Verify:** In a fresh process, the exercise checks confirm `a @ scaled == 10` and `a @ scaled / (np.linalg.norm(a) * np.linalg.norm(scaled))` matches `1 / np.sqrt(2)` within 1e-12.
 
 ## Exercise 3: Calculate a contrastive loss
 
-The question is: Use logits[1,0] with the positive at index0.
+The question is: Use logits [1, 0] with the positive at index 0.
 
 The loss encourages the positive score to exceed the negative score. It does not independently establish that the selected negative is semantically unrelated.
 
@@ -70,7 +70,7 @@ np.testing.assert_allclose(loss.numpy(), [np.log1p(np.exp(-1))], atol=1e-6, rtol
 
 **Expected:** loss \(\log(1+e^{-1})\).
 
-**Verify:** Compare the computed values or written argument with loss \(\log(1+e^{-1})\).
+**Verify:** In a fresh process, the exercise checks confirm `loss.numpy()` matches `[np.log1p(np.exp(-1))]` within 1e-6.
 
 ## Exercise 4: Detect a false negative
 
@@ -87,11 +87,11 @@ assert duplicate and positive_id == negative_id
 
 **Expected:** duplicate positive/negative identity is flagged.
 
-**Verify:** Compare the computed values or written argument with duplicate positive/negative identity is flagged.
+**Verify:** In a fresh process, the exercise checks confirm `duplicate` and `positive_id == negative_id`.
 
 ## Exercise 5: Observe temperature
 
-The question is: Compare softmax[1,0] at temperatures1 and.5.
+The question is: Compare softmax[1, 0] at temperatures 1 and 0.5.
 
 A lower positive temperature sharpens this distribution. It is not a source of additional evidence and must not be confused with a calibrated probability of semantic truth.
 
@@ -101,9 +101,9 @@ p2 = tf.nn.softmax(np.array([1.0, 0.0], dtype="float32") / 0.5).numpy()
 assert p2[0] > p1[0] and int(p1.argmax()) == int(p2.argmax()) == 0
 ```
 
-**Expected:** positive probability increases at.5; ranking stays0 first.
+**Expected:** positive probability increases at 0.5; ranking stays 0 first.
 
-**Verify:** Compare the computed values or written argument with positive probability increases at.5; ranking stays0 first.
+**Verify:** In a fresh process, the exercise checks confirm `p2[0] > p1[0]` and `int(p1.argmax()) == int(p2.argmax()) == 0`.
 
 ## Exercise 6: Reject undefined cosine
 
@@ -130,7 +130,7 @@ else:
 
 **Expected:** ValueError for zero norm.
 
-**Verify:** Compare the computed values or written argument with ValueError for zero norm.
+**Verify:** In a fresh process, the exercise checks confirm `cosine([0, 0], [1, 1])` raises `ValueError`.
 
 ## Review after comparison
 

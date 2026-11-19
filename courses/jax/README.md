@@ -24,4 +24,6 @@ Every Run starts a fresh Python process. Parameters, keys and in-memory compiled
 
 The one-device and named-mapped-axis examples execute real CPU calculations. They do not establish physical multi-device communication, accelerator scaling or multi-host recovery. Optional systems chapters are reading-only. Actual GPU, TPU, distributed and custom-kernel claims require their separately prepared resources and qualified execution. The [CUDA route](../cuda/README.md) supplies related architecture and device-methodology material without becoming a prerequisite for CPU JAX work.
 
+Each guide ends with an optional prompt for a repository-aware AI tutor that uses the checked-in learning skill; the guides are complete without it.
+
 [Authoring ownership](authoring/README.md) describes durable sources and subject-only generation. Runtime integration, shared readers and release checks have separate owners.

@@ -17,7 +17,7 @@ A condition variable is a waiting mechanism, not the shared condition itself. Th
 
 The mutex protects both the queue and the closed flag. The consumer holds a unique_lock and calls the predicate overload of wait. Waiting releases the mutex so a producer can change the state, then reacquires it before the predicate is evaluated again. A wakeup alone does not guarantee an item exists: spurious wakeups and other consumers can change the situation. The predicate is the source of truth.
 
-The first program enqueues2 and 3, then closes the queue while holding the mutex. The consumer drains the existing items even though closed is true, because nonempty still means work exists. Only empty and closed together terminate the loop. Exiting immediately on closed would discard accepted work. Waiting only for nonempty would hang after the last item because closure would not satisfy the condition.
+The first program enqueues 2 and 3, then closes the queue while holding the mutex. The consumer drains the existing items even though closed is true, because nonempty still means work exists. Only empty and closed together terminate the loop. Exiting immediately on closed would discard accepted work. Waiting only for nonempty would hang after the last item because closure would not satisfy the condition.
 
 The second program starts with an already empty, closed queue. The predicate is immediately true, so no notification is needed to make progress. This demonstrates why notifications should not be treated as stored messages. State persists; a notification may occur before another thread begins waiting. Rechecking the state under the same mutex avoids depending on an exact notification schedule.
 
@@ -53,7 +53,7 @@ List queue state protected by m.
 
 **Reasoning:** Protecting related fields separately can violate their relationship.
 
-**Verify:** Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.
+**Verify:** Check that every read or write of `q` and `closed` in Worked example 1 happens while a lock on `m` is held, including inside the wait predicate.
 
 ## Exercise 2: Drain before exit
 
@@ -63,7 +63,7 @@ Produce 2 and 3 then close.
 
 **Reasoning:** Close means no future work, not erase pending work.
 
-**Verify:** Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.
+**Verify:** Assert `total == 5` after `consumer.join()` and that `q.empty()` is true, so both items were consumed before the loop ended.
 
 ## Exercise 3: Bound the queue
 
@@ -73,7 +73,7 @@ Add capacity 2 and a producer wait predicate.
 
 **Reasoning:** Producers wait for room while consumers notify after pop.
 
-**Verify:** Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.
+**Verify:** Record `q.size()` right after every push while holding the lock, and assert it is never greater than 2.
 
 ## Exercise 4: Repair naked wait
 
@@ -83,7 +83,7 @@ Replace cv.wait(lock) with predicate waiting.
 
 **Reasoning:** A wake does not prove the condition is true.
 
-**Verify:** Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.
+**Verify:** Confirm the repaired call passes the predicate `!q.empty() || closed` to `cv.wait`, so `front()` is reached only after the queue was seen to be non-empty.
 
 ## Exercise 5: Test empty close
 
@@ -93,7 +93,7 @@ Close before enqueueing any items.
 
 **Reasoning:** The predicate includes closed to allow termination.
 
-**Verify:** Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.
+**Verify:** Set `closed = true` under the lock before any push, notify, and assert `total == 0` after `consumer.join()`; Worked example 2 shows the wait returning at once.
 
 ## Exercise 6: Transfer cancellation
 
@@ -103,4 +103,4 @@ Define whether cancellation drains or discards pending work.
 
 **Reasoning:** Shutdown semantics belong in the queue contract.
 
-**Verify:** Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.
+**Verify:** Count accepted, processed and discarded items and assert `accepted == processed + discarded` after every worker has been joined.

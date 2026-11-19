@@ -37,7 +37,7 @@ When tau is small, all theta values must lie close to mu in the centered represe
 
 A parameterization is not a free change of scientific meaning. Priors on tau, group-level covariates and observation scales still determine the model. Adding an arbitrary lower bound to tau can remove a difficult region by changing the prior support. That may be justified by knowledge, but it should not be hidden as a convergence repair.
 
-Compare diagnostics for the parameters and derived quantities that matter. A sampler can explore one population parameter adequately while poorly estimating an extreme group effect or a new-group prediction. The two short chains here are a demonstration of these observations, not sufficient evidence for every hierarchical decision.
+Compare diagnostics for the parameters and derived quantities that matter. A sampler can explore one population parameter adequately while poorly estimating an extreme group effect or a new-group prediction. The two short chains here are a demonstration of these observations, not sufficient evidence for every hierarchical decision. Apply the same screen to each parameterization's record (R-hat below 1.01, at least 100 bulk effective draws per chain and zero divergences); with 120 retained draws per chain, either form may fail it, and a divergence in the centered fit is a geometry signal rather than noise.
 
 ## Answered scientific discussion
 
@@ -47,7 +47,7 @@ Compare diagnostics for the parameters and derived quantities that matter. A sam
 
 ## Complete reproducible program
 
-Run the complete program in the classroom's declared prepared profile. Every run starts a fresh process with tiny offline synthetic data. This is a worked tutorial, with no exam or hidden solution. Runtime: `bayesian-cpu`.
+Run the complete program in the classroom's declared prepared profile. Every run starts a fresh process with tiny offline synthetic data. This is a worked tutorial, with no exam or hidden solution. These teaching-sized chains can fail the convergence screen from `bayes-006` (R-hat below 1.01, at least 100 bulk and tail effective draws per chain, no divergences); read the printed diagnostics against it before interpreting any estimate. Runtime: `bayesian-cpu`.
 
 ```python
 """Complete bounded synthetic Bayesian investigation; no external data."""
@@ -79,8 +79,8 @@ def sample_model(model, seed):
 def diagnostics(trace, names):
     import arviz as az
 
-    rhat = np.asarray(az.rhat(trace, var_names=names).to_array(), float)
-    ess = np.asarray(az.ess(trace, var_names=names, method="bulk").to_array(), float)
+    rhat = np.asarray(az.rhat(trace, var_names=names).to_dataarray(), float)
+    ess = np.asarray(az.ess(trace, var_names=names, method="bulk").to_dataarray(), float)
 
     def finite_extreme(values, maximum):
         values = values[np.isfinite(values)]

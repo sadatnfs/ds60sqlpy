@@ -1,4 +1,4 @@
-"""polars-001: worked starting point; complete the guide's six changes."""
+"""polars-001: both worked cases; complete the guide's six changes."""
 
 import polars as pl
 
@@ -13,8 +13,21 @@ def example_one():
     return {"rows": result.to_dicts(), "total_revenue": 30}
 
 
+def example_two():
+    frame = pl.DataFrame(
+        {"id": [1, 2], "label": ["new", "done"]}, schema={"id": pl.Int64, "label": pl.String}
+    )
+    assert frame.schema == {"id": pl.Int64, "label": pl.String}
+    empty = frame.filter(pl.col("id") > 10)
+    assert empty.height == 0 and empty.schema == frame.schema
+    selected = frame.select("label", "id")
+    assert selected.columns == ["label", "id"]
+    return {"empty_shape": empty.shape, "schema": str(empty.schema)}
+
+
 if __name__ == "__main__":
     print(example_one())
+    print(example_two())
 
 # TODO 1: Append an order with units 3 and price 4, then predict the total before running.
 # TODO 2: Return order_id and revenue only.

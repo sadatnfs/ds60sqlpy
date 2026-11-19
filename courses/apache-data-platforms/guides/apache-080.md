@@ -23,6 +23,10 @@ current state can legitimately change rows. A timeout can leave the client
 uncertain about which bytes were received, even though the read itself did not
 mutate the provider's table.
 
+**Execution boundary.** Restart, replacement and outage experiments need a prepared
+reference server and its storage, which the repository does not provide. The
+records described below are what to collect on that server.
+
 ## Worked case A: retain a shared version through replacement
 
 After a real successful bounded read, save server source/package identity,

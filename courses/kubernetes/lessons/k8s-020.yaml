@@ -1,3 +1,4 @@
+# k8s-020 starter. The learner starter contains only the Deployment; Exercise 2 asks you to add the hello Service. Compare with the separate reference in courses/kubernetes/solutions/ only after your attempt.
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -50,21 +51,15 @@ spec:
             capabilities:
               drop:
                 - ALL
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: hello
-spec:
-  selector:
-    app: hello
-  ports:
-    - name: http
-      port: 8080
-      targetPort: http
-# Exercise 1: Name the layers. Draw client namespace,DNS,Service,EndpointSlice,Pod port and HTTP route. Expected: Each layer has a distinct observation and possible failure.
-# Exercise 2: Verify the allowed path. Run the fixed Deployment/Service source under a qualified lease. Expected: Owned backend identity and exact /version response pass,with cleanup.
-# Exercise 3: Classify NXDOMAIN. Interpret a host-provided failed name-resolution trace. Expected: Investigate name,namespace and DNS context before backend application state.
-# Exercise 4: Classify a transport failure. Interpret resolution success followed by a bounded connection failure. Expected: Inspect ports,eligible endpoints and qualified policy evidence;cause remains conditional until discriminated.
-# Exercise 5: Classify HTTP failures. Compare404 at /missing and200 with a wrong version. Expected: Route mismatch versus application-contract mismatch.
-# Exercise 6: Design a finite host transfer. Specify a wrong-port or cross-namespace test only under a named host capability. Expected: Explicit target,allowed client,timeout,expected layer failure and cleanup are recorded.
+# Exercise 1: Name the layers. Draw client namespace, DNS, Service, EndpointSlice, Pod port and HTTP route.
+# My prediction and evidence:
+# Exercise 2: Verify the allowed path. The starter contains only the Deployment. Add the hello Service (selector app=hello, port 8080 named http, targetPort http), then Run the Deployment and Service under a qualified lease.
+# My prediction and evidence:
+# Exercise 3: Classify NXDOMAIN. Interpret a host-provided failed name-resolution trace.
+# My prediction and evidence:
+# Exercise 4: Classify a transport failure. Interpret resolution success followed by a bounded connection failure.
+# My prediction and evidence:
+# Exercise 5: Classify HTTP failures. Compare 404 at /missing and 200 with a wrong version.
+# My prediction and evidence:
+# Exercise 6: Design a finite host transfer. Specify a wrong-port or cross-namespace test only under a named host capability.
+# My prediction and evidence:

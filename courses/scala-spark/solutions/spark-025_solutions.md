@@ -179,4 +179,4 @@ The intentional failure is confined to a path created by this run. The subsequen
 
 ## Execution and interpretation
 
-Run the complete reference in its prepared fixed worker. The small fixture is constructed inside the program,so opening a lesson does not fetch data. A final success line is printed only after the reference assertions complete. Plan observations,partition evidence and resource measurements apply to the actual local configuration; they do not establish cluster-scale performance. Session cleanup is explicit,and any additional owned file/query lifecycle is described in the lesson.
+Run the complete reference in its prepared fixed worker. The small fixture is constructed inside the program, so opening a lesson does not fetch data. A final success line is printed only after the reference assertions complete. Plan observations, partition evidence and resource measurements apply to the actual local configuration; they do not establish cluster-scale performance. Session cleanup is explicit, and any additional owned file/query lifecycle is described in the lesson.

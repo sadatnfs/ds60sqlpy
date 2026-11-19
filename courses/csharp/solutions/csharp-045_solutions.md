@@ -1,6 +1,6 @@
 # csharp-045: explanation and comparison
 
-Attempt the six guide tasks before opening this comparison. The executable reference is [csharp-045_solution.cs](csharp-045_solution.cs). Its assertions are always active under the prepared classroom compile settings.
+Attempt the six guide tasks before opening this comparison. The executable reference is [csharp-045_solution.cs](csharp-045_solution.cs). It runs both worked examples and the reference answers below, and its assertions are always active under the prepared classroom compile settings.
 
 ## Why the two examples differ
 
@@ -8,21 +8,54 @@ Attempt the six guide tasks before opening this comparison. The executable refer
 
 **Prefer typed access for a fixed contract:** A statically known relationship gives the compiler and deployment tools more information. The fixed projection needs no string-based member lookup.
 
-## Reason through the six tasks
+## Task answers
 
-1. **Predict and explain.** Compare compile-time and runtime checking in the two examples.
+### Task 1: Predict and explain
 
-2. **Guided modification.** Inspect a different known property and handle absence explicitly.
+Compare compile-time and runtime checking in the two examples.
 
-3. **Independent construction.** Replace string-based access in a small report with a typed projection.
+No separate reference answer has been written for this task. Example A is the evidence to compare with: Runtime lookup needs an absence policy even when the programmer expects a member to exist. The known property is an int and the missing property is absent.
 
-4. **Diagnose a defect.** Diagnose assuming dynamic reflection will remain available after trimming.
+### Task 2: Guided modification
 
-5. **Boundary evidence.** Test an absent member and an unexpected member type.
+Inspect a different known property and handle absence explicitly.
 
-6. **Transfer and justify.** Plan an external Native AOT experiment stating target architecture, native prerequisites and runtime checks.
+No separate reference answer has been written for this task. Start from Example B: A statically known relationship gives the compiler and deployment tools more information. The fixed projection needs no string-based member lookup.
 
-For tasks 1 and 2, use the checked values and mechanism trace in the two examples. For task 3, choose names that expose the input and result contract and retain the same invariants. For task 4, the diagnosed mistakes below supply a concrete wrong assumption: preserve its counterexample before repairing it. Task 5 needs an explicit expected value or documented rejection at the boundary, not just successful execution. For task 6, explain what changes in the new context and which part of the original mechanism remains applicable. Several representations may satisfy this transfer task; justify the choice rather than treating this reference as the only architecture.
+### Task 3: Independent construction
+
+Replace string-based access in a small report with a typed projection.
+
+**Reference answer.** It runs as the `Task 3` block of the reference program.
+
+```csharp
+var metrics = new[] { new Metric(2), new Metric(5) };
+Func<Metric, int> count = metric => metric.Count;
+int total = metrics.Sum(count);
+Check(total == 7, "typed projection");
+```
+
+**Observe:** The typed projection sums the counts to 7.
+
+A Func<Metric, int> is checked by the compiler; renaming Count breaks the build instead of a reflection lookup failing at run time.
+
+### Task 4: Diagnose a defect
+
+Diagnose assuming dynamic reflection will remain available after trimming.
+
+No reference answer has been written for this task yet. The wrong assumptions to look for are this lesson's pitfalls: Publishing AOT does not guarantee a smaller or faster application for every workload. Never guess native memory ownership. A successful ordinary managed run does not qualify an AOT or interop path.
+
+### Task 5: Boundary evidence
+
+Test an absent member and an unexpected member type.
+
+No reference answer has been written for this task yet. Write the expected value or documented rejection for each boundary before running it, and compare with the checks in Example A (Inspect declared metadata) and Example B (Prefer typed access for a fixed contract).
+
+### Task 6: Transfer and justify
+
+Plan an external Native AOT experiment stating target architecture, native prerequisites and runtime checks.
+
+No single reference answer exists: several designs can satisfy this transfer task. Justify yours against the mechanism described below and the vocabulary entry **Reflection**, and state one limitation of your choice.
 
 ## Mechanism and diagnostic reasoning
 
@@ -36,4 +69,4 @@ Publishing AOT does not guarantee a smaller or faster application for every work
 
 ## Review before continuing
 
-The reference checks the worked scenarios, including their boundary distinctions. Your independent and transfer artifacts may have additional checks. Compare observations rather than only source text. Preserve any new regression case you discover and explain why it would reject a plausible wrong implementation. External project steps require their own build and platform evidence and are not established by a portable reference passing.
+Run the reference and confirm that it prints `csharp-045: passed`, then reconstruct one boundary case from memory and explain which check would reject a plausible wrong implementation. External project steps need their own build and platform evidence; a passing portable reference does not establish them.

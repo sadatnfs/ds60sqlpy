@@ -40,7 +40,7 @@ concurrent writers rather than a directory overwrite.
 
 ## Worked case B: a correction creates a new observation boundary
 
-Append a fourth west order with amount2 and capture the new snapshot. The old
+Append a fourth west order with amount 2 and capture the new snapshot. The old
 version-pinned scan remains three rows and west 9; the new scan contains four rows
 and west 11. The previously registered DataFusion Arrow relation remains bound
 to its materialized state until explicitly refreshed. Require all three

@@ -14,6 +14,29 @@ The Compose project has a master, two workers, a separate driver and a History S
 
 After initialization in the preceding chapter:
 
+The two workers share one YAML anchor and differ only in name, command and limits:
+
+From [`projects/cluster-lab/compose.yaml`](../projects/cluster-lab/compose.yaml):
+
+```yaml
+worker-a:
+  <<: *runtime
+  hostname: worker-a
+  environment:
+    <<: *spark-environment
+    SPARK_LOCAL_IP: worker-a
+  command: [worker, worker-a]
+  mem_limit: 1536m
+  cpus: 1
+  pids_limit: 512
+  depends_on: [master]
+```
+
+`<<: *runtime` merges the shared settings: the read-only root filesystem, the
+dropped capabilities and the private `lab` network. `SPARK_LOCAL_IP` is the name
+the worker advertises, and `mem_limit`, `cpus` and `pids_limit` are the container
+bounds that chapter 12 turns into a concurrency budget.
+
 ```sh
 python3 lab.py up
 python3 lab.py status

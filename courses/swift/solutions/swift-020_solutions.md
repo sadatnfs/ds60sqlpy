@@ -1,6 +1,6 @@
 # swift-020: explanation and comparison
 
-Attempt the six guide tasks before opening this comparison. The executable reference is [swift-020_solution.swift](swift-020_solution.swift). Its assertions are always active under the prepared classroom compile settings.
+Attempt the six guide tasks before opening this comparison. The executable reference is [swift-020_solution.swift](swift-020_solution.swift). It runs both worked examples and the reference answers below, and its assertions are always active under the prepared classroom compile settings.
 
 ## Why the two examples differ
 
@@ -8,21 +8,58 @@ Attempt the six guide tasks before opening this comparison. The executable refer
 
 **Materialize a lazy transformation:** Pure transformations keep delayed execution understandable and reproducible. The lazy recipe produces 20 and 30 when consumed.
 
-## Reason through the six tasks
+## Task answers
 
-1. **Predict and explain.** Predict slice count and startIndex separately.
+### Task 1: Predict and explain
 
-2. **Guided modification.** Traverse the slice using its indices.
+Predict slice count and startIndex separately.
 
-3. **Independent construction.** Write a generic sum over Sequence where the element type is suitable.
+No separate reference answer has been written for this task. Example A is the evidence to compare with: Element count and index origin are different properties. The slice starts at index 1 while traversal still produces two elements.
 
-4. **Diagnose a defect.** Diagnose indexing a slice from zero to count minus one.
+### Task 2: Guided modification
 
-5. **Boundary evidence.** Test an empty slice and a single-pass custom sequence.
+Traverse the slice using its indices.
 
-6. **Transfer and justify.** Choose lazy or materialized processing for a large input and explain repeatability and memory costs.
+No separate reference answer has been written for this task. Start from Example B: Pure transformations keep delayed execution understandable and reproducible. The lazy recipe produces 20 and 30 when consumed.
 
-For tasks 1 and 2, use the checked values and mechanism trace in the two examples. For task 3, choose names that expose the input and result contract and retain the same invariants. For task 4, the diagnosed mistakes below supply a concrete wrong assumption: preserve its counterexample before repairing it. Task 5 needs an explicit expected value or documented rejection at the boundary, not just successful execution. For task 6, explain what changes in the new context and which part of the original mechanism remains applicable. Several representations may satisfy this transfer task; justify the choice rather than treating this reference as the only architecture.
+### Task 3: Independent construction
+
+Write a generic sum over Sequence where the element type is suitable.
+
+**Reference answer.** It runs as the `Task 3` block of the reference program.
+
+```swift
+func sum<S: Sequence>(_ values: S) -> S.Element where S.Element: AdditiveArithmetic {
+  var total = S.Element.zero
+  for value in values { total += value }
+  return total
+}
+precondition(sum([1, 2, 3]) == 6)
+precondition(sum([1.5, 2.5]) == 4.0)
+precondition(sum([Int]()) == 0)
+```
+
+**Observe:** The sum works for Ints (6) and Doubles (4.0) and returns 0 for an empty sequence.
+
+AdditiveArithmetic supplies both .zero and +, which is exactly what summing needs, so any suitable element type works.
+
+### Task 4: Diagnose a defect
+
+Diagnose indexing a slice from zero to count minus one.
+
+No reference answer has been written for this task yet. The wrong assumptions to look for are this lesson's pitfalls: Not every Sequence can be traversed repeatedly. Index movement may be linear. Side effects in lazy closures can run later or more often than a caller expects.
+
+### Task 5: Boundary evidence
+
+Test an empty slice and a single-pass custom sequence.
+
+No reference answer has been written for this task yet. Write the expected value or documented rejection for each boundary before running it, and compare with the checks in Example A (Use slice indices honestly) and Example B (Materialize a lazy transformation).
+
+### Task 6: Transfer and justify
+
+Choose lazy or materialized processing for a large input and explain repeatability and memory costs.
+
+No single reference answer exists: several designs can satisfy this transfer task. Justify yours against the mechanism described below and the vocabulary entry **Sequence**, and state one limitation of your choice.
 
 ## Mechanism and diagnostic reasoning
 
@@ -36,4 +73,4 @@ Not every Sequence can be traversed repeatedly. Index movement may be linear. Si
 
 ## Review before continuing
 
-The reference checks the worked scenarios, including their boundary distinctions. Your independent and transfer artifacts may have additional checks. Compare observations rather than only source text. Preserve any new regression case you discover and explain why it would reject a plausible wrong implementation. External project steps require their own build and platform evidence and are not established by a portable reference passing.
+Run the reference and confirm that it prints `swift-020: passed`, then reconstruct one boundary case from memory and explain which check would reject a plausible wrong implementation. External project steps need their own build and platform evidence; a passing portable reference does not establish them.

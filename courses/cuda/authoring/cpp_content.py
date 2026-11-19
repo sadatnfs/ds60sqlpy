@@ -167,6 +167,41 @@ def cpu_starter(unit: dict) -> str:
     )
 
 
+def kernel_excerpt(source: str) -> str:
+    """Return every top-level __global__ function (with a template line) from a .cu file."""
+    lines = source.splitlines()
+    blocks = []
+    for index, line in enumerate(lines):
+        if not line.startswith("__global__"):
+            continue
+        start = index - 1 if index and lines[index - 1].startswith("template") else index
+        end = next(j for j in range(index, len(lines)) if lines[j] == "}")
+        blocks.append("\n".join(lines[start : end + 1]))
+    return "\n\n".join(blocks)
+
+
+def listing_section(unit: dict, identity: str, gpu: dict[int, str]) -> str:
+    """Render the chapter's CUDA C++ kernel listing, authored or excerpted from its lab."""
+    if "listing" in unit:
+        intro, code = unit["listing"]["intro"], unit["listing"]["code"].rstrip("\n")
+    elif unit["n"] in gpu:
+        intro = (
+            f"The kernel below is an excerpt from the chapter's complete [GPU reference](../references/{identity}_gpu.cu). "
+            "The full program adds device discovery, checked allocation and launch, completion checks and host validation."
+        )
+        code = kernel_excerpt(gpu[unit["n"]])
+    else:
+        return ""
+    return (
+        "## CUDA C++ kernel listing\n\n"
+        + intro
+        + " Read it as CUDA C++ source; the classroom reading pad does not compile or run it.\n\n"
+        + "```cpp\n"
+        + code
+        + "\n```\n\n"
+    )
+
+
 def render(unit: dict, gpu: dict[int, str]) -> dict[str, str]:
     number = unit["n"]
     identity = lesson_id(number)
@@ -215,9 +250,7 @@ def render(unit: dict, gpu: dict[int, str]) -> dict[str, str]:
             if index == 5
             else "State the output contract and which observations are needed in the new application."
         )
-        exercises.append(
-            f"### Exercise {index}\n\n{question}\n\n**Self-check:** Retain the requested calculation, output, diagram or explicit failure policy so another reader can compare it with the worked cases.\n\n**Hint 1:** {hint1}\n\n**Hint 2:** Review the mechanism paragraph and the relevant bounded CPU assertion; separate mathematical reasoning from optional device evidence.\n"
-        )
+        exercises.append(f"### Exercise {index}\n\n{question}\n\n**Hint:** {hint1}\n")
         worksheet.append(
             f"## Exercise {index}\n\n{question}\n\nMy prediction or design:\n\nMy calculation, trace or observation:\n\nEvidence surface (reading / CPU reference / actual NVIDIA execution):\n\nWhat this does not establish:\n"
         )
@@ -257,16 +290,17 @@ do not deliberately launch a hanging kernel or reset a shared GPU to reproduce i
 ## Level and prerequisites
 
 {level.capitalize()}; about {90 if number <= 16 else 110 if number <= 44 else 130} minutes, plus any optional hardware experiment. Direct prerequisites: {prerequisites}
-
+{(chr(10) + unit["prerequisite_note"] + chr(10)) if "prerequisite_note" in unit else ""}
 The order supports learning at your own pace. Reading and CPU reasoning remain
 available when NVIDIA hardware is absent. Advanced hardware features need their
 own capability checks and are not prerequisites for opening this chapter.
 
 ## Learning objectives
 
-Explain {title[0].lower() + title[1:]} using the concrete cases below. Produce {unit["evidence"][0].lower() + unit["evidence"][1:]}
-Distinguish an algorithmic calculation, a compiled artifact and an actual device
-observation when explaining what your work establishes.
+Work through *{title}* with the concrete cases below. Finish with this evidence:
+{unit["evidence"][0].lower() + unit["evidence"][1:] if unit["evidence"][1:2].islower() else unit["evidence"]} Distinguish an algorithmic
+calculation, a compiled artifact and an actual device observation when explaining
+what your work establishes.
 
 ## Purpose, vocabulary and mental model
 
@@ -274,30 +308,22 @@ observation when explaining what your work establishes.
 
 {equation}## How to run and study this lesson
 
-Open this chapter in `/classroom` and use its saved reading worksheet. The primary
-reading pad does not execute CUDA. The two examples, six tasks and separate
-explanations are usable offline on macOS, Linux and Windows through WSL 2 with
-the ordinary classroom. An AMD, Intel or Apple GPU does not make this CUDA C++
-source executable through Docker.
-
-For the bounded CPU calculation, select **CPU model (Python)** in this lesson.
-That variant keeps its own source and result history under the same chapter. Its
-answer-free starter supplies literal fixtures and the task contract; implement
-the model and assertions before replacing its deliberate incomplete-work error.
-The separate [CPU reference](../references/{identity}_cpu.py) uses only Python's
-standard library. For an optional terminal workflow, run this from the repository
-root in a prepared Python environment:
+Use the saved reading worksheet in `/classroom`; the reading pad does not execute
+CUDA. For the bounded calculation, select **CPU model (Python)**, whose
+answer-free starter supplies the literal fixtures and task contract. The
+[CUDA C++ study workflow](../README.md) covers platforms, optional GPU
+compilation and evidence labels. In a prepared Python environment you can also
+run the separate [CPU reference](../references/{identity}_cpu.py) from the
+repository root:
 
 ```sh
 python {cpu_path}
 ```
 
-The assertions check the stated numerical result or model invariant. Console text
-is evidence of this CPU reference only. The [CUDA C++ study workflow](../README.md)
-explains optional GPU compilation, paths, hardware requirements and evidence labels.
-No lesson opening downloads a model, installs a driver or starts a GPU job.
+Its assertions check the stated numerical result or model invariant; console
+text is evidence of this CPU model only, not of CUDA execution.
 
-## Worked example 1: trace the mechanism
+{listing_section(unit, identity, gpu)}## Worked example 1: trace the mechanism
 
 {unit["example1"]}
 
@@ -315,10 +341,9 @@ caches, instruction timing or device memory visibility.
 {unit["expected_output"]}
 ```
 
-Tiny floating-point display differences across platforms are acceptable only
-where the explicit assertions use a tolerance; integers, shapes and ordering
-must still satisfy their exact contracts. A printed hypothetical duration is a
-model output, not a measured GPU benchmark.
+Integers, shapes and ordering must match exactly; only assertions with an explicit
+tolerance accept small floating-point differences. A printed duration is a model
+output, not a measured GPU benchmark.
 
 ## Worked example 2: change a meaningful condition
 
@@ -330,16 +355,20 @@ valid. Keep the original case as a regression check when changing a boundary.
 
 {optional}## Six progressive exercises
 
+Exercises 1 and 2 are guided reconstructions of the worked examples; exercises
+3-6 change an input, diagnose a defect, test a boundary and transfer the idea.
+For each one, keep the calculation, output, diagram or failure policy you
+produce so another reader can compare it with the worked cases. If the hint is
+not enough, reread the mechanism paragraph and the bounded CPU assertion.
+
 {chr(10).join(exercises)}
 ## Common mistakes and diagnosis
 
 A tempting but incorrect claim in this chapter is: **{unit["mistake"]}**
 
 For the concrete failure exercise, {unit["tasks"][1]["question"][0].lower() + unit["tasks"][1]["question"][1:]}
-Preserve the original input and the stage where behavior diverged. Compare with
-the CPU model or dependency diagram before changing hardware configuration.
-A compiler result, synthetic timing model, profiler counter and returned numeric
-answer support different claims. Record unavailable hardware honestly.
+Preserve the original input and the stage where behavior diverged, and compare
+with the CPU model before changing hardware configuration.
 
 ## Self-check, retrieval and transfer
 
@@ -352,9 +381,8 @@ choice; it does not certify hardware qualification or expert mastery.
 
 ## Primary references
 
-These are further technical references. The chapter and local CPU model remain
-readable offline. Check the documentation matching your deliberately prepared
-toolkit before optional hardware execution.
+Check the documentation that matches your prepared toolkit before optional
+hardware execution.
 
 {links}
 

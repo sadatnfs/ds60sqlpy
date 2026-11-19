@@ -8,9 +8,11 @@ Kubernetes exposes typed API resources through a declarative control plane. An o
 
 apiVersion identifies the API group and version; kind identifies an object kind. metadata.namespace plus name locates a namespaced object, while uid identifies its incarnation. Spec and status should have separate Go fields and responsibilities. Pointer fields can distinguish an omitted desired value from an explicit zero. JSON tags bind the Go representation to wire names. A struct here models only the selected fields and is not the full generated Kubernetes API type.
 
-## 1. Decode desired and observed replicas
+## 1. Decode desired and observed replicas: change one input
 
-Decode a fixture requesting 3 replicas with 2 ready.
+Copy worked example 1 into a scratch pad and change `"replicas":3` to `"replicas":4`. Before running, predict which check fails and which value it now sees; then run it and restore the original line.
+
+The unchanged code is worked example 1:
 
 ```go
 var d Deployment
@@ -18,13 +20,15 @@ err := json.Unmarshal([]byte(`{"apiVersion":"apps/v1","kind":"Deployment","metad
 check(err == nil && d.Spec.Replicas != nil && *d.Spec.Replicas == 3 && d.Status.Ready == 2, "spec status")
 ```
 
-**Expected:** Desired is 3 while ready is 2.
+**Expected:** The changed run panics with `spec status` because `err == nil && d.Spec.Replicas != nil && *d.Spec.Replicas == 3 && d.Status.Ready == 2` no longer holds. Restoring the original line brings back the worked observation: desired is 3 while ready is 2.
 
 The accepted object and the observed rollout are different evidence. A controller must reconcile the gap.
 
-## 2. Distinguish omitted from explicit zero
+## 2. Distinguish omitted from explicit zero: diagnose an edited check
 
-Decode one absent replicas field and one replicas zero.
+A careless edit changed the check in worked example 2 so that it reads ``check(json.Unmarshal([]byte(`{"spec":{"replicas":1}}`), &b) == nil, "decode")``. Run worked example 2 with that line, explain why the edited check now fails for the same program state, and restore it.
+
+The unchanged code is worked example 2:
 
 ```go
 var a, b Deployment
@@ -33,58 +37,70 @@ check(json.Unmarshal([]byte(`{"spec":{"replicas":0}}`), &b) == nil, "decode")
 check(a.Spec.Replicas == nil && b.Spec.Replicas != nil && *b.Spec.Replicas == 0, "presence")
 ```
 
-**Expected:** Only the explicit zero has a non-nil pointer.
+**Expected:** Before the repair the program panics with `presence`; after it the line reads ``check(json.Unmarshal([]byte(`{"spec":{"replicas":0}}`), &b) == nil, "decode")`` again and only the explicit zero has a non-nil pointer.
 
 Defaulting and an intentional scale-to-zero request have different meanings. A plain integer field would lose that distinction before validation.
 
 ## 3. Separate name and incarnation
 
-Construct two objects sharing name but having different UIDs.
+Decode two objects that share namespace and name but carry different UIDs.
 
 ```go
-a := Metadata{Name: "demo", Namespace: "lesson", UID: "old"}
-b := Metadata{Name: "demo", Namespace: "lesson", UID: "new"}
-check(a.Name == b.Name && a.UID != b.UID, "incarnation")
+var a, b Deployment
+errA := json.Unmarshal([]byte(`{"metadata":{"name":"demo","namespace":"lesson","uid":"old"}}`), &a)
+errB := json.Unmarshal([]byte(`{"metadata":{"name":"demo","namespace":"lesson","uid":"new"}}`), &b)
+check(errA == nil && errB == nil, "decode")
+check(a.Metadata.Name == b.Metadata.Name && a.Metadata.UID != b.Metadata.UID, "incarnation")
 ```
 
-**Expected:** Their names match but identities differ.
+**Expected:** Their names match but their identities differ.
 
 Cleanup based only on name can delete a replacement object that the operation never owned.
 
 ## 4. Keep namespaces in a key
 
-Build keys for the same name in two namespaces.
+Build keys with one function for the same name in two namespaces.
 
 ```go
-a, b := "alpha/demo", "beta/demo"
-check(a != b, "namespace key")
+key := func(m Metadata) string { return m.Namespace + "/" + m.Name }
+a := Metadata{Name: "demo", Namespace: "alpha"}
+b := Metadata{Name: "demo", Namespace: "beta"}
+check(key(a) == "alpha/demo" && key(a) != key(b), "namespace key")
 ```
 
-**Expected:** The keys are different.
+**Expected:** The key is alpha/demo for the first object and differs from the second object's key.
 
 Names are unique within a namespaced resource scope, not across the whole cluster.
 
 ## 5. Treat versions as opaque
 
-Store a nonnumeric resourceVersion token and compare it for equality.
+Decode resourceVersion tokens 10 and 9 and compare them as the strings they are.
 
 ```go
-m := Metadata{Version: "opaque-v7"}
-check(m.Version == "opaque-v7", "opaque version")
+var a, b Metadata
+errA := json.Unmarshal([]byte(`{"resourceVersion":"10"}`), &a)
+errB := json.Unmarshal([]byte(`{"resourceVersion":"9"}`), &b)
+check(errA == nil && errB == nil, "decode")
+check(a.Version == "10" && a.Version != b.Version && a.Version < b.Version, "opaque version")
 ```
 
-**Expected:** The exact token is retained.
+**Expected:** Both tokens are retained exactly; they differ, and string order even places 10 before 9, so only equality is meaningful.
 
-Do not increment, subtract or numerically order resourceVersion. Its supported meaning is defined by API operations.
+Do not increment, subtract or numerically order resourceVersion. Its supported meaning is defined by API operations, and comparing tokens as text produces an order with no meaning.
 
 ## 6. Transfer readiness reasoning
 
-Compare desired 3 with ready 3 and then ready 2.
+Apply one readiness predicate to desired 3 with ready 3 and then ready 2.
 
 ```go
-wanted := 3
-check(wanted == 3 && 3 == wanted, "ready")
-check(2 != wanted, "not ready")
+complete := func(d Deployment) bool { return d.Spec.Replicas != nil && d.Status.Ready == *d.Spec.Replicas }
+want := 3
+var d Deployment
+d.Spec.Replicas = &want
+d.Status.Ready = 3
+check(complete(d), "ready")
+d.Status.Ready = 2
+check(!complete(d), "not ready")
 ```
 
 **Expected:** Only the equal complete state satisfies this simplified predicate.

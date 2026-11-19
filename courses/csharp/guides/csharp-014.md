@@ -6,7 +6,7 @@ Beginner, approximately 90 minutes. Prerequisites: `csharp-013`
 
 ## Learning objectives
 
-Design an immutable coordinate using a readonly record struct. Then choose identity-based or data-based equality for an order and explain how updates affect collection membership.
+Use records and structs for value equality and explain what a shallow with-copy shares. The central exercise is task 3: Design an immutable coordinate using a readonly record struct.
 
 ## Purpose and mental model
 
@@ -146,7 +146,7 @@ internal static class Program {
 
 6. **Transfer and justify.** Choose identity-based or data-based equality for an order and explain how updates affect collection membership.
 
-For each task, keep a short evidence table: input or initial state, prediction, observed value or diagnostic, and the rule that explains it. The guided examples establish mechanisms; the independent and transfer tasks require your own representation and explanation. Use the separate solution after attempting the task, then close it and reconstruct one boundary case.
+For each task, keep a short evidence table: input or initial state, prediction, observed value or diagnostic, and the rule that explains it. The guided examples establish mechanisms; the independent and transfer tasks require your own representation and explanation. The separate explanation gives an executed reference answer where one has been written and says plainly where none exists yet. Open it only after your own attempt, then close it and reconstruct one boundary case.
 
 ## Common pitfalls and diagnosis
 
@@ -156,9 +156,9 @@ A useful regression case distinguishes the intended rule from the tempting wrong
 
 ## Progressive hints
 
-1. Name the input, output and invariant using the vocabulary above. Reproduce Example A before changing two things at once.
-2. Compare the changed condition in Example B. Identify the first line whose behavior differs and state why.
-3. Reduce your independent task to a normal case, an empty or boundary case, and an invalid case. Write expected observations before inspecting the reference.
+1. Reproduce Example A (Equal data with distinct identities) before changing anything, and confirm its observation: Equal records can be distinct objects; with preserves the previous age.
+2. Compare Example B (Notice nested shared state) with Example A and name the first line whose behavior differs. Its observation is: Both records see the appended list item.
+3. Before opening the explanation, test your task 3 attempt against this lesson's main pitfall: Record equality does not recursively compare arbitrary collection contents.
 
 ## Self-check and next step
 
@@ -166,7 +166,7 @@ Explain Record, With expression, Shallow copy without reading the definitions. R
 
 ## Sources and execution boundary
 
-[Official language or framework documentation](https://learn.microsoft.com/en-us/dotnet/csharp/). The prose, small fixtures and task designs in this chapter are original. Documentation links provide additional API detail, not a dependency fetched by the classroom. Runtime qualification is recorded separately by the repository validation workflow. Reading a guide, compiling a reference, running its assertions and completing an external project are distinct achievements.
+[Official language or framework documentation](https://learn.microsoft.com/en-us/dotnet/csharp/). The prose, small fixtures and task designs in this chapter are original. Documentation links provide additional API detail, not a dependency fetched by the classroom. Reading a guide, compiling a reference, running its assertions and completing an external project are distinct achievements.
 
 ## Ask an AI tutor about this lesson
 

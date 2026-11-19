@@ -29,6 +29,17 @@ fixture is empty. Two belong to alpha on the same day and one belongs to beta.
 The query supplies both partition-key fields and returns alpha's orders in
 clustering order: order 3 before order 1, with amounts 7 and 4.
 
+The client creates the keyspace and the query-first table with these CQL
+statements:
+
+<!-- include: projects/cassandra/client.py from='if local["data_center"] != "datacenter1":' until='current = list(session.execute(ROW_QUERY))' python -->
+
+`PRIMARY KEY ((customer_id, day_bucket), ordered_at, order_id)` makes the pair
+`(customer_id, day_bucket)` the partition key, which decides the replica that stores
+a row, and `ordered_at, order_id` the clustering columns, which order rows inside
+that partition. A lookup that supplies both partition-key values reads one
+partition.
+
 This result is local to that selected partition. It is not a global ordering of
 every customer's orders. Asking for a month may require up to the month's daily
 buckets and an application-level merge or a different table design. Query fanout
@@ -52,6 +63,13 @@ A query selecting amount 7 without the required partition key has a different
 access shape. The unindexed fixture rejects that request rather than pretending
 it is a cheap point lookup. The client checks the actual filtering diagnostic,
 so an unrelated network or syntax failure cannot satisfy this negative case.
+
+After a bounded clustering-range read, the check sends the filter and accepts only the expected diagnostic:
+
+<!-- include: projects/cassandra/client.py from='window = list(session.execute(ID_QUERY' to='Unapproved unindexed filter' python -->
+
+Cassandra refuses the query because `amount` is neither a key column nor indexed;
+adding `ALLOW FILTERING` would make it scan every partition instead.
 
 Adding ALLOW FILTERING is not a general performance fix. It can authorize work
 whose cost depends on how much data must be examined instead of the small number

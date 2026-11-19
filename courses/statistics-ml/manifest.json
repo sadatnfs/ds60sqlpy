@@ -71,7 +71,7 @@
         "stat-02-17",
         "stat-02-18"
       ],
-      "prerequisites": ["statistics-001"],
+      "prerequisites": [],
       "level": "foundation",
       "minutes": 90,
       "dependencies": ["numpy"],
@@ -188,7 +188,7 @@
         "stat-05-22",
         "stat-05-23"
       ],
-      "prerequisites": ["statistics-004"],
+      "prerequisites": ["statistics-001", "statistics-003"],
       "level": "foundation",
       "minutes": 90,
       "dependencies": ["numpy"],
@@ -227,7 +227,7 @@
         "stat-06-24",
         "stat-06-25"
       ],
-      "prerequisites": ["statistics-005"],
+      "prerequisites": ["statistics-001", "statistics-004"],
       "level": "foundation",
       "minutes": 90,
       "dependencies": ["numpy", "pandas"],
@@ -266,7 +266,7 @@
         "stat-07-24",
         "stat-07-25"
       ],
-      "prerequisites": ["statistics-006"],
+      "prerequisites": ["statistics-005", "statistics-006"],
       "level": "foundation",
       "minutes": 90,
       "dependencies": ["numpy", "scipy"],
@@ -309,7 +309,7 @@
         "stat-08-28",
         "stat-08-29"
       ],
-      "prerequisites": ["statistics-007"],
+      "prerequisites": ["statistics-004", "statistics-005"],
       "level": "foundation",
       "minutes": 90,
       "dependencies": ["numpy", "scipy"],
@@ -438,7 +438,7 @@
         "stat-11-31",
         "stat-11-32"
       ],
-      "prerequisites": ["statistics-010"],
+      "prerequisites": ["statistics-002", "statistics-008"],
       "level": "intermediate",
       "minutes": 120,
       "dependencies": ["numpy", "scikit-learn", "scipy", "statsmodels"],
@@ -515,7 +515,7 @@
         "stat-13-24",
         "stat-13-25"
       ],
-      "prerequisites": ["statistics-012"],
+      "prerequisites": ["statistics-009", "statistics-011"],
       "level": "intermediate",
       "minutes": 120,
       "dependencies": ["numpy", "scipy"],
@@ -557,7 +557,7 @@
         "stat-14-27",
         "stat-14-28"
       ],
-      "prerequisites": ["statistics-013"],
+      "prerequisites": ["statistics-010", "statistics-013"],
       "level": "intermediate",
       "minutes": 120,
       "dependencies": ["numpy", "scipy", "statsmodels"],
@@ -593,7 +593,7 @@
         "stat-15-21",
         "stat-15-22"
       ],
-      "prerequisites": ["statistics-014"],
+      "prerequisites": ["statistics-001", "statistics-008"],
       "level": "intermediate",
       "minutes": 120,
       "dependencies": ["numpy"],
@@ -629,7 +629,7 @@
         "stat-16-21",
         "stat-16-22"
       ],
-      "prerequisites": ["statistics-015"],
+      "prerequisites": ["statistics-012", "statistics-015"],
       "level": "intermediate",
       "minutes": 120,
       "dependencies": ["numpy"],
@@ -672,7 +672,7 @@
         "stat-17-28",
         "stat-17-29"
       ],
-      "prerequisites": ["statistics-016"],
+      "prerequisites": ["statistics-011", "statistics-015"],
       "level": "intermediate",
       "minutes": 120,
       "dependencies": ["numpy"],
@@ -716,7 +716,7 @@
         "stat-18-29",
         "stat-18-30"
       ],
-      "prerequisites": ["statistics-017"],
+      "prerequisites": ["statistics-004", "statistics-008"],
       "level": "intermediate",
       "minutes": 120,
       "dependencies": ["numpy", "scipy"],
@@ -760,7 +760,7 @@
         "stat-19-29",
         "stat-19-30"
       ],
-      "prerequisites": ["statistics-018"],
+      "prerequisites": ["statistics-011"],
       "level": "intermediate",
       "minutes": 120,
       "dependencies": ["numpy", "scikit-learn"],
@@ -796,7 +796,7 @@
         "stat-20-21",
         "stat-20-22"
       ],
-      "prerequisites": ["statistics-019"],
+      "prerequisites": ["statistics-006", "statistics-019"],
       "level": "intermediate",
       "minutes": 120,
       "dependencies": ["numpy"],
@@ -836,7 +836,7 @@
         "stat-21-25",
         "stat-21-26"
       ],
-      "prerequisites": ["statistics-020"],
+      "prerequisites": ["statistics-002", "statistics-008"],
       "level": "intermediate",
       "minutes": 120,
       "dependencies": ["numpy", "scikit-learn"],
@@ -880,7 +880,7 @@
         "stat-22-29",
         "stat-22-30"
       ],
-      "prerequisites": ["statistics-021"],
+      "prerequisites": ["statistics-019"],
       "level": "intermediate",
       "minutes": 120,
       "dependencies": ["numpy", "scikit-learn"],
@@ -914,7 +914,7 @@
         "stat-23-19",
         "stat-23-20"
       ],
-      "prerequisites": ["statistics-022"],
+      "prerequisites": ["statistics-018", "statistics-022"],
       "level": "advanced",
       "minutes": 120,
       "dependencies": ["numpy"],
@@ -951,7 +951,7 @@
         "stat-24-22",
         "stat-24-23"
       ],
-      "prerequisites": ["statistics-023"],
+      "prerequisites": ["statistics-022"],
       "level": "advanced",
       "minutes": 120,
       "dependencies": ["numpy"],
@@ -990,7 +990,7 @@
         "stat-25-24",
         "stat-25-25"
       ],
-      "prerequisites": ["statistics-024"],
+      "prerequisites": ["statistics-003", "statistics-011"],
       "level": "advanced",
       "minutes": 120,
       "dependencies": ["numpy"],
@@ -1074,7 +1074,7 @@
         "stat-27-29",
         "stat-27-30"
       ],
-      "prerequisites": ["statistics-026"],
+      "prerequisites": ["statistics-022", "statistics-026"],
       "level": "advanced",
       "minutes": 120,
       "dependencies": ["numpy"],
@@ -1115,7 +1115,7 @@
         "stat-28-26",
         "stat-28-27"
       ],
-      "prerequisites": ["statistics-027"],
+      "prerequisites": ["statistics-008", "statistics-011"],
       "level": "advanced",
       "minutes": 120,
       "dependencies": ["numpy"],
@@ -1150,7 +1150,7 @@
         "stat-29-20",
         "stat-29-21"
       ],
-      "prerequisites": ["statistics-028"],
+      "prerequisites": ["statistics-009", "statistics-025"],
       "level": "advanced",
       "minutes": 120,
       "dependencies": ["numpy"],
@@ -1184,7 +1184,7 @@
         "stat-30-19",
         "stat-30-20"
       ],
-      "prerequisites": ["statistics-029"],
+      "prerequisites": ["statistics-012", "statistics-025"],
       "level": "advanced",
       "minutes": 120,
       "dependencies": ["numpy"],
@@ -1215,7 +1215,7 @@
         "stat-31-16",
         "stat-31-17"
       ],
-      "prerequisites": ["statistics-030"],
+      "prerequisites": ["statistics-003", "statistics-021"],
       "level": "advanced",
       "minutes": 120,
       "dependencies": ["numpy"],
@@ -1249,7 +1249,7 @@
         "stat-32-19",
         "stat-32-20"
       ],
-      "prerequisites": ["statistics-031"],
+      "prerequisites": ["statistics-019", "statistics-022"],
       "level": "advanced",
       "minutes": 120,
       "dependencies": ["numpy"],
@@ -1290,7 +1290,7 @@
         "stat-33-26",
         "stat-33-27"
       ],
-      "prerequisites": ["statistics-032"],
+      "prerequisites": ["statistics-019", "statistics-020"],
       "level": "advanced",
       "minutes": 120,
       "dependencies": ["numpy"],
@@ -1324,7 +1324,7 @@
         "stat-34-19",
         "stat-34-20"
       ],
-      "prerequisites": ["statistics-033"],
+      "prerequisites": ["statistics-022", "statistics-033"],
       "level": "advanced",
       "minutes": 120,
       "dependencies": ["numpy"],
@@ -1361,7 +1361,7 @@
         "stat-35-22",
         "stat-35-23"
       ],
-      "prerequisites": ["statistics-034"],
+      "prerequisites": ["statistics-014", "statistics-018"],
       "level": "advanced",
       "minutes": 120,
       "dependencies": ["numpy"],
@@ -1402,7 +1402,7 @@
         "stat-36-26",
         "stat-36-27"
       ],
-      "prerequisites": ["statistics-035"],
+      "prerequisites": ["statistics-002", "statistics-003"],
       "level": "advanced",
       "minutes": 120,
       "dependencies": ["numpy", "scipy"],
@@ -1436,7 +1436,7 @@
         "stat-37-19",
         "stat-37-20"
       ],
-      "prerequisites": ["statistics-036"],
+      "prerequisites": ["statistics-008"],
       "level": "advanced",
       "minutes": 120,
       "dependencies": ["numpy"],
@@ -1480,7 +1480,7 @@
         "stat-38-29",
         "stat-38-30"
       ],
-      "prerequisites": ["statistics-037"],
+      "prerequisites": ["statistics-014", "statistics-028"],
       "level": "advanced",
       "minutes": 120,
       "dependencies": ["numpy"],
@@ -1524,7 +1524,7 @@
         "stat-39-29",
         "stat-39-30"
       ],
-      "prerequisites": ["statistics-038"],
+      "prerequisites": ["statistics-009", "statistics-012"],
       "level": "advanced",
       "minutes": 120,
       "dependencies": ["numpy"],
@@ -1568,7 +1568,7 @@
         "stat-40-29",
         "stat-40-30"
       ],
-      "prerequisites": ["statistics-039"],
+      "prerequisites": ["statistics-014", "statistics-023"],
       "level": "advanced",
       "minutes": 120,
       "dependencies": ["numpy"],

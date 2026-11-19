@@ -15,6 +15,27 @@ State the unit, eligibility and time boundary. A change from repeat customers to
 
 Validate a reviewed allowlist, not every non-null column. Other leakage fields such as future status or post-decision aggregates need the same review.
 
+```python
+REVIEWED_FEATURES = {"usage", "tickets", "region"}
+
+
+def validate_features(contract):
+    columns = set(contract["feature_columns"])
+    if contract["label"] in columns:
+        raise ValueError("The label cannot be a training input.")
+    if not columns <= REVIEWED_FEATURES:
+        raise ValueError(f"Unreviewed feature columns: {sorted(columns - REVIEWED_FEATURES)}")
+
+
+validate_features({"feature_columns": ["usage", "tickets", "region"], "label": "label"})
+try:
+    validate_features({"feature_columns": ["usage", "label"], "label": "label"})
+except ValueError as error:
+    assert "label" in str(error)
+else:
+    raise AssertionError("The label was accepted as a feature.")
+```
+
 **Expected:** The target cannot enter training inputs accidentally.
 
 ## 3. Change the horizon
@@ -32,6 +53,22 @@ Add a reviewed node and prerequisite. Do not mark it complete merely because tra
 ## 5. Inspect identity
 
 Retain the previous contract and explain the change. A new hash detects different bytes but cannot judge scientific validity.
+
+```python
+# Uses digest() from main.py.
+contract = {
+    "unit": "one customer decision",
+    "prediction_time": "cutoff",
+    "feature_columns": ["usage", "tickets", "region"],
+    "label": "label",
+    "label_horizon_hours": 4,
+    "decision": "offer optional support",
+    "owner": "learning team",
+}
+changed = {**contract, "label_horizon_hours": 24}
+assert digest(changed) != digest(contract)
+assert digest(dict(reversed(list(contract.items())))) == digest(contract)
+```
 
 **Expected:** The exact identity changes.
 
@@ -133,4 +170,4 @@ if __name__ == "__main__":
 
 ## Interpretation
 
-Define an ML product through its decision, information boundary and accepted artifacts. Keep model fitting as one stage inside that contract, and use the later lessons to replace each local mechanism with actual inspected execution evidence.
+Keep model fitting as one stage inside that contract, and use the later lessons to replace each local mechanism with actual inspected execution evidence.

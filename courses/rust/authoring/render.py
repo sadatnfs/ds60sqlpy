@@ -3,6 +3,7 @@
 """Reproduce a subject's teaching artifacts from reviewed, original specifications."""
 
 import json
+import re
 import sys
 import textwrap
 from pathlib import Path
@@ -12,6 +13,22 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 from scripts.format_inline_code import canonical_markdown  # noqa: E402
+
+HERE = Path(__file__).resolve().parent
+if str(HERE) not in sys.path:
+    sys.path.insert(0, str(HERE))
+
+from answers import ANSWERS  # noqa: E402
+from outcomes import MINUTES, OUTCOMES  # noqa: E402
+
+TASK_NAMES = (
+    "Predict and explain",
+    "Guided modification",
+    "Independent construction",
+    "Diagnose a defect",
+    "Boundary evidence",
+    "Transfer and justify",
+)
 
 BASE = Path(__file__).resolve().parents[1]
 SUBJECT = BASE.name
@@ -45,8 +62,12 @@ def lesson(
     )
 
 
-def program(spec, examples, identity):
+def program(spec, examples, identity, answers=()):
     bodies = [textwrap.dedent(example[1]).strip() for example in examples]
+    bodies += [
+        f"// Task {task}: {TASK_NAMES[task - 1]}\n" + textwrap.dedent(answer["code"]).strip()
+        for task, answer in answers
+    ]
     body = "\n\n".join("    {\n" + textwrap.indent(code, "        ") + "\n    }" for code in bodies)
     return (
         spec["helpers"]
@@ -54,6 +75,57 @@ def program(spec, examples, identity):
         + body
         + f'\n    println!("{identity}: passed");\n    Ok(())\n}}\n'
     )
+
+
+def code_answers(number):
+    """Executable reference answers for one lesson, in task order."""
+    return sorted(
+        (task, answer) for task, answer in ANSWERS.get(number, {}).items() if answer.get("code")
+    )
+
+
+def first_sentence(text):
+    return text.split(". ")[0].rstrip(".") + "."
+
+
+def answer_text(number, task, spec, identity):
+    """The explanation for one task: its reference answer or an honest pointer."""
+    answer = ANSWERS.get(number, {}).get(task)
+    if answer and answer.get("code"):
+        code = textwrap.dedent(answer["code"]).strip()
+        used = [
+            f"`{name}`"
+            for kind, name in re.findall(
+                r"(?m)^(?:pub )?(fn|struct|enum|trait|type) (\w+)", spec["helpers"]
+            )
+            if re.search(rf"(?<![\w:.]){name}\s*\(" if kind == "fn" else rf"\b{name}\b", code)
+        ]
+        uses = ""
+        if used:
+            names = ", ".join(used[:-1]) + " and " + used[-1] if len(used) > 1 else used[0]
+            uses = f" It uses {names} from the lesson's helpers, defined in the reference program."
+        wrapped = (
+            "fn main() -> Result<(), Box<dyn std::error::Error>> {\n"
+            + textwrap.indent(code, "    ")
+            + "\n    Ok(())\n}"
+        )
+        return (
+            f"**Reference answer.** The same statements run as the `Task {task}` block of the "
+            f"reference program; here they are wrapped in `main` as a complete file.{uses}\n\n"
+            f"```{LANGUAGE}\n{wrapped}\n```\n\n"
+            f"**Observe:** {answer['observe']}\n\n{answer['explain']}"
+        )
+    if answer:
+        return f"**Written answer.** {answer['explain']}"
+    a, b = spec["a"], spec["b"]
+    return {
+        1: f"No separate reference answer has been written for this task. Example A is the evidence to compare with: {a[3]} {a[2]}",
+        2: f"No separate reference answer has been written for this task. Start from Example B: {b[3]} {b[2]}",
+        3: f"No reference answer has been written for this task yet. It needs a project or platform outside the single-file pad, so record your own build and run evidence and judge it against the vocabulary entry **{spec['terms'][0][0]}** and the lesson notes.",
+        4: f"No reference answer has been written for this task yet. The wrong assumptions to look for are this lesson's pitfalls: {spec['pitfalls']}",
+        5: f"No reference answer has been written for this task yet. Write the expected value or documented rejection for each boundary before running it, and compare with the checks in Example A ({a[0]}) and Example B ({b[0]}).",
+        6: f"No single reference answer exists: several designs can satisfy this transfer task. Justify yours against the mechanism described below and the vocabulary entry **{spec['terms'][0][0]}**, and state one limitation of your choice.",
+    }[task]
 
 
 def write(path, value):
@@ -74,18 +146,28 @@ def build():
         starter = f"courses/{SUBJECT}/lessons/{identity}.{EXT}"
         reference = f"courses/{SUBJECT}/solutions/{identity}_solution.{EXT}"
         solution = f"courses/{SUBJECT}/solutions/{identity}_solutions.md"
+        outcome = OUTCOMES[number]
+        if outcome == spec["tasks"][-1]:
+            raise ValueError(identity + " needs a specific outcome")
+        answered = code_answers(number)
+        third = ANSWERS.get(number, {}).get(3, {})
+        if third.get("code"):
+            lab, verification = spec["tasks"][2], third["observe"]
+        else:
+            lab = f"Reproduce Example A ({spec['a'][0]}) and Example B ({spec['b'][0]}) and explain each check."
+            verification = spec["a"][2] + " " + spec["b"][2]
         plan.append(
             {
                 "id": identity,
                 "title": spec["title"],
                 "level": level,
-                "minutes": 90 if level != "advanced" else 120,
+                "minutes": MINUTES.get(number, 90 if level != "advanced" else 120),
                 "prerequisites": prior,
                 "runtime": PROFILE,
                 "concepts": [term[0] for term in spec["terms"]],
-                "outcome": spec["tasks"][-1],
-                "lab": spec["tasks"][2],
-                "verification": spec["a"][2] + " " + spec["b"][2],
+                "outcome": outcome,
+                "lab": lab,
+                "verification": verification,
             }
         )
         admitted.append(
@@ -117,21 +199,11 @@ def build():
         )
         exercises = "\n\n".join(
             f"{i}. **{name}.** {task}"
-            for i, (name, task) in enumerate(
-                zip(
-                    (
-                        "Predict and explain",
-                        "Guided modification",
-                        "Independent construction",
-                        "Diagnose a defect",
-                        "Boundary evidence",
-                        "Transfer and justify",
-                    ),
-                    spec["tasks"],
-                    strict=True,
-                ),
-                1,
-            )
+            for i, (name, task) in enumerate(zip(TASK_NAMES, spec["tasks"], strict=True), 1)
+        )
+        task_answers = "\n\n".join(
+            f"### Task {i}: {name}\n\n{task}\n\n{answer_text(number, i, spec, identity)}"
+            for i, (name, task) in enumerate(zip(TASK_NAMES, spec["tasks"], strict=True), 1)
         )
         official = spec["source"] or "https://doc.rust-lang.org/book/"
         prompt = f"""Use $guide-ds60sqlpy-learning for {identity}: {spec["title"]}.
@@ -151,7 +223,7 @@ mechanism and all six task outcomes, not merely copying the success marker."""
 
 ## Learning objectives
 
-{spec["tasks"][2]} Then {spec["tasks"][-1][0].lower() + spec["tasks"][-1][1:]}
+{outcome} The central exercise is task 3: {spec["tasks"][2]}
 
 ## Purpose and mental model
 
@@ -183,7 +255,7 @@ Read the operations in dependency order. Record which values exist before each l
 
 {exercises}
 
-For each task, keep a short evidence table: input or initial state, prediction, observed value or diagnostic, and the rule that explains it. The guided examples establish mechanisms; the independent and transfer tasks require your own representation and explanation. Use the separate solution after attempting the task, then close it and reconstruct one boundary case.
+For each task, keep a short evidence table: input or initial state, prediction, observed value or diagnostic, and the rule that explains it. The guided examples establish mechanisms; the independent and transfer tasks require your own representation and explanation. The separate explanation gives an executed reference answer where one has been written and says plainly where none exists yet. Open it only after your own attempt, then close it and reconstruct one boundary case.
 
 ## Common pitfalls and diagnosis
 
@@ -193,9 +265,9 @@ A useful regression case distinguishes the intended rule from the tempting wrong
 
 ## Progressive hints
 
-1. Name the input, output and invariant using the vocabulary above. Reproduce Example A before changing two things at once.
-2. Compare the changed condition in Example B. Identify the first line whose behavior differs and state why.
-3. Reduce your independent task to a normal case, an empty or boundary case, and an invalid case. Write expected observations before inspecting the reference.
+1. Reproduce Example A ({spec["a"][0]}) before changing anything, and confirm its observation: {spec["a"][2]}
+2. Compare Example B ({spec["b"][0]}) with Example A and name the first line whose behavior differs. Its observation is: {spec["b"][2]}
+3. Before opening the explanation, test your task 3 attempt against this lesson's main pitfall: {first_sentence(spec["pitfalls"])}
 
 ## Self-check and next step
 
@@ -203,7 +275,7 @@ Explain {", ".join(term[0] for term in spec["terms"])} without reading the defin
 
 ## Sources and execution boundary
 
-[Official language or framework documentation]({official}). The prose, small fixtures and task designs in this chapter are original. Documentation links provide additional API detail, not a dependency fetched by the classroom. Runtime qualification is recorded separately by the repository validation workflow. Reading a guide, compiling a reference, running its assertions and completing an external project are distinct achievements.
+[Official language or framework documentation]({official}). The prose, small fixtures and task designs in this chapter are original. Documentation links provide additional API detail, not a dependency fetched by the classroom. Reading a guide, compiling a reference, running its assertions and completing an external project are distinct achievements.
 
 ## Ask an AI tutor about this lesson
 
@@ -220,11 +292,11 @@ Explain {", ".join(term[0] for term in spec["terms"])} without reading the defin
         write(BASE / "lessons" / f"{identity}.{EXT}", blank)
         write(
             BASE / "solutions" / f"{identity}_solution.{EXT}",
-            program(spec, [spec["a"], spec["b"]], identity),
+            program(spec, [spec["a"], spec["b"]], identity, answered),
         )
         explanation = f"""# {identity}: explanation and comparison
 
-Attempt the six guide tasks before opening this comparison. The executable reference is [{identity}_solution.{EXT}]({identity}_solution.{EXT}). Its assertions are always active under the prepared classroom compile settings.
+Attempt the six guide tasks before opening this comparison. The executable reference is [{identity}_solution.{EXT}]({identity}_solution.{EXT}). It runs both worked examples{" and the reference answers below" if answered else ""}, and its assertions are always active under the prepared classroom compile settings.
 
 ## Why the two examples differ
 
@@ -232,11 +304,9 @@ Attempt the six guide tasks before opening this comparison. The executable refer
 
 **{spec["b"][0]}:** {spec["b"][3]} {spec["b"][2]}
 
-## Reason through the six tasks
+## Task answers
 
-{exercises}
-
-For tasks 1 and 2, use the checked values and mechanism trace in the two examples. For task 3, choose names that expose the input and result contract and retain the same invariants. For task 4, the diagnosed mistakes below supply a concrete wrong assumption: preserve its counterexample before repairing it. Task 5 needs an explicit expected value or documented rejection at the boundary, not just successful execution. For task 6, explain what changes in the new context and which part of the original mechanism remains applicable. Several representations may satisfy this transfer task; justify the choice rather than treating this reference as the only architecture.
+{task_answers}
 
 ## Mechanism and diagnostic reasoning
 
@@ -248,11 +318,19 @@ For tasks 1 and 2, use the checked values and mechanism trace in the two example
 
 ## Review before continuing
 
-The reference checks the worked scenarios, including their boundary distinctions. Your independent and transfer artifacts may have additional checks. Compare observations rather than only source text. Preserve any new regression case you discover and explain why it would reject a plausible wrong implementation. External project steps require their own build and platform evidence and are not established by a portable reference passing.
+Run the reference and confirm that it prints `{identity}: passed`, then reconstruct one boundary case from memory and explain which check would reject a plausible wrong implementation. External project steps need their own build and platform evidence; a passing portable reference does not establish them.
 """
         write(BASE / "solutions" / f"{identity}_solutions.md", explanation)
     title = "Rust: ownership, reliable systems and Arrow data engineering"
     summary = f"{len(SPECS)} detailed lessons from first programs through language mechanisms, reliable systems and independently designed projects."
+    code = sum(len(code_answers(number)) for number in range(1, len(SPECS) + 1))
+    written = sum(
+        1 for tasks in ANSWERS.values() for answer in tasks.values() if not answer.get("code")
+    )
+    print(
+        f"{SUBJECT}: reference answers for {code} tasks (executed) and {written} written; "
+        f"{6 * len(SPECS) - code - written} of {6 * len(SPECS)} tasks have none yet."
+    )
     write(
         BASE / "track.json",
         json.dumps(

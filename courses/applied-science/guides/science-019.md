@@ -1,6 +1,6 @@
 # science-019: Estimated heterogeneity and prediction in research synthesis
 
-Tutorial mode. Stage: advanced. Direct prerequisites: `statistics-science-006`.
+Tutorial mode. Stage: advanced. Direct prerequisites: `statistics-039`.
 
 ## Evidence synthesis needs compatible questions
 

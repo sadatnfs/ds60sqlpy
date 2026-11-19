@@ -29,6 +29,17 @@ struct LessonMain {
       temperature.fahrenheit = 212
       precondition(abs(temperature.celsius - 100) < 1e-9)
     }
+
+    do {
+      // Task 3: Independent construction
+      /// Stores meters only; feet is a derived view and is never stored.
+      struct Length {
+        var meters: Double
+        var feet: Double { meters / 0.3048 }
+      }
+      let length = Length(meters: 3.048)
+      precondition(abs(length.feet - 10) < 1e-9)
+    }
     print("swift-014: passed")
   }
 }

@@ -14,11 +14,11 @@ Convolutional layers reuse a small kernel at many positions. Each output sees a 
 
 ## Reading the implementation
 
-tf.nn.conv2d expects image shape(batch,height,width,channels) and filter shape(height,width,input_channels,output_channels). A3x3 single-channel image and2x2 kernel with stride1 and VALID padding produce shape(1,2,2,1). The first result is1-5=-4. Rotating the kernel changes that sign. Keep the batch/channel singleton axes visible when checking shapes.
+tf.nn.conv2d expects image shape(batch, height, width, channels) and filter shape(height, width, input_channels, output_channels). A 3x3 single-channel image and 2x2 kernel with stride 1 and VALID padding produce shape (1, 2, 2, 1). The first result is 1-5=-4. Rotating the kernel changes that sign. Keep the batch/channel singleton axes visible when checking shapes.
 
 ## Exercise 1: Compute local differences
 
-The question is: Apply kernel[[1,0],[0,-1]] to the image1..9 arranged3x3.
+The question is: Apply kernel [[1, 0], [0, -1]] to the image 1..9 arranged 3x3.
 
 Every patch has a bottom-right value four greater than its top-left value. The equal outputs are an arithmetic property of this ramp image, not a generic property of convolution.
 
@@ -29,9 +29,9 @@ out = tf.nn.conv2d(image, kernel, strides=1, padding="VALID")
 np.testing.assert_array_equal(out.numpy().reshape(2, 2), np.full((2, 2), -4))
 ```
 
-**Expected:** all four outputs-4.
+**Expected:** all four outputs -4.
 
-**Verify:** Compare the computed values or written argument with all four outputs-4.
+**Verify:** In a fresh process, the exercise checks confirm `out.numpy().reshape(2, 2)` equals `np.full((2, 2), -4)`.
 
 ## Exercise 2: Rotate the kernel
 
@@ -47,11 +47,11 @@ np.testing.assert_array_equal(changed.numpy().reshape(2, 2), np.full((2, 2), 4))
 
 **Expected:** all outputs+4.
 
-**Verify:** Compare the computed values or written argument with all outputs+4.
+**Verify:** In a fresh process, the exercise checks confirm `changed.numpy().reshape(2, 2)` equals `np.full((2, 2), 4)`.
 
 ## Exercise 3: Count output positions
 
-The question is: Compare VALID stride1 and stride2.
+The question is: Compare VALID stride 1 and stride 2.
 
 A larger stride visits fewer legal patch starts. Shape arithmetic is a useful first check before interpreting any learned filter values.
 
@@ -60,13 +60,13 @@ assert tuple(out.shape) == (1, 2, 2, 1)
 assert tuple(tf.nn.conv2d(image, kernel, strides=2, padding="VALID").shape) == (1, 1, 1, 1)
 ```
 
-**Expected:** shapes(1,2,2,1) and(1,1,1,1).
+**Expected:** shapes (1, 2, 2, 1) and (1, 1, 1, 1).
 
-**Verify:** Compare the computed values or written argument with shapes(1,2,2,1) and(1,1,1,1).
+**Verify:** In a fresh process, the exercise checks confirm `tuple(out.shape) == (1, 2, 2, 1)` and `tuple(tf.nn.conv2d(image, kernel, strides=2, padding='VALID').shape) == (1, 1, 1, 1)`.
 
 ## Exercise 4: Trace one pixel influence
 
-The question is: Add10 to the top-left image pixel and inspect which output changes.
+The question is: Add 10 to the top-left image pixel and inspect which output changes.
 
 The top-left pixel belongs only to the top-left valid patch. This controlled perturbation directly tests the local receptive field.
 
@@ -77,13 +77,13 @@ delta = tf.nn.conv2d(changed_image, kernel, strides=1, padding="VALID").numpy() 
 np.testing.assert_array_equal(delta.reshape(2, 2), [[10, 0], [0, 0]])
 ```
 
-**Expected:** only output[0,0] increases10.
+**Expected:** only output [0, 0] increases 10.
 
-**Verify:** Compare the computed values or written argument with only output[0,0] increases10.
+**Verify:** In a fresh process, the exercise checks confirm `delta.reshape(2, 2)` equals `[[10, 0], [0, 0]]`.
 
 ## Exercise 5: Count shared parameters
 
-The question is: Construct a bias-free Conv2D layer with2 filters of size2x2 on one input channel.
+The question is: Construct a bias-free Conv2D layer with 2 filters of size 2x2 on one input channel.
 
 Each output channel has its own four kernel coefficients. Reusing the layer at more spatial locations increases computation but does not create a separate weight set for each location.
 
@@ -95,11 +95,11 @@ assert layer.count_params() == 8
 
 **Expected:** 8 trainable scalars regardless of image height.
 
-**Verify:** Compare the computed values or written argument with 8 trainable scalars regardless of image height.
+**Verify:** In a fresh process, the exercise checks confirm `layer.count_params() == 8`.
 
 ## Exercise 6: Add a constant image offset
 
-The question is: Add100 to every pixel and compare outputs under the zero-sum kernel.
+The question is: Add 100 to every pixel and compare outputs under the zero-sum kernel.
 
 The kernel coefficients sum to zero, so a constant offset cancels. This invariance belongs to this kernel; a general learned kernel need not preserve it.
 
@@ -110,7 +110,7 @@ np.testing.assert_array_equal(offset.numpy(), out.numpy())
 
 **Expected:** output unchanged.
 
-**Verify:** Compare the computed values or written argument with output unchanged.
+**Verify:** In a fresh process, the exercise checks confirm `offset.numpy()` equals `out.numpy()`.
 
 ## Review after comparison
 

@@ -8,9 +8,11 @@ Control flow chooses which operations execute. A loop invariant describes what r
 
 if treats zero as false and nonzero as true. for combines initialization, condition and update. while checks before the body; do-while checks afterward. break exits the nearest loop or switch, while continue skips to the next iteration. switch cases fall through unless control exits explicitly. Use size_t for lengths and indices, and avoid decrement loops that accidentally wrap an unsigned counter below zero.
 
-## Exercise 1: Trace a prefix sum
+## Exercise 1: Trace a prefix sum: change one input
 
-Sum 2, 4 and 6 with a length-bounded loop.
+Copy worked example 1 into a scratch pad and change `int values[] = {2, 4, 6};` to `int values[] = {3, 4, 6};`. Before running, predict which CHECK fails and which value it now sees; then run it and restore the original line.
+
+The unchanged code is worked example 1:
 
 ```c
 int values[] = {2, 4, 6};
@@ -21,13 +23,15 @@ for (size_t i = 0; i < 3; i++) {
 CHECK(sum == 12);
 ```
 
-**Expected:** The result is 12.
+**Expected:** The changed run stops with `Check failed` at the CHECK on `sum == 12`. Restoring the original line brings back the worked observation: the result is 12.
 
 Each iteration adds exactly one valid element. The index is proven less than the declared length before access.
 
-## Exercise 2: Handle zero iterations
+## Exercise 2: Handle zero iterations: debug a regression
 
-Sum zero elements from a valid storage object.
+A regression changed one token in worked example 2, so one line now reads `for (size_t i = 0; i <= length; i++) {`. Run worked example 2 with that line, use the failing CHECK to locate the defect and repair it without changing the CHECK.
+
+The unchanged code is worked example 2:
 
 ```c
 int values[1] = {9};
@@ -39,7 +43,7 @@ for (size_t i = 0; i < length; i++) {
 CHECK(sum == 0);
 ```
 
-**Expected:** The accumulator remains zero.
+**Expected:** Before the repair the run stops with `Check failed` at the CHECK on `sum == 0`; after it the line reads `for (size_t i = 0; i < length; i++) {` again and the accumulator remains zero.
 
 The example uses a real array because zero-length arrays are not standard C17. The logical length may still be zero.
 

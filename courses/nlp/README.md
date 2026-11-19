@@ -24,7 +24,10 @@ case study. The chapters connect mathematical mechanisms, code and failure modes
 Continue into [LLM theory](../llm-theory/README.md) for transformer training
 and [applied LLM systems](../llm-applied/README.md) for fine-tuning, RAG and
 subject-matter assistants. The [statistics book](../statistics-ml/README.md)
-provides the estimation, testing and causal reasoning behind evaluation.
+provides the estimation, testing and causal reasoning behind evaluation, and
+[LLM evaluation and alignment](../llm-evaluation/README.md) applies it to
+annotation agreement, paired comparisons, judge calibration and preference
+optimization.
 
 Examples use small local corpora and prepared Docker profiles. Downloading a
 pretrained model is a separate explicit optional workflow, never a hidden

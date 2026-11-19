@@ -15,11 +15,11 @@ The serial oracle supplies a simple independent answer, 21. The two workers read
 
 The final product combines parsing, ownership, concurrency and reporting. Raw rows are either accepted or rejected under a strict grammar. Accepted values are then assigned to bounded work. Every accepted task must end as completed, cancelled or failed before the operation can describe its outcome. These conservation rules prevent plausible partial totals from hiding lost input or abandoned work.
 
-The serial oracle sums [1, 2, 3, 4, 5, 6] to 21. The parallel example gives disjoint slices to two workers, producing6 and 15, then joins both before combining. The input vector remains alive and unchanged throughout. Each worker writes its own subtotal variable, so the example does not require competing updates to one shared accumulator. The owner reads those subtotals only after joins.
+The serial oracle sums [1, 2, 3, 4, 5, 6] to 21. The parallel example gives disjoint slices to two workers, producing 6 and 15, then joins both before combining. The input vector remains alive and unchanged throughout. Each worker writes its own subtotal variable, so the example does not require competing updates to one shared accumulator. The owner reads those subtotals only after joins.
 
 Partition boundaries need tests beyond an even-length input. An odd-sized vector can expose a dropped middle element or overlapping slice. Empty input can expose invalid first-element access. Repeated values can hide an overlap if only one aggregate is inspected, so retain counts and compare with the independent serial oracle. A faster wrong partition is not a successful parallel implementation.
 
-The executable reference adds strict raw-string parsing, at most100 rows, two workers and an injected worker failure. On failure, it publishes no partial total. Scheduling can affect how much other work completed before the stop request was observed, so the expected cancelled count is not one fixed number. The invariant completed+cancelled+failed_tasks=accepted is stable across those schedules.
+The executable reference adds strict raw-string parsing, at most 100 rows, two workers and an injected worker failure. On failure, it publishes no partial total. Scheduling can affect how much other work completed before the stop request was observed, so the expected cancelled count is not one fixed number. The invariant completed+cancelled+failed_tasks=accepted is stable across those schedules.
 
 Cancellation is cooperative, and thread creation can itself fail. If the second thread cannot be started, the already created first worker must receive a stop request and be joined before the exception leaves the owner scope. Otherwise cleanup can terminate the process or leave borrowed state unsafe. Error handling around worker creation is part of the product, not only the worker loop.
 
@@ -57,7 +57,7 @@ Declare at most 2 workers, 100 input rows and 16 characters per integer field.
 
 **Reasoning:** The capstone must bound input, concurrency and parsing work.
 
-**Verify:** Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.
+**Verify:** Check that each of the three limits appears with its number and with what happens when it is exceeded, for example a 17-character field being rejected.
 
 ## Exercise 2: Prove serial parity
 
@@ -67,7 +67,7 @@ Compare two-worker total on [1, 2, 3, 4, 5, 6] with serial oracle.
 
 **Reasoning:** Partitioning cannot drop or duplicate a row.
 
-**Verify:** Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.
+**Verify:** Assert `first == 6`, `second == 15` and `first + second == serial_total(rows)`, which is 21, as Worked example 2 does.
 
 ## Exercise 3: Account for bad rows
 
@@ -77,7 +77,7 @@ Add strings bad and 3x through the strict parser.
 
 **Reasoning:** Whole-field validation preserves the original ledger.
 
-**Verify:** Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.
+**Verify:** Assert 6 accepted, 2 rejected and an accepted total of 21 for the eight inputs; the rejected strings must not change the sum.
 
 ## Exercise 4: Inject worker failure
 
@@ -87,7 +87,7 @@ Make one partition report an error before publication.
 
 **Reasoning:** Partial totals must not be mislabeled complete.
 
-**Verify:** Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.
+**Verify:** Force one worker to report an error and confirm the program prints no combined total, exits nonzero, and reports which partition failed and what happened to the other.
 
 ## Exercise 5: Test empty and uneven work
 
@@ -97,7 +97,7 @@ Check zero rows and five rows [1, 2, 3, 4, 5].
 
 **Reasoning:** Partition bounds must cover a half-open range exactly once.
 
-**Verify:** Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.
+**Verify:** Assert the two-worker total is 0 for no rows and 15 for five rows, where the uneven split of 2 and 3 rows must still count the last row.
 
 ## Exercise 6: Deliver reviewer packet
 
@@ -107,4 +107,4 @@ Include source, fixtures, serial oracle, failure test, build/run receipts and li
 
 **Reasoning:** Production-quality evidence includes failure handling and platform limits, not a speed claim alone.
 
-**Verify:** Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.
+**Verify:** Have a second person follow only your package and confirm they reproduce total 21, total 0, the two rejected strings and the failed-partition case.

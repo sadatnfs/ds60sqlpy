@@ -14,7 +14,7 @@ Transfer learning reuses a representation for a related task. Freezing a base me
 
 ## Reading the implementation
 
-Set base.trainable=False before constructing the training variable list. Use base(x,training=False) to preserve its inference behavior. Train only head.trainable_variables. Snapshot all base weights before the update and compare arrays afterward. When unfreezing, use a new optimizer or explicitly build optimizer state for the newly trainable variables rather than assuming an old optimizer knows them.
+Set base.trainable=False before constructing the training variable list. Use base(x, training=False) to preserve its inference behavior. Train only head.trainable_variables. Snapshot all base weights before the update and compare arrays afterward. When unfreezing, use a new optimizer or explicitly build optimizer state for the newly trainable variables rather than assuming an old optimizer knows them.
 
 ## Exercise 1: Construct the local base
 
@@ -33,11 +33,11 @@ assert not base.trainable_variables
 
 **Expected:** base output equals input; no trainable base variables.
 
-**Verify:** Compare the computed values or written argument with base output equals input; no trainable base variables.
+**Verify:** In a fresh process, the exercise checks confirm `base(x).numpy()` equals `x.numpy()` and `not base.trainable_variables`.
 
 ## Exercise 2: Train a new head
 
-The question is: Attach a zero-initialized one-unit head; fit targets[1,2,3] for one SGD step.
+The question is: Attach a zero-initialized one-unit head; fit targets [1, 2, 3] for one SGD step.
 
 Zero initial outputs give nonzero residuals, so this fixture has an observable update. A trainable flag alone would not prove that an optimizer actually changed the head.
 
@@ -56,7 +56,7 @@ assert not np.array_equal(before, head.get_weights()[0])
 
 **Expected:** at least one head coefficient changes.
 
-**Verify:** Compare the computed values or written argument with at least one head coefficient changes.
+**Verify:** In a fresh process, the exercise checks confirm `not np.array_equal(before, head.get_weights()[0])`.
 
 ## Exercise 3: Prove base preservation
 
@@ -70,7 +70,7 @@ np.testing.assert_array_equal(base.get_weights()[0], np.eye(2, dtype="float32"))
 
 **Expected:** base weights remain byte-identical to identity.
 
-**Verify:** Compare the computed values or written argument with base weights remain byte-identical to identity.
+**Verify:** In a fresh process, the exercise checks confirm `base.get_weights()[0]` equals `np.eye(2, dtype='float32')`.
 
 ## Exercise 4: Compare predictions
 
@@ -85,7 +85,7 @@ assert pred.shape == (3, 1) and (pred > 0).all()
 
 **Expected:** all three predictions positive.
 
-**Verify:** Compare the computed values or written argument with all three predictions positive.
+**Verify:** In a fresh process, the exercise checks confirm `pred.shape == (3, 1)` and `(pred > 0).all()`.
 
 ## Exercise 5: Begin an explicit unfreeze phase
 
@@ -105,7 +105,7 @@ tf.keras.optimizers.SGD(0.01).apply_gradients(zip(grads, variables))
 
 **Expected:** both base and head now have connected gradients.
 
-**Verify:** Compare the computed values or written argument with both base and head now have connected gradients.
+**Verify:** In a fresh process, the exercise checks confirm `len(grads) == 2` and `all((g is not None for g in grads))`.
 
 ## Exercise 6: Detect changed base state
 
@@ -119,7 +119,7 @@ assert not np.array_equal(base.get_weights()[0], np.eye(2, dtype="float32"))
 
 **Expected:** base is no longer identical.
 
-**Verify:** Compare the computed values or written argument with base is no longer identical.
+**Verify:** In a fresh process, the exercise checks confirm `not np.array_equal(base.get_weights()[0], np.eye(2, dtype='float32'))`.
 
 ## Review after comparison
 

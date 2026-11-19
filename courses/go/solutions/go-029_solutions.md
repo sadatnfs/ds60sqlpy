@@ -8,9 +8,11 @@ A data race occurs when conflicting concurrent accesses include a write and lack
 
 A channel send synchronizes with its corresponding receive. Closing a channel synchronizes with a receive observing closure. An unlock synchronizes with a later lock on that mutex. atomic.Value can publish immutable snapshots. The ordinary pad has CGO disabled and does not claim race instrumentation; a prepared Linux development project with a compatible C toolchain can run go test -race ./....
 
-## 1. Publish through a channel
+## 1. Publish through a channel: change one input
 
-Send an initialized record from a goroutine.
+Copy worked example 1 into a scratch pad and change `go func() { ch <- Published{Count: 3, Ready: true} }()` to `go func() { ch <- Published{Count: 4, Ready: true} }()`. Before running, predict which check fails and which value it now sees; then run it and restore the original line.
+
+The unchanged code is worked example 1:
 
 ```go
 ch := make(chan Published)
@@ -19,13 +21,15 @@ v := <-ch
 check(v.Ready && v.Count == 3, "publication")
 ```
 
-**Expected:** The reader observes count 3 and ready true.
+**Expected:** The changed run panics with `publication` because `v.Ready && v.Count == 3` no longer holds. Restoring the original line brings back the worked observation: the reader observes count 3 and ready true.
 
 The send and receive establish ordering without a timing guess.
 
-## 2. Publish through closure
+## 2. Publish through closure: debug a regression
 
-Write 7 before closing done, then read after receiving done.
+A regression changed one token in worked example 2, so one line now reads `go func() { n = 8; close(done) }()`. Run worked example 2 with that line, use the failure to locate the defect and repair it without changing the check.
+
+The unchanged code is worked example 2:
 
 ```go
 done := make(chan struct{})
@@ -35,7 +39,7 @@ go func() { n = 7; close(done) }()
 check(n == 7, "close publication")
 ```
 
-**Expected:** The reader observes 7.
+**Expected:** Before the repair the program panics with `close publication`; after it the line reads `go func() { n = 7; close(done) }()` again and the reader observes 7.
 
 Removing this synchronization would make the ordinary shared variable unsafe. The proof uses ordering, not elapsed time.
 

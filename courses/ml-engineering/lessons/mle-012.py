@@ -1,4 +1,4 @@
-"""mle-012: worked starting point; complete the guide's six changes."""
+"""mle-012: both worked cases; complete the guide's six changes."""
 
 import numpy as np
 import pandas as pd
@@ -94,8 +94,23 @@ def example_one():
         }
 
 
+def example_two():
+    from fastapi.testclient import TestClient
+
+    frame = dataset()
+    model = fit_pipeline(frame[frame.label_available_at <= 180])
+    with TestClient(serving_app(model)) as client:
+        negative = client.post("/predict", json={"usage": -1, "tickets": 2, "region": "north"})
+        extra = client.post(
+            "/predict", json={"usage": 1, "tickets": 2, "region": "north", "label": 1}
+        )
+        assert negative.status_code == 422 and extra.status_code == 422
+        return {"negative_value_rejected": 422, "undeclared_target_field_rejected": 422}
+
+
 if __name__ == "__main__":
     print(example_one())
+    print(example_two())
 
 # TODO 1: Submit usage 0 and the declared maximum.
 # TODO 2: Add label to an otherwise valid request.

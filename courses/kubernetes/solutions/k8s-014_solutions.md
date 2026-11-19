@@ -4,7 +4,7 @@ These answers explain the stated synthetic and scoped runtime contracts. Static 
 
 ## Mechanism
 
-The beginner capstone assembles a stateless service from a Deployment, a Service and a ConfigMap, then verifies the application through a bounded client Job. Each component solves a different problem:the Deployment maintains replicas, the Service selects and routes, the ConfigMap supplies synthetic data, and the client observes the resulting HTTP contract.
+The beginner capstone assembles a stateless service from a Deployment, a Service and a ConfigMap, then verifies the application through a bounded client Job. Each component solves a different problem: the Deployment maintains replicas, the Service selects and routes, the ConfigMap supplies synthetic data, and the client observes the resulting HTTP contract.
 
 The current browser source is a complete admitted contract-2 resource set. Its one-shot execution can check controller convergence, owned Ready Pod identities, unique Service backends, version response and both configuration-consumption paths. It then removes only recorded owned UIDs. The six-task capstone also requires predictions, error analysis and a reviewable evidence packet, which are not automatically graded by process success.
 

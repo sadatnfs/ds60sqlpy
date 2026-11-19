@@ -55,13 +55,16 @@ func main() {
 
 	// Transfer a total budget
 	{
-		admitted := 0
-		for attempt := 0; attempt < 5; attempt++ {
-			if attempt < 3 {
-				admitted++
+		spent, attempts := 0, 0
+		for attempt := 0; ; attempt++ {
+			d := delay(attempt)
+			if spent+d > 10 {
+				break
 			}
+			spent += d
+			attempts++
 		}
-		check(admitted == 3, "budget")
+		check(attempts == 3 && spent == 7, "budget")
 	}
 	fmt.Println("All lesson checks passed.")
 }

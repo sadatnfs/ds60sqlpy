@@ -6,7 +6,7 @@ Read the [guide](../guides/spark-026.md) and attempt one language first. The [Sc
 
 ### Exercise 1: Implement the pure scalar rule precisely
 
-ReturnNULL/None unchanged; collapse only space, tab, newline and carriage return runs, trim ordinary spaces, and translateASCII A-Z to a-z. Preserve otherUnicode code points.
+Return NULL/None unchanged; collapse only space, tab, newline and carriage return runs, trim ordinary spaces, and translate ASCII A-Z to a-z. Preserve other Unicode code points.
 
 **Expected:** All 12 golden outputs, includingcafÉ,İi, nonbreaking-space-wrapped a and unchanged decomposed e-plus-accent.
 
@@ -37,7 +37,7 @@ The function is a pure value transformation with an explicit missingness rule. T
 
 ### Exercise 2: Express the same rule with native Spark functions
 
-Produce id, normalized using translate, regexp_replace and trim on the label column. PreserveNULL propagation and the exact golden values.
+Produce id, normalized using translate, regexp_replace and trim on the label column. Preserve NULL propagation and the exact golden values.
 
 **Expected:** The twelve ordered output pairs equal the golden fixture and normalized has string type.
 
@@ -166,7 +166,7 @@ The population checks catch a normalizer that turns unknown input into empty tex
 
 Validate a result against the full golden sequence. Deliberately apply general lowercasing and default trimming without interior-whitespace collapse, and require rejection.
 
-**Expected:** The wrong implementation disagrees at least on IDs 4,5,6,9. Python additionally removes the preserved nonbreaking spaces atID 8.
+**Expected:** The wrong implementation disagrees at least on IDs 4,5,6,9. Python additionally removes the preserved nonbreaking spaces at ID 8.
 
 ```scala
 def validateGolden(
@@ -183,10 +183,10 @@ def validate_golden(actual, expected):
         raise ValueError("Golden label contract mismatch")
 ```
 
-The negative control proves that the fixture distinguishes the declared policy from a tempting shortcut. Unicode lowercasing and default trimming are not inherently wrong; they are wrong for this specificASCII-only contract. Named counterexamples explain the failure and make it harder to weaken a test merely because an output looks polished to a reader.
+The negative control proves that the fixture distinguishes the declared policy from a tempting shortcut. Unicode lowercasing and default trimming are not inherently wrong; they are wrong for this specific ASCII-only contract. Named counterexamples explain the failure and make it harder to weaken a test merely because an output looks polished to a reader.
 
 **Verification evidence:** Assert named mismatch identities and that the golden validator raises rather than accepting a visually plausible normalization.
 
 ## Execution and interpretation
 
-Run the complete reference in its prepared fixed worker. The small fixture is constructed inside the program,so opening a lesson does not fetch data. A final success line is printed only after the reference assertions complete. Plan observations,partition evidence and resource measurements apply to the actual local configuration; they do not establish cluster-scale performance. Session cleanup is explicit,and any additional owned file/query lifecycle is described in the lesson.
+Run the complete reference in its prepared fixed worker. The small fixture is constructed inside the program, so opening a lesson does not fetch data. A final success line is printed only after the reference assertions complete. Plan observations, partition evidence and resource measurements apply to the actual local configuration; they do not establish cluster-scale performance. Session cleanup is explicit, and any additional owned file/query lifecycle is described in the lesson.

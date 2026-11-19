@@ -16,9 +16,9 @@ The reference here implements grouped head selection and blockwise stable attent
 
 **GQA:** Attention sharing key/value heads within groups of query heads.
 
-**Online softmax state:** A running maximum,normalizer and weighted-value numerator.
+**Online softmax state:** A running maximum, normalizer and weighted-value numerator.
 
-**IO-aware kernel:** An implementation designed around memory hierarchy and traffic,not only arithmetic count.
+**IO-aware kernel:** An implementation designed around memory hierarchy and traffic, not only arithmetic count.
 
 ## Reading the implementation
 
@@ -28,9 +28,9 @@ The online implementation checks its weighted-value numerator and denominator af
 
 ## Exercise 1: Count cache and projection dimensions
 
-The question is: Use batch 1, time 5, query heads4, head width 2, float32, and compare KV heads 4, 2, 1.
+The question is: Use batch 1, time 5, 4 query heads, head width 2 and float32, and compare 4, 2 and 1 KV heads.
 
-The cache factor2 counts keys and values. These are raw tensor/weight counts excluding allocator, activation, quantization-metadata and communication overhead.
+The cache factor 2 counts keys and values. These are raw tensor/weight counts excluding allocator, activation, quantization-metadata and communication overhead.
 
 ```python
 query_heads = 4
@@ -49,7 +49,7 @@ assert cache_bytes == [320, 160, 80] and parameters == [256, 192, 160]
 
 **Expected:** raw KV bytes 320, 160, 80; projection weights 256, 192, 160 for model width 8 without biases.
 
-**Verify:** Compare the computed values or written argument with raw KV bytes 320, 160, 80; projection weights 256, 192, 160 for model width 8 without biases.
+**Verify:** In a fresh process, the exercise checks confirm `cache_bytes == [320, 160, 80]` and `parameters == [256, 192, 160]`.
 
 ## Exercise 2: Verify grouped heads against an equivalent repeated-head oracle
 
@@ -73,7 +73,7 @@ np.testing.assert_allclose(grouped, oracle, atol=1e-12, rtol=0)
 
 **Expected:** outputs agree within 1e-12; shape(4, 3, 2).
 
-**Verify:** Compare the computed values or written argument with outputs agree within 1e-12; shape(4, 3, 2).
+**Verify:** In a fresh process, the exercise checks confirm `grouped.shape == (4, 3, 2)` and `grouped` matches `oracle` within 1e-12.
 
 ## Exercise 3: Trace online softmax at extreme scores
 
@@ -93,7 +93,7 @@ assert peak == 2 and np.isfinite(online).all()
 
 **Expected:** finite output equals a maximum-shifted dense calculation.
 
-**Verify:** Compare the computed values or written argument with finite output equals a maximum-shifted dense calculation.
+**Verify:** In a fresh process, the exercise checks confirm `online` matches `expected` within 1e-12, `peak == 2` and `np.isfinite(online).all()`.
 
 ## Exercise 4: Compare several block sizes under causal masking
 
@@ -115,7 +115,7 @@ for block in [1, 2, 3, 5]:
 
 **Expected:** all outputs agree within 1e-12; largest temporary score block does not exceed the chosen size.
 
-**Verify:** Compare the computed values or written argument with all outputs agree within 1e-12; largest temporary score block does not exceed the chosen size.
+**Verify:** In a fresh process, the exercise checks confirm for every `block` in `[1, 2, 3, 5]`, `output` matches `expected` within 1e-12 and for every `block` in `[1, 2, 3, 5]`, `peak <= block`.
 
 ## Exercise 5: Preserve a causal prefix under future changes
 
@@ -132,7 +132,7 @@ np.testing.assert_allclose(altered[:3], expected[:3], atol=1e-12, rtol=0)
 
 **Expected:** first three rows unchanged.
 
-**Verify:** Compare the computed values or written argument with first three rows unchanged.
+**Verify:** In a fresh process, the exercise checks confirm `altered[:3]` matches `expected[:3]` within 1e-12.
 
 ## Exercise 6: Reject invalid grouping and empty support
 
@@ -159,7 +159,7 @@ else:
 
 **Expected:** both raise ValueError; no output NaNs are accepted.
 
-**Verify:** Compare the computed values or written argument with both raise ValueError; no output NaNs are accepted.
+**Verify:** In a fresh process, the exercise checks confirm `gqa(np.zeros((4, 2, 2)), np.zeros((3, 2, 2)), np.zeros((3, 2, 2)))` raises `ValueError` and `online_attention(queries, keys, values, bad, 2)` raises `ValueError`.
 
 ## Review after comparison
 

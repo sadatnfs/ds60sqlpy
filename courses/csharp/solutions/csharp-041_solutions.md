@@ -1,6 +1,6 @@
 # csharp-041: explanation and comparison
 
-Attempt the six guide tasks before opening this comparison. The executable reference is [csharp-041_solution.cs](csharp-041_solution.cs). Its assertions are always active under the prepared classroom compile settings.
+Attempt the six guide tasks before opening this comparison. The executable reference is [csharp-041_solution.cs](csharp-041_solution.cs). It runs both worked examples, and its assertions are always active under the prepared classroom compile settings.
 
 ## Why the two examples differ
 
@@ -8,21 +8,43 @@ Attempt the six guide tasks before opening this comparison. The executable refer
 
 **Reject before claiming success:** The response category is part of the public contract and must not disagree with domain acceptance. Invalid requests produce 400 decisions.
 
-## Reason through the six tasks
+## Task answers
 
-1. **Predict and explain.** Describe the valid request and its status/body contract.
+### Task 1: Predict and explain
 
-2. **Guided modification.** Add a maximum quantity rule and document its rejection.
+Describe the valid request and its status/body contract.
 
-3. **Independent construction.** Run the separately prepared ApiLab project and inspect GET and POST responses.
+No separate reference answer has been written for this task. Example A is the evidence to compare with: The kernel isolates validation and status selection from host configuration. Valid input maps to the created outcome.
 
-4. **Diagnose a defect.** Diagnose returning 200 before input validation finishes.
+### Task 2: Guided modification
 
-5. **Boundary evidence.** Test missing identity, zero quantity and unknown resource lookup.
+Add a maximum quantity rule and document its rejection.
 
-6. **Transfer and justify.** Design idempotent update behavior and explain how duplicate creation differs.
+No separate reference answer has been written for this task. Start from Example B: The response category is part of the public contract and must not disagree with domain acceptance. Invalid requests produce 400 decisions.
 
-For tasks 1 and 2, use the checked values and mechanism trace in the two examples. For task 3, choose names that expose the input and result contract and retain the same invariants. For task 4, the diagnosed mistakes below supply a concrete wrong assumption: preserve its counterexample before repairing it. Task 5 needs an explicit expected value or documented rejection at the boundary, not just successful execution. For task 6, explain what changes in the new context and which part of the original mechanism remains applicable. Several representations may satisfy this transfer task; justify the choice rather than treating this reference as the only architecture.
+### Task 3: Independent construction
+
+Run the separately prepared ApiLab project and inspect GET and POST responses.
+
+No reference answer has been written for this task yet. It needs a project or platform outside the single-file pad, so record your own build and run evidence and judge it against the vocabulary entry **Endpoint** and the lesson notes.
+
+### Task 4: Diagnose a defect
+
+Diagnose returning 200 before input validation finishes.
+
+No reference answer has been written for this task yet. The wrong assumptions to look for are this lesson's pitfalls: An offline kernel test does not prove endpoint routing, serialization or host startup. The external project intentionally uses in-memory state, so restarting loses its sample inventory. It is not a persistence claim.
+
+### Task 5: Boundary evidence
+
+Test missing identity, zero quantity and unknown resource lookup.
+
+No reference answer has been written for this task yet. Write the expected value or documented rejection for each boundary before running it, and compare with the checks in Example A (Map a valid request) and Example B (Reject before claiming success).
+
+### Task 6: Transfer and justify
+
+Design idempotent update behavior and explain how duplicate creation differs.
+
+No single reference answer exists: several designs can satisfy this transfer task. Justify yours against the mechanism described below and the vocabulary entry **Endpoint**, and state one limitation of your choice.
 
 ## Mechanism and diagnostic reasoning
 
@@ -36,4 +58,4 @@ An offline kernel test does not prove endpoint routing, serialization or host st
 
 ## Review before continuing
 
-The reference checks the worked scenarios, including their boundary distinctions. Your independent and transfer artifacts may have additional checks. Compare observations rather than only source text. Preserve any new regression case you discover and explain why it would reject a plausible wrong implementation. External project steps require their own build and platform evidence and are not established by a portable reference passing.
+Run the reference and confirm that it prints `csharp-041: passed`, then reconstruct one boundary case from memory and explain which check would reject a plausible wrong implementation. External project steps need their own build and platform evidence; a passing portable reference does not establish them.

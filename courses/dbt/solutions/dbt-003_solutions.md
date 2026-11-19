@@ -199,4 +199,4 @@ if __name__ == "__main__":
 
 ## Interpretation
 
-Choose a materialization using observed database behavior and a stated workload. Retain ref-based dependencies and test the resulting graph, values and freshness expectations. This supports reliable selection and deployment when the project grows.
+Retain ref-based dependencies and test the resulting graph, values and freshness expectations. This supports reliable selection and deployment when the project grows.

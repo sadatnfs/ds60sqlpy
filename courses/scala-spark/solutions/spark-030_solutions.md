@@ -28,17 +28,17 @@ Acceptance would check the 30-row schema and digest from the actual runtime loca
 
 **Expected:** A matrix locating each dependency and its qualification evidence; reject a Scala 3 binary substitution and treating a native wheel as an ordinary pure-Python source zip.
 
-TheScala jar must be compiled for the declaredScala 2.13 binary family and checked against the selectedSpark 4.0.1/JDK 17 runtime. A Scala 3-suffixed artifact is not a documented substitute for this prepared profile. Driver and executor classpaths must receive the required application classes through the actual submission/package mechanism, and a local compile receipt alone does not prove remote class loading.
+TheScala jar must be compiled for the declared Scala 2.13 binary family and checked against the selected Spark 4.0.1/JDK 17 runtime. A Scala 3-suffixed artifact is not a documented substitute for this prepared profile. Driver and executor classpaths must receive the required application classes through the actual submission/package mechanism, and a local compile receipt alone does not prove remote class loading.
 
-The purePythonrules.zip can be a candidate for a supported Python-file distribution mechanism. Imports used by driver code must work in the driver's interpreter; imports used by task code must work in executor Python processes. A native-extension wheel additionally depends on interpreter ABI, platform and shared-library compatibility, so treating it as a source zip is insufficient. A qualified image or environment-archive approach could provide those layers, but its exact versions and bounded import/task receipt are still required. The worksheet neither installs that environment nor downloads packages.
+The pure Python rules.zip can be a candidate for a supported Python-file distribution mechanism. Imports used by driver code must work in the driver's interpreter; imports used by task code must work in executor Python processes. A native-extension wheel additionally depends on interpreter ABI, platform and shared-library compatibility, so treating it as a source zip is insufficient. A qualified image or environment-archive approach could provide those layers, but its exact versions and bounded import/task receipt are still required. The worksheet neither installs that environment nor downloads packages.
 
 **Verification evidence:** Name compiler/binary family, Python interpreter/platform compatibility and worker import checks separately.
 
 ### Exercise 4: Review a captured connection and a retrying task
 
-**Expected:** No connection object serialized from the driver; a defined task-side resource lifecycle if externalIO is later authorized, and a stable operation identity preventing duplicate external effects.
+**Expected:** No connection object serialized from the driver; a defined task-side resource lifecycle if external IO is later authorized, and a stable operation identity preventing duplicate external effects.
 
-An open connection belongs to the driver process and is not a valid portable task argument. Replacing it with small serializable configuration addresses only transmission, not authorization or correctness. If externalIO is part of a later authorized design, task-side code needs a bounded resource lifecycle with explicit open/use/close behavior and a concurrency budget suited to the destination.
+An open connection belongs to the driver process and is not a valid portable task argument. Replacing it with small serializable configuration addresses only transmission, not authorization or correctness. If external IO is part of a later authorized design, task-side code needs a bounded resource lifecycle with explicit open/use/close behavior and a concurrency budget suited to the destination.
 
 The audit write also needs an idempotency or transactional protocol keyed by stable logical operation identity. A retry can invoke the function again even when the first external write succeeded before the task failed. A task-attempt counter is not automatically the business operation key. Acceptance would inject a retry around the external-effect boundary and inspect exactly one logical destination result, while also proving connections are closed on failure. No live database or audit service is used by this worksheet.
 
@@ -48,7 +48,7 @@ The audit write also needs an idempotency or transactional protocol keyed by sta
 
 **Expected:** Classic internals are not assumed available; semantic goldens are retained while a separate supported diagnostic/runtime adapter is qualified.
 
-Spark Connect separates the client from server-side execution through a logical-plan interface. It does not expose every classicSparkContext, RDD or internalJVM handle used in the local diagnostic recipes. Keep the lessons' independent row/schema/bag goldens, but map transformations and observations to supported Connect capabilities instead of pretending _jdf is a transport-neutral interface.
+Spark Connect separates the client from server-side execution through a logical-plan interface. It does not expose every classic SparkContext, RDD or internal JVM handle used in the local diagnostic recipes. Keep the lessons' independent row/schema/bag goldens, but map transformations and observations to supported Connect capabilities instead of pretending _jdf is a transport-neutral interface.
 
 A readiness contract should pin client/server versions and test required APIs, session creation and closure, cancellation of bounded work, result-size limits, authentication handling and clear errors for unsupported diagnostics. It should also verify that a failed remote action cannot be mistaken for a saved local pad or a completed lesson. The existing local classic receipt establishes none of those remote facts. Until a separately implemented and tested adapter exists, the proposed profile remains a design candidate rather than an executable classroom capability.
 

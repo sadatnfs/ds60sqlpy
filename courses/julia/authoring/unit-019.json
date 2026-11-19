@@ -28,7 +28,7 @@
     },
     {
       "title": "Expose nonidentification",
-      "task": "Move the repeated-column coefficients along[0,1,-1].",
+      "task": "Move the repeated-column coefficients along `[0, 1, -1]`.",
       "expected": "Predictions on the design remain unchanged.",
       "hint": "The displacement lies in the null space.",
       "answer": "Fitted-value agreement does not uniquely identify every parameter."

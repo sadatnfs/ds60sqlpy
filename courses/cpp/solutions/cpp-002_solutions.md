@@ -6,7 +6,7 @@ Compare after an attempt or an explicit reveal. The [guide](../guides/cpp-002.md
 
 A build target gives a stable name to a program and its source list. CMake configures a build directory; the generated build tool compiles and links the target. CTest runs registered tests. Keeping build output outside the source directory makes the editable files obvious and lets Debug and Release builds coexist.
 
-The single-file worker uses fixed compiler flags and can compile this source, but that result is not a CMake or CTest receipt. The optional manual CMake project is [CMakeLists.txt](../fixtures/cpp-002/CMakeLists.txt); it requires already-qualified CMake3.28+ and Ninja. Do not install tools during Run. Use a fresh owned scratch project with the learner file copied as main.cpp beside that CMakeLists.txt. In Bash or PowerShell, the common commands are `cmake -S . -B build/pilot -G Ninja -DCMAKE_BUILD_TYPE=Debug`, `cmake --build build/pilot`, then `ctest --test-dir build/pilot --output-on-failure`. A missing tool is a capability failure, not a learner-language error.
+The single-file worker uses fixed compiler flags and can compile this source, but that result is not a CMake or CTest receipt. The optional manual CMake project is [CMakeLists.txt](../fixtures/cpp-002/CMakeLists.txt); it requires already-qualified CMake 3.28+ and Ninja. Do not install tools during Run. Use a fresh owned scratch project with the learner file copied as main.cpp beside that CMakeLists.txt. In Bash or PowerShell, the common commands are `cmake -S . -B build/pilot -G Ninja -DCMAKE_BUILD_TYPE=Debug`, `cmake --build build/pilot`, then `ctest --test-dir build/pilot --output-on-failure`. A missing tool is a capability failure, not a learner-language error.
 
 - **include:** makes a library declaration available to this translation unit
 - **main:** the program entry function returning an integer status
@@ -43,7 +43,7 @@ int main() {
 }
 ```
 
-**Expected:** stderr fixture rejected plus newline; exit2, intentionally.
+**Expected:** stderr fixture rejected plus newline; exit 2, intentionally.
 
 ## Exercises and explanatory solutions
 
@@ -89,9 +89,9 @@ The compiler may point at the following token because that is where the grammar 
 
 ### Exercise 5: Inspect an intentional nonzero exit
 
-**Inputs/evidence:** For cpp-002 Exercise 5, stderr fixture rejected; return2.
+**Inputs/evidence:** For cpp-002 Exercise 5, stderr fixture rejected; return 2.
 
-**Expected result/shape:** For cpp-002 Exercise 5, nonzero runtime result2 and the diagnostic; this is expected failure evidence.
+**Expected result/shape:** For cpp-002 Exercise 5, nonzero runtime result 2 and the diagnostic; this is expected failure evidence.
 
 **Verify:** For cpp-002 Exercise 5, distinguish the successful build from failed execution.
 

@@ -15,6 +15,25 @@ Record input size, engine and elapsed time. Do not extrapolate a tiny fixture in
 
 Explain why group cardinality affects memory. Streaming does not erase the state required to retain a result for each key.
 
+```python
+import polars as pl
+
+frame = pl.DataFrame({"id": range(1000), "value": [i % 7 for i in range(1000)]})
+few = (
+    frame.lazy()
+    .group_by((pl.col("id") % 5).alias("group"))
+    .agg(pl.col("value").sum())
+    .collect(engine="streaming")
+)
+many = (
+    frame.lazy()
+    .group_by((pl.col("id") // 2).alias("pair"))
+    .agg(pl.col("value").sum())
+    .collect(engine="streaming")
+)
+assert (few.height, many.height) == (5, 500)
+```
+
 **Expected:** The result has many more groups.
 
 ## 3. Compare collect and sink
@@ -26,6 +45,20 @@ The sink changes how the caller receives output, not the intended values. Keep a
 ## 4. Include a global sort
 
 Measure the query with that requirement included. Removing the sort to obtain a faster number changes the delivered contract.
+
+```python
+import polars as pl
+
+frame = pl.DataFrame({"id": range(1000), "value": [i % 7 for i in range(1000)]})
+ordered = (
+    frame.lazy()
+    .group_by((pl.col("id") % 5).alias("group"))
+    .agg(pl.col("value").sum())
+    .sort("group")
+    .collect(engine="streaming")
+)
+assert ordered["group"].to_list() == [0, 1, 2, 3, 4]
+```
 
 **Expected:** The result obeys the declared order.
 
@@ -101,4 +134,4 @@ if __name__ == "__main__":
 
 ## Interpretation
 
-Evaluate a query under an explicit engine and resource contract. Demonstrate equal logical results, inspect output materialization, and state which scalability questions remain unmeasured. This is the foundation for honest performance engineering.
+Demonstrate equal logical results, inspect output materialization, and state which scalability questions remain unmeasured. This is the foundation for honest performance engineering.

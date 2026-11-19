@@ -14,44 +14,50 @@ A data pipeline is part of the statistical experiment. It determines which recor
 
 ## Reading the implementation
 
-from_tensor_slices slices the leading axis of each tuple component together. map receives one ID and one value; arithmetic can use a frozen scalar mean. batch(2,drop_remainder=False) retains the final singleton. as_numpy_iterator materializes values for small teaching assertions, not an approach for collecting an unbounded production dataset. prefetch(1) limits the look-ahead buffer.
+from_tensor_slices slices the leading axis of each tuple component together. map receives one ID and one value; arithmetic can use a frozen scalar mean. batch (2, drop_remainder=False) retains the final singleton. as_numpy_iterator materializes values for small teaching assertions, not an approach for collecting an unbounded production dataset. prefetch(1) limits the look-ahead buffer. shuffle(5, seed=7, reshuffle_each_iteration=False) draws from a five-record buffer, so it can reorder the whole fixture; the seed fixes that order and reshuffle_each_iteration=False repeats it on every traversal.
 
-## Exercise 1: Observe batches
+## Exercise 1: Replay a seeded shuffle
 
-The question is: Build a dataset from IDs0..4 and values1..5, then batch by2.
+The question is: Shuffle the five records with shuffle(5, seed=7, reshuffle_each_iteration=False). Traverse it twice, rebuild the same pipeline from the literal arrays, and compare the ID orders.
 
-The input cardinality is five records but the batched cardinality is three elements. Naming the stage prevents a batch count from being mistaken for a dataset size.
-
-```python
-ds = tf.data.Dataset.from_tensor_slices((np.arange(5), np.arange(1, 6, dtype="float32")))
-batches = list(ds.batch(2).as_numpy_iterator())
-assert [len(ids) for ids, values in batches] == [2, 2, 1]
-```
-
-**Expected:** batch sizes[2,2,1].
-
-**Verify:** Compare the computed values or written argument with batch sizes[2,2,1].
-
-## Exercise 2: Apply training statistics
-
-The question is: Use values1,2,3 to fit mean 2, then transform all five values without refitting.
-
-The held-out values4 and5 are transformed with the same mean. Their transformed average is not zero, which is expected when a frozen training transformation meets a different subset.
+A buffer of five holds the whole fixture, so any order is possible. The operation seed fixes the order and reshuffle_each_iteration=False repeats it on every pass; with the default True, each epoch would draw a new order. Shuffling the (ID, value) tuple keeps each pair together, which the ID+1 check confirms.
 
 ```python
-mean = np.mean([1.0, 2.0, 3.0])
-centered = ds.map(lambda i, v: (i, v - tf.cast(mean, tf.float32)))
-values = np.array([float(v) for i, v in centered.as_numpy_iterator()])
-np.testing.assert_array_equal(values, [-1, 0, 1, 2, 3])
+replay = ds.shuffle(5, seed=7, reshuffle_each_iteration=False)
+first = [int(i) for i, v in replay.as_numpy_iterator()]
+assert [int(i) for i, v in replay.as_numpy_iterator()] == first
+rebuilt = tf.data.Dataset.from_tensor_slices(
+    (np.arange(5), np.arange(1, 6, dtype="float32"))
+).shuffle(5, seed=7, reshuffle_each_iteration=False)
+assert [int(i) for i, v in rebuilt.as_numpy_iterator()] == first
+assert sorted(first) == [0, 1, 2, 3, 4]
+assert all(float(v) == int(i) + 1 for i, v in replay.as_numpy_iterator())
 ```
 
-**Expected:** centered values[-1,0,1,2,3].
+**Expected:** the same ID order on both passes and after rebuilding; IDs 0-4 each appear once; every value is still ID+1.
 
-**Verify:** Compare the computed values or written argument with centered values[-1,0,1,2,3].
+**Verify:** In a fresh process, the exercise checks confirm `[int(i) for i, v in replay.as_numpy_iterator()] == first`; `[int(i) for i, v in rebuilt.as_numpy_iterator()] == first`; `sorted(first) == [0, 1, 2, 3, 4]` and `all((float(v) == int(i) + 1 for i, v in replay.as_numpy_iterator()))`.
+
+## Exercise 2: Predict a different batch size
+
+The question is: Predict the batch sizes for batch(3), then the surviving IDs when drop_remainder=True, before running the pipeline.
+
+Five records in batches of three leave a remainder of two. Dropping it removes 40 percent of this fixture, far more than the single record lost with batches of two, so the ledger of absent IDs matters more as the batch grows.
+
+```python
+sizes = [len(i) for i, v in ds.batch(3).as_numpy_iterator()]
+kept = np.concatenate([i for i, v in ds.batch(3, drop_remainder=True).as_numpy_iterator()])
+assert sizes == [3, 2]
+assert kept.tolist() == [0, 1, 2]
+```
+
+**Expected:** sizes [3, 2]; with drop_remainder=True only IDs 0, 1, 2 remain.
+
+**Verify:** In a fresh process, the exercise checks confirm `sizes == [3, 2]` and `kept.tolist() == [0, 1, 2]`.
 
 ## Exercise 3: Retain IDs through mapping
 
-The question is: Reassemble the IDs after centering, batching and prefetch1.
+The question is: Reassemble the IDs after centering, batching and prefetch 1.
 
 Value-only comparisons cannot detect reordered or duplicated observations when values repeat. IDs provide an independent conservation check across the pipeline.
 
@@ -60,9 +66,9 @@ got = np.concatenate([i for i, v in centered.batch(2).prefetch(1).as_numpy_itera
 np.testing.assert_array_equal(got, np.arange(5))
 ```
 
-**Expected:** IDs0,1,2,3,4 in order.
+**Expected:** IDs 0, 1, 2, 3, 4 in order.
 
-**Verify:** Compare the computed values or written argument with IDs0,1,2,3,4 in order.
+**Verify:** In a fresh process, the exercise checks confirm `got` equals `np.arange(5)`.
 
 ## Exercise 4: Compare explicit dropping
 
@@ -76,9 +82,9 @@ assert [len(i) for i, v in dropped] == [2, 2]
 assert np.concatenate([i for i, v in dropped]).tolist() == [0, 1, 2, 3]
 ```
 
-**Expected:** sizes[2,2]; ID4 absent.
+**Expected:** sizes [2, 2]; ID 4 absent.
 
-**Verify:** Compare the computed values or written argument with sizes[2,2]; ID4 absent.
+**Verify:** In a fresh process, the exercise checks confirm `[len(i) for i, v in dropped] == [2, 2]` and `np.concatenate([i for i, v in dropped]).tolist() == [0, 1, 2, 3]`.
 
 ## Exercise 5: Recreate a deterministic traversal
 
@@ -95,11 +101,11 @@ assert a == b == [(0, 1.0), (1, 2.0), (2, 3.0), (3, 4.0), (4, 5.0)]
 
 **Expected:** both traversals equal the original five pairs.
 
-**Verify:** Compare the computed values or written argument with both traversals equal the original five pairs.
+**Verify:** In a fresh process, the exercise checks confirm `a == b == [(0, 1.0), (1, 2.0), (2, 3.0), (3, 4.0), (4, 5.0)]`.
 
 ## Exercise 6: Check paired transformation
 
-The question is: Scale values by2 and preserve IDs, then verify the value relation2*(ID+1).
+The question is: Scale values by 2 and preserve IDs, then verify the value relation 2*(ID+1).
 
 Keeping paired components in one dataset tuple prevents independent reorderings. The exact arithmetic relation detects a pipeline that transforms values while selecting unrelated IDs.
 
@@ -110,7 +116,7 @@ assert all(float(v) == 2 * (int(i) + 1) for i, v in scaled.as_numpy_iterator())
 
 **Expected:** all five pairs satisfy the relation.
 
-**Verify:** Compare the computed values or written argument with all five pairs satisfy the relation.
+**Verify:** In a fresh process, the exercise checks confirm `all((float(v) == 2 * (int(i) + 1) for i, v in scaled.as_numpy_iterator()))`.
 
 ## Review after comparison
 

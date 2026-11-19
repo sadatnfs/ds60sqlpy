@@ -3,6 +3,7 @@
   "title": "GRPO groups, normalization and KL estimators",
   "concepts": ["GRPO", "group baseline", "zero variance", "length normalization", "KL estimator"],
   "outcome": "Compute group-relative advantages, expose degeneracy and weighting choices, and identify the sampling law required by a KL estimator.",
+  "verification": "Shifting all rewards leaves the normalized advantages unchanged, a constant group yields zero advantages, response and token averaging give 0 and 1/3, the estimator differs from current-policy KL under the wrong sampling law, and its value 0 has derivative 0.5.",
   "level": "advanced",
   "runtime": "python-core",
   "minutes": 120,

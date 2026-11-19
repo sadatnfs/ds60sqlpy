@@ -12,6 +12,20 @@ The renderer writes only the two ML course guides, learner worksheets, separate 
 
 The original executable worked examples now have a standalone fresh-process contract. Each ordinary later block includes the required preceding fixture setup; a topic can supply explicitly independent `worked_examples` and focused `preamble` text. `llm010.py` contains the reviewed position/normalization derivation and readable reference. The renderer's `guides_only=True` mode repairs guide presentation without rewriting already-qualified reference programs. `tests/test_ml_module_lessons.py` executes each core worked program in a new process and exposes explicit opt-in TensorFlow/Torch cases. Exact Docker qualification inventories can be generated under ignored `work/` with source and guide hashes.
 
+## Practice and Verify lines
+
+`transfer_exercises.py` gives a lesson two transfer exercises that change the
+fixture, ask for a prediction or add a debugging step. When a lesson has them,
+spec exercises 1 and 2 appear only as worked examples, the practice list is the
+two transfers followed by spec exercises 3-6, and the reference runs the worked
+code first and the transfers last. Lessons without transfers say that exercises
+1 and 2 are guided reconstructions of the worked examples. Every Verify line is
+derived from the exercise's own assertions by `verify_text.py`; written reading
+cases use the authored text in `AUTHORED_VERIFY`. The renderer writes learner
+and reference programs unformatted, so run the pinned Ruff 0.16.0 formatter
+(`ruff format courses/deep-learning-tensorflow courses/llm-theory`) or
+`scripts/format-repo` on the regenerated files before review.
+
 ## Prose review layers
 
 `depth_reviews_tf.py` supplies the 26 topic-specific derivation and diagnosis

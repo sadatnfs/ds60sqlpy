@@ -43,6 +43,23 @@ internal static class Program {
       }
       Check(rejected, "fractional quotient rejected");
     }
+    {
+      // Task 3: Independent construction
+      int Area(int width, int height) {
+        if (width < 0 || height < 0) {
+          throw new ArgumentOutOfRangeException(nameof(width));
+        }
+        return checked(width * height);
+      }
+      Check(Area(3, 4) == 12 && Area(0, 9) == 0, "valid dimensions");
+      bool rejected = false;
+      try {
+        Area(-1, 2);
+      } catch (ArgumentOutOfRangeException) {
+        rejected = true;
+      }
+      Check(rejected, "negative dimension rejected");
+    }
     Console.WriteLine("csharp-007: passed");
     await Task.CompletedTask;
   }

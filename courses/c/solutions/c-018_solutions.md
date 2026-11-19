@@ -8,9 +8,11 @@ A FILE stream buffers I/O and tracks state such as end-of-file and errors. A rea
 
 fwrite and fread return element counts, not necessarily byte counts unless element size is one. fseek or rewind changes position; rewind also clears error and EOF indicators. fgetc returns int so every unsigned-char value remains distinct from EOF. fgets reads a bounded line and retains a newline when one fits. fclose releases the stream and may report a final write failure.
 
-## Exercise 1: Round-trip an owned stream
+## Exercise 1: Round-trip an owned stream: predict an edited check
 
-Write abc, rewind and read three bytes.
+Copy worked example 1 into a scratch pad and change `CHECK(fwrite("abc", 1, 3, f) == 3);` to `CHECK(fwrite("abc", 1, 4, f) == 3);` inside its CHECK. Before running, predict whether the CHECK still holds and explain why; then restore it.
+
+The unchanged code is worked example 1:
 
 ```c
 FILE *f = tmpfile();
@@ -22,13 +24,15 @@ CHECK(fread(data, 1, 3, f) == 3 && strcmp(data, "abc") == 0);
 CHECK(fclose(f) == 0);
 ```
 
-**Expected:** Three bytes return and match abc.
+**Expected:** The changed run stops with `Check failed` at the CHECK on `fwrite("abc", 1, 3, f) == 3`. Restoring the original line brings back the worked observation: three bytes return and match abc.
 
 The terminator comes from initialized output storage, not from fread. Binary reads do not automatically append a string terminator.
 
-## Exercise 2: Observe a short read
+## Exercise 2: Observe a short read: diagnose an edited check
 
-Request four bytes from a two-byte stream.
+A careless edit changed the CHECK in worked example 2 so that it reads `CHECK(fwrite("ab", 1, 3, f) == 2);`. Run worked example 2 with that line, explain why the edited CHECK now fails for the same program state, and restore it.
+
+The unchanged code is worked example 2:
 
 ```c
 FILE *f = tmpfile();
@@ -41,7 +45,7 @@ CHECK(n == 2 && feof(f) && !ferror(f));
 CHECK(fclose(f) == 0);
 ```
 
-**Expected:** Two bytes return and EOF becomes set.
+**Expected:** Before the repair the run stops with `Check failed` at the CHECK on `fwrite("ab", 1, 2, f) == 2`; after it the line reads `CHECK(fwrite("ab", 1, 2, f) == 2);` again and two bytes return and EOF becomes set.
 
 The count is the primary evidence. EOF explains why the remaining requested bytes were unavailable.
 

@@ -29,7 +29,11 @@ internal static class Program {
     {
       var scale = new Scale(3);
       Check(scale.Apply(4) == 12, "primary constructor parameter");
-      Check(nameof(Scale.Apply) == "Apply", "symbol name");
+      Check(nameof(List<>) == "List", "C# 14 unbound generic nameof");
+      StringBuilder? missing = null;
+      missing?.Capacity = 32;
+      Check(missing is null, "C# 14 null-conditional assignment");
+      Check("\e" == "\u001b", "C# 13 escape sequence");
     }
     Console.WriteLine("csharp-046: passed");
     await Task.CompletedTask;

@@ -32,7 +32,7 @@ There is sampling uncertainty about the unknown rate, outcome randomness conditi
 
 A decision report should include the expected-value gap between plausible actions and how accurately that gap has been calculated. If the gap is negligible compared with operational costs or model uncertainty, a stable simpler action may be reasonable. That is a decision judgment that should be made explicitly.
 
-The finite program uses a fixed seed for reproducibility, but a fixed seed is not a guarantee of accuracy. Review the actual diagnostics and the exact-oracle discrepancy. Short-run R-hat or effective-size summaries can look acceptable for one parameter while the expected loss difference remains imprecise.
+The finite program uses a fixed seed for reproducibility, but a fixed seed is not a guarantee of accuracy. Review the actual diagnostics and the exact-oracle discrepancy. Short-run R-hat or effective-size summaries can pass the screen for one parameter (R-hat below 1.01, at least 100 bulk effective draws per chain) while the expected loss difference remains imprecise; the decision needs its own Monte Carlo error.
 
 ## Answered scientific discussion
 
@@ -42,7 +42,7 @@ The finite program uses a fixed seed for reproducibility, but a fixed seed is no
 
 ## Complete reproducible program
 
-Run the complete program in the classroom's declared prepared profile. Every run starts a fresh process with tiny offline synthetic data. This is a worked tutorial, with no exam or hidden solution. Runtime: `bayesian-cpu`.
+Run the complete program in the classroom's declared prepared profile. Every run starts a fresh process with tiny offline synthetic data. This is a worked tutorial, with no exam or hidden solution. These teaching-sized chains can fail the convergence screen from `bayes-006` (R-hat below 1.01, at least 100 bulk and tail effective draws per chain, no divergences); read the printed diagnostics against it before interpreting any estimate. Runtime: `bayesian-cpu`.
 
 ```python
 """Complete bounded synthetic Bayesian investigation; no external data."""
@@ -74,8 +74,8 @@ def sample_model(model, seed):
 def diagnostics(trace, names):
     import arviz as az
 
-    rhat = np.asarray(az.rhat(trace, var_names=names).to_array(), float)
-    ess = np.asarray(az.ess(trace, var_names=names, method="bulk").to_array(), float)
+    rhat = np.asarray(az.rhat(trace, var_names=names).to_dataarray(), float)
+    ess = np.asarray(az.ess(trace, var_names=names, method="bulk").to_dataarray(), float)
 
     def finite_extreme(values, maximum):
         values = values[np.isfinite(values)]

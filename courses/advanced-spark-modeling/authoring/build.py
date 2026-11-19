@@ -6,7 +6,9 @@ from __future__ import annotations
 import argparse
 import ast
 import json
+import re
 import sys
+import textwrap
 from pathlib import Path
 
 BASE = Path(__file__).resolve().parents[1]
@@ -25,6 +27,58 @@ def published_package_links(text: str) -> str:
     )
 
 
+INCLUDE = re.compile(
+    r"^<!-- include: (?P<path>[\w./-]+)(?: #(?P<symbol>\w+))?"
+    r"""(?: from=(?P<q1>["'])(?P<start>.+?)(?P=q1))?"""
+    r"""(?: to=(?P<q2>["'])(?P<end>.+?)(?P=q2))?"""
+    r"""(?: until=(?P<q3>["'])(?P<until>.+?)(?P=q3))? (?P<language>[\w+-]+) -->$""",
+    re.M,
+)
+CASE = re.compile(r"^## Worked case(?: (\w+))?: (.+)$", re.M)
+
+
+def excerpt(match: re.Match[str]) -> str:
+    """Embed exact project source named by an include marker in a chapter."""
+    relative = match["path"]
+    path = (BASE / relative).resolve()
+    if not path.is_relative_to(BASE / "projects") or not path.is_file():
+        raise ValueError(f"Include target {relative} is not a project file")
+    text = path.read_text("utf-8")
+    lines = text.splitlines()
+    if match["symbol"]:
+        node = next(
+            n
+            for n in ast.parse(text).body
+            if isinstance(n, (ast.FunctionDef, ast.ClassDef)) and n.name == match["symbol"]
+        )
+        first = min([d.lineno for d in node.decorator_list] + [node.lineno])
+        lines = lines[first - 1 : node.end_lineno]
+    if match["start"]:
+        lines = lines[next(i for i, line in enumerate(lines) if match["start"] in line) :]
+    if match["end"]:
+        lines = lines[: next(i for i, line in enumerate(lines) if match["end"] in line) + 1]
+    if match["until"]:
+        lines = lines[: next(i for i, line in enumerate(lines) if match["until"] in line)]
+    body = textwrap.dedent("\n".join(lines)).strip("\n")
+    if "```" in body or not body:
+        raise ValueError(f"Include {relative} cannot be fenced")
+    return f"From [`{relative}`](../{relative}):\n\n```{match['language']}\n{body}\n```"
+
+
+def lab(prose: str, reading: bool) -> str:
+    cases = [title.strip() for _, title in CASE.findall(prose)]
+    named = " and ".join(f'"{title}"' for title in cases)
+    if reading:
+        return (
+            f"Read the worked cases {named}, run the linked project only through its own "
+            "documented entrypoint, and compare its recorded observations with the chapter."
+        )
+    return (
+        f"Run the complete program and check the worked cases {named} against the values "
+        "and diagnostics the chapter states."
+    )
+
+
 def outputs() -> dict[Path, str]:
     units = json.loads((BASE / "authoring/units.json").read_text("utf-8"))
     if [u["id"] for u in units] != [f"asm-{i:03}" for i in range(1, 39)]:
@@ -39,6 +93,9 @@ def outputs() -> dict[Path, str]:
         prose = (BASE / "authoring/chapters" / (key + ".md")).read_text("utf-8").strip()
         program = (BASE / "authoring/programs" / (key + unit["suffix"])).read_text("utf-8")
         prose = published_package_links(prose)
+        prose = INCLUDE.sub(excerpt, prose)
+        if "<!-- include:" in prose:
+            raise ValueError(key + " has a malformed include marker")
         if unit["runtime"] == "reading" and unit["language"] == "markdown":
             program = published_package_links(program)
         if unit["language"] == "python":
@@ -103,13 +160,14 @@ def outputs() -> dict[Path, str]:
                 )
             }
             | {
-                "lab": (
-                    "Read the two complete worked cases, reproduce their evidence "
-                    "and compare their assumptions."
-                ),
+                "lab": lab(prose, reading),
                 "verification": (
-                    f"Complete source-bound {key} investigation with explicit numerical "
-                    "or execution diagnostics; no mastery grade."
+                    "Compare the project's recorded observations with the values and failure "
+                    "cases each worked case states; a command reference or hand calculation "
+                    "does not show that the project ran."
+                    if reading
+                    else f"Run `{key}{unit['suffix']}` on the `{unit['runtime']}` profile and "
+                    "confirm the printed values and diagnostics that both worked cases state."
                 ),
             }
         )

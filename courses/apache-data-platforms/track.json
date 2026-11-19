@@ -18,7 +18,7 @@
         "independent oracle"
       ],
       "outcome": "Separate storage, transport, execution, catalog and governance responsibilities",
-      "lab": "Compare the two complete worked cases and reproduce the stated observations.",
+      "lab": "Run the complete program and compare worked case A (\"preserve meaning across three representations\") and worked case B (\"a correct sum can still use the wrong population\") with the values the chapter states.",
       "verification": "Exact real-library outputs checked against small independent records, with explicit rejected inputs."
     },
     {
@@ -36,7 +36,7 @@
         "schema compatibility"
       ],
       "outcome": "Define logical types and physical representation before choosing a format",
-      "lab": "Compare the two complete worked cases and reproduce the stated observations.",
+      "lab": "Run the complete program and compare worked case A (\"preserve monetary units and missingness\") and worked case B (\"identifiers and schema compatibility\") with the values the chapter states.",
       "verification": "Exact real-library outputs checked against small independent records, with explicit rejected inputs."
     },
     {
@@ -54,7 +54,7 @@
         "catalog"
       ],
       "outcome": "Distinguish bytes, files, partitions, table metadata and atomic commits",
-      "lab": "Compare the two complete worked cases and reproduce the stated observations.",
+      "lab": "Run the complete program and compare worked case A (\"two appends create two different views\") and worked case B (\"a file in the warehouse is not necessarily table data\") with the values the chapter states.",
       "verification": "Exact real-library outputs checked against small independent records, with explicit rejected inputs."
     },
     {
@@ -73,7 +73,7 @@
         "bounded RPC"
       ],
       "outcome": "Trace a connection through client, DNS, listener and advertised endpoint",
-      "lab": "Compare the two complete worked cases and reproduce the stated observations.",
+      "lab": "Read worked case A (\"service discovery reaches the right process\") and worked case B (\"the client loopback cannot reach its neighbor\"), run their labeled commands only in the owned workshop, and compare the observations with the chapter.",
       "verification": "Actual owned Docker workshop observations, with source, failure and lifecycle scope stated separately. Commands are not executed by the classroom pad."
     },
     {
@@ -91,7 +91,7 @@
         "mergeable state"
       ],
       "outcome": "Explain partition-local ordering and the cost of a shuffle",
-      "lab": "Compare the two complete worked cases and reproduce the stated observations.",
+      "lab": "Run the complete program and compare worked case A (\"balanced independent keys\") and worked case B (\"a single hot customer\") with the values the chapter states.",
       "verification": "Complete actual local program with independent expected values and explicit negative checks; distributed-system claims are excluded."
     },
     {
@@ -109,7 +109,7 @@
         "retry boundaries"
       ],
       "outcome": "Specify the boundary at which a duplicate is suppressed",
-      "lab": "Compare the two complete worked cases and reproduce the stated observations.",
+      "lab": "Run the complete program and compare worked case A (\"acknowledge the same operation twice\") and worked case B (\"the identifier is reused for different data\") with the values the chapter states.",
       "verification": "Complete actual local program with independent expected values and explicit negative checks; distributed-system claims are excluded."
     },
     {
@@ -127,7 +127,7 @@
         "late corrections"
       ],
       "outcome": "Record source version, clock and query assumptions",
-      "lab": "Compare the two complete worked cases and reproduce the stated observations.",
+      "lab": "Run the complete program and compare worked case A (\"a late order crosses the report cutoff\") and worked case B (\"a correction changes history deliberately\") with the values the chapter states.",
       "verification": "Complete actual local program with independent expected values and explicit negative checks; distributed-system claims are excluded."
     },
     {
@@ -145,7 +145,7 @@
         "evidence boundaries"
       ],
       "outcome": "Design positive, negative and recovery checks without overclaiming production readiness",
-      "lab": "Compare the two complete worked cases and reproduce the stated observations.",
+      "lab": "Run the complete program and compare worked case A (\"reject a superficially plausible answer\") and worked case B (\"separate restart survival from availability\") with the values the chapter states.",
       "verification": "Complete actual local program with independent expected values and explicit negative checks; distributed-system claims are excluded."
     },
     {
@@ -163,7 +163,7 @@
         "offsets"
       ],
       "outcome": "Explain why logical length, buffer length and offset differ",
-      "lab": "Compare the two complete worked cases and reproduce the stated observations.",
+      "lab": "Run the complete program and compare worked case A (\"a missing measurement is not zero\") and worked case B (\"a slice is a view with an offset\") with the values the chapter states.",
       "verification": "Independent exact-value assertions and expected failure observations in the complete bounded program."
     },
     {
@@ -181,7 +181,7 @@
         "schema"
       ],
       "outcome": "Choose a schema that preserves missingness and semantic units",
-      "lab": "Compare the two complete worked cases and reproduce the stated observations.",
+      "lab": "Run the complete program and compare worked case A (\"missing list, empty list and missing element\") and worked case B (\"dictionary encoding preserves values, not universal codes\") with the values the chapter states.",
       "verification": "Independent exact-value assertions and expected failure observations in the complete bounded program."
     },
     {
@@ -199,7 +199,7 @@
         "null policy"
       ],
       "outcome": "Use vector kernels without confusing a chunk boundary with a partition",
-      "lab": "Compare the two complete worked cases and reproduce the stated observations.",
+      "lab": "Run the complete program and compare worked case A (\"the chunk boundary must not change an aggregate\") and worked case B (\"selecting rows and replacing missing measurements\") with the values the chapter states.",
       "verification": "Independent exact-value assertions and expected failure observations in the complete bounded program."
     },
     {
@@ -217,7 +217,7 @@
         "record batch"
       ],
       "outcome": "Compare zero-copy opportunities with allocations at conversion boundaries",
-      "lab": "Compare the two complete worked cases and reproduce the stated observations.",
+      "lab": "Run the complete program and compare worked case A (\"an ordered stream with explicit metadata\") and worked case B (\"random batch access in an IPC file\") with the values the chapter states.",
       "verification": "Independent exact-value assertions and expected failure observations in the complete bounded program."
     },
     {
@@ -235,13 +235,13 @@
         "residual filter"
       ],
       "outcome": "Inspect metadata and distinguish pruning from proof of row-level correctness",
-      "lab": "Compare the two complete worked cases and reproduce the stated observations.",
+      "lab": "Run the complete program and compare worked case A (\"eliminate an impossible partition\") and worked case B (\"retain a fragment but reject some of its rows\") with the values the chapter states.",
       "verification": "Independent exact-value assertions and expected failure observations in the complete bounded program."
     },
     {
       "id": "apache-014",
       "title": "Language boundaries and Flight",
-      "level": "intermediate",
+      "level": "advanced",
       "minutes": 70,
       "prerequisites": [
         "apache-012",
@@ -256,7 +256,7 @@
         "Rust Arrow"
       ],
       "outcome": "Explain C Data Interface lifetime and Flight transport without calling either a database",
-      "lab": "Compare the two complete worked cases and reproduce the stated observations.",
+      "lab": "Read worked case A (\"Python to Rust and back\") and worked case B (\"a real Flight request and rejected tickets\"), run their labeled commands only in the owned workshop, and compare the observations with the chapter.",
       "verification": "Actual owned Docker workshop observations, with source, failure and lifecycle scope stated separately. Commands are not executed by the classroom pad."
     },
     {
@@ -274,7 +274,7 @@
         "DataFrame"
       ],
       "outcome": "Separate plan construction from execution and materialization",
-      "lab": "Compare the two complete worked cases and reproduce the stated observations.",
+      "lab": "Run the complete program and compare worked case A (\"SQL and expressions answer one defined question\") and worked case B (\"a session name is not a global table\") with the values the chapter states.",
       "verification": "Actual DataFusion outputs checked against independent fixture identities, cardinalities and sums."
     },
     {
@@ -292,7 +292,7 @@
         "HAVING"
       ],
       "outcome": "Read operators and explain why plan text is evidence rather than a stable API",
-      "lab": "Compare the two complete worked cases and reproduce the stated observations.",
+      "lab": "Run the complete program and compare worked case A (\"a selective filter before aggregation\") and worked case B (\"filtering groups is a different calculation\") with the values the chapter states.",
       "verification": "Actual DataFusion outputs checked against independent fixture identities, cardinalities and sums."
     },
     {
@@ -310,7 +310,7 @@
         "SQL nulls"
       ],
       "outcome": "Predict join output multiplicity and missing-key semantics",
-      "lab": "Compare the two complete worked cases and reproduce the stated observations.",
+      "lab": "Run the complete program and compare worked case A (\"a valid many-to-one enrichment\") and worked case B (\"one duplicate changes the total\") with the values the chapter states.",
       "verification": "Actual DataFusion outputs checked against independent fixture identities, cardinalities and sums."
     },
     {
@@ -329,7 +329,7 @@
         "spill evidence"
       ],
       "outcome": "Explain why more partitions can increase overhead and peak memory",
-      "lab": "Compare the two complete worked cases and reproduce the stated observations.",
+      "lab": "Run the complete program and compare worked case A (\"one partition and four partitions\") and worked case B (\"projection and filtering before a bounded sort\") with the values the chapter states.",
       "verification": "Complete actual local program with independent expected values and explicit negative checks; distributed-system claims are excluded."
     },
     {
@@ -349,7 +349,7 @@
         "null semantics"
       ],
       "outcome": "Explain volatility, types and optimizer visibility",
-      "lab": "Compare the two complete worked cases and reproduce the stated observations.",
+      "lab": "Run the complete program and compare worked case A (\"a vectorized unit conversion\") and worked case B (\"missing data is not a zero measurement\") with the values the chapter states.",
       "verification": "Complete actual local program with independent expected values and explicit negative checks; distributed-system claims are excluded."
     },
     {
@@ -370,13 +370,13 @@
         "source-bound results"
       ],
       "outcome": "Define a bounded engine API with reproducible source and resource settings",
-      "lab": "Compare the two complete worked cases and reproduce the stated observations.",
+      "lab": "Run the complete program and compare worked case A (\"a narrow reporting request\") and worked case B (\"reject unapproved behavior before execution\") with the values the chapter states.",
       "verification": "Complete actual local program with independent expected values and explicit negative checks; distributed-system claims are excluded."
     },
     {
       "id": "apache-021",
       "title": "From an engine to a distributed scheduler",
-      "level": "intermediate",
+      "level": "advanced",
       "minutes": 75,
       "prerequisites": [
         "apache-020",
@@ -390,13 +390,13 @@
         "embedded control"
       ],
       "outcome": "Trace plan serialization, scheduling and Arrow Flight data movement",
-      "lab": "Compare the two complete worked cases and reproduce the stated observations.",
+      "lab": "Read worked case A (\"submit to a real scheduler\") and worked case B (\"compare the embedded and scheduled paths\"), run their labeled commands only in the owned workshop, and compare the observations with the chapter.",
       "verification": "Project-only actual product commands with independent fixture oracles. Source preparation, native runtime observations and restart evidence are recorded separately in the workshop qualification ledger."
     },
     {
       "id": "apache-022",
       "title": "Cluster configuration and shared data paths",
-      "level": "intermediate",
+      "level": "advanced",
       "minutes": 75,
       "prerequisites": [
         "apache-021",
@@ -409,13 +409,13 @@
         "immutable source identity"
       ],
       "outcome": "Distinguish logical paths from filesystem visibility across processes",
-      "lab": "Compare the two complete worked cases and reproduce the stated observations.",
+      "lab": "Read worked case A (\"one immutable shared Parquet fixture\") and worked case B (\"remove a registered file before execution\"), run their labeled commands only in the owned workshop, and compare the observations with the chapter.",
       "verification": "Project-only actual product commands with independent fixture oracles. Source preparation, native runtime observations and restart evidence are recorded separately in the workshop qualification ledger."
     },
     {
       "id": "apache-023",
       "title": "Stages, shuffle and task placement",
-      "level": "intermediate",
+      "level": "advanced",
       "minutes": 75,
       "prerequisites": [
         "apache-021",
@@ -430,13 +430,13 @@
         "skew"
       ],
       "outcome": "Explain stage barriers, shuffle files and scheduler decisions",
-      "lab": "Compare the two complete worked cases and reproduce the stated observations.",
+      "lab": "Read worked case A (\"a balanced aggregation\") and worked case B (\"a hot grouping key\"), run their labeled commands only in the owned workshop, and compare the observations with the chapter.",
       "verification": "Project-only actual product commands with independent fixture oracles. Source preparation, native runtime observations and restart evidence are recorded separately in the workshop qualification ledger."
     },
     {
       "id": "apache-024",
       "title": "Clients and supported language APIs",
-      "level": "intermediate",
+      "level": "advanced",
       "minutes": 75,
       "prerequisites": [
         "apache-021",
@@ -451,7 +451,7 @@
         "lazy actions"
       ],
       "outcome": "Respect protocol and release compatibility instead of assuming Spark API parity",
-      "lab": "Compare the two complete worked cases and reproduce the stated observations.",
+      "lab": "Read worked case A (\"SQL and DataFrame expressions through Python\") and worked case B (\"read the native Rust client boundary\"), run their labeled commands only in the owned workshop, and compare the observations with the chapter.",
       "verification": "Project-only actual product commands with independent fixture oracles. Source preparation, native runtime observations and restart evidence are recorded separately in the workshop qualification ledger."
     },
     {
@@ -472,7 +472,7 @@
         "retained receipts"
       ],
       "outcome": "Report precisely what recovered and what needs resubmission",
-      "lab": "Compare the two complete worked cases and reproduce the stated observations.",
+      "lab": "Read worked case A (\"remove the only executor from a bounded cluster\") and worked case B (\"restart the scheduler without inventing job continuity\"), run their labeled commands only in the owned workshop, and compare the observations with the chapter.",
       "verification": "Project-only actual product commands with independent fixture oracles. Source preparation, native runtime observations and restart evidence are recorded separately in the workshop qualification ledger."
     },
     {
@@ -493,7 +493,7 @@
         "measurement limits"
       ],
       "outcome": "Choose an embedded engine or a cluster from workload evidence",
-      "lab": "Compare the two complete worked cases and reproduce the stated observations.",
+      "lab": "Read worked case A (\"one and two task-slot allocations\") and worked case B (\"bound output before collecting\"), run their labeled commands only in the owned workshop, and compare the observations with the chapter.",
       "verification": "Project-only actual product commands with independent fixture oracles. Source preparation, native runtime observations and restart evidence are recorded separately in the workshop qualification ledger."
     },
     {
@@ -514,7 +514,7 @@
         "XCom references"
       ],
       "outcome": "Distinguish scheduler time, logical date and data interval",
-      "lab": "Compare the two complete worked cases and reproduce the stated observations.",
+      "lab": "Read worked case A (\"process two explicit daily intervals\") and worked case B (\"explain why now changes a backfill\"), run their labeled commands only in the owned workshop, and compare the observations with the chapter.",
       "verification": "Project-only actual product commands with independent fixture oracles. Source preparation, native runtime observations and restart evidence are recorded separately in the workshop qualification ledger."
     },
     {
@@ -534,7 +534,7 @@
         "atomic replacement"
       ],
       "outcome": "Keep side effects safe across retries and task clearing",
-      "lab": "Compare the two complete worked cases and reproduce the stated observations.",
+      "lab": "Read worked case A (\"repeat the same partition safely\") and worked case B (\"one real transient failure followed by retry\"), run their labeled commands only in the owned workshop, and compare the observations with the chapter.",
       "verification": "Project-only actual product commands with independent fixture oracles. Source preparation, native runtime observations and restart evidence are recorded separately in the workshop qualification ledger."
     },
     {
@@ -554,7 +554,7 @@
         "reprocessing identity"
       ],
       "outcome": "Choose a backfill plan with explicit completeness semantics",
-      "lab": "Compare the two complete worked cases and reproduce the stated observations.",
+      "lab": "Read worked case A (\"materialize two historical days\") and worked case B (\"correct one partition and preserve the other\"), run their labeled commands only in the owned workshop, and compare the observations with the chapter.",
       "verification": "Project-only actual product commands with independent fixture oracles. Source preparation, native runtime observations and restart evidence are recorded separately in the workshop qualification ledger."
     },
     {
@@ -574,7 +574,7 @@
         "source-version readback"
       ],
       "outcome": "Separate orchestration metadata from bulk data transfer",
-      "lab": "Compare the two complete worked cases and reproduce the stated observations.",
+      "lab": "Read worked case A (\"a successful producer schedules a consumer\") and worked case B (\"two mapped tasks share one pool slot\"), run their labeled commands only in the owned workshop, and compare the observations with the chapter.",
       "verification": "Project-only actual product commands with independent fixture oracles. Source preparation, native runtime observations and restart evidence are recorded separately in the workshop qualification ledger."
     },
     {
@@ -594,7 +594,7 @@
         "redacted diagnostics"
       ],
       "outcome": "Keep parse-time side effects and credentials outside authored code",
-      "lab": "Compare the two complete worked cases and reproduce the stated observations.",
+      "lab": "Read worked case A (\"resolve a known local connection in a task\") and worked case B (\"reject a missing connection explicitly\"), run their labeled commands only in the owned workshop, and compare the observations with the chapter.",
       "verification": "Project-only actual product commands with independent fixture oracles. Source preparation, native runtime observations and restart evidence are recorded separately in the workshop qualification ledger."
     },
     {
@@ -615,7 +615,7 @@
         "recovery evidence"
       ],
       "outcome": "Recover the owned installation without deleting orchestration history",
-      "lab": "Compare the two complete worked cases and reproduce the stated observations.",
+      "lab": "Read worked case A (\"restart without losing completed history\") and worked case B (\"diagnose waiting and failed work\"), run their labeled commands only in the owned workshop, and compare the observations with the chapter.",
       "verification": "Project-only actual product commands with independent fixture oracles. Source preparation, native runtime observations and restart evidence are recorded separately in the workshop qualification ledger."
     },
     {
@@ -634,7 +634,7 @@
         "consumer groups"
       ],
       "outcome": "Distinguish a durable log from a destructive queue",
-      "lab": "Compare the two complete worked cases and reproduce the stated observations.",
+      "lab": "Read worked case A (\"append and independently verify keyed records\") and worked case B (\"two independent consumer progress records\"), run their labeled commands only in the owned workshop, and compare the observations with the chapter.",
       "verification": "Actual owned Docker workshop observations, with source, failure and lifecycle scope stated separately. Commands are not executed by the classroom pad."
     },
     {
@@ -653,7 +653,7 @@
         "ambiguous outcomes"
       ],
       "outcome": "Explain producer IDs, sequence numbers and the scope of deduplication",
-      "lab": "Compare the two complete worked cases and reproduce the stated observations.",
+      "lab": "Read worked case A (\"wait for a committed acknowledged write\") and worked case B (\"identical business data sent twice remains twice\"), run their labeled commands only in the owned workshop, and compare the observations with the chapter.",
       "verification": "Actual owned Docker workshop observations, with source, failure and lifecycle scope stated separately. Commands are not executed by the classroom pad."
     },
     {
@@ -673,7 +673,7 @@
         "rebalance boundaries"
       ],
       "outcome": "Explain at-least-once processing with a concrete offset timeline",
-      "lab": "Compare the two complete worked cases and reproduce the stated observations.",
+      "lab": "Read worked case A (\"close before committing and observe replay\") and worked case B (\"commit next positions and reopen\"), run their labeled commands only in the owned workshop, and compare the observations with the chapter.",
       "verification": "Actual owned Docker workshop observations, with source, failure and lifecycle scope stated separately. Commands are not executed by the classroom pad."
     },
     {
@@ -693,7 +693,7 @@
         "fencing scope"
       ],
       "outcome": "State exactly which Kafka operations are atomic",
-      "lab": "Compare the two complete worked cases and reproduce the stated observations.",
+      "lab": "Read worked case A (\"commit one record and abort another\") and worked case B (\"committed duplicates remain distinct operations\"), run their labeled commands only in the owned workshop, and compare the observations with the chapter.",
       "verification": "Actual owned Docker workshop observations, with source, failure and lifecycle scope stated separately. Commands are not executed by the classroom pad."
     },
     {
@@ -713,7 +713,7 @@
         "reader contracts"
       ],
       "outcome": "Distinguish latest state from event history and schema compatibility",
-      "lab": "Compare the two complete worked cases and reproduce the stated observations.",
+      "lab": "Read worked case A (\"observe policy and reconstruct current state\") and worked case B (\"additive evolution versus incompatible values\"), run their labeled commands only in the owned workshop, and compare the observations with the chapter.",
       "verification": "Actual owned Docker workshop observations, with source, failure and lifecycle scope stated separately. Commands are not executed by the classroom pad."
     },
     {
@@ -734,7 +734,7 @@
         "operational evidence"
       ],
       "outcome": "Diagnose connectivity, consumer lag and disk bounds without claiming single-node HA",
-      "lab": "Compare the two complete worked cases and reproduce the stated observations.",
+      "lab": "Read worked case A (\"inspect a bounded single-node cluster\") and worked case B (\"resume a process, then replace its container\"), run their labeled commands only in the owned workshop, and compare the observations with the chapter.",
       "verification": "Actual owned Docker workshop observations, with source, failure and lifecycle scope stated separately. Commands are not executed by the classroom pad."
     },
     {
@@ -753,7 +753,7 @@
         "manifest references"
       ],
       "outcome": "Explain metadata files, manifests and data-file references",
-      "lab": "Compare the two complete worked cases and reproduce the stated observations.",
+      "lab": "Run the complete program and compare worked case A (\"create, append and inspect\") and worked case B (\"retain the first snapshot after another append\") with the values the chapter states.",
       "verification": "Complete actual local program with independent expected values and explicit negative checks; distributed-system claims are excluded."
     },
     {
@@ -772,7 +772,7 @@
         "nullability"
       ],
       "outcome": "Distinguish identity from column position or display name",
-      "lab": "Compare the two complete worked cases and reproduce the stated observations.",
+      "lab": "Run the complete program and compare worked case A (\"rename an amount without rewriting data\") and worked case B (\"optional addition and required-field rejection\") with the values the chapter states.",
       "verification": "Complete actual local program with independent expected values and explicit negative checks; distributed-system claims are excluded."
     },
     {
@@ -791,7 +791,7 @@
         "residual predicates"
       ],
       "outcome": "Explain residual predicates across multiple partition specs",
-      "lab": "Compare the two complete worked cases and reproduce the stated observations.",
+      "lab": "Run the complete program and compare worked case A (\"introduce region partitioning\") and worked case B (\"evolve to a different layout\") with the values the chapter states.",
       "verification": "Complete actual local program with independent expected values and explicit negative checks; distributed-system claims are excluded."
     },
     {
@@ -810,7 +810,7 @@
         "retry semantics"
       ],
       "outcome": "Identify the catalog compare-and-swap boundary",
-      "lab": "Compare the two complete worked cases and reproduce the stated observations.",
+      "lab": "Run the complete program and compare worked case A (\"reject a stale schema update\") and worked case B (\"reload and revalidate the intended update\") with the values the chapter states.",
       "verification": "Complete actual local program with independent expected values and explicit negative checks; distributed-system claims are excluded."
     },
     {
@@ -829,7 +829,7 @@
         "retention boundaries"
       ],
       "outcome": "Separate logical deletion, physical cleanup and rollback promises",
-      "lab": "Compare the two complete worked cases and reproduce the stated observations.",
+      "lab": "Run the complete program and compare worked case A (\"remove an order from the current view\") and worked case B (\"expire one unprotected historical snapshot\") with the values the chapter states.",
       "verification": "Complete actual local program with independent expected values and explicit negative checks; distributed-system claims are excluded."
     },
     {
@@ -849,7 +849,7 @@
         "cross-engine evidence"
       ],
       "outcome": "Verify engine/version capabilities instead of treating all catalog protocols as interchangeable",
-      "lab": "Compare the two complete worked cases and reproduce the stated observations.",
+      "lab": "Run the complete program and compare worked case A (\"query one committed snapshot through Arrow\") and worked case B (\"a new append does not mutate the old relation\") with the values the chapter states.",
       "verification": "Complete actual local program with independent expected values and explicit negative checks; distributed-system claims are excluded."
     },
     {
@@ -871,7 +871,7 @@
         "stream versus table"
       ],
       "outcome": "Trace source, transformation, sink and execution graph",
-      "lab": "Compare the two complete worked cases and reproduce the stated observations.",
+      "lab": "Read worked case A (\"submit a bounded Java stream\") and worked case B (\"ask the same question through Flink SQL\"), run their labeled commands only in the owned workshop, and compare the observations with the chapter.",
       "verification": "Project-only actual product commands with independent fixture oracles. Source preparation, native runtime observations and restart evidence are recorded separately in the workshop qualification ledger."
     },
     {
@@ -891,7 +891,7 @@
         "late side output"
       ],
       "outcome": "Explain that watermarks estimate completeness rather than guarantee it",
-      "lab": "Compare the two complete worked cases and reproduce the stated observations.",
+      "lab": "Read worked case A (\"out-of-order records before progress advances\") and worked case B (\"an event arrives after its window closed\"), run their labeled commands only in the owned workshop, and compare the observations with the chapter.",
       "verification": "Project-only actual product commands with independent fixture oracles. Source preparation, native runtime observations and restart evidence are recorded separately in the workshop qualification ledger."
     },
     {
@@ -912,7 +912,7 @@
         "operator identity"
       ],
       "outcome": "Distinguish operator state, keyed state and timer semantics",
-      "lab": "Compare the two complete worked cases and reproduce the stated observations.",
+      "lab": "Read worked case A (\"independent customer totals\") and worked case B (\"replace a timer, then fire it through a watermark\"), run their labeled commands only in the owned workshop, and compare the observations with the chapter.",
       "verification": "Project-only actual product commands with independent fixture oracles. Source preparation, native runtime observations and restart evidence are recorded separately in the workshop qualification ledger."
     },
     {
@@ -932,7 +932,7 @@
         "exactly-once scope"
       ],
       "outcome": "Bound exactly-once claims by source, state and sink participation",
-      "lab": "Compare the two complete worked cases and reproduce the stated observations.",
+      "lab": "Read worked case A (\"recover source position and managed totals\") and worked case B (\"distinguish a transactional sink from an external effect\"), run their labeled commands only in the owned workshop, and compare the observations with the chapter.",
       "verification": "Project-only actual product commands with independent fixture oracles. Source preparation, native runtime observations and restart evidence are recorded separately in the workshop qualification ledger."
     },
     {
@@ -952,7 +952,7 @@
         "state-compatible rescale"
       ],
       "outcome": "Explain bottleneck propagation, slots and partition skew",
-      "lab": "Compare the two complete worked cases and reproduce the stated observations.",
+      "lab": "Read worked case A (\"constrain a prepared downstream operator\") and worked case B (\"change capacity through compatible state\"), run their labeled commands only in the owned workshop, and compare the observations with the chapter.",
       "verification": "Project-only actual product commands with independent fixture oracles. Source preparation, native runtime observations and restart evidence are recorded separately in the workshop qualification ledger."
     },
     {
@@ -973,7 +973,7 @@
         "state ownership"
       ],
       "outcome": "Treat upgrades as state migrations with a rollback plan",
-      "lab": "Compare the two complete worked cases and reproduce the stated observations.",
+      "lab": "Read worked case A (\"stop and restore compatible state\") and worked case B (\"reject an incompatible operator identity\"), run their labeled commands only in the owned workshop, and compare the observations with the chapter.",
       "verification": "Project-only actual product commands with independent fixture oracles. Source preparation, native runtime observations and restart evidence are recorded separately in the workshop qualification ledger."
     },
     {
@@ -992,7 +992,7 @@
         "clustering order"
       ],
       "outcome": "Choose primary and clustering keys from access patterns",
-      "lab": "Compare the two complete worked cases and reproduce the stated observations.",
+      "lab": "Read worked case A (\"a bounded customer-and-day lookup\") and worked case B (\"an unindexed ad hoc filter is rejected\"), run their labeled commands only in the owned workshop, and compare the observations with the chapter.",
       "verification": "Actual native ARM64 Cassandra 5.0.9 CQL and retained-state observations; RF3 outage and table-level SSTable restore have independent acceptance receipts. Commands run only in the copied owned Docker project."
     },
     {
@@ -1011,7 +1011,7 @@
         "SSTable"
       ],
       "outcome": "Explain commit log, memtable, SSTable and read reconciliation",
-      "lab": "Compare the two complete worked cases and reproduce the stated observations.",
+      "lab": "Read worked case A (\"write timestamps determine a visible value\") and worked case B (\"a clustering range narrows a known partition\"), run their labeled commands only in the owned workshop, and compare the observations with the chapter.",
       "verification": "Actual native ARM64 Cassandra 5.0.9 CQL and retained-state observations; RF3 outage and table-level SSTable restore have independent acceptance receipts. Commands run only in the copied owned Docker project."
     },
     {
@@ -1031,7 +1031,7 @@
         "availability"
       ],
       "outcome": "Apply quorum reasoning only with its replication and failure assumptions",
-      "lab": "Compare the two complete worked cases and reproduce the stated observations.",
+      "lab": "Read worked case A (\"identify the RF1 boundary honestly\") and worked case B (\"distinguish one surviving replica from a quorum\"), run their labeled commands only in the owned workshop, and compare the observations with the chapter.",
       "verification": "Actual native ARM64 Cassandra 5.0.9 CQL and retained-state observations; RF3 outage and table-level SSTable restore have independent acceptance receipts. Commands run only in the copied owned Docker project."
     },
     {
@@ -1051,7 +1051,7 @@
         "garbage collection"
       ],
       "outcome": "Connect tombstones and compaction to resurrection risk",
-      "lab": "Compare the two complete worked cases and reproduce the stated observations.",
+      "lab": "Read worked case A (\"observe a real TTL countdown and disappearance\") and worked case B (\"deletion is distinct from compaction and repair\"), run their labeled commands only in the owned workshop, and compare the observations with the chapter.",
       "verification": "Actual native ARM64 Cassandra 5.0.9 CQL and retained-state observations; RF3 outage and table-level SSTable restore have independent acceptance receipts. Commands run only in the copied owned Docker project."
     },
     {
@@ -1070,7 +1070,7 @@
         "selectivity"
       ],
       "outcome": "Distinguish LWT, batch atomicity and ordinary last-write-wins semantics",
-      "lab": "Compare the two complete worked cases and reproduce the stated observations.",
+      "lab": "Read worked case A (\"accept one conditional update and reject stale state\") and worked case B (\"query an actual Storage Attached Index\"), run their labeled commands only in the owned workshop, and compare the observations with the chapter.",
       "verification": "Actual native ARM64 Cassandra 5.0.9 CQL and retained-state observations; RF3 outage and table-level SSTable restore have independent acceptance receipts. Commands run only in the copied owned Docker project."
     },
     {
@@ -1090,7 +1090,7 @@
         "recovery"
       ],
       "outcome": "Explain repair scope, consistency and restore boundaries",
-      "lab": "Compare the two complete worked cases and reproduce the stated observations.",
+      "lab": "Read worked case A (\"snapshot a known table and independently restore it\") and worked case B (\"replace a node container over retained state\"), run their labeled commands only in the owned workshop, and compare the observations with the chapter.",
       "verification": "Actual native ARM64 Cassandra 5.0.9 CQL and retained-state observations; RF3 outage and table-level SSTable restore have independent acceptance receipts. Commands run only in the copied owned Docker project."
     },
     {
@@ -1111,7 +1111,7 @@
         "coordination"
       ],
       "outcome": "Explain controller, broker, server, segment and ZooKeeper roles",
-      "lab": "Compare the two complete worked cases and reproduce the stated observations.",
+      "lab": "Read worked case A (\"load one bounded offline segment\") and worked case B (\"a broker query crosses the serving topology\"), run their labeled commands only in the owned workshop, and compare the observations with the chapter.",
       "verification": "Prepared actual Pinot Docker workshop and explicitly scoped extensions. Qualification ledger distinguishes source, native service acceptance, indexes, streaming, hybrid/upsert and multistage observations."
     },
     {
@@ -1127,7 +1127,7 @@
         "Kafka ingestion and real-time segments"
       ],
       "outcome": "Trace consuming segments into committed segments",
-      "lab": "Compare the two complete worked cases and reproduce the stated observations.",
+      "lab": "Work through worked case A (\"reconcile a known Kafka event set\") and worked case B (\"a malformed event changes reconciliation\"), which are design exercises with written answers, and compare your reasoning with those answers.",
       "verification": "Prepared actual Pinot Docker workshop and explicitly scoped extensions. Qualification ledger distinguishes source, native service acceptance, indexes, streaming, hybrid/upsert and multistage observations."
     },
     {
@@ -1144,7 +1144,7 @@
         "Indexes and query plans"
       ],
       "outcome": "Explain index selection and memory/storage tradeoffs",
-      "lab": "Compare the two complete worked cases and reproduce the stated observations.",
+      "lab": "Read worked case A (\"equality filtering with and without an index\") and worked case B (\"a range predicate composes with equality\"), run their labeled commands only in the owned workshop, and compare the observations with the chapter.",
       "verification": "Prepared actual Pinot Docker workshop and explicitly scoped extensions. Qualification ledger distinguishes source, native service acceptance, indexes, streaming, hybrid/upsert and multistage observations."
     },
     {
@@ -1161,7 +1161,7 @@
         "Time boundaries, hybrid tables and upserts"
       ],
       "outcome": "Prevent overlap double-counting and define late-update semantics",
-      "lab": "Compare the two complete worked cases and reproduce the stated observations.",
+      "lab": "Work through worked case A (\"divide an overlapping historical interval\") and worked case B (\"a later version changes current state\"), which are design exercises with written answers, and compare your reasoning with those answers.",
       "verification": "Prepared actual Pinot Docker workshop and explicitly scoped extensions. Qualification ledger distinguishes source, native service acceptance, indexes, streaming, hybrid/upsert and multistage observations."
     },
     {
@@ -1178,7 +1178,7 @@
         "Multistage queries and capacity"
       ],
       "outcome": "Separate analytical serving latency from batch throughput",
-      "lab": "Compare the two complete worked cases and reproduce the stated observations.",
+      "lab": "Read worked case B (\"a bounded request can fail explicitly\") and run its labeled commands only in the owned workshop; worked case A (\"enrich a bounded fact table\") is a design exercise with a written answer to compare against your reasoning.",
       "verification": "Prepared actual Pinot Docker workshop and explicitly scoped extensions. Qualification ledger distinguishes source, native service acceptance, indexes, streaming, hybrid/upsert and multistage observations."
     },
     {
@@ -1195,7 +1195,7 @@
         "Operations, recovery and data verification"
       ],
       "outcome": "Diagnose segment, schema and consumption failures without deleting state",
-      "lab": "Compare the two complete worked cases and reproduce the stated observations.",
+      "lab": "Read worked case A (\"exact stop and resume\") and worked case B (\"replace containers over retained volumes\"), run their labeled commands only in the owned workshop, and compare the observations with the chapter.",
       "verification": "Prepared actual Pinot Docker workshop and explicitly scoped extensions. Qualification ledger distinguishes source, native service acceptance, indexes, streaming, hybrid/upsert and multistage observations."
     },
     {
@@ -1215,7 +1215,7 @@
         "warehouse"
       ],
       "outcome": "Separate HiveServer2, Metastore and storage responsibilities",
-      "lab": "Compare the two complete worked cases and reproduce the stated observations.",
+      "lab": "Read worked case A (\"register an external table\") and worked case B (\"inspect metadata without querying data\"), run their labeled commands only in the owned workshop, and compare the observations with the chapter.",
       "verification": "Prepared actual Hive4.2.1/JDK21/PostgreSQL project; live SQL, independent Java Thrift, lifecycle, Iceberg and restore observations remain distinct acceptance gates."
     },
     {
@@ -1233,7 +1233,7 @@
         "physical schema"
       ],
       "outcome": "Explain SerDe, physical files and partition discovery",
-      "lab": "Compare the two complete worked cases and reproduce the stated observations.",
+      "lab": "Read worked case A (\"register one day and project columns\") and worked case B (\"a wrong declaration changes the result contract\"), run their labeled commands only in the owned workshop, and compare the observations with the chapter.",
       "verification": "Prepared actual Hive4.2.1/JDK21/PostgreSQL project; live SQL, independent Java Thrift, lifecycle, Iceberg and restore observations remain distinct acceptance gates."
     },
     {
@@ -1252,7 +1252,7 @@
         "metadata persistence"
       ],
       "outcome": "Trace Thrift metadata calls without confusing them with data reads",
-      "lab": "Compare the two complete worked cases and reproduce the stated observations.",
+      "lab": "Read worked case A (\"persist metadata in PostgreSQL\") and worked case B (\"query from a fresh metadata client after restart\"), run their labeled commands only in the owned workshop, and compare the observations with the chapter.",
       "verification": "Prepared actual Hive4.2.1/JDK21/PostgreSQL project; live SQL, independent Java Thrift, lifecycle, Iceberg and restore observations remain distinct acceptance gates."
     },
     {
@@ -1271,7 +1271,7 @@
         "join cardinality"
       ],
       "outcome": "Teach cost, statistics and execution-engine boundaries",
-      "lab": "Compare the two complete worked cases and reproduce the stated observations.",
+      "lab": "Read worked case A (\"explain a selective aggregate\") and run its labeled commands only in the owned workshop; worked case B (\"challenge a map-side join assumption\") is a design exercise with a written answer to compare against your reasoning.",
       "verification": "Prepared actual Hive4.2.1/JDK21/PostgreSQL project; live SQL, independent Java Thrift, lifecycle, Iceberg and restore observations remain distinct acceptance gates."
     },
     {
@@ -1290,7 +1290,7 @@
         "reader compatibility"
       ],
       "outcome": "Treat formats and commit protocols as explicit contracts",
-      "lab": "Compare the two complete worked cases and reproduce the stated observations.",
+      "lab": "Read worked case A (\"compare two commit narratives\") and worked case B (\"read a compatible Iceberg table\"), run their labeled commands only in the owned workshop, and compare the observations with the chapter.",
       "verification": "Prepared actual Hive4.2.1/JDK21/PostgreSQL project; live SQL, independent Java Thrift, lifecycle, Iceberg and restore observations remain distinct acceptance gates."
     },
     {
@@ -1310,7 +1310,7 @@
         "version verification"
       ],
       "outcome": "Plan metadata upgrades without assuming a rollback of binaries rolls back schema",
-      "lab": "Compare the two complete worked cases and reproduce the stated observations.",
+      "lab": "Read worked case A (\"verify before startup\") and worked case B (\"reject incompatibility and restore an owned copy\"), run their labeled commands only in the owned workshop, and compare the observations with the chapter.",
       "verification": "Prepared actual Hive4.2.1/JDK21/PostgreSQL project; live SQL, independent Java Thrift, lifecycle, Iceberg and restore observations remain distinct acceptance gates."
     },
     {
@@ -1330,7 +1330,7 @@
         "entity identity"
       ],
       "outcome": "Distinguish a type, entity, relationship and classification",
-      "lab": "Compare the two complete worked cases and reproduce the stated observations.",
+      "lab": "Read worked case A (\"define dataset and process contracts\") and worked case B (\"update one asset while retaining its identity\"), run their labeled commands only in the owned workshop, and compare the observations with the chapter.",
       "verification": "Complete real Atlas REST payload/client route with default local server omitted. Native compatible server preparation and actual API/graph/index/lifecycle acceptance are explicit separate work, never simulated execution."
     },
     {
@@ -1348,7 +1348,7 @@
         "instrumentation scope"
       ],
       "outcome": "Explain that recorded lineage is evidence only for instrumented operations",
-      "lab": "Compare the two complete worked cases and reproduce the stated observations.",
+      "lab": "Read worked case A (\"record an input-process-output path\") and worked case B (\"an intentionally missing relationship\"), run their labeled commands only in the owned workshop, and compare the observations with the chapter.",
       "verification": "Complete real Atlas REST payload/client route with default local server omitted. Native compatible server preparation and actual API/graph/index/lifecycle acceptance are explicit separate work, never simulated execution."
     },
     {
@@ -1368,7 +1368,7 @@
         "enforcement"
       ],
       "outcome": "Separate metadata labels from enforcement in a data engine",
-      "lab": "Compare the two complete worked cases and reproduce the stated observations.",
+      "lab": "Read worked case A (\"attach and discover a review label\") and worked case B (\"remove a label without deleting the asset\"), run their labeled commands only in the owned workshop, and compare the observations with the chapter.",
       "verification": "Complete real Atlas REST payload/client route with default local server omitted. Native compatible server preparation and actual API/graph/index/lifecycle acceptance are explicit separate work, never simulated execution."
     },
     {
@@ -1388,7 +1388,7 @@
         "provenance"
       ],
       "outcome": "Define provenance and delivery boundaries of metadata ingestion",
-      "lab": "Compare the two complete worked cases and reproduce the stated observations.",
+      "lab": "Read worked case A (\"explicit API ingestion with provenance\") and worked case B (\"retry the same logical asset\"), run their labeled commands only in the owned workshop, and compare the observations with the chapter.",
       "verification": "Complete real Atlas REST payload/client route with default local server omitted. Native compatible server preparation and actual API/graph/index/lifecycle acceptance are explicit separate work, never simulated execution."
     },
     {
@@ -1408,7 +1408,7 @@
         "governance"
       ],
       "outcome": "Keep policy intention distinct from actual enforcement",
-      "lab": "Compare the two complete worked cases and reproduce the stated observations.",
+      "lab": "Read worked case A (\"permitted and rejected API requests\") and worked case B (\"classification review versus actual data access\"), run their labeled commands only in the owned workshop, and compare the observations with the chapter.",
       "verification": "Complete real Atlas REST payload/client route with default local server omitted. Native compatible server preparation and actual API/graph/index/lifecycle acceptance are explicit separate work, never simulated execution."
     },
     {
@@ -1428,7 +1428,7 @@
         "recovery"
       ],
       "outcome": "Understand graph storage, search indexes and backup consistency",
-      "lab": "Compare the two complete worked cases and reproduce the stated observations.",
+      "lab": "Read worked case A (\"retain entities and lineage through restart\") and worked case B (\"distinguish index lag from missing graph data\"), run their labeled commands only in the owned workshop, and compare the observations with the chapter.",
       "verification": "Complete real Atlas REST payload/client route with default local server omitted. Native compatible server preparation and actual API/graph/index/lifecycle acceptance are explicit separate work, never simulated execution."
     },
     {
@@ -1449,7 +1449,7 @@
         "discovery"
       ],
       "outcome": "Distinguish Delta Sharing from an Apache project and from Delta table storage",
-      "lab": "Compare the two complete worked cases and reproduce the stated observations.",
+      "lab": "Read worked case A (\"discover one explicitly owned table\") and worked case B (\"reject an invalid recipient\"), run their labeled commands only in the owned workshop, and compare the observations with the chapter.",
       "verification": "Actual portable basic-Parquet protocol client plus separately prepared native Scala reference-server/table-store route. No local server, advanced Delta/CDF or unsupported ARM feature acceptance is inferred."
     },
     {
@@ -1467,7 +1467,7 @@
         "Parquet data plane"
       ],
       "outcome": "Trace control-plane authorization and data-plane retrieval",
-      "lab": "Compare the two complete worked cases and reproduce the stated observations.",
+      "lab": "Read worked case A (\"read the exact bounded table\") and worked case B (\"metadata succeeds while a file is unavailable\"), run their labeled commands only in the owned workshop, and compare the observations with the chapter.",
       "verification": "Actual portable basic-Parquet protocol client plus separately prepared native Scala reference-server/table-store route. No local server, advanced Delta/CDF or unsupported ARM feature acceptance is inferred."
     },
     {
@@ -1486,7 +1486,7 @@
         "correctness"
       ],
       "outcome": "Keep predicate pushdown and access control conceptually separate",
-      "lab": "Compare the two complete worked cases and reproduce the stated observations.",
+      "lab": "Read worked case A (\"compare a pinned and current read\") and worked case B (\"compare a hint with client-side truth\"), run their labeled commands only in the owned workshop, and compare the observations with the chapter.",
       "verification": "Actual portable basic-Parquet protocol client plus separately prepared native Scala reference-server/table-store route. No local server, advanced Delta/CDF or unsupported ARM feature acceptance is inferred."
     },
     {
@@ -1505,7 +1505,7 @@
         "revocation"
       ],
       "outcome": "Avoid embedding recipient credentials in notebooks or published source",
-      "lab": "Compare the two complete worked cases and reproduce the stated observations.",
+      "lab": "Read worked case A (\"use a fixture-only short-lived profile\") and worked case B (\"invalidate new access and inspect its limits\"), run their labeled commands only in the owned workshop, and compare the observations with the chapter.",
       "verification": "Actual portable basic-Parquet protocol client plus separately prepared native Scala reference-server/table-store route. No local server, advanced Delta/CDF or unsupported ARM feature acceptance is inferred."
     },
     {
@@ -1525,7 +1525,7 @@
         "native client"
       ],
       "outcome": "Negotiate capabilities rather than assuming every client reads every Delta feature",
-      "lab": "Compare the two complete worked cases and reproduce the stated observations.",
+      "lab": "Read worked case A (\"inspect a supported history or change range\") and worked case B (\"reject an unsupported protocol before data reads\"), run their labeled commands only in the owned workshop, and compare the observations with the chapter.",
       "verification": "Actual portable basic-Parquet protocol client plus separately prepared native Scala reference-server/table-store route. No local server, advanced Delta/CDF or unsupported ARM feature acceptance is inferred."
     },
     {
@@ -1545,7 +1545,7 @@
         "recovery"
       ],
       "outcome": "Distinguish persisted data, share configuration and client retry behavior",
-      "lab": "Compare the two complete worked cases and reproduce the stated observations.",
+      "lab": "Read worked case A (\"retain a shared version through replacement\") and worked case B (\"distinguish missing file from unavailable server\"), run their labeled commands only in the owned workshop, and compare the observations with the chapter.",
       "verification": "Actual portable basic-Parquet protocol client plus separately prepared native Scala reference-server/table-store route. No local server, advanced Delta/CDF or unsupported ARM feature acceptance is inferred."
     },
     {
@@ -1564,7 +1564,7 @@
         "Arrow materialization"
       ],
       "outcome": "Produce an evidence bundle with schema, snapshot and result identity",
-      "lab": "Compare the two complete worked cases and reproduce the stated observations.",
+      "lab": "Read worked case A (\"publish one finite event batch\") and worked case B (\"a correction creates a new observation boundary\"), run their labeled commands only in the owned workshop, and compare the observations with the chapter.",
       "verification": "A selected actual supported path with independent source/result/failure/lifecycle evidence; combined topologies and prepared native-server alternatives require separate acceptance and are not inferred from component tests."
     },
     {
@@ -1584,7 +1584,7 @@
         "sink participation"
       ],
       "outcome": "Document the guarantee at each source/state/sink boundary",
-      "lab": "Compare the two complete worked cases and reproduce the stated observations.",
+      "lab": "Read worked case A (\"move one bounded event contract\") and worked case B (\"duplicate delivery and a late correction\"), run their labeled commands only in the owned workshop, and compare the observations with the chapter.",
       "verification": "A selected actual supported path with independent source/result/failure/lifecycle evidence; combined topologies and prepared native-server alternatives require separate acceptance and are not inferred from component tests."
     },
     {
@@ -1605,7 +1605,7 @@
         "publication"
       ],
       "outcome": "Separate orchestration intervals from event-time semantics",
-      "lab": "Compare the two complete worked cases and reproduce the stated observations.",
+      "lab": "Read worked case A (\"correct one historical partition\") and worked case B (\"keep the live path independently owned\"), run their labeled commands only in the owned workshop, and compare the observations with the chapter.",
       "verification": "A selected actual supported path with independent source/result/failure/lifecycle evidence; combined topologies and prepared native-server alternatives require separate acceptance and are not inferred from component tests."
     },
     {
@@ -1624,7 +1624,7 @@
         "enforcement"
       ],
       "outcome": "Show where governance information ends and enforcement begins",
-      "lab": "Compare the two complete worked cases and reproduce the stated observations.",
+      "lab": "Read worked case A (\"register a selected table state and process\") and worked case B (\"compare a label with actual denied access\"), run their labeled commands only in the owned workshop, and compare the observations with the chapter.",
       "verification": "A selected actual supported path with independent source/result/failure/lifecycle evidence; combined topologies and prepared native-server alternatives require separate acceptance and are not inferred from component tests."
     },
     {
@@ -1644,7 +1644,7 @@
         "revocation scope"
       ],
       "outcome": "Specify a consumer contract with provenance and revocation limits",
-      "lab": "Compare the two complete worked cases and reproduce the stated observations.",
+      "lab": "Read worked case A (\"publish the bounded version 0 product\") and worked case B (\"validate recipient denial and its limits\"), run their labeled commands only in the owned workshop, and compare the observations with the chapter.",
       "verification": "A selected actual supported path with independent source/result/failure/lifecycle evidence; combined topologies and prepared native-server alternatives require separate acceptance and are not inferred from component tests."
     },
     {
@@ -1664,7 +1664,7 @@
         "unknown outcome"
       ],
       "outcome": "Write a recovery report distinguishing loss, duplication and unavailability",
-      "lab": "Compare the two complete worked cases and reproduce the stated observations.",
+      "lab": "Read worked case A (\"compare exact resume and replacement\") and worked case B (\"break one owned configuration\"), run their labeled commands only in the owned workshop, and compare the observations with the chapter.",
       "verification": "A selected actual supported path with independent source/result/failure/lifecycle evidence; combined topologies and prepared native-server alternatives require separate acceptance and are not inferred from component tests."
     },
     {
@@ -1684,7 +1684,7 @@
         "architectural tradeoff"
       ],
       "outcome": "Extrapolate carefully and separate measured results from capacity forecasts",
-      "lab": "Compare the two complete worked cases and reproduce the stated observations.",
+      "lab": "Read worked case A (\"measure one actual bounded path\") and worked case B (\"compare architecture tradeoffs with changed requirements\"), run their labeled commands only in the owned workshop, and compare the observations with the chapter.",
       "verification": "A selected actual supported path with independent source/result/failure/lifecycle evidence; combined topologies and prepared native-server alternatives require separate acceptance and are not inferred from component tests."
     },
     {
@@ -1709,7 +1709,7 @@
         "owned lifecycle"
       ],
       "outcome": "Deliver a reproducible design, implementation, runbook and evidence dossier",
-      "lab": "Compare the two complete worked cases and reproduce the stated observations.",
+      "lab": "Read worked case A (\"deliver one source-bound implementation\") and worked case B (\"independently verify failure and recovery\"), run their labeled commands only in the owned workshop, and compare the observations with the chapter.",
       "verification": "A selected actual supported path with independent source/result/failure/lifecycle evidence; combined topologies and prepared native-server alternatives require separate acceptance and are not inferred from component tests."
     }
   ]

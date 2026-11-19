@@ -23,6 +23,19 @@ struct LessonMain {
       precondition(describe(nil) == "missing")
       precondition(describe("") == "missing" && describe("x") == "value:x")
     }
+
+    do {
+      // Task 3: Independent construction
+      func sign(_ quantity: Int) -> String {
+        switch quantity {
+        case ..<0: return "negative"
+        case 0: return "zero"
+        default: return "positive"
+        }
+      }
+      precondition(sign(-2) == "negative" && sign(0) == "zero")
+      precondition(sign(7) == "positive")
+    }
     print("swift-006: passed")
   }
 }

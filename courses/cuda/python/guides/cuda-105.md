@@ -92,13 +92,20 @@ Real CUDA work needs supported NVIDIA hardware, a compatible host driver and an 
 
 Do not download packages, models or data by opening this lesson. Do not attach an engine socket, ambient cluster credentials or an arbitrary remote endpoint. A CPU pass, imported package, successful compilation, real GPU result and measured performance are distinct observations. Record the actual backend, data shape/dtype, source revision, versions and pending checks. A saved completion marker records learning progress, not hardware certification.
 
-## Ask an AI tutor about this lesson
-
-> I am studying `cuda-105` using `courses/cuda/python/guides/cuda-105.md` and `courses/cuda/python/lessons/cuda-105.md`. Help me reason about Distributed training beyond one host. Start with my current attempt and the two worked examples. Ask which backend actually ran, give one progressive hint, and do not reveal the separate solution or mark progress unless I request it.
-
 ## Primary references
 
 - [PyTorch CUDA semantics](https://docs.pytorch.org/docs/2.9/notes/cuda.html)
 - [TensorFlow GPU guide](https://www.tensorflow.org/guide/gpu)
 
 Use the version-matched documentation of your prepared environment. These references describe interfaces and supported boundaries; the chapter's synthetic examples and CPU models are original teaching material.
+
+## Ask an AI tutor about this lesson
+
+```text
+Use the checked-in $guide-ds60sqlpy-learning skill for cuda-105: Distributed training beyond one host.
+Read courses/cuda/python/guides/cuda-105.md and courses/cuda/python/lessons/cuda-105.md.
+Start with my current attempt and the two worked examples, and ask which backend actually ran.
+Give one progressive hint at a time. Keep the separate solution closed and do not mark
+progress unless I request it. Treat synthetic timings and CPU models as model evidence,
+not as GPU or cluster measurements.
+```

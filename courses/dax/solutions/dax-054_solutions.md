@@ -17,7 +17,7 @@ Clean retail model; UnitCost is constant per product and unique on ProductKey.
 The data model supplies the rate constancy that permits this grouping. The formula alone does not prove that assumption in another dataset.
 
 - Notebook has 7 units at 2, Pen 5 units at 1 and Mug 5 units at 5.
-- Grouped costs are 14,5 and 25, totaling 44.
+- Grouped costs are 14, 5 and 25, totaling 44.
 - The eight line-level costs independently sum to the same 44.
 
 ### Case B: Parity under a region and year selection
@@ -30,9 +30,9 @@ North and order year 2025 remain active while the grouped expression iterates pr
 
 This filtered case checks that a rewrite does not accidentally remove region or period constraints. Add missing-key and changing-rate cases before generalizing.
 
-- S4,S5,S8 are the eligible lines.
-- Their costs are 6,4 and 10.
-- The grouped quantities 3,4,2 at rates 2,1,5 also yield 20.
+- S4, S5, S8 are the eligible lines.
+- Their costs are 6, 4 and 10.
+- The grouped quantities 3, 4, 2 at rates 2, 1, 5 also yield 20.
 
 ## Explained practice answers
 

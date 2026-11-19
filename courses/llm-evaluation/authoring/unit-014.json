@@ -9,6 +9,7 @@
     "untrusted data"
   ],
   "outcome": "Build bounded adversarial and invariance tests while enforcing authorization independently of generated text or average answer quality.",
+  "verification": "Formatting changes keep the authorized result public-guide, removing authorization returns no document, extra authority fields fail the exact schema, an unsafe intermediate action is recorded as a policy failure, and unknown cases stay unknown and go to review.",
   "level": "advanced",
   "runtime": "python-core",
   "minutes": 120,

@@ -8,9 +8,11 @@ A pointer identifies an object or function, or holds a null value. Dereferencing
 
 &object obtains an address and *pointer accesses its target. int *p declares a pointer to int. Parentheses matter: *p += 1 changes the target, while p += 1 changes the pointer position. NULL is a null pointer constant. A function can return a pointer to caller-owned or static storage if its lifetime is documented, but must not return a pointer to an expired automatic local.
 
-## Exercise 1: Change a caller-owned value
+## Exercise 1: Change a caller-owned value: change one input
 
-Increment integer 4 through its address.
+Copy worked example 1 into a scratch pad and change `int n = 4;` to `int n = 5;`. Before running, predict which CHECK fails and which value it now sees; then run it and restore the original line.
+
+The unchanged code is worked example 1:
 
 ```c
 int n = 4;
@@ -18,13 +20,15 @@ increment(&n);
 CHECK(n == 5);
 ```
 
-**Expected:** The caller value becomes 5.
+**Expected:** The changed run stops with `Check failed` at the CHECK on `n == 5`. Restoring the original line brings back the worked observation: the caller value becomes 5.
 
 The helper receives a pointer copy, but that copy still designates the original integer.
 
-## Exercise 2: Read a target copy
+## Exercise 2: Read a target copy: debug a regression
 
-Copy the integer behind a pointer, then change the target.
+A regression changed `int n = 3;` to `int n = 4;` in worked example 2. Run worked example 2 with that change, use the failing CHECK to explain the defect and repair it without changing the CHECK.
+
+The unchanged code is worked example 2:
 
 ```c
 int n = 3;
@@ -34,7 +38,7 @@ int copy = *p;
 CHECK(copy == 3 && n == 9);
 ```
 
-**Expected:** The copied value stays 3 and the target becomes 9.
+**Expected:** Before the repair the run stops with `Check failed` at the CHECK on `copy == 3 && n == 9`; after it the line reads `int n = 3;` again and the copied value stays 3 and the target becomes 9.
 
 Dereferencing to obtain an int copies that scalar value. Retaining the pointer would retain access to future target changes.
 

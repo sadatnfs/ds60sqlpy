@@ -9,7 +9,15 @@ The executable reference contains the two complete worked cases with assertions.
 
 The native expression keeps semantics visible to the engine. Removing Python callbacks is useful when the native operation actually expresses the same logic.
 
-**Expected:** The values remain [1,4,9].
+```python
+import polars as pl
+
+frame = pl.DataFrame({"x": [1, 2, 3]})
+native = frame.select(pl.col("x").pow(2).alias("square"))
+assert native["square"].to_list() == [1, 4, 9]
+```
+
+**Expected:** The values remain [1, 4, 9].
 
 ## 2. State a return type
 
@@ -86,4 +94,4 @@ if __name__ == "__main__":
 
 ## Interpretation
 
-Use a Python UDF only with an explicit value, type and batching contract. Demonstrate equivalence to a trusted result on contrasting fixtures and identify which optimization claims are justified. Preserve a native implementation whenever it is clearer and semantically equivalent.
+Demonstrate equivalence to a trusted result on contrasting fixtures and identify which optimization claims are justified. Preserve a native implementation whenever it is clearer and semantically equivalent.

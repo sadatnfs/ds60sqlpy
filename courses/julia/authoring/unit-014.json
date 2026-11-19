@@ -14,7 +14,7 @@
   "exercises": [
     {
       "title": "Retain the denominator",
-      "task": "Summarize 1,missing,3 using observed values.",
+      "task": "Summarize `[1, missing, 3]` using observed values.",
       "expected": "Total 3, observed 2 and mean 2.",
       "hint": "Keep counts alongside the statistic.",
       "answer": "The result describes the observed measurements, not an assumed completed dataset."
@@ -42,8 +42,8 @@
     },
     {
       "title": "Distinguish absence",
-      "task": "Compare something(nothing,7) with coalesce(nothing,7).",
-      "expected": "The former returns 7; the latter retains nothing.",
+      "task": "Compare `something(nothing, 7)` with `coalesce(nothing, 7)`.",
+      "expected": "The former returns 7; the latter retains `nothing`.",
       "hint": "The helpers target different sentinel meanings.",
       "answer": "An absent return and a missing measurement should not be conflated accidentally."
     },

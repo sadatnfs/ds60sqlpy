@@ -145,7 +145,7 @@ def verify():
     np.testing.assert_allclose(residual, [1, 0, 0], atol=1e-12, rtol=0)
     np.testing.assert_allclose(accepted_mass + rejection * residual, p, atol=1e-12, rtol=0)
 
-    # Exercise 2: Exercise acceptance andcorrection paths
+    # Exercise 2: Exercise acceptance and correction paths
     rejected = one_step(p, q, 1, 0.8, 0.9)
     accepted = one_step(p, q, 2, 0.5, 0.1)
     assert rejected == {"token": 0, "accepted": False} and accepted == {
@@ -153,7 +153,7 @@ def verify():
         "accepted": True,
     }
 
-    # Exercise 3: Check an all-accepted round andbonus token
+    # Exercise 3: Check an all-accepted round and bonus token
     same = lambda prefix: p
     all_accepted = speculative_round([], same, same, [0.1, 0.6], [0.9, 0.9], 0.7, budget=3)
     assert (
@@ -187,7 +187,7 @@ def verify():
     broken.append(0)
     assert broken.tokens != fresh.tokens and not np.allclose(broken.output(), fresh.output())
 
-    # Exercise 6: Handle equality,EOS,budgets andinvalid support
+    # Exercise 6: Handle equality, EOS, budgets and invalid support
     alpha, none, mass = correction(p, p)
     assert mass == 0 and none is None and np.all(alpha == 1)
     eos = speculative_round([], same, same, [0.95, 0.1], [0.2, 0.2], 0.1, budget=3, eos=2)

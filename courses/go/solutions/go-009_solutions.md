@@ -8,9 +8,11 @@ A pointer contains the address of a value. Passing a pointer still copies the po
 
 &value obtains an address and *pointer dereferences it. In a type, *Point means a pointer to Point. new(T) returns a pointer to a zero T; it does not initialize maps or channels stored inside T. Selectors automatically follow a pointer to a struct, so p.X is convenient syntax for field access through p. A nil check guards dereference only when no unsynchronized writer can change the state between those operations.
 
-## 1. Mutate through a pointer
+## 1. Mutate through a pointer: change one input
 
-Create an integer 4 and increment it through a helper receiving its address.
+Copy worked example 1 into a scratch pad and change `n := 4` to `n := 5`. Before running, predict which check fails and which value it now sees; then run it and restore the original line.
+
+The unchanged code is worked example 1:
 
 ```go
 n := 4
@@ -18,20 +20,22 @@ increment(&n)
 check(n == 5, "pointer mutation")
 ```
 
-**Expected:** The caller value becomes 5.
+**Expected:** The changed run panics with `pointer mutation` because `n == 5` no longer holds. Restoring the original line brings back the worked observation: the caller value becomes 5.
 
 The helper changes the shared target, not the caller variable that stores the pointer. The mutation contract must be visible at the call site.
 
-## 2. Return a live value
+## 2. Return a live value: diagnose an edited check
 
-Return a pointer to a local integer initialized to 7.
+A careless edit changed the check in worked example 2 so that it reads `check(*p != 7, "returned pointer")`. Run worked example 2 with that line, explain why the edited check now fails for the same program state, and restore it.
+
+The unchanged code is worked example 2:
 
 ```go
 p := seven()
 check(*p == 7, "returned pointer")
 ```
 
-**Expected:** The returned pointer remains valid and reads 7.
+**Expected:** Before the repair the program panics with `returned pointer`; after it the line reads `check(*p == 7, "returned pointer")` again and the returned pointer remains valid and reads 7.
 
 Go extends storage lifetime as needed. Stack-versus-heap placement is an implementation decision and should not be guessed from the lexical block alone.
 

@@ -104,7 +104,8 @@ public class Main {
 
     // Exercise 3: Compile two real modules
     try (ModuleFixture fixture = new ModuleFixture()) {
-      assert fixture.compile() == 0;
+      int compiled = fixture.compile();
+      assert compiled == 0;
       assert java.nio.file.Files.isRegularFile(
         fixture.output.resolve("course.greeting/module-info.class")
       );
@@ -115,7 +116,8 @@ public class Main {
 
     // Exercise 4: Inspect declared dependencies and exports
     try (ModuleFixture fixture = new ModuleFixture()) {
-      assert fixture.compile() == 0;
+      int compiled = fixture.compile();
+      assert compiled == 0;
       var finder = java.lang.module.ModuleFinder.of(fixture.output);
       var app = finder.find("course.app").orElseThrow().descriptor();
       var library = finder.find("course.greeting").orElseThrow().descriptor();
@@ -131,8 +133,10 @@ public class Main {
 
     // Exercise 5: Run the modular application
     try (ModuleFixture fixture = new ModuleFixture()) {
-      assert fixture.compile() == 0;
-      assert fixture.run().strip().equals("Hello, modules!");
+      int compiled = fixture.compile();
+      assert compiled == 0;
+      String output = fixture.run();
+      assert output.strip().equals("Hello, modules!");
     }
 
     // Exercise 6: Reject a missing module dependency
@@ -141,7 +145,8 @@ public class Main {
         fixture.source.resolve("course.app/module-info.java"),
         "module course.app { requires course.missing; }"
       );
-      assert fixture.compile() != 0 && !fixture.diagnostics.isBlank();
+      int compiled = fixture.compile();
+      assert compiled != 0 && !fixture.diagnostics.isBlank();
     }
   }
 }

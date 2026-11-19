@@ -9,6 +9,17 @@ The executable reference contains the two complete worked cases with assertions.
 
 Include followup in the on list. The expected count assumes every selected column is retained, including any explicit null values.
 
+```python
+import polars as pl
+
+wide = pl.DataFrame({"id": [1, 2], "before": [10, 20], "after": [12, 18], "followup": [11, 19]})
+long = wide.unpivot(
+    index="id", on=["before", "after", "followup"], variable_name="period", value_name="value"
+)
+assert long.height == 6
+assert long.group_by("id").len().sort("id")["len"].to_list() == [3, 3]
+```
+
 **Expected:** There are six long rows for two identifiers.
 
 ## 2. Check cell identity
@@ -20,6 +31,16 @@ Validate the compound key. This catches multiple records that would otherwise be
 ## 3. Compare sum and mean
 
 Choose sum for additive contributions and mean for repeated comparable measurements only when their weighting is justified. Do not infer the policy from the API.
+
+```python
+import polars as pl
+
+duplicate = pl.DataFrame({"id": [1, 1], "period": ["after", "after"], "value": [4, 6]})
+total = duplicate.pivot(on="period", index="id", values="value", aggregate_function="sum")
+average = duplicate.pivot(on="period", index="id", values="value", aggregate_function="mean")
+assert total["after"].item() == 10
+assert average["after"].item() == 5.0
+```
 
 **Expected:** Sum is 10 and mean is 5.
 
@@ -92,4 +113,4 @@ if __name__ == "__main__":
 
 ## Interpretation
 
-Reshape a repeated-measurement dataset with a checked compound key. Demonstrate a round trip and one deliberate duplicate counterexample, then explain the chosen aggregation policy. The same reasoning applies to model comparison tables, experiment metrics and data marts.
+Demonstrate a round trip and one deliberate duplicate counterexample, then explain the chosen aggregation policy. The same reasoning applies to model comparison tables, experiment metrics and data marts.

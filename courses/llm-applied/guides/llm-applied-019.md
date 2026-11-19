@@ -10,7 +10,7 @@ Preference learning optimizes a comparison supplied by its feedback data. This c
 
 ## Purpose and mental model
 
-Preference optimization uses labels describing which of two responses is preferred. A DPO-style objective compares the policy chosen-versus-rejected log-probability advantage with the same advantage under a fixed reference policy, then applies a logistic loss scaled by beta. Equal adjusted margins give loss \(\log(2)\). The objective can be differentiated directly from offline preference pairs without running an online reinforcement-learning environment.
+Preference optimization uses labels describing which of two responses is preferred. A DPO-style objective compares the policy chosen-versus-rejected log-probability advantage with the same advantage under a fixed reference policy, then applies a logistic loss scaled by beta. Equal adjusted margins give loss log 2. The objective can be differentiated directly from offline preference pairs without running an online reinforcement-learning environment.
 
 RLHF is a broader family of workflows in which human feedback informs a reward or preference signal and a policy optimization procedure. A reward model and an online policy update introduce additional state, exploration and reward-hacking risks. This chapter performs a real scalar PyTorch update on a DPO-style preference margin and contrasts its evidence with an RLHF workflow. It does not claim to train a reward model, execute online RL, or establish factuality. A preferred answer can still be unsupported or wrong if the preference labels reward style over truth.
 
@@ -127,7 +127,7 @@ loss = F.softplus(-beta * (difference - reference))
 np.testing.assert_allclose(loss.item(), np.log(2), atol=1e-12, rtol=0)
 ```
 
-**Expected:** loss \(\log(2)\).
+**Expected:** loss log 2.
 
 ### Example B: Inspect the preference gradient
 
@@ -156,13 +156,13 @@ assert after.item() < loss.item()
 
 ## Prediction before your attempt
 
-For the supplied fixture, name the input unit, the intermediate state and the final quantity that changes. Predict one normal result and one failure result before touching the code. In particular, explain this lesson's acceptance condition in your own words: loss \(\log(2)\). offline update True; reward_model_trained False; online_rl False. Preserve the prediction beside your later observations so a correction is visible. A copied expected value is not a derivation.
+For the supplied fixture, name the input unit, the intermediate state and the final quantity that changes. Predict one normal result and one failure result before touching the code. In particular, explain this lesson's acceptance condition in your own words: loss log 2. offline update True; reward_model_trained False; online_rl False. Preserve the prediction beside your later observations so a correction is visible. A copied expected value is not a derivation.
 
 ## Exercises
 
 1. **Calculate the equal-margin loss.** Set policy difference 0, reference difference 0, beta.5.
-   **Expected:** loss \(\log(2)\).
-   **Verify:** Save the assertion results for exercise 1, including loss \(\log(2)\).
+   **Expected:** loss log 2.
+   **Verify:** Save the assertion results for exercise 1, including loss log 2.
 
 2. **Inspect the preference gradient.** Backpropagate the equal-margin loss.
    **Expected:** gradient-.25.

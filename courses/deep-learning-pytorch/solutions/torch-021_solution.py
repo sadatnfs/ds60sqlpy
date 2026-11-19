@@ -7,7 +7,7 @@ from torch.nn import functional as F
 
 
 def verify():
-    # Exercise 1: Lookup and mark padding
+    # Worked example A: Lookup and mark padding
     table = torch.tensor([[0.0, 0.0], [1.0, 0.0], [2.0, 2.0], [3.0, -1.0]])
     embedding = nn.Embedding.from_pretrained(table, freeze=False, padding_idx=0)
     ids = torch.tensor([[2, 3, 0]])
@@ -15,12 +15,12 @@ def verify():
     mask = ids != 0
     assert tuple(values.shape) == (1, 3, 2) and mask.tolist() == [[True, True, False]]
 
-    # Exercise 2: Verify padding-row gradient behavior
+    # Worked example B: Verify padding-row gradient behavior
     values.sum().backward()
     assert torch.count_nonzero(embedding.weight.grad[0]).item() == 0
     assert torch.count_nonzero(embedding.weight.grad[2:4]).item() > 0
 
-    # Exercise 3: Compare packed and valid-prefix GRU state
+    # Worked example C: Compare packed and valid-prefix GRU state
     gru = nn.GRU(2, 2, batch_first=True)
     with torch.no_grad():
         for parameter in gru.parameters():
@@ -50,6 +50,34 @@ def verify():
         pass
     else:
         raise AssertionError("zero-length packed sequence accepted")
+
+    # Exercise 1: Look up a short sequence
+    lookup_table = torch.tensor([[0.0, 0.0], [1.0, 0.0], [2.0, 2.0], [3.0, -1.0]])
+    lookup = nn.Embedding.from_pretrained(lookup_table, freeze=False, padding_idx=0)
+    short_ids = torch.tensor([[1, 0, 0]])
+    short_values = lookup(short_ids)
+    assert short_values.tolist() == [[[1.0, 0.0], [0.0, 0.0], [0.0, 0.0]]] and (
+        short_ids != 0
+    ).tolist() == [[True, False, False]]
+
+    # Exercise 2: Count gradients for repeated IDs
+    lookup(torch.tensor([[2, 2, 3]])).sum().backward()
+    assert lookup.weight.grad.tolist() == [[0.0, 0.0], [0.0, 0.0], [2.0, 2.0], [1.0, 1.0]]
+
+    # Exercise 3: Pack a batch with two lengths
+    rnn = nn.GRU(2, 2, batch_first=True)
+    with torch.no_grad():
+        for weight in rnn.parameters():
+            weight.fill_(0.1)
+    batch = torch.tensor([[[1.0, 0.0], [2.0, 2.0]], [[3.0, -1.0], [0.0, 0.0]]])
+    packed_batch = nn.utils.rnn.pack_padded_sequence(
+        batch, torch.tensor([2, 1]), batch_first=True, enforce_sorted=False
+    )
+    _, states = rnn(packed_batch)
+    _, first = rnn(batch[:1, :2])
+    _, second = rnn(batch[1:, :1])
+    torch.testing.assert_close(states[:, 0], first[:, 0], atol=1e-6, rtol=0)
+    torch.testing.assert_close(states[:, 1], second[:, 0], atol=1e-6, rtol=0)
     return {"checks": 6, "status": "passed"}
 
 

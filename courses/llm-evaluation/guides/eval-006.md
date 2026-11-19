@@ -170,6 +170,16 @@ Request 17 paired differences.
 - [SciPy paired permutation tests](https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.permutation_test.html)
 - [SciPy bootstrap conventions](https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.bootstrap.html)
 
-## Study companion
+## Ask an AI tutor about this lesson
 
-Use the repository learning-companion skill with this lesson ID and your own source/output. Ask for clarification of the estimand, probability distribution, data split or gradient before a hint. Keep claims about the authored fixture separate from claims requiring real population or model evidence.
+```text
+Use the checked-in $guide-ds60sqlpy-learning skill for eval-006, Paired comparisons and clustered uncertainty.
+Read courses/llm-evaluation/guides/eval-006.md and courses/llm-evaluation/lessons/eval-006.py. Direct prerequisites: eval-004, eval-005, statistics-003.
+Ask me to state the estimand, probability distribution, data split or gradient
+before giving a hint. Review my attempt at the six investigations one at a time,
+give one hint, and ask for the printed evidence.
+Keep courses/llm-evaluation/solutions/ closed until I attempt or explicitly request comparison.
+Keep claims about the authored fixture separate from claims that need real
+population or model evidence. Done when I can reproduce both worked programs,
+pass the six investigations and explain one failure case.
+```

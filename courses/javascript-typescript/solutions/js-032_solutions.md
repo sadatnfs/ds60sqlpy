@@ -24,11 +24,13 @@ Cancellation also needs cooperation from asynchronous generators or other work o
 
 Readable.from adapts an iterable. Transform receives chunks through transform(chunk, encoding, callback). Writable owns each write until its callback signals completion. The promise-based pipeline resolves only after completion or rejects on failure. Install the drain listener before releasing a controlled write callback so the event cannot be missed. finished observes stream completion after end. Object mode deliberately changes the unit of highWaterMark.
 
-## Exercise 1: Run an actual transform pipeline
+## Exercise 1: Run an actual transform pipeline: change one input
 
-Task: Uppercase two byte chunks and collect the transformed output.
+Task: Copy Example A into a scratch `main.mjs` and change `await pipeline(Readable.from(['ab', 'cd']), upper, sink);` to `await pipeline(Readable.from(['ab!', 'cd']), upper, sink);`. Before running it, predict which check fails and which value it now sees; then run it and restore the original line.
 
 The result is observed after pipeline resolves, so every stage has completed. A print before awaiting completion could report an incomplete collection.
+
+The unchanged code is the exercise block of Example A:
 
 ```javascript
 const output = [];
@@ -48,15 +50,17 @@ assert.equal(output.join(''), 'ABCD');
 assert.equal(sink.writableFinished, true);
 ```
 
-**Expected:** ABCD after successful pipeline completion.
+**Expected:** The changed run fails with an `AssertionError` at the check `assert.equal(output.join(''), 'ABCD')`. Restoring the original line brings back the worked observation: ABCD after successful pipeline completion.
 
-**Verify:** Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.
+**Verify:** Compare your written prediction with the reported `AssertionError`, including its actual and expected values, and name the value that made `assert.equal(output.join(''), 'ABCD')` fail. After restoring the line, the program prints its `{"checks":1,"status":"passed"}` receipt again.
 
-## Exercise 2: Observe false write and drain without guessing timing
+## Exercise 2: Observe false write and drain without guessing timing: debug a regression
 
-Task: Hold a write callback at a two-byte threshold, inspect write(), then release it.
+Task: A regression changed one token in Example B, so one line now reads `highWaterMark: 3,`. Run Example B with that line, use the failing check to locate the defect and repair it without changing the check.
 
 False means pause, not retry the same chunk. Retrying it would duplicate data because the original write was already accepted.
+
+The unchanged code is the exercise block of Example B:
 
 ```javascript
 let release;
@@ -75,9 +79,9 @@ sink.end();
 await finished(sink);
 ```
 
-**Expected:** write returns false; drain follows release; stream finishes.
+**Expected:** Before the repair the run fails with an `AssertionError` at the check `assert.equal(sink.write(Buffer.from('ab')), false)`; after it the line reads `highWaterMark: 2,` again and write returns false; drain follows release; stream finishes.
 
-**Verify:** Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.
+**Verify:** Keep the failing and the repaired runs. Explain why the changed token alters the value tested by `assert.equal(sink.write(Buffer.from('ab')), false)` for this input.
 
 ## Exercise 3: Propagate a producer failure and destroy the sink
 
@@ -101,7 +105,7 @@ assert.equal(sink.destroyed, true);
 
 **Expected:** pipeline rejects with source failed; sink is destroyed.
 
-**Verify:** Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.
+**Verify:** Keep a check equivalent to `assert.equal(sink.destroyed, true)`. As a control, change `assert.equal(sink.destroyed, true);` to `assert.equal(sink.destroyed, false);` inside it: the run must fail with an `AssertionError`, which shows the check can fail. Restore it.
 
 ## Exercise 4: Reject an invalid object in a transform
 
@@ -128,7 +132,7 @@ await assert.rejects(pipeline(Readable.from([1, -1]), checked, sink), RangeError
 
 **Expected:** pipeline rejects with RangeError.
 
-**Verify:** Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.
+**Verify:** Keep a check equivalent to `assert.rejects(pipeline(Readable.from([1, -1]), checked, sink), RangeError)`. As a control, change `objectMode: true,` to `objectMode: false,`: the run must fail with an `AssertionError` at that check. Restore the line before continuing.
 
 ## Exercise 5: Measure an object-mode threshold in objects
 
@@ -156,7 +160,7 @@ await finished(sink);
 
 **Expected:** write false and writableLength 1, irrespective of payload string length.
 
-**Verify:** Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.
+**Verify:** Keep a check equivalent to `assert.equal(sink.write({ payload: 'x'.repeat(1000) }), false)`. As a control, change `highWaterMark: 1,` to `highWaterMark: 2,`: the run must fail with an `AssertionError` at that check. Restore the line before continuing.
 
 ## Exercise 6: Abort a generator and its awaited timer
 
@@ -194,7 +198,7 @@ assert.equal(closed, true);
 
 **Expected:** pipeline rejects with AbortError; generator finally runs.
 
-**Verify:** Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.
+**Verify:** Keep a check equivalent to `assert.equal(closed, true)`. As a control, change `finally { closed = true; }` to `finally { closed = false; }`: the run must fail with an `AssertionError` at that check. Restore the line before continuing.
 
 ## After comparison
 

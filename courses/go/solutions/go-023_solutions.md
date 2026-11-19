@@ -8,29 +8,33 @@ An HTTP client owns a request lifecycle that can fail before any response exists
 
 RoundTrip(*http.Request) returns a response or a transport error. A function adapter can implement that interface for tests. NewRequestWithContext binds a request to cancellation. Client.Do follows client policy, including status-independent transport success. Read at most limit+1 bytes to detect oversized bodies. A response body must be closed even when its status is not accepted.
 
-## 1. Read a successful response
+## 1. Read a successful response: change one input
 
-Use a fake transport returning status 200 and body ready.
+Copy worked example 1 into a scratch pad and change `v, err := fetch(context.Background(), 200, "ready", 8)` to `v, err := fetch(context.Background(), 201, "ready", 8)`. Before running, predict which check fails and which value it now sees; then run it and restore the original line.
+
+The unchanged code is worked example 1:
 
 ```go
 v, err := fetch(context.Background(), 200, "ready", 8)
 check(err == nil && v == "ready", "client success")
 ```
 
-**Expected:** The client helper returns ready without error.
+**Expected:** The changed run panics with `client success` because `err == nil && v == "ready"` no longer holds. Restoring the original line brings back the worked observation: the client helper returns ready without error.
 
 The fake isolates policy from the network. A live connection test would establish additional behavior and requires a separate owned target.
 
-## 2. Reject an HTTP failure status
+## 2. Reject an HTTP failure status: diagnose an edited check
 
-Return status 404 with a body.
+A careless edit changed the check in worked example 2 so that it reads `check(err == nil, "HTTP status")`. Run worked example 2 with that line, explain why the edited check now fails for the same program state, and restore it.
+
+The unchanged code is worked example 2:
 
 ```go
 _, err := fetch(context.Background(), 404, "missing", 8)
 check(err != nil, "HTTP status")
 ```
 
-**Expected:** The helper returns an error despite transport success.
+**Expected:** Before the repair the program panics with `HTTP status`; after it the line reads `check(err != nil, "HTTP status")` again and the helper returns an error despite transport success.
 
 Client.Do does not classify every non-2xx response as a transport failure. Application status policy belongs in the consuming code.
 

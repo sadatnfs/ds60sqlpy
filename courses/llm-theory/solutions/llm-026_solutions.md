@@ -18,7 +18,7 @@ Create frozen torch tensors and fit or derive a small linear probe separately fr
 
 ## Exercise 1: Construct transparent representations
 
-The question is: Use features[-2,0],[-1,1],[1,0],[2,1] and labels 0,0,1,1.
+The question is: Use features [-2, 0], [-1, 1], [1, 0], [2, 1] and labels 0, 0, 1, 1.
 
 The label is deliberately encoded in a coordinate. This supplies a clear positive control for the probing procedure.
 
@@ -31,11 +31,11 @@ assert torch.equal(prediction, labels)
 
 **Expected:** first-coordinate sign predicts all four labels.
 
-**Verify:** Compare the computed values or written argument with first-coordinate sign predicts all four labels.
+**Verify:** In a fresh process, the exercise checks confirm `torch.equal(prediction, labels)`.
 
 ## Exercise 2: Use a held-out fixture
 
-The question is: Evaluate the same fixed threshold on new representations[-3,1],[3,0].
+The question is: Evaluate the same fixed threshold on new representations [-3, 1], [3, 0].
 
 The threshold is fixed before opening these two rows. The result has only two held-out units and should be reported with that count.
 
@@ -48,11 +48,11 @@ assert torch.equal(got, truth)
 
 **Expected:** two correct held-out predictions.
 
-**Verify:** Compare the computed values or written argument with two correct held-out predictions.
+**Verify:** In a fresh process, the exercise checks confirm `torch.equal(got, truth)`.
 
 ## Exercise 3: Add shuffled-label control
 
-The question is: Compare predictions against shuffled labels 0,1,0,1.
+The question is: Compare predictions against shuffled labels 0, 1, 0, 1.
 
 The control breaks the specific association while preserving label balance. A high control score would suggest the probe or split can exploit another shortcut.
 
@@ -61,9 +61,9 @@ shuffled = torch.tensor([0, 1, 0, 1])
 assert int((prediction == shuffled).sum()) == 2
 ```
 
-**Expected:** 2 of4 correct.
+**Expected:** 2 of 4 correct.
 
-**Verify:** Compare the computed values or written argument with 2 of4 correct.
+**Verify:** In a fresh process, the exercise checks confirm `int((prediction == shuffled).sum()) == 2`.
 
 ## Exercise 4: Protect frozen state
 
@@ -82,11 +82,11 @@ assert weight.grad is not None and features.grad is None and torch.equal(feature
 
 **Expected:** probe gradient exists; features have no gradient.
 
-**Verify:** Compare the computed values or written argument with probe gradient exists; features have no gradient.
+**Verify:** In a fresh process, the exercise checks confirm `weight.grad is not None`; `features.grad is None` and `torch.equal(features, before)`.
 
 ## Exercise 5: Expose family leakage
 
-The question is: Mark rows0 and 1 as versions of familyA and place them on opposite sides of a split.
+The question is: Mark rows 0 and 1 as versions of family A and place them on opposite sides of a split.
 
 A probe can memorize family-specific features. Row-level disjointness does not prevent related documents from leaking across evaluation.
 
@@ -95,13 +95,13 @@ families = ["A", "A", "B", "C"]
 assert {families[0]} & {families[1]} == {"A"}
 ```
 
-**Expected:** familyA crosses partitions.
+**Expected:** family A crosses partitions.
 
-**Verify:** Compare the computed values or written argument with familyA crosses partitions.
+**Verify:** In a fresh process, the exercise checks confirm `{families[0]} & {families[1]} == {'A'}`.
 
 ## Exercise 6: Bound the interpretation
 
-The question is: Write a result with heldout_count2,control_accuracy.5 and causal_use_establishedFalse.
+The question is: Write a result with heldout_count2, control_accuracy 0.5 and causal_use_establishedFalse.
 
 Even perfect decoding does not show that the original system consulted that coordinate. The interpretation must match what the probe actually measured.
 
@@ -117,7 +117,7 @@ assert report["decodable"] and not report["causal_use_established"]
 
 **Expected:** report distinguishes decodability from causal use.
 
-**Verify:** Compare the computed values or written argument with report distinguishes decodability from causal use.
+**Verify:** In a fresh process, the exercise checks confirm `report['decodable']` and `not report['causal_use_established']`.
 
 ## Review after comparison
 

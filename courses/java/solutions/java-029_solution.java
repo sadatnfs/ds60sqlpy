@@ -63,7 +63,8 @@ public class Main {
         var statement = connection.prepareStatement("SELECT COUNT(*) FROM accounts");
         var rows = statement.executeQuery()
       ) {
-        assert rows.next() && rows.getInt(1) == 2;
+        boolean hasRow = rows.next();
+        assert hasRow && rows.getInt(1) == 2;
       }
     }
 
@@ -74,11 +75,13 @@ public class Main {
     ) {
       statement.setString(1, "Alice");
       try (var rows = statement.executeQuery()) {
-        assert rows.next() && rows.getInt(1) == 1;
+        boolean hasRow = rows.next();
+        assert hasRow && rows.getInt(1) == 1;
       }
       statement.setString(1, "Alice' OR '1'='1");
       try (var rows = statement.executeQuery()) {
-        assert rows.next() && rows.getInt(1) == 0;
+        boolean hasRow = rows.next();
+        assert hasRow && rows.getInt(1) == 0;
       }
     }
 

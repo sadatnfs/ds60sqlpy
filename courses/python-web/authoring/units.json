@@ -9,7 +9,7 @@
     "language": "python",
     "suffix": ".py",
     "framework": "http",
-    "concepts": ["http", "HTTP", "From Python functions to HTTP responses"],
+    "concepts": ["HTTP request", "routing", "view function", "status code", "test client"],
     "outcome": "Trace a request through routing, a handler and a response using two real in-process client requests.",
     "sources": [
       ["HTTP semantics (RFC 9110)", "https://www.rfc-editor.org/rfc/rfc9110.html"],
@@ -26,7 +26,7 @@
     "language": "python",
     "suffix": ".py",
     "framework": "http",
-    "concepts": ["http", "HTTP", "URLs, path parameters and query strings"],
+    "concepts": ["URL path", "path parameter", "query string", "percent encoding", "404 Not Found"],
     "outcome": "Distinguish resource paths, repeated query values, percent encoding and missing-route behavior.",
     "sources": [
       ["HTTP semantics (RFC 9110)", "https://www.rfc-editor.org/rfc/rfc9110.html"],
@@ -43,7 +43,7 @@
     "language": "python",
     "suffix": ".py",
     "framework": "http",
-    "concepts": ["http", "HTTP", "HTTP methods, status codes and idempotence"],
+    "concepts": ["HTTP methods", "status codes", "idempotence", "safe methods", "PUT and DELETE"],
     "outcome": "Compare repeated replacement and deletion operations without confusing equal effects with equal status codes.",
     "sources": [
       ["HTTP semantics (RFC 9110)", "https://www.rfc-editor.org/rfc/rfc9110.html"],
@@ -60,7 +60,7 @@
     "language": "python",
     "suffix": ".py",
     "framework": "http",
-    "concepts": ["http", "HTTP", "Headers, JSON, bytes and content negotiation"],
+    "concepts": ["HTTP headers", "Content-Type", "JSON", "UTF-8 bytes", "content negotiation"],
     "outcome": "Validate media types and Unicode representations and diagnose malformed request bodies.",
     "sources": [
       ["HTTP semantics (RFC 9110)", "https://www.rfc-editor.org/rfc/rfc9110.html"],
@@ -77,7 +77,13 @@
     "language": "python",
     "suffix": ".py",
     "framework": "http",
-    "concepts": ["http", "HTTP", "Input schemas and explicit validation errors"],
+    "concepts": [
+      "input schema",
+      "type coercion",
+      "validation error",
+      "unexpected fields",
+      "422 Unprocessable Content"
+    ],
     "outcome": "Reject ambiguous coercions and unexpected fields with an explained structured error contract.",
     "sources": [
       ["HTTP semantics (RFC 9110)", "https://www.rfc-editor.org/rfc/rfc9110.html"],
@@ -94,7 +100,13 @@
     "language": "python",
     "suffix": ".py",
     "framework": "http",
-    "concepts": ["http", "HTTP", "HTML templates and context-aware escaping"],
+    "concepts": [
+      "Jinja templates",
+      "autoescaping",
+      "context-aware escaping",
+      "Markup",
+      "URL validation"
+    ],
     "outcome": "Render untrusted text safely and separate escaping from validating a URL or trusted HTML fragment.",
     "sources": [
       ["HTTP semantics (RFC 9110)", "https://www.rfc-editor.org/rfc/rfc9110.html"],
@@ -111,7 +123,13 @@
     "language": "python",
     "suffix": ".py",
     "framework": "http",
-    "concepts": ["http", "HTTP", "Forms, multipart data and upload limits"],
+    "concepts": [
+      "HTML forms",
+      "multipart/form-data",
+      "file upload",
+      "MAX_CONTENT_LENGTH",
+      "secure_filename"
+    ],
     "outcome": "Parse form and file requests, enforce size and content contracts and keep filenames out of trusted paths.",
     "sources": [
       ["HTTP semantics (RFC 9110)", "https://www.rfc-editor.org/rfc/rfc9110.html"],
@@ -128,7 +146,13 @@
     "language": "python",
     "suffix": ".py",
     "framework": "http",
-    "concepts": ["http", "HTTP", "Cookies, signed sessions and trust"],
+    "concepts": [
+      "cookies",
+      "Flask session",
+      "signed cookie",
+      "tamper detection",
+      "signing versus encryption"
+    ],
     "outcome": "Inspect a real session cookie, reject tampering and explain why signing does not encrypt its contents.",
     "sources": [
       ["HTTP semantics (RFC 9110)", "https://www.rfc-editor.org/rfc/rfc9110.html"],
@@ -145,7 +169,7 @@
     "language": "python",
     "suffix": ".py",
     "framework": "http",
-    "concepts": ["http", "HTTP", "WSGI, ASGI and the server boundary"],
+    "concepts": ["WSGI", "ASGI", "application callable", "server boundary", "event loop"],
     "outcome": "Compare real synchronous and asynchronous application interfaces without inventing network-performance evidence.",
     "sources": [
       ["HTTP semantics (RFC 9110)", "https://www.rfc-editor.org/rfc/rfc9110.html"],
@@ -162,7 +186,7 @@
     "language": "python",
     "suffix": ".py",
     "framework": "http",
-    "concepts": ["http", "HTTP", "Named routes, redirects and navigation"],
+    "concepts": ["url_for", "named routes", "redirect", "post/redirect/get", "303 See Other"],
     "outcome": "Generate URLs from route identities and implement a bounded post-redirect-get flow without open redirects.",
     "sources": [
       ["HTTP semantics (RFC 9110)", "https://www.rfc-editor.org/rfc/rfc9110.html"],
@@ -179,7 +203,7 @@
     "language": "python",
     "suffix": ".py",
     "framework": "http",
-    "concepts": ["http", "HTTP", "HTTP tests, fixtures and state isolation"],
+    "concepts": ["test client", "fixtures", "application factory", "cookie jar", "state isolation"],
     "outcome": "Separate server state, client cookies and factory-scoped fixtures using repeatable request sequences.",
     "sources": [
       ["HTTP semantics (RFC 9110)", "https://www.rfc-editor.org/rfc/rfc9110.html"],
@@ -196,7 +220,13 @@
     "language": "python",
     "suffix": ".py",
     "framework": "http",
-    "concepts": ["http", "HTTP", "Resource-oriented API design and REST constraints"],
+    "concepts": [
+      "resources",
+      "REST constraints",
+      "statelessness",
+      "resource identity",
+      "state transitions"
+    ],
     "outcome": "Design consistent resource identities and state transitions, explaining statelessness and representation tradeoffs.",
     "sources": [
       ["HTTP semantics (RFC 9110)", "https://www.rfc-editor.org/rfc/rfc9110.html"],
@@ -213,7 +243,13 @@
     "language": "python",
     "suffix": ".py",
     "framework": "flask",
-    "concepts": ["flask", "HTTP", "Flask application factories and configuration"],
+    "concepts": [
+      "Flask",
+      "application factory",
+      "configuration",
+      "test settings",
+      "instance isolation"
+    ],
     "outcome": "Construct isolated Flask applications with explicit test and deployment settings.",
     "sources": [
       ["Flask documentation", "https://flask.palletsprojects.com/en/stable/"],
@@ -230,7 +266,7 @@
     "language": "python",
     "suffix": ".py",
     "framework": "flask",
-    "concepts": ["flask", "HTTP", "Flask blueprints and error boundaries"],
+    "concepts": ["Flask", "blueprints", "error handlers", "abort", "route composition"],
     "outcome": "Compose routes through blueprints and distinguish application-wide from blueprint error handling.",
     "sources": [
       ["Flask documentation", "https://flask.palletsprojects.com/en/stable/"],
@@ -247,7 +283,7 @@
     "language": "python",
     "suffix": ".py",
     "framework": "flask",
-    "concepts": ["flask", "HTTP", "Flask request context, application context and cleanup"],
+    "concepts": ["Flask", "request context", "application context", "g object", "teardown"],
     "outcome": "Use request-local state and teardown correctly, including an exception path.",
     "sources": [
       ["Flask documentation", "https://flask.palletsprojects.com/en/stable/"],
@@ -264,7 +300,13 @@
     "language": "python",
     "suffix": ".py",
     "framework": "flask",
-    "concepts": ["flask", "HTTP", "Flask and SQLAlchemy transaction ownership"],
+    "concepts": [
+      "Flask",
+      "SQLAlchemy session",
+      "transaction",
+      "commit and rollback",
+      "request scope"
+    ],
     "outcome": "Scope a real database session to a request and verify successful commit and failed-operation rollback.",
     "sources": [
       ["Flask documentation", "https://flask.palletsprojects.com/en/stable/"],
@@ -281,7 +323,7 @@
     "language": "python",
     "suffix": ".py",
     "framework": "flask",
-    "concepts": ["flask", "HTTP", "Flask relational queries and deterministic pagination"],
+    "concepts": ["Flask", "SQLAlchemy queries", "ORDER BY", "pagination", "relationship loading"],
     "outcome": "Avoid accidental unordered pagination and inspect bounded relationship loading.",
     "sources": [
       ["Flask documentation", "https://flask.palletsprojects.com/en/stable/"],
@@ -298,7 +340,7 @@
     "language": "python",
     "suffix": ".py",
     "framework": "flask",
-    "concepts": ["flask", "HTTP", "Flask forms and CSRF protection"],
+    "concepts": ["Flask-WTF", "form validation", "CSRF token", "POST protection"],
     "outcome": "Use actual Flask-WTF validation and CSRF behavior instead of treating a signed cookie as sufficient protection.",
     "sources": [
       ["Flask documentation", "https://flask.palletsprojects.com/en/stable/"],
@@ -315,7 +357,7 @@
     "language": "python",
     "suffix": ".py",
     "framework": "flask",
-    "concepts": ["flask", "HTTP", "Flask login, logout and session behavior"],
+    "concepts": ["Flask-Login", "login_user", "session cookie", "anonymous user", "logout"],
     "outcome": "Use Flask-Login with a real client cookie jar and distinguish authenticated and anonymous requests.",
     "sources": [
       ["Flask documentation", "https://flask.palletsprojects.com/en/stable/"],
@@ -332,7 +374,13 @@
     "language": "python",
     "suffix": ".py",
     "framework": "flask",
-    "concepts": ["flask", "HTTP", "Flask authorization and object ownership"],
+    "concepts": [
+      "Flask",
+      "authorization",
+      "object ownership",
+      "404 for foreign objects",
+      "list filtering"
+    ],
     "outcome": "Apply object-level ownership checks and prevent list endpoints from exposing another user's data.",
     "sources": [
       ["Flask documentation", "https://flask.palletsprojects.com/en/stable/"],
@@ -349,7 +397,7 @@
     "language": "python",
     "suffix": ".py",
     "framework": "flask",
-    "concepts": ["flask", "HTTP", "Flask uploads, downloads and path boundaries"],
+    "concepts": ["Flask", "file upload", "send_file", "path traversal", "content validation"],
     "outcome": "Validate uploaded content and safely select owned download files without trusting submitted filenames.",
     "sources": [
       ["Flask documentation", "https://flask.palletsprojects.com/en/stable/"],
@@ -366,7 +414,7 @@
     "language": "python",
     "suffix": ".py",
     "framework": "flask",
-    "concepts": ["flask", "HTTP", "Flask conditional requests and cache policy"],
+    "concepts": ["Flask", "ETag", "If-None-Match", "304 Not Modified", "Cache-Control"],
     "outcome": "Implement ETag comparisons and choose public, private and non-cacheable response policies deliberately.",
     "sources": [
       ["Flask documentation", "https://flask.palletsprojects.com/en/stable/"],
@@ -383,7 +431,7 @@
     "language": "python",
     "suffix": ".py",
     "framework": "flask",
-    "concepts": ["flask", "HTTP", "Flask CLI and versioned schema changes"],
+    "concepts": ["Flask CLI", "click commands", "schema migration", "versioned schema"],
     "outcome": "Exercise application CLI commands and a bounded migration lifecycle with actual database effects.",
     "sources": [
       ["Flask documentation", "https://flask.palletsprojects.com/en/stable/"],
@@ -400,7 +448,7 @@
     "language": "python",
     "suffix": ".py",
     "framework": "flask",
-    "concepts": ["flask", "HTTP", "Flask outbound clients, timeouts and error translation"],
+    "concepts": ["HTTPX", "timeouts", "MockTransport", "upstream errors", "error translation"],
     "outcome": "Use a deterministic HTTP mock transport and translate upstream failures without claiming a live service test.",
     "sources": [
       ["Flask documentation", "https://flask.palletsprojects.com/en/stable/"],
@@ -417,7 +465,7 @@
     "language": "python",
     "suffix": ".py",
     "framework": "flask",
-    "concepts": ["flask", "HTTP", "Flask async views and background-work limits"],
+    "concepts": ["Flask async views", "WSGI", "asyncio", "background work", "durable jobs"],
     "outcome": "Explain what async changes under WSGI and distinguish request-scoped work from durable jobs.",
     "sources": [
       ["Flask documentation", "https://flask.palletsprojects.com/en/stable/"],
@@ -434,7 +482,7 @@
     "language": "python",
     "suffix": ".py",
     "framework": "flask",
-    "concepts": ["flask", "HTTP", "Flask application walkthrough"],
+    "concepts": ["Flask", "routing", "forms", "persistence", "authorization"],
     "outcome": "Integrate routing, forms, persistence and authorization in a complete finite client investigation and an owned application project.",
     "sources": [
       ["Flask documentation", "https://flask.palletsprojects.com/en/stable/"],
@@ -451,7 +499,7 @@
     "language": "python",
     "suffix": ".py",
     "framework": "fastapi",
-    "concepts": ["fastapi", "HTTP", "FastAPI typed paths, queries and response contracts"],
+    "concepts": ["FastAPI", "path parameters", "query parameters", "response_model", "OpenAPI"],
     "outcome": "Build typed routes with actual validation and response behavior, linking annotations to generated API metadata.",
     "sources": [
       ["FastAPI tutorial", "https://fastapi.tiangolo.com/tutorial/"],
@@ -468,7 +516,7 @@
     "language": "python",
     "suffix": ".py",
     "framework": "fastapi",
-    "concepts": ["fastapi", "HTTP", "Pydantic models, strictness and serialization"],
+    "concepts": ["Pydantic", "BaseModel", "strict mode", "model_dump", "exclude_unset"],
     "outcome": "Separate input models, output models and internal state while inspecting validation and serialization differences.",
     "sources": [
       ["FastAPI tutorial", "https://fastapi.tiangolo.com/tutorial/"],
@@ -485,7 +533,7 @@
     "language": "python",
     "suffix": ".py",
     "framework": "fastapi",
-    "concepts": ["fastapi", "HTTP", "FastAPI dependency injection and overrides"],
+    "concepts": ["FastAPI", "Depends", "Annotated", "dependency overrides", "yield dependencies"],
     "outcome": "Scope dependencies, compose authorization/data services and replace them deliberately in tests.",
     "sources": [
       ["FastAPI tutorial", "https://fastapi.tiangolo.com/tutorial/"],
@@ -502,7 +550,7 @@
     "language": "python",
     "suffix": ".py",
     "framework": "fastapi",
-    "concepts": ["fastapi", "HTTP", "FastAPI lifespan and resource ownership"],
+    "concepts": ["FastAPI", "lifespan", "app.state", "resource cleanup", "startup failure"],
     "outcome": "Initialize and close shared resources through actual lifespan events, including failed-request cleanup.",
     "sources": [
       ["FastAPI tutorial", "https://fastapi.tiangolo.com/tutorial/"],
@@ -519,7 +567,13 @@
     "language": "python",
     "suffix": ".py",
     "framework": "fastapi",
-    "concepts": ["fastapi", "HTTP", "Async Python, blocking work and cancellation"],
+    "concepts": [
+      "asyncio",
+      "event loop",
+      "create_task and gather",
+      "blocking calls",
+      "cancellation"
+    ],
     "outcome": "Measure cooperative concurrency with explicit synchronization rather than unqualified timing claims.",
     "sources": [
       ["FastAPI tutorial", "https://fastapi.tiangolo.com/tutorial/"],
@@ -536,7 +590,12 @@
     "language": "python",
     "suffix": ".py",
     "framework": "fastapi",
-    "concepts": ["fastapi", "HTTP", "FastAPI asynchronous database sessions"],
+    "concepts": [
+      "SQLAlchemy AsyncSession",
+      "aiosqlite",
+      "async_sessionmaker",
+      "event loop ownership"
+    ],
     "outcome": "Use real SQLAlchemy async sessions with bounded SQLite fixtures and correct event-loop ownership.",
     "sources": [
       ["FastAPI tutorial", "https://fastapi.tiangolo.com/tutorial/"],
@@ -553,7 +612,13 @@
     "language": "python",
     "suffix": ".py",
     "framework": "fastapi",
-    "concepts": ["fastapi", "HTTP", "Transactions, optimistic concurrency and idempotency keys"],
+    "concepts": [
+      "transactions",
+      "optimistic concurrency",
+      "version column",
+      "idempotency key",
+      "409 Conflict"
+    ],
     "outcome": "Protect updates and repeated requests with explicit version and request-identity contracts.",
     "sources": [
       ["FastAPI tutorial", "https://fastapi.tiangolo.com/tutorial/"],
@@ -570,7 +635,7 @@
     "language": "python",
     "suffix": ".py",
     "framework": "fastapi",
-    "concepts": ["fastapi", "HTTP", "FastAPI response filtering and sensitive fields"],
+    "concepts": ["FastAPI", "response_model", "sensitive fields", "serialization", "data leakage"],
     "outcome": "Verify that internal fields do not leak through serialization and explain when response validation fails.",
     "sources": [
       ["FastAPI tutorial", "https://fastapi.tiangolo.com/tutorial/"],
@@ -587,7 +652,13 @@
     "language": "python",
     "suffix": ".py",
     "framework": "fastapi",
-    "concepts": ["fastapi", "HTTP", "FastAPI errors and problem-details documents"],
+    "concepts": [
+      "FastAPI",
+      "HTTPException",
+      "exception handlers",
+      "problem details",
+      "validation errors"
+    ],
     "outcome": "Implement predictable application errors and preserve safe distinction between validation and server failures.",
     "sources": [
       ["FastAPI tutorial", "https://fastapi.tiangolo.com/tutorial/"],
@@ -604,7 +675,7 @@
     "language": "python",
     "suffix": ".py",
     "framework": "fastapi",
-    "concepts": ["fastapi", "HTTP", "Bearer tokens, JWT claims and authentication"],
+    "concepts": ["bearer tokens", "JWT", "PyJWT", "audience and issuer", "expiry"],
     "outcome": "Validate signatures and intended issuer/audience/expiry with real token libraries and explicit failure cases.",
     "sources": [
       ["FastAPI tutorial", "https://fastapi.tiangolo.com/tutorial/"],
@@ -621,7 +692,7 @@
     "language": "python",
     "suffix": ".py",
     "framework": "fastapi",
-    "concepts": ["fastapi", "HTTP", "Cookies, CSRF, CORS and browser origins"],
+    "concepts": ["cookies", "CSRF", "CORS", "same-origin policy", "SameSite"],
     "outcome": "Distinguish authentication, cross-origin permissions and CSRF protections with actual middleware/client observations.",
     "sources": [
       ["FastAPI tutorial", "https://fastapi.tiangolo.com/tutorial/"],
@@ -638,7 +709,7 @@
     "language": "python",
     "suffix": ".py",
     "framework": "fastapi",
-    "concepts": ["fastapi", "HTTP", "API scopes, roles and tenant boundaries"],
+    "concepts": ["scopes", "roles", "tenant isolation", "object ownership", "authorization"],
     "outcome": "Enforce both action-level permission and object ownership rather than relying on token presence alone.",
     "sources": [
       ["FastAPI tutorial", "https://fastapi.tiangolo.com/tutorial/"],
@@ -655,7 +726,7 @@
     "language": "python",
     "suffix": ".py",
     "framework": "fastapi",
-    "concepts": ["fastapi", "HTTP", "FastAPI file handling and streaming responses"],
+    "concepts": ["UploadFile", "StreamingResponse", "size limits", "content type", "chunked reads"],
     "outcome": "Bound uploaded data and construct finite streamed responses while retaining content and cleanup contracts.",
     "sources": [
       ["FastAPI tutorial", "https://fastapi.tiangolo.com/tutorial/"],
@@ -672,7 +743,7 @@
     "language": "python",
     "suffix": ".py",
     "framework": "fastapi",
-    "concepts": ["fastapi", "HTTP", "Background tasks, queues and durable work"],
+    "concepts": ["BackgroundTasks", "job queue", "durable jobs", "eager execution", "job status"],
     "outcome": "Compare request-attached tasks with an explicit durable-job design and label eager-task evidence honestly.",
     "sources": [
       ["FastAPI tutorial", "https://fastapi.tiangolo.com/tutorial/"],
@@ -689,7 +760,7 @@
     "language": "python",
     "suffix": ".py",
     "framework": "fastapi",
-    "concepts": ["fastapi", "HTTP", "WebSocket messages, validation and close behavior"],
+    "concepts": ["WebSocket", "message validation", "close codes", "ASGI", "connection lifecycle"],
     "outcome": "Exercise a finite real ASGI WebSocket exchange and explain connection/authentication/resource boundaries.",
     "sources": [
       ["FastAPI tutorial", "https://fastapi.tiangolo.com/tutorial/"],
@@ -706,7 +777,13 @@
     "language": "python",
     "suffix": ".py",
     "framework": "fastapi",
-    "concepts": ["fastapi", "HTTP", "Server-sent events and resumable event identities"],
+    "concepts": [
+      "server-sent events",
+      "event id",
+      "Last-Event-ID",
+      "text/event-stream",
+      "resumption"
+    ],
     "outcome": "Construct valid finite SSE records and distinguish their parsing from actual network flush and reconnection acceptance.",
     "sources": [
       ["FastAPI tutorial", "https://fastapi.tiangolo.com/tutorial/"],
@@ -723,7 +800,7 @@
     "language": "python",
     "suffix": ".py",
     "framework": "fastapi",
-    "concepts": ["fastapi", "HTTP", "OpenAPI, compatibility and generated clients"],
+    "concepts": ["OpenAPI schema", "compatibility", "generated clients", "breaking changes"],
     "outcome": "Inspect actual OpenAPI schemas and plan compatible changes, including offline documentation asset boundaries.",
     "sources": [
       ["FastAPI tutorial", "https://fastapi.tiangolo.com/tutorial/"],
@@ -740,7 +817,7 @@
     "language": "python",
     "suffix": ".py",
     "framework": "fastapi",
-    "concepts": ["fastapi", "HTTP", "FastAPI application walkthrough"],
+    "concepts": ["FastAPI", "typed requests", "persistence", "authentication", "job status API"],
     "outcome": "Connect typed requests, persistence, authentication and job/status APIs in a complete client example and live workshop.",
     "sources": [
       ["FastAPI tutorial", "https://fastapi.tiangolo.com/tutorial/"],
@@ -757,7 +834,7 @@
     "language": "python",
     "suffix": ".py",
     "framework": "django",
-    "concepts": ["django", "HTTP", "Django projects, settings, URLs and views"],
+    "concepts": ["Django", "settings", "URLconf", "views", "test client"],
     "outcome": "Trace a real Django client request and distinguish a compact fixture from the standard multi-file project layout.",
     "sources": [
       ["Django 6.1 documentation", "https://docs.djangoproject.com/en/6.1/"],
@@ -774,7 +851,13 @@
     "language": "python",
     "suffix": ".py",
     "framework": "django",
-    "concepts": ["django", "HTTP", "Django middleware and request lifecycle"],
+    "concepts": [
+      "Django middleware",
+      "request lifecycle",
+      "middleware ordering",
+      "short-circuit response",
+      "exception handling"
+    ],
     "outcome": "Explain middleware ordering, short-circuit responses and security-header behavior through concrete requests.",
     "sources": [
       ["Django 6.1 documentation", "https://docs.djangoproject.com/en/6.1/"],
@@ -784,14 +867,20 @@
   {
     "id": "pyweb-047",
     "title": "Django templates, inheritance and static assets",
-    "level": "beginner",
-    "minutes": 60,
+    "level": "intermediate",
+    "minutes": 90,
     "prerequisites": ["pyweb-046"],
     "runtime": "python-web",
     "language": "python",
     "suffix": ".py",
     "framework": "django",
-    "concepts": ["django", "HTTP", "Django templates, inheritance and static assets"],
+    "concepts": [
+      "Django templates",
+      "template inheritance",
+      "context",
+      "autoescaping",
+      "static files"
+    ],
     "outcome": "Render reusable templates with explicit context and explain why template output is not a browser asset test.",
     "sources": [
       ["Django 6.1 documentation", "https://docs.djangoproject.com/en/6.1/"],
@@ -808,7 +897,13 @@
     "language": "python",
     "suffix": ".py",
     "framework": "django",
-    "concepts": ["django", "HTTP", "Django models, migrations and constraints"],
+    "concepts": [
+      "Django models",
+      "migrations",
+      "database constraints",
+      "unique fields",
+      "model validation"
+    ],
     "outcome": "Create and evolve a real small schema while separating application validation from database constraints.",
     "sources": [
       ["Django 6.1 documentation", "https://docs.djangoproject.com/en/6.1/"],
@@ -825,7 +920,7 @@
     "language": "python",
     "suffix": ".py",
     "framework": "django",
-    "concepts": ["django", "HTTP", "Django QuerySets, aggregation and evaluation"],
+    "concepts": ["QuerySet", "lazy evaluation", "filter", "aggregate", "annotate"],
     "outcome": "Inspect lazy query evaluation, filtering and grouped calculations without unnecessary materialization.",
     "sources": [
       ["Django 6.1 documentation", "https://docs.djangoproject.com/en/6.1/"],
@@ -842,7 +937,13 @@
     "language": "python",
     "suffix": ".py",
     "framework": "django",
-    "concepts": ["django", "HTTP", "Django relationships and query-count diagnosis"],
+    "concepts": [
+      "ForeignKey",
+      "N+1 queries",
+      "select_related",
+      "prefetch_related",
+      "query counting"
+    ],
     "outcome": "Reproduce an N-plus-one query pattern and verify appropriate related-object loading with actual query counts.",
     "sources": [
       ["Django 6.1 documentation", "https://docs.djangoproject.com/en/6.1/"],
@@ -859,7 +960,13 @@
     "language": "python",
     "suffix": ".py",
     "framework": "django",
-    "concepts": ["django", "HTTP", "Django forms, ModelForms and field ownership"],
+    "concepts": [
+      "Django forms",
+      "ModelForm",
+      "cleaned_data",
+      "field allowlist",
+      "validation errors"
+    ],
     "outcome": "Validate user input through actual forms and restrict which model fields a request may change.",
     "sources": [
       ["Django 6.1 documentation", "https://docs.djangoproject.com/en/6.1/"],
@@ -876,7 +983,7 @@
     "language": "python",
     "suffix": ".py",
     "framework": "django",
-    "concepts": ["django", "HTTP", "Django class-based views and composition"],
+    "concepts": ["class-based views", "dispatch", "mixins", "generic views", "authorization"],
     "outcome": "Trace dispatch and mixin responsibilities while preserving explicit authorization and predictable context.",
     "sources": [
       ["Django 6.1 documentation", "https://docs.djangoproject.com/en/6.1/"],
@@ -893,7 +1000,13 @@
     "language": "python",
     "suffix": ".py",
     "framework": "django",
-    "concepts": ["django", "HTTP", "Django authentication, passwords and sessions"],
+    "concepts": [
+      "django.contrib.auth",
+      "password hashing",
+      "login and logout",
+      "sessions",
+      "invalid credentials"
+    ],
     "outcome": "Use the real authentication/session stack and inspect login, logout and invalid-credential behavior.",
     "sources": [
       ["Django 6.1 documentation", "https://docs.djangoproject.com/en/6.1/"],
@@ -910,7 +1023,7 @@
     "language": "python",
     "suffix": ".py",
     "framework": "django",
-    "concepts": ["django", "HTTP", "Django permissions, groups and object access"],
+    "concepts": ["permissions", "groups", "object ownership", "queryset restriction"],
     "outcome": "Separate model permissions from per-object ownership and verify queryset restrictions.",
     "sources": [
       ["Django 6.1 documentation", "https://docs.djangoproject.com/en/6.1/"],
@@ -927,7 +1040,13 @@
     "language": "python",
     "suffix": ".py",
     "framework": "django",
-    "concepts": ["django", "HTTP", "Django CSRF and session security"],
+    "concepts": [
+      "CsrfViewMiddleware",
+      "CSRF token",
+      "enforce_csrf_checks",
+      "session cookies",
+      "cookie settings"
+    ],
     "outcome": "Run clients with CSRF enforcement and explain cookie/origin settings without confusing tests with TLS.",
     "sources": [
       ["Django 6.1 documentation", "https://docs.djangoproject.com/en/6.1/"],
@@ -944,7 +1063,7 @@
     "language": "python",
     "suffix": ".py",
     "framework": "django",
-    "concepts": ["django", "HTTP", "Django admin as a privileged application"],
+    "concepts": ["Django admin", "admin.site", "staff users", "permissions", "privileged surface"],
     "outcome": "Configure and test a bounded admin surface while keeping staff access, permissions and public APIs distinct.",
     "sources": [
       ["Django 6.1 documentation", "https://docs.djangoproject.com/en/6.1/"],
@@ -961,7 +1080,7 @@
     "language": "python",
     "suffix": ".py",
     "framework": "django",
-    "concepts": ["django", "HTTP", "Django REST Framework serializers and viewsets"],
+    "concepts": ["Django REST framework", "serializers", "viewsets", "routers", "validation"],
     "outcome": "Build real serializers and routed APIs while comparing their contracts with the other frameworks.",
     "sources": [
       ["Django 6.1 documentation", "https://docs.djangoproject.com/en/6.1/"],
@@ -978,7 +1097,7 @@
     "language": "python",
     "suffix": ".py",
     "framework": "django",
-    "concepts": ["django", "HTTP", "DRF authentication, pagination and throttling"],
+    "concepts": ["DRF authentication", "pagination", "throttling", "APIClient", "permissions"],
     "outcome": "Test authenticated APIs and bounded pagination while documenting the limits of process-local throttles.",
     "sources": [
       ["Django 6.1 documentation", "https://docs.djangoproject.com/en/6.1/"],
@@ -995,7 +1114,7 @@
     "language": "python",
     "suffix": ".py",
     "framework": "django",
-    "concepts": ["django", "HTTP", "Django async views, ORM calls and sync bridges"],
+    "concepts": ["async views", "AsyncClient", "sync_to_async", "async ORM", "connection handling"],
     "outcome": "Use AsyncClient and deliberate sync bridges while explaining transaction and connection boundaries.",
     "sources": [
       ["Django 6.1 documentation", "https://docs.djangoproject.com/en/6.1/"],
@@ -1012,7 +1131,13 @@
     "language": "python",
     "suffix": ".py",
     "framework": "django",
-    "concepts": ["django", "HTTP", "Django caching, email and task interfaces"],
+    "concepts": [
+      "cache framework",
+      "cache keys",
+      "locmem email backend",
+      "django.tasks",
+      "Celery eager mode"
+    ],
     "outcome": "Inspect invalidation and in-memory email/task backends without labeling them production delivery.",
     "sources": [
       ["Django 6.1 documentation", "https://docs.djangoproject.com/en/6.1/"],
@@ -1029,7 +1154,13 @@
     "language": "python",
     "suffix": ".py",
     "framework": "django",
-    "concepts": ["django", "HTTP", "Django deployment settings and management checks"],
+    "concepts": [
+      "deployment checks",
+      "HSTS",
+      "Content Security Policy",
+      "secure cookies",
+      "ALLOWED_HOSTS"
+    ],
     "outcome": "Run relevant deployment/configuration checks and connect static files, secrets and database migrations to the owned project.",
     "sources": [
       ["Django 6.1 documentation", "https://docs.djangoproject.com/en/6.1/"],
@@ -1046,7 +1177,7 @@
     "language": "python",
     "suffix": ".py",
     "framework": "django",
-    "concepts": ["django", "HTTP", "Django application walkthrough"],
+    "concepts": ["Django", "domain models", "permissions", "REST endpoints", "client tests"],
     "outcome": "Integrate domain models, views, permissions and REST endpoints with actual client cases and a separate live deployment.",
     "sources": [
       ["Django 6.1 documentation", "https://docs.djangoproject.com/en/6.1/"],
@@ -1063,7 +1194,7 @@
     "language": "python",
     "suffix": ".py",
     "framework": "engineering",
-    "concepts": ["engineering", "HTTP", "Structured concurrency and service time budgets"],
+    "concepts": ["asyncio.TaskGroup", "timeouts", "deadlines", "cancellation", "error propagation"],
     "outcome": "Bound related async operations, propagate failures and distinguish application deadlines from client timeouts.",
     "sources": [
       ["HTTP semantics (RFC 9110)", "https://www.rfc-editor.org/rfc/rfc9110.html"],
@@ -1084,7 +1215,13 @@
     "language": "python",
     "suffix": ".py",
     "framework": "engineering",
-    "concepts": ["engineering", "HTTP", "Retries, idempotency and transactional outboxes"],
+    "concepts": [
+      "retries",
+      "idempotency",
+      "transactional outbox",
+      "at-least-once delivery",
+      "deduplication"
+    ],
     "outcome": "Implement a small atomic outbox/identity case and explain retry-safe effects under uncertain delivery.",
     "sources": [
       ["HTTP semantics (RFC 9110)", "https://www.rfc-editor.org/rfc/rfc9110.html"],
@@ -1105,7 +1242,13 @@
     "language": "python",
     "suffix": ".py",
     "framework": "engineering",
-    "concepts": ["engineering", "HTTP", "Database performance, indexes and contention"],
+    "concepts": [
+      "indexes",
+      "EXPLAIN QUERY PLAN",
+      "lock contention",
+      "transactions",
+      "SQLite limits"
+    ],
     "outcome": "Inspect real bounded query plans and transaction conflicts, then map the limits of SQLite evidence to PostgreSQL.",
     "sources": [
       ["HTTP semantics (RFC 9110)", "https://www.rfc-editor.org/rfc/rfc9110.html"],
@@ -1126,7 +1269,13 @@
     "language": "python",
     "suffix": ".py",
     "framework": "engineering",
-    "concepts": ["engineering", "HTTP", "Caching, rate limits and worker coordination"],
+    "concepts": [
+      "caching",
+      "invalidation",
+      "token bucket rate limiting",
+      "locks",
+      "worker coordination"
+    ],
     "outcome": "Compare cache/invalidation and per-process coordination with the explicit shared-state workshop contract.",
     "sources": [
       ["HTTP semantics (RFC 9110)", "https://www.rfc-editor.org/rfc/rfc9110.html"],
@@ -1147,7 +1296,13 @@
     "language": "python",
     "suffix": ".py",
     "framework": "engineering",
-    "concepts": ["engineering", "HTTP", "Logs, metrics and tracing without sensitive payloads"],
+    "concepts": [
+      "structured logging",
+      "metrics",
+      "OpenTelemetry tracing",
+      "label cardinality",
+      "sensitive data"
+    ],
     "outcome": "Record useful request diagnostics with bounded labels and an actual in-memory tracing exporter.",
     "sources": [
       ["HTTP semantics (RFC 9110)", "https://www.rfc-editor.org/rfc/rfc9110.html"],
@@ -1168,7 +1323,13 @@
     "language": "markdown",
     "suffix": ".md",
     "framework": "engineering",
-    "concepts": ["engineering", "HTTP", "Network streaming, backpressure and disconnects"],
+    "concepts": [
+      "streaming",
+      "backpressure",
+      "client disconnects",
+      "WebSocket",
+      "server-sent events"
+    ],
     "outcome": "Reproduce actual workshop HTTP/WS/SSE behavior and separate wire timing from in-process test-client buffering.",
     "sources": [
       ["HTTP semantics (RFC 9110)", "https://www.rfc-editor.org/rfc/rfc9110.html"],
@@ -1189,7 +1350,13 @@
     "language": "python",
     "suffix": ".py",
     "framework": "engineering",
-    "concepts": ["engineering", "HTTP", "Web threat modeling, proxies and TLS boundaries"],
+    "concepts": [
+      "threat modeling",
+      "reverse proxies",
+      "forwarded headers",
+      "TLS termination",
+      "secret handling"
+    ],
     "outcome": "Evaluate concrete input, origin, forwarding and secret-handling threats in the owned application design.",
     "sources": [
       ["HTTP semantics (RFC 9110)", "https://www.rfc-editor.org/rfc/rfc9110.html"],
@@ -1210,7 +1377,13 @@
     "language": "markdown",
     "suffix": ".md",
     "framework": "engineering",
-    "concepts": ["engineering", "HTTP", "Container deployment, migrations and recovery"],
+    "concepts": [
+      "container image",
+      "migrations",
+      "persistent volumes",
+      "stop and resume",
+      "recovery"
+    ],
     "outcome": "Build, start, stop and resume the owned web application with persistent data and source-bound acceptance.",
     "sources": [
       ["HTTP semantics (RFC 9110)", "https://www.rfc-editor.org/rfc/rfc9110.html"],
@@ -1231,7 +1404,13 @@
     "language": "python",
     "suffix": ".py",
     "framework": "engineering",
-    "concepts": ["engineering", "HTTP", "Integration, failure and load testing"],
+    "concepts": [
+      "integration tests",
+      "failure injection",
+      "load testing",
+      "latency percentiles",
+      "service limits"
+    ],
     "outcome": "Combine real framework tests with explicit service-level failure/load probes and interpret their scope.",
     "sources": [
       ["HTTP semantics (RFC 9110)", "https://www.rfc-editor.org/rfc/rfc9110.html"],
@@ -1252,7 +1431,13 @@
     "language": "markdown",
     "suffix": ".md",
     "framework": "engineering",
-    "concepts": ["engineering", "HTTP", "End-to-end Python web engineering review"],
+    "concepts": [
+      "framework choice",
+      "architecture review",
+      "request flow",
+      "job flow",
+      "diagnosis"
+    ],
     "outcome": "Choose and defend a framework architecture, reproduce a complete request/job flow and diagnose an intentional failure without losing state.",
     "sources": [
       ["HTTP semantics (RFC 9110)", "https://www.rfc-editor.org/rfc/rfc9110.html"],

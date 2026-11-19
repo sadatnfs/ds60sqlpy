@@ -105,4 +105,4 @@ if __name__ == "__main__":
 
 ## Interpretation
 
-Validate a feature interface structurally and semantically. Keep explicit rejection reasons and bind accepted feature meaning to the model artifact. This protects both reproducibility and useful diagnostics when inputs evolve.
+Keep explicit rejection reasons and bind accepted feature meaning to the model artifact. This protects both reproducibility and useful diagnostics when inputs evolve.

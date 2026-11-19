@@ -103,7 +103,7 @@ def governance_case(cross_group):
             d,
             models={
                 "internal": "{{ config(materialized='table') }} select 41 as value",
-                "consumer": "select value+1 as value from {{ ref('internal') }}",
+                "consumer": "select value + 1 as value from {{ ref('internal') }}",
             },
             schema=schema,
         )

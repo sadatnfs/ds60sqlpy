@@ -1,4 +1,4 @@
-"""dbt-021: worked starting point; complete the guide's six changes."""
+"""dbt-021: both worked cases; complete the guide's six changes."""
 
 import json
 import os
@@ -112,8 +112,10 @@ def ci_case(bad):
         state = p / "state"
         state.mkdir()
         shutil.copyfile(p / "target/manifest.json", state / "manifest.json")
-        sql = "select id from {{ ref('base') }}" + (
-            " union all select id from {{ ref('base') }}" if bad else " where id > 0"
+        sql = (
+            "select id\nfrom {{ ref('base') }}\nunion all\nselect id\nfrom {{ ref('base') }}"
+            if bad
+            else "select id from {{ ref('base') }} where id > 0"
         )
         (p / "models/child.sql").write_text(sql)
         invoke(
@@ -138,8 +140,13 @@ def example_one():
     return ci_case(False)
 
 
+def example_two():
+    return ci_case(True)
+
+
 if __name__ == "__main__":
     print(example_one())
+    print(example_two())
 
 # TODO 1: List the nodes and tests included by the state expression.
 # TODO 2: Change the child quantity while keeping its schema.

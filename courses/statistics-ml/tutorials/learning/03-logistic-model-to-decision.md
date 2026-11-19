@@ -1,6 +1,6 @@
 # Logistic regression: probability, uncertainty and action
 
-Tutorial ID: `statistics-learning-003`. Prerequisites: `statistics-learning-002`, `statistics-011`, `statistics-022`. Complete program: [learning_02.py](examples/learning_02.py).
+Tutorial ID: `statistics-learning-003`. Prerequisites: `statistics-learning-002`, `statistics-011`, `statistics-022`. Complete program: [learning_03.py](examples/learning_03.py).
 
 ## Build a probability model
 

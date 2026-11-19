@@ -4,14 +4,14 @@ import numpy as np
 
 
 def verify():
-    # Exercise 1: Align paired question results
+    # Worked example A: Align paired question results
     families = ["A", "A", "B"]
     diff = np.array([-1.0, -1.0, 1.0])
     grouped = np.array([diff[np.array(families) == f].mean() for f in ["A", "B"]])
     np.testing.assert_array_equal(grouped, [-1, 1])
     np.testing.assert_allclose(diff.mean(), -1 / 3, atol=1e-12, rtol=0)
 
-    # Exercise 2: Resample whole families
+    # Worked example B: Resample whole families
     indices = np.random.default_rng(8).integers(0, 2, size=(1000, 2))
     estimates = grouped[indices].mean(1)
     assert set(np.unique(estimates)) <= {-1.0, 0.0, 1.0} and grouped.mean() == 0
@@ -34,6 +34,20 @@ def verify():
     gates = {"severe_failures": 1, "tested_families": 2, "minimum_families": 2}
     go = gates["severe_failures"] == 0 and gates["tested_families"] >= gates["minimum_families"]
     assert not go
+
+    # Exercise 1: Group a second fixture
+    fam2 = np.array(["A", "B", "B", "C"])
+    d2 = np.array([2.0, -1.0, 0.0, 1.0])
+    g2 = np.array([d2[fam2 == f].mean() for f in ["A", "B", "C"]])
+    np.testing.assert_array_equal(g2, [2, -0.5, 1])
+    assert d2.mean() == 0.5
+    np.testing.assert_allclose(g2.mean(), 5 / 6, atol=1e-12, rtol=0)
+
+    # Exercise 2: Predict bootstrap support
+    idx = np.random.default_rng(3).integers(0, 3, size=(2000, 3))
+    est = g2[idx].mean(1)
+    assert est.min() >= -0.5 and est.max() <= 2
+    assert len(np.unique(np.round(est, 12))) <= 10
     return {"checks": 6, "status": "passed"}
 
 

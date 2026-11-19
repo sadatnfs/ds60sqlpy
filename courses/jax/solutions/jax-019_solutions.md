@@ -66,7 +66,7 @@ close(ridge, [1.0])
 
 ## Exercise 6: Compile a valid solve
 
-Compilation does not eliminate the need for conditioning and problem-admission checks.
+Compilation does not eliminate the need for conditioning and problem-validation checks.
 
 **Expected:** The same [2,3] result with a small residual.
 
@@ -79,6 +79,6 @@ close(matrix @ solution, right)
 
 ## Scope of this evidence
 
-A large sensitivity with a small residual can be an ill-conditioned problem rather than a broken solver. An admission threshold is a declared policy, not a theorem. State the assumptions of a differentiable unique solution and test both primal residual and derivative behavior.
+A large sensitivity with a small residual can be an ill-conditioned problem rather than a broken solver. A validation threshold is a declared policy, not a theorem. State the assumptions of a differentiable unique solution and test both primal residual and derivative behavior.
 
 Connect the ridge calculation to the statistics book's bias-variance discussion. Design a sensitivity report that separates perturbation of data, regularization choice and floating-point effects instead of calling every difference solver error.

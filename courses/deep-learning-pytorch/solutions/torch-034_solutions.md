@@ -22,7 +22,7 @@ Compute boolean error vectors before aggregation. Groupby declared labels and re
 
 ## Keep population, perturbation and mechanism claims separate
 
-The original three records contain one error: groupA has \(\frac{1}{2}\) and groupB has 0/1. Overall error is \(\frac{1}{3}\). Repeating the correct record c five additional times creates eight rows but only three unique IDs. A naive row-weighted error becomes \(\frac{1}{8}\) even though no new case was tested. The apparent improvement comes entirely from changing the weight of one existing success.
+The original three records contain one error: group A has \(\frac{1}{2}\) and group B has 0/1. Overall error is \(\frac{1}{3}\). Repeating the correct record c five additional times creates eight rows but only three unique IDs. A naive row-weighted error becomes \(\frac{1}{8}\) even though no new case was tested. The apparent improvement comes entirely from changing the weight of one existing success.
 
 This counterexample does not imply that every repeated identity should be removed. A longitudinal task may legitimately contain several observations from one person or device. The question is which unit the reported quantity is intended to average over, and whether dependence is modeled. Exact duplicate detection, source-family grouping and a weighting policy are related but different controls. A set of three IDs alone also does not prove those units are statistically independent.
 
@@ -30,7 +30,7 @@ Zero errors among one observation is weak evidence about an unknown error probab
 
 An empty group has no measured rate. Returning None preserves that absence; returning zero invents a successful observation. A report or chart should not replace missing rates with zero merely to fill a display. Likewise, a confidence calculation cannot create coverage for a group or condition that never appeared in the data. Keep coverage counts and the intended target population beside every aggregate.
 
-The perturbation rule here is f(x)=1 when \(x\ge 0\). Starting at one, the shifts-0.1, -0.9, -1.1 produce 0.9, 0.1, -0.1 and therefore labels 1, 1, 0. If the target itself is defined by the observed sign, the final change is correct behavior after crossing the decision boundary. Calling it a robustness failure would assume an invariant label that the task definition does not support.
+The perturbation rule here is f(x)=1 when \(x\ge 0\). Starting at one, the shifts -0.1, -0.9, -1.1 produce 0.9, 0.1, -0.1 and therefore labels 1, 1, 0. If the target itself is defined by the observed sign, the final change is correct behavior after crossing the decision boundary. Calling it a robustness failure would assume an invariant label that the task definition does not support.
 
 A different application might model these shifts as measurement noise while the latent class remains fixed. That is a different target policy and needs its own oracle. For this simple sign rule, perturbations with magnitude strictly below one cannot cross from the starting point to the negative side. That analytic statement is local to this scalar rule and declared perturbation set; it is not evidence that an arbitrary neural classifier is robust to all small changes.
 
@@ -42,59 +42,58 @@ An empirical privacy attack test and a mathematical privacy guarantee answer dif
 
 A useful card joins intended use, data/version identity, evaluation units, group counts, perturbation policy, severity results and untested conditions. It can summarize existing evidence but does not create it. The paired TensorFlow route uses the same reasoning fixtures, so framework choice does not change the denominator, independence or privacy interpretation.
 
-## Exercise 1: Count group errors
+## Exercise 1: Count errors for three groups
 
-The question is: Use groups A, A, B with truth 1, 1, 0 and prediction 1, 0, 0.
+The question is: Use groups A, B, B, C with truth 0, 1, 1, 0 and predictions 0, 0, 1, 1.
 
-Counts keep the evidence visible. Equal rates with different denominators do not imply equal uncertainty.
+Group C's single record makes its error rate 1, a reason to report counts with every rate.
 
 ```python
-truth = torch.tensor([1, 1, 0])
-prediction = torch.tensor([1, 0, 0])
-groups = ["A", "A", "B"]
-errors = prediction != truth
-report = {
-    group: (int(errors[torch.tensor([g == group for g in groups])].sum()), groups.count(group))
-    for group in ["A", "B"]
+truth_t = torch.tensor([0, 1, 1, 0])
+pred_t = torch.tensor([0, 0, 1, 1])
+groups_t = ["A", "B", "B", "C"]
+wrong = pred_t != truth_t
+summary = {
+    g: (int(wrong[torch.tensor([x == g for x in groups_t])].sum()), groups_t.count(g))
+    for g in ["A", "B", "C"]
 }
-assert report == {"A": (1, 2), "B": (0, 1)}
+assert summary == {"A": (0, 1), "B": (1, 2), "C": (1, 1)}
 ```
 
-**Expected:** A1/2errors; B0/1.
+**Expected:** A: 0 of 1 wrong; B: 1 of 2; C: 1 of 1.
 
-**Verify:** Compare the computed values or written argument with A1/2errors; B0/1.
+**Verify:** In a fresh process, the exercise checks confirm `summary == {'A': (0, 1), 'B': (1, 2), 'C': (1, 1)}`.
 
-## Exercise 2: Expose repeated identities
+## Exercise 2: Deduplicate repeated identities
 
-The question is: Repeat correct record c five times and compare row count with unique IDs.
+The question is: Use row identities p, q, q, r, r, r and count rows, unique identities and the largest repeat.
 
-Repeated rows can bias a metric without adding independent cases. Identity validation belongs before aggregation.
+Identity r would carry half of a row-weighted score.
 
 ```python
-ids = ["a", "b", "c"] + ["c"] * 5
-assert len(ids) == 8 and len(set(ids)) == 3
+rows_t = ["p", "q", "q", "r", "r", "r"]
+assert len(rows_t) == 6 and len(set(rows_t)) == 3 and max(rows_t.count(i) for i in set(rows_t)) == 3
 ```
 
-**Expected:** 8rows but 3 unique IDs.
+**Expected:** 6 rows, 3 unique identities, largest repeat 3.
 
-**Verify:** Compare the computed values or written argument with 8rows but 3 unique IDs.
+**Verify:** In a fresh process, the exercise checks confirm `len(rows_t) == 6`, `len(set(rows_t)) == 3` and `max((rows_t.count(i) for i in set(rows_t))) == 3`.
 
-## Exercise 3: Trace a controlled perturbation
+## Exercise 3: Trace a new perturbation
 
-The question is: Classify \(x\ge 0\) at base 1 after shifts-.1, -.9, -1.1.
+The question is: Classify \(x\ge 0\) at base 0.5 after shifts -0.4, -0.5 and -0.6.
 
-The last shift crosses the defined boundary. Whether that counts as a robustness failure depends on the intended label semantics.
+The boundary case shows why the tie rule must be stated with a perturbation test.
 
 ```python
-base = torch.tensor(1.0)
-shifts = torch.tensor([-0.1, -0.9, -1.1])
-changed = (base + shifts >= 0).long()
-assert changed.tolist() == [1, 1, 0]
+start = torch.tensor(0.5)
+moves = torch.tensor([-0.4, -0.5, -0.6])
+assert ((start + moves) >= 0).long().tolist() == [1, 1, 0]
 ```
 
-**Expected:** labels 1, 1, 0.
+**Expected:** labels 1, 1, 0; the shift of -0.5 lands exactly on the boundary.
 
-**Verify:** Compare the computed values or written argument with labels 1, 1, 0.
+**Verify:** In a fresh process, the exercise checks confirm `(start + moves >= 0).long().tolist() == [1, 1, 0]`.
 
 ## Exercise 4: Keep severe failures visible
 
@@ -109,9 +108,9 @@ np.testing.assert_allclose(passed.float().mean().item(), 0.9, atol=1e-6, rtol=0)
 assert int((~passed & severe).sum()) == 1
 ```
 
-**Expected:** overall pass rate.9; severe failure count 1.
+**Expected:** overall pass rate 0.9; severe failure count 1.
 
-**Verify:** Compare the computed values or written argument with overall pass rate.9; severe failure count 1.
+**Verify:** In a fresh process, the exercise checks confirm `passed.float().mean().item()` matches `0.9` within 1e-06 and `int((~passed & severe).sum()) == 1`.
 
 ## Exercise 5: Represent an untested group
 
@@ -127,9 +126,9 @@ def rate(errors, count):
 assert rate(0, 0) is None and rate(0, 1) == 0
 ```
 
-**Expected:** None for untested; 0for zero errors in one case.
+**Expected:** None for untested; 0 for zero errors in one case.
 
-**Verify:** Compare the computed values or written argument with None for untested; 0for zero errors in one case.
+**Verify:** In a fresh process, the exercise checks confirm `rate(0, 0) is None` and `rate(0, 1) == 0`.
 
 ## Exercise 6: Write a bounded card
 
@@ -149,7 +148,7 @@ assert card["unique_units"] == 3 and not card["differential_privacy_established"
 
 **Expected:** card explicitly has no privacy guarantee.
 
-**Verify:** Compare the computed values or written argument with card explicitly has no privacy guarantee.
+**Verify:** In a fresh process, the exercise checks confirm `card['unique_units'] == 3` and `not card['differential_privacy_established']`.
 
 ## Review after comparison
 

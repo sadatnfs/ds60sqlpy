@@ -5,15 +5,15 @@ Copy to .learning before editing. Six independent attempts belong below.
 """
 
 # Exercise 1: Prepare a tiny training batch
-# Use two four-token sequences and shifted labels with vocabulary16.
-# Expected: inputs shape(2,3);6 active targets.
+# Use two four-token sequences and shifted labels with vocabulary 16.
+# Expected: inputs shape (2, 3); 6 active targets.
 
 # Exercise 2: Measure the initial objective
 # Calculate initial cross entropy before any optimizer step.
 # Expected: finite positive loss.
 
 # Exercise 3: Perform twelve bounded updates
-# Use Adam(.01), zero gradients each step, log losses and norms, and update exactly12
+# Use Adam(0.01), zero gradients each step, log losses and norms, and update exactly 12
 # times.
 # Expected: 12 finite losses and norms; at least one positive norm.
 
@@ -23,10 +23,10 @@ Copy to .learning before editing. Six independent attempts belong below.
 
 # Exercise 5: Clear accumulated gradients
 # Call zero_grad(set_to_none=True) after the run and inspect every parameter gradient.
-# Expected: all gradientsNone.
+# Expected: all gradients None.
 
 # Exercise 6: Report budget honestly
-# Create a run record with12 completed updates and the declared200 maximum.
+# Create a run record with 12 completed updates and the declared 200 maximum.
 # Expected: stopped_at12; no convergence claim.
 
 if __name__ == "__main__":

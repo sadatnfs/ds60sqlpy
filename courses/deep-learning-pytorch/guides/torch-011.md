@@ -6,11 +6,17 @@ Beginner; approximately 120 minutes. Direct prerequisites: `torch-010`. The prer
 
 ## Learning objectives
 
-Annn. The central investigation is concrete: Build Scalar Model with weight 0 and buffer offset 0. The finish condition is one parameter weight; one buffer offset; both in state_dict. same weight object and one parameter. A useful explanation connects the calculation to the reason it is needed, rather than treating a function name as a definition.
+Register parameters and buffers in an nn.Module, run an explicit training step and detect an optimizer that still holds a replaced Parameter.
+
+Central investigation: Build a scalar module with weight 0 and buffer offset 0, take one SGD step, convert its dtype and replace its Parameter after creating an optimizer.
+
+Finish condition: The module exposes one parameter and one buffer in state_dict, one SGD step moves the weight to \(\frac{28}{15}\) while the buffer stays 0, both tensors convert to float32, and the stale optimizer still references the old Parameter.
+
+The worked examples demonstrate the mechanism; exercises 1-3 transfer it to new inputs and exercises 4-6 extend it to failures and boundary cases. A useful explanation connects the calculation to the reason it is needed, rather than treating a function name as a definition.
 
 ## Purpose and mental model
 
-Annn.Module owns a model's registered parameters, buffers and child modules. Its forward method defines a computation, but the optimizer membership and training loop remain explicit. A plain tensor attribute is not automatically a Parameter. A buffer is tracked state that moves with the module and appears in state_dict without being optimized by default. This distinction is useful for fixed preprocessing statistics, running counts or nontrainable masks.
+An nn.Module owns a model's registered parameters, buffers and child modules. Its forward method defines a computation, but the optimizer membership and training loop remain explicit. A plain tensor attribute is not automatically a Parameter. A buffer is tracked state that moves with the module and appears in state_dict without being optimized by default. This distinction is useful for fixed preprocessing statistics, running counts or nontrainable masks.
 
 Calling model(x) routes through Module machinery and forward; it does not calculate a loss or apply an update. A complete loop selects parameters for an optimizer, clears gradients, computes an objective, backpropagates and steps. Replacing a Parameter after constructing an optimizer does not automatically update the optimizer object list. This lesson uses a scalar module to make ownership and membership observable before larger architectures hide them.
 
@@ -130,33 +136,33 @@ assert model.offset.item() == 0
 
 ## Prediction before your attempt
 
-For the supplied fixture, name the input unit, the intermediate state and the final quantity that changes. Predict one normal result and one failure result before touching the code. In particular, explain this lesson's acceptance condition in your own words: one parameter weight; one buffer offset; both in state_dict. same weight object and one parameter. Preserve the prediction beside your later observations so a correction is visible. A copied expected value is not a derivation.
+For the supplied fixture, name the input unit, the intermediate state and the final quantity that changes. Predict one normal result and one failure result before touching the code. In particular, explain this lesson's acceptance condition in your own words: The module exposes one parameter and one buffer in state_dict, one SGD step moves the weight to \(\frac{28}{15}\) while the buffer stays 0, both tensors convert to float32, and the stale optimizer still references the old Parameter. Preserve the prediction beside your later observations so a correction is visible. A copied expected value is not a derivation.
 
 ## Exercises
 
-1. **Inspect module state.** Build Scalar Model with weight 0 and buffer offset 0.
-   **Expected:** one parameter weight; one buffer offset; both in state_dict.
-   **Verify:** Save the assertion results for exercise 1, including one parameter weight; one buffer offset; both in state_dict.
+1. **Evaluate a module with a nonzero buffer.** Build ScalarModel, set its offset buffer to 1 under no_grad and evaluate x = 1, 2, 3.
+   **Expected:** outputs [1, 1, 1]; offset is a buffer, not a parameter.
+   **Verify:** In a fresh process, the exercise checks confirm `shifted(xs).tolist() == [1.0, 1.0, 1.0]` and `'offset' not in dict(shifted.named_parameters())`.
 
-2. **Check a forward call.** Runx 1, 2, 3 through the zero-weight module.
-   **Expected:** three zero outputs; weight unchanged.
-   **Verify:** Save the assertion results for exercise 2, including three zero outputs; weight unchanged.
+2. **Predict one step with the offset present.** Train the shifted module one SGD step with learning rate 0.1 toward y = 2x using mean squared error.
+   **Expected:** initial loss 35/3; new weight 22/15; offset still 1.
+   **Verify:** In a fresh process, the exercise checks confirm `loss2.item()` matches `35 / 3` within 1e-12, `shifted.weight.item()` matches `22 / 15` within 1e-12 and `shifted.offset.item() == 1`.
 
-3. **Run one explicit loop step.** Use SGD with rate 0.1 and mean squared error, clearing gradients before backward.
-   **Expected:** weight \(\frac{28}{15}\); buffer still 0.
-   **Verify:** Save the assertion results for exercise 3, including weight \(\frac{28}{15}\); buffer still 0.
+3. **Count state in a ModuleList.** Put two ScalarModel instances in nn.ModuleList and count parameters, buffers and state_dict keys.
+   **Expected:** 2 parameters, 2 buffers and keys 0.weight, 0.offset, 1.weight, 1.offset.
+   **Verify:** In a fresh process, the exercise checks confirm `len(list(pair.parameters())) == 2`; `len(list(pair.buffers())) == 2` and `set(pair.state_dict()) == {'0.weight', '0.offset', '1.weight', '1.offset'}`.
 
 4. **Move dtype through registered state.** Convert the module to float32 and inspect parameter and buffer dtypes.
    **Expected:** both float32.
-   **Verify:** Save the assertion results for exercise 4, including both float32.
+   **Verify:** In a fresh process, the exercise checks confirm `model.weight.dtype == torch.float32` and `model.offset.dtype == torch.float32`.
 
 5. **Expose stale optimizer membership.** Create an optimizer, replace the module Parameter, and inspect captured object identity.
    **Expected:** optimizer still holds old Parameter, not replacement.
-   **Verify:** Save the assertion results for exercise 5, including optimizer still holds old Parameter, not replacement.
+   **Verify:** In a fresh process, the exercise checks confirm `stale.param_groups[0]['params'][0] is old` and `stale.param_groups[0]['params'][0] is not fresh.weight`.
 
 6. **Keep parameter count stable across calls.** Call a fresh module on batches of length 1 and 4 and compare parameter identities.
    **Expected:** same weight object and one parameter.
-   **Verify:** Save the assertion results for exercise 6, including same weight object and one parameter.
+   **Verify:** In a fresh process, the exercise checks confirm `id(stable.weight) == identity` and `len(list(stable.parameters())) == 1`.
 
 ## Common pitfalls and diagnosis
 
@@ -170,7 +176,7 @@ First draw the state described in the vocabulary section. Next use the smallest 
 
 ## Self-check and retrieval
 
-Close both worked examples. Explain Module, Buffer, Optimizer membership using the lesson fixture. Reconstruct one computation from its inputs. Then change one input while retaining the mechanism and predict whether the conclusion survives. Write which part is guaranteed by the code and which part would need new observations. This last distinction prevents a tiny deterministic teaching example from being presented as evidence about an unseen population or a production model.
+Close all three worked examples. Explain Module, Buffer, Optimizer membership using the lesson fixture. Reconstruct one computation from its inputs. Then change one input while retaining the mechanism and predict whether the conclusion survives. Write which part is guaranteed by the code and which part would need new observations. This last distinction prevents a tiny deterministic teaching example from being presented as evidence about an unseen population or a production model.
 
 ## Next step
 
@@ -178,7 +184,7 @@ Revisit the direct prerequisite `torch-010` if the calculation cannot be reconst
 
 ## Sources and verification status
 
-API and mechanism reference: [PyTorch2.9 reference](https://docs.pytorch.org/docs/2.9/index.html), reviewed 2026-10-22. The fixture, examples, counterexamples and exercise design are original course material. See [validation](../../../docs/validation.md) for execution gates. Check CI artifacts for the exact revision and platform to determine which runtime checks actually ran; authored content alone does not establish runtime execution.
+API and mechanism reference: [PyTorch 2.9 reference](https://docs.pytorch.org/docs/2.9/index.html), reviewed 2026-10-22. The fixture, examples, counterexamples and exercise design are original course material. See [validation](../../../docs/validation.md) for execution gates. Check CI artifacts for the exact revision and platform to determine which runtime checks actually ran; authored content alone does not establish runtime execution.
 
 ## Interview reasoning with worked answers
 

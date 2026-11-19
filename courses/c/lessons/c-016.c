@@ -1,13 +1,23 @@
 #include <stdio.h>
 
 int main(void) {
-  /* Exercise 1: Push into an empty vector
-     Push 3 and 5 into a zero-initialized vector.
-     Expected: Length is 2 and values are retained. */
+  /* Exercise 1: Push into an empty vector: predict an edited check
+     Copy worked example 1 into a scratch pad and change `CHECK(vector_push(&v,
+     3) && vector_push(&v, 5));` to `CHECK(vector_push(&v, 4) && vector_push(&v,
+     5));` inside its CHECK. Before running, predict whether the CHECK still
+     holds and explain why; then restore it. Expected: The changed run stops
+     with `Check failed` at the CHECK on `v.len == 2 && v.data[0] == 3 &&
+     v.data[1] == 5`. Restoring the original line brings back the worked
+     observation: length is 2 and values are retained. */
 
-  /* Exercise 2: Reserve without adding elements
-     Reserve capacity eight.
-     Expected: Capacity is at least eight while length stays zero. */
+  /* Exercise 2: Reserve without adding elements: diagnose an edited check
+     A careless edit changed the CHECK in worked example 2 so that it reads
+     `CHECK(v.cap > 8 && v.len == 0);`. Run worked example 2 with that line,
+     explain why the edited CHECK now fails for the same program state, and
+     restore it. Expected: Before the repair the run stops with `Check failed`
+     at the CHECK on `v.cap >= 8 && v.len == 0`; after it the line reads
+     `CHECK(v.cap >= 8 && v.len == 0);` again and capacity is at least eight
+     while length stays zero. */
 
   /* Exercise 3: Grow while preserving contents
      Push twenty sequential values.

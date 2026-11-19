@@ -1,13 +1,22 @@
 #include <stdio.h>
 
 int main(void) {
-  /* Exercise 1: Group before calculating
-     Compare 2+3*4 with (2+3)*4.
-     Expected: The values are 14 and 20. */
+  /* Exercise 1: Group before calculating: predict an edited check
+     Copy worked example 1 into a scratch pad and change `CHECK((2 + 3) * 4 ==
+     20);` to `CHECK((3 + 3) * 4 == 20);` inside its CHECK. Before running,
+     predict whether the CHECK still holds and explain why; then restore it.
+     Expected: The changed run stops with `Check failed` at the CHECK on `(2 +
+     3) * 4 == 20`. Restoring the original line brings back the worked
+     observation: the values are 14 and 20. */
 
-  /* Exercise 2: Use a short-circuit guard
-     Guard an array access with a false length test.
-     Expected: The access is skipped and the condition is false. */
+  /* Exercise 2: Use a short-circuit guard: debug a regression
+     A regression changed one token in worked example 2, so one line now reads
+     `bool found = length >= 0 && values[0] == 7;`. Run worked example 2 with
+     that line, use the failing CHECK to locate the defect and repair it without
+     changing the CHECK. Expected: Before the repair the run stops with `Check
+     failed` at the CHECK on `!found`; after it the line reads `bool found =
+     length > 0 && values[0] == 7;` again and the access is skipped and the
+     condition is false. */
 
   /* Exercise 3: Sequence updates explicitly
      Increment x and then calculate twice its updated value.
@@ -21,9 +30,10 @@ int main(void) {
      Select a valid value while the other branch would divide by zero.
      Expected: Only the chosen branch is evaluated and result is 7. */
 
-  /* Exercise 6: Transfer assignment diagnosis
-     Assign 3 to a variable, then separately compare it with 3.
-     Expected: The assignment changes the variable and equality tests it. */
+  /* Exercise 6: Transfer integer promotion
+     Add two unsigned char values 200 and 100, then store the sum back into an
+     unsigned char. Expected: The promoted int sum is 300; the stored unsigned
+     char is 44. */
 
   puts("Implement the six investigations in your saved pad.");
   return 0;

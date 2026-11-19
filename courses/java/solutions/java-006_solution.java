@@ -15,9 +15,9 @@ public class Main {
 
     // Exercise 3: Inspect set insertion
     Set<String> unique = new HashSet<>();
-    assert unique.add("red");
-    assert !unique.add("red");
-    assert unique.size() == 1;
+    boolean firstAdded = unique.add("red");
+    boolean secondAdded = unique.add("red");
+    assert firstAdded && !secondAdded && unique.size() == 1;
 
     // Exercise 4: Create deterministic output order
     List<String> keys = new ArrayList<>(counts.keySet());

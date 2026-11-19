@@ -1,6 +1,6 @@
 # spark-038: Explained paired reference solutions
 
-Read the [guide](../guides/spark-038.md) and attempt one language first. The [Scala reference](spark-038_solution.scala) and [PySpark reference](spark-038_solution.py) are complete single-file programs with explicit local sessions and finally-based stop. Each compares with literal expectations;matching two implementations alone would not rule out a shared mistake.
+Read the [guide](../guides/spark-038.md) and attempt one language first. The [Scala reference](spark-038_solution.scala) and [PySpark reference](spark-038_solution.py) are complete single-file programs with explicit local sessions and finally-based stop. Each compares with literal expectations; matching two implementations alone would not rule out a shared mistake.
 
 ## Exercises and reasoning
 
@@ -27,7 +27,7 @@ The actual query ingests three occurrences and retains two distinct IDs. Its sta
 
 ### Exercise 2: Interpret state and sink metrics with units
 
-Require a state operator and a nonnegative memory-used measurement;preserve unknown or negative sink-row sentinel values as unavailable.
+Require a state operator and a nonnegative memory-used measurement; preserve unknown or negative sink-row sentinel values as unavailable.
 
 **Expected:** State memory is reported in bytes. A missing or negative sink output count is not converted into zero.
 
@@ -79,7 +79,7 @@ This deduplication query has no eviction policy and adds one new key, so retaini
 
 Run a separate AvailableNow query over an empty owned input directory.
 
-**Expected:** Zero admitted rows and a terminated query;state/sink metrics may be absent.
+**Expected:** Zero admitted rows and a terminated query; state/sink metrics may be absent.
 
 ```scala
 def emptyObservation(spark: SparkSession, root: Path): Observation = {
@@ -103,7 +103,7 @@ A finite empty invocation can finish successfully without producing a readable f
 
 For the explicitly synthetic incident fixtures, choose one reversible check for skew, growing state and zero admitted input.
 
-**Expected:** Inspect key/partition distribution;inspect watermark/key-retention policy;inspect source discovery respectively.
+**Expected:** Inspect key/partition distribution; inspect watermark/key-retention policy; inspect source discovery respectively.
 
 ```scala
 def nextCheck(kind: String): String = {
@@ -151,10 +151,10 @@ def sanitize(event):
     return {key: value for key, value in event.items() if key in allowed}
 ```
 
-Event logs, plans and configuration can contain paths, SQL text or application data. This small allowlist creates a reviewable sanitized task record and never prints the fake secret input. It is not a universal log-redaction system;new fields need a deliberate data-handling decision before being exported.
+Event logs, plans and configuration can contain paths, SQL text or application data. This small allowlist creates a reviewable sanitized task record and never prints the fake secret input. It is not a universal log-redaction system; new fields need a deliberate data-handling decision before being exported.
 
-**Verification evidence:** Assert field set and values;do not print the unfiltered input.
+**Verification evidence:** Assert field set and values; do not print the unfiltered input.
 
 ## Execution and interpretation
 
-Run the complete reference in its prepared fixed worker. The small fixture is constructed inside the program,so opening a lesson does not fetch data. A final success line is printed only after the reference assertions complete. Plan observations,partition evidence and resource measurements apply to the actual local configuration;they do not establish cluster-scale performance. Session cleanup is explicit,and any additional owned file/query lifecycle is described in the lesson.
+Run the complete reference in its prepared fixed worker. The small fixture is constructed inside the program, so opening a lesson does not fetch data. A final success line is printed only after the reference assertions complete. Plan observations, partition evidence and resource measurements apply to the actual local configuration; they do not establish cluster-scale performance. Session cleanup is explicit, and any additional owned file/query lifecycle is described in the lesson.

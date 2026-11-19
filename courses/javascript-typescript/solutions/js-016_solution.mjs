@@ -1,5 +1,5 @@
 import { strict as assert } from "node:assert";
-import { mkdtemp, writeFile, readFile, rm } from "node:fs/promises";
+import { mkdtemp, open, writeFile, readFile, rm } from "node:fs/promises";
 import { createReadStream } from "node:fs";
 import { createInterface } from "node:readline";
 import { tmpdir } from "node:os";
@@ -38,8 +38,14 @@ export async function verify() {
       const path = join(directory, "message.txt");
       const text = "A😀B\n";
       await writeFile(path, text, { encoding: "utf8", flag: "wx" });
+      let owned;
+      {
+        await using handle = await open(path, "r");
+        owned = handle;
+        assert.equal((await handle.readFile()).length, 7);
+      }
+      assert.equal(owned.fd, -1);
       assert.equal(await readFile(path, "utf8"), text);
-      assert.equal((await readFile(path)).length, 7);
       assert.equal(text.length, 5);
     });
   }

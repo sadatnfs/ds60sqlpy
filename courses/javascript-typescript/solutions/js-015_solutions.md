@@ -22,11 +22,13 @@ Async tests must return or await their work. A Promise started and forgotten can
 
 import test from node:test declares tests, while node:assert/strict provides exact assertions. test(name, async () => ...) awaits the returned Promise. assert.deepEqual compares structured values; assert.throws and assert.rejects check distinct failure channels. The child runner uses process.execPath, a fixed argument array and shell:false through spawnSync. A temporary source file belongs to the exercise and is removed in finally. A nonzero child result is expected only in the deliberately broken fixture.
 
-## Exercise 1: Run a passing pure-function test
+## Exercise 1: Run a passing pure-function test: change one input
 
-Task: Start a real node --test process asserting add(2,3)=5.
+Task: Copy Example A into a scratch `main.mjs` and change `assert.equal(2` to `assert.equal(3`. Before running it, predict which check fails and which value it now sees; then run it and restore the original line.
 
 The child actually evaluates an assertion through the built-in runner. Process status supplies a machine-readable success signal; text is retained for diagnosis.
+
+The unchanged code is the exercise block of Example A:
 
 ```javascript
 const result = await runTests("test('addition', () => { assert.equal(2 + 3, 5); });");
@@ -34,15 +36,17 @@ assert.equal(result.status, 0, result.stderr + result.stdout);
 assert.match(result.stdout, /# pass 1/u);
 ```
 
-**Expected:** child exit status 0; one passing test.
+**Expected:** The changed run fails with an `AssertionError` at the check `assert.equal(result.status, 0, result.stderr + result.stdout)`. Restoring the original line brings back the worked observation: child exit status 0; one passing test.
 
-**Verify:** Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.
+**Verify:** Compare your written prediction with the reported `AssertionError`, including its actual and expected values, and name the value that made `assert.equal(result.status, 0, result.stderr + result.stdout)` fail. After restoring the line, the program prints its `{"checks":1,"status":"passed"}` receipt again.
 
-## Exercise 2: Prove a wrong result fails the runner
+## Exercise 2: Prove a wrong result fails the runner: debug a regression
 
-Task: Deliberately assert 2+3=6 in a child fixture.
+Task: A regression changed one token in Example B, so one line now reads `assert.equal(3`. Run Example B with that line, use the failing check to locate the defect and repair it without changing the check.
 
 A test suite that never fails cannot establish that its checks are connected. This controlled mutation proves that the assertion reaches the runner and influences the exit result.
+
+The unchanged code is the exercise block of Example B:
 
 ```javascript
 const result = await runTests("test('deliberate regression', () => { assert.equal(2 + 3, 6); });");
@@ -51,9 +55,9 @@ assert.match(result.stdout, /# fail 1/u);
 assert.match(result.stdout, /AssertionError/u);
 ```
 
-**Expected:** nonzero child exit; one failing test.
+**Expected:** Before the repair the run fails with an `AssertionError` at the check `assert.notEqual(result.status, 0)`; after it the line reads `assert.equal(2` again and nonzero child exit; one failing test.
 
-**Verify:** Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.
+**Verify:** Keep the failing and the repaired runs. Explain why the changed token alters the value tested by `assert.notEqual(result.status, 0)` for this input.
 
 ## Exercise 3: Await an asynchronous test
 
@@ -70,7 +74,7 @@ assert.equal(result.status, 0, result.stderr + result.stdout);
 
 **Expected:** child exit status 0.
 
-**Verify:** Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.
+**Verify:** Keep a check equivalent to `assert.equal(result.status, 0, result.stderr + result.stdout)`. As a control, change `Promise.resolve(7);` to `Promise.resolve(8);`: the run must fail with an `AssertionError` at that check. Restore the line before continuing.
 
 ## Exercise 4: Check rejection with rejects
 
@@ -87,7 +91,7 @@ assert.equal(result.status, 0, result.stderr + result.stdout);
 
 **Expected:** child exit status 0.
 
-**Verify:** Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.
+**Verify:** Keep a check equivalent to `assert.equal(result.status, 0, result.stderr + result.stdout)`. As a control, change `assert.equal(result.status, 0, result.stderr + result.stdout);` to `assert.equal(result.status, 1, result.stderr + result.stdout);` inside it: the run must fail with an `AssertionError`, which shows the check can fail. Restore it.
 
 ## Exercise 5: Cover a table of boundary cases
 
@@ -106,7 +110,7 @@ assert.match(result.stdout, /# pass 3/u);
 
 **Expected:** three passing child tests.
 
-**Verify:** Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.
+**Verify:** Keep a check equivalent to `assert.equal(result.status, 0, result.stderr + result.stdout)`. As a control, change `0` to `1`: the run must fail with an `AssertionError` at that check. Restore the line before continuing.
 
 ## Exercise 6: Keep fixtures independent
 
@@ -124,7 +128,7 @@ assert.match(result.stdout, /# pass 2/u);
 
 **Expected:** two tests pass without shared mutable state.
 
-**Verify:** Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.
+**Verify:** Keep a check equivalent to `assert.equal(result.status, 0, result.stderr + result.stdout)`. As a control, change `1` to `2`: the run must fail with an `AssertionError` at that check. Restore the line before continuing.
 
 ## After comparison
 

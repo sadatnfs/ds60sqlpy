@@ -1,13 +1,21 @@
 #include <stdio.h>
 
 int main(void) {
-  /* Exercise 1: Add ordinary values
-     Add 7 and 5 through the checked helper.
-     Expected: The result is 12. */
+  /* Exercise 1: Add ordinary values: predict an edited check
+     Copy worked example 1 into a scratch pad and change `CHECK(add_checked(7,
+     5, &out) && out == 12);` to `CHECK(add_checked(8, 5, &out) && out == 12);`
+     inside its CHECK. Before running, predict whether the CHECK still holds and
+     explain why; then restore it. Expected: The changed run stops with `Check
+     failed` at the CHECK on `add_checked(7, 5, &out) && out == 12`. Restoring
+     the original line brings back the worked observation: the result is 12. */
 
-  /* Exercise 2: Reject positive overflow
-     Add one to INT_MAX.
-     Expected: The operation fails and preserves output. */
+  /* Exercise 2: Reject positive overflow: debug a regression
+     A regression changed one token in worked example 2, so one line now reads
+     `int out = 10;`. Run worked example 2 with that line, use the failing CHECK
+     to locate the defect and repair it without changing the CHECK. Expected:
+     Before the repair the run stops with `Check failed` at the CHECK on
+     `!add_checked(INT_MAX, 1, &out) && out == 9`; after it the line reads `int
+     out = 9;` again and the operation fails and preserves output. */
 
   /* Exercise 3: Reject negative overflow
      Add negative one to INT_MIN.

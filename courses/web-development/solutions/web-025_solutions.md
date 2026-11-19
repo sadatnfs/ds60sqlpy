@@ -1,55 +1,43 @@
 # web-025: explanatory solutions
 
-Compare after your own attempt or an explicit solution reveal. This file explains the supplied deterministic fixtures. It does not claim that a learner or a production deployment passed.
-
-## Why the mechanism works
-
-The document object model is the browser's live tree of elements. JavaScript can select a node, observe an event and update content. HTML supplies the structure, CSS supplies presentation, and JavaScript handles behavior. Start with a native button so keyboard activation and focus work without reimplementation. The event listener is a function called when a matching event occurs; it is not the same as calling the function immediately while registering it.
-
-Keep state separate from the text that displays it. A numeric count in a variable is the source of truth; a render function translates it into a label. Reading the current label and repeatedly parsing it back into a number couples business state to presentation. Use textContent for plain user text because it creates text rather than parsing markup.
-
-`document.querySelector('#add')` returns a matching element or null. `addEventListener('click', handler)` registers a function. Update the number, then render the new value to an output element. Query elements after they exist, for example with a script at the end of the body. For JavaScript syntax, revisit the JavaScript foundations and browser chapters rather than treating this lesson as a substitute for that route.
-
-A classic inline script runs when the parser reaches it. A script in the head cannot assume that later body elements already exist. Separate classic script tags share the document's global lexical environment, while a module has its own scope and strict semantics. DOMContentLoaded fires after parsing and the relevant deferred script work; it does not mean every image has loaded. The load event describes the later document load boundary. Register a listener before its event occurs, or inspect readyState when code can be loaded at different times.
-
-An external classic script with defer preserves document order and waits for parsing. Async scripts do not provide that same ordering guarantee. Defer does not turn an inline classic script into a deferred one. Inline modules use real module semantics, including top-level this being undefined. The classroom supports inline modules but blocks external script files and imports. Study multi-file loading in a separately prepared local project rather than weakening the preview policy.
+Open this after your own attempt. Each answer explains the lesson's synthetic fixtures; it does not show that your work or a deployment passed. The mechanism is explained in `courses/web-development/guides/web-025.md`.
 
 ## Exercise 1: Predict when the registered callback executes.
 
-It runs on a matching event, not merely because the listener was registered.
+**Expected answer:** It runs on a matching event, not merely because the listener was registered.
 
-Trace the smallest example before editing. Name which values are source and which are observations.
+**Why:** addEventListener stores the callback; the browser calls it later, once per matching event.
 
 ## Exercise 2: Change the display label without changing numeric state.
 
-The counter logic remains independent of presentation wording.
+**Expected evidence:** The counter logic remains independent of presentation wording.
 
-Change only the named feature. Compare with the unchanged example and explain any unaffected behavior.
+**Why:** Keeping state separate from presentation lets the wording change without breaking the arithmetic.
 
 ## Exercise 3: Build a native-button counter with a reset action and output.
 
-Increment and reset work by keyboard and pointer, with a visible announced result.
+**Expected evidence:** Increment and reset work by keyboard and pointer, with a visible announced result.
 
-Sketch the structure or data contract first. Reuse the mechanism from the examples without copying the reference.
+**Why:** Native buttons are keyboard operable, and output can be announced as a status when its text changes.
 
 ## Exercise 4: Diagnose a null selection caused by a missing id.
 
-Inspect the document relationship before attaching the listener.
+**Expected answer:** Inspect the document relationship before attaching the listener.
 
-Keep the failing input. Identify the first layer where the observed result differs from the intended contract.
+**Why:** querySelector returns null when no element matches, and calling a method on null throws a TypeError.
 
 ## Exercise 5: Insert text containing angle brackets without creating markup.
 
-textContent preserves the literal data and creates no extra element.
+**Expected evidence:** textContent preserves the literal data and creates no extra element.
 
-Predict the boundary before running it. Add an explicit check or manual observation that would detect a regression.
+**Why:** textContent stores characters as text, so angle brackets never reach the HTML parser and cannot create elements.
 
 ## Exercise 6: Explain why reading state back from formatted text is fragile.
 
-Formatting, localization and extra words can break parsing while the underlying number is unchanged.
+**Expected answer:** Formatting, localization and extra words can break parsing while the underlying number is unchanged.
 
-Explain your choice to someone who has not seen the code. Include one limitation and the evidence needed to remove it.
+**Why:** Parsing formatted text couples logic to presentation, so a translation or extra word breaks the state.
 
-## Reference comparison and limits
+## Reference comparison
 
-Read the separate executable reference, where supplied, only after retaining your attempt. Compare structure and decisions rather than matching every identifier. A different implementation is acceptable when it satisfies the same behavior, preserves accessibility and rejects the same invalid cases. The checked reference uses tiny synthetic inputs so that each transformation can be inspected. It is not a ready-to-deploy authenticated application. Server lifecycle, persistence, concurrency and security require their own integration evidence.
+Open `courses/web-development/solutions/web-025_solution.html` only after saving your attempt, and compare decisions rather than identifiers. A different implementation is acceptable when it shows the same behavior and rejects the same invalid cases. The reference checks only its named synthetic cases; its success message is not an accessibility audit or proof of responsive behavior at every size.

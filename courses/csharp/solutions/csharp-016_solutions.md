@@ -1,6 +1,6 @@
 # csharp-016: explanation and comparison
 
-Attempt the six guide tasks before opening this comparison. The executable reference is [csharp-016_solution.cs](csharp-016_solution.cs). Its assertions are always active under the prepared classroom compile settings.
+Attempt the six guide tasks before opening this comparison. The executable reference is [csharp-016_solution.cs](csharp-016_solution.cs). It runs both worked examples and the reference answers below, and its assertions are always active under the prepared classroom compile settings.
 
 ## Why the two examples differ
 
@@ -8,21 +8,60 @@ Attempt the six guide tasks before opening this comparison. The executable refer
 
 **Retain rejection evidence:** Malformed and negative quantities remain excluded, and empty input produces an empty report rather than an invented item. Three rejected lines do not alter the valid pear total.
 
-## Reason through the six tasks
+## Task answers
 
-1. **Predict and explain.** Trace each input through validation and accumulation.
+### Task 1: Predict and explain
 
-2. **Guided modification.** Add one valid duplicate and predict the new total before running.
+Trace each input through validation and accumulation.
 
-3. **Independent construction.** Build a sorted text report from the accepted dictionary and the rejection count.
+No separate reference answer has been written for this task. Example A is the evidence to compare with: Repeated identities accumulate after validation rather than creating ambiguous duplicate dictionary entries. Pear totals 6 and apple totals 3.
 
-4. **Diagnose a defect.** Diagnose an importer that ignores TryParse failure and inserts zero.
+### Task 2: Guided modification
 
-5. **Boundary evidence.** Test empty item names, extra fields, zero quantity and empty input.
+Add one valid duplicate and predict the new total before running.
 
-6. **Transfer and justify.** Design a reusable import result that retains per-line rejection reasons without exposing sensitive raw input.
+No separate reference answer has been written for this task. Start from Example B: Malformed and negative quantities remain excluded, and empty input produces an empty report rather than an invented item. Three rejected lines do not alter the valid pear total.
 
-For tasks 1 and 2, use the checked values and mechanism trace in the two examples. For task 3, choose names that expose the input and result contract and retain the same invariants. For task 4, the diagnosed mistakes below supply a concrete wrong assumption: preserve its counterexample before repairing it. Task 5 needs an explicit expected value or documented rejection at the boundary, not just successful execution. For task 6, explain what changes in the new context and which part of the original mechanism remains applicable. Several representations may satisfy this transfer task; justify the choice rather than treating this reference as the only architecture.
+### Task 3: Independent construction
+
+Build a sorted text report from the accepted dictionary and the rejection count.
+
+**Reference answer.** It runs as the `Task 3` block of the reference program.
+
+```csharp
+var result = Import(new[] { "pear,2", "apple,3", "bad", "pear,1" });
+var comparer = StringComparer.Ordinal;
+var names = result.Counts.Keys.OrderBy(key => key, comparer);
+var lines = new List<string>();
+foreach (string name in names) {
+  lines.Add($"{name}: {result.Counts[name]}");
+}
+lines.Add($"rejected: {result.Rejected}");
+string report = string.Join("\n", lines);
+Check(report == "apple: 3\npear: 3\nrejected: 1", "sorted report");
+```
+
+**Observe:** The report lists apple: 3, pear: 3 and rejected: 1 in that order.
+
+Ordinal ordering makes the report deterministic, and the rejection count is reported beside the accepted totals instead of being hidden.
+
+### Task 4: Diagnose a defect
+
+Diagnose an importer that ignores TryParse failure and inserts zero.
+
+No reference answer has been written for this task yet. The wrong assumptions to look for are this lesson's pitfalls: Checking field count after indexing is too late. Case policy affects identity and must be documented. Extremely large totals can overflow, so checked accumulation belongs in a production input contract.
+
+### Task 5: Boundary evidence
+
+Test empty item names, extra fields, zero quantity and empty input.
+
+No reference answer has been written for this task yet. Write the expected value or documented rejection for each boundary before running it, and compare with the checks in Example A (Aggregate repeated valid items) and Example B (Retain rejection evidence).
+
+### Task 6: Transfer and justify
+
+Design a reusable import result that retains per-line rejection reasons without exposing sensitive raw input.
+
+No single reference answer exists: several designs can satisfy this transfer task. Justify yours against the mechanism described below and the vocabulary entry **Pipeline**, and state one limitation of your choice.
 
 ## Mechanism and diagnostic reasoning
 
@@ -36,4 +75,4 @@ Checking field count after indexing is too late. Case policy affects identity an
 
 ## Review before continuing
 
-The reference checks the worked scenarios, including their boundary distinctions. Your independent and transfer artifacts may have additional checks. Compare observations rather than only source text. Preserve any new regression case you discover and explain why it would reject a plausible wrong implementation. External project steps require their own build and platform evidence and are not established by a portable reference passing.
+Run the reference and confirm that it prints `csharp-016: passed`, then reconstruct one boundary case from memory and explain which check would reject a plausible wrong implementation. External project steps need their own build and platform evidence; a passing portable reference does not establish them.

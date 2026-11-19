@@ -35,6 +35,17 @@ internal static class Program {
       labels.Add("blue");
       Check(labels.Count == 2, "two identities");
     }
+    {
+      // Task 3: Independent construction
+      string[] tags = { "red", "blue", "red" };
+      var counts = new Dictionary<string, int>(StringComparer.Ordinal);
+      foreach (string tag in tags) {
+        counts.TryGetValue(tag, out int before);
+        counts[tag] = before + 1;
+      }
+      Check(counts["red"] == 2 && counts["blue"] == 1, "frequencies");
+      Check(counts.Count == 2, "one entry per distinct tag");
+    }
     Console.WriteLine("csharp-010: passed");
     await Task.CompletedTask;
   }

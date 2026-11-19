@@ -5,15 +5,43 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Links, paths, navigation and usable destinations: my attempt</title>
     <style>
-      /* Implement the lesson-specific CSS. Keep keyboard focus visible. */
+      /* Write the CSS for the exercises here. Keep keyboard focus visible. */
     </style>
   </head>
   <body>
-    <!-- web-004: Build a contents list that navigates to three local sections. -->
-    <!-- Save your prediction, then implement the six exercises from the guide. -->
+    <!--
+      web-004 exercises. Hints are in the guide; answers are in the solutions folder.
+      1. Resolve ../images/plot.svg from /notes/week1/page.html.
+      2. Replace vague link text with destination-specific wording.
+      3. Build a contents list that navigates to three local sections.
+      4. Diagnose a link whose fragment has no matching id.
+      5. Distinguish a disabled action from an unavailable destination.
+      6. Explain the difference between absolute, root-relative and document-relative paths.
+    -->
     <main>
       <h1>Links, paths, navigation and usable destinations</h1>
-      <!-- Build your own document here. The reference is separate. -->
+      <nav aria-label="Contents">
+        <a href="#methods">Click here</a>
+        <a href="#result">Results</a>
+      </nav>
+      <section id="methods">
+        <h2>Methods</h2>
+        <p>How the synthetic study notes were collected.</p>
+      </section>
+      <section id="results">
+        <h2>Results</h2>
+        <p>What the notes showed.</p>
+      </section>
+      <!--
+        Worked example 1: Within-page navigation
+        <a href="#methods">Read the methods</a>
+        <section id="methods"><h2>Methods</h2></section>
+      -->
+      <!--
+        Worked example 2: Link versus button
+        <a href="#results">View results</a>
+        <button type="button">Toggle details</button>
+      -->
     </main>
   </body>
 </html>

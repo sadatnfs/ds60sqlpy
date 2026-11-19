@@ -1,13 +1,24 @@
 // Answer-free learner source. Save your own copy before editing.
 
 export {};
-// Exercise 1: Complete one valid job lifecycle
-// Start a queued job and complete it with value 7.
-// Expected: succeeded with attempt 1 and value 7.
+// Exercise 1: Complete one valid job lifecycle: change one input
+// Copy Example A into a scratch `main.mts` and change `const completed = transition(started,
+// { type: 'complete', value: 7 });` to `const completed = transition(started, { type:
+// 'complete', value: 8 });`. Before running it, predict which check fails and which value it
+// now sees; then run it and restore the original line.
+// Expected: The changed run fails with an `AssertionError` at the check
+// `assert.deepEqual(completed, { id: 'A', attempt: 1, kind: 'succeeded', value: 7 })`.
+// Restoring the original line brings back the worked observation: succeeded with attempt 1
+// and value 7.
 
-// Exercise 2: Reject a result arriving before start
-// Send complete directly to queued.
-// Expected: invalid transition error; original remains queued.
+// Exercise 2: Reject a result arriving before start: diagnose an edited check
+// A careless edit changed a check in Example B so that it reads `assert.deepEqual(queued, {
+// id: 'A', attempt: 1, kind: 'queued' });`. Run Example B with that line, explain why the
+// edited check now fails for the same program state, and restore it.
+// Expected: Before the repair the run fails with an `AssertionError` at the check
+// `assert.deepEqual(queued, { id: 'A', attempt: 0, kind: 'queued' })`; after it the line
+// reads `assert.deepEqual(queued, { id: 'A', attempt: 0, kind: 'queued' });` again and
+// invalid transition error; original remains queued.
 
 // Exercise 3: Enforce the retry budget
 // Fail three started attempts and try to retry once more.

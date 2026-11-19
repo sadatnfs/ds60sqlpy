@@ -30,6 +30,55 @@ expected connection type and dataset marker, and records that the reference was
 resolved. It does not print the complete connection object or its URI, because
 real deployments can place passwords in those representations.
 
+The whole check is one task in the connection DAG:
+
+From [`projects/airflow/dags/classroom_workflows.py`](../projects/airflow/dags/classroom_workflows.py):
+
+```python
+@dag(
+    dag_id="classroom_connections",
+    schedule=None,
+    start_date=pendulum.datetime(2026, 1, 1, tz="UTC"),
+    catchup=False,
+    max_active_runs=1,
+    is_paused_upon_creation=True,
+    tags=["classroom", "runtime-connections"],
+)
+def connection_workflow():
+    @task(execution_timeout=timedelta(seconds=30))
+    def inspect_reference():
+        reference = Connection.get("classroom_fixture")
+        if reference.conn_type != "generic" or reference.extra_dejson.get("dataset") != "orders":
+            raise ValueError("Unexpected local connection contract")
+        try:
+            Connection.get("classroom_intentionally_missing")
+        except Exception as error:
+            text = str(error).lower()
+            if not any(
+                token in text for token in ("not found", "not_found", "isn't defined", "notfound")
+            ):
+                raise AssertionError("Unexpected missing-connection error category") from error
+            missing_type = type(error).__name__
+        else:
+            raise AssertionError("Absent connection unexpectedly resolved")
+        if Connection.get("classroom_fixture").conn_type != "generic":
+            raise AssertionError("Known connection changed")
+        result = {
+            "known_reference_resolved": True,
+            "missing_reference_rejected": True,
+            "missing_error_type": missing_type,
+            "credential_values_recorded": False,
+        }
+        atomic(ROOT / "observations" / "connections.json", result)
+        return result
+
+    inspect_reference()
+```
+
+`Connection.get` resolves a connection identifier through Airflow's configured
+secrets backends at run time. The recorded result contains only Boolean outcomes
+and an error type name, never the connection's URI or password.
+
 Resolution occurs inside task execution rather than at module import time.
 DAG parsing should be quick and repeatable; retrieving a remote secret or opening
 a database during parsing adds availability and performance dependencies to the

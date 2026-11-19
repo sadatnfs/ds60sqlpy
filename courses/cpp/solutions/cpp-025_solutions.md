@@ -55,7 +55,7 @@ Explain index 2 into vector size 2.
 
 **Reasoning:** A half-open index interval ends before size.
 
-**Verify:** Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.
+**Verify:** Check your explanation against `xs.size() == 2`: the last valid index is `size() - 1`, and `checked_at({2, 4}, 1) == 4` in Worked example 1 is the boundary that works.
 
 ## Exercise 2: Use checked access
 
@@ -65,7 +65,7 @@ Compare at(2) with the contract of operator[2].
 
 **Reasoning:** A deterministic exception is not a sanitizer report.
 
-**Verify:** Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.
+**Verify:** Confirm Worked example 2 catches `std::out_of_range` from `at(2)`, and do not run `xs[2]`; your answer must call it undefined behavior rather than predict its output.
 
 ## Exercise 3: Prepare instrumented build
 
@@ -75,7 +75,7 @@ Compile the safe reference with sanitizer flags on a supported host.
 
 **Reasoning:** Instrumentation requires the matching runtime library.
 
-**Verify:** Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.
+**Verify:** Build with `-fsanitize=address,undefined -g`, run the program, and record the compiler version plus separate compile, link and run statuses.
 
 ## Exercise 4: Diagnose a controlled failure
 
@@ -85,7 +85,7 @@ In a separate instrumented scratch program introduce one heap out-of-bounds acce
 
 **Reasoning:** Keep the fault isolated from normal lesson execution.
 
-**Verify:** Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.
+**Verify:** Confirm the AddressSanitizer report says `heap-buffer-overflow`, points at your scratch file and line, and that the exit status is nonzero.
 
 ## Exercise 5: Repair and rerun
 
@@ -95,7 +95,7 @@ Replace invalid access with a valid index or explicit check.
 
 **Reasoning:** Absence of a report is bounded evidence.
 
-**Verify:** Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.
+**Verify:** Rebuild the same scratch program with the same sanitizer flags and confirm it exits 0 with no report and asserts the correct value.
 
 ## Exercise 6: Transfer signed arithmetic
 
@@ -105,4 +105,4 @@ Review INT_MAX+1 and use pre-add range validation.
 
 **Reasoning:** Sanitizers diagnose executed undefined operations, not all possible inputs.
 
-**Verify:** Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.
+**Verify:** Check that the guard compares `a > std::numeric_limits<int>::max() - b` before adding, and assert it rejects `INT_MAX` plus 1 while accepting `INT_MAX - 1` plus 1.

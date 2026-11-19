@@ -54,7 +54,7 @@ Split add declaration, definition and caller using the supplied host-project rec
 
 **Reasoning:** The compiler sees declarations; the linker finds the body.
 
-**Verify:** Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.
+**Verify:** Confirm `math.hpp` holds only the declaration, `math.cpp` the single definition and `main.cpp` the caller, then run the executable and check that `add(2, 3)` produced 5.
 
 ## Exercise 2: Compile one object
 
@@ -64,7 +64,7 @@ Compile main.cpp with -c before linking.
 
 **Reasoning:** -c stops before the final link stage.
 
-**Verify:** Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.
+**Verify:** Run `g++ -std=c++20 -c main.cpp`, then list the directory and confirm `main.o` exists and no executable has been produced yet.
 
 ## Exercise 3: Link the complete set
 
@@ -74,7 +74,7 @@ Link main.o and math.o.
 
 **Reasoning:** Both object files contribute definitions/references.
 
-**Verify:** Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.
+**Verify:** Link with `g++ main.o math.o -o app`, run `./app`, and check both the printed value 5 and a status of 0 from `echo $?`.
 
 ## Exercise 4: Diagnose missing object
 
@@ -84,7 +84,7 @@ Omit math.o deliberately.
 
 **Reasoning:** Changing an include cannot supply a missing linked definition.
 
-**Verify:** Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.
+**Verify:** Link `main.o` alone and keep the undefined reference to `add(int, int)` message and the nonzero status; no new executable may appear.
 
 ## Exercise 5: Diagnose duplicate definition
 
@@ -94,7 +94,7 @@ Put a non-inline add body in a header included by both files.
 
 **Reasoning:** Include guards operate per translation unit.
 
-**Verify:** Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.
+**Verify:** Compile both files and link them; the linker must report a multiple definition of `add(int, int)`, and the error must disappear once the body moves back to `math.cpp`.
 
 ## Exercise 6: Transfer a library boundary
 
@@ -104,4 +104,4 @@ Add subtract declaration and definition and a caller test 5-3.
 
 **Reasoning:** Changing parameter types creates a different overload, not the intended definition.
 
-**Verify:** Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.
+**Verify:** Assert `subtract(5, 3) == 2` in `main.cpp`, and check that the declaration in `math.hpp` and the definition in `math.cpp` have the same parameter types.

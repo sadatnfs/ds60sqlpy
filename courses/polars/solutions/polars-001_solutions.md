@@ -7,7 +7,19 @@ The executable reference contains the two complete worked cases with assertions.
 
 ## 1. Predict a new order
 
-The additional revenue is 3*4=12;30+12=42. Preserve a unique order_id so row-level reconciliation remains possible.
+The additional revenue is \(3 \times 4 = 12\), so the total is \(30 + 12 = 42\). Preserve a unique order_id so row-level reconciliation remains possible.
+
+```python
+import polars as pl
+
+frame = pl.DataFrame({"order_id": [1, 2, 3], "units": [2, 1, 4], "price": [5, 8, 3]})
+extra = pl.DataFrame({"order_id": [4], "units": [3], "price": [4]})
+orders = pl.concat([frame, extra]).with_columns(
+    (pl.col("units") * pl.col("price")).alias("revenue")
+)
+assert orders.height == 4
+assert orders["revenue"].sum() == 42
+```
 
 **Expected:** The total is 42 and there are 4 order rows.
 
@@ -19,7 +31,16 @@ Apply result.select("order_id", "revenue"). select changes the returned columns,
 
 ## 3. Explain an aggregate
 
-The calculation is(10+8+12)/3. A mean per item would be 30/7 and answers a different question.
+The calculation is \((10 + 8 + 12)/3 = 10\). A mean per item would be 30/7 and answers a different question.
+
+```python
+import polars as pl
+
+frame = pl.DataFrame({"order_id": [1, 2, 3], "units": [2, 1, 4], "price": [5, 8, 3]})
+result = frame.with_columns((pl.col("units") * pl.col("price")).alias("revenue"))
+# The denominator is the number of order rows (3), not the number of units (7).
+assert result.select(pl.col("revenue").mean()).item() == 10.0
+```
 
 **Expected:** Mean order revenue is 10.
 
@@ -83,4 +104,4 @@ if __name__ == "__main__":
 
 ## Interpretation
 
-Construct and verify a typed table with a stated row grain. For an independent case, use a small inventory table with units and cost, calculate stock value, and verify it with Python arithmetic. Preserve both raw and transformed frames so a reviewer can explain every changed field. This establishes a small data contract, not a guarantee that an arbitrary input file is clean.
+For an independent case, use a small inventory table with units and cost, calculate stock value, and verify it with Python arithmetic. Preserve both raw and transformed frames so a reviewer can explain every changed field. This establishes a small data contract, not a guarantee that an arbitrary input file is clean.

@@ -14,13 +14,15 @@ An array is a fixed-length indexed container. A String is immutable text represe
 
 ## Reading the reference
 
-Array indices start at0 and stop before length. Arrays.copyOf creates a separate array, while assigning another variable shares the original array reference. String.codePoints produces integer Unicode values. substring uses UTF-16 offsets and can split a surrogate pair if given an arbitrary index. Normalizer.normalize with NFC is an explicit identity policy, not an automatic rule for every text field.
+Array indices start at 0 and stop before length. Arrays.copyOf creates a separate array, while assigning another variable shares the original array reference. String.codePoints produces integer Unicode values. substring uses UTF-16 offsets and can split a surrogate pair if given an arbitrary index. Normalizer.normalize with NFC is an explicit identity policy, not an automatic rule for every text field.
 
-## Exercise 1: Copy array storage
+## Exercise 1: Copy array storage: change one input
 
-Task: Copy array 1,2,3,mutate the copy and compare the original.
+Task: Copy Example A into a scratch `Main.java` and change `int[] original = { 1, 2, 3 };` to `int[] original = { 2, 2, 3 };`. Before running it with `java -ea Main`, predict which assertion fails and which value it now sees; then run it and restore the original line.
 
 The new array owns its storage. A simple assignment copy=original would alias the same array and make the mutation visible through both variables.
+
+The unchanged code is the part that Example A adds:
 
 ```java
 int[] original = { 1, 2, 3 };
@@ -29,15 +31,17 @@ copy[0] = 9;
 assert original[0] == 1 && copy[0] == 9;
 ```
 
-**Expected:** original starts 1; copy starts 9.
+**Expected:** The changed run fails with an `AssertionError` from the assertion on `original[0] == 1 && copy[0] == 9`. Restoring the original line brings back the worked observation: original starts 1; copy starts 9.
 
-**Verify:** Compare the program values or named exception with original starts 1; copy starts 9. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.
+**Verify:** Compare your written prediction with the reported `AssertionError` and its stack-trace line, and name the value that made `original[0] == 1 && copy[0] == 9` false. After restoring the line, the program completes without an `AssertionError` again.
 
-## Exercise 2: Count text units
+## Exercise 2: Count text units: diagnose an edited check
 
-Task: Inspect stringA followed by an emoji.
+Task: A careless edit changed the assertion that Example B adds after Example A so that it reads `assert text.codePointCount(1, text.length()) == 2;`. Run Example B with that line, explain why the edited assertion now fails for the same program state, and restore it.
 
-The emoji occupies a surrogate pair. Treatinglength as a visible-character count would overcount this simple example.
+The emoji occupies a surrogate pair. Treating length as a visible-character count would overcount this simple example.
+
+The unchanged code is the part that Example B adds:
 
 ```java
 String text = "A\ud83d\ude42";
@@ -45,13 +49,13 @@ assert text.length() == 3;
 assert text.codePointCount(0, text.length()) == 2;
 ```
 
-**Expected:** length3 code units;2 code points.
+**Expected:** Before the repair the run fails with an `AssertionError` from the assertion on `text.codePointCount(0, text.length()) == 2`; after it the line reads `assert text.codePointCount(0, text.length()) == 2;` again and length 3 code units; 2 code points.
 
-**Verify:** Compare the program values or named exception with length3 code units;2 code points. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.
+**Verify:** Keep the failing and the repaired runs. Explain why the edited assertion rejects the same program state that `text.codePointCount(0, text.length()) == 2` accepts.
 
 ## Exercise 3: Observe String immutability
 
-Task: Convert lowercasered to uppercase and retain both references.
+Task: Convert lowercase red to uppercase and retain both references.
 
 The method returns a new value rather than changing lower. Locale.ROOT makes the case policy explicit for a language-neutral fixture.
 
@@ -61,9 +65,9 @@ String upper = lower.toUpperCase(Locale.ROOT);
 assert lower.equals("red") && upper.equals("RED");
 ```
 
-**Expected:** originalred;newRED.
+**Expected:** original red; new RED.
 
-**Verify:** Compare the program values or named exception with originalred;newRED. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.
+**Verify:** Keep an assertion equivalent to `lower.equals("red") && upper.equals("RED")`. As a control, change `String lower = "red";` to `String lower = "red!";`: the run must fail with an `AssertionError` from the assertion on `lower.equals("red") && upper.equals("RED")`. Restore the line before continuing.
 
 ## Exercise 4: Select by code-point offset
 
@@ -77,13 +81,13 @@ String emoji = text.substring(offset);
 assert emoji.length() == 2 && emoji.codePointCount(0, emoji.length()) == 1;
 ```
 
-**Expected:** substring is the intact emoji withlength2.
+**Expected:** substring is the intact emoji with length 2.
 
-**Verify:** Compare the program values or named exception with substring is the intact emoji withlength2. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.
+**Verify:** Keep an assertion equivalent to `emoji.length() == 2 && emoji.codePointCount(0, emoji.length()) == 1`. As a control, change `int offset = text.offsetByCodePoints(0, 1);` to `int offset = text.offsetByCodePoints(1, 1);`: the run must fail with an `AssertionError` from the assertion on `emoji.length() == 2 && emoji.codePointCount(0, emoji.length()) == 1`. Restore the line before continuing.
 
 ## Exercise 5: Normalize deliberately
 
-Task: Compare composedé ande plus combining acute before and afterNFC.
+Task: Compare composedé ande plus combining acute before and after NFC.
 
 Normalization can merge representations that look equivalent. Whether that is appropriate for an identifier, password or display field is a domain decision.
 
@@ -96,15 +100,15 @@ assert java.text.Normalizer.normalize(decomposed, java.text.Normalizer.Form.NFC)
 );
 ```
 
-**Expected:** raw strings differ;normalized strings equal.
+**Expected:** raw strings differ; normalized strings equal.
 
-**Verify:** Compare the program values or named exception with raw strings differ;normalized strings equal. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.
+**Verify:** Keep an assertion equivalent to `java.text.Normalizer.normalize(decomposed, java.text.Normalizer.Form.NFC).equals(composed)`. As a control, change `String composed = "é";` to `String composed = "é!";`: the run must fail with an `AssertionError` from the assertion on `java.text.Normalizer.normalize(decomposed, java.text.Normalizer.Form.NFC).equals(composed)`. Restore the line before continuing.
 
 ## Exercise 6: Reject an invalid array index
 
-Task: Readindex3 from a length3 array and catch the boundary failure.
+Task: Read index 3 from a length 3 array and catch the boundary failure.
 
-The highest valid index islength-1. A container having three elements does not makeindex3 valid.
+The highest valid index is length-1. A container having three elements does not make index 3 valid.
 
 ```java
 boolean invalid = false;
@@ -118,7 +122,7 @@ assert invalid;
 
 **Expected:** ArrayIndexOutOfBoundsException.
 
-**Verify:** Compare the program values or named exception with ArrayIndexOutOfBoundsException. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.
+**Verify:** Keep an assertion equivalent to `invalid`. As a control, change `invalid = true;` to `invalid = false;`: the run must fail with an `AssertionError` from the assertion on `invalid`. Restore the line before continuing.
 
 ## After comparing the answer
 

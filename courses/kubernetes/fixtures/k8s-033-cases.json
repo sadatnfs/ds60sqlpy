@@ -6,18 +6,18 @@
   "cases": [
     {
       "exercise": 1,
-      "task": "Compare usage50m with requests100m and200m.",
-      "expected": "50percent and25percent respectively."
+      "task": "Compare usage 50m with requests 100m and 200m.",
+      "expected": "50 percent and 25 percent respectively."
     },
     {
       "exercise": 2,
-      "task": "Evaluate current1,observed80,target50 and current2,observed20,target50.",
-      "expected": "Unclipped recommendations2 and1."
+      "task": "Evaluate current 1, observed 80, target 50 and current 2, observed 20, target 50.",
+      "expected": "Unclipped recommendations 2 and 1."
     },
     {
       "exercise": 3,
-      "task": "Compute the ideal count at current1 and utilization200percent.",
-      "expected": "Ideal4, configured maximum2; capacity adequacy remains unproven."
+      "task": "Compute the ideal count at current 1 and utilization 200 percent.",
+      "expected": "Ideal 4, configured maximum 2; capacity adequacy remains unproven."
     },
     {
       "exercise": 4,

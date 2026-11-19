@@ -1,6 +1,6 @@
 # rust-037: explanation and comparison
 
-Attempt the six guide tasks before opening this comparison. The executable reference is [rust-037_solution.rs](rust-037_solution.rs). Its assertions are always active under the prepared classroom compile settings.
+Attempt the six guide tasks before opening this comparison. The executable reference is [rust-037_solution.rs](rust-037_solution.rs). It runs both worked examples and the reference answers below, and its assertions are always active under the prepared classroom compile settings.
 
 ## Why the two examples differ
 
@@ -8,21 +8,59 @@ Attempt the six guide tasks before opening this comparison. The executable refer
 
 **Use a variable-width text column:** Offsets and UTF-8 data support variable-width values without pretending every row has a fixed-size string slot. Different text lengths share one logical column.
 
-## Reason through the six tasks
+## Task answers
 
-1. **Predict and explain.** Identify logical length, type and null count.
+### Task 1: Predict and explain
 
-2. **Guided modification.** Add a fourth value and inspect its typed access.
+Identify logical length, type and null count.
 
-3. **Independent construction.** Construct paired integer and text columns with equal row counts.
+No separate reference answer has been written for this task. Example A is the evidence to compare with: The trait supplies common array behavior while the concrete type supplies typed value access. The concrete column contains three non-null integers.
 
-4. **Diagnose a defect.** Diagnose treating Arrow as an automatically installed SQL engine.
+### Task 2: Guided modification
 
-5. **Boundary evidence.** Test an empty typed array and a non-ASCII string.
+Add a fourth value and inspect its typed access.
 
-6. **Transfer and justify.** Compare row-object and columnar representations for a repeated analytical scan.
+No separate reference answer has been written for this task. Start from Example B: Offsets and UTF-8 data support variable-width values without pretending every row has a fixed-size string slot. Different text lengths share one logical column.
 
-For tasks 1 and 2, use the checked values and mechanism trace in the two examples. For task 3, choose names that expose the input and result contract and retain the same invariants. For task 4, the diagnosed mistakes below supply a concrete wrong assumption: preserve its counterexample before repairing it. Task 5 needs an explicit expected value or documented rejection at the boundary, not just successful execution. For task 6, explain what changes in the new context and which part of the original mechanism remains applicable. Several representations may satisfy this transfer task; justify the choice rather than treating this reference as the only architecture.
+### Task 3: Independent construction
+
+Construct paired integer and text columns with equal row counts.
+
+**Reference answer.** The same statements run as the `Task 3` block of the reference program; here they are wrapped in `main` as a complete file.
+
+```rust
+fn main() -> Result<(), Box<dyn std::error::Error>> {
+    use arrow::array::{Array, Int32Array, StringArray};
+    let names = StringArray::from(vec!["pear", "apple", "fig"]);
+    let quantities = Int32Array::from(vec![2, 5, 1]);
+    assert_eq!(names.len(), quantities.len());
+    assert_eq!(names.value(1), "apple");
+    assert_eq!(quantities.value(1), 5);
+    Ok(())
+}
+```
+
+**Observe:** Both columns have 3 rows, and row 1 pairs apple with 5.
+
+Paired columns describe the same rows only when their lengths match, so the length check comes before reading any position.
+
+### Task 4: Diagnose a defect
+
+Diagnose treating Arrow as an automatically installed SQL engine.
+
+No reference answer has been written for this task yet. The wrong assumptions to look for are this lesson's pitfalls: Value access at an invalid index still violates bounds. A library being linked does not mean every optional Arrow feature is enabled. Parquet and DataFusion are separate crates and workflows.
+
+### Task 5: Boundary evidence
+
+Test an empty typed array and a non-ASCII string.
+
+No reference answer has been written for this task yet. Write the expected value or documented rejection for each boundary before running it, and compare with the checks in Example A (Create a concrete integer column) and Example B (Use a variable-width text column).
+
+### Task 6: Transfer and justify
+
+Compare row-object and columnar representations for a repeated analytical scan.
+
+No single reference answer exists: several designs can satisfy this transfer task. Justify yours against the mechanism described below and the vocabulary entry **Columnar layout**, and state one limitation of your choice.
 
 ## Mechanism and diagnostic reasoning
 
@@ -36,4 +74,4 @@ Value access at an invalid index still violates bounds. A library being linked d
 
 ## Review before continuing
 
-The reference checks the worked scenarios, including their boundary distinctions. Your independent and transfer artifacts may have additional checks. Compare observations rather than only source text. Preserve any new regression case you discover and explain why it would reject a plausible wrong implementation. External project steps require their own build and platform evidence and are not established by a portable reference passing.
+Run the reference and confirm that it prints `rust-037: passed`, then reconstruct one boundary case from memory and explain which check would reject a plausible wrong implementation. External project steps need their own build and platform evidence; a passing portable reference does not establish them.

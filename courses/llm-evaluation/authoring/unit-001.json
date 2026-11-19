@@ -9,6 +9,7 @@
     "critical errors"
   ],
   "outcome": "Define which population, unit, loss and decision an evaluation estimates, and demonstrate why a different denominator can reverse its conclusion.",
+  "verification": "The reversed comparison gives +1 and -1, the reweighted improvement is 0.5, a duplicated identifier and an empty population are rejected, and observed accuracy 1 is reported beside label coverage 0.5.",
   "level": "beginner",
   "runtime": "python-core",
   "minutes": 120,

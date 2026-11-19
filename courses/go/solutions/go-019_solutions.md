@@ -8,9 +8,11 @@ JSON is a serialization format, not a complete application schema. A syntactical
 
 json:"name" maps a field to its wire name. json.Marshal returns bytes and an error. Decoder.DisallowUnknownFields rejects fields missing from a target struct. A second Decode should return io.EOF when exactly one JSON value is required. omitempty omits zero-like fields during encoding; it does not validate mandatory fields. Use pointers or explicit presence types when absent and zero differ.
 
-## 1. Decode a typed object
+## 1. Decode a typed object: change one input
 
-Decode a name and count into Config.
+Copy worked example 1 into a scratch pad and change ``err := json.Unmarshal([]byte(`{"name":"sample","count":3}`), &c)`` to ``err := json.Unmarshal([]byte(`{"name":"sample","count":4}`), &c)``. Before running, predict which check fails and which value it now sees; then run it and restore the original line.
+
+The unchanged code is worked example 1:
 
 ```go
 var c Config
@@ -18,13 +20,15 @@ err := json.Unmarshal([]byte(`{"name":"sample","count":3}`), &c)
 check(err == nil && c.Name == "sample" && c.Count == 3, "typed JSON")
 ```
 
-**Expected:** The fields become sample and 3.
+**Expected:** The changed run panics with `typed JSON` because `err == nil && c.Name == "sample" && c.Count == 3` no longer holds. Restoring the original line brings back the worked observation: the fields become sample and 3.
 
 Field names follow tags rather than an accidental presentation format. Parsing success still leaves count-range and name rules to domain validation.
 
-## 2. Reject an unknown property
+## 2. Reject an unknown property: diagnose an edited check
 
-Use a strict decoder on an object with an unexpected extra field.
+A careless edit changed the check in worked example 2 so that it reads `check(d.Decode(&c) == nil, "unknown field")`. Run worked example 2 with that line, explain why the edited check now fails for the same program state, and restore it.
+
+The unchanged code is worked example 2:
 
 ```go
 var c Config
@@ -33,7 +37,7 @@ d.DisallowUnknownFields()
 check(d.Decode(&c) != nil, "unknown field")
 ```
 
-**Expected:** Decoding returns an error.
+**Expected:** Before the repair the program panics with `unknown field`; after it the line reads `check(d.Decode(&c) != nil, "unknown field")` again and decoding returns an error.
 
 Strict rejection catches misspelled configuration keys instead of silently ignoring a learner or operator mistake.
 

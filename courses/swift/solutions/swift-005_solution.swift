@@ -20,6 +20,17 @@ struct LessonMain {
       precondition(valid == 42 && invalid == nil)
       precondition((invalid ?? -1) == -1)
     }
+
+    do {
+      // Task 3: Independent construction
+      func parseCount(_ text: String?) -> Int? {
+        guard let text, let value = Int(text), value >= 0 else { return nil }
+        return value
+      }
+      precondition(parseCount("12") == 12 && parseCount("0") == 0)
+      precondition(parseCount(nil) == nil && parseCount("-3") == nil)
+      precondition(parseCount("x") == nil)
+    }
     print("swift-005: passed")
   }
 }

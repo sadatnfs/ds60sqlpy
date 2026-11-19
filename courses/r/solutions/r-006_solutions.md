@@ -18,15 +18,11 @@ Predict length(c(NULL, NA_real_)).
 
 The length is one.
 
-**Expected evidence:** The length is one.
-
 ### Exercise 2
 
 Add zero to an all-missing measurement vector.
 
 The observed count becomes one and its observed mean is zero.
-
-**Expected evidence:** The observed count becomes one and its observed mean is zero.
 
 ### Exercise 3
 
@@ -34,15 +30,11 @@ Construct a finite-only mask for c(2, Inf, NA,4).
 
 is.finite retains two and four.
 
-**Expected evidence:** is.finite retains two and four.
-
 ### Exercise 4
 
 Diagnose calling an all-missing sum a measured zero.
 
 Report no observations and an explicit missing summary under the stated policy.
-
-**Expected evidence:** Report no observations and an explicit missing summary under the stated policy.
 
 ### Exercise 5
 
@@ -50,16 +42,12 @@ Distinguish NA from NaN.
 
 is.na is true for both, but is.nan is true only for NaN.
 
-**Expected evidence:** is.na is true for both, but is.nan is true only for NaN.
-
 ### Exercise 6
 
 Document a division-by-zero policy in a data pipeline.
 
 Validate the denominator and retain a meaningful signal instead of silently replacing every exceptional result with zero.
 
-**Expected evidence:** Validate the denominator and retain a meaningful signal instead of silently replacing every exceptional result with zero.
-
 ## What the checks establish
 
-The reference contains explicit behavioral assertions for its small synthetic inputs. A passing run establishes those assertions in the reported environment. It does not prove correctness for every input, statistical validity for an unrelated population, or compatibility with untested package versions.
+The reference makes 5 `stopifnot()` checks on its small synthetic inputs. A passing run establishes those assertions in the reported environment. It does not prove correctness for every input, statistical validity for an unrelated population, or compatibility with untested package versions.

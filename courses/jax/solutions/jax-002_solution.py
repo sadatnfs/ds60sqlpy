@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import math
 import numpy as np
 import jax
 import jax.numpy as jnp
@@ -66,7 +65,7 @@ def main():
     assert centered.shape == (3, 2)
     close(centered.sum(axis=1), jnp.zeros(3))
 
-    print("jax-002" + ": 8 asserted cases passed")
+    print("jax-002: 8 asserted cases passed")
 
 
 if __name__ == "__main__":

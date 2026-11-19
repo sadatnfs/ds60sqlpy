@@ -1,22 +1,22 @@
 # spark-041: Compatibility and recovery change rehearsal
 
-Authored paired Scala/PySpark teaching content. The default fixtures are tiny,local and deterministic. Runtime acceptance,logical correctness and learner understanding remain separate evidence.
+Authored paired Scala/PySpark teaching content. The default fixtures are tiny, local and deterministic. Runtime acceptance, logical correctness and learner understanding remain separate evidence.
 
 ## Level and prerequisites
 
-Advanced; approximately 120 minutes. Direct design prerequisites: `spark-040`. The prepared baseline is Spark4.0.1,Scala binary2.13,JDK17 and Python3.12. Read the [execution baseline](../execution-baseline.md);a proposed future tuple is not a runtime receipt.
+Advanced; approximately 120 minutes. Direct prerequisites: `spark-040`. The prepared baseline is Spark 4.0.1, Scala binary 2.13, JDK 17 and Python 3.12. Read the [execution baseline](../execution-baseline.md).
 
 ## How to run this lesson
 
-Open `spark-041` in the classroom and choose the Scala or PySpark implementation you understand. Prepare only its fixed `spark-local-scala` or `spark-local-python` profile,save your pad and run the complete source. Scala stages as `Main.scala` with `object Main`;Python stages as `main.py` with a main guard. Each program creates its own local[2] session,disables the UI,binds the driver to loopback and stops the session in finally. No external dataset,package download,JDBC connection or cloud service is requested.
+Open `spark-041` in the classroom and choose the Scala or PySpark implementation you understand. Prepare only its fixed `spark-local-scala` or `spark-local-python` profile, save your pad and run the complete source. Scala stages as `Main.scala` with `object Main`;Python stages as `main.py` with a main guard. Each program creates its own local[2] session, disables the UI, binds the driver to loopback and stops the session in finally. No external dataset, package download, JDBC connection or cloud service is requested.
 
-The [Scala learner](../lessons/spark-041.scala) and [PySpark learner](../lessons/spark-041.py) run two complete demonstrations and retain six explicit task stubs. Use the [explained solutions](../solutions/spark-041_solutions.md) only after an attempt or an explicit worked comparison;the [Scala reference](../solutions/spark-041_solution.scala) and [PySpark reference](../solutions/spark-041_solution.py) contain complete assertions. A bounded collect is used only for the declared tiny fixture;do not copy it onto an unbounded or large production table.
+The [Scala learner](../lessons/spark-041.scala) and [PySpark learner](../lessons/spark-041.py) run two complete demonstrations and retain six explicit task stubs. Use the [explained solutions](../solutions/spark-041_solutions.md) only after an attempt or an explicit worked comparison; the [Scala reference](../solutions/spark-041_solution.scala) and [PySpark reference](../solutions/spark-041_solution.py) contain complete assertions. A bounded collect is used only for the declared tiny fixture; do not copy it onto an unbounded or large production table.
 
 ## Learning objectives
 
 - Assess a Spark/runtime change without reusing incompatible state or trusting a version string alone.
-- State the input and output grain,schema,NULL policy and ordering before executing a transformation.
-- Compare each language implementation with independent literal expectations,not only with the other implementation.
+- State the input and output grain, schema, NULL policy and ordering before executing a transformation.
+- Compare each language implementation with independent literal expectations, not only with the other implementation.
 
 ## Vocabulary and concepts
 
@@ -34,17 +34,17 @@ The [Scala learner](../lessons/spark-041.scala) and [PySpark learner](../lessons
 
 A runtime change can affect binary loading, SQL semantics, Python dependencies, state schemas and sink behavior. A successful version print proves only which runtime answered that request. A credible change review joins the actual version tuple with independent golden results and a recovery plan. This lesson executes the current prepared Spark 4.0.1 stack and rehearses a query-shape change without pretending a second runtime has been provisioned.
 
-The receipt records Scala binary family and actual patch, JDK major and runtime patch, Python version and optional PyArrow distribution presence. Scala invokes only the bundled python 3 with a fixed five-second metadata probe;it does not install or import Arrow. PySpark records its own interpreter and JVM. An absent optional dependency is recorded as not-installed rather than silently fetched. These values matter at different boundaries:Scala binary compatibility is not the same as Python wheel compatibility or a valid persisted state schema.
+The receipt records Scala binary family and actual patch, JDK major and runtime patch, Python version and optional PyArrow distribution presence. Scala invokes only the bundled python 3 with a fixed five-second metadata probe; it does not install or import Arrow. PySpark records its own interpreter and JVM. An absent optional dependency is recorded as not-installed rather than silently fetched. These values matter at different boundaries:Scala binary compatibility is not the same as Python wheel compatibility or a valid persisted state schema.
 
 ## Test semantics before considering promotion
 
-The golden suite has four rows:two equal 100-cent occurrences under one ID, a NULL amount under another, and a zero under a third. Expected rows 4, known amounts 3, total 200 and distinct IDs 3 catch different defects. Dropping duplicate occurrences can preserve some aggregates while changing the population;replacing NULL with zero changes known-value counts. The suite also checks exact decimal 12345678.90 and a timezone-offset instant rendered 19:00UTC under the baseline.
+The golden suite has four rows:two equal 100-cent occurrences under one ID, a NULL amount under another, and a zero under a third. Expected rows 4, known amounts 3, total 200 and distinct IDs 3 catch different defects. Dropping duplicate occurrences can preserve some aggregates while changing the population; replacing NULL with zero changes known-value counts. The suite also checks exact decimal 12345678.90 and a timezone-offset instant rendered 19:00UTC under the baseline.
 
 The tests are deliberately tiny so their expected results are independently inspectable. They are not a complete compatibility certification. A production workload adds its own UDFs, connectors, data formats, optimizer-sensitive expectations and performance bounds. The important discipline is to run the same semantic contract in both actual environments and preserve failures, rather than comparing only two version labels.
 
 ## Separate state compatibility from source compatibility
 
-The baseline streaming query deduplicates by id and writes to its own Parquet sink. Its checkpoint contains state whose keys represent that operator contract. Changing the keys to id, cents changes both stored state representation and business semantics. The program refuses that same-checkpoint request before launching it. This refusal is an application policy check;the guide does not fabricate a particular Spark engine error.
+The baseline streaming query deduplicates by id and writes to its own Parquet sink. Its checkpoint contains state whose keys represent that operator contract. Changing the keys to id, cents changes both stored state representation and business semantics. The program refuses that same-checkpoint request before launching it. This refusal is an application policy check; the guide does not fabricate a particular Spark engine error.
 
 A rejected incompatible reuse must not be repaired by deleting checkpoint internals, changing schema checks or silently migrating state. The documented Spark recovery rules constrain what query changes can reuse a checkpoint. Some stateless changes may be supported under conditions, while stateful schema/operator changes require a separately designed recovery path. Review the exact operation instead of assuming every source edit is safe because the main function still compiles.
 
@@ -60,7 +60,7 @@ A production first-seen policy may itself be insufficient when conflicting updat
 
 The proposal gate requires actual target qualification, golden pass, recovery review and product acceptance. A missing target profile remains unavailable even if the proposed Spark/Scala/JDK strings look plausible. The lesson never downloads a second runtime or resets an existing learner checkpoint. All files are created inside one fresh root and removed only after owned queries terminate.
 
-The final packet records source and target claims separately. For this run, the source runtime and query-shape rehearsal have actual evidence;the hypothetical target runtime does not. That distinction makes a migration review actionable:it says exactly which acceptance work remains instead of giving an unsupported compatibility approval.
+The final packet records source and target claims separately. For this run, the source runtime and query-shape rehearsal have actual evidence; the hypothetical target runtime does not. That distinction makes a migration review actionable:it says exactly which acceptance work remains instead of giving an unsupported compatibility approval.
 
 ## Supplied local fixture
 
@@ -145,7 +145,7 @@ changed = ["id", "cents"]
 assert keys != changed
 ```
 
-The state-key change is visible before any query launch. This pure comparison motivates a separate recovery namespace;it does not claim to inspect or rewrite Spark checkpoint internals.
+The state-key change is visible before any query launch. This pure comparison motivates a separate recovery namespace; it does not claim to inspect or rewrite Spark checkpoint internals.
 
 ### Worked example 2
 
@@ -180,7 +180,7 @@ Record Spark, Scala binary and patch, JDK major and patch, Python version and op
 
 Evaluate the supplied four-row bag plus exact decimal and timezone expressions.
 
-**Expected result/shape:** 4 rows,3 known amounts, total 200,3 distinct IDs;decimal 12345678.90;instant 19:00UTC.
+**Expected result/shape:** 4 rows,3 known amounts, total 200,3 distinct IDs; decimal 12345678.90;instant 19:00UTC.
 
 **Verify:** Compare exact metrics and rendered values under the UTC baseline.
 
@@ -210,17 +210,17 @@ Add a new occurrence 1:999 and run id, cents deduplication using a new checkpoin
 
 Resume the original ID-only query with its original checkpoint after the candidate is rejected.
 
-**Expected result/shape:** The same baseline query ID resumes;the new occurrence of already-seen ID 1 does not add a row;baseline output stays 1:100,2:200.
+**Expected result/shape:** The same baseline query ID resumes; the new occurrence of already-seen ID 1 does not add a row; baseline output stays 1:100,2:200.
 
 **Verify:** Check query identity and exact sink bag without deleting either checkpoint.
 
-**Progressive hint:** Rollback restores the tested contract;it does not erase input history.
+**Progressive hint:** Rollback restores the tested contract; it does not erase input history.
 
 ### Exercise 6: Gate a proposed runtime change on actual evidence
 
 Require a qualified target profile, golden-suite pass, compatible recovery design and product acceptance before promotion.
 
-**Expected result/shape:** The supplied unqualified target or failed candidate is rejected;all four true permits a proposal in this pure decision model.
+**Expected result/shape:** The supplied unqualified target or failed candidate is rejected; all four true permits a proposal in this pure decision model.
 
 **Verify:** Check missing-profile and wrong-product negatives, then record that no second runtime was provisioned.
 
@@ -228,15 +228,15 @@ Require a qualified target profile, golden-suite pass, compatible recovery desig
 
 ## Common pitfalls
 
-Do not compare only version strings, assume Scala binary compatibility implies checkpoint compatibility, or reuse a candidate checkpoint/output accidentally. Do not delete state to turn an incompatible change into a fresh run without labeling that data-recovery choice. Keep optional Arrow absence explicit. The preflight refusal is application policy and the candidate is same-runtime query-shape rehearsal;neither is a claimed cross-version engine migration test.
+Do not compare only version strings, assume Scala binary compatibility implies checkpoint compatibility, or reuse a candidate checkpoint/output accidentally. Do not delete state to turn an incompatible change into a fresh run without labeling that data-recovery choice. Keep optional Arrow absence explicit. The preflight refusal is application policy and the candidate is same-runtime query-shape rehearsal; neither is a claimed cross-version engine migration test.
 
 ## Self-check
 
-Explain the contract of `versionReceipt` / `version_receipt` without reading its solution. Trace the specified boundary case,then explain the final exercise's evidence and limitation. Identify where a transformation builds a plan and where an action requests execution. Retain exact values or operator evidence rather than treating a successful process exit as proof of the whole learning objective.
+Explain the contract of `versionReceipt` / `version_receipt` without reading its solution. Trace the specified boundary case, then explain the final exercise's evidence and limitation. Identify where a transformation builds a plan and where an action requests execution. Retain exact values or operator evidence rather than treating a successful process exit as proof of the whole learning objective.
 
 ## Next step
 
-Use the [course route](../README.md) to continue. Paired-language agreement is useful only when both outputs also satisfy the independent fixture contract. Keep runtime/profile receipts separate from any cluster-performance or production-recovery claim.
+Use the [course route](../README.md) to continue. Paired-language agreement is useful only when both outputs also satisfy the independent fixture contract. A successful local run is not evidence of cluster performance or production recovery.
 
 ## Primary sources and official APIs
 
@@ -248,8 +248,8 @@ Use the [course route](../README.md) to continue. Paired-language agreement is u
 
 ```text
 Use $guide-ds60sqlpy-learning to coach me through spark-041: Compatibility and recovery change rehearsal.
-Read courses/scala-spark/guides/spark-041.md and courses/scala-spark/lessons/spark-041.scala;the paired sources are courses/scala-spark/lessons/spark-041.scala and courses/scala-spark/lessons/spark-041.py.
-Direct prerequisites: spark-040. Explain the schema,row grain and new Scala/Python/Spark syntax,ask me to predict a concrete result,then inspect my attempt. Give one hint at a time,review exact result and boundary evidence,and ask retrieval questions in my own words. Do not read solutions/ until I ask or have made an honest attempt.
-Use only the prepared local[2] worker profile and owned job scratch. Do not download dependencies,start a remote service,reset existing checkpoints or alter unrelated learner work.
+Read courses/scala-spark/guides/spark-041.md and courses/scala-spark/lessons/spark-041.scala; the paired sources are courses/scala-spark/lessons/spark-041.scala and courses/scala-spark/lessons/spark-041.py.
+Direct prerequisites: spark-040. Explain the schema, row grain and new Scala/Python/Spark syntax, ask me to predict a concrete result, then inspect my attempt. Give one hint at a time, review exact result and boundary evidence, and ask retrieval questions in my own words. Do not read solutions/ until I ask or have made an honest attempt.
+Use only the prepared local[2] worker profile and owned job scratch. Do not download dependencies, start a remote service, reset existing checkpoints or alter unrelated learner work.
 Done when all six contracts have inspected evidence and I can explain the stated assumptions and a meaningful failure case.
 ```

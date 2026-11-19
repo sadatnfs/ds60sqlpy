@@ -9,7 +9,7 @@ Scala evaluates expressions to values. `val total: Long = ...` binds a name to o
 The worker entry point is `object Main` with `def main(args: Array[String]): Unit`. Read it as a named singleton containing the program start function. Array[String] holds optional launch arguments, which this lesson ignores; Unit means the start function returns no useful value. Braces group statements. println writes one output line. The [Scala basics tour](https://docs.scala-lang.org/tour/basics.html) distinguishes immutable values, variables, blocks and functions.
 
 - **val:** an immutable name binding
-- **Long:** a signed64-bit integral value; use L on these small literal examples
+- **Long:** a signed 64-bit integral value; use L on these small literal examples
 - **String:** text inside double quotes
 - **expression:** code that produces a value
 - **interpolation:** s"total=$total" inserts a named value into text
@@ -45,9 +45,9 @@ println(label)
 
 ### Exercise 1: Compute the basket
 
-**Inputs/evidence:** For spark-002 Exercise 1, 125L,200L,75L.
+**Inputs/evidence:** For spark-002 Exercise 1, 125L, 200L, 75L.
 
-**Expected result/shape:** For spark-002 Exercise 1, total is400L.
+**Expected result/shape:** For spark-002 Exercise 1, total is 400L.
 
 **Verify:** For spark-002 Exercise 1, assert total==400L and print the named value.
 
@@ -57,7 +57,7 @@ Addition preserves all three prices. A literal String "400" can look correct whe
 
 **Inputs/evidence:** For spark-002 Exercise 2, 2147483647L+1L and an intentionally reviewed Int-only variant.
 
-**Expected result/shape:** For spark-002 Exercise 2, Long result2147483648L; reject relying on the overflowing Int value as money.
+**Expected result/shape:** For spark-002 Exercise 2, Long result 2147483648L; reject relying on the overflowing Int value as money.
 
 **Verify:** For spark-002 Exercise 2, run the Long assertion; explain why the narrower arithmetic is a different contract.
 
@@ -65,9 +65,9 @@ The expected number exceeds the positive Int range. This small example shows typ
 
 ### Exercise 3: Calculate remaining budget
 
-**Inputs/evidence:** For spark-002 Exercise 3, budget450L,total400L.
+**Inputs/evidence:** For spark-002 Exercise 3, budget 450L, total 400L.
 
-**Expected result/shape:** For spark-002 Exercise 3, remaining50L.
+**Expected result/shape:** For spark-002 Exercise 3, remaining 50L.
 
 **Verify:** For spark-002 Exercise 3, assert the difference, not merely the total.
 
@@ -75,7 +75,7 @@ A separate immutable budget keeps the meaning of each input visible. Subtract to
 
 ### Exercise 4: Return a branch value
 
-**Inputs/evidence:** For spark-002 Exercise 4, remaining50L, threshold0L.
+**Inputs/evidence:** For spark-002 Exercise 4, remaining 50L, threshold 0L.
 
 **Expected result/shape:** For spark-002 Exercise 4, String message is within budget.
 
@@ -87,7 +87,7 @@ Both branches must return meaningful labels. Writing println inside each branch 
 
 **Inputs/evidence:** For spark-002 Exercise 5, one immutable binding and a proposed reassignment.
 
-**Expected result/shape:** For spark-002 Exercise 5, compile-time rejection; repaired code uses a new name revisedBudget with350L.
+**Expected result/shape:** For spark-002 Exercise 5, compile-time rejection; repaired code uses a new name revisedBudget with 350L.
 
 **Verify:** For spark-002 Exercise 5, retain the compiler error category and show the new-name repair; do not include broken code in the final reference.
 
@@ -95,11 +95,11 @@ Reassignment violates val. The lesson asks for a new scenario, so name that scen
 
 ### Exercise 6: Transfer the budget
 
-**Inputs/evidence:** For spark-002 Exercise 6, same400L basket,new350L budget.
+**Inputs/evidence:** For spark-002 Exercise 6, same 400L basket, new 350L budget.
 
 **Expected result/shape:** For spark-002 Exercise 6, remaining-50L and over budget label.
 
-**Verify:** For spark-002 Exercise 6, assert both changed outputs while the original total stays400L.
+**Verify:** For spark-002 Exercise 6, assert both changed outputs while the original total stays 400L.
 
 Only the budget changes. A result that also changes spending has mixed the two scenarios; preserve the original bindings to expose that error.
 

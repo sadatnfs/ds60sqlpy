@@ -86,9 +86,10 @@ def example_one():
             d,
             models={
                 "metrics": (
-                    "select cohort, sum(successes)::double/nullif(sum(trials),0"
-                    ") as rate, sum(trials) as denominator from {{ "
-                    "ref('counts') }} group by cohort"
+                    "select cohort, sum(successes)::double / nullif(sum(trials), 0) as rate, "
+                    "sum(trials) as denominator\n"
+                    "from {{ ref('counts') }}\n"
+                    "group by cohort"
                 )
             },
             seeds={"counts": "cohort,successes,trials\nA,1,1\nA,9,99\nB,1,2\n"},
@@ -106,7 +107,7 @@ def example_two():
         p = project(
             d,
             models={
-                "wrong": "select avg(successes::double/trials) as rate from {{ ref('counts') }}"
+                "wrong": "select avg(successes::double / trials) as rate from {{ ref('counts') }}"
             },
             seeds={"counts": "successes,trials\n1,1\n9,99\n"},
         )

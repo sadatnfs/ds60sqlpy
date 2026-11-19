@@ -8,9 +8,11 @@ A dynamic vector separates logical length from allocated capacity. Growth may mo
 
 A vector stores data, len and cap. reserve ensures capacity without changing length. push reserves before writing data[len], then increments length. pop checks nonempty before decrementing. destroy frees storage and resets all fields, making repeated cleanup harmless under this local ownership contract. Never retain an element pointer across a call that may grow the vector.
 
-## Exercise 1: Push into an empty vector
+## Exercise 1: Push into an empty vector: predict an edited check
 
-Push 3 and 5 into a zero-initialized vector.
+Copy worked example 1 into a scratch pad and change `CHECK(vector_push(&v, 3) && vector_push(&v, 5));` to `CHECK(vector_push(&v, 4) && vector_push(&v, 5));` inside its CHECK. Before running, predict whether the CHECK still holds and explain why; then restore it.
+
+The unchanged code is worked example 1:
 
 ```c
 struct Vector v = {0};
@@ -19,13 +21,15 @@ CHECK(v.len == 2 && v.data[0] == 3 && v.data[1] == 5);
 vector_destroy(&v);
 ```
 
-**Expected:** Length is 2 and values are retained.
+**Expected:** The changed run stops with `Check failed` at the CHECK on `v.len == 2 && v.data[0] == 3 && v.data[1] == 5`. Restoring the original line brings back the worked observation: length is 2 and values are retained.
 
 The zero state is a usable empty vector. Growth happens before the first write.
 
-## Exercise 2: Reserve without adding elements
+## Exercise 2: Reserve without adding elements: diagnose an edited check
 
-Reserve capacity eight.
+A careless edit changed the CHECK in worked example 2 so that it reads `CHECK(v.cap > 8 && v.len == 0);`. Run worked example 2 with that line, explain why the edited CHECK now fails for the same program state, and restore it.
+
+The unchanged code is worked example 2:
 
 ```c
 struct Vector v = {0};
@@ -34,7 +38,7 @@ CHECK(v.cap >= 8 && v.len == 0);
 vector_destroy(&v);
 ```
 
-**Expected:** Capacity is at least eight while length stays zero.
+**Expected:** Before the repair the run stops with `Check failed` at the CHECK on `v.cap >= 8 && v.len == 0`; after it the line reads `CHECK(v.cap >= 8 && v.len == 0);` again and capacity is at least eight while length stays zero.
 
 Reservation is storage preparation, not logical insertion. Treating capacity as length would expose uninitialized elements.
 

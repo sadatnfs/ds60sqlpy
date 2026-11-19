@@ -17,7 +17,7 @@ Integer arithmetic and floating-point arithmetic have different contracts. Signe
 
 For nonnegative a and b, the guard a>max-b detects whether a+b would exceed the maximum. max-b is safe under the stated nonnegative supported range. Only after that guard passes should the addition be evaluated. If negative operands are allowed, the guard logic must cover underflow and other sign combinations separately. A formula valid for one restricted domain is not automatically a general checked-add implementation.
 
-Floating-point values represent a finite set of numbers with rounding. Decimal0.1 and 0.2 do not generally have exact finite binary representations, so their sum can differ slightly from the stored approximation of 0.3. The complete example uses a small tolerance for this specific comparison. That does not justify one universal tolerance for every scale or unit.
+Floating-point values represent a finite set of numbers with rounding. Decimal 0.1 and 0.2 do not generally have exact finite binary representations, so their sum can differ slightly from the stored approximation of 0.3. The complete example uses a small tolerance for this specific comparison. That does not justify one universal tolerance for every scale or unit.
 
 Addition order can matter because intermediate rounding occurs. Summing [1e16, 1, -1e16] in one order can lose the small contribution, while another grouping can preserve it. Parallel reduction can change grouping, so exact bitwise equality may require a stronger reproducibility design. For integer cents within a checked range, exact comparison remains appropriate; do not introduce approximate tolerances to hide a wrong integer result.
 
@@ -52,7 +52,7 @@ Add 100 and 25 integer cents.
 
 **Reasoning:** No approximate representation is needed.
 
-**Verify:** Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.
+**Verify:** Assert `safe_add(100, 25) == 125` with `int` values and no `double` anywhere in the calculation.
 
 ## Exercise 2: Reject overflow
 
@@ -62,7 +62,7 @@ Try INT_MAX plus 1.
 
 **Reasoning:** A check after overflow is too late.
 
-**Verify:** Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.
+**Verify:** Assert `!safe_add(std::numeric_limits<int>::max(), 1)`, as Worked example 1 does, and confirm the guard compares before adding.
 
 ## Exercise 3: Inspect rounding
 
@@ -72,7 +72,7 @@ Print 0.1+0.2 with sufficient precision.
 
 **Reasoning:** Decimal fractions may lack finite binary representations.
 
-**Verify:** Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.
+**Verify:** Print with `std::setprecision(17)` and record `0.30000000000000004`, then assert `std::abs((0.1 + 0.2) - 0.3) < 1e-12`, as Worked example 2 does.
 
 ## Exercise 4: Repair one-size tolerance
 
@@ -82,7 +82,7 @@ Explain why epsilon=0.1 is poor for both tiny and huge measurements.
 
 **Reasoning:** Tolerance depends on units and error budget.
 
-**Verify:** Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.
+**Verify:** Test your policy on 1e-9 versus 2e-9, which an absolute 0.1 calls equal, and on 1e20 versus 1e20 + 1e5, which it calls different although they differ by about 1e-15 relatively.
 
 ## Exercise 5: Check zero boundary
 
@@ -92,7 +92,7 @@ Run safe_add(0, 0) and safe_add(-1, 2).
 
 **Reasoning:** The subtraction-based guard assumes nonnegative inputs.
 
-**Verify:** Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.
+**Verify:** Assert `safe_add(0, 0) == 0` and `!safe_add(-1, 2)`; the second call is rejected by the `a < 0` check even though the true sum, 1, fits.
 
 ## Exercise 6: Transfer stability
 
@@ -102,4 +102,4 @@ Compare sums [1e16, 1, -1e16] under different groupings.
 
 **Reasoning:** Associativity is not guaranteed by floating arithmetic.
 
-**Verify:** Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.
+**Verify:** Assert `(1e16 + -1e16) + 1 == 1`, and print `(1e16 + 1) + -1e16`, which gives 0 because `1e16 + 1` rounds back to 1e16.

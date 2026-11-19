@@ -6,7 +6,7 @@ Compare these answers only after an attempt or an explicit solution reveal. They
 
 A binary logit is an unrestricted score. Its sigmoid maps that score to a number between zero and one under the model's probability convention. BCEWithLogitsLoss combines the sigmoid and binary cross-entropy algebra in a numerically stable form, so its input should be logits rather than already-sigmoid-transformed probabilities. Applying sigmoid twice changes the objective while often producing finite values that look plausible.
 
-A classification threshold is a separate decision policy. Changing it alters predicted labels without changing fitted logits. The threshold can reflect costs or coverage, but must be chosen on validation evidence rather than after viewing final-test results. The tiny scores-2, 0, 2 make the midpoint and boundary policy inspectable. Their probabilities are not automatically calibrated merely because sigmoid produced them.
+A classification threshold is a separate decision policy. Changing it alters predicted labels without changing fitted logits. The threshold can reflect costs or coverage, but must be chosen on validation evidence rather than after viewing final-test results. The tiny scores -2, 0, 2 make the midpoint and boundary policy inspectable. Their probabilities are not automatically calibrated merely because sigmoid produced them.
 
 **Logit:** A binary score before the sigmoid probability transformation.
 
@@ -24,11 +24,11 @@ The binary logit z is unrestricted. Its sigmoid is \(p=\frac{1}{1+\exp(-z)}\), a
 
 `loss = max(z,0) - z*y + log1p(exp(-abs(z)))`.
 
-The exponent is never applied to a large positive magnitude in the final term. This avoids first rounding a probability to zero or one and then taking its logarithm. The derivative with respect to z is p-y before any mean-reduction factor. At \(z=0\), \(y=1\), the loss is log 2 and the derivative is-0.5. A mean across N equally weighted binary entries divides that derivative contribution by N. [PyTorch 2.9 BCEWithLogitsLoss](https://docs.pytorch.org/docs/2.9/generated/torch.nn.BCEWithLogitsLoss.html).
+The exponent is never applied to a large positive magnitude in the final term. This avoids first rounding a probability to zero or one and then taking its logarithm. The derivative with respect to z is p-y before any mean-reduction factor. At \(z=0\), \(y=1\), the loss is log 2 and the derivative is -0.5. A mean across N equally weighted binary entries divides that derivative contribution by N. [PyTorch 2.9 BCEWithLogitsLoss](https://docs.pytorch.org/docs/2.9/generated/torch.nn.BCEWithLogitsLoss.html).
 
-For logits[-2, 0, 2], the reported probabilities are approximately[0.1192, 0.5, 0.8808]. They preserve ranking. A threshold 0.5 with a greater-than-or-equal tie rule classifies the zero logit as positive. Threshold 0.8 corresponds to a logit boundary \(\log\!\left(\frac{0.8}{0.2}\right)=\log4\), about 1.3863. Moving that boundary changes decisions without changing any fitted parameter or score.
+For logits [-2, 0, 2], the reported probabilities are approximately [0.1192, 0.5, 0.8808]. They preserve ranking. A threshold 0.5 with a greater-than-or-equal tie rule classifies the zero logit as positive. Threshold 0.8 corresponds to a logit boundary \(\log\!\left(\frac{0.8}{0.2}\right)=\log4\), about 1.3863. Moving that boundary changes decisions without changing any fitted parameter or score.
 
-The double-sigmoid error changes more than a label convention. At original \(z=0\), the first sigmoid gives 0.5. Passing that value as a logit asks the loss to interpret probability \(\sigma(0.5)\), about 0.6225. The positive-label loss becomes \(\log(1+\exp(-0.5))\), about 0.4741, instead of log 2. If the first sigmoid remains in the graph, the derivative with respect to the original z gains another factor p(1-p): at zero it is about-0.0944 rather than-0.5. Finite outputs therefore do not prove the intended objective or gradient.
+The double-sigmoid error changes more than a label convention. At original \(z=0\), the first sigmoid gives 0.5. Passing that value as a logit asks the loss to interpret probability \(\sigma(0.5)\), about 0.6225. The positive-label loss becomes \(\log(1+\exp(-0.5))\), about 0.4741, instead of log 2. If the first sigmoid remains in the graph, the derivative with respect to the original z gains another factor p(1-p): at zero it is about -0.0944 rather than -0.5. Finite outputs therefore do not prove the intended objective or gradient.
 
 Stable arithmetic also does not imply a good prediction. A logit 1000 with label 1 has a loss near zero; the same logit with label 0 has loss near 1000. Both are valid finite outputs of the stable formulation. The extreme-score fixture checks numerical behavior, not whether the labels are correct or the model generalizes.
 
@@ -38,59 +38,68 @@ Positive-label weighting changes the loss itself. With positive-term multiplierÎ
 
 The data boundary should validate target range, shape, dtype and finiteness. A floating target tensor is required by this binary objective, but floating representation alone does not prove that its values lie in the intended range. Likewise, a sigmoid output lies between zero and one by construction; that mathematical range does not establish empirical reliability. Report ranking, probability loss, decision errors and calibration as related but distinct observations.
 
-## Exercise 1: Convert fixed logits
+## Exercise 1: Convert new logits
 
-The question is: Apply sigmoid to-2, 0, 2.
+The question is: Apply sigmoid to the float64 logits -1, 1 and 3.
 
-The monotonic transformation preserves ranking. A score of zero is the exact midpoint, which makes threshold ties explicit.
-
-```python
-logits = torch.tensor([-2.0, 0.0, 2.0], dtype=torch.float64)
-probabilities = torch.sigmoid(logits)
-assert probabilities[1].item() == 0.5 and bool(torch.all(torch.diff(probabilities) > 0))
-```
-
-**Expected:** middle probability 0.5 and strictly increasing values.
-
-**Verify:** Compare the computed values or written argument with middle probability 0.5 and strictly increasing values.
-
-## Exercise 2: Check the midpoint objective
-
-The question is: Compute positive-label BCE at zero logit.
-
-A fifty-fifty prediction assigns probability one-half to the observed label. Its negative logarithm is an independent reference.
+\(\sigma(-z)=1-\sigma(z)\), so opposite logits give complementary probabilities.
 
 ```python
-loss = F.binary_cross_entropy_with_logits(
-    torch.tensor([0.0], dtype=torch.float64), torch.tensor([1.0], dtype=torch.float64)
+other = torch.tensor([-1.0, 1.0, 3.0], dtype=torch.float64)
+converted = torch.sigmoid(other)
+np.testing.assert_allclose(
+    converted.tolist(),
+    [1 / (1 + np.exp(1)), 1 / (1 + np.exp(-1)), 1 / (1 + np.exp(-3))],
+    atol=1e-12,
+    rtol=0,
 )
-np.testing.assert_allclose(loss.item(), np.log(2), atol=1e-12, rtol=0)
+np.testing.assert_allclose((converted[0] + converted[1]).item(), 1, atol=1e-12, rtol=0)
 ```
 
-**Expected:** loss log 2 within 1e-12.
+**Expected:** probabilities about 0.2689, 0.7311 and 0.9526; the first two sum to 1.
 
-**Verify:** Compare the computed values or written argument with loss log 2 within 1e-12.
+**Verify:** In a fresh process, the exercise checks confirm `converted.tolist()` matches `[1 / (1 + np.exp(1)), 1 / (1 + np.exp(-1)), 1 / (1 + np.exp(-3))]` within 1e-12 and `(converted[0] + converted[1]).item()` matches `1` within 1e-12.
 
-## Exercise 3: Move the decision threshold
+## Exercise 2: Compute a negative-label loss
 
-The question is: Compare thresholds.5 and.8 with>=ties.
+The question is: Compute BCEWithLogitsLoss for logit 2 with label 0.
 
-The middle decision changes while the model scores remain fixed. This is a policy change, not an optimizer update.
+For label 0 the loss is \(-\log(1-\sigma(z))=\log(1+e^{z})\); a confident wrong score is penalized heavily.
 
 ```python
-assert (probabilities >= 0.5).tolist() == [False, True, True]
-assert (probabilities >= 0.8).tolist() == [False, False, True]
+negative = F.binary_cross_entropy_with_logits(
+    torch.tensor([2.0], dtype=torch.float64), torch.tensor([0.0], dtype=torch.float64)
+)
+np.testing.assert_allclose(negative.item(), np.log1p(np.exp(2)), atol=1e-12, rtol=0)
+```
+
+**Expected:** loss \(\log(1+e^{2})\), about 2.1269, within 1e-12.
+
+**Verify:** In a fresh process, the exercise checks confirm `negative.item()` matches `np.log1p(np.exp(2))` within 1e-12.
+
+## Exercise 3: Threshold the new probabilities
+
+The question is: Classify the new probabilities at thresholds 0.5 and 0.75, counting a probability equal to the threshold as positive.
+
+0.7311 passes 0.5 but not 0.75, so the threshold is a policy choice applied after the model's probability.
+
+```python
+assert (converted >= 0.5).tolist() == [False, True, True] and (converted >= 0.75).tolist() == [
+    False,
+    False,
+    True,
+]
 ```
 
 **Expected:** labels False, True, True versus False, False, True.
 
-**Verify:** Compare the computed values or written argument with labels False, True, True versus False, False, True.
+**Verify:** In a fresh process, the exercise checks confirm `(converted >= 0.5).tolist() == [False, True, True]` and `(converted >= 0.75).tolist() == [False, False, True]`.
 
 ## Exercise 4: Expose a double-sigmoid mistake
 
 The question is: Feed probability 0.5 as though it were a logit and compare with log 2.
 
-The API interprets.5 as a score favoring the positive class. It cannot infer that the caller already transformed the score.
+The API interprets 0.5 as a score favoring the positive class. It cannot infer that the caller already transformed the score.
 
 ```python
 wrong = F.binary_cross_entropy_with_logits(
@@ -99,9 +108,9 @@ wrong = F.binary_cross_entropy_with_logits(
 assert abs(wrong.item() - np.log(2)) > 0.1
 ```
 
-**Expected:** incorrect loss differs by more than.1.
+**Expected:** incorrect loss differs by more than 0.1.
 
-**Verify:** Compare the computed values or written argument with incorrect loss differs by more than.1.
+**Verify:** In a fresh process, the exercise checks confirm `abs(wrong.item() - np.log(2)) > 0.1`.
 
 ## Exercise 5: Test extreme finite scores
 
@@ -119,7 +128,7 @@ torch.testing.assert_close(extreme, torch.zeros(2), atol=1e-6, rtol=0)
 
 **Expected:** finite losses approximately 0.
 
-**Verify:** Compare the computed values or written argument with finite losses approximately 0.
+**Verify:** In a fresh process, the exercise checks confirm `torch.isfinite(extreme).all()` and `extreme` matches `torch.zeros(2)` within 1e-06.
 
 ## Exercise 6: Count threshold errors
 
@@ -135,9 +144,9 @@ assert (
 )
 ```
 
-**Expected:** 0 errors at.5 and 1 at.8.
+**Expected:** 0 errors at 0.5 and 1 at 0.8.
 
-**Verify:** Compare the computed values or written argument with 0 errors at.5 and 1 at.8.
+**Verify:** In a fresh process, the exercise checks confirm `int(((probabilities >= 0.5) != truth).sum()) == 0` and `int(((probabilities >= 0.8) != truth).sum()) == 1`.
 
 ## Review after comparison
 

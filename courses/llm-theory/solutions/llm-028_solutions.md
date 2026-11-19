@@ -14,11 +14,11 @@ A tiny-transformer capstone combines model mechanics, fitting and evaluation int
 
 ## Reading the implementation
 
-Use the provided TinyDecoder with seed11. Train on shifted local sequences for exactly20 updates. Count bigram transitions without crossing document boundaries, apply add-one smoothing and evaluate the same held-out pairs. Hash canonical integer sequences and detached model parameter bytes separately. Open the heldout split only after freezing the update budget and model choice.
+Use the provided TinyDecoder with seed 11. Train on shifted local sequences for exactly 20 updates. Count bigram transitions without crossing document boundaries, apply add-one smoothing and evaluate the same held-out pairs. Hash canonical integer sequences and detached model parameter bytes separately. Open the heldout split only after freezing the update budget and model choice.
 
 ## Exercise 1: Freeze corpus identity
 
-The question is: Use train sequences[1,2,3,4],[1,2,4,3] and holdout[1,3,2,4] with distinct document IDs.
+The question is: Use train sequences [1, 2, 3, 4], [1, 2, 4, 3] and holdout [1, 3, 2, 4] with distinct document IDs.
 
 The literal corpus prevents hidden downloads and makes every target visible. Document identity is separate from token identity because repeated tokens are expected across splits.
 
@@ -32,13 +32,13 @@ digest = hashlib.sha256(json.dumps(split, sort_keys=True).encode()).hexdigest()
 assert len(docs) == 2 and len(held) - 1 == 3 and len(digest) == 64
 ```
 
-**Expected:** train2 documents;holdout1;context3.
+**Expected:** train 2 documents; holdout 1; context 3.
 
-**Verify:** Compare the computed values or written argument with train2 documents;holdout1;context3.
+**Verify:** In a fresh process, the exercise checks confirm `len(docs) == 2`, `len(held) - 1 == 3` and `len(digest) == 64`.
 
 ## Exercise 2: Train a bounded decoder
 
-The question is: Initialize seed11 and train20 Adam(.01) updates on the two training sequences.
+The question is: Initialize seed 11 and train 20 Adam(0.01) updates on the two training sequences.
 
 The budget and architecture are fixed before held-out evaluation. Training loss is retained as diagnostic evidence rather than a substitute for a test score.
 
@@ -62,13 +62,13 @@ assert (
 )
 ```
 
-**Expected:** 20 finite losses;parameter count below50000.
+**Expected:** 20 finite losses; parameter count below 50000.
 
-**Verify:** Compare the computed values or written argument with 20 finite losses;parameter count below50000.
+**Verify:** In a fresh process, the exercise checks confirm `len(curve) == 20`, `np.isfinite(curve).all()` and `sum((p.numel() for p in model.parameters())) < 50000`.
 
 ## Exercise 3: Fit the count baseline
 
-The question is: Build16x16 transition counts from training documents and add-one smooth each row.
+The question is: Build 16x16 transition counts from training documents and add-one smooth each row.
 
 The baseline uses the same vocabulary as the neural model. Changing vocabulary size would change the smoothing denominator and make the comparison less direct.
 
@@ -82,9 +82,9 @@ assert counts.sum() == 6
 np.testing.assert_allclose(prob.sum(1), 1, atol=1e-12, rtol=0)
 ```
 
-**Expected:** total6 observed transitions; every row sums1.
+**Expected:** total 6 observed transitions; every row sums 1.
 
-**Verify:** Compare the computed values or written argument with total6 observed transitions; every row sums1.
+**Verify:** In a fresh process, the exercise checks confirm `counts.sum() == 6` and `prob.sum(1)` matches `1` within 1e-12.
 
 ## Exercise 4: Score one frozen holdout
 
@@ -102,9 +102,9 @@ baseline = -np.mean([np.log(prob[a, b]) for a, b in zip(held[:-1], held[1:])])
 assert np.isfinite([neural, baseline]).all() and len(held) - 1 == 3
 ```
 
-**Expected:** both finite; denominator3; no required winner.
+**Expected:** both finite; denominator 3; no required winner.
 
-**Verify:** Compare the computed values or written argument with both finite; denominator3; no required winner.
+**Verify:** In a fresh process, the exercise checks confirm `np.isfinite([neural, baseline]).all()` and `len(held) - 1 == 3`.
 
 ## Exercise 5: Retest causality after training
 
@@ -121,11 +121,11 @@ torch.testing.assert_close(prefix, full[:, :2], atol=1e-6, rtol=0)
 
 **Expected:** prefix agreement within 1e-6.
 
-**Verify:** Compare the computed values or written argument with prefix agreement within 1e-6.
+**Verify:** In a fresh process, the exercise checks confirm `prefix` matches `full[:, :2]` within 1e-6.
 
 ## Exercise 6: Record model identity and limits
 
-The question is: Hash ordered parameter bytes and build a report with3 held-out targets,20 updates and the split hash.
+The question is: Hash ordered parameter bytes and build a report with 3 held-out targets, 20 updates and the split hash.
 
 Hashes identify this run state but do not prove the experiment is valid. The report must retain the actual split and failure analysis alongside those fingerprints.
 
@@ -145,9 +145,9 @@ report = {
 assert len(model_hash) == 64 and report["targets"] == 3 and report["updates"] == 20
 ```
 
-**Expected:** two64-character hashes and explicit tiny-corpus limitation.
+**Expected:** two 64-character hashes and explicit tiny-corpus limitation.
 
-**Verify:** Compare the computed values or written argument with two64-character hashes and explicit tiny-corpus limitation.
+**Verify:** In a fresh process, the exercise checks confirm `len(model_hash) == 64`, `report['targets'] == 3` and `report['updates'] == 20`.
 
 ## Review after comparison
 

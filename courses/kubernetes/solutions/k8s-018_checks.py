@@ -10,7 +10,11 @@ def main():
         assert request not in grants
     workload = {"automountServiceAccountToken": False}
     assert workload["automountServiceAccountToken"] is False
-    assert 900 > 60 + 15 + 5 and 30 < 60 + 15 + 5
+
+    def lease_covers(remaining, work=60, cleanup=15, margin=5):
+        return remaining > work + cleanup + margin
+
+    assert lease_covers(900) and not lease_covers(30)
     print("k8s-018 synthetic RBAC/expiry checks passed; no token or API response exposed")
 
 

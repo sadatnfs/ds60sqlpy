@@ -14,13 +14,13 @@ PyTorch builds a dynamic computation graph when operations involve tensors requi
 
 ## Reading the implementation
 
-torch.tensor(...,requires_grad=True) creates a leaf whose .grad is populated after backward. Clear gradients before a new independent step because backward accumulates by default. detach returns a value with requires_grad=False. nn.Embedding.from_pretrained(...,freeze=False) wraps a fixed literal table as trainable state. IDs use torch.long and select rows along the vocabulary axis.
+torch.tensor(..., requires_grad=True) creates a leaf whose .grad is populated after backward. Clear gradients before a new independent step because backward accumulates by default. detach returns a value with requires_grad=False. nn.Embedding.from_pretrained(..., freeze=False) wraps a fixed literal table as trainable state. IDs use torch.long and select rows along the vocabulary axis.
 
 ## Exercise 1: Derive a scalar gradient
 
-The question is: Differentiate(w-2)² atw0 in float64.
+The question is: Differentiate(w-2)² at w=0 in float64.
 
-The analytic derivative2(w-2) supplies an independent oracle. A correct loss alone would not show that the gradient graph was connected.
+The analytic derivative \(2(w-2)\) supplies an independent oracle. A correct loss alone would not show that the gradient graph was connected.
 
 ```python
 w = torch.tensor(0.0, dtype=torch.float64, requires_grad=True)
@@ -29,13 +29,13 @@ loss.backward()
 assert w.grad.item() == -4 and loss.item() == 4
 ```
 
-**Expected:** gradient-4 and loss4.
+**Expected:** gradient -4 and loss 4.
 
-**Verify:** Compare the computed values or written argument with gradient-4 and loss4.
+**Verify:** In a fresh process, the exercise checks confirm `w.grad.item() == -4` and `loss.item() == 4`.
 
 ## Exercise 2: Compare finite differences
 
-The question is: Use central differenceh=.001 for the same scalar function.
+The question is: Use central difference h=0.001 for the same scalar function.
 
 Finite differences perturb the function value rather than reading autograd internals. Agreement away from a nondifferentiable point supports the derivative calculation.
 
@@ -45,9 +45,9 @@ numeric = (((h - 2) ** 2) - ((-h - 2) ** 2)) / (2 * h)
 np.testing.assert_allclose(numeric, -4, atol=1e-10, rtol=0)
 ```
 
-**Expected:** finite difference approximately-4 within1e-10.
+**Expected:** finite difference approximately -4 within 1e-10.
 
-**Verify:** Compare the computed values or written argument with finite difference approximately-4 within1e-10.
+**Verify:** In a fresh process, the exercise checks confirm `numeric` matches `-4` within 1e-10.
 
 ## Exercise 3: Observe accumulation
 
@@ -60,9 +60,9 @@ PyTorch adds to existing gradients. A training loop that forgets zero_grad chang
 assert w.grad.item() == -8
 ```
 
-**Expected:** stored gradient becomes-8.
+**Expected:** stored gradient becomes -8.
 
-**Verify:** Compare the computed values or written argument with stored gradient becomes-8.
+**Verify:** In a fresh process, the exercise checks confirm `w.grad.item() == -8`.
 
 ## Exercise 4: Clear gradient state
 
@@ -76,13 +76,13 @@ w.grad = None
 assert w.grad.item() == -4
 ```
 
-**Expected:** gradient returns to-4.
+**Expected:** gradient returns to -4.
 
-**Verify:** Compare the computed values or written argument with gradient returns to-4.
+**Verify:** In a fresh process, the exercise checks confirm `w.grad.item() == -4`.
 
 ## Exercise 5: Inspect detachment
 
-The question is: Detachw and compare its value and gradient-tracking status.
+The question is: Detach w and compare its value and gradient-tracking status.
 
 Detach preserves a numeric observation while cutting dependency. It is appropriate for logging or explicit stop-gradient designs, but not a repair for an unexplained backward error.
 
@@ -91,13 +91,13 @@ detached = w.detach()
 assert detached.item() == 0 and detached.requires_grad is False
 ```
 
-**Expected:** same value0; requires_gradFalse.
+**Expected:** same value 0; requires_gradFalse.
 
-**Verify:** Compare the computed values or written argument with same value0; requires_gradFalse.
+**Verify:** In a fresh process, the exercise checks confirm `detached.item() == 0` and `detached.requires_grad is False`.
 
 ## Exercise 6: Check an embedding table
 
-The question is: Lookup IDs2,0,2 in a fixed4x2 table and compare repeated rows.
+The question is: Lookup IDs 2, 0, 2 in a fixed 4x2 table and compare repeated rows.
 
 The lookup does not average repeated IDs. Both positions refer to the same parameter row, so later gradient contributions to that row can accumulate.
 
@@ -109,9 +109,9 @@ assert tuple(out.shape) == (3, 2)
 np.testing.assert_array_equal(out.detach().numpy(), [[2, 2], [1, 0], [2, 2]])
 ```
 
-**Expected:** shape(3,2); rows0 and2 both[2,2].
+**Expected:** shape (3, 2); rows 0 and 2 both [2, 2].
 
-**Verify:** Compare the computed values or written argument with shape(3,2); rows0 and2 both[2,2].
+**Verify:** In a fresh process, the exercise checks confirm `tuple(out.shape) == (3, 2)` and `out.detach().numpy()` equals `[[2, 2], [1, 0], [2, 2]]`.
 
 ## Review after comparison
 

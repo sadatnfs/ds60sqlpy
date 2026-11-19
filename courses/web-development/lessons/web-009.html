@@ -5,15 +5,35 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Form constraints, errors and helpful recovery: my attempt</title>
     <style>
-      /* Implement the lesson-specific CSS. Keep keyboard focus visible. */
+      /* Write the CSS for the exercises here. Keep keyboard focus visible. */
     </style>
   </head>
   <body>
-    <!-- web-009: Build a bounded study-time form with linked help. -->
-    <!-- Save your prediction, then implement the six exercises from the guide. -->
+    <!--
+      web-009 exercises. Hints are in the guide; answers are in the solutions folder.
+      1. Predict required, minimum and maximum outcomes for empty, 4, 30 and 121.
+      2. Add a clear unit and range to a control's label.
+      3. Build a bounded study-time form with linked help.
+      4. Explain why type=email does not prove mailbox ownership.
+      5. Test validation with keyboard and an empty field.
+      6. Separate client feedback from server-side acceptance.
+    -->
     <main>
       <h1>Form constraints, errors and helpful recovery</h1>
-      <!-- Build your own document here. The reference is separate. -->
+      <form>
+        <label for="minutes">Time</label>
+        <input id="minutes" name="minutes" type="number" min="5" max="120" required />
+      </form>
+      <!--
+        Worked example 1: A bounded value
+        <label for="minutes">Minutes, 5 to 120</label>
+        <input id="minutes" name="minutes" type="number" min="5" max="120" required />
+      -->
+      <!--
+        Worked example 2: Connected help
+        <input id="alias" aria-describedby="alias-help" minlength="3" />
+        <p id="alias-help">Use at least three characters.</p>
+      -->
     </main>
   </body>
 </html>

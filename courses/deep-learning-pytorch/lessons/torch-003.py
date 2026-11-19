@@ -4,28 +4,31 @@ Answer-free learner worksheet. See the companion guide for worked examples.
 Copy to .learning before editing. Six independent attempts belong below.
 """
 
-# Exercise 1: Calculate a known affine layer
-# UseX[[1, 2, 3], [0, 1, 0]], weight[[1, 0, -1]], bias 2.
-# Expected: outputs[[0], [2]], shape(2, 1).
+# Exercise 1: Compute a new affine output
+# Set a 2-to-1 Linear layer's weight to [[2, -1]] and its bias to 0.5 in float64, then
+# evaluate the rows [1, 1] and [0, 2].
+# Expected: outputs [[1.5], [-1.5]] with shape (2, 1).
 
-# Exercise 2: Inspect registered state
-# Count weight and bias scalar entries and inspect state_dict keys.
-# Expected: 4 scalars; keys weight, bias.
+# Exercise 2: Predict a parameter count
+# Before creating it, predict the registered scalar count and the state_dict shapes of
+# nn.Linear(4, 3), then check them.
+# Expected: 15 scalars: weight (3, 4) and bias (3,).
 
-# Exercise 3: Compare with a mathematical matrix
-# Transpose the stored weight and calculate X@W+b directly.
-# Expected: direct result equals module output.
+# Exercise 3: Rebuild the output by hand
+# For the 2-to-1 layer, compute inputs @ weight.T + bias without calling the module and
+# compare it with the module output.
+# Expected: the manual result equals [[1.5], [-1.5]] within 1e-12.
 
 # Exercise 4: Remove the intercept explicitly
 # Create a bias-free layer with the same stored weights.
-# Expected: 3 parameters; outputs-2 and 0.
+# Expected: 3 parameters; outputs -2 and 0.
 
 # Exercise 5: Expose an unregistered tensor
 # Compare a Module holding a plain requires_grad tensor with one holding Parameter.
 # Expected: plain module has 0 registered parameters; proper module has 1.
 
 # Exercise 6: Reject wrong feature width
-# Pass a2-feature row to the 3-input layer.
+# Pass a 2-feature row to the 3-input layer.
 # Expected: RuntimeError from incompatible matrix dimensions.
 
 if __name__ == "__main__":

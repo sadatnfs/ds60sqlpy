@@ -24,7 +24,7 @@ A correction about a past event can still be future information.
 
 Real ingestion timing may require another rule, which must be documented and tested.
 
-**Expected observation:** The inclusive fixture admits the row.
+**Expected observation:** The inclusive cutoff returns the row whose availability time equals the lookup time.
 
 ## 5. Preserve entity identity
 

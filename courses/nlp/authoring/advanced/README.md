@@ -14,6 +14,8 @@ The shared policy must explicitly admit each generated Markdown path. Unsupporte
 
 Generation does not run examples or certify a runtime. The unchanged `python -m pytest tests/test_nlp_advanced.py` command executes guide snippets, reference checks and AST-based negative controls offline in the prepared environment. Those assertions remain authoritative. Regenerate shared readers through the normal root integration workflow after intentional changes.
 
+Each exercise's Verify line comes from `verify_lines.py`, keyed by lesson and exercise number; it names the assertion or record to inspect instead of repeating the expected text. The learning objectives shown in the classroom (`outcome`, `lab` and `verification` in `courses/nlp/track.json`) are authored per lesson and are not generated. The generated learner and reference programs are written unformatted; run the pinned Ruff formatter on `courses/nlp` before comparing them with the committed files.
+
 Learner sources preserve incomplete functions. Executable answers remain under solutions/. Handcrafted vectors, tiny attention layers, lexical extraction and vote aggregation are labeled by their actual mechanisms. They do not claim pretrained-model quality, broad multilingual coverage or a production authorization service.
 
 ## Shared maintenance gates

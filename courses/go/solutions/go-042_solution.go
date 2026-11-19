@@ -44,23 +44,34 @@ func main() {
 	// Represent a stale view
 	{
 		cache := Cached{Version: "a"}
-		server := Cached{Version: "b"}
-		check(cache.Version != server.Version, "stale view")
+		events := []Cached{{Version: "b"}, {Version: "c"}}
+		delivered := 1
+		for _, event := range events[:delivered] {
+			cache = event
+		}
+		check(cache.Version == "b" && events[len(events)-1].Version == "c", "stale view")
 	}
 
 	// Gate on initial synchronization
 	{
-		synced := false
-		ready := synced
-		check(!ready, "initial sync")
+		processed := 0
+		process := func(synced bool) bool {
+			if !synced {
+				return false
+			}
+			processed++
+			return true
+		}
+		check(!process(false) && processed == 0, "initial sync")
+		check(process(true) && processed == 1, "after sync")
 	}
 
 	// Queue identities instead of objects
 	{
-		key := "lesson/demo"
-		version := "a"
-		version = "b"
-		check(key == "lesson/demo" && version == "b", "key identity")
+		store := map[string]Cached{"lesson/demo": {Version: "a"}}
+		queue := []string{"lesson/demo"}
+		store["lesson/demo"] = Cached{Version: "b"}
+		check(store[queue[0]].Version == "b", "key identity")
 	}
 
 	// Transfer nested-copy independence

@@ -6,11 +6,11 @@ Intermediate, approximately 90 minutes. Direct prerequisites: `java-019`
 
 ## Learning objectives
 
-Explain binary-search invariant, stable sort, dynamic programming using a concrete program. Trace the normal execution, identify its boundary assumptions and make a failure case observable. The first investigation is Run lowerBound on 1,2,2,5 with target 2 and target 6. The final exercise transfers the mechanism to reject invalid recurrence inputs.
+Implement binary search, stable sorting and dynamic programming that handle empty, tied and unreachable cases. Along the way, explain binary-search invariant, stable sort, dynamic programming using a concrete program. Trace the normal execution, identify its boundary assumptions and make a failure case observable. Exercises 1 and 2 start from the worked examples; the authored investigations begin with this task: Sort records (a, 2), (b, 1) and (c, 2) by key only and inspect the equal-key order. The final exercise transfers the mechanism to reject invalid recurrence inputs.
 
 ## Purpose and mental model
 
-Algorithms connect a problem contract to a sequence of operations and invariants. Binary search relies on sorted input and repeatedly narrows a half-open interval containing the possible answer. Stable sorting preserves relative order among equal keys,which matters when records already have a meaningful prior order. Recursion solves a problem through smaller instances and needs a base case;memoization avoids recomputing repeated subproblems. Dynamic programming makes those dependencies explicit in a table. The coin-change fixture shows why a locally greedy choice can fail even when a valid combination exists.
+Algorithms connect a problem contract to a sequence of operations and invariants. Binary search relies on sorted input and repeatedly narrows a half-open interval containing the possible answer. Stable sorting preserves relative order among equal keys, which matters when records already have a meaningful prior order. Recursion solves a problem through smaller instances and needs a base case; memoization avoids recomputing repeated subproblems. Dynamic programming makes those dependencies explicit in a table. The coin-change fixture shows why a locally greedy choice can fail even when a valid combination exists.
 
 ## Vocabulary and concepts
 
@@ -37,7 +37,7 @@ The public class name and source filename must agree. Each worked example below 
 
 ## Syntax anatomy and execution trace
 
-A lower-bound search returns the first index whose value is at least the target,or length if none qualifies. The invariant keeps all earlier discarded positions below the target and all later discarded positions at least the target. A dynamic-programming tabledp[amount] stores the minimum coin count for that exact amount,withdp[0]=0 and an unreachable sentinel. Each transition considers a smaller amount and one added coin.
+A lower-bound search returns the first index whose value is at least the target, or length if none qualifies. The invariant keeps all earlier discarded positions below the target and all later discarded positions at least the target. A dynamic-programming table dp[amount] stores the minimum coin count for that exact amount, with dp[0]=0 and an unreachable sentinel. Each transition considers a smaller amount and one added coin.
 
 ## Worked example / walkthrough
 
@@ -86,7 +86,7 @@ public class Main {
 
 ### Example B: Handle empty and outside searches
 
-The half-open interval starts empty for an empty input. The result is an insertion position,not necessarily the index of an existing match.
+The half-open interval starts empty for an empty input. The result is an insertion position, not necessarily the index of an existing match.
 
 ```java
 import java.util.*;
@@ -128,7 +128,7 @@ public class Main {
 }
 ```
 
-**Expected:** both return0.
+**Expected:** both return 0.
 
 ## Prediction before your attempt
 
@@ -136,29 +136,29 @@ Read the source from the entry point and name each value before executing it. Id
 
 ## Exercises
 
-1. **Find the first duplicate boundary.** Run lowerBound on 1,2,2,5 with target 2 and target 6.
-   **Expected:** indices 1 and 4.
-   **Verify:** Compare your assertion values or captured diagnostic with indices 1 and 4.
+1. **Find the first duplicate boundary: change one input.** Copy Example A into a scratch `Main.java` and change `int[] sorted = { 1, 2, 2, 5 };` to `int[] sorted = { 2, 2, 2, 5 };`. Before running it with `java -ea Main`, predict which assertion fails and which value it now sees; then run it and restore the original line.
+   **Expected:** The changed run fails with an `AssertionError` from the assertion on `lowerBound(sorted, 2) == 1 && lowerBound(sorted, 6) == 4`. Restoring the original line brings back the worked observation: indices 1 and 4.
+   **Verify:** Compare your written prediction with the reported `AssertionError` and its stack-trace line, and name the value that made `lowerBound(sorted, 2) == 1 && lowerBound(sorted, 6) == 4` false. After restoring the line, the program completes without an `AssertionError` again.
 
-2. **Handle empty and outside searches.** Search an empty array and a target below the first element.
-   **Expected:** both return0.
-   **Verify:** Compare your assertion values or captured diagnostic with both return0.
+2. **Handle empty and outside searches: diagnose an edited check.** A careless edit changed the assertion that Example B adds after Example A so that it reads `assert lowerBound(new int[1], 7) == 0;`. Run Example B with that line, explain why the edited assertion now fails for the same program state, and restore it.
+   **Expected:** Before the repair the run fails with an `AssertionError` from the assertion on `lowerBound(new int[0], 7) == 0`; after it the line reads `assert lowerBound(new int[0], 7) == 0;` again and both return 0.
+   **Verify:** Keep the failing and the repaired runs. Explain why the edited assertion rejects the same program state that `lowerBound(new int[0], 7) == 0` accepts.
 
-3. **Preserve stable ties.** Sort recordsa2,b1,c2 by key only and inspect the equal-key order.
-   **Expected:** IDs b,a,c.
-   **Verify:** Compare your assertion values or captured diagnostic with IDs b,a,c.
+3. **Preserve stable ties.** Sort records (a, 2), (b, 1) and (c, 2) by key only and inspect the equal-key order.
+   **Expected:** IDs b, a, c.
+   **Verify:** Keep an assertion equivalent to `items.stream().map(Item::id).toList().equals(List.of("b", "a", "c"))`. As a control, change `List.of(new Item("a", 2), new Item("b", 1), new Item("c", 2))` to `List.of(new Item("a", 3), new Item("b", 1), new Item("c", 2))`: the run must fail with an `AssertionError` from the assertion on `items.stream().map(Item::id).toList().equals(List.of("b", "a", "c"))`. Restore the line before continuing.
 
-4. **Solve a greedy counterexample.** Find minimum coins foramount6 usingcoins1,3,4.
-   **Expected:** 2 coins,using3+3 rather than4+1+1.
-   **Verify:** Compare your assertion values or captured diagnostic with 2 coins,using3+3 rather than4+1+1.
+4. **Solve a greedy counterexample.** Find minimum coins for amount 6 using coins 1, 3, 4.
+   **Expected:** 2 coins, using 3+3 rather than 4+1+1.
+   **Verify:** Keep an assertion equivalent to `minimumCoins(6, new int[] { 1, 3, 4 }) == 2`. As a control, change `assert minimumCoins(6, new int[] { 1, 3, 4 }) == 2;` to `assert minimumCoins(6, new int[] { 1, 4, 4 }) == 2;` inside it: the run must fail with an `AssertionError`, which shows the assertion can fail. Restore it.
 
-5. **Represent an unreachable amount.** Solveamount3 withonlycoin2 andamount0 withanypositivecoins.
-   **Expected:** -1 forunreachable3;0 foramount0.
-   **Verify:** Compare your assertion values or captured diagnostic with -1 forunreachable3;0 foramount0.
+5. **Represent an unreachable amount.** Solve amount 3 with only coin 2 and amount 0 with any positive coins.
+   **Expected:** -1 for unreachable amount 3; 0 for amount 0.
+   **Verify:** Keep an assertion equivalent to `minimumCoins(0, new int[] { 2, 5 }) == 0`. As a control, change `assert minimumCoins(0, new int[] { 2, 5 }) == 0;` to `assert minimumCoins(1, new int[] { 2, 5 }) == 0;` inside it: the run must fail with an `AssertionError`, which shows the assertion can fail. Restore it.
 
 6. **Reject invalid recurrence inputs.** Pass a negative amount or a zero-valued coin.
    **Expected:** IllegalArgumentException for both.
-   **Verify:** Compare your assertion values or captured diagnostic with IllegalArgumentException for both.
+   **Verify:** Keep an assertion equivalent to `negative && zeroCoin`. As a control, change `minimumCoins(3, new int[] { 0, 1 });` to `minimumCoins(3, new int[] { 1, 1 });`: the run must fail with an `AssertionError` from the assertion on `negative && zeroCoin`. Restore the line before continuing.
 
 ## Common pitfalls and diagnosis
 
@@ -168,7 +168,14 @@ Do not replace a precise exception with a catch-all that returns a plausible def
 
 ## Progressive hints
 
-First reconstruct the values and identities in the worked example. Next isolate the line that changes the result when one input is altered. Finally compare the normal and failure paths with the stated contract. Use a small table of input, expected value, actual value and exception type. Ask for one hint about the first incorrect assumption before requesting the entire reference implementation.
+Read one hint at a time and attempt the exercise again before reading the next. Keep a small table of input, expected value, actual value and exception type. Ask for one hint about the first incorrect assumption before requesting the entire reference implementation.
+
+- **Exercise 1:** First restate the expected observation: indices 1 and 4. Then list the values read by `lowerBound(sorted, 2) == 1 && lowerBound(sorted, 6) == 4` and trace each one from its declaration. Finally, compute the asserted value with `int[] sorted = { 2, 2, 2, 5 };` in place before running.
+- **Exercise 2:** First restate the expected observation: both return 0. Then list the values read by `lowerBound(new int[0], 7) == 0` and trace each one from its declaration. Finally, compare `assert lowerBound(new int[1], 7) == 0;` with the same line in Example B and state the claim each version makes.
+- **Exercise 3:** First restate the expected observation: IDs b, a, c. Then list the values read by `items.stream().map(Item::id).toList().equals(List.of("b", "a", "c"))` and trace each one from its declaration. Finally, predict the effect of changing `List.of(new Item("a", 2), new Item("b", 1), new Item("c", 2))` to `List.of(new Item("a", 3), new Item("b", 1), new Item("c", 2))` before running anything.
+- **Exercise 4:** First restate the expected observation: 2 coins, using 3+3 rather than 4+1+1. Then list the values read by `minimumCoins(6, new int[] { 1, 3, 4 }) == 2` and trace each one from its declaration. Finally, name one input that would make `minimumCoins(6, new int[] { 1, 3, 4 }) == 2` false.
+- **Exercise 5:** First restate the expected observation: -1 for unreachable amount 3; 0 for amount 0. Then list the values read by `minimumCoins(0, new int[] { 2, 5 }) == 0` and trace each one from its declaration. Finally, name one input that would make `minimumCoins(0, new int[] { 2, 5 }) == 0` false.
+- **Exercise 6:** First restate the expected observation: illegalArgumentException for both. Then list the values read by `negative && zeroCoin` and trace each one from its declaration. Finally, predict the effect of changing `minimumCoins(3, new int[] { 0, 1 });` to `minimumCoins(3, new int[] { 1, 1 });` before running anything.
 
 ## Self-check and retrieval
 
@@ -180,7 +187,7 @@ Preserve the saved pad and the six exercise observations. Continue to the next l
 
 ## Sources and verification status
 
-[Official Java21 API or language reference](https://docs.oracle.com/en/java/javase/21/docs/api/index.html), reviewed2026-10-22. Examples and exercise fixtures are original course material. Use the [validation guide](../../../docs/validation.md) and CI artifacts for the exact revision and platform to inspect actual compile/run results. Authoring, parsing, compilation, execution and learner mastery are separate forms of evidence.
+[Official Java 21 API or language reference](https://docs.oracle.com/en/java/javase/21/docs/api/index.html), reviewed 2026-10-22. Examples and exercise fixtures are original course material. Use the [validation guide](../../../docs/validation.md) and CI artifacts for the exact revision and platform to inspect actual compile/run results. Authoring, parsing, compilation, execution and learner mastery are separate forms of evidence.
 
 ## Ask an AI tutor about this lesson
 
@@ -190,7 +197,7 @@ Read courses/java/guides/java-020.md and courses/java/lessons/java-020.java. Dir
 Explain the mechanism, ask for a prediction, review my attempt, give one hint,
 request compiler/runtime evidence, and ask a fresh retrieval question.
 Keep courses/java/solutions/ closed until I request comparison or show an attempt.
-Use Java21 and the declared offline fixture. Done when I can explain the state
+Use Java 21 and the declared offline fixture. Done when I can explain the state
 transitions, pass all six exercise contracts, diagnose one failure and solve a
 new boundary case without copying the solution.
 ```

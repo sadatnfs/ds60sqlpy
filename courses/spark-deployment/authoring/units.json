@@ -29,7 +29,7 @@
   {
     "id": "spark-deploy-004",
     "title": "Submit a bounded distributed fit",
-    "level": "beginner",
+    "level": "intermediate",
     "minutes": 60,
     "prerequisites": ["spark-deploy-003", "spark-022"],
     "concepts": ["submission", "partitions", "sufficient statistics", "fitting"],
@@ -101,7 +101,7 @@
   {
     "id": "spark-deploy-012",
     "title": "Budget memory, cores, PIDs and results",
-    "level": "intermediate",
+    "level": "advanced",
     "minutes": 90,
     "prerequisites": ["spark-deploy-004", "spark-039"],
     "concepts": ["memory", "CPU", "PIDs", "resources"],

@@ -4,7 +4,7 @@ Compare these answers only after an attempt or an explicit solution reveal. They
 
 ## Mechanism review
 
-Saving has two distinct purposes: preserving a trainable Keras model and exporting an inference interface. The .keras format preserves a Keras model configuration and state; model.export creates an inference artifact that can be loaded through SavedModel. Keras3 does not use model.save(directory) as the export workflow. Prediction parity must be checked after reconstruction, ideally in a fresh process. Matching predictions says nothing about whether optimizer state can resume the same next update, which is the separate checkpoint lesson. This fixture has one fixed weight and a known signature, so failures can be attributed to persistence and interface behavior rather than training randomness.
+Saving has two distinct purposes: preserving a trainable Keras model and exporting an inference interface. The .keras format preserves a Keras model configuration and state; model.export creates an inference artifact that can be loaded through SavedModel. Keras 3 does not use model.save(directory) as the export workflow. Prediction parity must be checked after reconstruction, ideally in a fresh process. Matching predictions says nothing about whether optimizer state can resume the same next update, which is the separate checkpoint lesson. This fixture has one fixed weight and a known signature, so failures can be attributed to persistence and interface behavior rather than training randomness.
 
 **Serialization:** Encoding model configuration and state into a recoverable artifact.
 
@@ -14,11 +14,11 @@ Saving has two distinct purposes: preserving a trainable Keras model and exporti
 
 ## Reading the implementation
 
-Save the built model to a path ending.keras. Load it with tf.keras.models.load_model. Export to a different owned directory and load it with tf.saved_model.load; call its serve endpoint. TemporaryDirectory owns both outputs. The child process accepts only the two local artifact paths created by the parent and prints predictions as JSON. Compare using float32 tolerance1e-6.
+Save the built model to a path ending.keras. Load it with tf.keras.models.load_model. Export to a different owned directory and load it with tf.saved_model.load; call its serve endpoint. TemporaryDirectory owns both outputs. The child process accepts only the two local artifact paths created by the parent and prints predictions as JSON. Compare using float32 tolerance 1e-6.
 
 ## Exercise 1: Create a fixed inference model
 
-The question is: Set a bias-free Dense weight to2 and predict on 1,3.
+The question is: Set a bias-free Dense weight to 2 and predict on 1, 3.
 
 A known fixed weight avoids making serialization success depend on a stochastic training result. The input shape and dtype are part of the inference contract.
 
@@ -36,9 +36,9 @@ expected = model(x).numpy()
 np.testing.assert_array_equal(expected, [[2], [6]])
 ```
 
-**Expected:** predictions2,6.
+**Expected:** predictions 2, 6.
 
-**Verify:** Compare the computed values or written argument with predictions2,6.
+**Verify:** In a fresh process, the exercise checks confirm `expected` equals `[[2], [6]]`.
 
 ## Exercise 2: Round-trip .keras
 
@@ -57,7 +57,7 @@ np.testing.assert_allclose(loaded(x).numpy(), expected, atol=1e-6, rtol=0)
 
 **Expected:** reloaded predictions match within 1e-6.
 
-**Verify:** Compare the computed values or written argument with reloaded predictions match within 1e-6.
+**Verify:** In a fresh process, the exercise checks confirm `loaded(x).numpy()` matches `expected` within 1e-6.
 
 ## Exercise 3: Export an inference endpoint
 
@@ -74,7 +74,7 @@ np.testing.assert_allclose(exported.serve(tf.constant(x)).numpy(), expected, ato
 
 **Expected:** serve returns the same predictions.
 
-**Verify:** Compare the computed values or written argument with serve returns the same predictions.
+**Verify:** In a fresh process, the exercise checks confirm `exported.serve(tf.constant(x)).numpy()` matches `expected` within 1e-6.
 
 ## Exercise 4: Check both in a fresh process
 
@@ -106,9 +106,9 @@ np.testing.assert_allclose(a, expected, atol=1e-6, rtol=0)
 np.testing.assert_allclose(b, expected, atol=1e-6, rtol=0)
 ```
 
-**Expected:** both child outputs[[2],[6]].
+**Expected:** both child outputs [[2], [6]].
 
-**Verify:** Compare the computed values or written argument with both child outputs[[2],[6]].
+**Verify:** In a fresh process, the exercise checks confirm `not (result.returncode)`, `a` matches `expected` within 1e-6 and `b` matches `expected` within 1e-6.
 
 ## Exercise 5: Check a new batch length
 
@@ -122,9 +122,9 @@ assert new.shape == (3, 1)
 np.testing.assert_array_equal(new[:, 0], [0, 4, 8])
 ```
 
-**Expected:** output shape(3,1), predictions0,4,8.
+**Expected:** output shape (3, 1), predictions 0, 4, 8.
 
-**Verify:** Compare the computed values or written argument with output shape(3,1), predictions0,4,8.
+**Verify:** In a fresh process, the exercise checks confirm `new.shape == (3, 1)` and `new[:, 0]` equals `[0, 4, 8]`.
 
 ## Exercise 6: Remove only owned artifacts
 
@@ -139,7 +139,7 @@ assert not folder.exists()
 
 **Expected:** temporary directory absent.
 
-**Verify:** Compare the computed values or written argument with temporary directory absent.
+**Verify:** In a fresh process, the exercise checks confirm `not folder.exists()`.
 
 ## Review after comparison
 

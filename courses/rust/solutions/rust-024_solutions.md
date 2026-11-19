@@ -1,6 +1,6 @@
 # rust-024: explanation and comparison
 
-Attempt the six guide tasks before opening this comparison. The executable reference is [rust-024_solution.rs](rust-024_solution.rs). Its assertions are always active under the prepared classroom compile settings.
+Attempt the six guide tasks before opening this comparison. The executable reference is [rust-024_solution.rs](rust-024_solution.rs). It runs both worked examples and the reference answers below, and its assertions are always active under the prepared classroom compile settings.
 
 ## Why the two examples differ
 
@@ -8,21 +8,60 @@ Attempt the six guide tasks before opening this comparison. The executable refer
 
 **Reject a plausible wrong boundary:** The property alone would not necessarily distinguish every wrong constant implementation. Zero rejects the incorrect default while idempotence adds a second property.
 
-## Reason through the six tasks
+## Task answers
 
-1. **Predict and explain.** Name a wrong implementation each case catches.
+### Task 1: Predict and explain
 
-2. **Guided modification.** Add an extreme integer input without negating its minimum value.
+Name a wrong implementation each case catches.
 
-3. **Independent construction.** Write table-driven checks for a quantity validator.
+No separate reference answer has been written for this task. Example A is the evidence to compare with: Literal expectations make the test independent of the implementation expression. Negative, zero and positive cases satisfy the stated clamp rule.
 
-4. **Diagnose a defect.** Diagnose an assertion comparing a function call with itself.
+### Task 2: Guided modification
 
-5. **Boundary evidence.** Test idempotence alongside independent boundary expectations.
+Add an extreme integer input without negating its minimum value.
 
-6. **Transfer and justify.** Separate unit, integration, compile-fail and runtime evidence for a library change.
+No separate reference answer has been written for this task. Start from Example B: The property alone would not necessarily distinguish every wrong constant implementation. Zero rejects the incorrect default while idempotence adds a second property.
 
-For tasks 1 and 2, use the checked values and mechanism trace in the two examples. For task 3, choose names that expose the input and result contract and retain the same invariants. For task 4, the diagnosed mistakes below supply a concrete wrong assumption: preserve its counterexample before repairing it. Task 5 needs an explicit expected value or documented rejection at the boundary, not just successful execution. For task 6, explain what changes in the new context and which part of the original mechanism remains applicable. Several representations may satisfy this transfer task; justify the choice rather than treating this reference as the only architecture.
+### Task 3: Independent construction
+
+Write table-driven checks for a quantity validator.
+
+**Reference answer.** The same statements run as the `Task 3` block of the reference program; here they are wrapped in `main` as a complete file.
+
+```rust
+fn main() -> Result<(), Box<dyn std::error::Error>> {
+    fn valid_quantity(value: i32) -> bool {
+        (0..=1000).contains(&value)
+    }
+    let cases = [(-1, false), (0, true), (1000, true), (1001, false)];
+    for (input, expected) in cases {
+        assert_eq!(valid_quantity(input), expected, "input {input}");
+    }
+    Ok(())
+}
+```
+
+**Observe:** All four rows pass, including both edges of the 0 to 1000 range.
+
+Each row pairs an input with an independently written expectation, and the message names the failing input.
+
+### Task 4: Diagnose a defect
+
+Diagnose an assertion comparing a function call with itself.
+
+No reference answer has been written for this task yet. The wrong assumptions to look for are this lesson's pitfalls: A disabled debug_assert is not a release invariant. Random cases require reproducibility and an oracle. A test that catches and ignores its own failure is misleading.
+
+### Task 5: Boundary evidence
+
+Test idempotence alongside independent boundary expectations.
+
+No reference answer has been written for this task yet. Write the expected value or documented rejection for each boundary before running it, and compare with the checks in Example A (Use independent expected cases) and Example B (Reject a plausible wrong boundary).
+
+### Task 6: Transfer and justify
+
+Separate unit, integration, compile-fail and runtime evidence for a library change.
+
+No single reference answer exists: several designs can satisfy this transfer task. Justify yours against the mechanism described below and the vocabulary entry **Test oracle**, and state one limitation of your choice.
 
 ## Mechanism and diagnostic reasoning
 
@@ -36,4 +75,4 @@ A disabled debug_assert is not a release invariant. Random cases require reprodu
 
 ## Review before continuing
 
-The reference checks the worked scenarios, including their boundary distinctions. Your independent and transfer artifacts may have additional checks. Compare observations rather than only source text. Preserve any new regression case you discover and explain why it would reject a plausible wrong implementation. External project steps require their own build and platform evidence and are not established by a portable reference passing.
+Run the reference and confirm that it prints `rust-024: passed`, then reconstruct one boundary case from memory and explain which check would reject a plausible wrong implementation. External project steps need their own build and platform evidence; a passing portable reference does not establish them.

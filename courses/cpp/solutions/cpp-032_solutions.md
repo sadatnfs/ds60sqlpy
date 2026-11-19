@@ -17,7 +17,7 @@ A future represents a result that may become available later. It carries either 
 
 The examples use std::launch::async explicitly so the operation is launched asynchronously rather than leaving a deferred policy choice to the implementation. That still does not define a production thread pool. Launching one async task per row in a very large input can create an unacceptable amount of concurrency or resource pressure. The lesson uses a fixed small number of tasks so the ownership and result flow are visible.
 
-The success program computes the square of 3 and observes9 through get. The failure program launches a task with -1, where checked_square throws invalid_argument. The exception is stored and rethrown when main calls get. A flag confirms that the specific error was observed. Ignoring the future or never retrieving its outcome can hide a failed task from the application report.
+The success program computes the square of 3 and observes 9 through get. The failure program launches a task with -1, where checked_square throws invalid_argument. The exception is stored and rethrown when main calls get. A flag confirms that the specific error was observed. Ignoring the future or never retrieving its outcome can hide a failed task from the application report.
 
 When combining multiple tasks, define whether one failure aborts the whole result or whether partial results have a valid meaning. A total assembled from successful tasks alone can look plausible while silently omitting failures. Keep accepted, completed, failed and cancelled work accounting explicit. Cancellation of pending work also needs a mechanism; future by itself is not a general cancel operation.
 
@@ -53,7 +53,7 @@ Define maximum workers 2 and queued tasks 4.
 
 **Reasoning:** Limiting workers alone can still allow an unbounded queue.
 
-**Verify:** Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.
+**Verify:** Check that your document gives two separate numbers, 2 running and 4 waiting, and says what happens to a fifth waiting task.
 
 ## Exercise 2: Compare serial results
 
@@ -63,7 +63,7 @@ Square 3 and 4 serially and in two futures.
 
 **Reasoning:** Parallelism must preserve the correctness contract.
 
-**Verify:** Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.
+**Verify:** Assert `checked_square(3) + checked_square(4) == 25`, and that the sum of `get()` on two `std::async` futures is also 25.
 
 ## Exercise 3: Propagate a failure
 
@@ -73,7 +73,7 @@ Include task -1 and call get.
 
 **Reasoning:** A future carries exceptions as well as values.
 
-**Verify:** Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.
+**Verify:** Assert that `get()` on the future for -1 throws `std::invalid_argument` in the calling thread, as Worked example 2 does with its `rejected` flag.
 
 ## Exercise 4: Repair fire-and-forget
 
@@ -83,7 +83,7 @@ Review discarded futures and missing result accounting.
 
 **Reasoning:** Unhandled failure cannot be labeled successful completion.
 
-**Verify:** Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.
+**Verify:** Confirm every `std::async` future is stored and `get()` is called on each, then check that results plus caught exceptions equal the number of submitted tasks.
 
 ## Exercise 5: Test empty workload
 
@@ -93,7 +93,7 @@ Run no tasks through the serial/reference contract.
 
 **Reasoning:** Do not create unnecessary workers for no input.
 
-**Verify:** Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.
+**Verify:** Run an empty task list and assert the results are empty and the total is 0 without starting any future.
 
 ## Exercise 6: Transfer backpressure
 
@@ -103,4 +103,4 @@ Sketch a capacity-4 queue for ten tasks and two consumers.
 
 **Reasoning:** Admission and completion counts provide inspectable bounds.
 
-**Verify:** Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.
+**Verify:** Check that the sketch blocks the producer when the queue holds 4 tasks, so running plus queued tasks never exceed 6 of the 10.

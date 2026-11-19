@@ -6,7 +6,13 @@ Advanced; approximately 120 minutes. Direct prerequisites: `torch-029`. The prer
 
 ## Learning objectives
 
-Distributed and accumulated gradients should represent a declared global objective. The central investigation is concrete: Combine means 2, 6 with counts 1, 3. The finish condition is global mean 5; unweighted shard mean 4. empty shard contributes 0; global mean 5. A useful explanation connects the calculation to the reason it is needed, rather than treating a function name as a definition.
+Combine gradients across shards and microbatches so that they represent the declared global mean objective.
+
+Central investigation: Weight shard means by their counts, accumulate summed squared-loss gradients over shards of sizes 1 and 3, and contrast separate microbatch steps.
+
+Finish condition: Shard means 2 and 6 with counts 1 and 3 give 5 rather than 4, the accumulated gradient is -30 like the full batch, one SGD step gives \(w=0\).3, separate steps end elsewhere, and an empty shard contributes 0.
+
+Exercises 1-3 repeat the worked examples as guided reconstructions; exercises 4-6 change the fixture or expose a failure. A useful explanation connects the calculation to the reason it is needed, rather than treating a function name as a definition.
 
 ## Purpose and mental model
 
@@ -50,11 +56,11 @@ Use reduction='sum' for each microbatch, call backward without stepping, then di
 
 Let rank or shard r contain n_r participating examples, local gradient sum S_r and local mean \(g_{r}=\frac{S_{r}}{n_{r}}\) when \(n_{r}>0\). The global example-mean gradient is \(\frac{\sum_r S_r}{\sum_r n_r}\), equivalently \(\frac{\sum_r n_rg_r}{N}\). For means 2 and 6 with counts 1 and 3, the numerator is \(2+18=20\) and \(N=4\), giving five. Averaging the two means gives four and defines a different objective with equal shard weight.
 
-The vector[2, 4, 6, 8] is an independent four-example oracle. Splitting it 1:3 gives sums 2 and 18, which recombine to \(\frac{20}{4}=5\). An empty shard contributes sum zero and count zero; its local mean need not be evaluated at all. A globally empty collection has \(N=0\) and must not be divided by zero or described as a valid zero-gradient batch without an explicit skip policy.
+The vector [2, 4, 6, 8] is an independent four-example oracle. Splitting it 1:3 gives sums 2 and 18, which recombine to \(\frac{20}{4}=5\). An empty shard contributes sum zero and count zero; its local mean need not be evaluated at all. A globally empty collection has \(N=0\) and must not be divided by zero or described as a valid zero-gradient batch without an explicit skip policy.
 
-For the actual squared-loss fixture, x=[1, 2, 3, 4], y=2x and \(w=0\). The per-example derivatives are \(-4x^2\), or[-4, -16, -36, -64]. Their sum is-120 and global mean-30. The two backward calls in Example C accumulate the summed objectives at the same unchanged w, then divide once by four. One SGD update at 0.01 gives \(w=0.3\).
+For the actual squared-loss fixture, x=[1, 2, 3, 4], y=2x and \(w=0\). The per-example derivatives are \(-4x^2\), or [-4, -16, -36, -64]. Their sum is -120 and global mean -30. The two backward calls in Example C accumulate the summed objectives at the same unchanged w, then divide once by four. One SGD update at 0.01 gives \(w=0.3\).
 
-Stepping after each microbatch changes both normalization and evaluation state. The first one-row mean has gradient-4, so w becomes 0.04. The second three-row mean is then evaluated at that new value and has derivative(58/3)(0.04-2), approximately-37.893333. Its second update ends at approximately 0.418933, not 0.3. This discrepancy is expected because it is a different optimization trajectory, not an accumulation bug to hide with a tolerance.
+Stepping after each microbatch changes both normalization and evaluation state. The first one-row mean has gradient -4, so w becomes 0.04. The second three-row mean is then evaluated at that new value and has derivative (58/3)(0.04-2), approximately -37.893333. Its second update ends at approximately 0.418933, not 0.3. This discrepancy is expected because it is a different optimization trajectory, not an accumulation bug to hide with a tolerance.
 
 A distributed reducer introduces another factor. Under a fixed R-rank configuration that averages gradients across ranks, backpropagating a local summed loss divided by global N would produce only \(\frac{1}{R}\) of the intended global gradient after averaging. One appropriate local scaling for this stated convention is \(L_r=\frac{R}{N}\sum_i\ell_{ri}\). The reducer then returns \(\frac1R\sum_r\frac{RS_r}{N}=\frac{\sum_rS_r}{N}\). Equivalently, weight each nonempty local mean by R \(\frac{n_{r}}{N}\). When all n_r are equal, the ordinary mean of local means already has the intended weighting.
 
@@ -120,37 +126,37 @@ full = ((oracle * x - y) ** 2).mean()
 assert torch.autograd.grad(full, oracle)[0].item() == -30
 ```
 
-**Expected:** gradient-30, matching full-batch mean.
+**Expected:** gradient -30, matching full-batch mean.
 
 ## Prediction before your attempt
 
-For the supplied fixture, name the input unit, the intermediate state and the final quantity that changes. Predict one normal result and one failure result before touching the code. In particular, explain this lesson's acceptance condition in your own words: global mean 5; unweighted shard mean 4. empty shard contributes 0; global mean 5. Preserve the prediction beside your later observations so a correction is visible. A copied expected value is not a derivation.
+For the supplied fixture, name the input unit, the intermediate state and the final quantity that changes. Predict one normal result and one failure result before touching the code. In particular, explain this lesson's acceptance condition in your own words: Shard means 2 and 6 with counts 1 and 3 give 5 rather than 4, the accumulated gradient is -30 like the full batch, one SGD step gives \(w=0\).3, separate steps end elsewhere, and an empty shard contributes 0. Preserve the prediction beside your later observations so a correction is visible. A copied expected value is not a derivation.
 
 ## Exercises
 
 1. **Weight unequal shard means.** Combine means 2, 6 with counts 1, 3.
    **Expected:** global mean 5; unweighted shard mean 4.
-   **Verify:** Save the assertion results for exercise 1, including global mean 5; unweighted shard mean 4.
+   **Verify:** In a fresh process, the exercise checks confirm `(means * counts).sum().div(counts.sum()).item() == 5` and `means.mean().item() == 4`.
 
 2. **Reconstruct an example mean.** Split gradients 2, 4, 6, 8 into one and three elements and recombine sums/counts.
    **Expected:** global mean 5.
-   **Verify:** Save the assertion results for exercise 2, including global mean 5.
+   **Verify:** In a fresh process, the exercise checks confirm the combined assertion.
 
 3. **Accumulate one full-batch gradient.** At \(w=0\), use \(x=(1, 2, 3, 4)\) and \(y=2x\), accumulate squared-loss sums for shards of sizes 1 and 3, and divide by the total sample count 4.
-   **Expected:** gradient-30, matching full-batch mean.
-   **Verify:** Save the assertion results for exercise 3, including gradient-30, matching full-batch mean.
+   **Expected:** gradient -30, matching full-batch mean.
+   **Verify:** In a fresh process, the exercise checks confirm `w.grad.item() == -30` and `torch.autograd.grad(full, oracle)[0].item() == -30`.
 
-4. **Apply one accumulated update.** Take SGD.01 after the global gradient is formed.
-   **Expected:** new weight.3.
-   **Verify:** Save the assertion results for exercise 4, including new weight.3.
+4. **Apply one accumulated update.** Take one SGD step with learning rate 0.01 after the global gradient is formed.
+   **Expected:** new weight 0.3.
+   **Verify:** In a fresh process, the exercise checks confirm `w.item()` matches `0.3` within 1e-12.
 
-5. **Contrast separate microbatch updates.** Reset w0and step after each shard mean instead.
-   **Expected:** endpoint differs from.3.
-   **Verify:** Save the assertion results for exercise 5, including endpoint differs from.3.
+5. **Contrast separate microbatch updates.** Reset w to 0 and step after each shard mean instead.
+   **Expected:** endpoint differs from 0.3.
+   **Verify:** In a fresh process, the exercise checks confirm `abs(other.item() - 0.3) > 1e-06`.
 
 6. **Represent empty-shard contributions.** Combine an empty shard and the four real gradients using sums and counts.
    **Expected:** empty shard contributes 0; global mean 5.
-   **Verify:** Save the assertion results for exercise 6, including empty shard contributes 0; global mean 5.
+   **Verify:** In a fresh process, the exercise checks confirm `denominator == 4` and `numerator.div(denominator).item() == 5`.
 
 ## Common pitfalls and diagnosis
 
@@ -164,7 +170,7 @@ First draw the state described in the vocabulary section. Next use the smallest 
 
 ## Self-check and retrieval
 
-Close both worked examples. Explain Global objective, Microbatch accumulation, Sha rd weighting using the lesson fixture. Reconstruct one computation from its inputs. Then change one input while retaining the mechanism and predict whether the conclusion survives. Write which part is guaranteed by the code and which part would need new observations. This last distinction prevents a tiny deterministic teaching example from being presented as evidence about an unseen population or a production model.
+Close all three worked examples. Explain Global objective, Microbatch accumulation, Sha rd weighting using the lesson fixture. Reconstruct one computation from its inputs. Then change one input while retaining the mechanism and predict whether the conclusion survives. Write which part is guaranteed by the code and which part would need new observations. This last distinction prevents a tiny deterministic teaching example from being presented as evidence about an unseen population or a production model.
 
 ## Next step
 
@@ -172,7 +178,7 @@ Revisit the direct prerequisite `torch-029` if the calculation cannot be reconst
 
 ## Sources and verification status
 
-API and mechanism reference: [PyTorch2.9 reference](https://docs.pytorch.org/docs/2.9/index.html), reviewed 2026-10-22. The fixture, examples, counterexamples and exercise design are original course material. See [validation](../../../docs/validation.md) for execution gates. Check CI artifacts for the exact revision and platform to determine which runtime checks actually ran; authored content alone does not establish runtime execution.
+API and mechanism reference: [PyTorch 2.9 reference](https://docs.pytorch.org/docs/2.9/index.html), reviewed 2026-10-22. The fixture, examples, counterexamples and exercise design are original course material. See [validation](../../../docs/validation.md) for execution gates. Check CI artifacts for the exact revision and platform to determine which runtime checks actually ran; authored content alone does not establish runtime execution.
 
 ## Interview reasoning with worked answers
 

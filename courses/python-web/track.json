@@ -16,13 +16,15 @@
       ],
       "runtime": "python-web",
       "concepts": [
-        "http",
-        "HTTP",
-        "From Python functions to HTTP responses"
+        "HTTP request",
+        "routing",
+        "view function",
+        "status code",
+        "test client"
       ],
       "outcome": "Trace a request through routing, a handler and a response using two real in-process client requests.",
-      "lab": "Read the two complete worked cases, reproduce their evidence and compare their assumptions.",
-      "verification": "Complete source-bound pyweb-001 investigation with explicit numerical or execution diagnostics; no mastery grade."
+      "lab": "Run the complete program, then change one input in each worked case and predict the new result before rerunning.",
+      "verification": "Every assertion in the pyweb-001 program passes and its printed JSON matches the worked cases; a passing run is not a mastery grade."
     },
     {
       "id": "pyweb-002",
@@ -34,13 +36,15 @@
       ],
       "runtime": "python-web",
       "concepts": [
-        "http",
-        "HTTP",
-        "URLs, path parameters and query strings"
+        "URL path",
+        "path parameter",
+        "query string",
+        "percent encoding",
+        "404 Not Found"
       ],
       "outcome": "Distinguish resource paths, repeated query values, percent encoding and missing-route behavior.",
-      "lab": "Read the two complete worked cases, reproduce their evidence and compare their assumptions.",
-      "verification": "Complete source-bound pyweb-002 investigation with explicit numerical or execution diagnostics; no mastery grade."
+      "lab": "Run the complete program, then change one input in each worked case and predict the new result before rerunning.",
+      "verification": "Every assertion in the pyweb-002 program passes and its printed JSON matches the worked cases; a passing run is not a mastery grade."
     },
     {
       "id": "pyweb-003",
@@ -52,13 +56,15 @@
       ],
       "runtime": "python-web",
       "concepts": [
-        "http",
-        "HTTP",
-        "HTTP methods, status codes and idempotence"
+        "HTTP methods",
+        "status codes",
+        "idempotence",
+        "safe methods",
+        "PUT and DELETE"
       ],
       "outcome": "Compare repeated replacement and deletion operations without confusing equal effects with equal status codes.",
-      "lab": "Read the two complete worked cases, reproduce their evidence and compare their assumptions.",
-      "verification": "Complete source-bound pyweb-003 investigation with explicit numerical or execution diagnostics; no mastery grade."
+      "lab": "Run the complete program, then change one input in each worked case and predict the new result before rerunning.",
+      "verification": "Every assertion in the pyweb-003 program passes and its printed JSON matches the worked cases; a passing run is not a mastery grade."
     },
     {
       "id": "pyweb-004",
@@ -70,13 +76,15 @@
       ],
       "runtime": "python-web",
       "concepts": [
-        "http",
-        "HTTP",
-        "Headers, JSON, bytes and content negotiation"
+        "HTTP headers",
+        "Content-Type",
+        "JSON",
+        "UTF-8 bytes",
+        "content negotiation"
       ],
       "outcome": "Validate media types and Unicode representations and diagnose malformed request bodies.",
-      "lab": "Read the two complete worked cases, reproduce their evidence and compare their assumptions.",
-      "verification": "Complete source-bound pyweb-004 investigation with explicit numerical or execution diagnostics; no mastery grade."
+      "lab": "Run the complete program, then change one input in each worked case and predict the new result before rerunning.",
+      "verification": "Every assertion in the pyweb-004 program passes and its printed JSON matches the worked cases; a passing run is not a mastery grade."
     },
     {
       "id": "pyweb-005",
@@ -89,13 +97,15 @@
       ],
       "runtime": "python-web",
       "concepts": [
-        "http",
-        "HTTP",
-        "Input schemas and explicit validation errors"
+        "input schema",
+        "type coercion",
+        "validation error",
+        "unexpected fields",
+        "422 Unprocessable Content"
       ],
       "outcome": "Reject ambiguous coercions and unexpected fields with an explained structured error contract.",
-      "lab": "Read the two complete worked cases, reproduce their evidence and compare their assumptions.",
-      "verification": "Complete source-bound pyweb-005 investigation with explicit numerical or execution diagnostics; no mastery grade."
+      "lab": "Run the complete program, then change one input in each worked case and predict the new result before rerunning.",
+      "verification": "Every assertion in the pyweb-005 program passes and its printed JSON matches the worked cases; a passing run is not a mastery grade."
     },
     {
       "id": "pyweb-006",
@@ -108,13 +118,15 @@
       ],
       "runtime": "python-web",
       "concepts": [
-        "http",
-        "HTTP",
-        "HTML templates and context-aware escaping"
+        "Jinja templates",
+        "autoescaping",
+        "context-aware escaping",
+        "Markup",
+        "URL validation"
       ],
       "outcome": "Render untrusted text safely and separate escaping from validating a URL or trusted HTML fragment.",
-      "lab": "Read the two complete worked cases, reproduce their evidence and compare their assumptions.",
-      "verification": "Complete source-bound pyweb-006 investigation with explicit numerical or execution diagnostics; no mastery grade."
+      "lab": "Run the complete program, then change one input in each worked case and predict the new result before rerunning.",
+      "verification": "Every assertion in the pyweb-006 program passes and its printed JSON matches the worked cases; a passing run is not a mastery grade."
     },
     {
       "id": "pyweb-007",
@@ -127,13 +139,15 @@
       ],
       "runtime": "python-web",
       "concepts": [
-        "http",
-        "HTTP",
-        "Forms, multipart data and upload limits"
+        "HTML forms",
+        "multipart/form-data",
+        "file upload",
+        "MAX_CONTENT_LENGTH",
+        "secure_filename"
       ],
       "outcome": "Parse form and file requests, enforce size and content contracts and keep filenames out of trusted paths.",
-      "lab": "Read the two complete worked cases, reproduce their evidence and compare their assumptions.",
-      "verification": "Complete source-bound pyweb-007 investigation with explicit numerical or execution diagnostics; no mastery grade."
+      "lab": "Run the complete program, then change one input in each worked case and predict the new result before rerunning.",
+      "verification": "Every assertion in the pyweb-007 program passes and its printed JSON matches the worked cases; a passing run is not a mastery grade."
     },
     {
       "id": "pyweb-008",
@@ -145,13 +159,15 @@
       ],
       "runtime": "python-web",
       "concepts": [
-        "http",
-        "HTTP",
-        "Cookies, signed sessions and trust"
+        "cookies",
+        "Flask session",
+        "signed cookie",
+        "tamper detection",
+        "signing versus encryption"
       ],
       "outcome": "Inspect a real session cookie, reject tampering and explain why signing does not encrypt its contents.",
-      "lab": "Read the two complete worked cases, reproduce their evidence and compare their assumptions.",
-      "verification": "Complete source-bound pyweb-008 investigation with explicit numerical or execution diagnostics; no mastery grade."
+      "lab": "Run the complete program, then change one input in each worked case and predict the new result before rerunning.",
+      "verification": "Every assertion in the pyweb-008 program passes and its printed JSON matches the worked cases; a passing run is not a mastery grade."
     },
     {
       "id": "pyweb-009",
@@ -163,13 +179,15 @@
       ],
       "runtime": "python-web",
       "concepts": [
-        "http",
-        "HTTP",
-        "WSGI, ASGI and the server boundary"
+        "WSGI",
+        "ASGI",
+        "application callable",
+        "server boundary",
+        "event loop"
       ],
       "outcome": "Compare real synchronous and asynchronous application interfaces without inventing network-performance evidence.",
-      "lab": "Read the two complete worked cases, reproduce their evidence and compare their assumptions.",
-      "verification": "Complete source-bound pyweb-009 investigation with explicit numerical or execution diagnostics; no mastery grade."
+      "lab": "Run the complete program, then change one input in each worked case and predict the new result before rerunning.",
+      "verification": "Every assertion in the pyweb-009 program passes and its printed JSON matches the worked cases; a passing run is not a mastery grade."
     },
     {
       "id": "pyweb-010",
@@ -181,13 +199,15 @@
       ],
       "runtime": "python-web",
       "concepts": [
-        "http",
-        "HTTP",
-        "Named routes, redirects and navigation"
+        "url_for",
+        "named routes",
+        "redirect",
+        "post/redirect/get",
+        "303 See Other"
       ],
       "outcome": "Generate URLs from route identities and implement a bounded post-redirect-get flow without open redirects.",
-      "lab": "Read the two complete worked cases, reproduce their evidence and compare their assumptions.",
-      "verification": "Complete source-bound pyweb-010 investigation with explicit numerical or execution diagnostics; no mastery grade."
+      "lab": "Run the complete program, then change one input in each worked case and predict the new result before rerunning.",
+      "verification": "Every assertion in the pyweb-010 program passes and its printed JSON matches the worked cases; a passing run is not a mastery grade."
     },
     {
       "id": "pyweb-011",
@@ -200,13 +220,15 @@
       ],
       "runtime": "python-web",
       "concepts": [
-        "http",
-        "HTTP",
-        "HTTP tests, fixtures and state isolation"
+        "test client",
+        "fixtures",
+        "application factory",
+        "cookie jar",
+        "state isolation"
       ],
       "outcome": "Separate server state, client cookies and factory-scoped fixtures using repeatable request sequences.",
-      "lab": "Read the two complete worked cases, reproduce their evidence and compare their assumptions.",
-      "verification": "Complete source-bound pyweb-011 investigation with explicit numerical or execution diagnostics; no mastery grade."
+      "lab": "Run the complete program, then change one input in each worked case and predict the new result before rerunning.",
+      "verification": "Every assertion in the pyweb-011 program passes and its printed JSON matches the worked cases; a passing run is not a mastery grade."
     },
     {
       "id": "pyweb-012",
@@ -218,13 +240,15 @@
       ],
       "runtime": "python-web",
       "concepts": [
-        "http",
-        "HTTP",
-        "Resource-oriented API design and REST constraints"
+        "resources",
+        "REST constraints",
+        "statelessness",
+        "resource identity",
+        "state transitions"
       ],
       "outcome": "Design consistent resource identities and state transitions, explaining statelessness and representation tradeoffs.",
-      "lab": "Read the two complete worked cases, reproduce their evidence and compare their assumptions.",
-      "verification": "Complete source-bound pyweb-012 investigation with explicit numerical or execution diagnostics; no mastery grade."
+      "lab": "Run the complete program, then change one input in each worked case and predict the new result before rerunning.",
+      "verification": "Every assertion in the pyweb-012 program passes and its printed JSON matches the worked cases; a passing run is not a mastery grade."
     },
     {
       "id": "pyweb-013",
@@ -236,13 +260,15 @@
       ],
       "runtime": "python-web",
       "concepts": [
-        "flask",
-        "HTTP",
-        "Flask application factories and configuration"
+        "Flask",
+        "application factory",
+        "configuration",
+        "test settings",
+        "instance isolation"
       ],
       "outcome": "Construct isolated Flask applications with explicit test and deployment settings.",
-      "lab": "Read the two complete worked cases, reproduce their evidence and compare their assumptions.",
-      "verification": "Complete source-bound pyweb-013 investigation with explicit numerical or execution diagnostics; no mastery grade."
+      "lab": "Run the complete program, then change one input in each worked case and predict the new result before rerunning.",
+      "verification": "Every assertion in the pyweb-013 program passes and its printed JSON matches the worked cases; a passing run is not a mastery grade."
     },
     {
       "id": "pyweb-014",
@@ -254,13 +280,15 @@
       ],
       "runtime": "python-web",
       "concepts": [
-        "flask",
-        "HTTP",
-        "Flask blueprints and error boundaries"
+        "Flask",
+        "blueprints",
+        "error handlers",
+        "abort",
+        "route composition"
       ],
       "outcome": "Compose routes through blueprints and distinguish application-wide from blueprint error handling.",
-      "lab": "Read the two complete worked cases, reproduce their evidence and compare their assumptions.",
-      "verification": "Complete source-bound pyweb-014 investigation with explicit numerical or execution diagnostics; no mastery grade."
+      "lab": "Run the complete program, then change one input in each worked case and predict the new result before rerunning.",
+      "verification": "Every assertion in the pyweb-014 program passes and its printed JSON matches the worked cases; a passing run is not a mastery grade."
     },
     {
       "id": "pyweb-015",
@@ -272,13 +300,15 @@
       ],
       "runtime": "python-web",
       "concepts": [
-        "flask",
-        "HTTP",
-        "Flask request context, application context and cleanup"
+        "Flask",
+        "request context",
+        "application context",
+        "g object",
+        "teardown"
       ],
       "outcome": "Use request-local state and teardown correctly, including an exception path.",
-      "lab": "Read the two complete worked cases, reproduce their evidence and compare their assumptions.",
-      "verification": "Complete source-bound pyweb-015 investigation with explicit numerical or execution diagnostics; no mastery grade."
+      "lab": "Run the complete program, then change one input in each worked case and predict the new result before rerunning.",
+      "verification": "Every assertion in the pyweb-015 program passes and its printed JSON matches the worked cases; a passing run is not a mastery grade."
     },
     {
       "id": "pyweb-016",
@@ -292,13 +322,15 @@
       ],
       "runtime": "python-web",
       "concepts": [
-        "flask",
-        "HTTP",
-        "Flask and SQLAlchemy transaction ownership"
+        "Flask",
+        "SQLAlchemy session",
+        "transaction",
+        "commit and rollback",
+        "request scope"
       ],
       "outcome": "Scope a real database session to a request and verify successful commit and failed-operation rollback.",
-      "lab": "Read the two complete worked cases, reproduce their evidence and compare their assumptions.",
-      "verification": "Complete source-bound pyweb-016 investigation with explicit numerical or execution diagnostics; no mastery grade."
+      "lab": "Run the complete program, then change one input in each worked case and predict the new result before rerunning.",
+      "verification": "Every assertion in the pyweb-016 program passes and its printed JSON matches the worked cases; a passing run is not a mastery grade."
     },
     {
       "id": "pyweb-017",
@@ -310,13 +342,15 @@
       ],
       "runtime": "python-web",
       "concepts": [
-        "flask",
-        "HTTP",
-        "Flask relational queries and deterministic pagination"
+        "Flask",
+        "SQLAlchemy queries",
+        "ORDER BY",
+        "pagination",
+        "relationship loading"
       ],
       "outcome": "Avoid accidental unordered pagination and inspect bounded relationship loading.",
-      "lab": "Read the two complete worked cases, reproduce their evidence and compare their assumptions.",
-      "verification": "Complete source-bound pyweb-017 investigation with explicit numerical or execution diagnostics; no mastery grade."
+      "lab": "Run the complete program, then change one input in each worked case and predict the new result before rerunning.",
+      "verification": "Every assertion in the pyweb-017 program passes and its printed JSON matches the worked cases; a passing run is not a mastery grade."
     },
     {
       "id": "pyweb-018",
@@ -328,13 +362,14 @@
       ],
       "runtime": "python-web",
       "concepts": [
-        "flask",
-        "HTTP",
-        "Flask forms and CSRF protection"
+        "Flask-WTF",
+        "form validation",
+        "CSRF token",
+        "POST protection"
       ],
       "outcome": "Use actual Flask-WTF validation and CSRF behavior instead of treating a signed cookie as sufficient protection.",
-      "lab": "Read the two complete worked cases, reproduce their evidence and compare their assumptions.",
-      "verification": "Complete source-bound pyweb-018 investigation with explicit numerical or execution diagnostics; no mastery grade."
+      "lab": "Run the complete program, then change one input in each worked case and predict the new result before rerunning.",
+      "verification": "Every assertion in the pyweb-018 program passes and its printed JSON matches the worked cases; a passing run is not a mastery grade."
     },
     {
       "id": "pyweb-019",
@@ -346,13 +381,15 @@
       ],
       "runtime": "python-web",
       "concepts": [
-        "flask",
-        "HTTP",
-        "Flask login, logout and session behavior"
+        "Flask-Login",
+        "login_user",
+        "session cookie",
+        "anonymous user",
+        "logout"
       ],
       "outcome": "Use Flask-Login with a real client cookie jar and distinguish authenticated and anonymous requests.",
-      "lab": "Read the two complete worked cases, reproduce their evidence and compare their assumptions.",
-      "verification": "Complete source-bound pyweb-019 investigation with explicit numerical or execution diagnostics; no mastery grade."
+      "lab": "Run the complete program, then change one input in each worked case and predict the new result before rerunning.",
+      "verification": "Every assertion in the pyweb-019 program passes and its printed JSON matches the worked cases; a passing run is not a mastery grade."
     },
     {
       "id": "pyweb-020",
@@ -364,13 +401,15 @@
       ],
       "runtime": "python-web",
       "concepts": [
-        "flask",
-        "HTTP",
-        "Flask authorization and object ownership"
+        "Flask",
+        "authorization",
+        "object ownership",
+        "404 for foreign objects",
+        "list filtering"
       ],
       "outcome": "Apply object-level ownership checks and prevent list endpoints from exposing another user's data.",
-      "lab": "Read the two complete worked cases, reproduce their evidence and compare their assumptions.",
-      "verification": "Complete source-bound pyweb-020 investigation with explicit numerical or execution diagnostics; no mastery grade."
+      "lab": "Run the complete program, then change one input in each worked case and predict the new result before rerunning.",
+      "verification": "Every assertion in the pyweb-020 program passes and its printed JSON matches the worked cases; a passing run is not a mastery grade."
     },
     {
       "id": "pyweb-021",
@@ -382,13 +421,15 @@
       ],
       "runtime": "python-web",
       "concepts": [
-        "flask",
-        "HTTP",
-        "Flask uploads, downloads and path boundaries"
+        "Flask",
+        "file upload",
+        "send_file",
+        "path traversal",
+        "content validation"
       ],
       "outcome": "Validate uploaded content and safely select owned download files without trusting submitted filenames.",
-      "lab": "Read the two complete worked cases, reproduce their evidence and compare their assumptions.",
-      "verification": "Complete source-bound pyweb-021 investigation with explicit numerical or execution diagnostics; no mastery grade."
+      "lab": "Run the complete program, then change one input in each worked case and predict the new result before rerunning.",
+      "verification": "Every assertion in the pyweb-021 program passes and its printed JSON matches the worked cases; a passing run is not a mastery grade."
     },
     {
       "id": "pyweb-022",
@@ -400,13 +441,15 @@
       ],
       "runtime": "python-web",
       "concepts": [
-        "flask",
-        "HTTP",
-        "Flask conditional requests and cache policy"
+        "Flask",
+        "ETag",
+        "If-None-Match",
+        "304 Not Modified",
+        "Cache-Control"
       ],
       "outcome": "Implement ETag comparisons and choose public, private and non-cacheable response policies deliberately.",
-      "lab": "Read the two complete worked cases, reproduce their evidence and compare their assumptions.",
-      "verification": "Complete source-bound pyweb-022 investigation with explicit numerical or execution diagnostics; no mastery grade."
+      "lab": "Run the complete program, then change one input in each worked case and predict the new result before rerunning.",
+      "verification": "Every assertion in the pyweb-022 program passes and its printed JSON matches the worked cases; a passing run is not a mastery grade."
     },
     {
       "id": "pyweb-023",
@@ -418,13 +461,14 @@
       ],
       "runtime": "python-web",
       "concepts": [
-        "flask",
-        "HTTP",
-        "Flask CLI and versioned schema changes"
+        "Flask CLI",
+        "click commands",
+        "schema migration",
+        "versioned schema"
       ],
       "outcome": "Exercise application CLI commands and a bounded migration lifecycle with actual database effects.",
-      "lab": "Read the two complete worked cases, reproduce their evidence and compare their assumptions.",
-      "verification": "Complete source-bound pyweb-023 investigation with explicit numerical or execution diagnostics; no mastery grade."
+      "lab": "Run the complete program, then change one input in each worked case and predict the new result before rerunning.",
+      "verification": "Every assertion in the pyweb-023 program passes and its printed JSON matches the worked cases; a passing run is not a mastery grade."
     },
     {
       "id": "pyweb-024",
@@ -437,13 +481,15 @@
       ],
       "runtime": "python-web",
       "concepts": [
-        "flask",
-        "HTTP",
-        "Flask outbound clients, timeouts and error translation"
+        "HTTPX",
+        "timeouts",
+        "MockTransport",
+        "upstream errors",
+        "error translation"
       ],
       "outcome": "Use a deterministic HTTP mock transport and translate upstream failures without claiming a live service test.",
-      "lab": "Read the two complete worked cases, reproduce their evidence and compare their assumptions.",
-      "verification": "Complete source-bound pyweb-024 investigation with explicit numerical or execution diagnostics; no mastery grade."
+      "lab": "Run the complete program, then change one input in each worked case and predict the new result before rerunning.",
+      "verification": "Every assertion in the pyweb-024 program passes and its printed JSON matches the worked cases; a passing run is not a mastery grade."
     },
     {
       "id": "pyweb-025",
@@ -455,13 +501,15 @@
       ],
       "runtime": "python-web",
       "concepts": [
-        "flask",
-        "HTTP",
-        "Flask async views and background-work limits"
+        "Flask async views",
+        "WSGI",
+        "asyncio",
+        "background work",
+        "durable jobs"
       ],
       "outcome": "Explain what async changes under WSGI and distinguish request-scoped work from durable jobs.",
-      "lab": "Read the two complete worked cases, reproduce their evidence and compare their assumptions.",
-      "verification": "Complete source-bound pyweb-025 investigation with explicit numerical or execution diagnostics; no mastery grade."
+      "lab": "Run the complete program, then change one input in each worked case and predict the new result before rerunning.",
+      "verification": "Every assertion in the pyweb-025 program passes and its printed JSON matches the worked cases; a passing run is not a mastery grade."
     },
     {
       "id": "pyweb-026",
@@ -473,13 +521,15 @@
       ],
       "runtime": "python-web",
       "concepts": [
-        "flask",
-        "HTTP",
-        "Flask application walkthrough"
+        "Flask",
+        "routing",
+        "forms",
+        "persistence",
+        "authorization"
       ],
       "outcome": "Integrate routing, forms, persistence and authorization in a complete finite client investigation and an owned application project.",
-      "lab": "Read the two complete worked cases, reproduce their evidence and compare their assumptions.",
-      "verification": "Complete source-bound pyweb-026 investigation with explicit numerical or execution diagnostics; no mastery grade."
+      "lab": "Run the complete program, then change one input in each worked case and predict the new result before rerunning.",
+      "verification": "Every assertion in the pyweb-026 program passes and its printed JSON matches the worked cases; a passing run is not a mastery grade."
     },
     {
       "id": "pyweb-027",
@@ -492,13 +542,15 @@
       ],
       "runtime": "python-web",
       "concepts": [
-        "fastapi",
-        "HTTP",
-        "FastAPI typed paths, queries and response contracts"
+        "FastAPI",
+        "path parameters",
+        "query parameters",
+        "response_model",
+        "OpenAPI"
       ],
       "outcome": "Build typed routes with actual validation and response behavior, linking annotations to generated API metadata.",
-      "lab": "Read the two complete worked cases, reproduce their evidence and compare their assumptions.",
-      "verification": "Complete source-bound pyweb-027 investigation with explicit numerical or execution diagnostics; no mastery grade."
+      "lab": "Run the complete program, then change one input in each worked case and predict the new result before rerunning.",
+      "verification": "Every assertion in the pyweb-027 program passes and its printed JSON matches the worked cases; a passing run is not a mastery grade."
     },
     {
       "id": "pyweb-028",
@@ -510,13 +562,15 @@
       ],
       "runtime": "python-web",
       "concepts": [
-        "fastapi",
-        "HTTP",
-        "Pydantic models, strictness and serialization"
+        "Pydantic",
+        "BaseModel",
+        "strict mode",
+        "model_dump",
+        "exclude_unset"
       ],
       "outcome": "Separate input models, output models and internal state while inspecting validation and serialization differences.",
-      "lab": "Read the two complete worked cases, reproduce their evidence and compare their assumptions.",
-      "verification": "Complete source-bound pyweb-028 investigation with explicit numerical or execution diagnostics; no mastery grade."
+      "lab": "Run the complete program, then change one input in each worked case and predict the new result before rerunning.",
+      "verification": "Every assertion in the pyweb-028 program passes and its printed JSON matches the worked cases; a passing run is not a mastery grade."
     },
     {
       "id": "pyweb-029",
@@ -528,13 +582,15 @@
       ],
       "runtime": "python-web",
       "concepts": [
-        "fastapi",
-        "HTTP",
-        "FastAPI dependency injection and overrides"
+        "FastAPI",
+        "Depends",
+        "Annotated",
+        "dependency overrides",
+        "yield dependencies"
       ],
       "outcome": "Scope dependencies, compose authorization/data services and replace them deliberately in tests.",
-      "lab": "Read the two complete worked cases, reproduce their evidence and compare their assumptions.",
-      "verification": "Complete source-bound pyweb-029 investigation with explicit numerical or execution diagnostics; no mastery grade."
+      "lab": "Run the complete program, then change one input in each worked case and predict the new result before rerunning.",
+      "verification": "Every assertion in the pyweb-029 program passes and its printed JSON matches the worked cases; a passing run is not a mastery grade."
     },
     {
       "id": "pyweb-030",
@@ -546,13 +602,15 @@
       ],
       "runtime": "python-web",
       "concepts": [
-        "fastapi",
-        "HTTP",
-        "FastAPI lifespan and resource ownership"
+        "FastAPI",
+        "lifespan",
+        "app.state",
+        "resource cleanup",
+        "startup failure"
       ],
       "outcome": "Initialize and close shared resources through actual lifespan events, including failed-request cleanup.",
-      "lab": "Read the two complete worked cases, reproduce their evidence and compare their assumptions.",
-      "verification": "Complete source-bound pyweb-030 investigation with explicit numerical or execution diagnostics; no mastery grade."
+      "lab": "Run the complete program, then change one input in each worked case and predict the new result before rerunning.",
+      "verification": "Every assertion in the pyweb-030 program passes and its printed JSON matches the worked cases; a passing run is not a mastery grade."
     },
     {
       "id": "pyweb-031",
@@ -565,13 +623,15 @@
       ],
       "runtime": "python-web",
       "concepts": [
-        "fastapi",
-        "HTTP",
-        "Async Python, blocking work and cancellation"
+        "asyncio",
+        "event loop",
+        "create_task and gather",
+        "blocking calls",
+        "cancellation"
       ],
       "outcome": "Measure cooperative concurrency with explicit synchronization rather than unqualified timing claims.",
-      "lab": "Read the two complete worked cases, reproduce their evidence and compare their assumptions.",
-      "verification": "Complete source-bound pyweb-031 investigation with explicit numerical or execution diagnostics; no mastery grade."
+      "lab": "Run the complete program, then change one input in each worked case and predict the new result before rerunning.",
+      "verification": "Every assertion in the pyweb-031 program passes and its printed JSON matches the worked cases; a passing run is not a mastery grade."
     },
     {
       "id": "pyweb-032",
@@ -584,13 +644,14 @@
       ],
       "runtime": "python-web",
       "concepts": [
-        "fastapi",
-        "HTTP",
-        "FastAPI asynchronous database sessions"
+        "SQLAlchemy AsyncSession",
+        "aiosqlite",
+        "async_sessionmaker",
+        "event loop ownership"
       ],
       "outcome": "Use real SQLAlchemy async sessions with bounded SQLite fixtures and correct event-loop ownership.",
-      "lab": "Read the two complete worked cases, reproduce their evidence and compare their assumptions.",
-      "verification": "Complete source-bound pyweb-032 investigation with explicit numerical or execution diagnostics; no mastery grade."
+      "lab": "Run the complete program, then change one input in each worked case and predict the new result before rerunning.",
+      "verification": "Every assertion in the pyweb-032 program passes and its printed JSON matches the worked cases; a passing run is not a mastery grade."
     },
     {
       "id": "pyweb-033",
@@ -602,13 +663,15 @@
       ],
       "runtime": "python-web",
       "concepts": [
-        "fastapi",
-        "HTTP",
-        "Transactions, optimistic concurrency and idempotency keys"
+        "transactions",
+        "optimistic concurrency",
+        "version column",
+        "idempotency key",
+        "409 Conflict"
       ],
       "outcome": "Protect updates and repeated requests with explicit version and request-identity contracts.",
-      "lab": "Read the two complete worked cases, reproduce their evidence and compare their assumptions.",
-      "verification": "Complete source-bound pyweb-033 investigation with explicit numerical or execution diagnostics; no mastery grade."
+      "lab": "Run the complete program, then change one input in each worked case and predict the new result before rerunning.",
+      "verification": "Every assertion in the pyweb-033 program passes and its printed JSON matches the worked cases; a passing run is not a mastery grade."
     },
     {
       "id": "pyweb-034",
@@ -620,13 +683,15 @@
       ],
       "runtime": "python-web",
       "concepts": [
-        "fastapi",
-        "HTTP",
-        "FastAPI response filtering and sensitive fields"
+        "FastAPI",
+        "response_model",
+        "sensitive fields",
+        "serialization",
+        "data leakage"
       ],
       "outcome": "Verify that internal fields do not leak through serialization and explain when response validation fails.",
-      "lab": "Read the two complete worked cases, reproduce their evidence and compare their assumptions.",
-      "verification": "Complete source-bound pyweb-034 investigation with explicit numerical or execution diagnostics; no mastery grade."
+      "lab": "Run the complete program, then change one input in each worked case and predict the new result before rerunning.",
+      "verification": "Every assertion in the pyweb-034 program passes and its printed JSON matches the worked cases; a passing run is not a mastery grade."
     },
     {
       "id": "pyweb-035",
@@ -638,13 +703,15 @@
       ],
       "runtime": "python-web",
       "concepts": [
-        "fastapi",
-        "HTTP",
-        "FastAPI errors and problem-details documents"
+        "FastAPI",
+        "HTTPException",
+        "exception handlers",
+        "problem details",
+        "validation errors"
       ],
       "outcome": "Implement predictable application errors and preserve safe distinction between validation and server failures.",
-      "lab": "Read the two complete worked cases, reproduce their evidence and compare their assumptions.",
-      "verification": "Complete source-bound pyweb-035 investigation with explicit numerical or execution diagnostics; no mastery grade."
+      "lab": "Run the complete program, then change one input in each worked case and predict the new result before rerunning.",
+      "verification": "Every assertion in the pyweb-035 program passes and its printed JSON matches the worked cases; a passing run is not a mastery grade."
     },
     {
       "id": "pyweb-036",
@@ -656,13 +723,15 @@
       ],
       "runtime": "python-web",
       "concepts": [
-        "fastapi",
-        "HTTP",
-        "Bearer tokens, JWT claims and authentication"
+        "bearer tokens",
+        "JWT",
+        "PyJWT",
+        "audience and issuer",
+        "expiry"
       ],
       "outcome": "Validate signatures and intended issuer/audience/expiry with real token libraries and explicit failure cases.",
-      "lab": "Read the two complete worked cases, reproduce their evidence and compare their assumptions.",
-      "verification": "Complete source-bound pyweb-036 investigation with explicit numerical or execution diagnostics; no mastery grade."
+      "lab": "Run the complete program, then change one input in each worked case and predict the new result before rerunning.",
+      "verification": "Every assertion in the pyweb-036 program passes and its printed JSON matches the worked cases; a passing run is not a mastery grade."
     },
     {
       "id": "pyweb-037",
@@ -674,13 +743,15 @@
       ],
       "runtime": "python-web",
       "concepts": [
-        "fastapi",
-        "HTTP",
-        "Cookies, CSRF, CORS and browser origins"
+        "cookies",
+        "CSRF",
+        "CORS",
+        "same-origin policy",
+        "SameSite"
       ],
       "outcome": "Distinguish authentication, cross-origin permissions and CSRF protections with actual middleware/client observations.",
-      "lab": "Read the two complete worked cases, reproduce their evidence and compare their assumptions.",
-      "verification": "Complete source-bound pyweb-037 investigation with explicit numerical or execution diagnostics; no mastery grade."
+      "lab": "Run the complete program, then change one input in each worked case and predict the new result before rerunning.",
+      "verification": "Every assertion in the pyweb-037 program passes and its printed JSON matches the worked cases; a passing run is not a mastery grade."
     },
     {
       "id": "pyweb-038",
@@ -692,13 +763,15 @@
       ],
       "runtime": "python-web",
       "concepts": [
-        "fastapi",
-        "HTTP",
-        "API scopes, roles and tenant boundaries"
+        "scopes",
+        "roles",
+        "tenant isolation",
+        "object ownership",
+        "authorization"
       ],
       "outcome": "Enforce both action-level permission and object ownership rather than relying on token presence alone.",
-      "lab": "Read the two complete worked cases, reproduce their evidence and compare their assumptions.",
-      "verification": "Complete source-bound pyweb-038 investigation with explicit numerical or execution diagnostics; no mastery grade."
+      "lab": "Run the complete program, then change one input in each worked case and predict the new result before rerunning.",
+      "verification": "Every assertion in the pyweb-038 program passes and its printed JSON matches the worked cases; a passing run is not a mastery grade."
     },
     {
       "id": "pyweb-039",
@@ -710,13 +783,15 @@
       ],
       "runtime": "python-web",
       "concepts": [
-        "fastapi",
-        "HTTP",
-        "FastAPI file handling and streaming responses"
+        "UploadFile",
+        "StreamingResponse",
+        "size limits",
+        "content type",
+        "chunked reads"
       ],
       "outcome": "Bound uploaded data and construct finite streamed responses while retaining content and cleanup contracts.",
-      "lab": "Read the two complete worked cases, reproduce their evidence and compare their assumptions.",
-      "verification": "Complete source-bound pyweb-039 investigation with explicit numerical or execution diagnostics; no mastery grade."
+      "lab": "Run the complete program, then change one input in each worked case and predict the new result before rerunning.",
+      "verification": "Every assertion in the pyweb-039 program passes and its printed JSON matches the worked cases; a passing run is not a mastery grade."
     },
     {
       "id": "pyweb-040",
@@ -728,13 +803,15 @@
       ],
       "runtime": "python-web",
       "concepts": [
-        "fastapi",
-        "HTTP",
-        "Background tasks, queues and durable work"
+        "BackgroundTasks",
+        "job queue",
+        "durable jobs",
+        "eager execution",
+        "job status"
       ],
       "outcome": "Compare request-attached tasks with an explicit durable-job design and label eager-task evidence honestly.",
-      "lab": "Read the two complete worked cases, reproduce their evidence and compare their assumptions.",
-      "verification": "Complete source-bound pyweb-040 investigation with explicit numerical or execution diagnostics; no mastery grade."
+      "lab": "Run the complete program, then change one input in each worked case and predict the new result before rerunning.",
+      "verification": "Every assertion in the pyweb-040 program passes and its printed JSON matches the worked cases; a passing run is not a mastery grade."
     },
     {
       "id": "pyweb-041",
@@ -746,13 +823,15 @@
       ],
       "runtime": "python-web",
       "concepts": [
-        "fastapi",
-        "HTTP",
-        "WebSocket messages, validation and close behavior"
+        "WebSocket",
+        "message validation",
+        "close codes",
+        "ASGI",
+        "connection lifecycle"
       ],
       "outcome": "Exercise a finite real ASGI WebSocket exchange and explain connection/authentication/resource boundaries.",
-      "lab": "Read the two complete worked cases, reproduce their evidence and compare their assumptions.",
-      "verification": "Complete source-bound pyweb-041 investigation with explicit numerical or execution diagnostics; no mastery grade."
+      "lab": "Run the complete program, then change one input in each worked case and predict the new result before rerunning.",
+      "verification": "Every assertion in the pyweb-041 program passes and its printed JSON matches the worked cases; a passing run is not a mastery grade."
     },
     {
       "id": "pyweb-042",
@@ -764,13 +843,15 @@
       ],
       "runtime": "python-web",
       "concepts": [
-        "fastapi",
-        "HTTP",
-        "Server-sent events and resumable event identities"
+        "server-sent events",
+        "event id",
+        "Last-Event-ID",
+        "text/event-stream",
+        "resumption"
       ],
       "outcome": "Construct valid finite SSE records and distinguish their parsing from actual network flush and reconnection acceptance.",
-      "lab": "Read the two complete worked cases, reproduce their evidence and compare their assumptions.",
-      "verification": "Complete source-bound pyweb-042 investigation with explicit numerical or execution diagnostics; no mastery grade."
+      "lab": "Run the complete program, then change one input in each worked case and predict the new result before rerunning.",
+      "verification": "Every assertion in the pyweb-042 program passes and its printed JSON matches the worked cases; a passing run is not a mastery grade."
     },
     {
       "id": "pyweb-043",
@@ -782,13 +863,14 @@
       ],
       "runtime": "python-web",
       "concepts": [
-        "fastapi",
-        "HTTP",
-        "OpenAPI, compatibility and generated clients"
+        "OpenAPI schema",
+        "compatibility",
+        "generated clients",
+        "breaking changes"
       ],
       "outcome": "Inspect actual OpenAPI schemas and plan compatible changes, including offline documentation asset boundaries.",
-      "lab": "Read the two complete worked cases, reproduce their evidence and compare their assumptions.",
-      "verification": "Complete source-bound pyweb-043 investigation with explicit numerical or execution diagnostics; no mastery grade."
+      "lab": "Run the complete program, then change one input in each worked case and predict the new result before rerunning.",
+      "verification": "Every assertion in the pyweb-043 program passes and its printed JSON matches the worked cases; a passing run is not a mastery grade."
     },
     {
       "id": "pyweb-044",
@@ -800,13 +882,15 @@
       ],
       "runtime": "python-web",
       "concepts": [
-        "fastapi",
-        "HTTP",
-        "FastAPI application walkthrough"
+        "FastAPI",
+        "typed requests",
+        "persistence",
+        "authentication",
+        "job status API"
       ],
       "outcome": "Connect typed requests, persistence, authentication and job/status APIs in a complete client example and live workshop.",
-      "lab": "Read the two complete worked cases, reproduce their evidence and compare their assumptions.",
-      "verification": "Complete source-bound pyweb-044 investigation with explicit numerical or execution diagnostics; no mastery grade."
+      "lab": "Run the complete program, then change one input in each worked case and predict the new result before rerunning.",
+      "verification": "Every assertion in the pyweb-044 program passes and its printed JSON matches the worked cases; a passing run is not a mastery grade."
     },
     {
       "id": "pyweb-045",
@@ -818,13 +902,15 @@
       ],
       "runtime": "python-web",
       "concepts": [
-        "django",
-        "HTTP",
-        "Django projects, settings, URLs and views"
+        "Django",
+        "settings",
+        "URLconf",
+        "views",
+        "test client"
       ],
       "outcome": "Trace a real Django client request and distinguish a compact fixture from the standard multi-file project layout.",
-      "lab": "Read the two complete worked cases, reproduce their evidence and compare their assumptions.",
-      "verification": "Complete source-bound pyweb-045 investigation with explicit numerical or execution diagnostics; no mastery grade."
+      "lab": "Run the complete program, then change one input in each worked case and predict the new result before rerunning.",
+      "verification": "Every assertion in the pyweb-045 program passes and its printed JSON matches the worked cases; a passing run is not a mastery grade."
     },
     {
       "id": "pyweb-046",
@@ -836,31 +922,35 @@
       ],
       "runtime": "python-web",
       "concepts": [
-        "django",
-        "HTTP",
-        "Django middleware and request lifecycle"
+        "Django middleware",
+        "request lifecycle",
+        "middleware ordering",
+        "short-circuit response",
+        "exception handling"
       ],
       "outcome": "Explain middleware ordering, short-circuit responses and security-header behavior through concrete requests.",
-      "lab": "Read the two complete worked cases, reproduce their evidence and compare their assumptions.",
-      "verification": "Complete source-bound pyweb-046 investigation with explicit numerical or execution diagnostics; no mastery grade."
+      "lab": "Run the complete program, then change one input in each worked case and predict the new result before rerunning.",
+      "verification": "Every assertion in the pyweb-046 program passes and its printed JSON matches the worked cases; a passing run is not a mastery grade."
     },
     {
       "id": "pyweb-047",
       "title": "Django templates, inheritance and static assets",
-      "level": "beginner",
-      "minutes": 60,
+      "level": "intermediate",
+      "minutes": 90,
       "prerequisites": [
         "pyweb-046"
       ],
       "runtime": "python-web",
       "concepts": [
-        "django",
-        "HTTP",
-        "Django templates, inheritance and static assets"
+        "Django templates",
+        "template inheritance",
+        "context",
+        "autoescaping",
+        "static files"
       ],
       "outcome": "Render reusable templates with explicit context and explain why template output is not a browser asset test.",
-      "lab": "Read the two complete worked cases, reproduce their evidence and compare their assumptions.",
-      "verification": "Complete source-bound pyweb-047 investigation with explicit numerical or execution diagnostics; no mastery grade."
+      "lab": "Run the complete program, then change one input in each worked case and predict the new result before rerunning.",
+      "verification": "Every assertion in the pyweb-047 program passes and its printed JSON matches the worked cases; a passing run is not a mastery grade."
     },
     {
       "id": "pyweb-048",
@@ -874,13 +964,15 @@
       ],
       "runtime": "python-web",
       "concepts": [
-        "django",
-        "HTTP",
-        "Django models, migrations and constraints"
+        "Django models",
+        "migrations",
+        "database constraints",
+        "unique fields",
+        "model validation"
       ],
       "outcome": "Create and evolve a real small schema while separating application validation from database constraints.",
-      "lab": "Read the two complete worked cases, reproduce their evidence and compare their assumptions.",
-      "verification": "Complete source-bound pyweb-048 investigation with explicit numerical or execution diagnostics; no mastery grade."
+      "lab": "Run the complete program, then change one input in each worked case and predict the new result before rerunning.",
+      "verification": "Every assertion in the pyweb-048 program passes and its printed JSON matches the worked cases; a passing run is not a mastery grade."
     },
     {
       "id": "pyweb-049",
@@ -892,13 +984,15 @@
       ],
       "runtime": "python-web",
       "concepts": [
-        "django",
-        "HTTP",
-        "Django QuerySets, aggregation and evaluation"
+        "QuerySet",
+        "lazy evaluation",
+        "filter",
+        "aggregate",
+        "annotate"
       ],
       "outcome": "Inspect lazy query evaluation, filtering and grouped calculations without unnecessary materialization.",
-      "lab": "Read the two complete worked cases, reproduce their evidence and compare their assumptions.",
-      "verification": "Complete source-bound pyweb-049 investigation with explicit numerical or execution diagnostics; no mastery grade."
+      "lab": "Run the complete program, then change one input in each worked case and predict the new result before rerunning.",
+      "verification": "Every assertion in the pyweb-049 program passes and its printed JSON matches the worked cases; a passing run is not a mastery grade."
     },
     {
       "id": "pyweb-050",
@@ -910,13 +1004,15 @@
       ],
       "runtime": "python-web",
       "concepts": [
-        "django",
-        "HTTP",
-        "Django relationships and query-count diagnosis"
+        "ForeignKey",
+        "N+1 queries",
+        "select_related",
+        "prefetch_related",
+        "query counting"
       ],
       "outcome": "Reproduce an N-plus-one query pattern and verify appropriate related-object loading with actual query counts.",
-      "lab": "Read the two complete worked cases, reproduce their evidence and compare their assumptions.",
-      "verification": "Complete source-bound pyweb-050 investigation with explicit numerical or execution diagnostics; no mastery grade."
+      "lab": "Run the complete program, then change one input in each worked case and predict the new result before rerunning.",
+      "verification": "Every assertion in the pyweb-050 program passes and its printed JSON matches the worked cases; a passing run is not a mastery grade."
     },
     {
       "id": "pyweb-051",
@@ -928,13 +1024,15 @@
       ],
       "runtime": "python-web",
       "concepts": [
-        "django",
-        "HTTP",
-        "Django forms, ModelForms and field ownership"
+        "Django forms",
+        "ModelForm",
+        "cleaned_data",
+        "field allowlist",
+        "validation errors"
       ],
       "outcome": "Validate user input through actual forms and restrict which model fields a request may change.",
-      "lab": "Read the two complete worked cases, reproduce their evidence and compare their assumptions.",
-      "verification": "Complete source-bound pyweb-051 investigation with explicit numerical or execution diagnostics; no mastery grade."
+      "lab": "Run the complete program, then change one input in each worked case and predict the new result before rerunning.",
+      "verification": "Every assertion in the pyweb-051 program passes and its printed JSON matches the worked cases; a passing run is not a mastery grade."
     },
     {
       "id": "pyweb-052",
@@ -947,13 +1045,15 @@
       ],
       "runtime": "python-web",
       "concepts": [
-        "django",
-        "HTTP",
-        "Django class-based views and composition"
+        "class-based views",
+        "dispatch",
+        "mixins",
+        "generic views",
+        "authorization"
       ],
       "outcome": "Trace dispatch and mixin responsibilities while preserving explicit authorization and predictable context.",
-      "lab": "Read the two complete worked cases, reproduce their evidence and compare their assumptions.",
-      "verification": "Complete source-bound pyweb-052 investigation with explicit numerical or execution diagnostics; no mastery grade."
+      "lab": "Run the complete program, then change one input in each worked case and predict the new result before rerunning.",
+      "verification": "Every assertion in the pyweb-052 program passes and its printed JSON matches the worked cases; a passing run is not a mastery grade."
     },
     {
       "id": "pyweb-053",
@@ -965,13 +1065,15 @@
       ],
       "runtime": "python-web",
       "concepts": [
-        "django",
-        "HTTP",
-        "Django authentication, passwords and sessions"
+        "django.contrib.auth",
+        "password hashing",
+        "login and logout",
+        "sessions",
+        "invalid credentials"
       ],
       "outcome": "Use the real authentication/session stack and inspect login, logout and invalid-credential behavior.",
-      "lab": "Read the two complete worked cases, reproduce their evidence and compare their assumptions.",
-      "verification": "Complete source-bound pyweb-053 investigation with explicit numerical or execution diagnostics; no mastery grade."
+      "lab": "Run the complete program, then change one input in each worked case and predict the new result before rerunning.",
+      "verification": "Every assertion in the pyweb-053 program passes and its printed JSON matches the worked cases; a passing run is not a mastery grade."
     },
     {
       "id": "pyweb-054",
@@ -983,13 +1085,14 @@
       ],
       "runtime": "python-web",
       "concepts": [
-        "django",
-        "HTTP",
-        "Django permissions, groups and object access"
+        "permissions",
+        "groups",
+        "object ownership",
+        "queryset restriction"
       ],
       "outcome": "Separate model permissions from per-object ownership and verify queryset restrictions.",
-      "lab": "Read the two complete worked cases, reproduce their evidence and compare their assumptions.",
-      "verification": "Complete source-bound pyweb-054 investigation with explicit numerical or execution diagnostics; no mastery grade."
+      "lab": "Run the complete program, then change one input in each worked case and predict the new result before rerunning.",
+      "verification": "Every assertion in the pyweb-054 program passes and its printed JSON matches the worked cases; a passing run is not a mastery grade."
     },
     {
       "id": "pyweb-055",
@@ -1001,13 +1104,15 @@
       ],
       "runtime": "python-web",
       "concepts": [
-        "django",
-        "HTTP",
-        "Django CSRF and session security"
+        "CsrfViewMiddleware",
+        "CSRF token",
+        "enforce_csrf_checks",
+        "session cookies",
+        "cookie settings"
       ],
       "outcome": "Run clients with CSRF enforcement and explain cookie/origin settings without confusing tests with TLS.",
-      "lab": "Read the two complete worked cases, reproduce their evidence and compare their assumptions.",
-      "verification": "Complete source-bound pyweb-055 investigation with explicit numerical or execution diagnostics; no mastery grade."
+      "lab": "Run the complete program, then change one input in each worked case and predict the new result before rerunning.",
+      "verification": "Every assertion in the pyweb-055 program passes and its printed JSON matches the worked cases; a passing run is not a mastery grade."
     },
     {
       "id": "pyweb-056",
@@ -1019,13 +1124,15 @@
       ],
       "runtime": "python-web",
       "concepts": [
-        "django",
-        "HTTP",
-        "Django admin as a privileged application"
+        "Django admin",
+        "admin.site",
+        "staff users",
+        "permissions",
+        "privileged surface"
       ],
       "outcome": "Configure and test a bounded admin surface while keeping staff access, permissions and public APIs distinct.",
-      "lab": "Read the two complete worked cases, reproduce their evidence and compare their assumptions.",
-      "verification": "Complete source-bound pyweb-056 investigation with explicit numerical or execution diagnostics; no mastery grade."
+      "lab": "Run the complete program, then change one input in each worked case and predict the new result before rerunning.",
+      "verification": "Every assertion in the pyweb-056 program passes and its printed JSON matches the worked cases; a passing run is not a mastery grade."
     },
     {
       "id": "pyweb-057",
@@ -1037,13 +1144,15 @@
       ],
       "runtime": "python-web",
       "concepts": [
-        "django",
-        "HTTP",
-        "Django REST Framework serializers and viewsets"
+        "Django REST framework",
+        "serializers",
+        "viewsets",
+        "routers",
+        "validation"
       ],
       "outcome": "Build real serializers and routed APIs while comparing their contracts with the other frameworks.",
-      "lab": "Read the two complete worked cases, reproduce their evidence and compare their assumptions.",
-      "verification": "Complete source-bound pyweb-057 investigation with explicit numerical or execution diagnostics; no mastery grade."
+      "lab": "Run the complete program, then change one input in each worked case and predict the new result before rerunning.",
+      "verification": "Every assertion in the pyweb-057 program passes and its printed JSON matches the worked cases; a passing run is not a mastery grade."
     },
     {
       "id": "pyweb-058",
@@ -1055,13 +1164,15 @@
       ],
       "runtime": "python-web",
       "concepts": [
-        "django",
-        "HTTP",
-        "DRF authentication, pagination and throttling"
+        "DRF authentication",
+        "pagination",
+        "throttling",
+        "APIClient",
+        "permissions"
       ],
       "outcome": "Test authenticated APIs and bounded pagination while documenting the limits of process-local throttles.",
-      "lab": "Read the two complete worked cases, reproduce their evidence and compare their assumptions.",
-      "verification": "Complete source-bound pyweb-058 investigation with explicit numerical or execution diagnostics; no mastery grade."
+      "lab": "Run the complete program, then change one input in each worked case and predict the new result before rerunning.",
+      "verification": "Every assertion in the pyweb-058 program passes and its printed JSON matches the worked cases; a passing run is not a mastery grade."
     },
     {
       "id": "pyweb-059",
@@ -1074,13 +1185,15 @@
       ],
       "runtime": "python-web",
       "concepts": [
-        "django",
-        "HTTP",
-        "Django async views, ORM calls and sync bridges"
+        "async views",
+        "AsyncClient",
+        "sync_to_async",
+        "async ORM",
+        "connection handling"
       ],
       "outcome": "Use AsyncClient and deliberate sync bridges while explaining transaction and connection boundaries.",
-      "lab": "Read the two complete worked cases, reproduce their evidence and compare their assumptions.",
-      "verification": "Complete source-bound pyweb-059 investigation with explicit numerical or execution diagnostics; no mastery grade."
+      "lab": "Run the complete program, then change one input in each worked case and predict the new result before rerunning.",
+      "verification": "Every assertion in the pyweb-059 program passes and its printed JSON matches the worked cases; a passing run is not a mastery grade."
     },
     {
       "id": "pyweb-060",
@@ -1092,13 +1205,15 @@
       ],
       "runtime": "python-web",
       "concepts": [
-        "django",
-        "HTTP",
-        "Django caching, email and task interfaces"
+        "cache framework",
+        "cache keys",
+        "locmem email backend",
+        "django.tasks",
+        "Celery eager mode"
       ],
       "outcome": "Inspect invalidation and in-memory email/task backends without labeling them production delivery.",
-      "lab": "Read the two complete worked cases, reproduce their evidence and compare their assumptions.",
-      "verification": "Complete source-bound pyweb-060 investigation with explicit numerical or execution diagnostics; no mastery grade."
+      "lab": "Run the complete program, then change one input in each worked case and predict the new result before rerunning.",
+      "verification": "Every assertion in the pyweb-060 program passes and its printed JSON matches the worked cases; a passing run is not a mastery grade."
     },
     {
       "id": "pyweb-061",
@@ -1110,13 +1225,15 @@
       ],
       "runtime": "python-web",
       "concepts": [
-        "django",
-        "HTTP",
-        "Django deployment settings and management checks"
+        "deployment checks",
+        "HSTS",
+        "Content Security Policy",
+        "secure cookies",
+        "ALLOWED_HOSTS"
       ],
       "outcome": "Run relevant deployment/configuration checks and connect static files, secrets and database migrations to the owned project.",
-      "lab": "Read the two complete worked cases, reproduce their evidence and compare their assumptions.",
-      "verification": "Complete source-bound pyweb-061 investigation with explicit numerical or execution diagnostics; no mastery grade."
+      "lab": "Run the complete program, then change one input in each worked case and predict the new result before rerunning.",
+      "verification": "Every assertion in the pyweb-061 program passes and its printed JSON matches the worked cases; a passing run is not a mastery grade."
     },
     {
       "id": "pyweb-062",
@@ -1128,13 +1245,15 @@
       ],
       "runtime": "python-web",
       "concepts": [
-        "django",
-        "HTTP",
-        "Django application walkthrough"
+        "Django",
+        "domain models",
+        "permissions",
+        "REST endpoints",
+        "client tests"
       ],
       "outcome": "Integrate domain models, views, permissions and REST endpoints with actual client cases and a separate live deployment.",
-      "lab": "Read the two complete worked cases, reproduce their evidence and compare their assumptions.",
-      "verification": "Complete source-bound pyweb-062 investigation with explicit numerical or execution diagnostics; no mastery grade."
+      "lab": "Run the complete program, then change one input in each worked case and predict the new result before rerunning.",
+      "verification": "Every assertion in the pyweb-062 program passes and its printed JSON matches the worked cases; a passing run is not a mastery grade."
     },
     {
       "id": "pyweb-063",
@@ -1148,13 +1267,15 @@
       ],
       "runtime": "python-web",
       "concepts": [
-        "engineering",
-        "HTTP",
-        "Structured concurrency and service time budgets"
+        "asyncio.TaskGroup",
+        "timeouts",
+        "deadlines",
+        "cancellation",
+        "error propagation"
       ],
       "outcome": "Bound related async operations, propagate failures and distinguish application deadlines from client timeouts.",
-      "lab": "Read the two complete worked cases, reproduce their evidence and compare their assumptions.",
-      "verification": "Complete source-bound pyweb-063 investigation with explicit numerical or execution diagnostics; no mastery grade."
+      "lab": "Run the complete program, then change one input in each worked case and predict the new result before rerunning.",
+      "verification": "Every assertion in the pyweb-063 program passes and its printed JSON matches the worked cases; a passing run is not a mastery grade."
     },
     {
       "id": "pyweb-064",
@@ -1166,13 +1287,15 @@
       ],
       "runtime": "python-web",
       "concepts": [
-        "engineering",
-        "HTTP",
-        "Retries, idempotency and transactional outboxes"
+        "retries",
+        "idempotency",
+        "transactional outbox",
+        "at-least-once delivery",
+        "deduplication"
       ],
       "outcome": "Implement a small atomic outbox/identity case and explain retry-safe effects under uncertain delivery.",
-      "lab": "Read the two complete worked cases, reproduce their evidence and compare their assumptions.",
-      "verification": "Complete source-bound pyweb-064 investigation with explicit numerical or execution diagnostics; no mastery grade."
+      "lab": "Run the complete program, then change one input in each worked case and predict the new result before rerunning.",
+      "verification": "Every assertion in the pyweb-064 program passes and its printed JSON matches the worked cases; a passing run is not a mastery grade."
     },
     {
       "id": "pyweb-065",
@@ -1184,13 +1307,15 @@
       ],
       "runtime": "python-web",
       "concepts": [
-        "engineering",
-        "HTTP",
-        "Database performance, indexes and contention"
+        "indexes",
+        "EXPLAIN QUERY PLAN",
+        "lock contention",
+        "transactions",
+        "SQLite limits"
       ],
       "outcome": "Inspect real bounded query plans and transaction conflicts, then map the limits of SQLite evidence to PostgreSQL.",
-      "lab": "Read the two complete worked cases, reproduce their evidence and compare their assumptions.",
-      "verification": "Complete source-bound pyweb-065 investigation with explicit numerical or execution diagnostics; no mastery grade."
+      "lab": "Run the complete program, then change one input in each worked case and predict the new result before rerunning.",
+      "verification": "Every assertion in the pyweb-065 program passes and its printed JSON matches the worked cases; a passing run is not a mastery grade."
     },
     {
       "id": "pyweb-066",
@@ -1202,13 +1327,15 @@
       ],
       "runtime": "python-web",
       "concepts": [
-        "engineering",
-        "HTTP",
-        "Caching, rate limits and worker coordination"
+        "caching",
+        "invalidation",
+        "token bucket rate limiting",
+        "locks",
+        "worker coordination"
       ],
       "outcome": "Compare cache/invalidation and per-process coordination with the explicit shared-state workshop contract.",
-      "lab": "Read the two complete worked cases, reproduce their evidence and compare their assumptions.",
-      "verification": "Complete source-bound pyweb-066 investigation with explicit numerical or execution diagnostics; no mastery grade."
+      "lab": "Run the complete program, then change one input in each worked case and predict the new result before rerunning.",
+      "verification": "Every assertion in the pyweb-066 program passes and its printed JSON matches the worked cases; a passing run is not a mastery grade."
     },
     {
       "id": "pyweb-067",
@@ -1220,13 +1347,15 @@
       ],
       "runtime": "python-web",
       "concepts": [
-        "engineering",
-        "HTTP",
-        "Logs, metrics and tracing without sensitive payloads"
+        "structured logging",
+        "metrics",
+        "OpenTelemetry tracing",
+        "label cardinality",
+        "sensitive data"
       ],
       "outcome": "Record useful request diagnostics with bounded labels and an actual in-memory tracing exporter.",
-      "lab": "Read the two complete worked cases, reproduce their evidence and compare their assumptions.",
-      "verification": "Complete source-bound pyweb-067 investigation with explicit numerical or execution diagnostics; no mastery grade."
+      "lab": "Run the complete program, then change one input in each worked case and predict the new result before rerunning.",
+      "verification": "Every assertion in the pyweb-067 program passes and its printed JSON matches the worked cases; a passing run is not a mastery grade."
     },
     {
       "id": "pyweb-068",
@@ -1238,13 +1367,15 @@
       ],
       "runtime": "reading",
       "concepts": [
-        "engineering",
-        "HTTP",
-        "Network streaming, backpressure and disconnects"
+        "streaming",
+        "backpressure",
+        "client disconnects",
+        "WebSocket",
+        "server-sent events"
       ],
       "outcome": "Reproduce actual workshop HTTP/WS/SSE behavior and separate wire timing from in-process test-client buffering.",
-      "lab": "Read the two complete worked cases, reproduce their evidence and compare their assumptions.",
-      "verification": "Complete source-bound pyweb-068 investigation with explicit numerical or execution diagnostics; no mastery grade."
+      "lab": "Follow the linked project's documented entrypoint and compare its recorded evidence with the two worked cases.",
+      "verification": "The project checks named in pyweb-068 pass under their documented lifecycle; reading the unit records no pad run or mastery grade."
     },
     {
       "id": "pyweb-069",
@@ -1256,13 +1387,15 @@
       ],
       "runtime": "python-web",
       "concepts": [
-        "engineering",
-        "HTTP",
-        "Web threat modeling, proxies and TLS boundaries"
+        "threat modeling",
+        "reverse proxies",
+        "forwarded headers",
+        "TLS termination",
+        "secret handling"
       ],
       "outcome": "Evaluate concrete input, origin, forwarding and secret-handling threats in the owned application design.",
-      "lab": "Read the two complete worked cases, reproduce their evidence and compare their assumptions.",
-      "verification": "Complete source-bound pyweb-069 investigation with explicit numerical or execution diagnostics; no mastery grade."
+      "lab": "Run the complete program, then change one input in each worked case and predict the new result before rerunning.",
+      "verification": "Every assertion in the pyweb-069 program passes and its printed JSON matches the worked cases; a passing run is not a mastery grade."
     },
     {
       "id": "pyweb-070",
@@ -1276,13 +1409,15 @@
       ],
       "runtime": "reading",
       "concepts": [
-        "engineering",
-        "HTTP",
-        "Container deployment, migrations and recovery"
+        "container image",
+        "migrations",
+        "persistent volumes",
+        "stop and resume",
+        "recovery"
       ],
       "outcome": "Build, start, stop and resume the owned web application with persistent data and source-bound acceptance.",
-      "lab": "Read the two complete worked cases, reproduce their evidence and compare their assumptions.",
-      "verification": "Complete source-bound pyweb-070 investigation with explicit numerical or execution diagnostics; no mastery grade."
+      "lab": "Follow the linked project's documented entrypoint and compare its recorded evidence with the two worked cases.",
+      "verification": "The project checks named in pyweb-070 pass under their documented lifecycle; reading the unit records no pad run or mastery grade."
     },
     {
       "id": "pyweb-071",
@@ -1294,13 +1429,15 @@
       ],
       "runtime": "python-web",
       "concepts": [
-        "engineering",
-        "HTTP",
-        "Integration, failure and load testing"
+        "integration tests",
+        "failure injection",
+        "load testing",
+        "latency percentiles",
+        "service limits"
       ],
       "outcome": "Combine real framework tests with explicit service-level failure/load probes and interpret their scope.",
-      "lab": "Read the two complete worked cases, reproduce their evidence and compare their assumptions.",
-      "verification": "Complete source-bound pyweb-071 investigation with explicit numerical or execution diagnostics; no mastery grade."
+      "lab": "Run the complete program, then change one input in each worked case and predict the new result before rerunning.",
+      "verification": "Every assertion in the pyweb-071 program passes and its printed JSON matches the worked cases; a passing run is not a mastery grade."
     },
     {
       "id": "pyweb-072",
@@ -1314,13 +1451,15 @@
       ],
       "runtime": "reading",
       "concepts": [
-        "engineering",
-        "HTTP",
-        "End-to-end Python web engineering review"
+        "framework choice",
+        "architecture review",
+        "request flow",
+        "job flow",
+        "diagnosis"
       ],
       "outcome": "Choose and defend a framework architecture, reproduce a complete request/job flow and diagnose an intentional failure without losing state.",
-      "lab": "Read the two complete worked cases, reproduce their evidence and compare their assumptions.",
-      "verification": "Complete source-bound pyweb-072 investigation with explicit numerical or execution diagnostics; no mastery grade."
+      "lab": "Follow the linked project's documented entrypoint and compare its recorded evidence with the two worked cases.",
+      "verification": "The project checks named in pyweb-072 pass under their documented lifecycle; reading the unit records no pad run or mastery grade."
     }
   ]
 }

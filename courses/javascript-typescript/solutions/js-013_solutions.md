@@ -18,15 +18,21 @@ Timeouts express a waiting policy. A timeout does not establish that an external
 
 **Cleanup ownership:** Responsibility for cancelling timers and removing listeners.
 
+**Disposable:** An object whose Symbol.dispose or Symbol.asyncDispose method releases what it owns at block exit.
+
 ## Reading the implementation
 
 controller.abort(reason) changes signal.aborted and signal.reason. signal.throwIfAborted throws the stored reason immediately. AbortSignal.any combines signals with a first-abort policy. Node's timers/promises delay accepts a signal and rejects with AbortError, retaining the caller's reason as cause. That wrapper error and the original reason are distinct objects. A custom API should document which cancellation shape it returns.
 
-## Exercise 1: Cancel a pending timer
+A using declaration binds an object whose Symbol.dispose method runs when the enclosing block exits, whether it completes or throws; await using does the same with an asynchronous Symbol.asyncDispose method. Node 24 runs both declarations natively. When several disposables share a block, they are released in reverse order of declaration.
 
-Task: Start a timer with a signal, abort it, and inspect the rejection.
+## Exercise 1: Cancel a pending timer: predict an edited check
+
+Task: Copy Example A into a scratch `main.mjs` and change `await assert.rejects(pending, error => error.name === 'AbortError' && error.cause === reason);` to `await assert.rejects(pending, error => error.name === 'AbortError!' && error.cause === reason);` inside its check. Before running it, predict whether the check still passes and explain why; then restore it.
 
 The timer API cooperates with the signal and cancels its pending timer. The rejection shape is the API contract, not an arbitrary string comparison.
+
+The unchanged code is the exercise block of Example A:
 
 ```javascript
 const controller = new AbortController();
@@ -36,15 +42,17 @@ controller.abort(reason);
 await assert.rejects(pending, (error) => error.name === 'AbortError' && error.cause === reason);
 ```
 
-**Expected:** AbortError with the original reason as cause.
+**Expected:** The changed run fails with an `AssertionError` at the check `assert.rejects(pending, (error) => error.name === 'AbortError' && error.cause === reason)`. Restoring the original line brings back the worked observation: abortError with the original reason as cause.
 
-**Verify:** Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.
+**Verify:** Compare your written prediction with the reported `AssertionError`, including its actual and expected values, and explain why the edited check rejects the values that `assert.rejects(pending, (error) => error.name === 'AbortError' && error.cause === reason)` accepts. After restoring the line, the program prints its `{"checks":1,"status":"passed"}` receipt again.
 
-## Exercise 2: Reject an already aborted request before work
+## Exercise 2: Reject an already aborted request before work: diagnose an edited check
 
-Task: Abort before calling the custom operation.
+Task: A careless edit changed a check in Example B so that it reads `await assert.rejects(cancellableValue(7, controller.signal, trace), error => error !== reason);`. Run Example B with that line, explain why the edited check now fails for the same program state, and restore it.
 
 The pre-check prevents side effects from beginning after cancellation was already known. It also handles an abort event that occurred before any listener was installed.
+
+The unchanged code is the exercise block of Example B:
 
 ```javascript
 const controller = new AbortController();
@@ -55,9 +63,9 @@ await assert.rejects(cancellableValue(7, controller.signal, trace), (error) => e
 assert.deepEqual(trace, []);
 ```
 
-**Expected:** the exact reason is rejected; no timer starts.
+**Expected:** Before the repair the run fails with an `AssertionError` at the check `assert.rejects(cancellableValue(7, controller.signal, trace), (error) => error === reason)`; after it the line reads `await assert.rejects(cancellableValue(7, controller.signal, trace), error => error === reason);` again and the exact reason is rejected; no timer starts.
 
-**Verify:** Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.
+**Verify:** Keep the failing and the repaired runs. Explain why the edited check rejects the same program state that `assert.rejects(cancellableValue(7, controller.signal, trace), (error) => error === reason)` accepts.
 
 ## Exercise 3: Complete normally and clean up once
 
@@ -75,7 +83,7 @@ assert.deepEqual(trace, ['started', 'completed', 'cleaned']);
 
 **Expected:** value 7; started,completed,cleaned exactly once.
 
-**Verify:** Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.
+**Verify:** Keep a check equivalent to `assert.equal(await cancellableValue(7, controller.signal, trace), 7)`. As a control, change `assert.equal(await cancellableValue(7, controller.signal, trace), 7);` to `assert.equal(await cancellableValue(8, controller.signal, trace), 7);` inside it: the run must fail with an `AssertionError`, which shows the check can fail. Restore it.
 
 ## Exercise 4: Cancel custom work and release its timer
 
@@ -95,7 +103,7 @@ assert.deepEqual(trace, ['started', 'aborted', 'cleaned']);
 
 **Expected:** rejected reason; started,aborted,cleaned.
 
-**Verify:** Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.
+**Verify:** Keep a check equivalent to `assert.deepEqual(trace, ['started', 'aborted', 'cleaned'])`. As a control, change `assert.deepEqual(trace, ['started', 'aborted', 'cleaned']);` to `assert.deepEqual(trace, ['started!', 'aborted', 'cleaned']);` inside it: the run must fail with an `AssertionError`, which shows the check can fail. Restore it.
 
 ## Exercise 5: Keep the first abort reason
 
@@ -117,28 +125,31 @@ assert.throws(
 
 **Expected:** the first reason remains authoritative.
 
-**Verify:** Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.
+**Verify:** Keep a check equivalent to `assert.throws(() => controller.signal.throwIfAborted(), (error) => error === first)`. As a control, change `assert.throws(() => controller.signal.throwIfAborted(), error => error === first);` to `assert.throws(() => controller.signal.throwIfAborted(), error => error !== first);` inside it: the run must fail with an `AssertionError`, which shows the check can fail. Restore it.
 
 ## Exercise 6: Combine caller and deadline signals
 
-Task: Combine two controllers and abort the deadline controller.
+Task: Combine a caller signal with a disposable one-second deadline, abort the caller first, then leave the block that owns the deadline.
 
-Combining signals observes either source without aborting the other controller. The example triggers the deadline explicitly to keep the test independent of scheduler speed.
+Combining signals observes either source without aborting the other controller, so the deadline signal stays unaborted. The using declaration calls the deadline's Symbol.dispose method as soon as its block ends, so the one-second timer is cleared instead of keeping the process alive. Without it, every early exit, including an exception, would need its own clearTimeout call.
 
 ```javascript
 const caller = new AbortController();
-const deadline = new AbortController();
-const combined = AbortSignal.any([caller.signal, deadline.signal]);
-const reason = new Error('deadline');
-deadline.abort(reason);
-assert.equal(combined.aborted, true);
-assert.equal(combined.reason, reason);
-assert.equal(caller.signal.aborted, false);
+const trace = [];
+const reason = new Error('caller stopped');
+{
+  using deadline = deadlineSignal(1000, trace);
+  const combined = AbortSignal.any([caller.signal, deadline.signal]);
+  caller.abort(reason);
+  assert.equal(combined.reason, reason);
+  assert.equal(deadline.signal.aborted, false);
+}
+assert.deepEqual(trace, ['deadline cleared']);
 ```
 
-**Expected:** combined signal is aborted with deadline reason.
+**Expected:** combined signal carries the caller reason; the deadline stays unaborted and its timer is cleared once when the block ends.
 
-**Verify:** Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.
+**Verify:** Keep a check equivalent to `assert.deepEqual(trace, ['deadline cleared'])`. As a control, change `assert.deepEqual(trace, ['deadline cleared']);` to `assert.deepEqual(trace, ['deadline cleared!']);` inside it: the run must fail with an `AssertionError`, which shows the check can fail. Restore it.
 
 ## After comparison
 

@@ -8,9 +8,11 @@ An integer type has a finite range. C guarantees minimum ranges for fundamental 
 
 sizeof reports a size in char units, and sizeof(char) is always one; CHAR_BIT gives bits per char. INT_MAX and UINT_MAX expose implementation limits. A U suffix creates an unsigned integer constant. Integer division truncates toward zero. Convert an operand before division when a fractional result is required. fabs computes an absolute floating difference; a tolerance is specific to the numerical problem.
 
-## Exercise 1: Compare integer and floating division
+## Exercise 1: Compare integer and floating division: change one input
 
-Compute 7/2 and 7/2.0.
+Copy worked example 1 into a scratch pad and change `int whole = 7 / 2;` to `int whole = 8 / 2;`. Before running, predict which CHECK fails and which value it now sees; then run it and restore the original line.
+
+The unchanged code is worked example 1:
 
 ```c
 int whole = 7 / 2;
@@ -18,13 +20,15 @@ double fraction = 7 / 2.0;
 CHECK(whole == 3 && fraction == 3.5);
 ```
 
-**Expected:** The results are 3 and 3.5.
+**Expected:** The changed run stops with `Check failed` at the CHECK on `whole == 3 && fraction == 3.5`. Restoring the original line brings back the worked observation: the results are 3 and 3.5.
 
 Converting the already truncated integer result afterward cannot restore the missing fraction.
 
-## Exercise 2: Observe defined unsigned wrap
+## Exercise 2: Observe defined unsigned wrap: debug a regression
 
-Add one to UINT_MAX in unsigned arithmetic.
+A regression changed one token in worked example 2, so one line now reads `n -= 1U;`. Run worked example 2 with that line, use the failing CHECK to locate the defect and repair it without changing the CHECK.
+
+The unchanged code is worked example 2:
 
 ```c
 unsigned int n = UINT_MAX;
@@ -32,7 +36,7 @@ n += 1U;
 CHECK(n == 0U);
 ```
 
-**Expected:** The result is zero.
+**Expected:** Before the repair the run stops with `Check failed` at the CHECK on `n == 0U`; after it the line reads `n += 1U;` again and the result is zero.
 
 This result is guaranteed for unsigned arithmetic. Repeating the experiment with INT_MAX would invoke undefined behavior and is not an acceptable runnable example.
 

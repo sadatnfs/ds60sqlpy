@@ -26,8 +26,9 @@ def run_cases():
     django.setup()
     from django.core.checks import run_checks
     from django.http import JsonResponse
-    from django.test import override_settings
+    from django.test import Client, override_settings
     from django.urls import path
+    from django.utils.csp import CSP
 
     def view(request):
         return JsonResponse({"ok": True})
@@ -42,14 +43,17 @@ def run_cases():
         SESSION_COOKIE_SECURE=True,
         CSRF_COOKIE_SECURE=True,
         SECURE_SSL_REDIRECT=True,
+        # A one-hour max-age is a first rollout step. Preload is deliberately
+        # absent: the preload list requires at least one year and is slow to undo.
         SECURE_HSTS_SECONDS=3600,
         SECURE_HSTS_INCLUDE_SUBDOMAINS=True,
-        SECURE_HSTS_PRELOAD=True,
+        SECURE_CSP={"default-src": [CSP.SELF]},
         MIDDLEWARE=[
             "django.middleware.security.SecurityMiddleware",
             "django.contrib.sessions.middleware.SessionMiddleware",
             "django.middleware.csrf.CsrfViewMiddleware",
             "django.middleware.clickjacking.XFrameOptionsMiddleware",
+            "django.middleware.csp.ContentSecurityPolicyMiddleware",
         ],
         SECRET_KEY="fixture-only-72-char-mixed-string-0123456789-ABCDEFGHIJKLMNOPQRSTUVWXYZ-abcdef",
     ):
@@ -61,9 +65,22 @@ def run_cases():
             "security.W012",
             "security.W016",
         }.intersection(revised)
+        # The missing preload declaration is a recorded decision, not an oversight.
+        assert "security.W021" in revised
+        response = Client().get("/", secure=True, HTTP_HOST="web.example")
+        assert response.status_code == 200
+        headers = {
+            name: response[name]
+            for name in ("Strict-Transport-Security", "Content-Security-Policy")
+        }
+        assert headers == {
+            "Strict-Transport-Security": "max-age=3600; includeSubDomains",
+            "Content-Security-Policy": "default-src 'self'",
+        }
     return {
         "initial_check_ids": sorted(ids),
         "revised_check_ids": sorted(revised),
+        "revised_headers": headers,
         "scope": "configuration diagnostics, not actual TLS or proxy acceptance",
     }
 

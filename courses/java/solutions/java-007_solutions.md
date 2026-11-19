@@ -16,11 +16,13 @@ An object combines state with operations that preserve its rules. Encapsulation 
 
 private fields are accessed by methods inside the class. this denotes the current object when needed to distinguish fields and parameters. A method should calculate and validate a candidate state before assigning it. Math.addExact prevents integer overflow from turning a positive deposit into a negative balance. Public accessors can expose a value without exposing a mutable internal collection.
 
-## Exercise 1: Create independent accounts
+## Exercise 1: Create independent accounts: change one input
 
-Task: Construct accounts with 100 and 100 cents,deposit 50 into the first.
+Task: Copy Example A into a scratch `Main.java` and change `Account first = new Account(100);` to `Account first = new Account(101);`. Before running it with `java -ea Main`, predict which assertion fails and which value it now sees; then run it and restore the original line.
 
-Equal initial values do not mean shared identity. Eachnew expression creates a separate object whose field can evolve independently.
+Equal initial values do not mean shared identity. Each new expression creates a separate object whose field can evolve independently.
+
+The unchanged code is the part that Example A adds:
 
 ```java
 Account first = new Account(100);
@@ -29,28 +31,30 @@ first.deposit(50);
 assert first.balance() == 150 && second.balance() == 100;
 ```
 
-**Expected:** balances 150 and 100.
+**Expected:** The changed run fails with an `AssertionError` from the assertion on `first.balance() == 150 && second.balance() == 100`. Restoring the original line brings back the worked observation: balances 150 and 100.
 
-**Verify:** Compare the program values or named exception with balances 150 and 100. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.
+**Verify:** Compare your written prediction with the reported `AssertionError` and its stack-trace line, and name the value that made `first.balance() == 150 && second.balance() == 100` false. After restoring the line, the program completes without an `AssertionError` again.
 
-## Exercise 2: Withdraw within the contract
+## Exercise 2: Withdraw within the contract: debug a regression
 
-Task: Withdraw40 cents from the first account.
+Task: A regression changed one token in the code that Example B adds after Example A, so one line now reads `first.withdraw(41);`. Run Example B with that line, use the failing assertion to locate the defect and repair it without changing the assertion.
 
 The method validates the amount against current state, then performs one state change. The caller does not calculate and assign a raw field.
+
+The unchanged code is the part that Example B adds:
 
 ```java
 first.withdraw(40);
 assert first.balance() == 110;
 ```
 
-**Expected:** balance110.
+**Expected:** Before the repair the run fails with an `AssertionError` from the assertion on `first.balance() == 110`; after it the line reads `first.withdraw(40);` again and balance 110.
 
-**Verify:** Compare the program values or named exception with balance110. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.
+**Verify:** Keep the failing and the repaired runs. Explain why the changed token alters the value tested by `first.balance() == 110` for this input.
 
 ## Exercise 3: Reject overdraft atomically
 
-Task: Attempt to withdraw111 from balance110.
+Task: Attempt to withdraw 111 from balance 110.
 
 Validation precedes mutation. Subtracting first and throwing afterward would leave an invalid object behind.
 
@@ -64,13 +68,13 @@ try {
 assert overdraft && first.balance() == 110;
 ```
 
-**Expected:** IllegalArgumentException;balance still110.
+**Expected:** IllegalArgumentException; balance still 110.
 
-**Verify:** Compare the program values or named exception with IllegalArgumentException;balance still110. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.
+**Verify:** Keep an assertion equivalent to `overdraft && first.balance() == 110`. As a control, change `overdraft = true;` to `overdraft = false;`: the run must fail with an `AssertionError` from the assertion on `overdraft && first.balance() == 110`. Restore the line before continuing.
 
 ## Exercise 4: Reject negative input
 
-Task: Attempt a deposit of-1.
+Task: Attempt a deposit of -1.
 
 A negative deposit is not silently interpreted as a withdrawal. Each operation has a clear domain meaning and validation path.
 
@@ -84,13 +88,13 @@ try {
 assert negative && first.balance() == 110;
 ```
 
-**Expected:** IllegalArgumentException;balance unchanged.
+**Expected:** IllegalArgumentException; balance unchanged.
 
-**Verify:** Compare the program values or named exception with IllegalArgumentException;balance unchanged. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.
+**Verify:** Keep an assertion equivalent to `negative && first.balance() == 110`. As a control, change `negative = true;` to `negative = false;`: the run must fail with an `AssertionError` from the assertion on `negative && first.balance() == 110`. Restore the line before continuing.
 
 ## Exercise 5: Reject invalid construction
 
-Task: Construct an account with-1 cents.
+Task: Construct an account with -1 cents.
 
 An invariant should hold from the moment an object becomes available. Requiring a later repair call would expose invalid intermediate state to every user.
 
@@ -104,13 +108,13 @@ try {
 assert invalidStart;
 ```
 
-**Expected:** constructor throwsIllegalArgumentException.
+**Expected:** constructor throws IllegalArgumentException.
 
-**Verify:** Compare the program values or named exception with constructor throwsIllegalArgumentException. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.
+**Verify:** Keep an assertion equivalent to `invalidStart`. As a control, change `invalidStart = true;` to `invalidStart = false;`: the run must fail with an `AssertionError` from the assertion on `invalidStart`. Restore the line before continuing.
 
 ## Exercise 6: Protect against overflow
 
-Task: Create an account atInteger.MAX_VALUE and deposit1.
+Task: Create an account at Integer.MAX_VALUE and deposit 1.
 
 The right-hand calculation fails before field assignment, so the prior valid value remains. Overflow is distinct from an ordinary insufficient-funds domain error.
 
@@ -125,9 +129,9 @@ try {
 assert overflow && full.balance() == Integer.MAX_VALUE;
 ```
 
-**Expected:** ArithmeticException;original maximum balance preserved.
+**Expected:** ArithmeticException; original maximum balance preserved.
 
-**Verify:** Compare the program values or named exception with ArithmeticException;original maximum balance preserved. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.
+**Verify:** Keep an assertion equivalent to `overflow && full.balance() == Integer.MAX_VALUE`. As a control, change `overflow = true;` to `overflow = false;`: the run must fail with an `AssertionError` from the assertion on `overflow && full.balance() == Integer.MAX_VALUE`. Restore the line before continuing.
 
 ## After comparing the answer
 

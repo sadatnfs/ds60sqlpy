@@ -6,7 +6,13 @@ Advanced; approximately 135 minutes. Direct prerequisites: `torch-027`. The prer
 
 ## Learning objectives
 
-Restartable training requires the state that determines the next update, not merely weights that reproduce the current prediction. The central investigation is concrete: Take two Adam updates of a zero-weight linear model onx 1, 2 and y 2 x. The finish condition is optimizer step 2 and positive weight. directory absent; no distributed-loader claim. A useful explanation connects the calculation to the reason it is needed, rather than treating a function name as a definition.
+Save and restore every state that determines the next training update, and show that weights alone do not resume training.
+
+Central investigation: Take two Adam updates, checkpoint model, optimizer, RNG and data position, then continue in place and in a fresh interpreter.
+
+Finish condition: The checkpoint holds Adam step 2 and data position 2, the fresh-process continuation reproduces the random probe and the next weight within 1e-6, a weights-only restart diverges, and the owned directory is removed.
+
+The worked examples demonstrate the mechanism; exercises 1-3 transfer it to new inputs and exercises 4-6 extend it to failures and boundary cases. A useful explanation connects the calculation to the reason it is needed, rather than treating a function name as a definition.
 
 ## Purpose and mental model
 
@@ -157,33 +163,33 @@ assert (
 
 ## Prediction before your attempt
 
-For the supplied fixture, name the input unit, the intermediate state and the final quantity that changes. Predict one normal result and one failure result before touching the code. In particular, explain this lesson's acceptance condition in your own words: optimizer step 2 and positive weight. directory absent; no distributed-loader claim. Preserve the prediction beside your later observations so a correction is visible. A copied expected value is not a derivation.
+For the supplied fixture, name the input unit, the intermediate state and the final quantity that changes. Predict one normal result and one failure result before touching the code. In particular, explain this lesson's acceptance condition in your own words: The checkpoint holds Adam step 2 and data position 2, the fresh-process continuation reproduces the random probe and the next weight within 1e-6, a weights-only restart diverges, and the owned directory is removed. Preserve the prediction beside your later observations so a correction is visible. A copied expected value is not a derivation.
 
 ## Exercises
 
-1. **Create nontrivial training state.** Take two Adam updates of a zero-weight linear model onx 1, 2 and y 2 x.
-   **Expected:** optimizer step 2 and positive weight.
-   **Verify:** Save the assertion results for exercise 1, including optimizer step 2 and positive weight.
+1. **Predict Adam's first step.** From a fresh make_state(), take one step with zero noise and compare the weight with the learning rate 0.05.
+   **Expected:** weight 0.05 within 1e-6.
+   **Verify:** In a fresh process, the exercise checks confirm `fresh_model.weight.item()` matches `0.05` within 1e-06.
 
-2. **Save the complete local contract.** Write model, optimizer, RNG and data_position2 into an owned temporary checkpoint.
-   **Expected:** file exists and metadata position 2.
-   **Verify:** Save the assertion results for exercise 2, including file exists and metadata position 2.
+2. **Inspect the new optimizer state.** List the state entries Adam stores for that parameter after one step.
+   **Expected:** keys step, exp_avg and exp_avg_sq; step equals 1.
+   **Verify:** In a fresh process, the exercise checks confirm `set(fresh_adam.state[fresh_param]) == {'step', 'exp_avg', 'exp_avg_sq'}` and `fresh_adam.state[fresh_param]['step'].item() == 1`.
 
-3. **Record uninterrupted continuation.** Draw three random values, then a small target perturbation, and perform the third update.
-   **Expected:** finite weight, step 3, and saved three-value random probe.
-   **Verify:** Save the assertion results for exercise 3, including finite weight, step 3, and saved three-value random probe.
+3. **Replay a saved random state.** Save torch.get_rng_state(), draw three values, restore the state and draw again.
+   **Expected:** the two draws are identical.
+   **Verify:** In a fresh process, the exercise checks confirm `torch.equal(torch.rand(3), first_draw)`.
 
 4. **Restore in a fresh interpreter.** Recreate model and Adam, restore all state, repeat the same draws and update.
    **Expected:** probe matches and next weight agrees within 1e-6; position 3.
-   **Verify:** Save the assertion results for exercise 4, including probe matches and next weight agrees within 1e-6; position 3.
+   **Verify:** In a fresh process, the exercise checks confirm `not (result.returncode)`, `restored['probe']` matches `probe.tolist()` exactly, `restored['weight']` matches `expected` within 1e-06 and `restored['position'] == 3`.
 
 5. **Expose a weights-only restart.** Restore only the saved model into fresh Adam and take the same third batch update.
    **Expected:** next weight differs from full-state continuation.
-   **Verify:** Save the assertion results for exercise 5, including next weight differs from full-state continuation.
+   **Verify:** In a fresh process, the exercise checks confirm `abs(weights_only.weight.item() - expected) > 1e-06`.
 
 6. **Verify cleanup and bounded claims.** Remove the owned checkpoint directory and report that the literal CPU batch contract was tested.
    **Expected:** directory absent; no distributed-loader claim.
-   **Verify:** Save the assertion results for exercise 6, including directory absent; no distributed-loader claim.
+   **Verify:** In a fresh process, the exercise checks confirm `not folder.exists()`, `receipt['cpu_next_step_checked']` and `not receipt['distributed_restart_verified']`.
 
 ## Common pitfalls and diagnosis
 
@@ -197,7 +203,7 @@ First draw the state described in the vocabulary section. Next use the smallest 
 
 ## Self-check and retrieval
 
-Close both worked examples. Explain Training checkpoint, RNG state, Data position using the lesson fixture. Reconstruct one computation from its inputs. Then change one input while retaining the mechanism and predict whether the conclusion survives. Write which part is guaranteed by the code and which part would need new observations. This last distinction prevents a tiny deterministic teaching example from being presented as evidence about an unseen population or a production model.
+Close all three worked examples. Explain Training checkpoint, RNG state, Data position using the lesson fixture. Reconstruct one computation from its inputs. Then change one input while retaining the mechanism and predict whether the conclusion survives. Write which part is guaranteed by the code and which part would need new observations. This last distinction prevents a tiny deterministic teaching example from being presented as evidence about an unseen population or a production model.
 
 ## Next step
 

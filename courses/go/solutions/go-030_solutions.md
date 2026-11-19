@@ -8,9 +8,11 @@ Performance work starts with a behavioral contract and representative input. Com
 
 sort.Search finds the first index where a monotone predicate becomes true, or n when none does. It does not sort or validate input. make([]int,0,n) reserves capacity with zero length; make([]int,n) creates n elements. Prepared project benchmarks use testing.B in _test.go files; pprof investigates CPU or allocation evidence rather than establishing a universal speed ranking.
 
-## 1. Find a lower boundary
+## 1. Find a lower boundary: change one input
 
-Find the first value at least 5 in 2, 4, 6, 8.
+Copy worked example 1 into a scratch pad and change `items := []int{2, 4, 6, 8}` to `items := []int{2, 5, 6, 8}`. Before running, predict which check fails and which value it now sees; then run it and restore the original line.
+
+The unchanged code is worked example 1:
 
 ```go
 items := []int{2, 4, 6, 8}
@@ -18,13 +20,15 @@ i := sort.Search(len(items), func(i int) bool { return items[i] >= 5 })
 check(i == 2, "boundary")
 ```
 
-**Expected:** The index is 2.
+**Expected:** The changed run panics with `boundary` because `i == 2` no longer holds. Restoring the original line brings back the worked observation: the index is 2.
 
 Sorting makes the predicate monotone. The same expression over unsorted input violates the algorithm precondition.
 
-## 2. Represent no match
+## 2. Represent no match: debug a regression
 
-Search for a value at least 9 in the same data.
+A regression changed one token in worked example 2, so one line now reads `items := []int{2, 4, 6, 9}`. Run worked example 2 with that line, use the failure to locate the defect and repair it without changing the check.
+
+The unchanged code is worked example 2:
 
 ```go
 items := []int{2, 4, 6, 8}
@@ -32,7 +36,7 @@ i := sort.Search(len(items), func(i int) bool { return items[i] >= 9 })
 check(i == len(items), "not found")
 ```
 
-**Expected:** The index equals the collection length.
+**Expected:** Before the repair the program panics with `not found`; after it the line reads `items := []int{2, 4, 6, 8}` again and the index equals the collection length.
 
 The sentinel is not a valid element index. Check it before indexing.
 

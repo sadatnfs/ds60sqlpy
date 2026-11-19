@@ -8,9 +8,11 @@ A controller needs several evidence layers. Pure tests check decision rules quic
 
 Use a narrow interface at the application boundary and inject a fake with explicit outcomes. Assert both the result and which calls were made. A forbidden error should not trigger an endless retry loop; a cancellation should stop new calls. For live tests, create a unique owned namespace, retain UIDs, bound all waits and verify cleanup without deleting resources identified only by a reusable name. Do not use production contexts as convenient fixtures.
 
-## 1. Verify one successful API call
+## 1. Verify one successful API call: change one input
 
-Run a fake client configured to return a value.
+Copy worked example 1 into a scratch pad and change `f := &FakeReader{Value: 3}` to `f := &FakeReader{Value: 4}`. Before running, predict which check fails and which value it now sees; then run it and restore the original line.
+
+The unchanged code is worked example 1:
 
 ```go
 f := &FakeReader{Value: 3}
@@ -18,13 +20,15 @@ v, err := readOnce(context.Background(), f)
 check(err == nil && v == 3 && f.Calls == 1, "success")
 ```
 
-**Expected:** The result is retained and exactly one call occurs.
+**Expected:** The changed run panics with `success` because `err == nil && v == 3 && f.Calls == 1` no longer holds. Restoring the original line brings back the worked observation: the result is retained and exactly one call occurs.
 
 Call count is evidence about adapter behavior, while the returned value checks the consuming contract.
 
-## 2. Preserve a forbidden error
+## 2. Preserve a forbidden error: diagnose an edited check
 
-Make the fake return ErrForbidden.
+A careless edit changed the check in worked example 2 so that it reads `check(errors.Is(err, ErrForbidden) && f.Calls != 1, "forbidden")`. Run worked example 2 with that line, explain why the edited check now fails for the same program state, and restore it.
+
+The unchanged code is worked example 2:
 
 ```go
 f := &FakeReader{Err: ErrForbidden}
@@ -32,7 +36,7 @@ _, err := readOnce(context.Background(), f)
 check(errors.Is(err, ErrForbidden) && f.Calls == 1, "forbidden")
 ```
 
-**Expected:** The exact cause is visible and only one call occurs.
+**Expected:** Before the repair the program panics with `forbidden`; after it the line reads `check(errors.Is(err, ErrForbidden) && f.Calls == 1, "forbidden")` again and the exact cause is visible and only one call occurs.
 
 Authorization failure is not repaired by repeating the same request. Surface the required permission or configuration diagnosis.
 
@@ -83,16 +87,18 @@ Preserving the cause supports diagnosis. A read retry policy differs from replay
 
 ## 6. Transfer source-bound evidence
 
-Bind a synthetic receipt to its lesson ID and source digest label.
+Bind a synthetic receipt to its lesson ID and the SHA-256 digest of the exact source text, then compare it with a source that has one extra byte.
 
 ```go
-receipt := map[string]string{"lesson": "go-047", "source": "reviewed-fixture"}
-check(receipt["lesson"] == "go-047" && receipt["source"] == "reviewed-fixture", "receipt identity")
+source := "package main\n"
+digest := func(text string) string { return fmt.Sprintf("%x", sha256.Sum256([]byte(text))) }
+receipt := map[string]string{"lesson": "go-047", "source": digest(source)}
+check(receipt["lesson"] == "go-047" && receipt["source"] == digest(source) && receipt["source"] != digest(source+" "), "receipt identity")
 ```
 
-**Expected:** Both identifiers survive comparison.
+**Expected:** The receipt matches the exact source and rejects the changed source.
 
-This small metadata check illustrates binding, not a cryptographic receipt implementation. The classroom records actual source hashes separately.
+Binding evidence to a digest of the exact bytes means a later edit cannot reuse an old result. This small check illustrates the binding; the classroom records actual source hashes separately.
 
 ## Transfer after comparison
 

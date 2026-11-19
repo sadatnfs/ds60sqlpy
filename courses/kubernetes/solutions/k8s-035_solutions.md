@@ -4,7 +4,7 @@ These answers explain the stated synthetic and scoped runtime contracts. Static 
 
 ## Mechanism
 
-A read-modify-write operation can lose another client's change if it assumes the object stayed unchanged after reading. Kubernetes uses resourceVersion for optimistic concurrency. The client submits a conditional update based on the version it read; if the stored object changed, the server can reject the stale update with409 Conflict. The correct recovery is to read current state and recompute the intended change, not repeatedly force the old snapshot over newer state.
+A read-modify-write operation can lose another client's change if it assumes the object stayed unchanged after reading. Kubernetes uses resourceVersion for optimistic concurrency. The client submits a conditional update based on the version it read; if the stored object changed, the server can reject the stale update with 409 Conflict. The correct recovery is to read current state and recompute the intended change, not repeatedly force the old snapshot over newer state.
 
 resourceVersion is an opaque token supplied by the server. Treat it as a string for the API contract. Do not increment it, subtract two versions to estimate elapsed time or use it as a user-defined clock. UID identifies an object lifetime, while resourceVersion identifies a state version within API semantics. Recreating the same name can change UID and invalidate an operation's ownership assumptions.
 
@@ -50,4 +50,4 @@ The observer should separate stream progress from application objects and make s
 
 A conditional replace, a patch with appropriate preconditions and server-side apply have different merge/ownership semantics. This lesson models compare-and-swap on a tiny object; it does not teach that every PATCH automatically prevents lost updates. Specify the actual API operation and precondition when reviewing a live client.
 
-A supplied409 or410 trace is a deterministic teaching fixture. A live receipt must include the exact owned identity, request outcome and bounded recovery observation without exposing credentials. Do not enable broad watch or write permissions merely to make a reading exercise runnable in the normal module pad.
+A supplied 409 or 410 trace is a deterministic teaching fixture. A live receipt must include the exact owned identity, request outcome and bounded recovery observation without exposing credentials. Do not enable broad watch or write permissions merely to make a reading exercise runnable in the normal module pad.

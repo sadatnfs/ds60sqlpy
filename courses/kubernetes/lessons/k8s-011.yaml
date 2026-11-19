@@ -1,10 +1,11 @@
+# k8s-011 starter. The learner starter allows one retry and a 30-second deadline; Exercise 1 asks you to set the reference budget. Compare with the separate reference in courses/kubernetes/solutions/ only after your attempt.
 apiVersion: batch/v1
 kind: Job
 metadata:
   name: hello-task
 spec:
-  backoffLimit: 0
-  activeDeadlineSeconds: 20
+  backoffLimit: 1
+  activeDeadlineSeconds: 30
   completions: 1
   parallelism: 1
   template:
@@ -42,9 +43,15 @@ spec:
               drop:
                 - ALL
       restartPolicy: Never
-# Exercise 1: Identify finite-work controls. Read completions,parallelism,restartPolicy,backoffLimit and activeDeadlineSeconds. Expected: 1,1,Never,0 and20seconds for the reference.
-# Exercise 2: Verify exact task output. Run the successful fixed task under a qualified lease. Expected: Owned Complete Job,controlled successful task Pod,exit0 and exact accepted3/rejected2/total35 output.
-# Exercise 3: Observe intentional failure. Change only the allowed outcome from success to failure. Expected: Job reaches Failed;operation reports failure and cleans its owned UID.
-# Exercise 4: Explain retry semantics. Compare backoffLimit0 and1 with restartPolicy Never. Expected: At most the declared retry budget is requested;Never does not forbid a replacement Pod attempt.
-# Exercise 5: Review the suspended CronJob. Interpret schedule,timeZone,suspend,concurrency and starting deadline fields. Expected: A five-minute UTC schedule is configured but suspended;existing active Jobs require separate handling.
-# Exercise 6: Design an idempotent handoff. Describe how a real finite task would avoid publishing duplicate effects after retry. Expected: A stable logical-work key,commit boundary,replay policy and acceptance ledger are named.
+# Exercise 1: Identify finite-work controls. The starter Job allows one retry and a 30-second deadline. Read completions, parallelism, restartPolicy, backoffLimit and activeDeadlineSeconds, then set no retry and a 20-second deadline.
+# My prediction and evidence:
+# Exercise 2: Verify exact task output. Run the successful fixed task under a qualified lease.
+# My prediction and evidence:
+# Exercise 3: Observe intentional failure. Change only the allowed outcome from success to failure.
+# My prediction and evidence:
+# Exercise 4: Explain retry semantics. Compare backoffLimit 0 and 1 with restartPolicy Never.
+# My prediction and evidence:
+# Exercise 5: Review the suspended CronJob. Interpret schedule, timeZone, suspend, concurrency and starting deadline fields.
+# My prediction and evidence:
+# Exercise 6: Design an idempotent handoff. Describe how a real finite task would avoid publishing duplicate effects after retry.
+# My prediction and evidence:

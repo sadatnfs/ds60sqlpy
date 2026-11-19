@@ -200,4 +200,4 @@ if __name__ == "__main__":
 
 ## Interpretation
 
-Publish and resolve a model artifact with an explicit trusted interface. Verify real registry linkage and prediction parity while keeping integrity, authenticity and deployment acceptance distinct. Prefer a safe bounded representation at a local demonstration service boundary.
+Verify real registry linkage and prediction parity while keeping integrity, authenticity and deployment acceptance distinct. Prefer a safe bounded representation at a local demonstration service boundary.

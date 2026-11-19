@@ -6,7 +6,13 @@ Advanced; approximately 135 minutes. Direct prerequisites: `torch-034`. The prer
 
 ## Learning objectives
 
-Model comparisons should preserve the pairing between predictions on the same held-out identities. The central investigation is concrete: Use truth a0, b1, c2 with A0, 2, 2 and B 1, 2, 3 in different dictionary order. The finish condition is paired squared-loss differences-1, 0, -1. test selection violates the declared boundary. A useful explanation connects the calculation to the reason it is needed, rather than treating a function name as a definition.
+Compare two models on the same held-out identities with paired differences and a reproducible bootstrap.
+
+Central investigation: Align three predictions by ID, average the paired squared-loss differences and draw 1000 seeded bootstrap means.
+
+Finish condition: The paired differences are -1, 0, -1 with mean \(\frac{-2}{3}\) favoring model A, all 1000 bootstrap means lie in [-1, 0], reseeding with 7 replays the same indices, and a missing ID is rejected before comparison.
+
+The worked examples demonstrate the mechanism; exercises 1-3 transfer it to new inputs and exercises 4-6 extend it to failures and boundary cases. A useful explanation connects the calculation to the reason it is needed, rather than treating a function name as a definition.
 
 ## Purpose and mental model
 
@@ -44,7 +50,7 @@ Run the three worked blocks in order in one scratch file; later blocks reuse the
 
 ## Syntax anatomy and reasoning sequence
 
-Align prediction dictionaries by stable IDs and check equal keysets. Calculate squared-error A minus squared-errorB for each ID. Sample indices with torch.rand int and an explicit Generator, then index the paired difference vector. Use the same resampling unit for both systems by resampling the already-paired values. Report independent count and selection history beside the estimate.
+Align prediction dictionaries by stable IDs and check equal keysets. Calculate squared error A minus squared error B for each ID. Sample indices with torch.randint and an explicit Generator, then index the paired difference vector. Use the same resampling unit for both systems by resampling the already-paired values. Report independent count and selection history beside the estimate.
 
 ## Derive the paired contrast and the finite bootstrap law
 
@@ -62,7 +68,7 @@ Pairing preserves shared case difficulty. In general, \(\operatorname{Var}(\ell_
 
 A separate analytic example makes the dependence visible. Suppose two cases have losses A=[1, 11] and B=[0, 10]. Every paired difference is one, so every paired resampled mean is one. Independent resampling can pair the easy A loss with the hard B loss or vice versa and create variation that was absent from the paired contrast. This explains the method without claiming that the original three-case code exercised that different fixture.
 
-For the actual differences[-1, 0, -1], an empirical draw has probability \(\frac{2}{3}\) of-1 and \(\frac{1}{3}\) of zero. Each bootstrap estimate averages three independent draws from that empirical distribution. Let K count the selected-1 values; then K has a Binomial(3, \(\frac{2}{3}\)) law and the estimate is-K/3:
+For the actual differences [-1, 0, -1], an empirical draw has probability \(\frac{2}{3}\) of -1 and \(\frac{1}{3}\) of zero. Each bootstrap estimate averages three independent draws from that empirical distribution. Let K count the selected-1 values; then K has a Binomial(3, \(\frac{2}{3}\)) law and the estimate is -K/3:
 
 | Resampled mean | Exact empirical probability |
 | --- | --- |
@@ -105,7 +111,7 @@ difference = torch.tensor(
 assert difference.tolist() == [-1.0, 0.0, -1.0]
 ```
 
-**Expected:** paired squared-loss differences-1, 0, -1.
+**Expected:** paired squared-loss differences -1, 0, -1.
 
 ### Example B: Interpret the average contrast
 
@@ -133,41 +139,41 @@ assert (
 )
 ```
 
-**Expected:** 1000finite estimates within-1..0.
+**Expected:** 1000 finite estimates within -1..0.
 
 ## Prediction before your attempt
 
-For the supplied fixture, name the input unit, the intermediate state and the final quantity that changes. Predict one normal result and one failure result before touching the code. In particular, explain this lesson's acceptance condition in your own words: paired squared-loss differences-1, 0, -1. test selection violates the declared boundary. Preserve the prediction beside your later observations so a correction is visible. A copied expected value is not a derivation.
+For the supplied fixture, name the input unit, the intermediate state and the final quantity that changes. Predict one normal result and one failure result before touching the code. In particular, explain this lesson's acceptance condition in your own words: The paired differences are -1, 0, -1 with mean \(\frac{-2}{3}\) favoring model A, all 1000 bootstrap means lie in [-1, 0], reseeding with 7 replays the same indices, and a missing ID is rejected before comparison. Preserve the prediction beside your later observations so a correction is visible. A copied expected value is not a derivation.
 
 ## Exercises
 
-1. **Align predictions by ID.** Use truth a0, b1, c2 with A0, 2, 2 and B 1, 2, 3 in different dictionary order.
-   **Expected:** paired squared-loss differences-1, 0, -1.
-   **Verify:** Save the assertion results for exercise 1, including paired squared-loss differences-1, 0, -1.
+1. **Align a new pair of models.** Use truth x=1, y=2 with model A predictions x=1, y=4 and model B predictions y=2, x=0 in different dictionary order.
+   **Expected:** paired squared-loss differences A minus B: [-1, 4].
+   **Verify:** In a fresh process, the exercise checks confirm `paired.tolist() == [-1.0, 4.0]`.
 
-2. **Interpret the average contrast.** Average the three paired differences.
-   **Expected:** mean \(\frac{-2}{3}\), favoring A on this loss fixture.
-   **Verify:** Save the assertion results for exercise 2, including mean \(\frac{-2}{3}\), favoring A on this loss fixture.
+2. **Interpret the new mean contrast.** Average the two paired differences and state which model the fixture favors.
+   **Expected:** mean 1.5, favoring model B on this loss.
+   **Verify:** In a fresh process, the exercise checks confirm `paired.mean().item() == 1.5`.
 
-3. **Resample pairs reproducibly.** Draw 1000 three-index bootstrap samples with local Generator seed 7.
-   **Expected:** 1000finite estimates within-1..0.
-   **Verify:** Save the assertion results for exercise 3, including 1000finite estimates within-1..0.
+3. **Bound the new bootstrap means.** Draw 500 two-index bootstrap samples with Generator seed 11 and inspect the possible means.
+   **Expected:** every mean is -1, 1.5 or 4.
+   **Verify:** In a fresh process, the exercise checks confirm `set(boot.tolist()) <= {-1.0, 1.5, 4.0}`; `boot.min() >= -1` and `boot.max() <= 4`.
 
 4. **Replay the local random stream.** Create a new Generator with seed 7 and compare the index matrix.
    **Expected:** exact match.
-   **Verify:** Save the assertion results for exercise 4, including exact match.
+   **Verify:** In a fresh process, the exercise checks confirm `torch.equal(indices, again)`.
 
 5. **Reject missing assessment identities.** Remove c from one prediction dictionary and check the keyset.
    **Expected:** mismatch detected before comparison.
-   **Verify:** Save the assertion results for exercise 5, including mismatch detected before comparison.
+   **Verify:** In a fresh process, the exercise checks confirm `set(missing) != set(truth)`.
 
 6. **Preserve a final-test boundary.** Record configuration choice on validation and assessment on test; flag a test-driven new choice.
    **Expected:** test selection violates the declared boundary.
-   **Verify:** Save the assertion results for exercise 6, including test selection violates the declared boundary.
+   **Verify:** In a fresh process, the exercise checks confirm `all((partition == 'validation' for action, partition in ledger if action == 'choose'))` and `('choose', 'test')[1] != 'validation'`.
 
 ## Common pitfalls and diagnosis
 
-If the contrast changes when dictionary order changes, repair the identity join. If a model lacks an assessment ID, stop instead of comparing a convenient intersection. If bootstrap draws exceed[-1, 0] here, inspect index bounds, axis reduction and whether the paired difference vector was actually sampled.
+If the contrast changes when dictionary order changes, repair the identity join. If a model lacks an assessment ID, stop instead of comparing a convenient intersection. If bootstrap draws exceed [-1, 0] here, inspect index bounds, axis reduction and whether the paired difference vector was actually sampled.
 
 If an unpaired method gives different uncertainty, inspect the covariance and resampling unit rather than choosing the narrower result. If repeated seeds disagree, check generator ownership and preceding draws. If a thousand draws are presented as a thousand new test cases, restore the distinction between Monte Carlo approximation and independent evidence. If final-test feedback changed a configuration, record the selection history before interpreting the reported interval.
 
@@ -177,7 +183,7 @@ First draw the state described in the vocabulary section. Next use the smallest 
 
 ## Self-check and retrieval
 
-Close both worked examples. Explain Paired difference, Resampling unit, Selection bias using the lesson fixture. Reconstruct one computation from its inputs. Then change one input while retaining the mechanism and predict whether the conclusion survives. Write which part is guaranteed by the code and which part would need new observations. This last distinction prevents a tiny deterministic teaching example from being presented as evidence about an unseen population or a production model.
+Close all three worked examples. Explain Paired difference, Resampling unit, Selection bias using the lesson fixture. Reconstruct one computation from its inputs. Then change one input while retaining the mechanism and predict whether the conclusion survives. Write which part is guaranteed by the code and which part would need new observations. This last distinction prevents a tiny deterministic teaching example from being presented as evidence about an unseen population or a production model.
 
 ## Next step
 
@@ -185,7 +191,7 @@ Revisit the direct prerequisite `torch-034` if the calculation cannot be reconst
 
 ## Sources and verification status
 
-API and mechanism reference: [PyTorch2.9 reference](https://docs.pytorch.org/docs/2.9/index.html), reviewed 2026-10-22. The fixture, examples, counterexamples and exercise design are original course material. See [validation](../../../docs/validation.md) for execution gates. Check CI artifacts for the exact revision and platform to determine which runtime checks actually ran; authored content alone does not establish runtime execution.
+API and mechanism reference: [PyTorch 2.9 reference](https://docs.pytorch.org/docs/2.9/index.html), reviewed 2026-10-22. The fixture, examples, counterexamples and exercise design are original course material. See [validation](../../../docs/validation.md) for execution gates. Check CI artifacts for the exact revision and platform to determine which runtime checks actually ran; authored content alone does not establish runtime execution.
 
 ## Interview reasoning with worked answers
 

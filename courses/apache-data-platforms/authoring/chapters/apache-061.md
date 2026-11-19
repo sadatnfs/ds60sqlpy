@@ -19,7 +19,30 @@ ports, release support and matching join result must be qualified together befor
 calling that extension ready. Documentation examples can describe features newer
 than the pinned server.
 
-## Worked case A: enrich a bounded fact table
+## Worked case A: enrich a bounded fact table (design exercise)
+
+The workshop's checker uses only the single-stage engine, so this join is a design
+exercise. With a second owned table `ds60_territories` holding one row per region,
+the query would be:
+
+```sql
+SET useMultistageEngine = true;
+
+SELECT
+  t.territory,
+  SUM(o.amount) AS total,
+  COUNT(*) AS orders
+FROM
+  ds60_orders o
+  JOIN ds60_territories t ON o.region = t.region
+GROUP BY
+  t.territory;
+```
+
+With territories Atlantic for east and Pacific for west, the written answer is
+Atlantic 11 from two orders and Pacific 9 from one order. If a second
+`('east', 'Atlantic')` row is added, Atlantic becomes 22 from four joined rows and
+the grand total becomes 31 instead of 20.
 
 Create a separate owned dimension table with exactly one row for east and one
 for west, mapping them to named territories. Join the three known orders to that
@@ -40,6 +63,15 @@ It does not demonstrate cross-rack resilience, stable performance at high
 cardinality, or arbitrary relational optimizer parity with another engine.
 
 ## Worked case B: a bounded request can fail explicitly
+
+This case is executed by `bash run.sh check`. Every request sets a five-second
+timeout through query options and treats a non-empty `exceptions` array as a
+failure:
+
+<!-- include: projects/pinot/client.py #query python -->
+
+The negative check then sends `SELECT absent_field FROM ds60_orders LIMIT 1` and
+requires an exception message that names `absent_field`.
 
 Set a finite query timeout and a small result limit. Query an unknown column or
 unsupported operation and require a structured response exception. HTTP success

@@ -302,7 +302,7 @@ Uniform logits over eight vocabulary entries give each target probability 1/8 an
 
 The prompt remains an input to the causal computation. Answer tokens can attend to its allowed positions and gradients from answer losses can flow through their use of prompt representations. Loss masking chooses which predictions contribute directly to the objective. An attention mask chooses which input relationships exist. A padding mask and an instruction/answer loss mask therefore have related but distinct jobs.
 
-The EOS decision is part of the task contract. This fixture includes the final3 as an answer target, teaching the modeled sequence to terminate there. A different template might encode turns or end markers differently. For a real tokenizer, verify the rendered chat template and the actual token boundaries, especially around prompt/answer joins. Independently tokenizing two strings and concatenating their IDs need not reproduce tokenizing the combined text under every tokenizer.
+The EOS decision is part of the task contract. This fixture includes the final 3 as an answer target, teaching the modeled sequence to terminate there. A different template might encode turns or end markers differently. For a real tokenizer, verify the rendered chat template and the actual token boundaries, especially around prompt/answer joins. Independently tokenizing two strings and concatenating their IDs need not reproduce tokenizing the combined text under every tokenizer.
 
 An all-false answer mask has denominator zero and must be rejected or handled by an explicit policy before reduction. Returning a plausible zero loss would hide the absence of supervision. Likewise, template variants from one source family should not cross the train/evaluation boundary merely because their strings differ. The code verifies loss and gradient mechanics on literal IDs; it does not demonstrate instruction-following quality. The [applied adaptation route](../../llm-applied/README.md) adds data construction, real tiny updates and an explicitly optional pretrained workflow with template and masking checks.
 """,
@@ -312,7 +312,7 @@ This lesson uses row vectors and the convention y=x*(W+A*B), with W[8, 8], A[8, 
 
 For this loss, the gradient G=dL/dy has eight entries equal to 2/8=0.25. Matrix differentiation gives dL/dB=(x*A).T*G, so every B gradient is 0.25. It also gives dL/dA=x.T*G*B.T, which is zero at this first step because B is zero. Zero initial dA is therefore expected, not evidence that autograd is broken. If both A and B started at zero, both adapter gradients would vanish for this bilinear path.
 
-SGD at learning rate 0.1 changes every B entry to-0.025. Each entry of A*B is then2*(1/8)*(-0.025)=-0.00625. Multiplying by the eight ones in x changes each output by-0.05, giving y=0.95 and loss 0.9025. The update has rank at most two, but these identical columns and rows make its actual rank one. A rank bound is not a promise that optimization uses every available direction.
+SGD at learning rate 0.1 changes every B entry to -0.025. Each entry of A*B is then 2*(1/8)*(-0.025)=-0.00625. Multiplying by the eight ones in x changes each output by-0.05, giving y=0.95 and loss 0.9025. The update has rank at most two, but these identical columns and rows make its actual rank one. A rank bound is not a promise that optimization uses every available direction.
 
 ## Frozen weights still participate in the computation
 
@@ -324,9 +324,9 @@ The [LoRA paper](https://arxiv.org/abs/2106.09685) motivates learning a low-rank
 
 For a common prompt x and chosen/rejected answers, let delta_policy=log p_policy(chosen|x)-log p_policy(rejected|x), with an analogous delta_reference. The objective used here is L=log(1+exp(-m)), where m=beta*(delta_policy-delta_reference). A positive margin means the policy favors the chosen answer more than the reference does under this sequence-scoring convention. It does not mean the chosen answer has high absolute probability or that its factual claims are true.
 
-In the first case, policy scores-2 and-3 give delta_policy=1, while reference scores-4 and-5 also give delta_reference=1. Their difference is zero, so the loss is log(2), about 0.693147, even though both systems prefer the chosen answer. In the second case the supplied differences are2 and0 with beta0.5, yielding margin 1 and loss about 0.313262. Reversing the preference gives margin-1 and loss about 1.313262. The objective rewards a change in relative preference against the reference.
+In the first case, policy scores -2 and -3 give delta_policy=1, while reference scores -4 and -5 also give delta_reference=1. Their difference is zero, so the loss is log(2), about 0.693147, even though both systems prefer the chosen answer. In the second case the supplied differences are 2 and 0 with beta 0.5, yielding margin 1 and loss about 0.313262. Reversing the preference gives margin -1 and loss about 1.313262. The objective rewards a change in relative preference against the reference.
 
-The derivative with respect to the margin is -sigmoid(-m). For a large positive margin it approaches zero; for a very negative margin it approaches-1. Computing logaddexp(0, -m) avoids directly exponentiating a huge positive number. At margins1000 and-1000 the stable losses are approximately 0 and1000, rather than an overflow in the latter case.
+The derivative with respect to the margin is -sigmoid(-m). For a large positive margin it approaches zero; for a very negative margin it approaches -1. Computing logaddexp(0, -m) avoids directly exponentiating a huge positive number. At margins 1000 and -1000 the stable losses are approximately 0 and 1000, rather than an overflow in the latter case.
 
 ## Objective, optimization and preference quality are separate
 
@@ -336,21 +336,21 @@ A practical comparison needs paired answers for the same prompt, a declared labe
 """,
         "llm-034": """## Quantization changes values before the matrix product
 
-The full-precision fixture has W=[[0.1, -0.9], [1.7, -0.2]] and x=[1, -2], giving W*x=[1.9, 2.1]. A symmetric shared scale s=1.7/127 maps the weights to integer codes round(W/s)=[[7, -67], [127, -15]]. Dequantization multiplies these codes by s. The resulting output is approximately[1.887401575, 2.101574803], so the maximum absolute output error is about 0.012598425.
+The full-precision fixture has W=[[0.1, -0.9], [1.7, -0.2]] and x=[1, -2], giving W*x=[1.9, 2.1]. A symmetric shared scale s=1.7/127 maps the weights to integer codes round(W/s)=[[7, -67], [127, -15]]. Dequantization multiplies these codes by s. The resulting output is approximately [1.887401575, 2.101574803], so the maximum absolute output error is about 0.012598425.
 
-The largest magnitude1.7 sets the shared scale. With a separate scale per row, the first row can use0.9/127, yielding codes[14, -127] and output1.899212598. The second row is unchanged. The maximum error then becomes approximately 0.001574803. This improvement is specific to the supplied weights and input, and costs an additional scale. More granular scales can reduce some representation errors while increasing metadata and implementation complexity.
+The largest magnitude 1.7 sets the shared scale. With a separate scale per row, the first row can use 0.9/127, yielding codes [14, -127] and output 1.899212598. The second row is unchanged. The maximum error then becomes approximately 0.001574803. This improvement is specific to the supplied weights and input, and costs an additional scale. More granular scales can reduce some representation errors while increasing metadata and implementation complexity.
 
 For nearest rounding without clipping, each weight error has magnitude at most s/2. Writing E=W_restored-W, the output error in row i obeys |(E*x)_i| <= sum_j |E_ij|*|x_j| <= (s/2)*||x||_1. Here the bound is approximately 0.02007874 because ||x||_1=3. It is a worst-case bound for these assumptions, not the observed error. Clipping an out-of-range value can exceed the half-step bound. A zero-valued block also needs an explicit scale convention to avoid division by zero in a general implementation.
 
 ## Count the intended storage and the actual operations
 
-Four int8 codes and one float32 scale would use8 raw data bytes; two float32 scales would use12. Those are layout calculations for the proposed representation. This NumPy program uses float64 for its analysis scales and dequantized arithmetic, plus array metadata and intermediates. It does not demonstrate an eight-byte process allocation or an integer matrix-multiplication kernel.
+Four int8 codes and one float32 scale would use 8 raw data bytes; two float32 scales would use 12. Those are layout calculations for the proposed representation. This NumPy program uses float64 for its analysis scales and dequantized arithmetic, plus array metadata and intermediates. It does not demonstrate an eight-byte process allocation or an integer matrix-multiplication kernel.
 
-The code restores floating values before multiplying. Therefore it measures numerical error from a specified quantizer, not inference speed, GPU memory savings or a full low-bit model. It also declares NumPy's ties-to-even rounding:0.5 goes to 0, 1.5 to 2 and2.5 to 2. Quantization comparisons should state code range, scale shape, rounding, clipping, accumulation dtype and the calibration data used to set ranges. Evaluate downstream outputs under a representative task; a small weight error alone need not imply a small decision change near a classification boundary.
+The code restores floating values before multiplying. Therefore it measures numerical error from a specified quantizer, not inference speed, GPU memory savings or a full low-bit model. It also declares NumPy's ties-to-even rounding:0.5 goes to 0, 1.5 to 2 and 2.5 to 2. Quantization comparisons should state code range, scale shape, rounding, clipping, accumulation dtype and the calibration data used to set ranges. Evaluate downstream outputs under a representative task; a small weight error alone need not imply a small decision change near a classification boundary.
 """,
         "llm-035": """## Trace two requests without sharing their state
 
-Request A has tokens[2, 5, 7], while B has[1, 3]. The scheduler alternates A0, B0, A1, B1, A2, always retrieving the cache belonging to that request. After A1, A has two positions while B still has one. At completion their cache lengths are three and two. Combining each request's incremental logits must match its own full-prefix pass, regardless of this interleaving.
+Request A has tokens [2, 5, 7], while B has [1, 3]. The scheduler alternates A0, B0, A1, B1, A2, always retrieving the cache belonging to that request. After A1, A has two positions while B still has one. At completion their cache lengths are three and two. Combining each request's incremental logits must match its own full-prefix pass, regardless of this interleaving.
 
 The key includes request, model-version and tokenizer-version identities. A different model or tokenizer label misses the existing entry in the fixture. That demonstrates the lookup policy, but the surrounding system must bind those labels to actual artifacts. Reusing label v1 after changing weights would fool a string-key check. Prompt prefix, position policy, adapter identity and access boundary can also matter to whether reuse is valid.
 
@@ -437,11 +437,11 @@ A severe-failure gate can remain unsatisfied despite 90% overall success. If the
 """,
         "llm-040": """## The sampling unit determines the comparison
 
-The supplied question families are A, A, B, with paired score differences[-1, -1, +1]. An equal-row mean is-1/3. First averaging within family gives A=-1 and B=+1, whose equal-family mean is zero. These answer different questions: performance on the observed row mix versus performance when each sampled family receives equal weight. A report must say which target weighting it intends.
+The supplied question families are A, A, B, with paired score differences [-1, -1, +1]. An equal-row mean is -1/3. First averaging within family gives A=-1 and B=+1, whose equal-family mean is zero. These answer different questions: performance on the observed row mix versus performance when each sampled family receives equal weight. A report must say which target weighting it intends.
 
-Now duplicate a negative A-type row ten more times. The equal-row mean becomes-11/13, but the two family means remain-1 and+1, so the equal-family mean remains zero. Duplicating related prompts increases the number of rows without necessarily increasing the number of independent units. This is why resampling arbitrary rows can understate uncertainty when the data have family structure.
+Now duplicate a negative A-type row ten more times. The equal-row mean becomes -11/13, but the two family means remain -1 and +1, so the equal-family mean remains zero. Duplicating related prompts increases the number of rows without necessarily increasing the number of independent units. This is why resampling arbitrary rows can understate uncertainty when the data have family structure.
 
-With only these two empirical family means, drawing two families with replacement gives mean-1, 0 or+1 with probabilities1/4, 1/2 and1/4. Running a thousand bootstrap draws samples that small empirical distribution more densely; it does not create a thousand new independent families or establish transfer to unrepresented families. The interval is conditional on the observed sample and chosen resampling scheme. More independent evaluation families would provide different evidence from more repetitions of the same bootstrap.
+With only these two empirical family means, drawing two families with replacement gives mean -1, 0 or +1 with probabilities 1/4, 1/2 and 1/4. Running a thousand bootstrap draws samples that small empirical distribution more densely; it does not create a thousand new independent families or establish transfer to unrepresented families. The interval is conditional on the observed sample and chosen resampling scheme. More independent evaluation families would provide different evidence from more repetitions of the same bootstrap.
 
 ## Accuracy and coverage describe different decisions
 
@@ -451,7 +451,7 @@ Keep prompt and threshold selection in the development process and reserve indep
 """,
         "llm-041": """## Match a mathematical map before matching framework names
 
-For row input x=[1, 2] and W=[[1, 2, 3], [4, 5, 6]], x*W=[9, 12, 15]. A Keras Dense kernel for this map has shape[2, 3]. PyTorch Linear stores its weight as[out_features, in_features], so the same map uses W transposed with shape[3, 2], because its forward operation multiplies by the stored weight's transpose. Comparing equal-shaped square matrices can conceal this orientation error, which is why the worksheet uses a rectangular example.
+For row input x=[1, 2] and W=[[1, 2, 3], [4, 5, 6]], x*W=[9, 12, 15]. A Keras Dense kernel for this map has shape [2, 3]. PyTorch Linear stores its weight as[out_features, in_features], so the same map uses W transposed with shape [3, 2], because its forward operation multiplies by the stored weight's transpose. Comparing equal-shaped square matrices can conceal this orientation error, which is why the worksheet uses a rectangular example.
 
 A meaningful parity experiment explicitly assigns weights and biases, fixes dtype, uses the same epsilon and reduction rules, and selects equivalent training/evaluation modes. Matching a seed across two frameworks does not assign identical parameter arrays, since initialization algorithms and random streams can differ. Equal layer names are also insufficient when defaults, layouts or state updates differ.
 
@@ -467,7 +467,7 @@ Functional SDPA applies the dropout probability passed to the function. A surrou
 
 The three questions cover shape, color and an astronomy question with missing evidence. The candidate correctness records give the tiny candidate 1/3, count candidate 0/3 and retrieval candidate 3/3, with the last retrieval success meaning correct abstention. These are hand-authored saved decision records used to demonstrate comparison logic. They are not answers newly generated by the model in this program and must not be reported as measured benchmark quality for a trained system.
 
-The program separately initializes a small decoder and runs a full forward pass and three incremental cached passes on tokens[2, 5, 7]. Their logits must agree within the stated tolerance. This is an actual numerical mechanism check with an untrained random model. It establishes neither subject knowledge nor the correctness of the hand-authored answer ledger. The elapsed time includes those particular calls and Python orchestration; it is not a general generation-throughput benchmark.
+The program separately initializes a small decoder and runs a full forward pass and three incremental cached passes on tokens [2, 5, 7]. Their logits must agree within the stated tolerance. This is an actual numerical mechanism check with an untrained random model. It establishes neither subject knowledge nor the correctness of the hand-authored answer ledger. The elapsed time includes those particular calls and Python orchestration; it is not a general generation-throughput benchmark.
 
 | Artifact in this exercise | What it supports | What it does not establish |
 | --- | --- | --- |
@@ -502,71 +502,5 @@ DIAGNOSIS_NOTES.update(
 
 
 def apply_prose_review(specs):
-    """Repair prose spelling without touching imports, helpers or exercise code."""
-    import re
-
-    replacements = {
-        "parametersP, tokensD, stepsS, computeC": "parameter count P, unique corpus tokens D, optimizer steps S, relative compute C",
-        "lossL": "loss L",
-        "andcontent_hash": "and content_hash",
-        "with-100": "with -100",
-        "shaped8x8": "shaped 8x8",
-        "A8x2": "A 8x2",
-        "andB2x8": "and B 2x8",
-        "has 32": "has 32",
-        "with 64": "with 64",
-        "InitializingB": "Initializing B",
-        "ofA": "of A",
-        "byB": "by B",
-        "whileB": "while B",
-        "throughA": "through A",
-        "andB": "and B",
-        "withW": "with W",
-        "as(out, in)": "as (out, in)",
-        "values-127": "values -127",
-        "toint8": "to int8",
-        "retaink": "retain k",
-        "from(request": "from (request",
-        "anddocument_id": "and document_id",
-        "asX@W": "as X@W",
-        "appliesX@W.T": "applies X@W.T",
-        "uses1": "uses 1",
-        "orTrue": "or True",
-        "supply0": "supply 0",
-        "asTrue": "as True",
-        "OnlyTrue": "Only True",
-        "orNone": "or None",
-        "held-out": "held-out",
-        "whereq3correct": "where q3 correct",
-        "scores1/3": "scores 1/3",
-        "on2, 5, 7": "on 2, 5, 7",
-        "within1e-6": "within 1e-6",
-        "below50000": "below 50000",
-        "two64-character": "two 64-character",
-        "cap4": "cap 4",
-        "mechanismTrue": "mechanism True",
-        "trust-boundaryTrue": "trust-boundary True",
-        "evidenceNone": "evidence None",
-        "gateFalse": "gate False",
-        "decisionno-go": "decision no-go",
-        "theno-go": "the no-go",
-        "namesq3": "names q3",
-        "unsupportedanswer": "unsupported answer",
-    }
-
-    def clean(value):
-        for old, new in replacements.items():
-            value = value.replace(old, new)
-        return re.sub(r", (?=[A-Za-z])", ", ", value)
-
-    for number in range(29, 43):
-        spec = specs[f"llm-{number:03}"]
-        for field in ["mental", "anatomy"]:
-            spec[field] = clean(spec[field])
-        spec["terms"] = [(clean(term), clean(definition)) for term, definition in spec["terms"]]
-        for exercise in spec["exercises"]:
-            for field in ["title", "prompt", "expected", "why"]:
-                exercise[field] = clean(exercise[field])
-    specs["llm-042"]["mental"] = (
-        """This capstone implements a decision-report template using hand-authored candidate correctness records and a separate actual tiny-decoder parity probe. It does not generate or train the candidate answers whose scores appear in the ledger. The purpose is to learn which artifacts support a claim, how paired comparisons and required gates work, and why unknown or failed evidence can justify a no-go. A real language-system study must replace the illustrative records with actual frozen-question runs, answer artifacts and independent scoring. Keep task quality, numerical mechanism checks and resource observations separate throughout the review."""
-    )
+    """Retained for the build entry point; reviewed prose now lives in the specifications."""
+    return specs

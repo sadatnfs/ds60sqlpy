@@ -9,6 +9,22 @@ The executable reference contains the two complete worked cases with assertions.
 
 The source and staged counts should both increase by one. Keep the identifier unique and verify the new row separately.
 
+```python
+# Uses the tempfile import and the project(), invoke() and rows() helpers in main.py.
+with tempfile.TemporaryDirectory() as d:
+    p = project(
+        d,
+        models={
+            "orders": (
+                "select id::integer as id, amount::integer as amount from {{ ref('raw_orders') }}"
+            )
+        },
+        seeds={"raw_orders": "id,amount\n1,5\n2,7\n3,9\n4,3\n"},
+    )
+    invoke(p, "build")
+    assert rows(p, "select count(*), sum(amount) from orders") == [(4, 24)]
+```
+
 **Expected:** Accepted total becomes 24.
 
 ## 2. Add missing text
@@ -37,9 +53,27 @@ Use seeds for small controlled fixtures or mappings. Production ingestion needs 
 
 ## 6. Fail mandatory parsing
 
-Use strict failure when invalid input must block the product. Keep the failed evidence and do not mistake a stopped run for data that never arrived.
+Use strict failure when invalid input must block the product. A view builds without reading any rows, so the conversion error would appear only when someone queries it; materialize a table, or add a test that reads the rows, so the build itself fails. Keep the failed evidence and do not mistake a stopped run for data that never arrived.
 
-**Expected:** The malformed fixture fails.
+```python
+# Uses the tempfile import and the project(), invoke() and rows() helpers in main.py.
+with tempfile.TemporaryDirectory() as d:
+    p = project(
+        d,
+        models={
+            "clean": (
+                "{{ config(materialized='table') }} "
+                "select id::integer as id, cast(amount as integer) as amount "
+                "from {{ ref('raw_orders') }}"
+            )
+        },
+        seeds={"raw_orders": "id,amount\n1,5\n2,bad\n3,9\n"},
+    )
+    # A view would build without reading rows; a table must convert every row.
+    invoke(p, "build", succeeds=False)
+```
+
+**Expected:** Materialized as a table, the malformed fixture fails the build.
 
 ## Complete reference
 
@@ -156,9 +190,9 @@ def example_two():
             d,
             models={
                 "clean": (
-                    "select id::integer as id, try_cast(amount as integer) as "
-                    "amount from {{ ref('raw_orders') }} where try_cast(amount "
-                    "as integer) is not null"
+                    "select id::integer as id, try_cast(amount as integer) as amount\n"
+                    "from {{ ref('raw_orders') }}\n"
+                    "where try_cast(amount as integer) is not null"
                 )
             },
             seeds={"raw_orders": "id,amount\n1,5\n2,bad\n3,9\n"},
@@ -184,4 +218,4 @@ if __name__ == "__main__":
 
 ## Interpretation
 
-Create a staging boundary with complete record accounting. State which invalid inputs block publication and which are quarantined, then test both paths using identified records. The same contract will later protect model features from silent data changes.
+State which invalid inputs block publication and which are quarantined, then test both paths using identified records. The same contract will later protect model features from silent data changes.

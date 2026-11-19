@@ -15,6 +15,27 @@ The total is not the mean of 0.1 and 0.5 because group trial counts differ. The 
 
 Return null or reject it with a reason; do not silently assign rate 0, which would claim observed failures.
 
+```python
+import polars as pl
+
+frame = pl.DataFrame(
+    {"group": ["A", "A", "B", "C"], "successes": [1, 9, 1, 0], "trials": [1, 99, 2, 0]}
+)
+rates = (
+    frame.group_by("group")
+    .agg(pl.col("successes").sum(), pl.col("trials").sum())
+    .with_columns(
+        pl.when(pl.col("trials") > 0)
+        .then(pl.col("successes") / pl.col("trials"))
+        .otherwise(None)
+        .alias("rate")
+    )
+    .sort("group")
+)
+# Policy: a group with no trials has an undefined rate (null), not 0 and not NaN.
+assert rates["rate"].to_list() == [0.1, 0.5, None]
+```
+
 **Expected:** The output follows an explicit undefined-rate policy.
 
 ## 3. Change the estimand
@@ -100,4 +121,4 @@ if __name__ == "__main__":
 
 ## Interpretation
 
-Build an aggregate whose numerator, denominator and weighting unit are explicit. Reconcile the totals independently with Python arithmetic, retain coverage counts, and then decide whether the result supports the intended comparison. Apply the same discipline to conversion rates, average losses and model-quality dashboards.
+Reconcile the totals independently with Python arithmetic, retain coverage counts, and then decide whether the result supports the intended comparison. Apply the same discipline to conversion rates, average losses and model-quality dashboards.

@@ -21,7 +21,7 @@ The second program forces a capacity increase with reserve(capacity()+1) after a
 
 begin and end define a half-open range. begin names the first element when one exists; end names the position after the last and must not be dereferenced. Empty vectors have begin==end, so algorithms can handle them without a special invalid first-element access. Sorting rearranges values within the range. It preserves multiplicity: the two threes remain two elements. Copying original before sorting gives a separate owner, so the original order remains available for comparison.
 
-accumulate uses its initial value both as the starting total and to determine the accumulator type. Starting with 0LL selects long long and the additive identity. Starting with 10LL adds an unwanted ten even though the element traversal is otherwise correct. Starting with int0 can introduce a narrower intermediate accumulator for large values. A wider accumulator reduces some overflow risks but is not an unlimited arithmetic guarantee.
+accumulate uses its initial value both as the starting total and to determine the accumulator type. Starting with 0LL selects long long and the additive identity. Starting with 10LL adds an unwanted ten even though the element traversal is otherwise correct. Starting with int 0 can introduce a narrower intermediate accumulator for large values. A wider accumulator reduces some overflow risks but is not an unlimited arithmetic guarantee.
 
 The sort/unique/erase idiom has separate contracts. sort brings equal values together. unique rearranges a retained prefix and returns its logical end; it does not shrink the vector. erase removes the tail and changes size. Code that prints the whole vector after unique but before erase can show unspecified leftover tail values and mistakenly believe deduplication failed. Inspect the retained range and final size, not just one displayed element.
 
@@ -58,7 +58,7 @@ Sort [3, 1, 3, 0] on paper.
 
 **Reasoning:** Ordering does not remove multiplicity.
 
-**Verify:** Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.
+**Verify:** Compare your paper result with the `sorted:` line printed by Worked example 1, element by element, and confirm the duplicate 3 appears twice.
 
 ## Exercise 2: Preserve evidence
 
@@ -68,7 +68,7 @@ Sort a copy and compare the original.
 
 **Reasoning:** Copying creates a separately owned buffer.
 
-**Verify:** Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.
+**Verify:** Assert `original == std::vector<int>{3, 1, 3, 0}` after sorting the copy, and assert `std::ranges::is_sorted(copy)`.
 
 ## Exercise 3: Count a boundary
 
@@ -78,7 +78,7 @@ Use count_if to count >=3.
 
 **Reasoning:** Both equal-valued rows count.
 
-**Verify:** Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.
+**Verify:** Assert the `std::count_if` result with the predicate `x >= 3` is 2 on `{3, 1, 3, 0}`; changing the predicate to `x > 3` must give 0.
 
 ## Exercise 4: Repair a wrong total
 
@@ -88,7 +88,7 @@ Replace accumulate start 0LL with 10LL, then repair.
 
 **Reasoning:** The initial value participates in the fold.
 
-**Verify:** Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.
+**Verify:** Run the scratch copy and confirm it prints `sum=17`, exactly 10 more than the data; after restoring `0LL` the `sum=7` line must return.
 
 ## Exercise 5: Check an empty vector
 
@@ -98,7 +98,7 @@ Sort, count and sum an empty vector.
 
 **Reasoning:** Algorithms accept an empty half-open range.
 
-**Verify:** Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.
+**Verify:** Assert `xs.size() == 0`, a count of 0 and `std::accumulate(xs.begin(), xs.end(), 0LL) == 0` in one program, with no `front()` or `[0]` call.
 
 ## Exercise 6: Transfer to ordered unique values
 
@@ -108,4 +108,4 @@ Sort [3, 1, 3, 0], then erase the unique tail.
 
 **Reasoning:** unique moves survivors but erase actually changes vector size.
 
-**Verify:** Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.
+**Verify:** Assert `xs == std::vector<int>{0, 1, 3}` after `xs.erase(std::unique(xs.begin(), xs.end()), xs.end())`; run `std::unique` once without sorting to see the non-adjacent 3 survive.

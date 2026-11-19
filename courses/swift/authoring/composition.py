@@ -356,7 +356,7 @@ lesson(
     "Testing behavior with the prepared package",
     """A meaningful test rejects a plausible wrong implementation. Examples should include independently derived expected values, boundaries and a known misconception. Properties such as idempotence can cover a wider family, but they complement concrete expected cases rather than replacing them.
 
-The pad uses precondition for dependency-free executable checks. The JourneyCore package includes XCTest tests available with the prepared Swift toolchain. Swift Testing is another modern test framework and its macro-based API has a distinct project/toolchain requirement. Keep whichever test surface is actually prepared explicit. Unit tests do not prove UI interaction, signing or remote service availability.""",
+The pad uses precondition for dependency-free executable checks. The JourneyCore package includes XCTest tests available with the prepared Swift toolchain. Swift Testing (import Testing, @Test, #expect) also ships with Swift 6 toolchains, including the Linux toolchain used here, and swift test runs it alongside XCTest without an extra package dependency. This fixture keeps XCTest so its existing tests stay unchanged. Keep whichever test surface is actually prepared explicit. Unit tests do not prove UI interaction, signing or remote service availability.""",
     "Table-driven checks separate input fixtures from execution. XCTest test methods use XCTAssertEqual and XCTAssertThrowsError in the package. Async tests should await owned work rather than sleep and guess.",
     [
         ("Oracle", "An independent rule deciding correct behavior."),

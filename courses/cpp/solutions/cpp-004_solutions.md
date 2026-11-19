@@ -13,7 +13,7 @@ Trace [4, -2, 0, 6] as four transitions. Starting total 0 becomes 4 after the fi
 <!-- depth:start -->
 ## State, boundaries and loop progress
 
-A loop has three questions: what state is carried, which element is visited next, and why does the process terminate? In nonnegative_sum, the carried state is total. Immediately before each iteration, total equals the sum of the nonnegative values in the already visited prefix. Initially that prefix is empty, so zero is the correct state. After processing4 the prefix sum is 4; after -2 it stays4; after 0 it stays4; after 6 it becomes10. This is an invariant, not merely a description of one lucky output.
+A loop has three questions: what state is carried, which element is visited next, and why does the process terminate? In nonnegative_sum, the carried state is total. Immediately before each iteration, total equals the sum of the nonnegative values in the already visited prefix. Initially that prefix is empty, so zero is the correct state. After processing 4 the prefix sum is 4; after -2 it stays 4; after 0 it stays 4; after 6 it becomes 10. This is an invariant, not merely a description of one lucky output.
 
 The range-for declaration `int x : xs` copies the current integer into x. Changing x would not change the vector element. The body executes once per element and never for an empty vector. No special empty-case index is needed because the traversal contract already handles zero elements. An index loop requires more care: for a vector of size n, valid indices are 0 through n-1, while n is the past-the-end position. Using <=size instead of <size creates an invalid access on the final iteration.
 
@@ -52,7 +52,7 @@ Trace [4, -2, 0, 6] with a row for each input.
 
 **Reasoning:** Only the negative value is excluded.
 
-**Verify:** Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.
+**Verify:** Add a temporary print of `x` and `total` inside the loop of Worked example 1: it must print exactly four lines, and the last total must equal the asserted 10.
 
 ## Exercise 2: Change the threshold
 
@@ -62,7 +62,7 @@ Count retained values for >=0 and >0 on [4, -2, 0, 6].
 
 **Reasoning:** A sum can hide a zero-boundary error.
 
-**Verify:** Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.
+**Verify:** Assert both counts (3 and 2) and both sums (10) in one program; only the element 0 changes classification between the two predicates.
 
 ## Exercise 3: Construct a bounded loop
 
@@ -72,7 +72,7 @@ Sum integers 1 through 4 with an index loop.
 
 **Reasoning:** Use i<=4 or an equivalent half-open range.
 
-**Verify:** Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.
+**Verify:** Keep a separate iteration counter and assert `counter == 4 && sum == 10`, then confirm the condition is `i <= 4` when `i` starts at 1.
 
 ## Exercise 4: Repair a reset
 
@@ -82,7 +82,7 @@ Move total=0 into the loop, predict, then repair the scratch copy.
 
 **Reasoning:** Initialization inside the loop forgets earlier state.
 
-**Verify:** Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.
+**Verify:** Run the broken scratch copy and confirm it returns 6, the last element alone; after moving `total = 0` back above the loop, assert the result is 10 again.
 
 ## Exercise 5: Test the empty boundary
 
@@ -92,7 +92,7 @@ Run empty and all-negative vectors.
 
 **Reasoning:** The invariant starts valid before any iteration.
 
-**Verify:** Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.
+**Verify:** Assert `nonnegative_sum({}) == 0` and `nonnegative_sum({-1, -5}) == 0` in one program; the empty case must not index the vector.
 
 ## Exercise 6: Transfer the predicate
 
@@ -102,4 +102,4 @@ Keep readings in [0, 5] from [-1, 0, 4, 5, 6].
 
 **Reasoning:** Use conjunction with both inclusive boundaries.
 
-**Verify:** Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.
+**Verify:** Assert the kept values equal `std::vector<int>{0, 4, 5}` and their total is 9; both boundary values 0 and 5 stay while -1 and 6 are dropped.

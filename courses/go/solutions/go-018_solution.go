@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"io/fs"
+	"os"
 	"testing/fstest"
 )
 
@@ -54,13 +55,19 @@ func main() {
 		check(err == nil && len(v) == 0, "empty file")
 	}
 
-	// Transfer a subtree boundary
+	// Transfer confinement to a real directory with os.Root
 	{
-		files := fstest.MapFS{"data/item.txt": &fstest.MapFile{Data: []byte("7")}}
-		sub, err := fs.Sub(files, "data")
-		check(err == nil, "sub root")
-		v, err := fs.ReadFile(sub, "item.txt")
-		check(err == nil && string(v) == "7", "sub read")
+		dir, err := os.MkdirTemp("", "lesson-root-")
+		check(err == nil, "owned directory")
+		defer os.RemoveAll(dir)
+		root, err := os.OpenRoot(dir)
+		check(err == nil, "open root")
+		defer root.Close()
+		file, err := root.Create("item.txt")
+		check(err == nil, "create inside")
+		check(file.Close() == nil, "close")
+		_, err = root.Open("../outside.txt")
+		check(err != nil, "escape rejected")
 	}
 	fmt.Println("All lesson checks passed.")
 }

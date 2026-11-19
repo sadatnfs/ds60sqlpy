@@ -15,7 +15,7 @@ Treat the result as a tagged choice. For 0, the active alternative is int and th
 
 An operation can fail without producing a valid result. The interface must make that distinction visible. optional<T> represents either a value or absence, but carries no detailed error by itself. variant<int, ParseError> can represent a successful integer or a structured reason. An exception transfers control to a matching handler and can unwind intermediate scopes. These choices express different contracts rather than one universally best error style.
 
-The positive function accepts zero because nonnegative includes the boundary. Its success alternative contains int0. The failure alternative for -1 contains ParseError with reason negative. holds_alternative checks which type is active before the caller extracts a value. Treating the variant as though it always held int would lose the error path; using get on the wrong alternative can itself throw bad_variant_access.
+The positive function accepts zero because nonnegative includes the boundary. Its success alternative contains int 0. The failure alternative for -1 contains ParseError with reason negative. holds_alternative checks which type is active before the caller extracts a value. Treating the variant as though it always held int would lose the error path; using get on the wrong alternative can itself throw bad_variant_access.
 
 Error context should explain the input boundary without exposing unnecessary data. A parser might retain row number and a reason code while avoiding a complete sensitive record. A small structured error also supports exact tests and programmatic handling more reliably than matching a long free-form sentence. The teaching reason string is deliberately simple, not a complete production diagnostic schema.
 
@@ -54,7 +54,7 @@ Evaluate positive for 0, 5, -1.
 
 **Reasoning:** Error state is encoded independently of numeric value.
 
-**Verify:** Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.
+**Verify:** Assert `std::get<int>(positive(0)) == 0`, `std::get<int>(positive(5)) == 5` and `std::holds_alternative<ParseError>(positive(-1))`; zero is a success, not an error.
 
 ## Exercise 2: Write an observer
 
@@ -64,7 +64,7 @@ Use get_if to print value or reason without throwing.
 
 **Reasoning:** Check the active variant before accessing it.
 
-**Verify:** Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.
+**Verify:** Run 0, 5 and -1 through one `std::get_if` branch each and confirm three printed lines, with -1 showing `negative` and no exception escaping.
 
 ## Exercise 3: Preserve a missing value
 
@@ -74,7 +74,7 @@ Distinguish optional<int>{0} from nullopt.
 
 **Reasoning:** get_or_else-style defaults can erase missingness.
 
-**Verify:** Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.
+**Verify:** Assert `std::optional<int>{0}.has_value()` and `!std::optional<int>{}.has_value()`; comparing contained values alone would hide the difference.
 
 ## Exercise 4: Repair bad access
 
@@ -84,7 +84,7 @@ Call get<int> on the error in a scratch copy.
 
 **Reasoning:** A wrong alternative is a program logic error.
 
-**Verify:** Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.
+**Verify:** Wrap `std::get<int>(positive(-1))` in `try`/`catch` and assert `std::bad_variant_access` is caught; after switching to `std::get_if` or `std::visit`, no exception is possible.
 
 ## Exercise 5: Choose a boundary
 
@@ -94,7 +94,7 @@ Explain why a missing required file is fatal while one bad row can be recorded.
 
 **Reasoning:** The caller needs enough context to choose recovery.
 
-**Verify:** Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.
+**Verify:** Check that your explanation stops the whole run with a nonzero status for the missing file but records the bad row and continues with the next one.
 
 ## Exercise 6: Transfer richer reasons
 
@@ -104,4 +104,4 @@ Add too_large for values above 100.
 
 **Reasoning:** Named reasons preserve the failure taxonomy.
 
-**Verify:** Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.
+**Verify:** Assert the reasons for 101 and -1 are `too_large` and `negative`, and that `std::get<int>(positive(100)) == 100`; 100 is the inclusive boundary.

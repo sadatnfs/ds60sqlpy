@@ -16,9 +16,9 @@
         "Linker",
         "Assertion"
       ],
-      "outcome": "Explain and implement source, compilation, linking and checked execution.",
-      "lab": "Store 2 plus 3 in an int.",
-      "verification": "The stored value is 5. The checked amount is 24."
+      "outcome": "Compile, link and run a one-file C17 program whose checks fail loudly instead of printing an unchecked result.",
+      "lab": "Start at 1, increment, then multiply by 3.",
+      "verification": "The result is 6."
     },
     {
       "id": "c-002",
@@ -34,9 +34,9 @@
         "Unsigned modular arithmetic",
         "Undefined behavior"
       ],
-      "outcome": "Explain and implement integer ranges, signedness and floating approximation.",
-      "lab": "Compute 7/2 and 7/2.0.",
-      "verification": "The results are 3 and 3.5. The quotient is -3 and remainder -1."
+      "outcome": "Predict integer division, unsigned wraparound and floating rounding, and widen before a multiplication can overflow.",
+      "lab": "Check sizeof(char) and minimum CHAR_BIT.",
+      "verification": "A char occupies one char unit and has at least eight bits."
     },
     {
       "id": "c-003",
@@ -50,11 +50,12 @@
       "concepts": [
         "Precedence",
         "Sequencing",
+        "Integer promotion",
         "Usual arithmetic conversions"
       ],
-      "outcome": "Explain and implement expressions, conversions and sequencing.",
-      "lab": "Compare 2+3*4 with (2+3)*4.",
-      "verification": "The values are 14 and 20. The assignment changes the variable and equality tests it."
+      "outcome": "Predict grouping, short-circuit evaluation, integer promotion and signed-unsigned conversions before running an expression.",
+      "lab": "Increment x and then calculate twice its updated value.",
+      "verification": "x is 2 and the result is 4."
     },
     {
       "id": "c-004",
@@ -70,9 +71,9 @@
         "Half-open range",
         "Fallthrough"
       ],
-      "outcome": "Explain and implement branches, loops and invariants.",
-      "lab": "Sum 2, 4 and 6 with a length-bounded loop.",
-      "verification": "The result is 12. The reversed number is 321."
+      "outcome": "Write branches and loops with explicit invariants that handle zero iterations, exact thresholds and safe reverse traversal.",
+      "lab": "Search 3, 8, 8 and stop on the first 8.",
+      "verification": "The index is 1."
     },
     {
       "id": "c-005",
@@ -88,9 +89,9 @@
         "Output parameter",
         "Failure atomicity"
       ],
-      "outcome": "Explain and implement functions, prototypes and output parameters.",
-      "lab": "Evaluate twice for 7 and 0.",
-      "verification": "The results are 14 and 0. The operation rejects it and preserves output."
+      "outcome": "Declare prototypes and use output parameters that are written only on success and validated before use.",
+      "lab": "Request area with width zero.",
+      "verification": "The call fails and output remains -1."
     },
     {
       "id": "c-006",
@@ -106,9 +107,9 @@
         "Array-to-pointer conversion",
         "Logical length"
       ],
-      "outcome": "Explain and implement arrays, bounds and element counts.",
-      "lab": "Create a three-element array and calculate its count with sizeof.",
-      "verification": "The count is 3. The original first element remains 1."
+      "outcome": "Pass arrays with an explicit element count and keep every access inside the logical length.",
+      "lab": "Initialize only the first element of a three-element array.",
+      "verification": "The remaining two elements are zero."
     },
     {
       "id": "c-007",
@@ -124,9 +125,9 @@
         "Capacity",
         "Truncation"
       ],
-      "outcome": "Explain and implement strings, null terminators and output capacities.",
-      "lab": "Create the writable string cat.",
-      "verification": "strlen is 3 while array size is 4. Its string length is zero."
+      "outcome": "Manage strings with explicit capacity, detect truncation from snprintf's return value and compare content with strcmp.",
+      "lab": "Format hello into a four-character buffer.",
+      "verification": "The required length is 5 and stored text is hel."
     },
     {
       "id": "c-008",
@@ -142,9 +143,9 @@
         "Dereference",
         "Lifetime"
       ],
-      "outcome": "Explain and implement pointers, addresses and explicit mutation.",
-      "lab": "Increment integer 4 through its address.",
-      "verification": "The caller value becomes 5. The values exchange positions."
+      "outcome": "Use pointers to read or update a caller-owned object and reject a null target before dereferencing it.",
+      "lab": "Pass NULL to an optional update helper.",
+      "verification": "The helper returns false without an access."
     },
     {
       "id": "c-009",
@@ -160,9 +161,9 @@
         "Pointer difference",
         "Borrowed view"
       ],
-      "outcome": "Explain and implement pointer arithmetic and bounded array views.",
-      "lab": "Read the second element through both forms.",
-      "verification": "Both yield 4. The corresponding original element changes."
+      "outcome": "Traverse and slice arrays with pointer arithmetic while keeping one-past-the-end pointers undereferenced.",
+      "lab": "Sum through a begin/end pointer loop.",
+      "verification": "The result is 12."
     },
     {
       "id": "c-010",
@@ -178,9 +179,9 @@
         "Discriminator",
         "Padding"
       ],
-      "outcome": "Explain and implement structs, enums and tagged domain values.",
-      "lab": "Construct Point with x 2 and y 3.",
-      "verification": "The field sum is 5. The validator rejects it."
+      "outcome": "Model domain values with structs, enums and tagged unions, and reject an invalid tag instead of guessing.",
+      "lab": "Create a tagged number with an integer payload.",
+      "verification": "The checked payload is 7."
     },
     {
       "id": "c-011",
@@ -196,9 +197,9 @@
         "Storage duration",
         "Reentrancy"
       ],
-      "outcome": "Explain and implement scope, storage duration and object lifetime.",
-      "lab": "Declare an outer value 3 and a separate inner value 7.",
-      "verification": "After the inner block, the outer remains 3. The result is the defined zero identity."
+      "outcome": "Distinguish scope from storage duration and return only addresses whose objects outlive the call.",
+      "lab": "Get a pointer to a static read-only value.",
+      "verification": "The target remains valid and equals 7."
     },
     {
       "id": "c-012",
@@ -214,9 +215,9 @@
         "Const pointer",
         "Deep immutability"
       ],
-      "outcome": "Explain and implement const-correct views and mutation boundaries.",
-      "lab": "Observe a mutable integer through const int pointer.",
-      "verification": "The read yields 4. The snapshot remains 2 while the view reads 5."
+      "outcome": "Use const-qualified views to state which functions may mutate data, and explain what const does not guarantee.",
+      "lab": "Create an int pointer that cannot be reassigned, then update its target.",
+      "verification": "The target becomes 8."
     },
     {
       "id": "c-013",
@@ -232,9 +233,9 @@
         "Repeated evaluation",
         "Compile-time assertion"
       ],
-      "outcome": "Explain and implement preprocessing, macros and compile-time contracts.",
-      "lab": "Square the side-effect-free expression 2+3.",
-      "verification": "The result is 25. The results are 0 and 9."
+      "outcome": "Write safe parenthesized macros, prefer typed functions for side effects and enforce assumptions with _Static_assert.",
+      "lab": "Check the language-required char size at translation time.",
+      "verification": "Compilation accepts the true static assertion."
     },
     {
       "id": "c-014",
@@ -250,9 +251,9 @@
         "Range error",
         "Whole-string contract"
       ],
-      "outcome": "Explain and implement parsing numbers with complete error evidence.",
-      "lab": "Parse 42 into an output integer.",
-      "verification": "Success is true and output is 42. Leading whitespace is accepted; trailing whitespace is rejected."
+      "outcome": "Parse integers with strtol and reject empty input, trailing characters and out-of-range values using errno and the end pointer.",
+      "lab": "Parse an empty string.",
+      "verification": "No numeric value is accepted."
     },
     {
       "id": "c-015",
@@ -268,9 +269,9 @@
         "Dangling pointer",
         "Size overflow"
       ],
-      "outcome": "Explain and implement dynamic allocation and single-owner release.",
-      "lab": "Allocate three ints, assign 2, 4, 6 and sum them.",
-      "verification": "The sum is 12 before release. The owner records absence afterward."
+      "outcome": "Allocate with a checked size calculation, initialize the memory and release it exactly once on every path.",
+      "lab": "Request zero elements through the helper.",
+      "verification": "The helper returns NULL without an allocation."
     },
     {
       "id": "c-016",
@@ -286,9 +287,9 @@
         "Capacity",
         "Reallocation"
       ],
-      "outcome": "Explain and implement reallocation and a checked dynamic vector.",
-      "lab": "Push 3 and 5 into a zero-initialized vector.",
-      "verification": "Length is 2 and values are retained. The original value and length remain intact."
+      "outcome": "Implement a growable vector whose reallocation preserves contents and leaves the vector unchanged when growth fails.",
+      "lab": "Push twenty sequential values.",
+      "verification": "Every stored value matches its index."
     },
     {
       "id": "c-017",
@@ -304,9 +305,9 @@
         "Owned result",
         "Clone"
       ],
-      "outcome": "Explain and implement ownership apis, borrowing and independent clones.",
-      "lab": "Create an owner for alpha.",
-      "verification": "Length is 5 and content is alpha. Only the destination retains the allocation."
+      "outcome": "Design owning and borrowing APIs, clone independent storage and make cleanup safe to call twice.",
+      "lab": "Read through a const pointer borrowed from an owner.",
+      "verification": "The borrowed content is ready."
     },
     {
       "id": "c-018",
@@ -322,9 +323,9 @@
         "Short read",
         "EOF indicator"
       ],
-      "outcome": "Explain and implement file streams, short operations and reliable closure.",
-      "lab": "Write abc, rewind and read three bytes.",
-      "verification": "Three bytes return and match abc. All three bytes survive, including the middle zero."
+      "outcome": "Read and write files with stdio while handling short reads, end-of-file and close errors explicitly.",
+      "lab": "Inspect an empty stream before and after a read.",
+      "verification": "EOF is false before the read and true afterward."
     },
     {
       "id": "c-019",
@@ -340,9 +341,9 @@
         "Wire format",
         "Alignment"
       ],
-      "outcome": "Explain and implement binary formats, byte order and representation boundaries.",
-      "lab": "Encode 0x12345678 in big-endian order.",
-      "verification": "The bytes are 12, 34, 56, 78 in hexadecimal. Version 1 and payload 7 are interpreted separately."
+      "outcome": "Encode and decode fixed-width big-endian integers with explicit length checks and promotion-safe shifts.",
+      "lab": "Attempt to decode only three available bytes.",
+      "verification": "The decoder fails and preserves output."
     },
     {
       "id": "c-020",
@@ -358,9 +359,9 @@
         "Callback contract",
         "Comparator"
       ],
-      "outcome": "Explain and implement function pointers, callbacks and comparator contracts.",
-      "lab": "Assign a doubling function and call it with 4.",
-      "verification": "The result is 8. The result is zero and no element is accessed."
+      "outcome": "Pass function pointers as callbacks and write a qsort comparator that is correct for extreme values and ties.",
+      "lab": "Compare INT_MIN and INT_MAX.",
+      "verification": "The result correctly reports the first is smaller."
     },
     {
       "id": "c-021",
@@ -376,9 +377,9 @@
         "Head pointer",
         "Mutation invariant"
       ],
-      "outcome": "Explain and implement linked lists and mutation-safe traversal.",
-      "lab": "Push 1 and then 2.",
-      "verification": "The list order is 2 then 1. Its original order is restored."
+      "outcome": "Build, count and reverse a singly linked list in place without losing or leaking nodes.",
+      "lab": "Measure and destroy a null head.",
+      "verification": "Length is zero and head stays NULL."
     },
     {
       "id": "c-022",
@@ -394,9 +395,9 @@
         "LIFO",
         "Ring buffer"
       ],
-      "outcome": "Explain and implement stacks, queues and ring-buffer invariants.",
-      "lab": "Enqueue 2 then 5 and dequeue twice.",
-      "verification": "The values arrive as 2 then 5. The popped value is 5."
+      "outcome": "Implement a ring buffer that rejects reads when empty and writes when full while reusing storage in FIFO order.",
+      "lab": "Fill four slots and attempt a fifth insertion.",
+      "verification": "The fifth fails and occupancy stays four."
     },
     {
       "id": "c-023",
@@ -412,9 +413,9 @@
         "Probe sequence",
         "Load factor"
       ],
-      "outcome": "Explain and implement hash tables, collisions and explicit occupancy.",
-      "lab": "Store key 1 with value 7.",
-      "verification": "Lookup succeeds with 7. Replacement still succeeds."
+      "outcome": "Implement an open-addressing hash table that resolves collisions and distinguishes an absent key from a stored zero.",
+      "lab": "Write key 2 twice with different values.",
+      "verification": "The latest value is 8."
     },
     {
       "id": "c-024",
@@ -430,9 +431,9 @@
         "Search invariant",
         "Asymptotic growth"
       ],
-      "outcome": "Explain and implement sorting, binary search and complexity evidence.",
-      "lab": "Search 2, 4, 6, 8 for target 5.",
-      "verification": "The lower-bound index is 2. The guarded membership test succeeds."
+      "outcome": "Implement a lower-bound binary search that handles empty input, duplicates and the no-match boundary.",
+      "lab": "Search 2, 4, 6 for target 9.",
+      "verification": "The result is length 3."
     },
     {
       "id": "c-025",
@@ -448,9 +449,9 @@
         "Progress measure",
         "Depth budget"
       ],
-      "outcome": "Explain and implement recursion, trees and depth budgets.",
-      "lab": "Sum a root 2 with children 1 and 3.",
-      "verification": "The total is 6. Depth is 1 and sum is 7."
+      "outcome": "Traverse a binary tree recursively with an explicit depth budget and correct empty-tree behavior.",
+      "lab": "Measure the root and two children.",
+      "verification": "The depth is 2."
     },
     {
       "id": "c-026",
@@ -466,9 +467,9 @@
         "Failure-atomic append",
         "Overlap contract"
       ],
-      "outcome": "Explain and implement bounded string builders and failure-atomic appends.",
-      "lab": "Append red then space sky.",
-      "verification": "The result is red sky with length 7. The exact result is a,b,c."
+      "outcome": "Build a bounded string builder whose appends either succeed completely or leave the buffer unchanged.",
+      "lab": "Append fifteen characters to capacity sixteen.",
+      "verification": "The complete payload fits and remains terminated."
     },
     {
       "id": "c-027",
@@ -484,9 +485,9 @@
         "Test oracle",
         "Failure-path coverage"
       ],
-      "outcome": "Explain and implement testing, injected allocation failure and useful oracles.",
-      "lab": "Copy a tiny string using the working allocator.",
-      "verification": "The output owns an equal string. Red remains different from red."
+      "outcome": "Inject allocation failures into tests and assert that outputs and existing state survive every failure path.",
+      "lab": "Fail allocation while output points to a separate valid buffer.",
+      "verification": "The output pointer remains unchanged."
     },
     {
       "id": "c-028",
@@ -502,9 +503,9 @@
         "Definition",
         "Linkage"
       ],
-      "outcome": "Explain and implement headers, translation units and reproducible builds.",
-      "lab": "Use the stats_sum prototype before its definition.",
-      "verification": "Summing 2, 4, 6 returns 12. Both results equal 6."
+      "outcome": "Split a program into a header and translation units with one definition per symbol and reproducible behavior.",
+      "lab": "Call the same helper with two separate arrays.",
+      "verification": "The results are 3 and 7."
     },
     {
       "id": "c-029",
@@ -520,9 +521,9 @@
         "Object representation",
         "Strict aliasing"
       ],
-      "outcome": "Explain and implement undefined behavior, aliasing and object representation.",
-      "lab": "Copy a float into bytes and back into a float object.",
-      "verification": "The restored value is 1.5. All bytes match exactly."
+      "outcome": "Inspect object bytes with unsigned char and memcpy, and name the aliasing rule that a pointer cast would break.",
+      "lab": "Shift abc right by one within a buffer using memmove.",
+      "verification": "The buffer prefix becomes aabc."
     },
     {
       "id": "c-030",
@@ -538,9 +539,9 @@
         "Regression fixture",
         "Diagnostic evidence"
       ],
-      "outcome": "Explain and implement sanitizers, debugger evidence and safe regressions.",
-      "lab": "Use a checked accessor on the final valid index.",
-      "verification": "The value 6 is returned. Only zero is valid."
+      "outcome": "Turn a sanitizer finding into a bounds-checked regression test that runs safely without the original undefined behavior.",
+      "lab": "Request index zero from an empty logical view.",
+      "verification": "No access occurs."
     },
     {
       "id": "c-031",
@@ -556,9 +557,9 @@
         "Checked arithmetic",
         "Conversion boundary"
       ],
-      "outcome": "Explain and implement checked arithmetic and allocation-size contracts.",
-      "lab": "Add 7 and 5 through the checked helper.",
-      "verification": "The result is 12. The checked mathematical result is zero."
+      "outcome": "Check addition and multiplication for overflow before computing a value or an allocation size.",
+      "lab": "Add negative one to INT_MIN.",
+      "verification": "The operation fails without evaluating the overflow."
     },
     {
       "id": "c-032",
@@ -574,9 +575,9 @@
         "Element size",
         "Typed wrapper"
       ],
-      "outcome": "Explain and implement generic byte apis, alignment and element-size discipline.",
-      "lab": "Exchange two ints using their exact object size.",
-      "verification": "The values become 7 and 2. Both semantic fields match."
+      "outcome": "Write a generic byte-swap API that is parameterized by element size and respects alignment and zero-length calls.",
+      "lab": "Invoke the helper with size zero and valid object pointers.",
+      "verification": "Both objects remain unchanged."
     },
     {
       "id": "c-033",
@@ -592,9 +593,9 @@
         "Header size",
         "Contiguous ownership"
       ],
-      "outcome": "Explain and implement flexible array members and single-allocation records.",
-      "lab": "Create a packet containing bytes 1, 2, 3.",
-      "verification": "Length and all three bytes are retained. The owned packet retains its copied value."
+      "outcome": "Allocate a record with a flexible array member in one checked allocation and clone it without sharing storage.",
+      "lab": "Request SIZE_MAX payload bytes.",
+      "verification": "The operation returns NULL before allocation."
     },
     {
       "id": "c-034",
@@ -610,9 +611,9 @@
         "Pipe endpoint",
         "Descriptor ownership"
       ],
-      "outcome": "Explain and implement posix descriptors, pipes and explicit endpoint closure.",
-      "lab": "Write abc, close the writer and read the bytes.",
-      "verification": "Three bytes arrive unchanged. The tag is OK and one byte remains for the next read."
+      "outcome": "Move bytes through a POSIX pipe, observe end-of-file after every write end is closed, and account for duplicated descriptors.",
+      "lab": "Write four bytes and request two bytes at a time.",
+      "verification": "The pieces are ab and cd."
     },
     {
       "id": "c-035",
@@ -628,9 +629,9 @@
         "Async-signal safety",
         "sig_atomic_t"
       ],
-      "outcome": "Explain and implement signals, interruption and minimal handlers.",
-      "lab": "Install the lesson handler for SIGINT and restore the previous disposition.",
-      "verification": "Both operations succeed. Admission stops and unfinished work remains visible."
+      "outcome": "Install a minimal signal handler that only records a flag, and explain why -std=c17 builds must reinstall it after each delivery.",
+      "lab": "Raise SIGINT with the lesson handler installed and let a normal-flow function turn the recorded flag into a shutdown decision.",
+      "verification": "The decision is continue before the signal and stop after the handler records it."
     },
     {
       "id": "c-036",
@@ -646,9 +647,9 @@
         "Join",
         "Disjoint result storage"
       ],
-      "outcome": "Explain and implement posix threads and joined object lifetimes.",
-      "lab": "Start a thread squaring input 7 and join it.",
-      "verification": "The retained result is 49. The second input produces its own output 16."
+      "outcome": "Create POSIX threads with separate argument storage and join every thread before using its result.",
+      "lab": "Have the worker return its caller-owned argument pointer.",
+      "verification": "Join returns that same live object address."
     },
     {
       "id": "c-037",
@@ -664,9 +665,9 @@
         "Condition variable",
         "Spurious wakeup"
       ],
-      "outcome": "Explain and implement mutexes, condition variables and predicate loops.",
-      "lab": "Run four threads doing one hundred locked increments each.",
-      "verification": "The final count is 400. Both totals are 10."
+      "outcome": "Protect shared state with a mutex and wait on a condition variable inside a predicate loop.",
+      "lab": "Run two workers whose increment loops are empty.",
+      "verification": "The result remains zero."
     },
     {
       "id": "c-038",
@@ -682,9 +683,9 @@
         "Memory order",
         "Publication"
       ],
-      "outcome": "Explain and implement c11 atomics and release-acquire publication.",
-      "lab": "Add 3 to an atomic integer initially 2.",
-      "verification": "The returned old value is 2 and current value is 5. The old state is false and the new state true."
+      "outcome": "Use C11 atomics for counters and compare-and-exchange, and publish initialized data with release-acquire ordering.",
+      "lab": "Attempt replacement with stale expected value 2 when current is 3.",
+      "verification": "It fails and expected becomes 3."
     },
     {
       "id": "c-039",
@@ -700,9 +701,9 @@
         "Array of structs",
         "Struct of arrays"
       ],
-      "outcome": "Explain and implement data layout, locality and honest performance experiments.",
-      "lab": "Sum x fields from three Point records.",
-      "verification": "The result is 6. The total is 15 without a sixth access."
+      "outcome": "Compare row and column data layouts with an honest, repeatable experiment that keeps results identical.",
+      "lab": "Inspect x and y offsets in Point.",
+      "verification": "Offsets are within the struct and preserve declaration order."
     },
     {
       "id": "c-040",
@@ -718,9 +719,9 @@
         "Calling convention",
         "Allocator boundary"
       ],
-      "outcome": "Explain and implement c abi boundaries and foreign-function ownership.",
-      "lab": "Copy hello into sufficient caller storage through a status API.",
-      "verification": "The output is complete and required length is 5. The API succeeds and stores a terminator."
+      "outcome": "Design a C ABI function with caller-owned buffers, a size query and explicit insufficient-capacity errors.",
+      "lab": "Call with no output buffer and capacity zero.",
+      "verification": "The required payload length is still reported."
     },
     {
       "id": "c-041",
@@ -736,15 +737,15 @@
         "Parser state",
         "Staged output"
       ],
-      "outcome": "Explain and implement state-machine parsing and bounded input grammars.",
-      "lab": "Parse 1,20,3 into capacity three.",
-      "verification": "Three values are returned in order. Zero is valid; space-prefixed input is not."
+      "outcome": "Parse a bounded input grammar with an explicit state machine that rejects empty fields, trailing separators and overflow.",
+      "lab": "Parse 1,2,.",
+      "verification": "The parse fails."
     },
     {
       "id": "c-042",
       "title": "Capstone: a validated data pipeline with explicit ownership",
       "level": "advanced",
-      "minutes": 120,
+      "minutes": 180,
       "prerequisites": [
         "c-041"
       ],
@@ -754,9 +755,9 @@
         "Batch atomicity",
         "Operational evidence"
       ],
-      "outcome": "Explain and implement capstone: a validated data pipeline with explicit ownership.",
-      "lab": "Process alpha,3 and beta,4.",
-      "verification": "Two rows produce total 7. Only the corrected complete batch publishes total 8."
+      "outcome": "Build a validated record pipeline that commits a summary only when every record parses, so a malformed record never publishes a partial total.",
+      "lab": "Summarize zero records.",
+      "verification": "Rows and total are both zero."
     }
   ]
 }

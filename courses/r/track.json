@@ -19,7 +19,7 @@
       ],
       "outcome": "Run a self-contained calculation and distinguish printed output, saved source and a successful check.",
       "lab": "Construct a script for subtotal 20 plus fee 3.",
-      "verification": "Run explicit behavioral checks for the declared inputs; inspect types, shape, missingness, diagnostics and supported figures."
+      "verification": "Reproduce the worked observations: 18 saved_total 18; recalculated 24."
     },
     {
       "id": "r-002",
@@ -38,7 +38,7 @@
       ],
       "outcome": "Inspect numeric types and choose an equality check that matches the numerical contract.",
       "lab": "Check that 19 items form three groups of five with four left.",
-      "verification": "Run explicit behavioral checks for the declared inputs; inspect types, shape, missingness, diagnostics and supported figures."
+      "verification": "Reproduce the worked observations: integer and double. Approximately 0.3; three groups and two remaining."
     },
     {
       "id": "r-003",
@@ -57,7 +57,7 @@
       ],
       "outcome": "Write vectorized calculations while rejecting accidental recycling and unintended coercion.",
       "lab": "Write a guard allowing one fee or one fee per amount.",
-      "verification": "Run explicit behavioral checks for the declared inputs; inspect types, shape, missingness, diagnostics and supported figures."
+      "verification": "Reproduce the worked observations: 12, 22, 32. 11, 22, 31, 42; per-row lengths are invalid."
     },
     {
       "id": "r-004",
@@ -76,7 +76,7 @@
       ],
       "outcome": "Build explicit selection predicates and handle unknown values without turning them into false evidence.",
       "lab": "Construct a mask for known amounts from ten through twenty inclusive.",
-      "verification": "Run explicit behavioral checks for the declared inputs; inspect types, shape, missingness, diagnostics and supported figures."
+      "verification": "Reproduce the worked observations: FALSE, TRUE, FALSE, TRUE. FALSE; no empty-vector extraction error."
     },
     {
       "id": "r-005",
@@ -96,7 +96,7 @@
       ],
       "outcome": "Select and replace vector elements without confusing positions, exclusions and unknown masks.",
       "lab": "Select and update a validated named value.",
-      "verification": "Run explicit behavioral checks for the declared inputs; inspect types, shape, missingness, diagnostics and supported figures."
+      "verification": "Reproduce the worked observations: C 30, A 10, A 10. raw contains 10 and NA; known contains 10."
     },
     {
       "id": "r-006",
@@ -116,7 +116,7 @@
       ],
       "outcome": "Choose and test a missingness policy that preserves the distinction between absence, undefined arithmetic and zero.",
       "lab": "Construct a finite-only mask for c(2, Inf, NA,4).",
-      "verification": "Run explicit behavioral checks for the declared inputs; inspect types, shape, missingness, diagnostics and supported figures."
+      "verification": "Reproduce the worked observations: Only zero and four are finite. Observed count zero; reported sum NA."
     },
     {
       "id": "r-007",
@@ -136,7 +136,7 @@
       ],
       "outcome": "Explain why ordinary vector updates differ from mutations of reference objects and why attributes matter.",
       "lab": "Construct a two-column shape from four numbers.",
-      "verification": "Run explicit behavioral checks for the declared inputs; inspect types, shape, missingness, diagnostics and supported figures."
+      "verification": "Reproduce the worked observations: Original A is one; edited A is 99. 2."
     },
     {
       "id": "r-008",
@@ -157,7 +157,7 @@
       ],
       "outcome": "Construct and subset matrices while distinguishing elementwise arithmetic from a matrix product.",
       "lab": "Compute predictions for intercept two and slope three at x=3,4.",
-      "verification": "Run explicit behavioral checks for the declared inputs; inspect types, shape, missingness, diagnostics and supported figures."
+      "verification": "Reproduce the worked observations: 2,5,8 in a 3 by 1 matrix. Solution 3,2; residual below tolerance."
     },
     {
       "id": "r-009",
@@ -178,7 +178,7 @@
       ],
       "outcome": "Read and update nested records while preserving heterogeneous fields and validating required components.",
       "lab": "Validate required id and values fields.",
-      "verification": "Run explicit behavioral checks for the declared inputs; inspect types, shape, missingness, diagnostics and supported figures."
+      "verification": "Reproduce the worked observations: 2,4. Only id remains after deletion."
     },
     {
       "id": "r-010",
@@ -199,7 +199,7 @@
       ],
       "outcome": "Create a typed table, select records safely and verify its grain and key instead of relying on row positions.",
       "lab": "Validate a nonmissing unique ID column.",
-      "verification": "Run explicit behavioral checks for the declared inputs; inspect types, shape, missingness, diagnostics and supported figures."
+      "verification": "Reproduce the worked observations: A10, B20, C30. A one-row one-column data frame with amount 30."
     },
     {
       "id": "r-011",
@@ -220,7 +220,7 @@
       ],
       "outcome": "Implement bounded loops with explicit scalar conditions, empty-input behavior and predictable output shape.",
       "lab": "Construct a loop summing only positive values.",
-      "verification": "Run explicit behavioral checks for the declared inputs; inspect types, shape, missingness, diagnostics and supported figures."
+      "verification": "Reproduce the worked observations: 4,16,36. Three steps; remaining 2.5."
     },
     {
       "id": "r-012",
@@ -239,7 +239,7 @@
       ],
       "outcome": "Define reusable functions with validated inputs, explicit defaults and testable return values.",
       "lab": "Write a function returning count and total.",
-      "verification": "Run explicit behavioral checks for the declared inputs; inspect types, shape, missingness, diagnostics and supported figures."
+      "verification": "Reproduce the worked observations: 9,18. Count 2, total 6; empty count 0."
     },
     {
       "id": "r-013",
@@ -259,7 +259,7 @@
       ],
       "outcome": "Explain captured configuration and lazy argument timing without relying on hidden global state.",
       "lab": "Capture a threshold at construction time.",
-      "verification": "Run explicit behavioral checks for the declared inputs; inspect types, shape, missingness, diagnostics and supported figures."
+      "verification": "Reproduce the worked observations: 8 and 12. Lazy 15; fixed 6."
     },
     {
       "id": "r-014",
@@ -280,7 +280,7 @@
       ],
       "outcome": "Map a validated computation over records and retain predictable output types with readable data flow.",
       "lab": "Map count and mean into a list per group.",
-      "verification": "Run explicit behavioral checks for the declared inputs; inspect types, shape, missingness, diagnostics and supported figures."
+      "verification": "Reproduce the worked observations: Named totals A = 3 and B = 10. 1,2."
     },
     {
       "id": "r-015",
@@ -300,7 +300,7 @@
       ],
       "outcome": "Recover from expected input failures without concealing programming defects or dropping diagnostics.",
       "lab": "Return structured status, value and diagnostic fields.",
-      "verification": "Run explicit behavioral checks for the declared inputs; inspect types, shape, missingness, diagnostics and supported figures."
+      "verification": "Reproduce the worked observations: okFALSE with the digit-only diagnostic. Value 4 and one recorded notice."
     },
     {
       "id": "r-016",
@@ -321,7 +321,7 @@
       ],
       "outcome": "Normalize and parse small text records with explicit patterns while preserving identifiers and Unicode meaning.",
       "lab": "Split \"A|12\" on a literal pipe.",
-      "verification": "Run explicit behavioral checks for the declared inputs; inspect types, shape, missingness, diagnostics and supported figures."
+      "verification": "Reproduce the worked observations: Only 0017 is valid. Four characters and five bytes."
     },
     {
       "id": "r-017",
@@ -342,7 +342,7 @@
       ],
       "outcome": "Represent categories explicitly and avoid interpreting internal factor codes as measurements.",
       "lab": "Retain an unused C level in a table.",
-      "verification": "Run explicit behavioral checks for the declared inputs; inspect types, shape, missingness, diagnostics and supported figures."
+      "verification": "Reproduce the worked observations: Labels 10,20,10; codes 1,2,1. A2, B0, C0."
     },
     {
       "id": "r-018",
@@ -362,7 +362,7 @@
       ],
       "outcome": "Parse dates and timestamps with explicit formats and zones, distinguishing calendar labels from elapsed time.",
       "lab": "Parse an explicit ISO calendar date.",
-      "verification": "Run explicit behavioral checks for the declared inputs; inspect types, shape, missingness, diagnostics and supported figures."
+      "verification": "Reproduce the worked observations: February 28, February 29, March 1. 12:00 UTC and 07:00 NewYork; elapsed 90 minutes."
     },
     {
       "id": "r-019",
@@ -384,7 +384,7 @@
       ],
       "outcome": "Round-trip small local data through appropriate formats while verifying types, missingness and cleanup.",
       "lab": "Round-trip one trusted R object with attributes.",
-      "verification": "Run explicit behavioral checks for the declared inputs; inspect types, shape, missingness, diagnostics and supported figures."
+      "verification": "Reproduce the worked observations: IDs 001,002; second amountNA. JSONrecord and exact factor round trip."
     },
     {
       "id": "r-020",
@@ -406,7 +406,7 @@
       ],
       "outcome": "Reduce a defect to a small case and build behavioral checks that cover ordinary, boundary and rejected inputs.",
       "lab": "Add tests for mismatched lengths and zero total weight.",
-      "verification": "Run explicit behavioral checks for the declared inputs; inspect types, shape, missingness, diagnostics and supported figures."
+      "verification": "Reproduce the worked observations: 17.5 under both weight scales. The two vectors match exactly in this run."
     },
     {
       "id": "r-021",
@@ -428,7 +428,7 @@
       ],
       "outcome": "Build a validated S3 measurement value, dispatch a domain-specific generic and reject malformed objects at the public boundary.",
       "lab": "Implement an observed-count generic for measurement objects.",
-      "verification": "Run explicit behavioral checks for the declared inputs; inspect types, shape, missingness, diagnostics and supported figures."
+      "verification": "Reproduce the worked observations: A named numeric total ms=6. Original total 6, copied total 104; forged and unsupported inputs rejected."
     },
     {
       "id": "r-022",
@@ -448,7 +448,7 @@
       ],
       "outcome": "Define an S4 measurement with cross-slot invariants and select methods using both argument classes.",
       "lab": "Construct a new object with an infinite measurement.",
-      "verification": "Run explicit behavioral checks for the declared inputs; inspect types, shape, missingness, diagnostics and supported figures."
+      "verification": "Reproduce the worked observations: A FormalMeasure with values 2,4,6 and unit ms. Three expected errors, each matched to its cause."
     },
     {
       "id": "r-023",
@@ -470,7 +470,7 @@
       ],
       "outcome": "Trace shared R6 identity, protect state through methods and distinguish shallow from nested-R6 deep cloning.",
       "lab": "Verify that a rejected negative increment leaves the counter unchanged.",
-      "verification": "Run explicit behavioral checks for the declared inputs; inspect types, shape, missingness, diagnostics and supported figures."
+      "verification": "Reproduce the worked observations: Alias reads 5; independent clone reads 9. Original 3, shallow 3, deep 6."
     },
     {
       "id": "r-024",
@@ -491,7 +491,7 @@
       ],
       "outcome": "Use the pinned S7 property and method API to construct valid values, reject invalid replacement and dispatch across two typed arguments.",
       "lab": "Add a series_count generic returning the number of observations.",
-      "verification": "Run explicit behavioral checks for the declared inputs; inspect types, shape, missingness, diagnostics and supported figures."
+      "verification": "Reproduce the worked observations: A joined vector 2,4,6 and total ms=12. Three expected failures; the original value remains valid."
     },
     {
       "id": "r-025",
@@ -513,7 +513,7 @@
       ],
       "outcome": "Convert S3, S4, R6 and S7 values through validated adapters and inspect ggplot2 through public build interfaces.",
       "lab": "Write an S7 adapter using its declared properties.",
-      "verification": "Run explicit behavioral checks for the declared inputs; inspect types, shape, missingness, diagnostics and supported figures."
+      "verification": "Reproduce the worked observations: Mean 3, count 2, unit ms for both representations. Coordinates(1,8),(2,5),(3,6) and the prepared package version."
     },
     {
       "id": "r-026",
@@ -534,7 +534,7 @@
       ],
       "outcome": "Use exported namespace-qualified functions and inspect a local package source layout without confusing sourced definitions with an installed package.",
       "lab": "Create and inspect DESCRIPTION, NAMESPACE and one R source file in a temporary tree.",
-      "verification": "Run explicit behavioral checks for the declared inputs; inspect types, shape, missingness, diagnostics and supported figures."
+      "verification": "Reproduce the worked observations: Masked result -999; exported stats result 4. Three expected source files and mean 3; the temporary directory is removed."
     },
     {
       "id": "r-027",
@@ -556,7 +556,7 @@
       ],
       "outcome": "Compare numerically equivalent R implementations, collect bounded timing and profiling evidence, and explain its measurement limits.",
       "lab": "Measure both implementations with the same fixture and repetitions.",
-      "verification": "Run explicit behavioral checks for the declared inputs; inspect types, shape, missingness, diagnostics and supported figures."
+      "verification": "Reproduce the worked observations: Equivalent results, nonnegative timings, input size and a bounded profile summary. Positive object size; allocation event count or explicit unavailable value."
     },
     {
       "id": "r-028",
@@ -578,7 +578,7 @@
       ],
       "outcome": "Execute fixed independent tasks with two local PSOCK workers, preserve deterministic task results and close worker processes on every ordinary exit path.",
       "lab": "Implement a self-contained task that returns count and squared sum.",
-      "verification": "Run explicit behavioral checks for the declared inputs; inspect types, shape, missingness, diagnostics and supported figures."
+      "verification": "Reproduce the worked observations: Squared-sum results 14 and 77, equal to the serial computation. Four task means; exact equality by identity across the two schedules."
     },
     {
       "id": "r-029",
@@ -600,7 +600,7 @@
       ],
       "outcome": "Run repeatable stochastic calculations without leaking caller RNG state and record a bounded configuration, input digest and software-version ledger.",
       "lab": "Test the case where .Random.seed did not exist before the call.",
-      "verification": "Run explicit behavioral checks for the declared inputs; inspect types, shape, missingness, diagnostics and supported figures."
+      "verification": "Reproduce the worked observations: Identical five-value vectors and unchanged caller RNG state. Configuration, two 64-character digests, R/package versions and RNG kinds."
     },
     {
       "id": "r-030",
@@ -622,7 +622,7 @@
       ],
       "outcome": "Assemble a tested analytical value object with unique record identity, explicit missingness, compatible aggregation and a documented package continuation.",
       "lab": "Independently implement and test the duplicate-ID and equal-length constructor rules.",
-      "verification": "Run explicit behavioral checks for the declared inputs; inspect types, shape, missingness, diagnostics and supported figures."
+      "verification": "Reproduce the worked observations: Four rows, three observed, one missing; mean 16/3 ms. Both invalid combinations rejected; all-missing mean NA and observed count 0."
     },
     {
       "id": "r-031",
@@ -642,7 +642,7 @@
       ],
       "outcome": "Build an auditable table transformation whose row population, units and key alignment remain inspectable.",
       "lab": "Return an exclusion count alongside the selected table.",
-      "verification": "Run explicit behavioral checks for the declared inputs; inspect types, shape, missingness, diagnostics and supported figures."
+      "verification": "Reproduce the worked observations: L1=8, L3=9. 20 in either order."
     },
     {
       "id": "r-032",
@@ -663,7 +663,7 @@
       ],
       "outcome": "Aggregate groups while preserving missingness counts and enough state to reconstruct the intended overall mean.",
       "lab": "Return rows, observed, missing, sum and mean per group.",
-      "verification": "Run explicit behavioral checks for the declared inputs; inspect types, shape, missingness, diagnostics and supported figures."
+      "verification": "Reproduce the worked observations: 25 versus 20. Arows 2/observed 1; Crows 0/meanNA."
     },
     {
       "id": "r-033",
@@ -684,7 +684,7 @@
       ],
       "outcome": "Perform a validated many-to-one lookup and detect duplicate or unmatched keys before they change totals.",
       "lab": "Write a many-to-one join guard.",
-      "verification": "Run explicit behavioral checks for the declared inputs; inspect types, shape, missingness, diagnostics and supported figures."
+      "verification": "Reproduce the worked observations: Three rows, total 60. Three rows, total 40 instead of 30."
     },
     {
       "id": "r-034",
@@ -705,7 +705,7 @@
       ],
       "outcome": "Reshape repeated measurements only after validating the observation key and deciding how missing cells are represented.",
       "lab": "Reverse a complete wide table to long form.",
-      "verification": "Run explicit behavioral checks for the declared inputs; inspect types, shape, missingness, diagnostics and supported figures."
+      "verification": "Reproduce the worked observations: A10/12;B20/23. B visit 2 isNA."
     },
     {
       "id": "r-035",
@@ -727,7 +727,7 @@
       ],
       "outcome": "Validate a small ingestion boundary without silently coercing, dropping or repairing invalid records.",
       "lab": "Return admitted and quarantined tables with stable IDs.",
-      "verification": "Run explicit behavioral checks for the declared inputs; inspect types, shape, missingness, diagnostics and supported figures."
+      "verification": "Reproduce the worked observations: One admitted row, three rejected rows. The malformed batch is rejected."
     },
     {
       "id": "r-036",
@@ -747,7 +747,7 @@
       ],
       "outcome": "Combine chunk-level sufficient statistics correctly and distinguish a memory strategy from a performance claim.",
       "lab": "Implement an all-missing finalization rule.",
-      "verification": "Run explicit behavioral checks for the declared inputs; inspect types, shape, missingness, diagnostics and supported figures."
+      "verification": "Reproduce the worked observations: Count 4, total 100, mean 25. Observed 3, missing 2, total 9."
     },
     {
       "id": "r-037",
@@ -769,7 +769,7 @@
       ],
       "outcome": "Use a small simulation to investigate a probability while separating simulation error from model uncertainty.",
       "lab": "Simulate an event and retain seed, B, estimate and error estimate.",
-      "verification": "Run explicit behavioral checks for the declared inputs; inspect types, shape, missingness, diagnostics and supported figures."
+      "verification": "Reproduce the worked observations: Estimate near 0.3125 with finite simulation error. Approximately 0.0458 and 0.0229."
     },
     {
       "id": "r-038",
@@ -790,7 +790,7 @@
       ],
       "outcome": "Compute and reconcile conditional probabilities from a finite original table without confusing the conditioning direction.",
       "lab": "Construct joint probabilities from the count table.",
-      "verification": "Run explicit behavioral checks for the declared inputs; inspect types, shape, missingness, diagnostics and supported figures."
+      "verification": "Reproduce the worked observations: 0.3 versus 0.75. Alert probability 0.2; reverse conditional 0.75."
     },
     {
       "id": "r-039",
@@ -811,7 +811,7 @@
       ],
       "outcome": "Inspect the numeric design implied by a formula before interpreting coefficients or fitting a model.",
       "lab": "Inspect and validate a design before fitting.",
-      "verification": "Run explicit behavioral checks for the declared inputs; inspect types, shape, missingness, diagnostics and supported figures."
+      "verification": "Reproduce the worked observations: Four identifiable columns for these four distinct rows. Three columns, rank two."
     },
     {
       "id": "r-040",
@@ -834,7 +834,7 @@
       ],
       "outcome": "Deliver a self-contained analysis that validates inputs, joins metadata, summarizes groups and reports a bounded conclusion.",
       "lab": "Assemble validate, enrich, summarize into one callable pipeline.",
-      "verification": "Run explicit behavioral checks for the declared inputs; inspect types, shape, missingness, diagnostics and supported figures."
+      "verification": "Reproduce the worked observations: Three admitted records, total 70. Alpha count 1, total 10, mean 10; Beta count 2, total 60, mean 30."
     },
     {
       "id": "r-041",
@@ -853,7 +853,7 @@
       ],
       "outcome": "Produce a descriptive summary whose observation counts, missing-value policy and distributional limits are explicit.",
       "lab": "Construct group summaries for A=c(1,NA) and B=c(4,6,NA), retaining observed counts.",
-      "verification": "Run explicit behavioral checks for the declared inputs; inspect types, shape, missingness, diagnostics and supported figures."
+      "verification": "Reproduce the worked observations: Rows 5, observed 3, missing 2, observed mean 11/3. Mean 21.6 and median 2; the four smaller values have mean and median 2."
     },
     {
       "id": "r-042",
@@ -861,6 +861,7 @@
       "level": "intermediate",
       "minutes": 140,
       "prerequisites": [
+        "r-037",
         "r-041"
       ],
       "runtime": "r-statistics",
@@ -872,7 +873,7 @@
       ],
       "outcome": "Calculate and interpret distinct uncertainty quantities while keeping the resampling population and assumptions explicit.",
       "lab": "Enumerate all four-draw bootstrap samples and verify their conditional variance.",
-      "verification": "Run explicit behavioral checks for the declared inputs; inspect types, shape, missingness, diagnostics and supported figures."
+      "verification": "Reproduce the worked observations: Mean 5; sample variance 20/3; squared SE 5/3. 256 resamples; mean 5; conditional variance 1.25."
     },
     {
       "id": "r-043",
@@ -880,6 +881,7 @@
       "level": "intermediate",
       "minutes": 140,
       "prerequisites": [
+        "r-039",
         "r-042"
       ],
       "runtime": "r-statistics",
@@ -892,7 +894,7 @@
       ],
       "outcome": "Connect an R model formula to its numerical design matrix, fitted coefficients and diagnostic assumptions.",
       "lab": "Fit y~x*group to two exact group lines A:1+2x and B:4+x.",
-      "verification": "Run explicit behavioral checks for the declared inputs; inspect types, shape, missingness, diagnostics and supported figures."
+      "verification": "Reproduce the worked observations: Intercept 1, slope 1.8, residual sum near 0, RSS 0.8. Same fitted mean; wider future-observation interval."
     },
     {
       "id": "r-044",
@@ -912,7 +914,7 @@
       ],
       "outcome": "Translate a logistic model between its link scale, probabilities and evaluation quantities without confusing their interpretations.",
       "lab": "Calculate the trial-weighted Brier score.",
-      "verification": "Run explicit behavioral checks for the declared inputs; inspect types, shape, missingness, diagnostics and supported figures."
+      "verification": "Reproduce the worked observations: Probabilities 0.2/0.6; odds ratio 6. Brier 0.2, threshold accuracy 0.7, finite log loss."
     },
     {
       "id": "r-045",
@@ -932,7 +934,7 @@
       ],
       "outcome": "Construct validation procedures whose partitions and preprocessing match the intended transfer claim.",
       "lab": "Perform leave-one-group-out prediction for the exact rule y=1+2x.",
-      "verification": "Run explicit behavioral checks for the declared inputs; inspect types, shape, missingness, diagnostics and supported figures."
+      "verification": "Reproduce the worked observations: No shared row IDs can coexist with four shared groups; group split has zero shared groups. Training center1; global center51; valid held-out transformed values 99/101."
     },
     {
       "id": "r-046",
@@ -952,7 +954,7 @@
       ],
       "outcome": "Fit and inspect PCA while preserving its preprocessing, orientation and interpretation contracts.",
       "lab": "Reverse the first loading and score signs together.",
-      "verification": "Run explicit behavioral checks for the declared inputs; inspect types, shape, missingness, diagnostics and supported figures."
+      "verification": "Reproduce the worked observations: Raw large-unit loading magnitude10/sqrt101; standardized magnitudes1/sqrt2. Near-exact reconstruction and orthonormal loading columns."
     },
     {
       "id": "r-047",
@@ -960,7 +962,7 @@
       "level": "advanced",
       "minutes": 140,
       "prerequisites": [
-        "r-046"
+        "r-045"
       ],
       "runtime": "r-statistics",
       "concepts": [
@@ -972,7 +974,7 @@
       ],
       "outcome": "Fit a small rpart classifier and distinguish its partition, probability output, complexity policy and generalization limits.",
       "lab": "Prune with cp 1 and count terminal leaves.",
-      "verification": "Run explicit behavioral checks for the declared inputs; inspect types, shape, missingness, diagnostics and supported figures."
+      "verification": "Reproduce the worked observations: Two leaves; classes low/high; probability rows sum to 1. One terminal root after pruning."
     },
     {
       "id": "r-048",
@@ -980,7 +982,7 @@
       "level": "advanced",
       "minutes": 140,
       "prerequisites": [
-        "r-047"
+        "r-043"
       ],
       "runtime": "r-statistics",
       "concepts": [
@@ -992,7 +994,7 @@
       ],
       "outcome": "Construct survival outcomes and inspect Kaplan-Meier and Cox calculations without treating censored observations as observed event times.",
       "lab": "Validate an event column before creating Surv.",
-      "verification": "Run explicit behavioral checks for the declared inputs; inspect types, shape, missingness, diagnostics and supported figures."
+      "verification": "Reproduce the worked observations: Survival 0.75,0.75,0.375,0. Finite positive hazard ratio and two bounded survival curves."
     },
     {
       "id": "r-049",
@@ -1000,7 +1002,8 @@
       "level": "advanced",
       "minutes": 140,
       "prerequisites": [
-        "r-048"
+        "r-018",
+        "r-045"
       ],
       "runtime": "r-statistics",
       "concepts": [
@@ -1012,7 +1015,7 @@
       ],
       "outcome": "Fit and evaluate a small time-series model while preserving temporal information boundaries and forecast targets.",
       "lab": "Construct rolling-origin naive predictions for origins 4 through 7 of 1:8.",
-      "verification": "Run explicit behavioral checks for the declared inputs; inspect types, shape, missingness, diagnostics and supported figures."
+      "verification": "Reproduce the worked observations: Forecasts 0.2,0.1,0.05 with finite nonnegative SEs. Four one-step forecasts, all errors1, MSE 1."
     },
     {
       "id": "r-050",
@@ -1020,7 +1023,7 @@
       "level": "advanced",
       "minutes": 140,
       "prerequisites": [
-        "r-049"
+        "r-045"
       ],
       "runtime": "r-statistics",
       "concepts": [
@@ -1032,7 +1035,7 @@
       ],
       "outcome": "Produce a small analytical report that connects the scientific question, model comparison, numerical evidence and limits.",
       "lab": "Reorder one candidate table and realign by ID before scoring.",
-      "verification": "Run explicit behavioral checks for the declared inputs; inspect types, shape, missingness, diagnostics and supported figures."
+      "verification": "Reproduce the worked observations: Affine MSE 0.390625; quadratic error near zero on four authored held-out points. Metric and held-out count preserved through a local JSON round trip."
     },
     {
       "id": "r-051",
@@ -1040,7 +1043,7 @@
       "level": "advanced",
       "minutes": 140,
       "prerequisites": [
-        "r-050"
+        "r-041"
       ],
       "runtime": "r-statistics",
       "concepts": [
@@ -1052,7 +1055,7 @@
       ],
       "outcome": "Construct a labeled base-R graphic and manage an explicitly owned file device without confusing drawing with browser delivery.",
       "lab": "Set and inspect exact limits 0:4 and 0:8.",
-      "verification": "Run explicit behavioral checks for the declared inputs; inspect types, shape, missingness, diagnostics and supported figures."
+      "verification": "Reproduce the worked observations: One base graphic; coordinate limits 0/4/0/8 and the line through all five points. A nonempty PNG with the expected signature, followed by owned cleanup."
     },
     {
       "id": "r-052",
@@ -1072,7 +1075,7 @@
       ],
       "outcome": "Build a compact uncertainty display whose panels, interval target and axis choices support a valid comparison.",
       "lab": "Draw raw observations and summaries with shared y limits.",
-      "verification": "Run explicit behavioral checks for the declared inputs; inspect types, shape, missingness, diagnostics and supported figures."
+      "verification": "Reproduce the worked observations: One two-panel graphic; group means 2.5/4.5 and explicitly constructed t intervals. Linear differences 9/90; log10 differences 1/1."
     },
     {
       "id": "r-053",
@@ -1092,7 +1095,7 @@
       ],
       "outcome": "Construct and inspect a ggplot whose data, mappings and layer-specific responsibilities are explicit.",
       "lab": "Add a group-mean layer using its own data.",
-      "verification": "Run explicit behavioral checks for the declared inputs; inspect types, shape, missingness, diagnostics and supported figures."
+      "verification": "Reproduce the worked observations: Four points, two group colours and shapes, one explicitly printed plot. Raw layer four rows; summary layer two means at y2 and 4."
     },
     {
       "id": "r-054",
@@ -1113,7 +1116,7 @@
       ],
       "outcome": "Choose a statistic and grouping contract that matches whether the input contains raw observations or precomputed summaries.",
       "lab": "Diagnose geom_bar(aes(category,n)) with the default statistic.",
-      "verification": "Run explicit behavioral checks for the declared inputs; inspect types, shape, missingness, diagnostics and supported figures."
+      "verification": "Reproduce the worked observations: Both plots have heights2/1/3, from different declared data representations. Six observations arranged into two line groups."
     },
     {
       "id": "r-055",
@@ -1133,7 +1136,7 @@
       ],
       "outcome": "Choose scale, coordinate and facet policies while explaining how each affects calculations and visual comparisons.",
       "lab": "Compare fixed and free-y facet scale assignments.",
-      "verification": "Run explicit behavioral checks for the declared inputs; inspect types, shape, missingness, diagnostics and supported figures."
+      "verification": "Reproduce the worked observations: The full-data fitted line differs from the line fitted after removing the extreme observation. Two panels with two y-scale assignments under free_y."
     },
     {
       "id": "r-056",
@@ -1154,7 +1157,7 @@
       ],
       "outcome": "Construct diagnostic graphics from fitted quantities and explain which model concerns they can investigate without treating a plot as proof.",
       "lab": "Construct a normal Q-Q graphic of those residuals.",
-      "verification": "Run explicit behavioral checks for the declared inputs; inspect types, shape, missingness, diagnostics and supported figures."
+      "verification": "Reproduce the worked observations: Coefficients1/2 and eight correctly paired residual marks. Slope 2 with residual magnitude increasing exactly with fitted value."
     },
     {
       "id": "r-057",
@@ -1162,7 +1165,7 @@
       "level": "advanced",
       "minutes": 140,
       "prerequisites": [
-        "r-056"
+        "r-055"
       ],
       "runtime": "r-statistics",
       "concepts": [
@@ -1174,7 +1177,7 @@
       ],
       "outcome": "Construct and inspect a small Plotly figure whose trace data and layout correspond to a declared analytical view.",
       "lab": "Set axis titles through layout.",
-      "verification": "Run explicit behavioral checks for the declared inputs; inspect types, shape, missingness, diagnostics and supported figures."
+      "verification": "Reproduce the worked observations: Two traces with observed 2/4/3 and rule2/4/6 values. Three bars with named categories and supplied heights2/1/3."
     },
     {
       "id": "r-058",
@@ -1194,7 +1197,7 @@
       ],
       "outcome": "Encode a bounded interactive view while preserving observation identity and a non-hover-dependent explanation.",
       "lab": "Encode All and Group A visibility buttons for two known traces.",
-      "verification": "Run explicit behavioral checks for the declared inputs; inspect types, shape, missingness, diagnostics and supported figures."
+      "verification": "Reproduce the worked observations: Two traces, retained IDs, an All/Group A control and a printed four-row table. Two retained observations in the actual figure data."
     },
     {
       "id": "r-059",
@@ -1214,7 +1217,7 @@
       ],
       "outcome": "Translate a supported ggplot to Plotly and verify retained data while identifying the visual and interaction properties that still require review.",
       "lab": "Add a mean reference line and inspect the translated structure.",
-      "verification": "Run explicit behavioral checks for the declared inputs; inspect types, shape, missingness, diagnostics and supported figures."
+      "verification": "Reproduce the worked observations: Four retained source observations, one static figure and one converted figure. Four marker observations plus reference-line geometry."
     },
     {
       "id": "r-060",
@@ -1235,7 +1238,7 @@
       ],
       "outcome": "Build a linked numerical, static and interactive analysis whose denominators, identities, uncertainty and delivery limits can be reviewed.",
       "lab": "Construct a static raw-point and interval display from those tables.",
-      "verification": "Run explicit behavioral checks for the declared inputs; inspect types, shape, missingness, diagnostics and supported figures."
+      "verification": "Reproduce the worked observations: Eight observed values, two missing values, group means 2.5/4.5 and squared SEs 5/12 and 17/12. Two mean marks with exact supplied t-interval half-widths."
     }
   ]
 }

@@ -13,7 +13,7 @@ function probabilities(weights)
 end
 
 function worked_b()
-    generator = MersenneTwister(140)
+    generator = Xoshiro(140)
     for count = 1:20
         values = rand(generator, count) .+ 0.01
         result = probabilities(values)

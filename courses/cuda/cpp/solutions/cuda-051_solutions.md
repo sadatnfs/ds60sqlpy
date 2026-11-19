@@ -8,7 +8,7 @@ The separate [CPU reference](../references/cuda-051_cpu.py) checks the chapter's
 
 ## Exercise 1
 
-For logits \([1000,1001]\), subtract maximum 1001 to obtain \([-1,0]\). Exponentials are approximately \([0.367879,1]\), giving probabilities \([0.268941,0.731059]\). Directly computing exp(1001) can overflow in common floating types although the normalized answer is well behaved.
+For logits \([1000,1001]\), subtract maximum 1001 to obtain \([-1,0]\). Exponentials are approximately \([0.367879,1]\), giving probabilities \([0.268941,0.731059]\). Directly computing \(e^{1001}\) can overflow in common floating types although the normalized answer is well behaved.
 
 ## Exercise 2
 

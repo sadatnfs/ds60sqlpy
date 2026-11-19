@@ -136,7 +136,7 @@ qualification gates. The prepared Python route already invokes real Rust service
 
 ## Released wrapper networking limitation
 
-The54.1.0 Python scheduler wrapper configures the listener but does not expose its
+The 54.1.0 Python scheduler wrapper configures the listener but does not expose its
 advertised external host. The native default remains localhost. Actual testing
 found that separate-container executors could listen successfully while callbacks
 to that advertised address failed. The first query timed out and its failed
@@ -152,12 +152,12 @@ rebuilding it. Replace `yourname` with the publisher's namespace. Docker selects
 the native architecture from the combined manifest:
 
 ```bash
-docker pull yourname/ds60sqlpy:1.1.0-worker-swift-linux
-docker tag yourname/ds60sqlpy:1.1.0-worker-swift-linux ds60sqlpy-worker-swift-linux:1.1.0
+docker pull yourname/ds60sqlpy:1.4.0-worker-swift-linux
+docker tag yourname/ds60sqlpy:1.4.0-worker-swift-linux ds60sqlpy-worker-swift-linux:1.4.0
 ```
 
 Then use the explicit `--reuse-swift` preparation in a fresh copied workshop. The
 launcher still verifies the native image architecture. This pulls and locally
 retags an existing Swift/Noble base; it does not push an image or rebuild that base.
 The separate workshop dependencies are prepared by the explicit workshop command.
-Combined worker tags include `worker-`; `1.1.0-swift-linux` is not this layout.
+Combined worker tags include `worker-`; `1.4.0-swift-linux` is not this layout.

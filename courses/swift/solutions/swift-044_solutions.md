@@ -1,28 +1,50 @@
 # swift-044: explanation and comparison
 
-Attempt the six guide tasks before opening this comparison. The executable reference is [swift-044_solution.swift](swift-044_solution.swift). Its assertions are always active under the prepared classroom compile settings.
+Attempt the six guide tasks before opening this comparison. The executable reference is [swift-044_solution.swift](swift-044_solution.swift). It runs both worked examples, and its assertions are always active under the prepared classroom compile settings.
 
 ## Why the two examples differ
 
 **Describe state with words:** A textual state remains meaningful when a visual marker is unavailable. The label communicates completion without relying on color.
 
-**Keep identity separate from translation:** Saved work and navigation should not break when a learner changes language. Display text changes while identity remains stable.
+**Keep identity separate from translation:** Saved work and navigation should not break when a learner changes language. Switching language changes the title from Read to Lire while the completion saved under lesson-one still shows complete.
 
-## Reason through the six tasks
+## Task answers
 
-1. **Predict and explain.** Identify which information would be lost without color.
+### Task 1: Predict and explain
 
-2. **Guided modification.** Write an accessible label for an incomplete item and its action.
+Identify which information would be lost without color.
 
-3. **Independent construction.** Run JourneyApp using keyboard navigation and VoiceOver on macOS.
+No separate reference answer has been written for this task. Example A is the evidence to compare with: A textual state remains meaningful when a visual marker is unavailable. The label communicates completion without relying on color.
 
-4. **Diagnose a defect.** Diagnose using a testing identifier as the only meaningful accessibility label.
+### Task 2: Guided modification
 
-5. **Boundary evidence.** Check large text, empty content and long translated titles in the Apple project.
+Write an accessible label for an incomplete item and its action.
 
-6. **Transfer and justify.** Create a manual accessibility acceptance checklist with concrete observations and retained defects.
+No separate reference answer has been written for this task. Start from Example B: Saved work and navigation should not break when a learner changes language. Switching language changes the title from Read to Lire while the completion saved under lesson-one still shows complete.
 
-For tasks 1 and 2, use the checked values and mechanism trace in the two examples. For task 3, choose names that expose the input and result contract and retain the same invariants. For task 4, the diagnosed mistakes below supply a concrete wrong assumption: preserve its counterexample before repairing it. Task 5 needs an explicit expected value or documented rejection at the boundary, not just successful execution. For task 6, explain what changes in the new context and which part of the original mechanism remains applicable. Several representations may satisfy this transfer task; justify the choice rather than treating this reference as the only architecture.
+### Task 3: Independent construction
+
+Run JourneyApp using keyboard navigation and VoiceOver on macOS.
+
+No reference answer has been written for this task yet. It needs a project or platform outside the single-file pad, so record your own build and run evidence and judge it against the vocabulary entry **Accessible name** and the lesson notes.
+
+### Task 4: Diagnose a defect
+
+Diagnose using a testing identifier as the only meaningful accessibility label.
+
+No reference answer has been written for this task yet. The wrong assumptions to look for are this lesson's pitfalls: A label should not duplicate an entire surrounding screen. Fixed heights can clip large text. The portable string checks do not establish screen-reader order or keyboard focus behavior.
+
+### Task 5: Boundary evidence
+
+Check large text, empty content and long translated titles in the Apple project.
+
+No reference answer has been written for this task yet. Write the expected value or documented rejection for each boundary before running it, and compare with the checks in Example A (Describe state with words) and Example B (Keep identity separate from translation).
+
+### Task 6: Transfer and justify
+
+Create a manual accessibility acceptance checklist with concrete observations and retained defects.
+
+No single reference answer exists: several designs can satisfy this transfer task. Justify yours against the mechanism described below and the vocabulary entry **Accessible name**, and state one limitation of your choice.
 
 ## Mechanism and diagnostic reasoning
 
@@ -36,4 +58,4 @@ A label should not duplicate an entire surrounding screen. Fixed heights can cli
 
 ## Review before continuing
 
-The reference checks the worked scenarios, including their boundary distinctions. Your independent and transfer artifacts may have additional checks. Compare observations rather than only source text. Preserve any new regression case you discover and explain why it would reject a plausible wrong implementation. External project steps require their own build and platform evidence and are not established by a portable reference passing.
+Run the reference and confirm that it prints `swift-044: passed`, then reconstruct one boundary case from memory and explain which check would reject a plausible wrong implementation. External project steps need their own build and platform evidence; a passing portable reference does not establish them.

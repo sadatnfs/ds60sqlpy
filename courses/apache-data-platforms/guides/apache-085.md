@@ -23,10 +23,10 @@ bearer tokens or signed file URLs. A temporary capability is not a durable publi
 provenance link, and storing it can expose authority rather than improve
 reproducibility.
 
-## Worked case A: publish the bounded version 0product
+## Worked case A: publish the bounded version 0 product
 
 Create an actual Delta table containing the three known orders and retain its
-version 0log/schema/file identity. Configure one owned share/schema/table pointing
+version 0 log, schema and file identity. Configure one owned share/schema/table pointing
 to that data and start the actual prepared reference server. List the expected
 names, request version 0, inspect protocol/metadata and read the signed Parquet
 files through the compatible client.
@@ -44,7 +44,7 @@ without a corresponding storage/maintenance policy.
 
 ## Worked case B: validate recipient denial and its limits
 
-Use the valid fixture profile for a bounded read, then require401/403 with an
+Use the valid fixture profile for a bounded read, then require 401 or 403 with an
 invalid or revoked fixture recipient credential. Distinguish that from a missing
 file, unsupported protocol or unavailable server. Those failures do not prove
 authorization worked and require different operational responses.
@@ -93,8 +93,8 @@ Prepare the real reference server and supported table store. Read the fixed vers
 - Cleanup/evidence-storage result and any separate prepared or unavailable feature.
 
 For the common three-order fixture, require IDs 1/2/3 with amounts 4/9/7, total 20,
-east 11 and west 9. A later fourth west order of2changes current total to22 and west
-to11while an earlier pinned snapshot remains unchanged. Do not use this simple
+east 11 and west 9. A later fourth west order of 2 changes the current total to 22 and west
+to 11 while an earlier pinned snapshot remains unchanged. Do not use this simple
 oracle to claim correctness for a different pipeline without defining its
 deduplication, correction and visibility semantics.
 

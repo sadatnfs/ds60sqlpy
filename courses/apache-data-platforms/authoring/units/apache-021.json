@@ -1,7 +1,7 @@
 {
   "language": "markdown",
   "runtime": "reading",
-  "level": "intermediate",
+  "level": "advanced",
   "minutes": 75,
   "prerequisites": ["apache-020", "apache-014"],
   "concepts": ["scheduler", "executor", "plan serialization", "embedded control"],

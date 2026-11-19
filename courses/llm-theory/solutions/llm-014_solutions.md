@@ -16,44 +16,45 @@ A count-based model is a useful baseline because its entire fitted state can be 
 
 Initialize a square count matrix with zeros. For each document, update only adjacent pairs inside it. Add one to every cell and divide each row by its row sum plus vocabulary size. Index the probability table with held-out current/next token IDs, sum negative logs and divide by the number of transitions. Save counts before evaluation to demonstrate that assessment did not refit the model.
 
-## Exercise 1: Fit a tiny baseline
+## Exercise 1: Count transitions in new documents
 
-The question is: Use vocabularyA,B,C and documentsABAB,AC; count transitions within documents.
+The question is: Use vocabulary A=0, B=1, C=2 and the documents CAAB and BCA; count transitions within each document.
 
-The end of ABAB is not linked to the start of AC. Counts describe the specified training corpus, not all concatenations of its files.
+The first document ends in B and the second starts with B. Concatenating them would invent a B to B transition, so the zero in that cell checks the document boundary.
 
 ```python
-docs = [[0, 1, 0, 1], [0, 2]]
-counts = np.zeros((3, 3), dtype=int)
-for doc in docs:
+docs2 = [[2, 0, 0, 1], [1, 2, 0]]
+counts2 = np.zeros((3, 3), dtype=int)
+for doc in docs2:
     for a, b in zip(doc[:-1], doc[1:]):
-        counts[a, b] += 1
-assert counts[0, 1] == 2 and counts[1, 0] == 1 and counts[0, 2] == 1 and counts.sum() == 4
+        counts2[a, b] += 1
+assert counts2[2, 0] == 2 and counts2[0, 0] == 1 and counts2[0, 1] == 1 and counts2[1, 2] == 1
+assert counts2.sum() == 5 and counts2[1, 1] == 0
 ```
 
-**Expected:** AtoB2,BtoA1,AtoC1; total4.
+**Expected:** C to A: 2, A to A: 1, A to B: 1, B to C: 1; total 5; no B to B transition across the document boundary.
 
-**Verify:** Compare the computed values or written argument with AtoB2,BtoA1,AtoC1; total4.
+**Verify:** In a fresh process, the exercise checks confirm `counts2[2, 0] == 2`; `counts2[0, 0] == 1`; `counts2[0, 1] == 1`; `counts2[1, 2] == 1` and 2 further checks.
 
-## Exercise 2: Normalize smoothed rows
+## Exercise 2: Predict two smoothed rows
 
-The question is: Apply add-one smoothing to the count matrix.
+The question is: Apply add-one smoothing to the new counts and predict the rows for contexts A and C.
 
-Smoothing adds three pseudocounts to each denominator because there are three possible next tokens. Adding one only to the numerator would create excess probability mass.
+Each row adds one pseudo-count per vocabulary item, so its denominator is the row count plus 3. Context A has two observed transitions and context C has two, but their distributions differ because the counts fall in different cells.
 
 ```python
-prob = (counts + 1) / (counts.sum(1, keepdims=True) + 3)
-np.testing.assert_allclose(prob.sum(1), 1, atol=1e-12, rtol=0)
-np.testing.assert_allclose(prob[2], [1 / 3] * 3, atol=1e-12, rtol=0)
+prob2 = (counts2 + 1) / (counts2.sum(1, keepdims=True) + 3)
+np.testing.assert_allclose(prob2[0], [2 / 5, 2 / 5, 1 / 5], atol=1e-12, rtol=0)
+np.testing.assert_allclose(prob2[2], [3 / 5, 1 / 5, 1 / 5], atol=1e-12, rtol=0)
 ```
 
-**Expected:** row sums1; unseen C context is uniform.
+**Expected:** row A [2/5, 2/5, 1/5]; row C [3/5, 1/5, 1/5].
 
-**Verify:** Compare the computed values or written argument with row sums1; unseen C context is uniform.
+**Verify:** In a fresh process, the exercise checks confirm `prob2[0]` matches `[2 / 5, 2 / 5, 1 / 5]` within 1e-12 and `prob2[2]` matches `[3 / 5, 1 / 5, 1 / 5]` within 1e-12.
 
 ## Exercise 3: Score held-out transitions
 
-The question is: Evaluate held-out sequenceA,C,B using the frozen table.
+The question is: Evaluate held-out sequence A, C, B using the frozen table.
 
 The two transition probabilities are \(p(C\mid A)=2/6=1/3\) and \(p(B\mid C)=1/3\). Their negative log probabilities sum to \(-\log(1/3)-\log(1/3)=2\log 3\). Dividing this total negative log likelihood by two active targets gives mean loss \(\log 3\).
 
@@ -65,9 +66,9 @@ np.testing.assert_allclose(nll, 2 * np.log(3), atol=1e-12, rtol=0)
 assert len(held) - 1 == 2
 ```
 
-**Expected:** 2 targets; NLL log3+log3.
+**Expected:** 2 targets; NLL log 3+log 3.
 
-**Verify:** Compare the computed values or written argument with 2 targets; NLL log3+log3.
+**Verify:** In a fresh process, the exercise checks confirm `nll` matches `2 * np.log(3)` within 1e-12 and `len(held) - 1 == 2`.
 
 ## Exercise 4: Prove no assessment update
 
@@ -81,11 +82,11 @@ np.testing.assert_array_equal(counts, saved)
 
 **Expected:** counts unchanged exactly.
 
-**Verify:** Compare the computed values or written argument with counts unchanged exactly.
+**Verify:** In a fresh process, the exercise checks confirm `counts` equals `saved`.
 
 ## Exercise 5: Verify a causal prefix oracle
 
-The question is: For zero-score attention values2,4,8 calculate prefix means and independently recompute each prefix.
+The question is: For zero-score attention values 2, 4, 8 calculate prefix means and independently recompute each prefix.
 
 This arithmetic verifies the simple information boundary independently of the baseline. A count model and an attention mechanism answer different architectural questions.
 
@@ -99,13 +100,13 @@ for cut in range(1, 4):
     )
 ```
 
-**Expected:** outputs2,3,14/3.
+**Expected:** outputs 2, 3, 14/3.
 
-**Verify:** Compare the computed values or written argument with outputs2,3,14/3.
+**Verify:** In a fresh process, the exercise checks confirm `out` matches `[2, 3, 14 / 3]` within 1e-12 and for every `cut` in `range(1, 4)`, `out[:cut]` matches `[values[:i + 1].mean() for i in range(cut)]` within 1e-12.
 
 ## Exercise 6: Write the bounded comparison
 
-The question is: Create a report with vocabulary size3,2 held-out targets and a limitation about unseen tasks.
+The question is: Create a report with vocabulary size 3, 2 held-out targets and a limitation about unseen tasks.
 
 A complete report can be modest. Counts, denominator and limitations let a reviewer understand exactly what the model was asked to do and what the result cannot establish.
 
@@ -123,9 +124,9 @@ assert (
 )
 ```
 
-**Expected:** report includes finite meanNLL and no broad competence claim.
+**Expected:** report includes finite mean NLL and no broad competence claim.
 
-**Verify:** Compare the computed values or written argument with report includes finite meanNLL and no broad competence claim.
+**Verify:** In a fresh process, the exercise checks confirm `np.isfinite(report['mean_nll'])`, `report['targets'] == 2` and `'untested' in report['limitation']`.
 
 ## Review after comparison
 

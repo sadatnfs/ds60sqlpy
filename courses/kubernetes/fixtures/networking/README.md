@@ -84,7 +84,7 @@ The original IPv4 fixture serves GET `/version` with HTTP 200 and exact text
 GET `/` returns 404 by design. An Ingress/Gateway Prefix rule for `/` forwards
 `/version` as `/version` unless a separately documented rewrite is configured.
 Use `/version` for the positive application acceptance request. A correctly
-routed root404 is not evidence that the network failed.
+routed root 404 is not evidence that the network failed.
 
 For the ordinary ClusterIP fixture, an in-cluster client requests
 `http://network-study:80/version`. For the headless fixture, A/AAAA resolution

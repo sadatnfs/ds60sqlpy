@@ -1,6 +1,6 @@
 # Geometry, derivatives and the meaning of a fit
 
-Tutorial ID: `statistics-learning-001`. Prerequisites: `statistics-002`, `statistics-003`. Complete program: [learning_07.py](examples/learning_07.py).
+Tutorial ID: `statistics-learning-001`. Prerequisites: `statistics-002`, `statistics-003`. Complete program: [learning_01.py](examples/learning_01.py).
 
 ## Build the objects before multiplying them
 

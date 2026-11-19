@@ -9,6 +9,7 @@
     "winner optimism"
   ],
   "outcome": "Evaluate a complete model/prompt selection procedure without using final outcomes to choose the winner.",
+  "verification": "The mean maximum of two noisy candidates is 0.05, changing only final outcomes leaves the selected IDs unchanged, ties choose the first candidate, and the optimistic same-table procedure scores 0.85 but no longer counts as a protected assessment.",
   "level": "intermediate",
   "runtime": "python-core",
   "minutes": 120,

@@ -8,22 +8,26 @@ A watch streams changes after a chosen observation point, but it is not an infin
 
 This offline reducer handles ADDED, MODIFIED, DELETED, BOOKMARK and an explicit expired-history signal. Ordinary events update a keyed cache; bookmarks only advance the token. Expiration invalidates continuity and requires a fresh list rather than fabricated incremental recovery. The real API uses Status errors and HTTP responses whose interpretation belongs to client-go or a carefully reviewed client.
 
-## 1. Apply an added object
+## 1. Apply an added object: predict an edited check
 
-Apply ADDED for demo with value 2.
+Copy worked example 1 into a scratch pad and change `applyWatch(&s, WatchEvent{Kind: "ADDED", Key: "demo", Value: 2, Version: "a"})` to `applyWatch(&s, WatchEvent{Kind: "ADDED", Key: "demo", Value: 3, Version: "a"})` inside its check. Before running, predict whether the check still passes and explain why; then restore it.
+
+The unchanged code is worked example 1:
 
 ```go
 s := newWatch()
 check(applyWatch(&s, WatchEvent{Kind: "ADDED", Key: "demo", Value: 2, Version: "a"}) == nil && s.Items["demo"] == 2, "add")
 ```
 
-**Expected:** The cache gains demo=2.
+**Expected:** The changed run panics with `add` because the edited check no longer holds. Restoring the original line brings back the worked observation: the cache gains demo=2.
 
 The key identifies current state. Reconciliation should inspect that state rather than treat addition as an irreversible once-only command.
 
-## 2. Apply a modification
+## 2. Apply a modification: diagnose an edited check
 
-Add then modify the same key.
+A careless edit changed the check in worked example 2 so that it reads `applyWatch(&s, WatchEvent{Kind: "MODIFIED", Key: "demo", Value: 4, Version: "b"})`. Run worked example 2 with that line, explain why the edited check now fails for the same program state, and restore it.
+
+The unchanged code is worked example 2:
 
 ```go
 s := newWatch()
@@ -31,7 +35,7 @@ _ = applyWatch(&s, WatchEvent{Kind: "ADDED", Key: "demo", Value: 2, Version: "a"
 check(applyWatch(&s, WatchEvent{Kind: "MODIFIED", Key: "demo", Value: 3, Version: "b"}) == nil && s.Items["demo"] == 3, "modify")
 ```
 
-**Expected:** The cached value becomes 3.
+**Expected:** Before the repair the program panics with `modify`; after it the line reads `applyWatch(&s, WatchEvent{Kind: "MODIFIED", Key: "demo", Value: 3, Version: "b"})` again and the cached value becomes 3.
 
 The newest observed value replaces the prior value for this simplified cache. A production informer also manages resource typing and synchronization.
 

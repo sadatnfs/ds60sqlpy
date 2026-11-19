@@ -11,8 +11,8 @@
     },
     {
       "exercise": 2,
-      "task": "Evaluate healthy counts2,1 and0 with minimum1.",
-      "expected": "Potential disruptions1,0,0 in the simplified model."
+      "task": "Evaluate healthy counts 2, 1 and 0 with minimum 1.",
+      "expected": "Potential disruptions 1, 0, 0 in the simplified model."
     },
     {
       "exercise": 3,

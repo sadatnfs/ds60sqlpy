@@ -24,11 +24,13 @@ Listeners also have a lifetime. A component removed from use should release subs
 
 Select an element after its markup exists, guard its expected type, and attach a named listener. textContent inserts text without parsing HTML. event.target identifies the originating target, while event.currentTarget identifies the listener owner during dispatch. closest can locate an action button from a nested child. A native button has type=button when it should not submit a surrounding form. hidden changes visibility and participation in layout; aria-expanded communicates the control state but does not itself hide content.
 
-## Exercise 1: Use a native button and live result
+## Exercise 1: Use a native button and live result: change one input
 
-Task: Open the complete snippet, activate Add twice by pointer and once by keyboard, then inspect the count.
+Task: Rebuild Example A in your copy of the lesson's browser fixture without looking at it. Then change one attribute, label or handler and write down the visible, focus or announcement change you expect before reloading.
 
 The browser supplies native button activation. The script handles click once rather than separately counting keydown and click, which could double-count keyboard use.
+
+The unchanged code is the exercise block of Example A:
 
 ```html
 <!doctype html>
@@ -46,15 +48,17 @@ button.addEventListener('click', () => { count += 1; output.textContent = `Count
 >
 ```
 
-**Expected:** count 3; button remains keyboard reachable.
+**Expected:** Your rebuild reproduces the worked observation (count 3; button remains keyboard reachable), and the changed copy shows the difference you predicted.
 
-**Verify:** Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.
+**Verify:** Record the browser observation before and after your change, including where focus lands and any live-region text, and explain which line caused the difference.
 
-## Exercise 2: Trace target and currentTarget through delegation
+## Exercise 2: Trace target and currentTarget through delegation: debug a regression
 
-Task: Click the nested word inside the list button in the snippet.
+Task: Introduce one deliberate defect into a copy of Example B, such as a wrong selector, a missing attribute or a handler on the wrong element. Predict which browser behavior will expose it, confirm that prediction, then repair it.
 
 The listener belongs to the list, but the original target can be a child inside the button. Delegation checks both the matching action and its containment in the component.
+
+The unchanged code is the exercise block of Example B:
 
 ```html
 <!doctype html>
@@ -80,9 +84,9 @@ list.addEventListener('click', event => {
 >
 ```
 
-**Expected:** selected A; target SPAN and currentTarget UL.
+**Expected:** The defective copy no longer shows: selected A; target SPAN and currentTarget UL. The repaired copy shows it again.
 
-**Verify:** Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.
+**Verify:** Keep notes on the failing and the repaired behavior and name the first browser observation that differed between them.
 
 ## Exercise 3: Handle a dynamically appended action
 
@@ -102,7 +106,7 @@ list.append(item);
 
 **Expected:** the existing ancestor listener reports B without a new per-button listener.
 
-**Verify:** Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.
+**Verify:** In the browser fixture, record the observation that shows: the existing ancestor listener reports B without a new per-button listener. Then change one input and record what changes, keeping keyboard and pointer results separate.
 
 ## Exercise 4: Implement an accessible disclosure
 
@@ -118,7 +122,7 @@ details.hidden = expanded;
 
 **Expected:** opening reveals details and sets true; closing hides it and sets false.
 
-**Verify:** Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.
+**Verify:** In the browser fixture, record the observation that shows: opening reveals details and sets true; closing hides it and sets false. Then change one input and record what changes, keeping keyboard and pointer results separate.
 
 ## Exercise 5: Remove listeners through their lifecycle signal
 
@@ -134,7 +138,7 @@ controller.abort();
 
 **Expected:** the count stops increasing after abort.
 
-**Verify:** Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.
+**Verify:** In the browser fixture, record the observation that shows: the count stops increasing after abort. Then change one input and record what changes, keeping keyboard and pointer results separate.
 
 ## Exercise 6: Diagnose a missing required element
 
@@ -151,7 +155,7 @@ if (missing === null) {
 
 **Expected:** null is detected before accessing a property.
 
-**Verify:** Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.
+**Verify:** In the browser fixture, record the observation that shows: null is detected before accessing a property. Then change one input and record what changes, keeping keyboard and pointer results separate.
 
 ## After comparison
 

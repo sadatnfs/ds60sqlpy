@@ -27,6 +27,15 @@ that the independent checker reconciles to the original IDs and final region
 totals, east 11 and west 9. The job must actually reach a terminal successful state;
 client submission alone is not accepted as execution evidence.
 
+The bounded mode of the Java job builds this pipeline:
+
+<!-- include: projects/flink/src/WorkshopJobs.java from="var source = FileSource" to="region-total" java -->
+
+`keyBy` sends every order for one region to the same parallel instance, and the
+keyed function below keeps one running total per region:
+
+<!-- include: projects/flink/src/WorkshopJobs.java from="public static final class RunningTotal" until="public static final class WindowTotals" java -->
+
 A running aggregate can emit several updates for one key. The first east record
 produces one partial total and the later east record advances it. Those updates
 are not duplicate final table rows. They are an observable stream of state changes.

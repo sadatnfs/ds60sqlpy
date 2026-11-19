@@ -1,12 +1,12 @@
 # spark-036: Explained paired reference solutions
 
-Read the [guide](../guides/spark-036.md) and attempt one language first. The [Scala reference](spark-036_solution.scala) and [PySpark reference](spark-036_solution.py) are complete single-file programs with explicit local sessions and finally-based stop. Each compares with literal expectations;matching two implementations alone would not rule out a shared mistake.
+Read the [guide](../guides/spark-036.md) and attempt one language first. The [Scala reference](spark-036_solution.scala) and [PySpark reference](spark-036_solution.py) are complete single-file programs with explicit local sessions and finally-based stop. Each compares with literal expectations; matching two implementations alone would not rule out a shared mistake.
 
 ## Exercises and reasoning
 
 ### Exercise 1: Define canonical bounded microbatch content
 
-Validate the explicit bigint schema, nonnegative cents, positive IDs and at most 8 rows;return sorted id, cents newline records preserving multiplicity.
+Validate the explicit bigint schema, nonnegative cents, positive IDs and at most 8 rows; return sorted id, cents newline records preserving multiplicity.
 
 **Expected:** Exact text 1,100 newline 2,200 newline, with a stable SHA256 after repartitioning.
 
@@ -29,7 +29,7 @@ Canonical bytes make a retry comparison independent of task order. Validation an
 
 Publish the same canonical content twice under identity manual-v1 and batch 7. Compare the existing receipt instead of appending.
 
-**Expected:** First call publishes true;second returns false;exactly 2 logical rows remain.
+**Expected:** First call publishes true; second returns false; exactly 2 logical rows remain.
 
 ```scala
 def publishOnce(root: Path, identity: String, batchId: Long, text: String): Boolean = {
@@ -42,7 +42,7 @@ def publish_once(root, identity, batch_id, text):
     return publish_batch(root, identity, batch_id, text, False)
 ```
 
-The local commit file contains both data and the batch identity, digest together. Its atomic rename is the visibility boundary. A repeated call with identical content is a no-op;the sink does not add a second copy. This assumes a single writer and the prepared same-filesystem rename semantics, not distributed transaction coordination or power-loss durability.
+The local commit file contains both data and the batch identity, digest together. Its atomic rename is the visibility boundary. A repeated call with identical content is a no-op; the sink does not add a second copy. This assumes a single writer and the prepared same-filesystem rename semantics, not distributed transaction coordination or power-loss durability.
 
 **Verification evidence:** Assert return values, unchanged receipt bytes and one batch file.
 
@@ -50,7 +50,7 @@ The local commit file contains both data and the batch identity, digest together
 
 Run the actual foreachBatch query with failure after staging and before rename. Retain the wrapped streaming exception and attempted batch ID.
 
-**Expected:** The query fails with injected_before_publication;no stream-v1 batch is visible and the attempted batch ID is 0.
+**Expected:** The query fails with injected_before_publication; no stream-v1 batch is visible and the attempted batch ID is 0.
 
 ```scala
 def failCallback(spark: SparkSession, input: Path, checkpoint: Path, sink: Path): Unit = {
@@ -86,7 +86,7 @@ This is an actual streaming callback failure, not only a direct helper exception
 
 Restart the same source/checkpoint/query namespace without failure. Compare attempts and logical query/run IDs.
 
-**Expected:** Batch 0 is attempted again and publishes 2 rows once. Query ID persists;run ID changes.
+**Expected:** Batch 0 is attempted again and publishes 2 rows once. Query ID persists; run ID changes.
 
 ```scala
 def recoverCallback(spark: SparkSession, input: Path, checkpoint: Path, sink: Path): RunReceipt = {
@@ -107,7 +107,7 @@ The repeated batch ID is direct evidence that callback delivery can repeat. The 
 
 Append the same canonical batch text twice to a separate unsafe-demo file, then compare it with the idempotent published batch.
 
-**Expected:** Unsafe append has 4 row occurrences;the committed batch remains 2.
+**Expected:** Unsafe append has 4 row occurrences; the committed batch remains 2.
 
 ```scala
 def unsafeAppend(path: Path, text: String): Unit = {
@@ -128,7 +128,7 @@ def unsafe_append(path, text):
         handle.write(text)
 ```
 
-This intentionally unsafe local side effect is isolated from the real sink. Its duplicate result does not depend on a race or random timing;two deliveries visibly append two copies. The counterexample shows why a successful callback or checkpoint configuration cannot magically make a non-idempotent external operation exactly once.
+This intentionally unsafe local side effect is isolated from the real sink. Its duplicate result does not depend on a race or random timing; two deliveries visibly append two copies. The counterexample shows why a successful callback or checkpoint configuration cannot magically make a non-idempotent external operation exactly once.
 
 **Verification evidence:** Compare exact repeated lines and preserve the unsafe file as a separate diagnostic until owned cleanup.
 
@@ -163,4 +163,4 @@ Idempotency is a content-aware identity rule, not unconditional suppression of a
 
 ## Execution and interpretation
 
-Run the complete reference in its prepared fixed worker. The small fixture is constructed inside the program,so opening a lesson does not fetch data. A final success line is printed only after the reference assertions complete. Plan observations,partition evidence and resource measurements apply to the actual local configuration;they do not establish cluster-scale performance. Session cleanup is explicit,and any additional owned file/query lifecycle is described in the lesson.
+Run the complete reference in its prepared fixed worker. The small fixture is constructed inside the program, so opening a lesson does not fetch data. A final success line is printed only after the reference assertions complete. Plan observations, partition evidence and resource measurements apply to the actual local configuration; they do not establish cluster-scale performance. Session cleanup is explicit, and any additional owned file/query lifecycle is described in the lesson.

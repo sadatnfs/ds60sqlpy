@@ -92,7 +92,7 @@ def package_project(directory):
     local = p / "local_packages/classroom_utils"
     (local / "macros").mkdir(parents=True)
     (local / "dbt_project.yml").write_text(
-        "name: classroom_utils\nversion: '1.0'\nconfig-version: 2\nmacro-paths: [macros]\n"
+        'name: classroom_utils\nversion: "1.0"\nconfig-version: 2\nmacro-paths: [macros]\n'
     )
     (local / "macros/add_one.sql").write_text(
         "{% macro add_one(value) %} (({{ value }}) + 1) {% endmacro %}"

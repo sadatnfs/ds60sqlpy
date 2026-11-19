@@ -4,7 +4,7 @@ The course teaches Kubernetes from object anatomy through controlled platform ch
 
 ## Prepare immediately before the lab
 
-Build or download the explicitly approved images and tools before preparing the private Kubernetes session. The current lease lasts fifteen minutes, so prepare immediately before starting the broker and running the bounded cases. If it expires before Run, the readiness guard should refuse it. Preserve learner source, stop the expired broker, release only the exact owned session through the host helper, and prepare a fresh session. Do not bypass expiry with ambient credentials or change the runtime to ignore the cleanup reserve. See the [owned preparation guide](../../docker/kubernetes/README.md).
+Build or download the explicitly approved images and tools before preparing the private Kubernetes session. In this course a lease is the classroom's private, time-limited lab credential for one owned cluster and namespace; it is unrelated to the Kubernetes `Lease` API object (`coordination.k8s.io/v1`) that controllers use for leader election and node heartbeats. The current lease lasts fifteen minutes, so prepare immediately before starting the broker and running the bounded cases. If it expires before Run, the readiness guard should refuse it. Preserve learner source, stop the expired broker, release only the exact owned session through the host helper, and prepare a fresh session. Do not bypass expiry with ambient credentials or change the runtime to ignore the cleanup reserve. See the [owned preparation guide](../../docker/kubernetes/README.md).
 
 ## The current bounded browser operation
 
@@ -46,7 +46,7 @@ The ordinary worker Role has only its reviewed namespaced resource actions and r
 
 The following examples assume an already provisioned capability and environment variables copied from its nonsecret path/context/namespace fields. They do not create a cluster or discover an ambient target. Run from the repository root. Substitute the exact lesson resource in later commands only when the chapter names it and the receipt permits it.
 
-POSIX shell:
+Bash on Linux, macOS or Ubuntu under WSL 2:
 
 ```sh
 : "${LAB_KUBECONFIG:?Use the private path from the owned receipt}"
@@ -55,15 +55,7 @@ POSIX shell:
 kubectl --kubeconfig "$LAB_KUBECONFIG" --context "$LAB_CONTEXT" --namespace "$LAB_NAMESPACE" get deployment hello -o json
 ```
 
-PowerShell:
-
-```powershell
-if (-not $env:LAB_KUBECONFIG -or -not $env:LAB_CONTEXT -or -not $env:LAB_NAMESPACE) {
-    throw 'Use the private path, context and namespace from the owned receipt.'
-}
-& kubectl --kubeconfig $env:LAB_KUBECONFIG --context $env:LAB_CONTEXT --namespace $env:LAB_NAMESPACE get deployment hello -o json
-if ($LASTEXITCODE -ne 0) { throw 'The explicit owned-target read failed.' }
-```
+Windows learners run exactly these Bash commands inside WSL 2, from a checkout addressed by its Linux path. The lab adapter refuses native Windows credential handling, so there is no PowerShell variant of these reads; PowerShell is only a way to open the WSL 2 distribution, for example `wsl.exe --distribution Ubuntu`.
 
 Keep the explicit arguments on every call. The examples intentionally fail when a targeting variable is absent. Do not use `kubectl config use-context`, overwrite a default kubeconfig or select a production/shared context to make a lesson work.
 

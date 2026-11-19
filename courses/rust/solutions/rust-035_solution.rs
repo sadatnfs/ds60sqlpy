@@ -13,6 +13,18 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         assert!(values.capacity() >= 100);
         assert_eq!(values.iter().sum::<i32>(), 45);
     }
+
+    {
+        // Task 3: Independent construction
+        fn total_cloned(rows: &[String]) -> usize {
+            rows.iter().map(|row| row.clone().len()).sum()
+        }
+        fn total_borrowed(rows: &[String]) -> usize {
+            rows.iter().map(|row| row.len()).sum()
+        }
+        let rows: Vec<String> = (0..100).map(|i| format!("row-{i}")).collect();
+        assert_eq!(total_cloned(&rows), total_borrowed(&rows));
+    }
     println!("rust-035: passed");
     Ok(())
 }

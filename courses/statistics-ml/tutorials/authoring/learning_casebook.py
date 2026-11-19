@@ -12,6 +12,21 @@ from sklearn.preprocessing import OneHotEncoder, StandardScaler
 from sklearn.tree import DecisionTreeRegressor
 
 
+# Function names are stable test identities. Standalone programs and printed
+# labels follow the guide order: learning_01.py runs case_07 (geometry), then
+# learning_02.py to learning_07.py run case_01 to case_06.
+PROGRAM_ORDER = (
+    "case_07",
+    "case_01",
+    "case_02",
+    "case_03",
+    "case_04",
+    "case_05",
+    "case_06",
+    "case_08",
+)
+
+
 def wilson_interval(successes, n, alpha=0.05):
     p = np.asarray(successes) / n
     z = stats.norm.ppf(1 - alpha / 2)
@@ -47,7 +62,7 @@ def case_01():
         "exact_wald_coverage_at_005": wald_coverage,
         "exact_wilson_coverage_at_005": wilson_coverage,
     }
-    print("01 likelihood to coverage:", result)
+    print("02 likelihood to coverage:", result)
     return result
 
 
@@ -108,7 +123,7 @@ def case_02():
         "conditional_or": 2.0,
         "marginal_or": marginal_or,
     }
-    print("02 logistic model to decision:", result)
+    print("03 logistic model to decision:", result)
     return result
 
 
@@ -155,7 +170,7 @@ def case_03():
         "tiny_bootstrap_indices": bootstrap.tolist(),
         "tiny_oob_indices": oob.tolist(),
     }
-    print("03 forest selection:", result)
+    print("04 forest selection:", result)
     return result
 
 
@@ -196,7 +211,7 @@ def case_04():
         "validation_mse": validation[best - 1],
         "test_mse": mean_squared_error(target[270:], frozen.predict(features[270:])),
     }
-    print("04 boosting trajectory:", result)
+    print("05 boosting trajectory:", result)
     return result
 
 
@@ -225,7 +240,7 @@ def case_05():
         "full_test_accuracy": full_model.score(test_x, test_y),
         "scaled_variance_ratios": scaled.explained_variance_ratio_.tolist(),
     }
-    print("05 compression versus prediction:", result)
+    print("06 compression versus prediction:", result)
     return result
 
 
@@ -258,7 +273,7 @@ def case_06():
         "new_group_accuracy": group_scores.mean(),
         "nested_outer_mse": outer_scores,
     }
-    print("06 evaluation of the full procedure:", result)
+    print("07 evaluation of the full procedure:", result)
     return result
 
 
@@ -292,7 +307,7 @@ def case_07():
         "stable_error": stable,
         "oversized_step_error": unstable,
     }
-    print("07 geometry and optimization:", result)
+    print("01 geometry and optimization:", result)
     return result
 
 
@@ -331,7 +346,7 @@ def case_08():
 
 
 def main():
-    for case in (case_01, case_02, case_03, case_04, case_05, case_06, case_07, case_08):
+    for case in (case_07, case_01, case_02, case_03, case_04, case_05, case_06, case_08):
         case()
 
 

@@ -16,6 +16,15 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         assert_eq!(values.get(0), Some(&7));
         assert_eq!(values.get(1), None);
     }
+
+    {
+        // Task 3: Independent construction
+        fn maximum(values: &[i32]) -> Option<i32> {
+            values.iter().copied().max()
+        }
+        assert_eq!(maximum(&[3, 9, 4]), Some(9));
+        assert_eq!(maximum(&[]), None);
+    }
     println!("rust-011: passed");
     Ok(())
 }

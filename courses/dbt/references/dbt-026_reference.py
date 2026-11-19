@@ -92,17 +92,18 @@ def capstone(bad_dimension):
     with tempfile.TemporaryDirectory() as d:
         models = {
             "staging_orders": (
-                "select id::integer as order_id,customer::integer as "
-                "customer_id,try_cast(amount as integer) as amount from {{ "
-                "ref('raw_orders') }} where try_cast(amount as integer) is "
-                "not null"
+                "select\n"
+                "    id::integer as order_id, customer::integer as customer_id, try_cast(amount as "
+                "integer) as amount\n"
+                "from {{ ref('raw_orders') }}\n"
+                "where try_cast(amount as integer) is not null"
             ),
             "customer_mart": (
-                "select o.customer_id,c.region,sum(o.amount)::bigint as "
-                "total,count(*)::bigint as orders from {{ "
-                "ref('staging_orders') }} o join {{ ref('customers') }} c "
-                "on o.customer_id=c.customer_id group by "
-                "o.customer_id,c.region"
+                "select o.customer_id, c.region, sum(o.amount)::bigint as total, count(*)::bigint "
+                "as orders\n"
+                "from {{ ref('staging_orders') }} o\n"
+                "join {{ ref('customers') }} c on o.customer_id = c.customer_id\n"
+                "group by o.customer_id, c.region"
             ),
         }
         schema = {

@@ -2,6 +2,10 @@
 
 import ast
 import json
+import re
+import subprocess
+import sys
+import textwrap
 from pathlib import Path
 
 BASE = Path(__file__).resolve().parents[1]
@@ -13,6 +17,56 @@ UNITS = json.loads((BASE / "authoring" / "units.json").read_text(encoding="utf-8
 def write(path, text):
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(text.rstrip() + "\n", encoding="utf-8")
+
+
+def format_python(text, name):
+    """Apply the repository's Ruff import order and formatting to generated Python."""
+    config = str(ROOT / "pyproject.toml")
+    for command in (
+        ["check", "--select", "I", "--fix", "--config", config, "--stdin-filename", name, "-"],
+        ["format", "--config", config, "--stdin-filename", name, "-"],
+    ):
+        text = subprocess.run(
+            [sys.executable, "-m", "ruff", *command],
+            input=text,
+            capture_output=True,
+            text=True,
+            check=True,
+        ).stdout
+    return text
+
+
+def js_literal(value, indent=0, prefix="", suffix=""):
+    """Write a JSON-compatible fixture the way the repository's Prettier settings do."""
+
+    def flat(item):
+        if isinstance(item, list):
+            return "[" + ", ".join(flat(x) for x in item) + "]"
+        if isinstance(item, dict):
+            pairs = ", ".join(
+                (k if re.fullmatch(r"[A-Za-z_$][\w$]*", k) else json.dumps(k)) + ": " + flat(v)
+                for k, v in item.items()
+            )
+            return "{ " + pairs + " }" if pairs else "{}"
+        return json.dumps(item)
+
+    pad = " " * indent
+    one_line = pad + prefix + flat(value) + suffix
+    if len(one_line) <= 100 or not isinstance(value, (list, dict)):
+        return one_line
+    if isinstance(value, list):
+        inner = [js_literal(item, indent + 2, "", ",") for item in value]
+        return pad + prefix + "[\n" + "\n".join(inner) + "\n" + pad + "]" + suffix
+    inner = [
+        js_literal(
+            v,
+            indent + 2,
+            (k if re.fullmatch(r"[A-Za-z_$][\w$]*", k) else json.dumps(k)) + ": ",
+            ",",
+        )
+        for k, v in value.items()
+    ]
+    return pad + prefix + "{\n" + "\n".join(inner) + "\n" + pad + "}" + suffix
 
 
 def standalone_python(number):
@@ -68,6 +122,108 @@ def standalone_python(number):
     return "\n\n\n".join(parts)
 
 
+ANATOMY_START = "<!-- plotly-anatomy:start -->"
+ANATOMY_END = "<!-- plotly-anatomy:end -->"
+OPENERS, CLOSERS = "([{", ")]}"
+
+
+def python_figure_lines(number):
+    """Return the exact figure-construction statements of one durable Python case."""
+    text = (BASE / "authoring" / "python_cases.py").read_text()
+    function = next(
+        node
+        for node in ast.parse(text).body
+        if isinstance(node, ast.FunctionDef) and node.name == f"case_{number:02d}"
+    )
+
+    def touches_figure(statement):
+        targets = statement.targets if isinstance(statement, ast.Assign) else []
+        if any(isinstance(t, ast.Name) and t.id == "fig" for t in targets):
+            return True
+        call = statement.value if isinstance(statement, ast.Expr) else None
+        return (
+            isinstance(call, ast.Call)
+            and isinstance(call.func, ast.Attribute)
+            and isinstance(call.func.value, ast.Name)
+            and call.func.value.id == "fig"
+        )
+
+    chosen = [statement for statement in function.body if touches_figure(statement)]
+    lines = text.splitlines()[chosen[0].lineno - 1 : chosen[-1].end_lineno]
+    return textwrap.dedent("\n".join(lines))
+
+
+def balanced_block(lines, first):
+    """Collect lines from first until JavaScript brackets outside strings balance."""
+    depth, quote, collected = 0, None, []
+    for line in lines[first:]:
+        collected.append(line)
+        escaped = False
+        for character in line:
+            if quote:
+                if escaped:
+                    escaped = False
+                elif character == "\\":
+                    escaped = True
+                elif character == quote:
+                    quote = None
+            elif character in "\"'`":
+                quote = character
+            elif character in OPENERS:
+                depth += 1
+            elif character in CLOSERS:
+                depth -= 1
+        if depth <= 0:
+            return collected
+    raise ValueError("Unbalanced JavaScript excerpt")
+
+
+def javascript_figure_lines(number):
+    """Return the trace and layout declarations of one durable browser case."""
+    text = (BASE / "authoring" / "browser_cases.js").read_text()
+    start = text.index(f"\n  {number}() {{\n")
+    end = text.index("\n  },\n", start)
+    lines = text[start:end].splitlines()
+    data = next(
+        i
+        for i, line in enumerate(lines)
+        if line.startswith(("      data: [", "    const data = ", "    const data=["))
+    )
+    layout = next(i for i, line in enumerate(lines) if line.startswith("      layout: {"))
+    return "\n".join(
+        textwrap.dedent("\n".join(balanced_block(lines, first))) for first in (data, layout)
+    )
+
+
+def anatomy(number):
+    return (
+        f"{ANATOMY_START}\n"
+        f"Python, from `case_{number:02d}` in the subject's durable Plotly source:\n\n"
+        f"```python\n{python_figure_lines(number)}\n```\n\n"
+        f"JavaScript, from browser specification {number}, which `renderCase` passes to "
+        "`Plotly.newPlot` with the shared caption and table:\n\n"
+        f"```javascript\n{javascript_figure_lines(number)}\n```\n"
+        f"{ANATOMY_END}"
+    )
+
+
+def lab_text(guide):
+    text = guide.read_text(encoding="utf-8")
+    worked = re.search(r"^## Worked case: (.+)$", text, flags=re.M).group(1).strip()
+    first, *_, last = exercise_titles(text)
+    return (
+        f"Rebuild the worked case ({worked}) from the inline fixture, then complete the six "
+        f"exercises from {first.lower()} to {last.lower()}, checking each expected value "
+        "in the figure and its table."
+    )
+
+
+def exercise_titles(text):
+    titles = re.findall(r"^\d\. \*\*(.+?)\.\*\*", text, flags=re.M)
+    assert len(titles) == 6, titles
+    return titles
+
+
 def build():
     plan, admission, inventory = [], [], []
     browser = (BASE / "authoring" / "browser_cases.js").read_text()
@@ -93,10 +249,7 @@ def build():
                 "runtime": "python-core",
                 "concepts": concepts,
                 "outcome": outcome,
-                "lab": (
-                    f"Use the supplied fixture to complete the six {title.lower()} tasks "
-                    "and compare the numerical and visual evidence."
-                ),
+                "lab": lab_text(BASE / "guides" / f"{key}.md"),
                 "verification": (
                     "Check the named values and failure case in the guide; "
                     f"the reference prints {key} Plotly complete after creating its figure."
@@ -126,39 +279,63 @@ def build():
                 ],
             }
         )
-        write(ROOT / python_reference, standalone_python(number))
+        write(ROOT / python_reference, format_python(standalone_python(number), f"{key}.py"))
         write(
             ROOT / js_reference,
             browser + f'\nawait renderCase(specifications[{number}](), "{key} Plotly complete");\n',
         )
+        tasks = exercise_titles((BASE / "guides" / f"{key}.md").read_text(encoding="utf-8"))
+        python_todos = "\n".join(
+            f"    # TODO {index}: {task}." for index, task in enumerate(tasks, 1)
+        )
+        javascript_todos = "\n".join(
+            f"// TODO {index}: {task}." for index, task in enumerate(tasks, 1)
+        )
         write(
             ROOT / python_source,
-            f'''"""{key}: learner source. Read the guide and keep your own saved draft."""
+            format_python(
+                f'''"""{key}: learner source. Read the guide and keep your own saved draft."""
 
 import plotly.graph_objects as go
 
 FIXTURE = {fixture!r}
 
 
+def build_figure():
+    """Derive traces, axis titles and units from FIXTURE as the guide describes."""
+    fig = go.Figure()
+{python_todos}
+    # Add traces with fig.add_trace(go.Bar(...)) or fig.add_trace(go.Scatter(...)).
+    fig.update_layout(title="Describe the measured quantity and its units")
+    return fig
+
+
 def main():
-    # Derive the chart and accessible table from FIXTURE.
-    # Follow the six tasks in the guide; the worked reference is separate.
-    print("Prepared Plotly figure type:", go.Figure.__name__)
-    print("Fixture loaded; derive the figure and its checks from the guide tasks.")
+    figure = build_figure()
+    print("Fixture records:", FIXTURE)
+    print("Traces so far:", len(figure.data))
+    # When the figure and its table are complete, display it with figure.show().
 
 
 if __name__ == "__main__":
     main()
 ''',
+                f"{key}.py",
+            ),
         )
         write(
             ROOT / js_source,
             f"""// {key}: learner source for the prepared browser Plotly variant.
 // window.Plotly, #chart and #output are supplied. No imports or fetches.
-const fixture = {json.dumps(fixture)};
+{js_literal(fixture, prefix="const fixture = ", suffix=";")}
 console.table(fixture);
 // Derive your traces, caption and native source table from fixture.
-// Complete the six guide tasks in your own saved source.
+{javascript_todos}
+const traces = [];
+const layout = {{ title: {{ text: "Describe the measured quantity and its units" }} }};
+if (typeof Plotly !== "undefined" && traces.length > 0) {{
+  Plotly.newPlot(document.getElementById("chart"), traces, layout);
+}}
 console.log("Fixture loaded; derive the figure and its checks from the guide tasks.");
 """,
         )
@@ -182,6 +359,11 @@ console.log("Fixture loaded; derive the figure and its checks from the guide tas
         write(ROOT / explanation, solution)
         path = ROOT / guide
         text = path.read_text()
+        heading, body = text.split("\n", 1)
+        text = f"# {key}: {title}\n" + body
+        if ANATOMY_START in text:
+            before, rest = text.split(ANATOMY_START, 1)
+            text = before + anatomy(number) + rest.split(ANATOMY_END, 1)[1]
         marker = "## Ask an AI tutor about this lesson"
         if marker in text:
             text = text.split(marker, 1)[0].rstrip() + "\n"

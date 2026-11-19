@@ -131,7 +131,7 @@ def example_one():
             d,
             models={
                 "base": "{{ config(tags=['feature']) }} select 1 as x",
-                "child": "select x+1 as x from {{ ref('base') }}",
+                "child": "select x + 1 as x from {{ ref('base') }}",
                 "unrelated": "select 9 as x",
             },
         )
@@ -148,7 +148,7 @@ def example_one():
 def example_two():
     with tempfile.TemporaryDirectory() as d:
         p = project(
-            d, models={"base": "select 1 as x", "child": "select x+1 as x from {{ ref('base') }}"}
+            d, models={"base": "select 1 as x", "child": "select x + 1 as x from {{ ref('base') }}"}
         )
         invoke(p, "parse")
         state = p / "previous_state"
@@ -188,4 +188,4 @@ if __name__ == "__main__":
 
 ## Interpretation
 
-Construct and inspect a reproducible selection against an explicit baseline. Explain which dependencies and tests are included and which data changes are outside the comparison. The later CI lessons connect that selection to real execution and deferral.
+Explain which dependencies and tests are included and which data changes are outside the comparison. The later CI lessons connect that selection to real execution and deferral.

@@ -1,13 +1,20 @@
 #include <stdio.h>
 
 int main(void) {
-  /* Exercise 1: Change a caller-owned value
-     Increment integer 4 through its address.
-     Expected: The caller value becomes 5. */
+  /* Exercise 1: Change a caller-owned value: change one input
+     Copy worked example 1 into a scratch pad and change `int n = 4;` to `int n
+     = 5;`. Before running, predict which CHECK fails and which value it now
+     sees; then run it and restore the original line. Expected: The changed run
+     stops with `Check failed` at the CHECK on `n == 5`. Restoring the original
+     line brings back the worked observation: the caller value becomes 5. */
 
-  /* Exercise 2: Read a target copy
-     Copy the integer behind a pointer, then change the target.
-     Expected: The copied value stays 3 and the target becomes 9. */
+  /* Exercise 2: Read a target copy: debug a regression
+     A regression changed `int n = 3;` to `int n = 4;` in worked example 2. Run
+     worked example 2 with that change, use the failing CHECK to explain the
+     defect and repair it without changing the CHECK. Expected: Before the
+     repair the run stops with `Check failed` at the CHECK on `copy == 3 && n ==
+     9`; after it the line reads `int n = 3;` again and the copied value stays 3
+     and the target becomes 9. */
 
   /* Exercise 3: Reject an absent target
      Pass NULL to an optional update helper.

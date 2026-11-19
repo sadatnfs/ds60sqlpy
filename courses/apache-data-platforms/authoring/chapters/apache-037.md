@@ -27,6 +27,15 @@ Kafka Admin API. It writes acct-1=v1, acct-1=v2 and acct-2=v3 only when the sour
 end offset is zero. A bounded KafkaConsumer then reads to the actual end position,
 not to a requested physical-message count.
 
+The probe asks for compaction when it creates the topic through the Admin API:
+
+<!-- include: projects/streaming/RetentionProbe.java from="var wanted = Map.of(" to=");" java -->
+
+`cleanup.policy=compact` lets the log cleaner eventually keep only the latest record
+for each key, while the two `-1` values disable time and size deletion. Compaction
+runs in the background, so the probe reconstructs current state from what it reads
+instead of expecting older records to have disappeared.
+
 Offset 0 may be absent after valid compaction. Offsets 1 and 2 with exact latest
 payloads must remain, source end offset stays 3, and the latest map must contain
 acct-1=v2 and acct-2=v3. The reported source SHA256 binds the observation to the

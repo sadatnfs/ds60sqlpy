@@ -14,7 +14,7 @@
   "exercises": [
     {
       "title": "Advance safely",
-      "task": "Move from the first to the second character in the UTF -8 fixture.",
+      "task": "Move from the first to the second character in the UTF-8 fixture.",
       "expected": "nextind returns 3.",
       "hint": "Use a string-aware index operation.",
       "answer": "Adding one to a valid byte index can enter a multibyte character."

@@ -5,15 +5,53 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Data tables, captions and header relationships: my attempt</title>
     <style>
-      /* Implement the lesson-specific CSS. Keep keyboard focus visible. */
+      /* Write the CSS for the exercises here. Keep keyboard focus visible. */
     </style>
   </head>
   <body>
-    <!-- web-007: Build a three-row study table with correct header relationships. -->
-    <!-- Save your prediction, then implement the six exercises from the guide. -->
+    <!--
+      web-007 exercises. Hints are in the guide; answers are in the solutions folder.
+      1. Explain what a single cell value means with both headers.
+      2. Add a caption that states the reporting period.
+      3. Build a three-row study table with correct header relationships.
+      4. Replace a table used to align unrelated navigation and article content.
+      5. Inspect the table at a narrow width without deleting data.
+      6. Explain when a chart should keep a supporting table.
+    -->
     <main>
       <h1>Data tables, captions and header relationships</h1>
-      <!-- Build your own document here. The reference is separate. -->
+      <table>
+        <tr>
+          <td>Subject</td>
+          <td>Minutes</td>
+        </tr>
+        <tr>
+          <td>HTML</td>
+          <td>40</td>
+        </tr>
+        <tr>
+          <td>CSS</td>
+          <td>55</td>
+        </tr>
+        <tr>
+          <td>PHP</td>
+          <td>35</td>
+        </tr>
+      </table>
+      <table>
+        <tr>
+          <td><a href="#notes">Notes</a></td>
+          <td id="notes">This week's article text is aligned with a layout table.</td>
+        </tr>
+      </table>
+      <!--
+        Worked example 1: A column header
+        <tr><th scope="col">Subject</th><th scope="col">Minutes</th></tr>
+      -->
+      <!--
+        Worked example 2: A row header
+        <tr><th scope="row">HTML</th><td>40</td></tr>
+      -->
     </main>
   </body>
 </html>

@@ -11,7 +11,10 @@ def recommend(current, observed, target, minimum=1, maximum=2):
 
 
 def main():
-    assert 50 / 100 * 100 == 50 and 50 / 200 * 100 == 25
+    def utilization(usage_m, request_m):
+        return 100 * usage_m / request_m
+
+    assert utilization(50, 100) == 50 and utilization(50, 200) == 25
     assert recommend(1, 80, 50) == (2, 2)
     assert recommend(2, 20, 50) == (1, 1)
     assert recommend(1, 200, 50) == (4, 2)

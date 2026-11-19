@@ -26,6 +26,14 @@ expected connection type and dataset marker, and records that the reference was
 resolved. It does not print the complete connection object or its URI, because
 real deployments can place passwords in those representations.
 
+The whole check is one task in the connection DAG:
+
+<!-- include: projects/airflow/dags/classroom_workflows.py #connection_workflow python -->
+
+`Connection.get` resolves a connection identifier through Airflow's configured
+secrets backends at run time. The recorded result contains only Boolean outcomes
+and an error type name, never the connection's URI or password.
+
 Resolution occurs inside task execution rather than at module import time.
 DAG parsing should be quick and repeatable; retrieving a remote secret or opening
 a database during parsing adds availability and performance dependencies to the

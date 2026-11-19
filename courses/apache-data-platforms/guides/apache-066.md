@@ -25,7 +25,38 @@ never checked independently.
 ## Worked case A: explain a selective aggregate
 
 The prepared explain.sql filters the day partition, groups by region and sums
-amount. The independent result is east 11 and west 9. Inspect the partition
+amount:
+
+From [`projects/hive/explain.sql`](../projects/hive/explain.sql):
+
+```sql
+EXPLAIN
+SELECT
+  region,
+  SUM(amount)
+FROM
+  ds60.orders
+WHERE
+  day = '2026-01-01'
+GROUP BY
+  region;
+
+SELECT
+  region,
+  SUM(amount)
+FROM
+  ds60.orders
+WHERE
+  day = '2026-01-01'
+GROUP BY
+  region
+ORDER BY
+  region;
+```
+
+`bash run.sh explain` runs both statements against the external `ds60.orders`
+table, which has one `day='2026-01-01'` partition holding orders 1 (east, 4),
+2 (west, 9) and 3 (east, 7). The independent result is east 11 and west 9. Inspect the partition
 predicate and aggregation stages in the actual plan, then run the query. Keep
 the SQL text, schema, partition inventory and result together so the plan can be
 interpreted against the input it describes.
@@ -42,7 +73,29 @@ capacity or engine recommendations. Retain data shape and selected configuration
 beside timings; a query name alone is insufficient context for a performance
 comparison.
 
-## Worked case B: challenge a map-side join assumption
+## Worked case B: challenge a map-side join assumption (design exercise)
+
+The workshop has no dimension table and `run.sh` has no join command, so this case
+is a design exercise with a written answer rather than an executed example. In a
+copied workshop, the dimension and the plan request would be:
+
+```sql
+CREATE EXTERNAL TABLE IF NOT EXISTS ds60.regions (region STRING, manager STRING)
+STORED AS PARQUET LOCATION 'file:///warehouse/regions';
+INSERT INTO ds60.regions VALUES ('east', 'Avery'), ('west', 'Blake');
+
+EXPLAIN
+SELECT o.region, COUNT(*) AS orders, SUM(o.amount) AS total
+FROM ds60.orders o
+JOIN ds60.regions r ON o.region = r.region
+WHERE o.day = '2026-01-01'
+GROUP BY o.region;
+```
+
+With one row per region, the written answer is east 11 from two orders and west 9
+from one order. In the plan, a map-side join appears as a `Map Join Operator`
+whose small side is loaded into a hash table; a shuffle join appears as a
+`Merge Join Operator` or `Join Operator` after an exchange.
 
 Prepare a separate owned dimension with one row per region and join it to orders.
 First verify uniqueness and the expected three enriched fact identities. Then
@@ -52,6 +105,10 @@ that a particular release and configuration will choose it.
 
 Now deliberately duplicate the east dimension key in an isolated comparison.
 The join may multiply east facts even if its physical strategy remains efficient.
+After inserting `('east', 'Casey')`, the written answer becomes east 22 from four
+joined rows while west stays 9, and
+`SELECT region, COUNT(*) FROM ds60.regions GROUP BY region HAVING COUNT(*) > 1`
+returns `east 2` before the join runs.
 An optimizer cannot infer an unstated business uniqueness constraint from a
 three-row sample. Validate the intended many-to-one relationship before treating
 the aggregate as trustworthy.

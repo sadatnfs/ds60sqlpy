@@ -48,7 +48,7 @@
     },
     {
       "title": "Check a large integer",
-      "task": "Compute BigInt(2)^100.",
+      "task": "Compute `BigInt(2)^100`.",
       "expected": "The mathematical integer is retained beyond the machine Int range.",
       "hint": "Promote before exponentiation.",
       "answer": "Converting a wrapped machine result afterward cannot reconstruct the lost value."

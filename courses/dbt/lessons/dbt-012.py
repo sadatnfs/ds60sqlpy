@@ -1,5 +1,6 @@
-"""dbt-012: worked starting point; complete the guide's six changes."""
+"""dbt-012: both worked cases; complete the guide's six changes."""
 
+import json
 import os
 import tempfile
 from pathlib import Path
@@ -80,6 +81,10 @@ def rows(root, sql):
         return connection.execute(sql).fetchall()
 
 
+def artifact(root, name):
+    return json.loads((root / "target" / name).read_text())
+
+
 def example_one():
     with tempfile.TemporaryDirectory() as d:
         schema = {
@@ -110,8 +115,27 @@ def example_one():
         return {"explicit_v1": 100, "latest_v2": 80}
 
 
+def example_two():
+    with tempfile.TemporaryDirectory() as d:
+        p = project(
+            d,
+            models={
+                "base": "select 100 as gross, 20 as returns",
+                "net": "select gross - returns as net from {{ ref('base') }}",
+            },
+        )
+        invoke(p, "build")
+        assert rows(p, "select net from net") == [(80,)]
+        manifest = artifact(p, "manifest.json")
+        assert manifest["nodes"]["model.classroom.net"]["depends_on"]["nodes"] == [
+            "model.classroom.base"
+        ]
+        return {"semantic_change": "gross to net", "net": 80, "dependency_recorded": True}
+
+
 if __name__ == "__main__":
     print(example_one())
+    print(example_two())
 
 # TODO 1: Change the latest consumer to request version 1 explicitly.
 # TODO 2: Declare version 1 as latest in the fixture.

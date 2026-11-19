@@ -15,11 +15,11 @@ add(
 
 A Pod can be replaced and receive a different IP and UID. A Service can keep its identity and virtual address while its backend Pods change. A node can host many Pods, and its address is not automatically the public address of every application on it. The correct destination depends on the caller and the intended traffic path.
 
-The synthetic topology uses Pod10.244.1.7, node192.0.2.10 and Service10.96.0.20. The node address is from documentation space and is never a real target. These values illustrate roles; actual ranges are cluster configuration. A browser on your laptop generally cannot route directly to an arbitrary ClusterIP or Pod IP in a desktop cluster.""",
+The synthetic topology uses Pod 10.244.1.7, node 192.0.2.10 and Service 10.96.0.20. The node address is from documentation space and is never a real target. These values illustrate roles; actual ranges are cluster configuration. A browser on your laptop generally cannot route directly to an arbitrary ClusterIP or Pod IP in a desktop cluster.""",
     """The Pod status can report podIP and podIPs, while its spec names the scheduled node. A Service spec can report clusterIP, clusterIPs, type and ports. Node status contains addresses with types such as InternalIP. Read each field in its own object and preserve the object’s UID so an old address is not confused with a replacement.
 
 A Service routes transport traffic to endpoints. It is not a process that has an application socket bound to every virtual address in the ordinary way. The implementation might program kernel rules or eBPF paths. The application process still listens inside a Pod at its target port.""",
-    "caller Pod -> Service10.96.0.20:80 -> eligible Pod10.244.1.7:8080\nnode192.0.2.10 hosts the Pod; it is a separate address role",
+    "caller Pod -> Service 10.96.0.20:80 -> eligible Pod 10.244.1.7:8080\nnode 192.0.2.10 hosts the Pod; it is a separate address role",
     (
         "Classify a topology record",
         "These are synthetic observations with explicit roles.",
@@ -31,7 +31,7 @@ A Service routes transport traffic to endpoints. It is not a process that has an
         "Predict Pod replacement",
         "The Service can remain stable while one backend changes.",
         "text",
-        "before: Service10.96.0.20 -> Pod UID-A at10.244.1.7\nafter:  Service10.96.0.20 -> Pod UID-B at10.244.1.9",
+        "before: Service 10.96.0.20 -> Pod UID-A at 10.244.1.7\nafter:  Service 10.96.0.20 -> Pod UID-B at 10.244.1.9",
         "The stable service destination does not prove the same backend process handled both requests.",
     ),
     [
@@ -47,7 +47,7 @@ A Service routes transport traffic to endpoints. It is not a process that has an
         ),
         (
             "Draw the internal request path with both ports.",
-            "Service port80 maps to Pod listener8080.",
+            "Service port 80 maps to Pod listener 8080.",
             "Port roles are independent of address roles. The application must actually listen at the target endpoint.",
         ),
         (
@@ -63,7 +63,7 @@ A Service routes transport traffic to endpoints. It is not a process that has an
         (
             "Explain a successful request with a changed backend UID.",
             "Service continuity and backend identity are separate observations.",
-            "Record the actual serving identity when the exercise requires replacement evidence; a200 response alone cannot identify the process.",
+            "Record the actual serving identity when the exercise requires replacement evidence; a 200 response alone cannot identify the process.",
         ),
     ],
     "https://kubernetes.io/docs/concepts/services-networking/",
@@ -73,12 +73,12 @@ A Service routes transport traffic to endpoints. It is not a process that has an
 add(
     "CIDRs, subnets, routing and address planning",
     ["CIDR", "subnet", "route", "overlap"],
-    """CIDR notation combines an address with a prefix length, such as10.244.0.0/16. The prefix describes which leading bits identify the network. A longer prefix describes a smaller address set. CIDR membership is a binary relationship, not a string-prefix test.
+    """CIDR notation combines an address with a prefix length, such as 10.244.0.0/16. The prefix describes which leading bits identify the network. A longer prefix describes a smaller address set. CIDR membership is a binary relationship, not a string-prefix test.
 
 Clusters need address planning for nodes, Pods and Services, and may interact with a host LAN, VPN or cloud network. Overlapping ranges can make a destination ambiguous or route traffic to the wrong place. A configuration can be valid YAML while its network plan is unusable in the actual environment.
 
 Pod and Service CIDRs serve different purposes. Pod ranges allocate workload endpoints according to the CNI and cluster design. Service ranges allocate virtual service destinations. A Service IP should not be assumed to appear as an ordinary Pod interface address. Dual-stack adds another family of addresses and routes rather than replacing these distinctions.""",
-    """Use an IP-address library for membership and overlap reasoning. In a/24 IPv4 network there are256 numeric addresses, but usable allocations depend on the system’s rules and reservations. Do not turn the arithmetic count into a guaranteed Kubernetes capacity claim.
+    """Use an IP-address library for membership and overlap reasoning. In a/24 IPv4 network there are 256 numeric addresses, but usable allocations depend on the system’s rules and reservations. Do not turn the arithmetic count into a guaranteed Kubernetes capacity claim.
 
 A routing table chooses a next hop according to destination and policy, commonly preferring the most specific matching prefix. An overlapping VPN route can affect traffic before it reaches a cluster component. Investigate the caller’s route context rather than changing Kubernetes selectors to fix a host routing conflict.""",
     "caller destination -> routing lookup -> most specific applicable route -> next hop\naddress plan: node network | Pod CIDR | Service CIDR | host/VPN ranges",
@@ -87,7 +87,7 @@ A routing table chooses a next hop according to destination and policy, commonly
         "This is an offline calculation.",
         "python",
         'from ipaddress import ip_address, ip_network\nnetwork=ip_network("10.244.0.0/16")\nprint(ip_address("10.244.1.7") in network)\nprint(ip_address("10.96.0.20") in network)',
-        "True thenFalse; no packet is sent.",
+        "True, then False; no packet is sent.",
     ),
     (
         "Detect an overlap",
@@ -99,7 +99,7 @@ A routing table chooses a next hop according to destination and policy, commonly
     [
         (
             "Predict Pod-IP membership in the fixture CIDR.",
-            "10.244.1.7 belongs to10.244.0.0/16.",
+            "10.244.1.7 belongs to 10.244.0.0/16.",
             "Use network arithmetic rather than text comparison. Membership says nothing yet about whether the address is allocated or reachable.",
         ),
         (
@@ -118,7 +118,7 @@ A routing table chooses a next hop according to destination and policy, commonly
             "Locate the first wrong next hop. Changing a Service selector does not repair the host route decision.",
         ),
         (
-            "Explain why256 addresses do not guarantee256 allocatable endpoints.",
+            "Explain why 256 addresses do not guarantee 256 allocatable endpoints.",
             "Reservation and implementation rules reduce or constrain allocation.",
             "Arithmetic cardinality is only one input. The allocator and network design determine actual usable capacity.",
         ),
@@ -137,26 +137,28 @@ add(
     ["Pod network", "loopback", "sidecar", "port collision"],
     """Containers in the same Pod share a network namespace. They can communicate through localhost and share the Pod’s port space. Containers in different Pods normally have different network namespaces and Pod addresses. This makes a Pod a unit of co-location and shared networking rather than merely a label grouping unrelated containers.
 
-Loopback always refers to the caller’s network namespace. A sidecar in the same Pod can reach an application bound to127.0.0.1:8080. A different Pod cannot reach that listener through the first Pod’s loopback address. To accept traffic on the Pod interface, the application generally listens on an appropriate non-loopback address, often0.0.0.0 for IPv4.
+Loopback always refers to the caller’s network namespace. A sidecar in the same Pod can reach an application bound to 127.0.0.1:8080. A different Pod cannot reach that listener through the first Pod’s loopback address. To accept traffic on the Pod interface, the application generally listens on an appropriate non-loopback address, often 0.0.0.0 for IPv4.
 
 A sidecar is a supporting container associated with an application Pod. It may proxy traffic, collect logs or perform another bounded role. Co-location introduces shared fate, startup and shutdown ordering, resource competition and port conflicts. A sidecar is not automatically a separate security or availability boundary.""",
     """The containerPort field documents a container’s intended port and can supply a name used elsewhere. It does not start a listener. Two containers in one Pod cannot both bind the same address/port combination independently. Their filesystem namespaces can still differ even though networking is shared.
 
-An emptyDir volume is one way to share files within a Pod, but it is not implied by shared networking and does not survive Pod replacement. Keep the network and storage contracts distinct when explaining a sidecar design.""",
-    "app container127.0.0.1:8080 <-> sidecar in same Pod namespace\nother Pod -> Pod IP:8080 -> requires listener on reachable interface",
+An emptyDir volume is one way to share files within a Pod, but it is not implied by shared networking and does not survive Pod replacement. Keep the network and storage contracts distinct when explaining a sidecar design.
+
+Since Kubernetes 1.33, native sidecar containers are stable. Declare the helper under `initContainers` with `restartPolicy: Always`. The kubelet starts it in init-container order before the application containers and moves on once it has started, or once its startupProbe succeeds when one is defined. It keeps running for the life of the Pod, is restarted if it exits, is stopped only after the application containers during Pod termination, and does not keep a Job's Pod from completing. A helper listed under `containers` has none of these ordering guarantees, which is why older sidecar designs needed startup polling and shutdown workarounds.""",
+    "app container 127.0.0.1:8080 <-> sidecar in same Pod namespace\nother Pod -> Pod IP:8080 -> requires listener on reachable interface",
     (
         "Compare two localhost callers",
         "The same string names different destinations in different Pods.",
         "text",
-        "sidecar in PodA ->127.0.0.1:8080 -> app in PodA\nclient in PodB ->127.0.0.1:8080 -> PodB itself",
+        "sidecar in PodA -> 127.0.0.1:8080 -> app in PodA\nclient in PodB -> 127.0.0.1:8080 -> PodB itself",
         "Only the same-Pod sidecar reaches PodA through loopback.",
     ),
     (
-        "Read a declared port",
-        "This is metadata in a Pod container specification.",
+        "Declare a native sidecar beside the application",
+        "This Pod spec excerpt declares a log-forwarding sidecar and an application in one network namespace. The image names are placeholders.",
         "yaml",
-        "ports:\n  - name: http\n    containerPort: 8080",
-        "The field does not cause any process to bind8080.",
+        "initContainers:\n  - name: log-forwarder\n    image: registry.example.test/log-forwarder:1.0\n    restartPolicy: Always\n    ports:\n      - name: metrics\n        containerPort: 9090\ncontainers:\n  - name: app\n    image: registry.example.test/app:1.0\n    ports:\n      - name: http\n        containerPort: 8080",
+        "The sidecar starts before app and keeps running beside it. Neither containerPort field starts a listener; the two ports must differ because both processes share one Pod port space.",
     ),
     [
         (
@@ -175,7 +177,7 @@ An emptyDir volume is one way to share files within a Pod, but it is not implied
             "Specify address and port for every listener so a collision is visible before runtime.",
         ),
         (
-            "Diagnose two containers binding0.0.0.0:8080.",
+            "Diagnose two containers binding 0.0.0.0:8080.",
             "They compete for the same socket within one Pod namespace.",
             "The container boundary does not create a second network namespace inside the Pod. Assign distinct listener roles.",
         ),
@@ -210,7 +212,7 @@ The synthetic topology uses two nodes and two Pod subnets to make the hop sequen
         "Trace an overlay path",
         "These are logical responsibilities, not guaranteed interface names.",
         "text",
-        "inner:10.244.1.7 ->10.244.2.9\nouter:nodeA address ->nodeB address\ndestination node removes encapsulation and delivers inner packet",
+        "inner: 10.244.1.7 -> 10.244.2.9\nouter: nodeA address -> nodeB address\ndestination node removes encapsulation and delivers inner packet",
         "Inner Pod addresses and outer transport addresses serve different layers.",
     ),
     (
@@ -257,14 +259,14 @@ The synthetic topology uses two nodes and two Pod subnets to make the hop sequen
 )
 
 add(
-    "ClusterIP Services and Layer4 routing",
+    "ClusterIP Services and Layer 4 routing",
     ["ClusterIP", "Service selector", "port", "targetPort"],
     """A ClusterIP Service gives clients a stable virtual endpoint for a changing set of backends. The selector usually identifies Pods by labels. The Service port is what clients address; targetPort identifies the backend listener, either numerically or through a named container port. A Service does not select an image name or Deployment name directly.
 
-Layer4 routing concerns transport connections such as TCP. It does not normally choose a backend by HTTP path or rewrite an application URL. HTTP-aware routing belongs to a proxy or controller with that capability. A long-lived TCP connection can continue using one backend even if individual requests are numerous.
+Layer 4 routing concerns transport connections such as TCP. It does not normally choose a backend by HTTP path or rewrite an application URL. HTTP-aware routing belongs to a proxy or controller with that capability. A long-lived TCP connection can continue using one backend even if individual requests are numerous.
 
 A Service can exist with no eligible endpoints. Its ClusterIP allocation is not a health certificate. Read the selector, matching Pod labels, readiness and EndpointSlices, then issue a fresh request from the intended caller. Each observation narrows a different possible failure.""",
-    """The fixture uses Service port80 and named targetPort http, resolving to containerPort8080 on the selected Pod. Named ports help avoid duplicating a number but still need a matching declaration and real listener. Protocol defaults and transport type should be explicit when teaching non-TCP workloads.
+    """The fixture uses Service port 80 and named targetPort http, resolving to containerPort 8080 on the selected Pod. Named ports help avoid duplicating a number but still need a matching declaration and real listener. Protocol defaults and transport type should be explicit when teaching non-TCP workloads.
 
 A selectorless Service can be paired with manually managed EndpointSlices, but it has a different ownership model and extra restrictions. This introductory fixture uses selectors so the controller maintains endpoints. Do not manually edit controller-owned slices to hide a wrong selector.""",
     "client -> ClusterIP:80 -> service data plane -> ready endpoint PodIP:8080\nselector labels -> endpoint controller -> EndpointSlice addresses and ports",
@@ -273,7 +275,7 @@ A selectorless Service can be paired with manually managed EndpointSlices, but i
         "This is a Service fragment from the maintained fixture.",
         "yaml",
         "type: ClusterIP\nselector:\n  app: network-study\nports:\n  - name: http\n    port: 80\n    targetPort: http",
-        "Clients use80; the named backend port resolves to the app listener8080.",
+        "Clients use 80; the named backend port resolves to the app listener 8080.",
     ),
     (
         "Compare a selector mismatch",
@@ -285,7 +287,7 @@ A selectorless Service can be paired with manually managed EndpointSlices, but i
     [
         (
             "Predict client and backend ports.",
-            "Client80 and backend8080.",
+            "Client 80 and backend 8080.",
             "The two fields belong to different sides of the mapping. The app listener must match the resolved target.",
         ),
         (
@@ -305,7 +307,7 @@ A selectorless Service can be paired with manually managed EndpointSlices, but i
         ),
         (
             "Explain why HTTP path routing is not provided by this Service.",
-            "Layer4 connection selection does not interpret URL paths.",
+            "Layer 4 connection selection does not interpret URL paths.",
             "An HTTP-aware proxy needs a separate configuration and implementation. Keep transport and application routing distinct.",
         ),
         (
@@ -324,7 +326,7 @@ add(
 
 For a typical cluster domain cluster.local, a Service named api in namespace study has a name like api.study.svc.cluster.local. The cluster domain is configurable, so do not hardcode it as a universal fact in a reusable client. A DNS answer establishes name resolution, not a listening process or healthy application.
 
-Caching affects how quickly clients observe changes. Resolver libraries and applications can cache differently, and long-lived connections can continue using an existing destination without a new DNS lookup. Diagnose the actual client behavior before concluding that a DNS record update should have moved every request immediately.""",
+Caching affects how quickly clients observe changes, but what can go stale depends on the Service type. A ClusterIP Service name keeps resolving to the same virtual IP while its endpoints change, so DNS caching does not delay endpoint changes there; staleness comes from long-lived connections that stay on their original backend. A headless Service returns Pod addresses directly, so a cached answer can keep sending new connections to a removed Pod until the record's TTL expires and the client resolves again. Resolver libraries and applications cache differently. Diagnose the actual client behavior before concluding that a DNS record update should have moved every request immediately.""",
     """A Pod’s dnsPolicy and dnsConfig influence resolver behavior. Search suffixes and ndots can cause multiple queries for one short-looking name. NetworkPolicy that blocks DNS can break service discovery even when direct IP transport works.
 
 The fixture’s names are synthetic. Optional host observations should inspect the relevant Pod’s resolver and issue a bounded lookup from the intended namespace. Do not use a successful lookup on the laptop as proof of what a Pod’s resolver sees.""",
@@ -340,7 +342,7 @@ The fixture’s names are synthetic. Optional host observations should inspect t
         "Separate resolution from serving",
         "These observations can disagree without contradiction.",
         "text",
-        "DNS: api ->10.96.0.20\nTCP: connection refused\nHTTP: no response available",
+        "DNS: api -> 10.96.0.20\nTCP: connection refused\nHTTP: no response available",
         "Name resolution succeeded; the failure is later in the path.",
     ),
     [
@@ -366,7 +368,7 @@ The fixture’s names are synthetic. Optional host observations should inspect t
         ),
         (
             "Explain stale behavior after endpoint changes.",
-            "Caching or existing connections can delay fresh destination use.",
+            "For a ClusterIP Service, existing connections keep their old backend because the name still resolves to the same virtual IP; for a headless Service, cached Pod address records can also send new connections to a removed Pod.",
             "Inspect the client lifecycle and resolver policy. Repeatedly changing records without evidence can make the incident harder to interpret.",
         ),
         (
@@ -458,19 +460,19 @@ add(
     ["kube-proxy", "iptables", "nftables", "eBPF"],
     """The Service API describes desired routing behavior. A data-plane implementation turns that intent into packet handling on nodes. kube-proxy is a common component that watches Service and endpoint state and programs the supported backend for the cluster version. Other networking implementations can provide Service routing through eBPF or different mechanisms.
 
-iptables, IPVS and nftables refer to Linux packet-processing facilities with different models and operational properties. Their availability, maturity and support status depend on the Kubernetes and operating-system version. Do not assume every current cluster supports every mode or that an old performance claim applies unchanged.
+On Linux, kube-proxy programs exactly one backend, chosen by its configuration. In Kubernetes 1.37 the default is iptables: a KUBE-SERVICES chain jumps to a per-Service KUBE-SVC chain, which picks a per-endpoint KUBE-SEP chain with random-probability rules, and that chain rewrites the destination (DNAT) to the Pod address. The nftables backend, GA since Kubernetes 1.33 and requiring Linux kernel 5.13 or later, keeps its rules in one `kube-proxy` table with verdict maps and processes endpoint changes more efficiently; the documentation says a future release will make it the default and recommends setting the mode explicitly. In nftables mode NodePort Services answer only on the node's primary addresses by default, not on 127.0.0.1. The IPVS backend uses kernel virtual servers plus iptables helpers; it has been deprecated since Kubernetes 1.35, and the current documentation schedules it to be disabled by default in 1.40 and removed in 1.43, so new clusters should choose nftables or iptables.
 
 An eBPF-based implementation can attach programmable logic at particular kernel hooks. That changes how traffic is handled and observed, but it does not eliminate the need for endpoint identity, policy, routing and application acceptance. The API contract and the implementation evidence remain separate layers.""",
-    """Begin diagnosis by identifying the installed implementation, version and active mode. A Service object can be correct while a node’s programmed state is stale or broken. Conversely, reading a packet rule does not prove the application accepts a connection.
+    """Begin diagnosis by identifying the installed implementation, version and active mode. On a kubeadm-style cluster, including kind, the `mode` field inside the `config.conf` key of the kube-system `kube-proxy` ConfigMap names the backend; an empty value means the release default. A Service object can be correct while a node’s programmed state is stale or broken. Conversely, reading a packet rule does not prove the application accepts a connection.
 
 The course does not modify node packet tables or switch proxy modes. Use the synthetic control/data-plane sequence and consult the prepared environment’s operator documentation. Any privileged host inspection is a separately authorized capability, not part of a browser lesson.""",
     "Service/EndpointSlice API -> watch/reconciliation -> node data-plane state\npacket arrives -> implementation lookup/translation -> selected endpoint -> reply path",
     (
-        "Separate API and implementation",
-        "The same Service intent can have different implementations.",
+        "Identify the active mode before reading rules",
+        "This is a synthetic, abbreviated transcript. The first command reads configuration through the API; the nft commands need a separately authorized shell on one node.",
         "text",
-        "API intent: ClusterIP10.96.0.20:80 -> ready endpoints\nimplementationA: kube-proxy supported kernel mode\nimplementationB: CNI-provided eBPF service routing",
-        "The intended mapping is shared; observation tools and failure modes can differ.",
+        "$ kubectl -n kube-system get configmap kube-proxy -o jsonpath='{.data.config\\.conf}' | grep '^mode'\nmode: nftables\nnode-a# nft list map ip kube-proxy service-ips\n  10.96.0.20 . tcp . 80 : goto service-AB12CD34-lesson/hello/tcp/http\nnode-a# nft list chain ip kube-proxy service-AB12CD34-lesson/hello/tcp/http\n  numgen random mod 2 vmap { 0 : goto endpoint-EF56GH78-lesson/hello/tcp/http__10.244.1.7/8080, 1 : goto endpoint-IJ90KL12-lesson/hello/tcp/http__10.244.2.9/8080 }",
+        "The Service address and port map to one service chain, which picks one of two endpoint chains at random; each endpoint chain then rewrites the destination to a Pod address. In iptables mode the same roles appear as KUBE-SVC and KUBE-SEP chains in `iptables-save -t nat` output.",
     ),
     (
         "Classify a stale-node symptom",
@@ -487,8 +489,8 @@ The course does not modify node packet tables or switch proxy modes. Use the syn
         ),
         (
             "Identify why proxy-mode advice is version-sensitive.",
-            "Support and behavior change with Kubernetes and kernel releases.",
-            "Use the documentation matching the installed environment rather than a universal mode recommendation.",
+            "In Kubernetes 1.37 iptables is the default, nftables has been GA since 1.33 and needs kernel 5.13 or later, and IPVS has been deprecated since 1.35 with removal scheduled, so advice depends on the release and the node kernel.",
+            "A recommendation that was correct for an older release, such as choosing IPVS for performance, can now point at a deprecated backend. Read the documentation for the installed release, check the node kernel, and record the configured mode explicitly so an upgrade cannot change the backend silently.",
         ),
         (
             "Draw the watch-to-packet sequence.",
@@ -522,10 +524,10 @@ add(
 
 A node address must actually be reachable from the client. Desktop cluster nodes may be containers or VMs behind additional network boundaries. A valid NodePort allocation does not automatically open a host firewall, publish a VM port or create an internet route. Local and cloud setups therefore have different external paths.
 
-The commonly seen range30000 through32767 is a default, not a universal constant. Explicit allocations must fit the configured range and avoid collisions. Do not expose a teaching service publicly just to make a diagram seem more realistic.""",
+The commonly seen range 30000 through 32767 is a default, not a universal constant. Explicit allocations must fit the configured range and avoid collisions. Do not expose a teaching service publicly just to make a diagram seem more realistic.""",
     """Read port as the ClusterIP-facing Service port, targetPort as the Pod listener and nodePort as the node-facing port. The application still listens at its target endpoint. externalTrafficPolicy can affect endpoint selection and source address behavior, covered in a later chapter.
 
-The example uses nodePort30080 only in a manual fixture. The ordinary classroom adapter does not admit this wider networking operation. A local kind setup needs deliberately prepared port mappings or another supported access route before host-browser acceptance is possible.""",
+The example uses nodePort 30080 only in a manual fixture. The ordinary classroom adapter does not admit this wider networking operation. A local kind setup needs deliberately prepared port mappings or another supported access route before host-browser acceptance is possible.""",
     "external client -> reachable nodeIP:30080 -> Service data plane -> PodIP:8080\ninternal client -> ClusterIP:80 -> same logical Service -> eligible Pod",
     (
         "Read all three ports",
@@ -544,7 +546,7 @@ The example uses nodePort30080 only in a manual fixture. The ordinary classroom 
     [
         (
             "Label port, targetPort and nodePort.",
-            "80,8080 and30080 serve distinct path positions.",
+            "80, 8080 and 30080 serve distinct path positions.",
             "A request must use the port appropriate to its caller and destination address.",
         ),
         (
@@ -656,14 +658,14 @@ Ingress remains a supported API, while Gateway API offers a more expressive role
         "This is a fragment for an explicitly prepared controller.",
         "yaml",
         "rules:\n  - host: study.example.test\n    http:\n      paths:\n        - path: /\n          pathType: Prefix\n          backend:\n            service:\n              name: network-study\n              port:\n                number: 80",
-        "The API backend references Service port80. The controller may resolve it to Pod listener8080 directly or route through the ClusterIP, according to its documented upstream mode.",
+        "The API backend references Service port 80. The controller may resolve it to Pod listener 8080 directly or route through the ClusterIP, according to its documented upstream mode.",
     ),
     (
         "Separate proxy route and app route",
         "No rewrite is implied in this example.",
         "text",
-        "client GET /reports -> Ingress forwards /reports -> app receives /reports\napp has only / -> app may return404",
-        "A matched Ingress rule does not guarantee the application implements the forwarded path. The maintained original fixture serves /version with ds60-fixture-v1 plus a newline and /ready with ready plus a newline; / returns404. Use /version for the positive routing check rather than expecting the root path to succeed.",
+        "client GET /reports -> Ingress forwards /reports -> app receives /reports\napp has only / -> app may return 404",
+        "A matched Ingress rule does not guarantee the application implements the forwarded path. The maintained original fixture serves /version with ds60-fixture-v1 plus a newline and /ready with ready plus a newline; / returns 404. Use /version for the positive routing check rather than expecting the root path to succeed.",
     ),
     [
         (
@@ -682,7 +684,7 @@ Ingress remains a supported API, while Gateway API offers a more expressive role
             "The API references the Service, while the controller may proxy directly to derived Pod endpoints or use ClusterIP routing. Name the actual implementation path.",
         ),
         (
-            "Diagnose an app404 after a matched prefix route.",
+            "Diagnose an app 404 after a matched prefix route.",
             "The forwarded path may not exist in the application.",
             "Inspect rewrite behavior and actual request path. A proxy match only chooses a backend.",
         ),
@@ -692,7 +694,7 @@ Ingress remains a supported API, while Gateway API offers a more expressive role
             "Copying annotations from another controller can be ignored or behave differently. Use the prepared implementation documentation.",
         ),
         (
-            "Compare Ingress and a Layer4 Service.",
+            "Compare Ingress and a Layer 4 Service.",
             "Ingress interprets HTTP routing; the Service handles transport endpoint selection.",
             "Choose the mechanism according to the protocol and routing requirement rather than treating both as generic public exposure switches.",
         ),
@@ -771,7 +773,7 @@ add(
 
 TLS termination means a component decrypts the client connection and may open another connection upstream. A load balancer, Ingress controller or Gateway can terminate TLS. The proxy-to-application hop then has its own protocol and trust requirements. Client-to-proxy encryption does not automatically encrypt the upstream hop.
 
-SNI communicates the requested server name during the TLS handshake so a listener can select an appropriate certificate. HTTP Host routing occurs after a successful HTTP-capable connection. A certificate mismatch and an HTTP404 are failures at different stages and need different diagnosis.""",
+SNI communicates the requested server name during the TLS handshake so a listener can select an appropriate certificate. HTTP Host routing occurs after a successful HTTP-capable connection. A certificate mismatch and an HTTP 404 are failures at different stages and need different diagnosis.""",
     """Kubernetes commonly stores certificate/key material in a Secret referenced by the controller configuration. Secret base64 encoding is not encryption. Do not include a private key in a lesson fixture or print Secret data during inspection. The fixture uses no real certificate and does not request one from an external authority.
 
 For a real owned lab, validate the hostname, listener protocol, certificate reference, controller support and upstream policy. Never teach disabling certificate verification as the normal solution to a mismatched name. A self-signed teaching certificate needs an explicitly scoped trust setup, not global trust changes.""",
@@ -780,7 +782,7 @@ For a real owned lab, validate the hostname, listener protocol, certificate refe
         "Classify two failures",
         "These are intentionally synthetic symptoms.",
         "text",
-        "TLS name mismatch: client cannot verify requested identity\nHTTP404: an HTTP server responded but route/content was not found",
+        "TLS name mismatch: client cannot verify requested identity\nHTTP 404: an HTTP server responded but route/content was not found",
         "The second occurs after a successful enough transport exchange to receive HTTP.",
     ),
     (
@@ -807,7 +809,7 @@ For a real owned lab, validate the hostname, listener protocol, certificate refe
             "Useful validation does not require publishing sensitive material. Keep credentials in the prepared private channel.",
         ),
         (
-            "Diagnose certificate mismatch separately from404.",
+            "Diagnose certificate mismatch separately from 404.",
             "Identity validation versus HTTP routing/content.",
             "Repair the first failing layer. Changing backend selectors cannot fix an invalid certificate name.",
         ),
@@ -842,7 +844,7 @@ The synthetic examples explain the tradeoff without asserting a particular provi
         "Trace a translated source",
         "These addresses are illustrative only.",
         "text",
-        "original source198.51.100.25\nbackend observes192.0.2.10 after source translation\nheader says198.51.100.25 only if a trusted proxy supplied it",
+        "original source 198.51.100.25\nbackend observes 192.0.2.10 after source translation\nheader says 198.51.100.25 only if a trusted proxy supplied it",
         "Transport peer and reported original client can differ.",
     ),
     (
@@ -896,7 +898,7 @@ add(
 A StatefulSet provides stable Pod identities and ordered-management semantics under its configuration. Stable names do not mean a Pod process never changes, and storage retention does not guarantee application replication or consistency. A replacement Pod can have a new UID while keeping a stable logical name.
 
 Stateful systems often need bootstrap discovery before every peer is ready. publishNotReadyAddresses can alter which endpoints are published, but it also exposes clients to peers that are not ready for ordinary work. Use it only with a protocol that understands the distinction between discovery and serving.""",
-    """The headless Service fixture names the same selector but sets clusterIP to None. Its A/AAAA answers identify Pod addresses directly. There is no virtual-IP proxy translating Service port80 into targetPort 8080: a client using those addresses must connect to the actual endpoint listener8080. A client using SRV discovery must honor the returned endpoint port and target. A/AAAA records carry addresses only, so those clients need the listener port from their application configuration. For this fixture, request http://network-study-headless:8080/version; the successful body is ds60-fixture-v1 plus a newline. The named-port SRV query uses _http._tcp.network-study-headless with the actual namespace and cluster domain, and a capable client honors each returned target/port. Merely requesting headless-name:80 would not reach this fixture’s 8080 listener.
+    """The headless Service fixture names the same selector but sets clusterIP to None. Its A/AAAA answers identify Pod addresses directly. There is no virtual-IP proxy translating Service port 80 into targetPort 8080: a client using those addresses must connect to the actual endpoint listener 8080. A client using SRV discovery must honor the returned endpoint port and target. A/AAAA records carry addresses only, so those clients need the listener port from their application configuration. For this fixture, request http://network-study-headless:8080/version; the successful body is ds60-fixture-v1 plus a newline. The named-port SRV query uses _http._tcp.network-study-headless with the actual namespace and cluster domain, and a capable client honors each returned target/port. Merely requesting headless-name:80 would not reach this fixture’s 8080 listener.
 
 A StatefulSet’s serviceName ties its network identity to a governing Service. DNS names depend on Pod identity, service, namespace and cluster domain.
 
@@ -913,7 +915,7 @@ A client receiving several addresses must implement its own selection, retries a
         "Separate logical and process identity",
         "A replacement changes a concrete instance.",
         "text",
-        "logical peer: store-0\nbefore Pod UID:uid-old\nafter Pod UID:uid-new\nretained claim:explicit persistent storage identity",
+        "logical peer: store-0\nbefore Pod UID: uid-old\nafter Pod UID: uid-new\nretained claim: explicit persistent storage identity",
         "Stable naming and retained storage are distinct from an unchanged process.",
     ),
     [
@@ -1147,10 +1149,12 @@ add(
 
 Spreading replicas across zones can improve resilience to a zone failure, but only if scheduling, storage and dependencies also span the required failure domains. A local preference can concentrate traffic on a small number of endpoints if placement is uneven. Capacity and availability must be considered together.
 
-Topology features evolve with Kubernetes versions. Fields, hints and traffic-distribution semantics should be read for the actual release and data plane. The lesson teaches the reasoning with a synthetic two-zone example and does not promise that every local kind cluster can reproduce cloud-zone behavior.""",
+Kubernetes 1.37 offers two Service-level mechanisms. The `spec.trafficDistribution` field accepts `PreferSameZone`, which sends a caller's traffic to ready endpoints in its own zone and falls back cluster-wide when that zone has none, and `PreferSameNode`, which prefers the caller's node, then its zone, then the cluster. `PreferClose`, the first value to reach GA in 1.33, is now a deprecated alias for `PreferSameZone`. The older `service.kubernetes.io/topology-mode: Auto` annotation assigns zone hints in proportion to allocatable CPU, includes safeguards for small endpoint counts and takes precedence over the field when both are set. Without either, traffic is spread across all ready endpoints. The EndpointSlice controller publishes these preferences as hints, and the service proxy must honor them. The lesson's synthetic two-zone example does not promise that a local kind cluster reproduces cloud-zone behavior.""",
     """Separate workload placement from traffic selection. Topology spread constraints influence where Pods can be scheduled; Service routing policy influences which eligible endpoint a caller uses. One does not automatically configure the other.
 
-For the synthetic example, zoneA has two ready app endpoints and zoneB has one. A local-only rule can overload the single endpoint in zoneB even when total cluster capacity appears sufficient. A failover policy must define what happens when a zone has no eligible local endpoint.""",
+For the synthetic example, zoneA has two ready app endpoints and zoneB has one. A local-only rule can overload the single endpoint in zoneB even when total cluster capacity appears sufficient. A failover policy must define what happens when a zone has no eligible local endpoint.
+
+A spread constraint such as `maxSkew: 1` with `topologyKey: topology.kubernetes.io/zone` and `whenUnsatisfiable: DoNotSchedule` keeps the per-zone counts of matching Pods within one of each other, which is what keeps zone preferences safe. `PreferSameZone` does not rebalance load: a zone with one endpoint sends all of its traffic there. The stricter `internalTrafficPolicy: Local` uses only endpoints on the caller's node and drops traffic when there are none, so it is a requirement rather than a preference.""",
     "scheduler placement -> endpoint distribution across nodes/zones\ncaller location + routing policy -> eligible/preferred endpoint set\ncapacity and failover behavior -> actual latency and availability",
     (
         "Compare two-zone capacity",
@@ -1161,10 +1165,10 @@ For the synthetic example, zoneA has two ready app endpoints and zoneB has one. 
     ),
     (
         "Separate placement and routing",
-        "Both decisions need their own configuration.",
-        "text",
-        "spread constraint: where replicas may run\ntraffic preference: where a caller sends requests\nfailover rule: what happens when nearby endpoints are absent",
-        "A spread configuration alone does not prove local routing.",
+        "The Service field sets a routing preference; the Deployment excerpt sets a scheduling rule. Both use the synthetic hello labels.",
+        "yaml",
+        "apiVersion: v1\nkind: Service\nmetadata:\n  name: hello\nspec:\n  selector:\n    app: hello\n  ports:\n    - name: http\n      port: 80\n      targetPort: http\n  trafficDistribution: PreferSameZone\n---\n# Deployment Pod template excerpt: spec.template.spec\ntopologySpreadConstraints:\n  - maxSkew: 1\n    topologyKey: topology.kubernetes.io/zone\n    whenUnsatisfiable: DoNotSchedule\n    labelSelector:\n      matchLabels:\n        app: hello",
+        "The spread constraint keeps the per-zone counts of hello Pods within one of each other; the Service field makes each caller prefer ready endpoints in its own zone and fall back cluster-wide only when its zone has none. Neither setting configures the other.",
     ),
     [
         (
@@ -1189,8 +1193,8 @@ For the synthetic example, zoneA has two ready app endpoints and zoneB has one. 
         ),
         (
             "Explain version-dependent topology behavior.",
-            "Use the actual API/controller/data-plane support matrix.",
-            "Do not copy a field from a newer tutorial into an older cluster and infer it is enforced.",
+            "Name the trafficDistribution values the pinned release accepts (PreferSameZone, PreferSameNode and the deprecated PreferClose), the precedence of the topology-mode annotation and whether the data plane honors EndpointSlice hints.",
+            "Do not copy a field from a newer tutorial into an older cluster and infer it is enforced. A service proxy that ignores the hints, or an annotation that takes precedence, changes the actual routing even when the Service field is accepted by the API server.",
         ),
         (
             "Defend a locality tradeoff.",
@@ -1200,6 +1204,7 @@ For the synthetic example, zoneA has two ready app endpoints and zoneB has one. 
     ],
     "https://kubernetes.io/docs/concepts/services-networking/topology-aware-routing/",
     "https://kubernetes.io/docs/concepts/scheduling-eviction/topology-spread-constraints/",
+    "https://kubernetes.io/docs/reference/networking/virtual-ips/#traffic-distribution",
 )
 
 add(
@@ -1225,7 +1230,7 @@ During a rollout, inspect desired generation, updated replicas, ready endpoints 
         "Diagnose a masked failed rollout",
         "This is a synthetic observation.",
         "text",
-        "old revision:2 Ready Pods\nnew revision:2 Pods failing readiness\nService request:200 from old revision",
+        "old revision: 2 Ready Pods\nnew revision: 2 Pods failing readiness\nService request: 200 from old revision",
         "Availability can remain while the intended new revision is not accepted.",
     ),
     [
@@ -1245,7 +1250,7 @@ During a rollout, inspect desired generation, updated replicas, ready endpoints 
             "Account for propagation and existing connections. Application cleanup must fit the configured grace period.",
         ),
         (
-            "Diagnose200 responses during a failed new rollout.",
+            "Diagnose 200 responses during a failed new rollout.",
             "Identify the serving revision and new-revision readiness separately.",
             "Old replicas can mask the failure. Preserve image and Pod identity in acceptance evidence.",
         ),
@@ -1280,7 +1285,7 @@ The fixture supplies synthetic event and request records to practice correlation
         "Classify evidence types",
         "These are distinct synthetic signals.",
         "text",
-        "event: FailedScheduling for Pod UID-A\nlog: request idR returned503\nmetric: request duration histogram for serviceapi\ntrace: spans for requestR across proxy and app",
+        "event: FailedScheduling for Pod UID-A\nlog: request idR returned 503\nmetric: request duration histogram for serviceapi\ntrace: spans for requestR across proxy and app",
         "Each signal answers a different question and can have a different retention period.",
     ),
     (
@@ -1404,7 +1409,7 @@ This chapter is design and reading practice. The course does not install a mesh,
         "Separate identity and authorization",
         "A valid workload identity is only one input to policy.",
         "text",
-        "mTLS peer identity: serviceA\napplication action: read account123\nauthorization decision: separate policy for that action",
+        "mTLS peer identity: serviceA\napplication action: read account 123\nauthorization decision: separate policy for that action",
         "An authenticated service is not automatically allowed every business operation.",
     ),
     (
@@ -1473,7 +1478,7 @@ Use the same source and object identities throughout a run. Record a fresh respo
         "Choose one controlled fault",
         "The exercise changes exactly one field in a copied source.",
         "text",
-        "fault: Service targetPort points to8081 while app listens on8080\nobserve: endpoints/ports and failed request\nrepair: restore intended target mapping\nrecheck: fresh response from current revision",
+        "fault: Service targetPort points to 8081 while app listens on 8080\nobserve: endpoints/ports and failed request\nrepair: restore intended target mapping\nrecheck: fresh response from current revision",
         "The repair addresses the identified mismatch without broadening exposure or permissions.",
     ),
     [

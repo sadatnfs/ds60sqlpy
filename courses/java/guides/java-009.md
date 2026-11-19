@@ -6,7 +6,7 @@ Beginner, approximately 90 minutes. Direct prerequisites: `java-008`
 
 ## Learning objectives
 
-Explain checked exception, resource lifetime, suppressed exception using a concrete program. Trace the normal execution, identify its boundary assumptions and make a failure case observable. The first investigation is Open a Probe resource, record body, then inspect closure order. The final exercise transfers the mechanism to retain a translated cause.
+Manage resources with try-with-resources and read close order, suppressed exceptions and translated causes. Along the way, explain checked exception, resource lifetime, suppressed exception using a concrete program. Trace the normal execution, identify its boundary assumptions and make a failure case observable. Exercises 1 and 2 start from the worked examples; the authored investigations begin with this task: Throw IllegalStateException in the body and inspect events after catching it. The final exercise transfers the mechanism to retain a translated cause.
 
 ## Purpose and mental model
 
@@ -37,7 +37,7 @@ The public class name and source filename must agree. Each worked example below 
 
 ## Syntax anatomy and execution trace
 
-A try(resource declarations) block owns the declared resources until control exits. AutoCloseable.close may throwException. getSuppressed exposes secondary close failures. Use a specific catch when a failure is expected, and preserve the original cause when translating to a domain exception. A finally block is useful for cleanup patterns not covered by resources, but throwing from finally can replace an important earlier failure.
+A try(resource declarations) block owns the declared resources until control exits. AutoCloseable.close may throw Exception. getSuppressed exposes secondary close failures. Use a specific catch when a failure is expected, and preserve the original cause when translating to a domain exception. A finally block is useful for cleanup patterns not covered by resources, but throwing from finally can replace an important earlier failure.
 
 ## Worked example / walkthrough
 
@@ -123,7 +123,7 @@ public class Main {
 }
 ```
 
-**Expected:** closeB beforecloseA.
+**Expected:** closeB before close A.
 
 ## Prediction before your attempt
 
@@ -131,29 +131,29 @@ Read the source from the entry point and name each value before executing it. Id
 
 ## Exercises
 
-1. **Close on normal completion.** Open a Probe resource, record body, then inspect closure order.
-   **Expected:** events body, close A.
-   **Verify:** Compare your assertion values or captured diagnostic with events body, close A.
+1. **Close on normal completion: change one input.** Copy Example A into a scratch `Main.java` and change `try (Probe resource = new Probe("A", events, false)) {` to `try (Probe resource = new Probe("A!", events, false)) {`. Before running it with `java -ea Main`, predict which assertion fails and which value it now sees; then run it and restore the original line.
+   **Expected:** The changed run fails with an `AssertionError` from the assertion on `events.equals(List.of("body", "closeA"))`. Restoring the original line brings back the worked observation: events body, close A.
+   **Verify:** Compare your written prediction with the reported `AssertionError` and its stack-trace line, and name the value that made `events.equals(List.of("body", "closeA"))` false. After restoring the line, the program completes without an `AssertionError` again.
 
-2. **Close in reverse order.** Declare resourcesA thenB and leave the block.
-   **Expected:** closeB beforecloseA.
-   **Verify:** Compare your assertion values or captured diagnostic with closeB beforecloseA.
+2. **Close in reverse order: debug a regression.** A regression changed one token in the code that Example B adds after Example A, so one line now reads `try (Probe a = new Probe("A!", events, false); Probe b = new Probe("B", events, false)) {`. Run Example B with that line, use the failing assertion to locate the defect and repair it without changing the assertion.
+   **Expected:** Before the repair the run fails with an `AssertionError` from the assertion on `events.equals(List.of("body", "closeB", "closeA"))`; after it the line reads `try (Probe a = new Probe("A", events, false); Probe b = new Probe("B", events, false)) {` again and closeB before close A.
+   **Verify:** Keep the failing and the repaired runs. Explain why the changed token alters the value tested by `events.equals(List.of("body", "closeB", "closeA"))` for this input.
 
 3. **Close after body failure.** Throw IllegalStateException in the body and inspect events after catching it.
    **Expected:** close A still recorded.
-   **Verify:** Compare your assertion values or captured diagnostic with close A still recorded.
+   **Verify:** Keep an assertion equivalent to `bodyFailed && events.equals(List.of("closeA"))`. As a control, change `bodyFailed = true;` to `bodyFailed = false;`: the run must fail with an `AssertionError` from the assertion on `bodyFailed && events.equals(List.of("closeA"))`. Restore the line before continuing.
 
 4. **Preserve suppressed close failure.** Make the body throw and the resource close throw too.
-   **Expected:** primary message body;one suppressed exceptioncloseA.
-   **Verify:** Compare your assertion values or captured diagnostic with primary message body;one suppressed exceptioncloseA.
+   **Expected:** primary message body; one suppressed exception close A.
+   **Verify:** Keep an assertion equivalent to `expected.getSuppressed()[0].getMessage().equals("closeA")`. As a control, change `try (Probe a = new Probe("A", events, true)) {` to `try (Probe a = new Probe("A!", events, true)) {`: the run must fail with an `AssertionError` from the assertion on `expected.getSuppressed()[0].getMessage().equals("closeA")`. Restore the line before continuing.
 
-5. **Observe close-only failure.** Let the body succeed but close throwIOException.
-   **Expected:** IOExceptioncloseA is primary.
-   **Verify:** Compare your assertion values or captured diagnostic with IOExceptioncloseA is primary.
+5. **Observe close-only failure.** Let the body succeed but close throw IOException.
+   **Expected:** IOException close A is primary.
+   **Verify:** Keep an assertion equivalent to `closeFailed`. As a control, change `try (Probe a = new Probe("A", events, true)) {} catch (java.io.IOException expected) {` to `try (Probe a = new Probe("A", events, false)) {} catch (java.io.IOException expected) {`: the run must fail with an `AssertionError` from the assertion on `closeFailed`. Restore the line before continuing.
 
 6. **Retain a translated cause.** Wrap an IOException in IllegalStateException with a domain message and inspect cause.
    **Expected:** cause remains the original IOException.
-   **Verify:** Compare your assertion values or captured diagnostic with cause remains the original IOException.
+   **Verify:** Keep an assertion equivalent to `translated.getCause() == original && translated.getMessage().contains("fixture")`. As a control, change `assert translated.getCause() == original && translated.getMessage().contains("fixture");` to `assert translated.getCause() == original && translated.getMessage().contains("fixture!");` inside it: the run must fail with an `AssertionError`, which shows the assertion can fail. Restore it.
 
 ## Common pitfalls and diagnosis
 
@@ -163,7 +163,14 @@ Do not replace a precise exception with a catch-all that returns a plausible def
 
 ## Progressive hints
 
-First reconstruct the values and identities in the worked example. Next isolate the line that changes the result when one input is altered. Finally compare the normal and failure paths with the stated contract. Use a small table of input, expected value, actual value and exception type. Ask for one hint about the first incorrect assumption before requesting the entire reference implementation.
+Read one hint at a time and attempt the exercise again before reading the next. Keep a small table of input, expected value, actual value and exception type. Ask for one hint about the first incorrect assumption before requesting the entire reference implementation.
+
+- **Exercise 1:** First restate the expected observation: events body, close A. Then list the values read by `events.equals(List.of("body", "closeA"))` and trace each one from its declaration. Finally, compute the asserted value with `try (Probe resource = new Probe("A!", events, false)) {` in place before running.
+- **Exercise 2:** First restate the expected observation: closeB before close A. Then list the values read by `events.equals(List.of("body", "closeB", "closeA"))` and trace each one from its declaration. Finally, compare `try (Probe a = new Probe("A!", events, false); Probe b = new Probe("B", events, false)) {` with the same line in Example B and state the claim each version makes.
+- **Exercise 3:** First restate the expected observation: close A still recorded. Then list the values read by `bodyFailed && events.equals(List.of("closeA"))` and trace each one from its declaration. Finally, predict the effect of changing `bodyFailed = true;` to `bodyFailed = false;` before running anything.
+- **Exercise 4:** First restate the expected observation: primary message body; one suppressed exception close A. Then list the values read by `expected.getSuppressed()[0].getMessage().equals("closeA")` and trace each one from its declaration. Finally, predict the effect of changing `try (Probe a = new Probe("A", events, true)) {` to `try (Probe a = new Probe("A!", events, true)) {` before running anything.
+- **Exercise 5:** First restate the expected observation: IOException close A is primary. Then list the values read by `closeFailed` and trace each one from its declaration. Finally, predict the effect of changing `try (Probe a = new Probe("A", events, true)) {} catch (java.io.IOException expected) {` to `try (Probe a = new Probe("A", events, false)) {} catch (java.io.IOException expected) {` before running anything.
+- **Exercise 6:** First restate the expected observation: cause remains the original IOException. Then list the values read by `translated.getCause() == original && translated.getMessage().contains("fixture")` and trace each one from its declaration. Finally, name one input that would make `translated.getCause() == original && translated.getMessage().contains("fixture")` false.
 
 ## Self-check and retrieval
 
@@ -175,7 +182,7 @@ Preserve the saved pad and the six exercise observations. Continue to the next l
 
 ## Sources and verification status
 
-[Official Java21 API or language reference](https://docs.oracle.com/en/java/javase/21/docs/api/index.html), reviewed2026-10-22. Examples and exercise fixtures are original course material. Use the [validation guide](../../../docs/validation.md) and CI artifacts for the exact revision and platform to inspect actual compile/run results. Authoring, parsing, compilation, execution and learner mastery are separate forms of evidence.
+[Official Java 21 API or language reference](https://docs.oracle.com/en/java/javase/21/docs/api/index.html), reviewed 2026-10-22. Examples and exercise fixtures are original course material. Use the [validation guide](../../../docs/validation.md) and CI artifacts for the exact revision and platform to inspect actual compile/run results. Authoring, parsing, compilation, execution and learner mastery are separate forms of evidence.
 
 ## Ask an AI tutor about this lesson
 
@@ -185,7 +192,7 @@ Read courses/java/guides/java-009.md and courses/java/lessons/java-009.java. Dir
 Explain the mechanism, ask for a prediction, review my attempt, give one hint,
 request compiler/runtime evidence, and ask a fresh retrieval question.
 Keep courses/java/solutions/ closed until I request comparison or show an attempt.
-Use Java21 and the declared offline fixture. Done when I can explain the state
+Use Java 21 and the declared offline fixture. Done when I can explain the state
 transitions, pass all six exercise contracts, diagnose one failure and solve a
 new boundary case without copying the solution.
 ```

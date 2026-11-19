@@ -2,7 +2,9 @@
 
 ## Level and prerequisites
 
-Advanced; about 130 minutes, plus any optional hardware experiment. Direct prerequisites: `cuda-051`, `cuda-052`, `cuda-061`, `cuda-097`, `cuda-098`
+Advanced; about 130 minutes, plus any optional hardware experiment. Direct prerequisites: `cuda-051`, `cuda-052`, `cuda-061`
+
+The framework-binding part of this capstone also uses `cuda-097` (a Python API over a CUDA C++ operator) and `cuda-098` (backward as part of the operator) from the Python branch. They come later in the subject order, so read them before that part rather than treating them as a gate for opening this chapter.
 
 The order supports learning at your own pace. Reading and CPU reasoning remain
 available when NVIDIA hardware is absent. Advanced hardware features need their
@@ -10,9 +12,10 @@ own capability checks and are not prerequisites for opening this chapter.
 
 ## Learning objectives
 
-Explain capstone: a custom ML operator that earns its existence using the concrete cases below. Produce supported-contract documentation, forward and backward tests, invalid-input behavior, end-to-end measurement and an honest decision to keep or reject the custom kernel.
-Distinguish an algorithmic calculation, a compiled artifact and an actual device
-observation when explaining what your work establishes.
+Work through *Capstone: a custom ML operator that earns its existence* with the concrete cases below. Finish with this evidence:
+supported-contract documentation, forward and backward tests, invalid-input behavior, end-to-end measurement and an honest decision to keep or reject the custom kernel. Distinguish an algorithmic
+calculation, a compiled artifact and an actual device observation when explaining
+what your work establishes.
 
 ## Purpose, vocabulary and mental model
 
@@ -28,28 +31,20 @@ This derivative assumes a and b are constant with respect to the input. Paramete
 
 ## How to run and study this lesson
 
-Open this chapter in `/classroom` and use its saved reading worksheet. The primary
-reading pad does not execute CUDA. The two examples, six tasks and separate
-explanations are usable offline on macOS, Linux and Windows through WSL 2 with
-the ordinary classroom. An AMD, Intel or Apple GPU does not make this CUDA C++
-source executable through Docker.
-
-For the bounded CPU calculation, select **CPU model (Python)** in this lesson.
-That variant keeps its own source and result history under the same chapter. Its
-answer-free starter supplies literal fixtures and the task contract; implement
-the model and assertions before replacing its deliberate incomplete-work error.
-The separate [CPU reference](../references/cuda-064_cpu.py) uses only Python's
-standard library. For an optional terminal workflow, run this from the repository
-root in a prepared Python environment:
+Use the saved reading worksheet in `/classroom`; the reading pad does not execute
+CUDA. For the bounded calculation, select **CPU model (Python)**, whose
+answer-free starter supplies the literal fixtures and task contract. The
+[CUDA C++ study workflow](../README.md) covers platforms, optional GPU
+compilation and evidence labels. In a prepared Python environment you can also
+run the separate [CPU reference](../references/cuda-064_cpu.py) from the
+repository root:
 
 ```sh
 python courses/cuda/cpp/references/cuda-064_cpu.py
 ```
 
-The assertions check the stated numerical result or model invariant. Console text
-is evidence of this CPU reference only. The [CUDA C++ study workflow](../README.md)
-explains optional GPU compilation, paths, hardware requirements and evidence labels.
-No lesson opening downloads a model, installs a driver or starts a GPU job.
+Its assertions check the stated numerical result or model invariant; console
+text is evidence of this CPU model only, not of CUDA execution.
 
 ## Worked example 1: trace the mechanism
 
@@ -86,10 +81,9 @@ print({"forward": forward, "CPU_finite_difference_gradients": gradients})
 {'forward': [-2.0, 1.0, 7.0], 'CPU_finite_difference_gradients': [3.000000000019653, 2.9999999999752442, 3.000000000064062]}
 ```
 
-Tiny floating-point display differences across platforms are acceptable only
-where the explicit assertions use a tolerance; integers, shapes and ordering
-must still satisfy their exact contracts. A printed hypothetical duration is a
-model output, not a measured GPU benchmark.
+Integers, shapes and ordering must match exactly; only assertions with an explicit
+tolerance accept small floating-point differences. A printed duration is a model
+output, not a measured GPU benchmark.
 
 ## Worked example 2: change a meaningful condition
 
@@ -101,75 +95,55 @@ valid. Keep the original case as a regression check when changing a boundary.
 
 ## Six progressive exercises
 
+Exercises 1 and 2 are guided reconstructions of the worked examples; exercises
+3-6 change an input, diagnose a defect, test a boundary and transfer the idea.
+For each one, keep the calculation, output, diagram or failure policy you
+produce so another reader can compare it with the worked cases. If the hint is
+not enough, reread the mechanism paragraph and the bounded CPU assertion.
+
 ### Exercise 1
 
 Predict and trace the first worked example before running its CPU reference. Write every intermediate quantity that leads to the stated result, including units or ownership where applicable.
 
-**Self-check:** Retain the requested calculation, output, diagram or explicit failure policy so another reader can compare it with the worked cases.
-
-**Hint 1:** Start with the literal input and intermediate quantities in worked example 1.
-
-**Hint 2:** Review the mechanism paragraph and the relevant bounded CPU assertion; separate mathematical reasoning from optional device evidence.
+**Hint:** Start with the literal input and intermediate quantities in worked example 1.
 
 ### Exercise 2
 
 Reconstruct the second worked example without copying its conclusion. Identify the changed input or condition, show the resulting calculation or dependency, and explain why it differs from the first example.
 
-**Self-check:** Retain the requested calculation, output, diagram or explicit failure policy so another reader can compare it with the worked cases.
-
-**Hint 1:** Identify exactly which condition changes in worked example 2.
-
-**Hint 2:** Review the mechanism paragraph and the relevant bounded CPU assertion; separate mathematical reasoning from optional device evidence.
+**Hint:** Identify exactly which condition changes in worked example 2.
 
 ### Exercise 3
 
 Compute input gradients for loss=sum(3*x+1).
 
-**Self-check:** Retain the requested calculation, output, diagram or explicit failure policy so another reader can compare it with the worked cases.
-
-**Hint 1:** Use the first worked example to establish the relevant quantities, then change only the requested input.
-
-**Hint 2:** Review the mechanism paragraph and the relevant bounded CPU assertion; separate mathematical reasoning from optional device evidence.
+**Hint:** Use the first worked example to establish the relevant quantities, then change only the requested input.
 
 ### Exercise 4
 
 A kernel assumes contiguous tensors but accepts transposed views. Diagnose it.
 
-**Self-check:** Retain the requested calculation, output, diagram or explicit failure policy so another reader can compare it with the worked cases.
-
-**Hint 1:** Locate the failed phase or violated dependency before proposing a repair.
-
-**Hint 2:** Review the mechanism paragraph and the relevant bounded CPU assertion; separate mathematical reasoning from optional device evidence.
+**Hint:** Locate the failed phase or violated dependency before proposing a repair.
 
 ### Exercise 5
 
 What should an unsupported dtype do?
 
-**Self-check:** Retain the requested calculation, output, diagram or explicit failure policy so another reader can compare it with the worked cases.
-
-**Hint 1:** Check what the algorithm is allowed to read, write or assume at this boundary.
-
-**Hint 2:** Review the mechanism paragraph and the relevant bounded CPU assertion; separate mathematical reasoning from optional device evidence.
+**Hint:** Check what the algorithm is allowed to read, write or assume at this boundary.
 
 ### Exercise 6
 
 Define final acceptance for the custom operator.
 
-**Self-check:** Retain the requested calculation, output, diagram or explicit failure policy so another reader can compare it with the worked cases.
-
-**Hint 1:** State the output contract and which observations are needed in the new application.
-
-**Hint 2:** Review the mechanism paragraph and the relevant bounded CPU assertion; separate mathematical reasoning from optional device evidence.
+**Hint:** State the output contract and which observations are needed in the new application.
 
 ## Common mistakes and diagnosis
 
 A tempting but incorrect claim in this chapter is: **faster forward execution alone proves the operator improves training or is safe for arbitrary framework tensors.**
 
 For the concrete failure exercise, a kernel assumes contiguous tensors but accepts transposed views. Diagnose it.
-Preserve the original input and the stage where behavior diverged. Compare with
-the CPU model or dependency diagram before changing hardware configuration.
-A compiler result, synthetic timing model, profiler counter and returned numeric
-answer support different claims. Record unavailable hardware honestly.
+Preserve the original input and the stage where behavior diverged, and compare
+with the CPU model before changing hardware configuration.
 
 ## Self-check, retrieval and transfer
 
@@ -182,9 +156,8 @@ choice; it does not certify hardware qualification or expert mastery.
 
 ## Primary references
 
-These are further technical references. The chapter and local CPU model remain
-readable offline. Check the documentation matching your deliberately prepared
-toolkit before optional hardware execution.
+Check the documentation that matches your prepared toolkit before optional
+hardware execution.
 
 - [CUDA Programming Guide](https://docs.nvidia.com/cuda/cuda-programming-guide/)
 
@@ -193,7 +166,7 @@ toolkit before optional hardware execution.
 ```text
 Use $guide-ds60sqlpy-learning for cuda-064: Capstone: a custom ML operator that earns its existence.
 Read courses/cuda/cpp/guides/cuda-064.md and courses/cuda/cpp/lessons/cuda-064.md.
-Direct prerequisites: `cuda-051`, `cuda-052`, `cuda-061`, `cuda-097`, `cuda-098`
+Direct prerequisites: `cuda-051`, `cuda-052`, `cuda-061`
 Review my own explanation and worksheet; give one progressive hint at a time.
 Keep courses/cuda/cpp/solutions/cuda-064_solutions.md and GPU references closed until I request comparison.
 Treat courses/cuda/cpp/references/cuda-064_cpu.py as CPU model evidence, never a CUDA execution receipt.

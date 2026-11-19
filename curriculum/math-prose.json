@@ -1097,14 +1097,6 @@
       "paths": ["courses/llm-applied/guides/llm-applied-019.md"]
     },
     {
-      "source": "0.0/1.0",
-      "latex": "\\frac{0.0}{1.0}",
-      "paths": [
-        "courses/deep-learning-pytorch/guides/torch-022.md",
-        "courses/deep-learning-pytorch/solutions/torch-022_solutions.md"
-      ]
-    },
-    {
       "source": "0.03/7",
       "latex": "\\frac{0.03}{7}",
       "paths": ["courses/llm-applied/guides/llm-applied-017.md"]
@@ -1417,8 +1409,6 @@
       "source": "1/1",
       "latex": "\\frac{1}{1}",
       "paths": [
-        "courses/deep-learning-pytorch/guides/torch-024.md",
-        "courses/deep-learning-pytorch/solutions/torch-024_solutions.md",
         "courses/llm-theory/authoring/textbook_advanced/llm-036.md",
         "courses/llm-theory/guides/llm-036.md"
       ]
@@ -3574,7 +3564,7 @@
     },
     {
       "source": "IDF=log(1+(N-df+0.5)/(df+0.5))",
-      "latex": "\\mathrm{IDF}=\\log(1+\\frac{N-\\partial f+0.5}{\\partial f+0.5})",
+      "latex": "\\mathrm{IDF}=\\log(1+\\frac{N-\\mathrm{df}+0.5}{\\mathrm{df}+0.5})",
       "paths": ["courses/nlp/guides/nlp-022.md"]
     },
     {
@@ -5451,7 +5441,7 @@
     },
     {
       "source": "df=1",
-      "latex": "\\partial f=1",
+      "latex": "\\mathrm{df}=1",
       "paths": [
         "courses/llm-applied/guides/llm-applied-006.md",
         "courses/llm-applied/solutions/llm-applied-006_solutions.md"
@@ -5459,7 +5449,7 @@
     },
     {
       "source": "df=2",
-      "latex": "\\partial f=2",
+      "latex": "\\mathrm{df}=2",
       "paths": [
         "courses/llm-applied/guides/llm-applied-006.md",
         "courses/llm-applied/solutions/llm-applied-006_solutions.md",
@@ -6015,12 +6005,12 @@
     },
     {
       "source": "idf=log(1+(N-df+.5)/(df+.5))",
-      "latex": "\\mathrm{idf}=\\log(1+\\frac{N-\\partial f+0.5}{\\partial f+0.5})",
+      "latex": "\\mathrm{idf}=\\log(1+\\frac{N-\\mathrm{df}+0.5}{\\mathrm{df}+0.5})",
       "paths": ["courses/llm-applied/guides/llm-applied-006.md"]
     },
     {
       "source": "idf_j=log((1+n)/(1+df_j))+1",
-      "latex": "\\mathrm{idf}_{j}=\\log(\\frac{1+n}{1+\\partial f_{j}})+1",
+      "latex": "\\mathrm{idf}_{j}=\\log(\\frac{1+n}{1+\\mathrm{df}_{j}})+1",
       "paths": ["courses/nlp/guides/nlp-007.md"]
     },
     {

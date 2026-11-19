@@ -6,13 +6,13 @@ The executable reference is `julia-007_reference.jl`. Its checks cover the state
 
 Operations can dispatch or broadcast differently for these shapes.
 
-**Expected observation:** Their sizes are(2,) and(2,1).
+**Expected observation:** Their sizes are `(2,)` and `(2, 1)`.
 
 ## 2. Trace column order
 
 The storage order is explicit and should not be confused with the scientific interpretation of axes.
 
-**Expected observation:** It is at row 1,column 3.
+**Expected observation:** It is at row 1, column 3.
 
 ## 3. Take a snapshot
 

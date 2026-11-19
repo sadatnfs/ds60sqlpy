@@ -6,7 +6,7 @@ Read the [guide](../guides/spark-029.md) and attempt one language first. The [Sc
 
 ### Exercise 1: Validate the product before computing its digest
 
-Require ordered fieldsid, value with bigint types, exactly 30 known unique IDs 0..29, known values equal to 2*id and total 870. ReturnSHA-256 of sorted SparkJSON lines joined by newline without a trailing newline.
+Require ordered fieldsid, value with bigint types, exactly 30 known unique IDs 0..29, known values equal to 2*id and total 870. Return SHA-256 of sorted Spark JSON lines joined by newline without a trailing newline.
 
 **Expected:** A64-character lowercase digest for the valid product. Wrong values, counts, types or identities are rejected before hashing.
 
@@ -59,7 +59,7 @@ def product_digest(frame):
 
 Validation establishes the business product before hashing its canonical representation. Sorting makes the digest independent of execution partition and arrival order. The count check bounds the driver collection to 30 rows. The digest convention is explicit so different implementations cannot silently hash different field orders, newline conventions or number renderings and call the results equivalent.
 
-**Verification evidence:** Assert a64-hex digest and equal digest after repartitioning; reject a 31-row source.
+**Verification evidence:** Assert a 64-hex digest and equal digest after repartitioning; reject a 31-row source.
 
 ### Exercise 2: Stage a run and validate the persisted readback
 
@@ -271,4 +271,4 @@ Canonical content identity is stable across physical repartitioning, so the retr
 
 ## Execution and interpretation
 
-Run the complete reference in its prepared fixed worker. The small fixture is constructed inside the program,so opening a lesson does not fetch data. A final success line is printed only after the reference assertions complete. Plan observations,partition evidence and resource measurements apply to the actual local configuration; they do not establish cluster-scale performance. Session cleanup is explicit,and any additional owned file/query lifecycle is described in the lesson.
+Run the complete reference in its prepared fixed worker. The small fixture is constructed inside the program, so opening a lesson does not fetch data. A final success line is printed only after the reference assertions complete. Plan observations, partition evidence and resource measurements apply to the actual local configuration; they do not establish cluster-scale performance. Session cleanup is explicit, and any additional owned file/query lifecycle is described in the lesson.

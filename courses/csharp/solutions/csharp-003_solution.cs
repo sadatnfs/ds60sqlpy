@@ -40,6 +40,16 @@ internal static class Program {
       Check(Math.Round(2.345m, 2, MidpointRounding.AwayFromZero) == 2.35m,
             "away midpoint");
     }
+    {
+      // Task 3: Independent construction
+      decimal[] prices = { 19.99m, 5.01m, 0.35m };
+      decimal subtotal = prices.Sum();
+      decimal tax = subtotal * 0.0825m;
+      decimal payable = Math.Round(subtotal + tax, 2, MidpointRounding.ToEven);
+      Check(subtotal == 25.35m, "exact decimal subtotal");
+      Check(tax == 2.091375m, "unrounded tax");
+      Check(payable == 27.44m, "rounded only at the end");
+    }
     Console.WriteLine("csharp-003: passed");
     await Task.CompletedTask;
   }

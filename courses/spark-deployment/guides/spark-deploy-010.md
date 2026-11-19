@@ -17,6 +17,18 @@ python3 lab.py submit
 python3 lab.py urls
 ```
 
+Event logging is switched on for every application by the shared defaults:
+
+From [`projects/cluster-lab/conf/spark-defaults.conf`](../projects/cluster-lab/conf/spark-defaults.conf):
+
+```properties
+spark.eventLog.enabled               true
+spark.eventLog.dir                   file:/events
+```
+
+`/events` is a mounted directory in the workshop state, so the history server can
+read the log after the driver container has gone.
+
 Open the History Server URL, find the exact application ID from the bounded JSON result and inspect its completed stages. Allow its configured scan interval to observe finalized events; the absence of a new listing immediately after submission does not establish data loss. Keep the result receipt, event filenames and source identity together.
 
 ```text

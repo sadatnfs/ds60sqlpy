@@ -1,13 +1,21 @@
 // Answer-free learner source. Save your own copy before editing.
 
 export {};
-// Exercise 1: Use structural compatibility
-// Pass a wider named object with id and count to a function requiring only id.
-// Expected: label A; original count remains 2.
+// Exercise 1: Use structural compatibility: change one input
+// Copy Example A into a scratch `main.mts` and change `const wider = { id: 'A', count: 2 };`
+// to `const wider = { id: 'A', count: 3 };`. Before running it, predict which check fails
+// and which value it now sees; then run it and restore the original line.
+// Expected: The changed run fails with an `AssertionError` at the check
+// `assert.equal(wider.count, 2)`. Restoring the original line brings back the worked
+// observation: label A; original count remains 2.
 
-// Exercise 2: Observe mutation through an alias
-// Create a readonly view of a mutable record, then mutate the original reference.
-// Expected: readonly view observes count changing from 1 to 4.
+// Exercise 2: Observe mutation through an alias: debug a regression
+// A regression changed one token in Example B, so one line now reads `mutable.count = 5;`.
+// Run Example B with that line, use the failing check to locate the defect and repair it
+// without changing the check.
+// Expected: Before the repair the run fails with an `AssertionError` at the check
+// `assert.equal(view.count, 4)`; after it the line reads `mutable.count = 4;` again and
+// readonly view observes count changing from 1 to 4.
 
 // Exercise 3: Handle absent and zero-valued optional counts
 // Use a nullish fallback on an optional count.

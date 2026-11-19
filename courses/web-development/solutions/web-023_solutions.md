@@ -1,51 +1,43 @@
 # web-023: explanatory solutions
 
-Compare after your own attempt or an explicit solution reveal. This file explains the supplied deterministic fixtures. It does not claim that a learner or a production deployment passed.
-
-## Why the mechanism works
-
-Progressive enhancement starts from useful content and adds capabilities when the environment supports them. A document should communicate its core information before advanced styling or scripts run. This does not mean every application must offer identical features in every environment; it means essential requirements and fallbacks are deliberate rather than accidental.
-
-Print is a different presentation context. Navigation controls that are useful on screen can waste space on paper, while a visible URL or document title may become more valuable. A print stylesheet can remove decoration, preserve contrast and avoid splitting small related blocks. It cannot guarantee the printer, paper size or user settings, so inspect the browser's print preview before making claims.
-
-Use `@media print` for print-specific rules and `@supports` for a feature-dependent enhancement. Keep the base rule valid independently. Avoid hiding the actual article while removing navigation. `break-inside:avoid` is a request to the fragmentation system, not a promise that an arbitrarily large element fits on one page.
+Open this after your own attempt. Each answer explains the lesson's synthetic fixtures; it does not show that your work or a deployment passed. The mechanism is explained in `courses/web-development/guides/web-023.md`.
 
 ## Exercise 1: Identify content that must survive when scripts fail.
 
-The page's primary information and basic navigation remain available.
+**Expected answer:** The page's primary information and basic navigation remain available.
 
-Trace the smallest example before editing. Name which values are source and which are observations.
+**Why:** Content and links in the HTML remain available when scripts fail, which is the baseline progressive enhancement protects.
 
 ## Exercise 2: Add a print rule that removes only irrelevant controls.
 
-The article and its headings remain in print preview.
+**Expected evidence:** The article and its headings remain in print preview.
 
-Change only the named feature. Compare with the unchanged example and explain any unaffected behavior.
+**Why:** A print view keeps the article and headings because the reader wants the content, not controls that cannot work on paper.
 
 ## Exercise 3: Build printable study notes with a useful baseline layout.
 
-Screen and print views preserve meaning with appropriate presentation.
+**Expected evidence:** Screen and print views preserve meaning with appropriate presentation.
 
-Sketch the structure or data contract first. Reuse the mechanism from the examples without copying the reference.
+**Why:** A content-first baseline keeps meaning in both media, while each media query only changes presentation.
 
 ## Exercise 4: Diagnose a print rule that hides the main region.
 
-Narrow the selector to navigation or actions instead of the content container.
+**Expected answer:** Narrow the selector to navigation or actions instead of the content container.
 
-Keep the failing input. Identify the first layer where the observed result differs from the intended contract.
+**Why:** display: none on a container removes everything inside it, so the rule must target the controls themselves.
 
 ## Exercise 5: Inspect multiple pages of print preview.
 
-Headings, tables and long blocks remain legible across page breaks.
+**Expected evidence:** Headings, tables and long blocks remain legible across page breaks.
 
-Predict the boundary before running it. Add an explicit check or manual observation that would detect a regression.
+**Why:** Page breaks can split tables and headings from their content, which only appears across multiple pages.
 
 ## Exercise 6: Explain what a feature query proves and what it does not.
 
-It detects supported syntax, not performance, usability or correctness of the whole component.
+**Expected answer:** It detects supported syntax, not performance, usability or correctness of the whole component.
 
-Explain your choice to someone who has not seen the code. Include one limitation and the evidence needed to remove it.
+**Why:** A feature query checks whether the browser parses a property and value, not whether the result is fast, accessible or correct.
 
-## Reference comparison and limits
+## Reference comparison
 
-Read the separate executable reference, where supplied, only after retaining your attempt. Compare structure and decisions rather than matching every identifier. A different implementation is acceptable when it satisfies the same behavior, preserves accessibility and rejects the same invalid cases. The checked reference uses tiny synthetic inputs so that each transformation can be inspected. It is not a ready-to-deploy authenticated application. Server lifecycle, persistence, concurrency and security require their own integration evidence.
+Open `courses/web-development/solutions/web-023_solution.html` only after saving your attempt, and compare decisions rather than identifiers. A different implementation is acceptable when it shows the same behavior and rejects the same invalid cases. The reference checks only its named synthetic cases; its success message is not an accessibility audit or proof of responsive behavior at every size.

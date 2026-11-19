@@ -1,6 +1,6 @@
 # rust-011: explanation and comparison
 
-Attempt the six guide tasks before opening this comparison. The executable reference is [rust-011_solution.rs](rust-011_solution.rs). Its assertions are always active under the prepared classroom compile settings.
+Attempt the six guide tasks before opening this comparison. The executable reference is [rust-011_solution.rs](rust-011_solution.rs). It runs both worked examples and the reference answers below, and its assertions are always active under the prepared classroom compile settings.
 
 ## Why the two examples differ
 
@@ -8,21 +8,58 @@ Attempt the six guide tasks before opening this comparison. The executable refer
 
 **Separate capacity from logical elements:** The optional lookup exposes absence instead of indexing uninitialized capacity. Reserved storage still contains zero logical elements until push.
 
-## Reason through the six tasks
+## Task answers
 
-1. **Predict and explain.** Identify owner, length and borrowed view in each call.
+### Task 1: Predict and explain
 
-2. **Guided modification.** Use a subslice and predict its total.
+Identify owner, length and borrowed view in each call.
 
-3. **Independent construction.** Implement a maximum function accepting a slice and returning Option.
+No separate reference answer has been written for this task. Example A is the evidence to compare with: The function requires read access, not a particular allocation strategy. One slice interface accepts several owning representations.
 
-4. **Diagnose a defect.** Diagnose keeping an element reference live across a conflicting vector push.
+### Task 2: Guided modification
 
-5. **Boundary evidence.** Test empty, singleton and out-of-range get cases.
+Use a subslice and predict its total.
 
-6. **Transfer and justify.** Choose an array, Vec or slice for stored state, function input and fixed-size coordinates.
+No separate reference answer has been written for this task. Start from Example B: The optional lookup exposes absence instead of indexing uninitialized capacity. Reserved storage still contains zero logical elements until push.
 
-For tasks 1 and 2, use the checked values and mechanism trace in the two examples. For task 3, choose names that expose the input and result contract and retain the same invariants. For task 4, the diagnosed mistakes below supply a concrete wrong assumption: preserve its counterexample before repairing it. Task 5 needs an explicit expected value or documented rejection at the boundary, not just successful execution. For task 6, explain what changes in the new context and which part of the original mechanism remains applicable. Several representations may satisfy this transfer task; justify the choice rather than treating this reference as the only architecture.
+### Task 3: Independent construction
+
+Implement a maximum function accepting a slice and returning Option.
+
+**Reference answer.** The same statements run as the `Task 3` block of the reference program; here they are wrapped in `main` as a complete file.
+
+```rust
+fn main() -> Result<(), Box<dyn std::error::Error>> {
+    fn maximum(values: &[i32]) -> Option<i32> {
+        values.iter().copied().max()
+    }
+    assert_eq!(maximum(&[3, 9, 4]), Some(9));
+    assert_eq!(maximum(&[]), None);
+    Ok(())
+}
+```
+
+**Observe:** The maximum of 3, 9 and 4 is Some(9); an empty slice gives None.
+
+Returning Option makes the empty case explicit instead of inventing a sentinel such as i32::MIN.
+
+### Task 4: Diagnose a defect
+
+Diagnose keeping an element reference live across a conflicting vector push.
+
+No reference answer has been written for this task yet. The wrong assumptions to look for are this lesson's pitfalls: Capacity is not a valid index limit. A slice does not extend its owner's lifetime. Avoid accepting &Vec when a slice expresses the actual requirement.
+
+### Task 5: Boundary evidence
+
+Test empty, singleton and out-of-range get cases.
+
+No reference answer has been written for this task yet. Write the expected value or documented rejection for each boundary before running it, and compare with the checks in Example A (Accept arrays and vectors uniformly) and Example B (Separate capacity from logical elements).
+
+### Task 6: Transfer and justify
+
+Choose an array, Vec or slice for stored state, function input and fixed-size coordinates.
+
+No single reference answer exists: several designs can satisfy this transfer task. Justify yours against the mechanism described below and the vocabulary entry **Array**, and state one limitation of your choice.
 
 ## Mechanism and diagnostic reasoning
 
@@ -36,4 +73,4 @@ Capacity is not a valid index limit. A slice does not extend its owner's lifetim
 
 ## Review before continuing
 
-The reference checks the worked scenarios, including their boundary distinctions. Your independent and transfer artifacts may have additional checks. Compare observations rather than only source text. Preserve any new regression case you discover and explain why it would reject a plausible wrong implementation. External project steps require their own build and platform evidence and are not established by a portable reference passing.
+Run the reference and confirm that it prints `rust-011: passed`, then reconstruct one boundary case from memory and explain which check would reject a plausible wrong implementation. External project steps need their own build and platform evidence; a passing portable reference does not establish them.

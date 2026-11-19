@@ -18,7 +18,7 @@ Serialize metadata with sorted keys and fixed separators before hashing. Keep sc
 
 ## Exercise 1: Build a literal model bundle
 
-The question is: Create a float32 two-feature model with coefficient[2,-1] and schema width2.
+The question is: Create a float32 two-feature model with coefficient [2, -1] and schema width 2.
 
 A known probe connects the serialized feature order to numerical behavior. Swapping features would change the prediction even if the model file remained readable.
 
@@ -30,13 +30,13 @@ model.layers[0].set_weights([weights])
 np.testing.assert_array_equal(model(np.array([[3, 4]], dtype="float32")).numpy(), [[2]])
 ```
 
-**Expected:** probe[3,4] predicts2.
+**Expected:** probe [3, 4] predicts 2.
 
-**Verify:** Compare the computed values or written argument with probe[3,4] predicts2.
+**Verify:** In a fresh process, the exercise checks confirm `model(np.array([[3, 4]], dtype='float32')).numpy()` equals `[[2]]`.
 
 ## Exercise 2: Freeze and hash a split manifest
 
-The question is: Hash train IDs[a,b] and test IDs[c,d] using canonical JSON.
+The question is: Hash train IDs [a, b] and test IDs [c, d] using canonical JSON.
 
 The canonical representation avoids a digest change caused only by dictionary key order. The explicit intersection check verifies a property that a hash alone cannot establish.
 
@@ -49,9 +49,9 @@ digest = hashlib.sha256(payload).hexdigest()
 assert not set(split["train"]) & set(split["test"]) and len(digest) == 64
 ```
 
-**Expected:** disjoint IDs and a64-character SHA256.
+**Expected:** disjoint IDs and a 64-character SHA256.
 
-**Verify:** Compare the computed values or written argument with disjoint IDs and a64-character SHA256.
+**Verify:** In a fresh process, the exercise checks confirm `not set(split['train']) & set(split['test'])` and `len(digest) == 64`.
 
 ## Exercise 3: Catch tampered lineage
 
@@ -69,7 +69,7 @@ assert other != digest
 
 **Expected:** digest differs.
 
-**Verify:** Compare the computed values or written argument with digest differs.
+**Verify:** In a fresh process, the exercise checks confirm `other != digest`.
 
 ## Exercise 4: Block incompatible schemas
 
@@ -82,13 +82,13 @@ incoming = {"features": ["a", "b", "c"], "dtype": "float32", "width": 3}
 assert incoming != schema
 ```
 
-**Expected:** schema gate isFalse.
+**Expected:** schema gate is False.
 
-**Verify:** Compare the computed values or written argument with schema gate isFalse.
+**Verify:** In a fresh process, the exercise checks confirm `incoming != schema`.
 
 ## Exercise 5: Make the decision fail closed
 
-The question is: Evaluate required gates with an unexecuted restart proof represented asNone, then with an actual failed schema gate.
+The question is: Evaluate required gates with an unexecuted restart proof represented as None, then with an actual failed schema gate.
 
 Unknown evidence is not a pass. The lesson deliberately avoids fabricating a restart receipt and shows that even three passing checks cannot compensate for a required failed fourth check.
 
@@ -99,9 +99,9 @@ gates.update(restart=True, schema=False)
 assert not all(value is True for value in gates.values())
 ```
 
-**Expected:** both decisionsno-go.
+**Expected:** both decisions no-go.
 
-**Verify:** Compare the computed values or written argument with both decisionsno-go.
+**Verify:** In a fresh process, the exercise checks confirm `not all((value is True for value in gates.values()))` and `not all((value is True for value in gates.values()))`.
 
 ## Exercise 6: Retain a rollback decision
 
@@ -120,9 +120,9 @@ record = {
 assert record["decision"] == "no-go" and record["previous"] == "v1" and record["holdout_count"] == 2
 ```
 
-**Expected:** decisionno-go and previous artifactv1 retained.
+**Expected:** decision no-go and previous artifact v1 retained.
 
-**Verify:** Compare the computed values or written argument with decisionno-go and previous artifactv1 retained.
+**Verify:** In a fresh process, the exercise checks confirm `record['decision'] == 'no-go'`, `record['previous'] == 'v1'` and `record['holdout_count'] == 2`.
 
 ## Review after comparison
 

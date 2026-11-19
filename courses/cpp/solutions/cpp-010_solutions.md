@@ -17,11 +17,11 @@ A struct turns related fields into one value, but C++ does not automatically kno
 
 enum class gives named, scoped alternatives. Status::paid and Status::pending are easier to review than magic integers, and accidental implicit conversion to an integer is restricted. This still does not validate arbitrary external bytes: a parser must map permitted input names or numbers to the intended enum values and reject unsupported states. A type with named states is useful only when the boundary respects that vocabulary.
 
-Aggregate initialization follows field order in the shown definition. Payment{7, 200, Status::paid} binds7 to id and 200 to cents. If fields of the same type are accidentally swapped, the compiler may accept the program while its meaning changes. Named construction functions or stronger distinct types can help when that risk becomes important. For the small fixture, trace each field explicitly before aggregating.
+Aggregate initialization follows field order in the shown definition. Payment{7, 200, Status::paid} binds 7 to id and 200 to cents. If fields of the same type are accidentally swapped, the compiler may accept the program while its meaning changes. Named construction functions or stronger distinct types can help when that risk becomes important. For the small fixture, trace each field explicitly before aggregating.
 
 The amount invariant is checked before state filtering. A pending payment with negative cents should not evade validation merely because it currently contributes zero. Validation asks whether the record is meaningful; contribution asks how a meaningful record participates in the requested statistic. Combining those questions into a single conditional can hide invalid data in excluded categories.
 
-Zero paid cents is valid and contributes zero. Pending200 also contributes zero, but for a different reason. A total alone cannot distinguish those cases, so retain count and state evidence when diagnosing the calculation. When adding refunded, define its business contribution deliberately and test it. A default branch that silently returns zero for every future state can mask a missing policy decision.
+Zero paid cents is valid and contributes zero. Pending 200 also contributes zero, but for a different reason. A total alone cannot distinguish those cases, so retain count and state evidence when diagnosing the calculation. When adding refunded, define its business contribution deliberately and test it. A default branch that silently returns zero for every future state can mask a missing policy decision.
 
 ## Debugging the contract
 
@@ -54,7 +54,7 @@ Describe each field of Payment{7, 200, paid}.
 
 **Reasoning:** Identity and amount serve different purposes.
 
-**Verify:** Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.
+**Verify:** Check each part of your description against the declaration: `id` holds 7, `cents` holds 200 cents rather than dollars, and `status` is the enumerator `Status::paid`, not a string.
 
 ## Exercise 2: Filter state
 
@@ -64,7 +64,7 @@ Aggregate paid 200 and pending 200 records.
 
 **Reasoning:** Filtering contribution does not delete input evidence.
 
-**Verify:** Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.
+**Verify:** Sum `settled()` over both records and assert the total is 200 while the input vector's size is 2; the pending record is still counted as input.
 
 ## Exercise 3: Add a named state
 
@@ -74,7 +74,7 @@ Add refunded and specify a zero settled contribution policy.
 
 **Reasoning:** Define behavior for every named state.
 
-**Verify:** Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.
+**Verify:** Add `Status::refunded`, make `settled()` return 0 for it, and assert that a paid 200 record plus a refunded 200 record sum to 200.
 
 ## Exercise 4: Reject an invalid amount
 
@@ -84,7 +84,7 @@ Construct paid amount -1 and call settled.
 
 **Reasoning:** Validate amounts independently of state filtering.
 
-**Verify:** Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.
+**Verify:** Wrap `settled(Payment{9, -1, Status::paid})` in `try`/`catch`, assert that `std::invalid_argument` was caught, and confirm no total was updated.
 
 ## Exercise 5: Retain zero payments
 
@@ -94,7 +94,7 @@ Inspect paid 0.
 
 **Reasoning:** Zero is a valid amount, not invalid data.
 
-**Verify:** Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.
+**Verify:** Assert `settled(Payment{10, 0, Status::paid}) == 0` without an exception; 0 passes the `cents < 0` guard.
 
 ## Exercise 6: Transfer identity
 
@@ -104,4 +104,4 @@ Use two paid records with equal 200 amounts and distinct IDs.
 
 **Reasoning:** Value equality does not imply duplicate business events.
 
-**Verify:** Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.
+**Verify:** Assert the settled sum is 400 and that the two records' `id` fields differ; equal amounts must not merge two payments.

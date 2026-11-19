@@ -1,7 +1,7 @@
 DETAILS = {
     29: (
         "Thread lifetime and cooperative cancellation",
-        """Starting a thread creates another flow of execution; it does not wait for that work to finish. A reference capture borrows an object from the creating scope. The owner must keep that object alive until the worker's last access. In the first program,answer belongs to main, the thread writes42, and join completes before main reads the result or ends the scope. The join is part of the correctness argument, not an optional delay.
+        """Starting a thread creates another flow of execution; it does not wait for that work to finish. A reference capture borrows an object from the creating scope. The owner must keep that object alive until the worker's last access. In the first program,answer belongs to main, the thread writes 42, and join completes before main reads the result or ends the scope. The join is part of the correctness argument, not an optional delay.
 
 A thread object that remains joinable at destruction is a serious lifecycle error for std::thread. Every path after successful creation needs an ownership decision: join the work or deliberately transfer its management. Detaching makes lifetime reasoning harder because the creating scope can disappear while the worker still uses borrowed state. The course examples retain and join every worker instead.
 
@@ -10,7 +10,7 @@ Cancellation is a request, not an asynchronous kill. The second example uses a p
 The memory used for the flag must support concurrent access. A plain bool read and written by different threads without synchronization would introduce a data race. Atomic access makes the flag communication defined. That does not imply every other shared object is safe; each shared value needs its own ownership or synchronization argument.
 
 std::jthread can automate joining and provide a stop token, but cooperative work still has to check the request at useful points. A blocking operation that never returns may prevent timely cancellation. Production design therefore needs bounded I/O, a shutdown deadline and a policy for unresponsive work. The tiny fixture teaches the request/observation/join sequence without pretending to solve arbitrary thread interruption.""",
-        """If a test occasionally reads0 instead of42, inspect whether it observes completion before reading shared state. If shutdown hangs, locate the next cancellation check or blocking call rather than adding a longer sleep. If a function exits while a thread borrows its locals, fix the ownership scope. If thread creation can throw after another worker starts, join the already created worker during the failure path before propagating the exception.""",
+        """If a test occasionally reads 0 instead of42, inspect whether it observes completion before reading shared state. If shutdown hangs, locate the next cancellation check or blocking call rather than adding a longer sleep. If a function exits while a thread borrows its locals, fix the ownership scope. If thread creation can throw after another worker starts, join the already created worker during the failure path before propagating the exception.""",
     ),
     30: (
         "Condition variables coordinate a state machine",
@@ -18,7 +18,7 @@ std::jthread can automate joining and provide a stop token, but cooperative work
 
 The mutex protects both the queue and the closed flag. The consumer holds a unique_lock and calls the predicate overload of wait. Waiting releases the mutex so a producer can change the state, then reacquires it before the predicate is evaluated again. A wakeup alone does not guarantee an item exists: spurious wakeups and other consumers can change the situation. The predicate is the source of truth.
 
-The first program enqueues2 and3, then closes the queue while holding the mutex. The consumer drains the existing items even though closed is true, because nonempty still means work exists. Only empty and closed together terminate the loop. Exiting immediately on closed would discard accepted work. Waiting only for nonempty would hang after the last item because closure would not satisfy the condition.
+The first program enqueues 2 and3, then closes the queue while holding the mutex. The consumer drains the existing items even though closed is true, because nonempty still means work exists. Only empty and closed together terminate the loop. Exiting immediately on closed would discard accepted work. Waiting only for nonempty would hang after the last item because closure would not satisfy the condition.
 
 The second program starts with an already empty,closed queue. The predicate is immediately true, so no notification is needed to make progress. This demonstrates why notifications should not be treated as stored messages. State persists; a notification may occur before another thread begins waiting. Rechecking the state under the same mutex avoids depending on an exact notification schedule.
 
@@ -29,14 +29,14 @@ A bounded queue adds a capacity predicate for producers. When full, the interfac
         "Atomic counting and publishing related data",
         """An atomic operation makes an access to that atomic object indivisible under its specified ordering. It does not automatically protect every nearby variable. Counting independent events and publishing a non-atomic payload are different problems, so the examples deliberately use two different synchronization arguments.
 
-For the counter,each fetch_add contributes one increment. Two workers each add1000, and main joins both before checking2000. Relaxed ordering is enough for the counter's atomic updates because no additional payload visibility is being communicated through each increment. join supplies completion before the final observation. Replacing fetch_add with an unsynchronized read-modify-write on an ordinary int would permit lost updates and a data race.
+For the counter,each fetch_add contributes one increment. Two workers each add 1000, and main joins both before checking 2000. Relaxed ordering is enough for the counter's atomic updates because no additional payload visibility is being communicated through each increment. join supplies completion before the final observation. Replacing fetch_add with an unsynchronized read-modify-write on an ordinary int would permit lost updates and a data race.
 
 Publication uses a separate payload and ready flag. The producer writes payload=7 and then performs a release store of true. The consumer loops until an acquire load observes that publication,then reads payload. The release/acquire relationship orders the earlier payload write before the consumer's later read. This is an inter-thread visibility argument,not merely a promise that the flag eventually changes.
 
 Changing both flag operations to relaxed would retain atomicity of ready but remove this publication argument for payload. The fact that a particular machine often prints7 is not a substitute for the language memory model. Likewise,volatile is not a general thread-synchronization mechanism. Start from the required happens-before relationship and choose operations that establish it.
 
 Memory ordering is easy to overcomplicate. A mutex can be clearer when multiple fields form one invariant or when the design is not a simple publication pattern. Stronger ordering may be an acceptable starting point while the interface is developed. Weakening ordering for speed requires both a correct proof and a measurement showing the change matters. The lesson's bounded examples do not constitute a lock-free container design.""",
-        """If the counter is sometimes below2000, inspect whether every increment is one atomic read-modify-write and whether workers are joined. If the payload has no ordering relationship, do not trust repeated successful runs. Find the release store and the acquire load that actually observes it. If several fields must change consistently,consider a mutex instead of treating each field as an unrelated atomic and hoping the combined state is coherent.""",
+        """If the counter is sometimes below 2000, inspect whether every increment is one atomic read-modify-write and whether workers are joined. If the payload has no ordering relationship, do not trust repeated successful runs. Find the release store and the acquire load that actually observes it. If several fields must change consistently,consider a mutex instead of treating each field as an unrelated atomic and hoping the combined state is coherent.""",
     ),
     32: (
         "Futures, launch policy and bounded work ownership",
@@ -44,7 +44,7 @@ Memory ordering is easy to overcomplicate. A mutex can be clearer when multiple 
 
 The examples use std::launch::async explicitly so the operation is launched asynchronously rather than leaving a deferred policy choice to the implementation. That still does not define a production thread pool. Launching one async task per row in a very large input can create an unacceptable amount of concurrency or resource pressure. The lesson uses a fixed small number of tasks so the ownership and result flow are visible.
 
-The success program computes the square of3 and observes9 through get. The failure program launches a task with -1,where checked_square throws invalid_argument. The exception is stored and rethrown when main calls get. A flag confirms that the specific error was observed. Ignoring the future or never retrieving its outcome can hide a failed task from the application report.
+The success program computes the square of3 and observes 9 through get. The failure program launches a task with -1,where checked_square throws invalid_argument. The exception is stored and rethrown when main calls get. A flag confirms that the specific error was observed. Ignoring the future or never retrieving its outcome can hide a failed task from the application report.
 
 When combining multiple tasks,define whether one failure aborts the whole result or whether partial results have a valid meaning. A total assembled from successful tasks alone can look plausible while silently omitting failures. Keep accepted,completed,failed and cancelled work accounting explicit. Cancellation of pending work also needs a mechanism; future by itself is not a general cancel operation.
 
@@ -55,9 +55,9 @@ A real executor has at least worker count,queue capacity,submission policy,resul
         "Testing concurrency without guessing the schedule",
         """A concurrency test needs observable synchronization points. A promise/future pair can signal that a worker reached a chosen state. join confirms that a worker has terminated. These facts are stronger than waiting an arbitrary number of milliseconds. A sleep changes the chance of an ordering but does not establish that the expected event happened.
 
-In the first program,the worker assigns42 and then fulfills a promise. Waiting on the future establishes the result's availability before main checks it. The worker is still joined to close its lifetime. Startup,publication and termination are separate events even when they occur close together in a tiny example.
+In the first program,the worker assigns 42 and then fulfills a promise. Waiting on the future establishes the result's availability before main checks it. The worker is still joined to close its lifetime. Startup,publication and termination are separate events even when they occur close together in a tiny example.
 
-The second program repeats a fixed invariant twenty times:two participants each increment the same atomic counter100 times,and the joined result must be200. Repetition can expose some timing-sensitive defects,but it does not enumerate all possible schedules. A passing stress loop is bounded evidence,not proof that a race is impossible. The synchronization argument remains necessary.
+The second program repeats a fixed invariant twenty times: two participants each increment the same atomic counter 100 times,and the joined result must be 200. Repetition can expose some timing-sensitive defects,but it does not enumerate all possible schedules. A passing stress loop is bounded evidence,not proof that a race is impossible. The synchronization argument remains necessary.
 
 A supervisor timeout makes a deadlock or unresponsive worker a finite test failure. The timeout belongs outside the potentially stuck code path when necessary; a worker that never returns cannot reliably report its own timeout after the fact. Retain the phase,last observed synchronization point and cancellation outcome so the failure is diagnosable.
 
@@ -68,7 +68,7 @@ ThreadSanitizer is a separate instrumented execution path with toolchain and pla
         "Data layout follows the access pattern",
         """An array of structures stores complete records together. A structure-of-arrays layout stores each field in its own sequence. Neither layout is universally faster. The useful question is which fields the operation reads and in what order. Summing only value can benefit from dense values,while operations that need id and value together may favor a record layout.
 
-The first example stores three Sample records with IDs1,2,3 and values10,20,30. It visits each record and adds value. The second stores just the values and uses accumulation. Both must produce60 before any timing comparison is meaningful. Equal totals are a basic correctness check;in a richer transformation,also verify that identity-to-value relationships remain intact.
+The first example stores three Sample records with IDs 1,2,3 and values10,20,30. It visits each record and adds value. The second stores just the values and uses accumulation. Both must produce 60 before any timing comparison is meaningful. Equal totals are a basic correctness check;in a richer transformation,also verify that identity-to-value relationships remain intact.
 
 reserve(rows.size()) can avoid repeated growth allocations while materializing a values vector. It changes capacity,not size. push_back constructs the actual elements. Writing values[0] immediately after reserve on an empty vector would violate the element-access contract. This is a concrete link between performance-oriented allocation control and the ownership rules from cpp-007.
 
@@ -81,9 +81,9 @@ Hardware cache behavior,alignment,compiler vectorization and input size influenc
         "Algorithmic work and index side effects",
         """Complexity describes how work grows with input size under a stated model. A linear scan visits elements to answer a query. An index spends work and memory building a reusable structure so later queries can be cheaper. The right choice depends on the number of queries,update frequency,key distribution and required semantics,not only a big-O label.
 
-The map fixture counts occurrences of2,3,2,4. The count for2 is2,which preserves multiplicity. A set would retain only membership and answer a different question. The index construction traverses every input and updates counts. That upfront work must be included when comparing one query with a direct scan,and can be amortized only when the index is actually reused.
+The map fixture counts occurrences of2,3,2,4. The count for 2 is2,which preserves multiplicity. A set would retain only membership and answer a different question. The index construction traverses every input and updates counts. That upfront work must be included when comparing one query with a direct scan,and can be amortized only when the index is actually reused.
 
-map::find is an observation that does not insert a missing key. operator[] can insert a value-initialized mapped value when the key is absent. The second complete program demonstrates this difference:find(9) leaves size unchanged,while counts[9] creates a new zero entry. A read-like expression can therefore mutate the data and distort later measurements or reports.
+map::find is an observation that does not insert a missing key. operator[] can insert a value-initialized mapped value when the key is absent. The second complete program demonstrates this difference: find(9) leaves size unchanged,while counts[9] creates a new zero entry. A read-like expression can therefore mutate the data and distort later measurements or reports.
 
 Ordering is also part of the container contract. std::map maintains an ordering by its comparator,whereas unordered alternatives have different iteration and performance properties. Do not rely on unspecified order when emitting a deterministic report. If output order matters,choose or impose it deliberately rather than inheriting it accidentally from one implementation run.
 
@@ -92,9 +92,9 @@ A useful performance comparison checks identical answers first,then records inde
     ),
     36: (
         "Constant evaluation is a different computation phase",
-        """constexpr permits a function to participate in constant evaluation when the call satisfies the language rules. It does not require every call to run during compilation. A call using an ordinary runtime value can execute normally. consteval is stricter:an immediate function call must produce a constant-evaluated result under its contract.
+        """constexpr permits a function to participate in constant evaluation when the call satisfies the language rules. It does not require every call to run during compilation. A call using an ordinary runtime value can execute normally. consteval is stricter: an immediate function call must produce a constant-evaluated result under its contract.
 
-The first example uses static_assert(square(4)==16),so a wrong result prevents compilation. No runtime branch is needed to check that statement. The second uses runtime=5 and checks25 during program execution. The same constexpr function supports both uses. This distinction helps explain why compile-time and runtime tests can complement each other.
+The first example uses static_assert(square(4)==16),so a wrong result prevents compilation. No runtime branch is needed to check that statement. The second uses runtime=5 and checks 25 during program execution. The same constexpr function supports both uses. This distinction helps explain why compile-time and runtime tests can complement each other.
 
 Constant evaluation moves work into the build;it does not make work free. Large generated tables or complex compile-time recursion can increase compiler time,memory use and binary size. A lookup table may improve runtime behavior for a repeated operation,but the build and storage tradeoffs still need measurement. A tiny square example cannot establish a performance advantage.
 
@@ -122,7 +122,7 @@ Materialization costs memory proportional to retained values. A production pipel
 
 For nonnegative a and b,the guard a>max-b detects whether a+b would exceed the maximum. max-b is safe under the stated nonnegative supported range. Only after that guard passes should the addition be evaluated. If negative operands are allowed,the guard logic must cover underflow and other sign combinations separately. A formula valid for one restricted domain is not automatically a general checked-add implementation.
 
-Floating-point values represent a finite set of numbers with rounding. Decimal0.1 and0.2 do not generally have exact finite binary representations,so their sum can differ slightly from the stored approximation of0.3. The complete example uses a small tolerance for this specific comparison. That does not justify one universal tolerance for every scale or unit.
+Floating-point values represent a finite set of numbers with rounding. Decimal 0.1 and0.2 do not generally have exact finite binary representations,so their sum can differ slightly from the stored approximation of0.3. The complete example uses a small tolerance for this specific comparison. That does not justify one universal tolerance for every scale or unit.
 
 Addition order can matter because intermediate rounding occurs. Summing [1e16,1,-1e16] in one order can lose the small contribution,while another grouping can preserve it. Parallel reduction can change grouping,so exact bitwise equality may require a stronger reproducibility design. For integer cents within a checked range,exact comparison remains appropriate;do not introduce approximate tolerances to hide a wrong integer result.
 
@@ -131,7 +131,7 @@ Choose numeric representation from the domain. Money may use checked integer min
     ),
     39: (
         "Opaque handles and ownership across an ABI",
-        """An opaque handle hides a C++ implementation behind a pointer-shaped public interface. A consumer can pass the handle back to the provider without knowing the class layout. This reduces coupling to implementation details,but the handle still has a lifecycle:creation succeeds or fails,use requires a live valid handle,and destruction ends that lifetime.
+        """An opaque handle hides a C++ implementation behind a pointer-shaped public interface. A consumer can pass the handle back to the provider without knowing the class layout. This reduces coupling to implementation details,but the handle still has a lifecycle: creation succeeds or fails,use requires a live valid handle,and destruction ends that lifetime.
 
 The create function catches allocation failure and returns null under its no-throw boundary. The caller checks that result before use. The read function returns a status code and writes through an output pointer only on success. The destroy function belongs to the provider,which keeps allocation and release responsibilities paired. A foreign consumer should not guess that its own delete or allocator is interchangeable.
 
@@ -159,7 +159,7 @@ A secure-looking function name is not evidence. Test exact length boundaries,emp
         "A release packet connects source to behavior",
         """A release is an identifiable artifact with an explicit contract and evidence for supported environments. A version string alone does not connect the binary to the source,compiler options or tested fixture. Record source revision or hash,toolchain,architecture,build configuration,dependency identities and the output schema that consumers rely on.
 
-The example report uses schema1,rows3,total6. Its always-active condition checks the checksum before printing the report. This matters in Release builds where ordinary assert expressions may be removed. A successful build followed by an unchecked output string could otherwise look like acceptance even if the actual computation changed.
+The example report uses schema1,rows 3,total 6. Its always-active condition checks the checksum before printing the report. This matters in Release builds where ordinary assert expressions may be removed. A successful build followed by an unchecked output string could otherwise look like acceptance even if the actual computation changed.
 
 Debug and optimized builds answer related but different questions. Debug information helps diagnosis;optimization changes performance and can expose latent undefined behavior. Both should preserve the declared result. Keep timing observations separate from correctness assertions,and record the exact flags used. A configuration name by itself is not enough to reproduce a binary.
 
@@ -172,11 +172,11 @@ Rollback needs a known compatible artifact and a check that the restored version
         "Parallel analysis with conservation of work",
         """The final product combines parsing,ownership,concurrency and reporting. Raw rows are either accepted or rejected under a strict grammar. Accepted values are then assigned to bounded work. Every accepted task must end as completed,cancelled or failed before the operation can describe its outcome. These conservation rules prevent plausible partial totals from hiding lost input or abandoned work.
 
-The serial oracle sums [1,2,3,4,5,6] to21. The parallel example gives disjoint slices to two workers,producing6 and15,then joins both before combining. The input vector remains alive and unchanged throughout. Each worker writes its own subtotal variable,so the example does not require competing updates to one shared accumulator. The owner reads those subtotals only after joins.
+The serial oracle sums [1,2,3,4,5,6] to21. The parallel example gives disjoint slices to two workers,producing 6 and15,then joins both before combining. The input vector remains alive and unchanged throughout. Each worker writes its own subtotal variable,so the example does not require competing updates to one shared accumulator. The owner reads those subtotals only after joins.
 
 Partition boundaries need tests beyond an even-length input. An odd-sized vector can expose a dropped middle element or overlapping slice. Empty input can expose invalid first-element access. Repeated values can hide an overlap if only one aggregate is inspected,so retain counts and compare with the independent serial oracle. A faster wrong partition is not a successful parallel implementation.
 
-The executable reference adds strict raw-string parsing,at most100 rows,two workers and an injected worker failure. On failure,it publishes no partial total. Scheduling can affect how much other work completed before the stop request was observed,so the expected cancelled count is not one fixed number. The invariant completed+cancelled+failed_tasks=accepted is stable across those schedules.
+The executable reference adds strict raw-string parsing,at most 100 rows,two workers and an injected worker failure. On failure,it publishes no partial total. Scheduling can affect how much other work completed before the stop request was observed,so the expected cancelled count is not one fixed number. The invariant completed+cancelled+failed_tasks=accepted is stable across those schedules.
 
 Cancellation is cooperative,and thread creation can itself fail. If the second thread cannot be started,the already created first worker must receive a stop request and be joined before the exception leaves the owner scope. Otherwise cleanup can terminate the process or leave borrowed state unsafe. Error handling around worker creation is part of the product,not only the worker loop.
 

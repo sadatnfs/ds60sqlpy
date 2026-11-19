@@ -18,7 +18,7 @@ The fixture is a float32 matrix with one row per observation. Slicing by saved I
 
 ## Exercise 1: Freeze six records
 
-The question is: Create the three-feature fixture below, assign IDs0..3 to train and 4..5 to holdout, and calculate targets.
+The question is: Create the three-feature fixture below, assign IDs 0..3 to train and 4..5 to holdout, and calculate targets.
 
 The target formula is specified before fitting. This makes the learning problem inspectable, while still requiring the optimizer to recover useful weights from only the training subset.
 
@@ -31,9 +31,9 @@ assert not set(train) & set(test)
 np.testing.assert_array_equal(y[:, 0], [0, 2, -1, 1, 2, 4])
 ```
 
-**Expected:** targets[0,2,-1,1,2,4], disjoint IDs.
+**Expected:** targets [0, 2, -1, 1, 2, 4], disjoint IDs.
 
-**Verify:** Compare the computed values or written argument with targets[0,2,-1,1,2,4], disjoint IDs.
+**Verify:** In a fresh process, the exercise checks confirm `not set(train) & set(test)` and `y[:, 0]` equals `[0, 2, -1, 1, 2, 4]`.
 
 ## Exercise 2: Measure the baseline
 
@@ -47,13 +47,13 @@ baseline = float(np.mean((y[test] - mean) ** 2))
 assert mean == 0.5 and baseline == 7.25
 ```
 
-**Expected:** training mean.5; holdout MSE7.25.
+**Expected:** training mean 0.5; holdout MSE 7.25.
 
-**Verify:** Compare the computed values or written argument with training mean.5; holdout MSE7.25.
+**Verify:** In a fresh process, the exercise checks confirm `mean == 0.5` and `baseline == 7.25`.
 
 ## Exercise 3: Train a bounded model
 
-The question is: Initialize a three-by-one kernel at zero and make exactly100 full-training SGD updates at rate 0.1.
+The question is: Initialize a three-by-one kernel at zero and make exactly 100 full-training SGD updates at rate 0.1.
 
 The explicit step cap bounds the teaching run. Improvement is checked against the same initial training batch. It does not imply a universal learning-rate rule or a production acceptance threshold.
 
@@ -72,11 +72,11 @@ assert step + 1 == 100 and train_error < initial and np.isfinite(w.numpy()).all(
 
 **Expected:** 100 updates; finite weights; training error below its initial value.
 
-**Verify:** Compare the computed values or written argument with 100 updates; finite weights; training error below its initial value.
+**Verify:** In a fresh process, the exercise checks confirm `step + 1 == 100`, `train_error < initial` and `np.isfinite(w.numpy()).all()`.
 
 ## Exercise 4: Open the holdout once
 
-The question is: Compute held-out MSE after the fixed100 updates and compare it with the frozen baseline.
+The question is: Compute held-out MSE after the fixed 100 updates and compare it with the frozen baseline.
 
 Report training and held-out errors separately. The small test count is part of the result, not an inconvenient detail to suppress. Do not restart tuning after inspecting this value.
 
@@ -87,13 +87,13 @@ report = {"train_mse": train_error, "test_mse": test_error, "test_count": 2, "st
 assert report["test_count"] == 2
 ```
 
-**Expected:** holdout error below7.25 on the two supplied records.
+**Expected:** holdout error below 7.25 on the two supplied records.
 
-**Verify:** Compare the computed values or written argument with holdout error below7.25 on the two supplied records.
+**Verify:** In a fresh process, the exercise checks confirm `test_error < baseline` and `report['test_count'] == 2`.
 
 ## Exercise 5: Preserve arithmetic evidence
 
-The question is: Derive a one-feature pilot update from x = [1, 2, 3] and target2x at w = 0,rate 0.1.
+The question is: Derive a one-feature pilot update from x = [1, 2, 3] and target 2x at w = 0, rate 0.1.
 
 A scalar diagnostic is a separate implementation check, not an alternative score for the three-feature model. Keeping both prevents an impressive-looking fit from concealing a broken update.
 
@@ -106,9 +106,9 @@ np.testing.assert_allclose(
 )
 ```
 
-**Expected:** weight28/15 and loss56/675.
+**Expected:** weight 28/15 and loss 56/675.
 
-**Verify:** Compare the computed values or written argument with weight28/15 and loss56/675.
+**Verify:** In a fresh process, the exercise checks confirm `[updated, np.mean((updated * pilot - 2 * pilot) ** 2)]` matches `[28 / 15, 56 / 675]` within 1e-12.
 
 ## Exercise 6: Reject a false conclusion
 
@@ -125,9 +125,9 @@ report.update(
 assert report["test_ids"] == [4, 5] and "do not establish" in report["limitation"]
 ```
 
-**Expected:** report names2 holdout records and makes no population guarantee.
+**Expected:** report names 2 holdout records and makes no population guarantee.
 
-**Verify:** Compare the computed values or written argument with report names2 holdout records and makes no population guarantee.
+**Verify:** In a fresh process, the exercise checks confirm `report['test_ids'] == [4, 5]` and `'do not establish' in report['limitation']`.
 
 ## Review after comparison
 

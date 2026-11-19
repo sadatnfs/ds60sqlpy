@@ -190,4 +190,4 @@ if __name__ == "__main__":
 
 ## Interpretation
 
-Recover a data product through explicit accepted versions and a tested pointer mechanism. Demonstrate a failed candidate and a reversible local promotion, then describe which distributed or operational guarantees still need separate implementation and qualification.
+Demonstrate a failed candidate and a reversible local promotion, then describe which distributed or operational guarantees still need separate implementation and qualification.

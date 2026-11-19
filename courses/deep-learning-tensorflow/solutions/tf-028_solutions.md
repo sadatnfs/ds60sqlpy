@@ -14,11 +14,11 @@ A training checkpoint is more than a weight file. Adam keeps moving estimates of
 
 ## Reading the implementation
 
-Create the variable and optimizer, then build optimizer slots before restoring. tf.train.Checkpoint tracks both. save writes a numbered checkpoint prefix; restore(...).assert_consumed() detects missing tracked state. The child process constructs fresh objects and takes exactly one further update. Compare float32 weights with tolerance1e-6. A weights-only control resets optimizer history and should diverge on this fixture.
+Create the variable and optimizer, then build optimizer slots before restoring. tf.train.Checkpoint tracks both. save writes a numbered checkpoint prefix; restore(...).assert_consumed() detects missing tracked state. The child process constructs fresh objects and takes exactly one further update. Compare float32 weights with tolerance 1e-6. A weights-only control resets optimizer history and should diverge on this fixture.
 
 ## Exercise 1: Create nontrivial optimizer state
 
-The question is: Take two Adam steps on(w-2)² fromw0 and inspect iterations.
+The question is: Take two Adam steps on (w-2)² from w=0 and inspect iterations.
 
 A checkpoint made before any updates would not test restoration of nonzero moment estimates. Two steps create state that a fresh optimizer does not possess.
 
@@ -29,13 +29,13 @@ step(w, opt)
 assert int(opt.iterations) == 2 and float(w) > 0
 ```
 
-**Expected:** iteration count2 and positive weight.
+**Expected:** iteration count 2 and positive weight.
 
-**Verify:** Compare the computed values or written argument with iteration count2 and positive weight.
+**Verify:** In a fresh process, the exercise checks confirm `int(opt.iterations) == 2` and `float(w) > 0`.
 
 ## Exercise 2: Save both state components
 
-The question is: Save a checkpoint containingw and Adam into a TemporaryDirectory.
+The question is: Save a checkpoint containing w and Adam into a TemporaryDirectory.
 
 The returned prefix includes a save counter. Keep the exact prefix rather than guessing a filename. Temporary ownership confines the example to disposable local files.
 
@@ -49,7 +49,7 @@ assert Path(prefix + ".index").is_file()
 
 **Expected:** checkpoint index exists; no course source file is written.
 
-**Verify:** Compare the computed values or written argument with checkpoint index exists; no course source file is written.
+**Verify:** In a fresh process, the exercise checks confirm `Path(prefix + '.index').is_file()`.
 
 ## Exercise 3: Calculate the uninterrupted control
 
@@ -64,9 +64,9 @@ expected = float(w)
 assert int(opt.iterations) == 3 and expected != saved
 ```
 
-**Expected:** iteration count3; weight changes.
+**Expected:** iteration count 3; weight changes.
 
-**Verify:** Compare the computed values or written argument with iteration count3; weight changes.
+**Verify:** In a fresh process, the exercise checks confirm `int(opt.iterations) == 3` and `expected != saved`.
 
 ## Exercise 4: Restore in a fresh process
 
@@ -94,9 +94,9 @@ np.testing.assert_allclose(restored["weight"], expected, atol=1e-6, rtol=0)
 assert restored["iterations"] == 3
 ```
 
-**Expected:** child weight matches control within 1e-6; child iterations3.
+**Expected:** child weight matches control within 1e-6; child iterations 3.
 
-**Verify:** Compare the computed values or written argument with child weight matches control within 1e-6; child iterations3.
+**Verify:** In a fresh process, the exercise checks confirm `not (result.returncode)`, `restored['weight']` matches `expected` within 1e-6 and `restored['iterations'] == 3`.
 
 ## Exercise 5: Expose a weights-only restart
 
@@ -111,9 +111,9 @@ step(weights_only, fresh)
 assert abs(float(weights_only) - expected) > 1e-6 and int(fresh.iterations) == 1
 ```
 
-**Expected:** next weight differs from the full-state control by more than1e-6.
+**Expected:** next weight differs from the full-state control by more than 1e-6.
 
-**Verify:** Compare the computed values or written argument with next weight differs from the full-state control by more than1e-6.
+**Verify:** In a fresh process, the exercise checks confirm `abs(float(weights_only) - expected) > 1e-06` and `int(fresh.iterations) == 1`.
 
 ## Exercise 6: Verify cleanup
 
@@ -128,7 +128,7 @@ assert not folder.exists()
 
 **Expected:** temporary checkpoint directory absent.
 
-**Verify:** Compare the computed values or written argument with temporary checkpoint directory absent.
+**Verify:** In a fresh process, the exercise checks confirm `not folder.exists()`.
 
 ## Review after comparison
 

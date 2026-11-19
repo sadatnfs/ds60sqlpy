@@ -46,7 +46,7 @@
   {
     "id": "asm-003",
     "title": "Independent group fits and one shared model",
-    "level": "beginner",
+    "level": "intermediate",
     "minutes": 75,
     "prerequisites": ["asm-002", "spark-016"],
     "runtime": "spark-local-python",
@@ -68,7 +68,7 @@
   {
     "id": "asm-004",
     "title": "Whole-group memory, shuffle and skew",
-    "level": "beginner",
+    "level": "intermediate",
     "minutes": 75,
     "prerequisites": ["asm-003", "spark-022"],
     "runtime": "spark-local-python",
@@ -134,7 +134,7 @@
   {
     "id": "asm-007",
     "title": "A driver optimizer over distributed passes",
-    "level": "intermediate",
+    "level": "advanced",
     "minutes": 100,
     "prerequisites": ["asm-006", "clp-015"],
     "runtime": "spark-local-python",
@@ -156,7 +156,7 @@
   {
     "id": "asm-008",
     "title": "Merge precision, unequal partitions and one penalty",
-    "level": "intermediate",
+    "level": "advanced",
     "minutes": 100,
     "prerequisites": ["asm-007", "clp-013"],
     "runtime": "spark-local-python",
@@ -178,7 +178,7 @@
   {
     "id": "asm-009",
     "title": "Retry-safe evaluation and external side effects",
-    "level": "intermediate",
+    "level": "advanced",
     "minutes": 100,
     "prerequisites": ["asm-008", "spark-035"],
     "runtime": "spark-local-python",
@@ -200,7 +200,7 @@
   {
     "id": "asm-010",
     "title": "Nonlinear global maximum likelihood",
-    "level": "intermediate",
+    "level": "advanced",
     "minutes": 100,
     "prerequisites": ["asm-007", "clp-006"],
     "runtime": "spark-local-python",
@@ -222,7 +222,7 @@
   {
     "id": "asm-011",
     "title": "When a likelihood is not separable",
-    "level": "intermediate",
+    "level": "advanced",
     "minutes": 100,
     "prerequisites": ["asm-010", "clp-012"],
     "runtime": "spark-local-python",
@@ -244,7 +244,7 @@
   {
     "id": "asm-012",
     "title": "State-space boundaries and complete-series ownership",
-    "level": "intermediate",
+    "level": "advanced",
     "minutes": 100,
     "prerequisites": ["asm-011", "r-049"],
     "runtime": "spark-local-python",

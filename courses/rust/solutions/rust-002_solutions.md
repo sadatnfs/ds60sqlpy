@@ -1,6 +1,6 @@
 # rust-002: explanation and comparison
 
-Attempt the six guide tasks before opening this comparison. The executable reference is [rust-002_solution.rs](rust-002_solution.rs). Its assertions are always active under the prepared classroom compile settings.
+Attempt the six guide tasks before opening this comparison. The executable reference is [rust-002_solution.rs](rust-002_solution.rs). It runs both worked examples and the reference answers below, and its assertions are always active under the prepared classroom compile settings.
 
 ## Why the two examples differ
 
@@ -8,21 +8,60 @@ Attempt the six guide tasks before opening this comparison. The executable refer
 
 **Shadow after a representation change:** Shadowing can change type, but names must still explain whether a value is text, length or parsed quantity. The new count is the text length, not the number twelve.
 
-## Reason through the six tasks
+## Task answers
 
-1. **Predict and explain.** Identify the static type and mutability of each binding.
+### Task 1: Predict and explain
 
-2. **Guided modification.** Remove unnecessary mut declarations in a small program.
+Identify the static type and mutability of each binding.
 
-3. **Independent construction.** Write a running total with fixed input and mutable accumulator.
+No separate reference answer has been written for this task. Example A is the evidence to compare with: Only the value requiring state transitions is declared mutable. The mutable total changes while the fixed input remains 4.
 
-4. **Diagnose a defect.** Diagnose assigning a String to a mutable integer binding.
+### Task 2: Guided modification
 
-5. **Boundary evidence.** Test an empty input string and a zero accumulator.
+Remove unnecessary mut declarations in a small program.
 
-6. **Transfer and justify.** Choose shadowing or distinct names for parsing stages and justify readability.
+No separate reference answer has been written for this task. Start from Example B: Shadowing can change type, but names must still explain whether a value is text, length or parsed quantity. The new count is the text length, not the number twelve.
 
-For tasks 1 and 2, use the checked values and mechanism trace in the two examples. For task 3, choose names that expose the input and result contract and retain the same invariants. For task 4, the diagnosed mistakes below supply a concrete wrong assumption: preserve its counterexample before repairing it. Task 5 needs an explicit expected value or documented rejection at the boundary, not just successful execution. For task 6, explain what changes in the new context and which part of the original mechanism remains applicable. Several representations may satisfy this transfer task; justify the choice rather than treating this reference as the only architecture.
+### Task 3: Independent construction
+
+Write a running total with fixed input and mutable accumulator.
+
+**Reference answer.** The same statements run as the `Task 3` block of the reference program; here they are wrapped in `main` as a complete file.
+
+```rust
+fn main() -> Result<(), Box<dyn std::error::Error>> {
+    let deliveries = [3, 5, 2];
+    let mut total = 0;
+    for amount in deliveries {
+        total += amount;
+    }
+    assert_eq!(total, 10);
+    assert_eq!(deliveries, [3, 5, 2]);
+    Ok(())
+}
+```
+
+**Observe:** The running total ends at 10 and the input array is unchanged.
+
+Only the accumulator is declared mut; the fixed input stays immutable, so the compiler rejects any accidental edit to it.
+
+### Task 4: Diagnose a defect
+
+Diagnose assigning a String to a mutable integer binding.
+
+No reference answer has been written for this task yet. The wrong assumptions to look for are this lesson's pitfalls: Immutable does not mean every object reachable through a type is deeply frozen. Shadowing can conceal a units change. Type inference is not dynamic typing.
+
+### Task 5: Boundary evidence
+
+Test an empty input string and a zero accumulator.
+
+No reference answer has been written for this task yet. Write the expected value or documented rejection for each boundary before running it, and compare with the checks in Example A (Expose an accumulator) and Example B (Shadow after a representation change).
+
+### Task 6: Transfer and justify
+
+Choose shadowing or distinct names for parsing stages and justify readability.
+
+No single reference answer exists: several designs can satisfy this transfer task. Justify yours against the mechanism described below and the vocabulary entry **Binding**, and state one limitation of your choice.
 
 ## Mechanism and diagnostic reasoning
 
@@ -36,4 +75,4 @@ Immutable does not mean every object reachable through a type is deeply frozen. 
 
 ## Review before continuing
 
-The reference checks the worked scenarios, including their boundary distinctions. Your independent and transfer artifacts may have additional checks. Compare observations rather than only source text. Preserve any new regression case you discover and explain why it would reject a plausible wrong implementation. External project steps require their own build and platform evidence and are not established by a portable reference passing.
+Run the reference and confirm that it prints `rust-002: passed`, then reconstruct one boundary case from memory and explain which check would reject a plausible wrong implementation. External project steps need their own build and platform evidence; a passing portable reference does not establish them.

@@ -1,7 +1,7 @@
 {
   "language": "markdown",
   "runtime": "reading",
-  "level": "intermediate",
+  "level": "advanced",
   "minutes": 70,
   "prerequisites": ["apache-012", "apache-004", "rust-042"],
   "concepts": [

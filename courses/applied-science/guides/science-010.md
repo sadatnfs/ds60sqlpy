@@ -1,6 +1,6 @@
 # science-010: Survival risk sets, delayed entry and partial likelihood
 
-Tutorial mode. Stage: intermediate. Direct prerequisites: `statistics-science-004`.
+Tutorial mode. Stage: intermediate. Direct prerequisites: `statistics-028`.
 
 ## Follow-up creates changing comparison sets
 

@@ -11,27 +11,27 @@
     },
     {
       "exercise": 2,
-      "task": "Subtract12:00:00Z from12:01:30Z in seconds.",
-      "expected": "90seconds,compared with target120seconds."
+      "task": "Subtract 12:00:00Z from 12:01:30Z in seconds.",
+      "expected": "90 seconds, compared with target 120 seconds."
     },
     {
       "exercise": 3,
-      "task": "Compare source11:59:50Z with restored11:59:30Z.",
-      "expected": "20seconds,compared with target30seconds."
+      "task": "Compare source 11:59:50Z with restored 11:59:30Z.",
+      "expected": "20 seconds, compared with target 30 seconds."
     },
     {
       "exercise": 4,
-      "task": "Evaluate service_ok true,data_ok false,Pod_ready true.",
+      "task": "Evaluate service_ok true, data_ok false, Pod_ready true.",
       "expected": "Recovery finish remains false."
     },
     {
       "exercise": 5,
-      "task": "Identify timezone,clock source,backup reference,marker hash and host receipt for each milestone.",
+      "task": "Identify timezone, clock source, backup reference, marker hash and host receipt for each milestone.",
       "expected": "Every measurement is traceable without exporting sensitive backup contents."
     },
     {
       "exercise": 6,
-      "task": "Report target,observed result,failed controls and untested conditions.",
+      "task": "Report target, observed result, failed controls and untested conditions.",
       "expected": "A bounded drill conclusion with no universal recovery guarantee."
     }
   ]

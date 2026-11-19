@@ -6,7 +6,7 @@ The executable reference is `julia-022_reference.jl`. Its checks cover the state
 
 An analytic case provides an independent reference for the AD implementation.
 
-**Expected observation:** The result is[4,18].
+**Expected observation:** The result is `[4, 18]`.
 
 ## 2. Check Jacobian axes
 
@@ -24,7 +24,7 @@ Ordinary evaluation alone does not reveal a differentiation-incompatible convers
 
 A reduction change alters gradient scale and cannot be treated as a cosmetic refactor.
 
-**Expected observation:** Gradients are[1,1] and[0.5,0.5].
+**Expected observation:** Gradients are `[1, 1]` and `[0.5, 0.5]`.
 
 ## 5. Inspect a branch boundary
 

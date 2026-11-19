@@ -6,7 +6,7 @@ Advanced, approximately 120 minutes. Prerequisites: `csharp-046`
 
 ## Learning objectives
 
-Implement a result lookup that does not execute the command again. Then design durable atomic storage for an effect and its receipt and state remaining failure modes.
+Make retried operations idempotent by storing receipts and rejecting conflicting reuse of an identifier. The central exercise is task 3: Implement a result lookup that does not execute the command again.
 
 ## Purpose and mental model
 
@@ -175,7 +175,7 @@ internal static class Program {
 
 6. **Transfer and justify.** Design durable atomic storage for an effect and its receipt and state remaining failure modes.
 
-For each task, keep a short evidence table: input or initial state, prediction, observed value or diagnostic, and the rule that explains it. The guided examples establish mechanisms; the independent and transfer tasks require your own representation and explanation. Use the separate solution after attempting the task, then close it and reconstruct one boundary case.
+For each task, keep a short evidence table: input or initial state, prediction, observed value or diagnostic, and the rule that explains it. The guided examples establish mechanisms; the independent and transfer tasks require your own representation and explanation. The separate explanation gives an executed reference answer where one has been written and says plainly where none exists yet. Open it only after your own attempt, then close it and reconstruct one boundary case.
 
 ## Common pitfalls and diagnosis
 
@@ -185,9 +185,9 @@ A useful regression case distinguishes the intended rule from the tempting wrong
 
 ## Progressive hints
 
-1. Name the input, output and invariant using the vocabulary above. Reproduce Example A before changing two things at once.
-2. Compare the changed condition in Example B. Identify the first line whose behavior differs and state why.
-3. Reduce your independent task to a normal case, an empty or boundary case, and an invalid case. Write expected observations before inspecting the reference.
+1. Reproduce Example A (Replay a recorded result without applying again) before changing anything, and confirm its observation: The repeated identity returns its prior result without increasing the total.
+2. Compare Example B (Distinguish a new operation) with Example A and name the first line whose behavior differs. Its observation is: A new identity applies separately, while a changed payload under an old key is rejected.
+3. Before opening the explanation, test your task 3 attempt against this lesson's main pitfall: This in-memory ledger does not survive restart and is not concurrent.
 
 ## Self-check and next step
 
@@ -195,7 +195,7 @@ Explain Idempotency key, Transient failure, Reconciliation without reading the d
 
 ## Sources and execution boundary
 
-[Official language or framework documentation](https://learn.microsoft.com/en-us/dotnet/csharp/). The prose, small fixtures and task designs in this chapter are original. Documentation links provide additional API detail, not a dependency fetched by the classroom. Runtime qualification is recorded separately by the repository validation workflow. Reading a guide, compiling a reference, running its assertions and completing an external project are distinct achievements.
+[Official language or framework documentation](https://learn.microsoft.com/en-us/dotnet/csharp/). The prose, small fixtures and task designs in this chapter are original. Documentation links provide additional API detail, not a dependency fetched by the classroom. Reading a guide, compiling a reference, running its assertions and completing an external project are distinct achievements.
 
 ## Ask an AI tutor about this lesson
 

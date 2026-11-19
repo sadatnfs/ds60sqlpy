@@ -26,7 +26,7 @@ The training objective is \(L(w)=\frac{14}{3}(w-2)^2\) on x=[1, 2, 3]. With lear
 
 The held-out inputs are 4 and 5, with targets 8 and 10. The training-mean target baseline predicts four, so its squared errors are 16 and 36 and MSE is 26. For the trained scalar model, the holdout MSE is \(\frac{16+25}{2}(w_{30}-2)^2=82\left(\frac{68}{75}\right)^{60}\), approximately 0.229442. The threshold below 26 is therefore interpretable for this visible fixture. It does not establish population quality: the rule y=2x is public, and both assessment inputs extrapolate beyond the training range.
 
-The predictor is more than its state tensor. Its architecture is bias-free Linear(1, 1), its dtype is float64, its feature list is['x'], and its output represents the same scalar target units. The manifest carries that schema, split IDs, step count and a digest of the serialized weight file. A future normalized or categorical model would also need its fitted preprocessing and label mapping. Reconstructing a tensor of the right shape cannot recover omitted semantic metadata.
+The predictor is more than its state tensor. Its architecture is bias-free Linear(1, 1), its dtype is float64, its feature list is ['x'], and its output represents the same scalar target units. The manifest carries that schema, split IDs, step count and a digest of the serialized weight file. A future normalized or categorical model would also need its fitted preprocessing and label mapping. Reconstructing a tensor of the right shape cannot recover omitted semantic metadata.
 
 The digest binds the manifest's expected weight identity to the actual saved bytes. The child recomputes SHA256 before loading and rejects a mismatch. The deliberate all-zero expected digest exercises that rejection path. It is a successful negative test because the invalid bundle fails with the expected diagnostic; it does not mean the corrupted bundle is an accepted release.
 
@@ -54,75 +54,65 @@ Publication and cleanup also have boundaries. The files are created in one owned
 
 The final record can therefore say local_contracts_pass=True and production_go=False without contradiction. It acknowledges successful mechanics while preserving missing assessment and operational evidence. The paired TensorFlow release uses different formats and some different gates, but follows the same principle: each claim should be supported by the corresponding actual check, and a required unknown or failure must remain visible.
 
-## Exercise 1: Freeze the scalar experiment
+## Exercise 1: Freeze a new split
 
-The question is: Use train x = [1, 2, 3] and holdout 4, 5 with target 2 x and disjoint IDs.
+The question is: Assign IDs a, b, c, d to training and e, f to holdout and check that the sets are disjoint.
 
-The data identity is fixed before training. The tiny holdout is useful for local mechanics but not sufficient for a broad quality claim.
+The manifest records identities, so a later reader can confirm the separation without the data.
 
 ```python
-x = torch.tensor([[1.0], [2.0], [3.0]], dtype=torch.float64)
-y = 2 * x
-held = torch.tensor([[4.0], [5.0]], dtype=torch.float64)
-split = {"train": ["a", "b", "c"], "test": ["d", "e"]}
-assert not set(split["train"]) & set(split["test"]) and len(split["test"]) == 2
+release_split = {"train": ["a", "b", "c", "d"], "test": ["e", "f"]}
+assert not set(release_split["train"]) & set(release_split["test"]) and (
+    len(release_split["train"]),
+    len(release_split["test"]),
+) == (4, 2)
 ```
 
-**Expected:** 3 training and 2 holdout records.
+**Expected:** 4 training and 2 holdout IDs with no overlap.
 
-**Verify:** Compare the computed values or written argument with 3 training and 2 holdout records.
+**Verify:** In a fresh process, the exercise checks confirm `not set(release_split['train']) & set(release_split['test'])` and `(len(release_split['train']), len(release_split['test'])) == (4, 2)`.
 
-## Exercise 2: Train within a declared budget
+## Exercise 2: Predict a ten-step weight
 
-The question is: Zero-initialize float64 Linear and run 30 SGD.01 updates.
+The question is: Train a zero-initialized float64 Linear(1, 1) without bias for 10 SGD steps with learning rate 0.01 on x = 1, 2, 3 and y = 2x.
 
-The budget is not extended after seeing the holdout. The baseline predicts training mean target 4, so gives errors 16 and 36on the two test rows.
+Each step multiplies the error w-2 by 1-0.01*28/3=68/75, so the budget sets a predictable endpoint.
 
 ```python
-model = nn.Linear(1, 1, bias=False, dtype=torch.float64)
+ten_model = nn.Linear(1, 1, bias=False, dtype=torch.float64)
 with torch.no_grad():
-    model.weight.zero_()
-optimizer = torch.optim.SGD(model.parameters(), lr=0.01)
-for _ in range(30):
-    optimizer.zero_grad(set_to_none=True)
-    (model(x) - y).square().mean().backward()
-    optimizer.step()
-model.eval()
-with torch.no_grad():
-    expected = model(held)
-    error = (expected - 2 * held).square().mean().item()
-assert torch.isfinite(model.weight).all() and error < 26
+    ten_model.weight.zero_()
+ten_opt = torch.optim.SGD(ten_model.parameters(), lr=0.01)
+ten_x = torch.tensor([[1.0], [2.0], [3.0]], dtype=torch.float64)
+for _ in range(10):
+    ten_opt.zero_grad(set_to_none=True)
+    (ten_model(ten_x) - 2 * ten_x).square().mean().backward()
+    ten_opt.step()
+np.testing.assert_allclose(ten_model.weight.item(), 2 - 2 * (68 / 75) ** 10, atol=1e-12, rtol=0)
 ```
 
-**Expected:** finite weights; holdout error below constant training-mean baseline 26.
+**Expected:** weight 2-2*(68/75)**10, about 1.2492, within 1e-12.
 
-**Verify:** Compare the computed values or written argument with finite weights; holdout error below constant training-mean baseline 26.
+**Verify:** In a fresh process, the exercise checks confirm `ten_model.weight.item()` matches `2 - 2 * (68 / 75) ** 10` within 1e-12.
 
-## Exercise 3: Build the owned release bundle
+## Exercise 3: Hash bytes deterministically
 
-The question is: Save weights, schema and split manifest with a weight SHA256.
+The question is: Compute the SHA-256 of the bytes weights-v2 twice and of weights-v3 once.
 
-The hash binds the manifest to the saved bytes. The feature order and dtype provide semantic information that a state dictionary alone cannot explain.
+A recorded digest lets a loader reject any modified artifact before trusting its contents.
 
 ```python
-temporary = tempfile.TemporaryDirectory()
-folder = Path(temporary.name)
-weights = folder / "weights.pt"
-torch.save(model.state_dict(), weights)
-manifest = {
-    "schema": {"features": ["x"], "dtype": "float64", "width": 1},
-    "split": split,
-    "weight_sha256": hashlib.sha256(weights.read_bytes()).hexdigest(),
-    "steps": 30,
-}
-manifest_path = folder / "manifest.json"
-manifest_path.write_text(json.dumps(manifest, sort_keys=True))
-assert len(manifest["weight_sha256"]) == 64 and manifest["schema"]["width"] == 1
+first_hash = hashlib.sha256(b"weights-v2").hexdigest()
+assert (
+    first_hash == hashlib.sha256(b"weights-v2").hexdigest()
+    and first_hash != hashlib.sha256(b"weights-v3").hexdigest()
+    and len(first_hash) == 64
+)
 ```
 
-**Expected:** manifest has feature x, float64, width 1 and matching hash.
+**Expected:** identical bytes give identical 64-character digests; one changed byte changes the digest.
 
-**Verify:** Compare the computed values or written argument with manifest has feature x, float64, width 1 and matching hash.
+**Verify:** In a fresh process, the exercise checks confirm `first_hash == hashlib.sha256(b'weights-v2').hexdigest()`, `first_hash != hashlib.sha256(b'weights-v3').hexdigest()` and `len(first_hash) == 64`.
 
 ## Exercise 4: Verify fresh-process prediction parity
 
@@ -159,7 +149,7 @@ np.testing.assert_allclose(
 
 **Expected:** predictions match within 1e-12.
 
-**Verify:** Compare the computed values or written argument with predictions match within 1e-12.
+**Verify:** In a fresh process, the exercise checks confirm `not (result.returncode)` and `json.loads(result.stdout.strip().splitlines()[-1])` matches `expected.numpy()` within 1e-12.
 
 ## Exercise 5: Make a corrupted artifact fail
 
@@ -183,7 +173,7 @@ manifest_path.write_text(json.dumps(manifest, sort_keys=True))
 
 **Expected:** nonzero child exit and weight hash mismatch diagnostic.
 
-**Verify:** Compare the computed values or written argument with nonzero child exit and weight hash mismatch diagnostic.
+**Verify:** In a fresh process, the exercise checks confirm `rejected.returncode != 0` and `'weight hash mismatch' in rejected.stderr`.
 
 ## Exercise 6: Record a bounded decision and cleanup
 
@@ -205,7 +195,7 @@ assert receipt["local_contracts_pass"] and not receipt["production_go"] and not 
 
 **Expected:** local checks True; production no-go; directory absent.
 
-**Verify:** Compare the computed values or written argument with local checks True; production no-go; directory absent.
+**Verify:** In a fresh process, the exercise checks confirm `receipt['local_contracts_pass']`, `not receipt['production_go']` and `not folder.exists()`.
 
 ## Review after comparison
 

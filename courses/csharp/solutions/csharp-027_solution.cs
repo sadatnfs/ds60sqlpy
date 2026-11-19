@@ -38,6 +38,15 @@ internal static class Program {
                 start,
             "round-trip format");
     }
+    {
+      // Task 3: Independent construction
+      var start = new DateTimeOffset(2025, 3, 1, 22, 30, 0, TimeSpan.Zero);
+      var end = new DateTimeOffset(2025, 3, 2, 1, 15, 0, TimeSpan.Zero);
+      TimeSpan elapsed = end - start;
+      string report = $"{elapsed.TotalMinutes} minutes";
+      Check(elapsed == TimeSpan.FromMinutes(165), "across midnight");
+      Check(report == "165 minutes", "invariant report");
+    }
     Console.WriteLine("csharp-027: passed");
     await Task.CompletedTask;
   }

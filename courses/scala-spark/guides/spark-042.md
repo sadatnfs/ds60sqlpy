@@ -1,22 +1,22 @@
 # spark-042: Capstone: a recoverable late-event data product
 
-Authored paired Scala/PySpark teaching content. The default fixtures are tiny,local and deterministic. Runtime acceptance,logical correctness and learner understanding remain separate evidence.
+Authored paired Scala/PySpark teaching content. The default fixtures are tiny, local and deterministic. Runtime acceptance, logical correctness and learner understanding remain separate evidence.
 
 ## Level and prerequisites
 
-Advanced; approximately 180 minutes. Direct design prerequisites: `spark-041`. The prepared baseline is Spark4.0.1,Scala binary2.13,JDK17 and Python3.12. Read the [execution baseline](../execution-baseline.md);a proposed future tuple is not a runtime receipt.
+Advanced; approximately 180 minutes. Direct prerequisites: `spark-041`. The prepared baseline is Spark 4.0.1, Scala binary 2.13, JDK 17 and Python 3.12. Read the [execution baseline](../execution-baseline.md).
 
 ## How to run this lesson
 
-Open `spark-042` in the classroom and choose the Scala or PySpark implementation you understand. Prepare only its fixed `spark-local-scala` or `spark-local-python` profile,save your pad and run the complete source. Scala stages as `Main.scala` with `object Main`;Python stages as `main.py` with a main guard. Each program creates its own local[2] session,disables the UI,binds the driver to loopback and stops the session in finally. No external dataset,package download,JDBC connection or cloud service is requested.
+Open `spark-042` in the classroom and choose the Scala or PySpark implementation you understand. Prepare only its fixed `spark-local-scala` or `spark-local-python` profile, save your pad and run the complete source. Scala stages as `Main.scala` with `object Main`;Python stages as `main.py` with a main guard. Each program creates its own local[2] session, disables the UI, binds the driver to loopback and stops the session in finally. No external dataset, package download, JDBC connection or cloud service is requested.
 
-The [Scala learner](../lessons/spark-042.scala) and [PySpark learner](../lessons/spark-042.py) run two complete demonstrations and retain six explicit task stubs. Use the [explained solutions](../solutions/spark-042_solutions.md) only after an attempt or an explicit worked comparison;the [Scala reference](../solutions/spark-042_solution.scala) and [PySpark reference](../solutions/spark-042_solution.py) contain complete assertions. A bounded collect is used only for the declared tiny fixture;do not copy it onto an unbounded or large production table.
+The [Scala learner](../lessons/spark-042.scala) and [PySpark learner](../lessons/spark-042.py) run two complete demonstrations and retain six explicit task stubs. Use the [explained solutions](../solutions/spark-042_solutions.md) only after an attempt or an explicit worked comparison; the [Scala reference](../solutions/spark-042_solution.scala) and [PySpark reference](../solutions/spark-042_solution.py) contain complete assertions. A bounded collect is used only for the declared tiny fixture; do not copy it onto an unbounded or large production table.
 
 ## Learning objectives
 
 - Deliver a bounded streaming product with credible correctness, recovery and operational evidence.
-- State the input and output grain,schema,NULL policy and ordering before executing a transformation.
-- Compare each language implementation with independent literal expectations,not only with the other implementation.
+- State the input and output grain, schema, NULL policy and ordering before executing a transformation.
+- Compare each language implementation with independent literal expectations, not only with the other implementation.
 
 ## Vocabulary and concepts
 
@@ -38,7 +38,7 @@ The source schema is delivery:bigint, id:string, event_second:bigint, cents:bigi
 
 ## State the policy before running the stream
 
-Accepted IDs are single uppercase letters, event seconds are integers 0..1000 and cents are integers 0..1000. Zero cents is valid. Domain-invalid rows are counted invalid and never advance event time. For a domain-valid row, an existing ID with the same event time and amount is a duplicate;an existing ID with different payload is invalid conflict. A new ID older than the frozen cutoff is late. All remaining new IDs are accepted.
+Accepted IDs are single uppercase letters, event seconds are integers 0..1000 and cents are integers 0..1000. Zero cents is valid. Domain-invalid rows are counted invalid and never advance event time. For a domain-valid row, an existing ID with the same event time and amount is a duplicate; an existing ID with different payload is invalid conflict. A new ID older than the frozen cutoff is late. All remaining new IDs are accepted.
 
 The cutoff for a batch is previous committed maximum accepted event_second minus 10. It is inclusive:an event exactly at the cutoff is accepted. The cutoff does not move after each row in the current batch. This prevents the processing order of one batch from deciding whether another row in the same batch is late. Accepted events update the maximum for the next committed batch.
 
@@ -46,25 +46,25 @@ This is an explicit application policy implemented in the bounded sink state. It
 
 ## Work the three immutable input batches
 
-BatchA containsA(100,10), B(105,20), an equalA duplicate and a NULL business ID. It yields accepted 2, duplicate 1, invalid 1, late 0, total 30, max 105. The next cutoff is 95. BatchB deliberately presentsE(120,40) beforeD(95,0), thenC(94,7) and an equalB duplicate. D is accepted at the frozen 95 boundary even though E raises the next maximum to 120. C is late. The cumulative product becomes accepted 4, duplicate 2, late 1, invalid 1, total 70.
+Batch A contains A(100,10), B(105,20), an equal A duplicate and a NULL business ID. It yields accepted 2, duplicate 1, invalid 1, late 0, total 30, max 105. The next cutoff is 95. Batch B deliberately presents E(120,40) before D(95,0), then C(94,7) and an equal B duplicate. D is accepted at the frozen 95 boundary even though E raises the next maximum to 120. C is late. The cumulative product becomes accepted 4, duplicate 2, late 1, invalid 1, total 70.
 
-BatchC uses cutoff 110. A changed B amount 999 is an invalid conflict, and F(110,5) is accepted exactly at the boundary. The final accepted IDs areA, B, D, E, F, total 75, with duplicate 2, late 1, invalid 2. The conservation equation is 5+2+1+2=10 raw occurrences. A total-only check would miss dropping the valid zero-valuedD, so the oracle includes every accepted identity and timestamp as well as counts and total.
+Batch C uses cutoff 110. A changed B amount 999 is an invalid conflict, and F(110,5) is accepted exactly at the boundary. The final accepted IDs are A, B, D, E, F, total 75, with duplicate 2, late 1, invalid 2. The conservation equation is 5+2+1+2=10 raw occurrences. A total-only check would miss dropping the valid zero-valued D, so the oracle includes every accepted identity and timestamp as well as counts and total.
 
 ## Publish input and state together
 
 Each callback canonicalizes all input occurrences into deterministic JSON, including invalid business fields. The commit file stores query identity, batch ID, input JSON and SHA256, previous commit digest and canonical derived state. The predecessor chain is bounded and validated when read. State is recomputed from the committed input ledger and compared with the recorded state, so a reader does not trust an unexplained summary counter.
 
-The file is staged beside its final batch-key path and atomically renamed under a single-writer local-filesystem assumption. Input, state and commit metadata share one visibility point. A repeated batch key must carry identical input and a valid existing chain;it returns the already committed logical state rather than applying the rows again. JSON integer fields are validated by numeric value and integral type, avoiding the JVM node-width round-trip mistake discussed in the sink lesson.
+The file is staged beside its final batch-key path and atomically renamed under a single-writer local-filesystem assumption. Input, state and commit metadata share one visibility point. A repeated batch key must carry identical input and a valid existing chain; it returns the already committed logical state rather than applying the rows again. JSON integer fields are validated by numeric value and integral type, avoiding the JVM node-width round-trip mistake discussed in the sink lesson.
 
-This protocol provides the tested local visibility and replay behavior. It does not fsync a power-loss-durable transaction log, coordinate multiple distributed writers or prove object-store atomicity. Hashes identify bytes but do not authenticate an attacker-controlled publisher. Every file here is created inside the owned local job root;the example does not open a database or remote service.
+This protocol provides the tested local visibility and replay behavior. It does not fsync a power-loss-durable transaction log, coordinate multiple distributed writers or prove object-store atomicity. Hashes identify bytes but do not authenticate an attacker-controlled publisher. Every file here is created inside the owned local job root; the example does not open a database or remote service.
 
 ## Fail after the effect exists
 
-The first actual foreachBatch callback publishesBatchA, then raises injected_after_publication before Spark records normal batch completion. The query fails, but the committed product is readable. That is an uncertain outcome from the caller's perspective:the effect happened even though the call did not return success.
+The first actual foreachBatch callback publishes Batch A, then raises injected_after_publication before Spark records normal batch completion. The query fails, but the committed product is readable. That is an uncertain outcome from the caller's perspective:the effect happened even though the call did not return success.
 
-Restarting the same compatible checkpoint deliversBatch 0 again. The sink validates the existing content and leaves its bytes and counters unchanged. Query identity persists while run identity changes. The attempt ledger is[0,0], but there is only one committed first-batch effect. This is replay-safe publication, not exactly-once callback computation.
+Restarting the same compatible checkpoint delivers Batch 0 again. The sink validates the existing content and leaves its bytes and counters unchanged. Query identity persists while run identity changes. The attempt ledger is [0, 0], but there is only one committed first-batch effect. This is replay-safe publication, not exactly-once callback computation.
 
-After the restart, the program publishesBatchB and BatchC in turn and waits for each finite query to finish. The final attempt IDs are[0,0,1,2], and callback row counts are[4,4,4,2]. Physical callback work therefore examines 14 row occurrences while the committed source ledger accounts for 10 logical occurrences. Keeping these numbers separate prevents a retry from being mistaken for extra business events or a cost-free recovery.
+After the restart, the program publishes Batch B and Batch C in turn and waits for each finite query to finish. The final attempt IDs are [0, 0, 1, 2], and callback row counts are [4, 4, 4, 2]. Physical callback work therefore examines 14 row occurrences while the committed source ledger accounts for 10 logical occurrences. Keeping these numbers separate prevents a retry from being mistaken for extra business events or a cost-free recovery.
 
 ## Review the handoff and cleanup
 
@@ -192,9 +192,9 @@ The independent final oracle checks both conservation and zero retention. The to
 
 Require the explicit four-field schema, at most 8 rows and unique delivery IDs 1..12. Preserve NULL/business-invalid fields for classification and emit deterministic JSON.
 
-**Expected result/shape:** BatchA has four occurrences with IDsA, B, A, NULL;NULL is preserved in canonical input. An oversized batch is rejected before collection.
+**Expected result/shape:** Batch A has four occurrences with IDs A, B, A, NULL; NULL is preserved in canonical input. An oversized batch is rejected before collection.
 
-**Verify:** Compare decoded delivery IDs 1..4 and the NULL marker;reject a 12-row union.
+**Verify:** Compare decoded delivery IDs 1..4 and the NULL marker; reject a 12-row union.
 
 **Progressive hint:** Structural delivery identity is required even when business data is invalid.
 
@@ -202,9 +202,9 @@ Require the explicit four-field schema, at most 8 rows and unique delivery IDs 1
 
 Freeze cutoff at previous committed max_event_second minus 10. Validate domain, then classify existing equal ID payload as duplicate, conflicting payload as invalid, new old event as late, and remaining event as accepted.
 
-**Expected result/shape:** AfterA:accepted 2, duplicate 1, late 0, invalid 1, total 30, max 105. An invalid far-future row does not advance max time.
+**Expected result/shape:** After A: accepted 2, duplicate 1, late 0, invalid 1, total 30, max 105. An invalid far-future row does not advance max time.
 
-**Verify:** Assert exact state and an invalid future control;preserve the original state value.
+**Verify:** Assert exact state and an invalid future control; preserve the original state value.
 
 **Progressive hint:** The cutoff is fixed for the microbatch, not recomputed after each row.
 
@@ -212,7 +212,7 @@ Freeze cutoff at previous committed max_event_second minus 10. Validate domain, 
 
 Run the actual foreachBatch query with one injected exception after the atomic commit file becomes visible.
 
-**Expected result/shape:** The query fails with injected_after_publication;commit 0 is readable and contains the correct first-state ledger.
+**Expected result/shape:** The query fails with injected_after_publication; commit 0 is readable and contains the correct first-state ledger.
 
 **Verify:** Inspect the expected streaming exception, attempt 0 and unchanged source/checkpoint ownership.
 
@@ -226,15 +226,15 @@ Restart the same compatible query and checkpoint. Validate the existing batch in
 
 **Verify:** Compare query/run identities, exact bytes and all first-state counters.
 
-**Progressive hint:** Repeated computation is allowed;repeated logical publication is not.
+**Progressive hint:** Repeated computation is allowed; repeated logical publication is not.
 
 ### Exercise 5: Process late, boundary, duplicate and conflicting events
 
-PublishBatchB thenBatchC as separate immutable files and run each finite invocation against the same checkpoint.
+Publish Batch B then Batch C as separate immutable files and run each finite invocation against the same checkpoint.
 
-**Expected result/shape:** Final accepted IDsA, B, D, E, F, total 75;duplicate 2, late 1, invalid 2;10 logical occurrences. Zero-valuedD and cutoff-boundaryF remain accepted.
+**Expected result/shape:** Final accepted IDs A, B, D, E, F, total 75;duplicate 2, late 1, invalid 2;10 logical occurrences. Zero-valued D and cutoff-boundary F remain accepted.
 
-**Verify:** Compare intermediateB counts and the final literal state;the high-timeE must not make same-batchD late.
+**Verify:** Compare intermediate B counts and the final literal state; the high-time E must not make same-batch D late.
 
 **Progressive hint:** Freeze each cutoff from the previously committed state:95 for B and 110 for C.
 
@@ -242,9 +242,9 @@ PublishBatchB thenBatchC as separate immutable files and run each finite invocat
 
 Return the exact final canonical state, record callback work 14 versus logical occurrences 10, and reject binding the existing sink to a different checkpoint.
 
-**Expected result/shape:** Literal golden state matches;attempt IDs 0,0,1,2;callback rows 4,4,4,2;only owned inactive queries are eligible for cleanup.
+**Expected result/shape:** Literal golden state matches; attempt IDs 0,0,1,2;callback rows 4,4,4,2;only owned inactive queries are eligible for cleanup.
 
-**Verify:** Compare the complete state JSON and namespace-refusal negative;state the single-writer/local-filesystem limitations.
+**Verify:** Compare the complete state JSON and namespace-refusal negative; state the single-writer/local-filesystem limitations.
 
 **Progressive hint:** An evidence packet separates data effects, physical work, source identity and cleanup.
 
@@ -254,11 +254,11 @@ Do not call a repeated callback exactly-once computation, advance the cutoff wit
 
 ## Self-check
 
-Explain the contract of `canonicalProductInput` / `canonical_product_input` without reading its solution. Trace the specified boundary case,then explain the final exercise's evidence and limitation. Identify where a transformation builds a plan and where an action requests execution. Retain exact values or operator evidence rather than treating a successful process exit as proof of the whole learning objective.
+Explain the contract of `canonicalProductInput` / `canonical_product_input` without reading its solution. Trace the specified boundary case, then explain the final exercise's evidence and limitation. Identify where a transformation builds a plan and where an action requests execution. Retain exact values or operator evidence rather than treating a successful process exit as proof of the whole learning objective.
 
 ## Next step
 
-Use the [course route](../README.md) to continue. Paired-language agreement is useful only when both outputs also satisfy the independent fixture contract. Keep runtime/profile receipts separate from any cluster-performance or production-recovery claim.
+Use the [course route](../README.md) to continue. Paired-language agreement is useful only when both outputs also satisfy the independent fixture contract. A successful local run is not evidence of cluster performance or production recovery.
 
 ## Primary sources and official APIs
 
@@ -266,14 +266,14 @@ Use the [course route](../README.md) to continue. Paired-language agreement is u
 
 - [Spark4.0.1 event-time concepts](https://spark.apache.org/docs/4.0.1/streaming/apis-on-dataframes-and-datasets.html#handling-late-data-and-watermarking)
 
-- [Java17 atomic file publication](https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/nio/file/Files.html#move(java.nio.file.Path,java.nio.file.Path,java.nio.file.CopyOption...))
+- [Java 17 atomic file publication](https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/nio/file/Files.html#move(java.nio.file.Path,java.nio.file.Path,java.nio.file.CopyOption...))
 
 ## Ask an AI tutor about this lesson
 
 ```text
 Use $guide-ds60sqlpy-learning to coach me through spark-042: Capstone: a recoverable late-event data product.
-Read courses/scala-spark/guides/spark-042.md and courses/scala-spark/lessons/spark-042.scala;the paired sources are courses/scala-spark/lessons/spark-042.scala and courses/scala-spark/lessons/spark-042.py.
-Direct prerequisites: spark-041. Explain the schema,row grain and new Scala/Python/Spark syntax,ask me to predict a concrete result,then inspect my attempt. Give one hint at a time,review exact result and boundary evidence,and ask retrieval questions in my own words. Do not read solutions/ until I ask or have made an honest attempt.
-Use only the prepared local[2] worker profile and owned job scratch. Do not download dependencies,start a remote service,reset existing checkpoints or alter unrelated learner work.
+Read courses/scala-spark/guides/spark-042.md and courses/scala-spark/lessons/spark-042.scala; the paired sources are courses/scala-spark/lessons/spark-042.scala and courses/scala-spark/lessons/spark-042.py.
+Direct prerequisites: spark-041. Explain the schema, row grain and new Scala/Python/Spark syntax, ask me to predict a concrete result, then inspect my attempt. Give one hint at a time, review exact result and boundary evidence, and ask retrieval questions in my own words. Do not read solutions/ until I ask or have made an honest attempt.
+Use only the prepared local[2] worker profile and owned job scratch. Do not download dependencies, start a remote service, reset existing checkpoints or alter unrelated learner work.
 Done when all six contracts have inspected evidence and I can explain the stated assumptions and a meaningful failure case.
 ```

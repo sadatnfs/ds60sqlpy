@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import math
 import numpy as np
 import jax
 import jax.numpy as jnp
@@ -124,7 +123,7 @@ def main():
         compare(left, right)
         assert int(right[3]) == 4
 
-    print("jax-017" + ": 8 asserted cases passed")
+    print("jax-017: 8 asserted cases passed")
 
 
 if __name__ == "__main__":

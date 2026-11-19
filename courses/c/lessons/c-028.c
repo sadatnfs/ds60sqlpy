@@ -1,13 +1,21 @@
 #include <stdio.h>
 
 int main(void) {
-  /* Exercise 1: Call a declared API
-     Use the stats_sum prototype before its definition.
-     Expected: Summing 2, 4, 6 returns 12. */
+  /* Exercise 1: Call a declared API: change one input
+     Copy worked example 1 into a scratch pad and change `int values[] = {2, 4,
+     6};` to `int values[] = {3, 4, 6};`. Before running, predict which CHECK
+     fails and which value it now sees; then run it and restore the original
+     line. Expected: The changed run stops with `Check failed` at the CHECK on
+     `stats_sum(values, 3) == 12`. Restoring the original line brings back the
+     worked observation: summing 2, 4, 6 returns 12. */
 
-  /* Exercise 2: Use an empty API contract
-     Sum a zero-length view.
-     Expected: The result is zero. */
+  /* Exercise 2: Use an empty API contract: diagnose an edited check
+     A careless edit changed the CHECK in worked example 2 so that it reads
+     `CHECK(stats_sum(NULL, 0) != 0);`. Run worked example 2 with that line,
+     explain why the edited CHECK now fails for the same program state, and
+     restore it. Expected: Before the repair the run stops with `Check failed`
+     at the CHECK on `stats_sum(NULL, 0) == 0`; after it the line reads
+     `CHECK(stats_sum(NULL, 0) == 0);` again and the result is zero. */
 
   /* Exercise 3: Compare two callers
      Call the same helper with two separate arrays.

@@ -24,7 +24,7 @@ The fixture's covariate .5 lies within the observed design range. Predicting far
 
 ## Diagnose compiler and model failures separately
 
-A mismatch between the number of design columns and coefficient length is a shape error. A misplaced row/vector transpose can cause a type error or express a different calculation. Read the compiler's line and column information against the exact submitted source; do not assume a diagnostic from an older receipt refers to a later edited pad.
+A mismatch between the number of design columns and coefficient length is a shape error. A misplaced row/vector transpose can cause a type error or express a different calculation. Read the compiler's line and column information against the exact submitted source; do not assume a diagnostic from an older saved run refers to a later edited pad.
 
 A model can compile while being poorly identified. Nearly duplicate columns can create a strong posterior correlation, as the earlier PyMC geometry tutorial demonstrated. Weak data on sigma can also make prior choices important. Examine actual sampler diagnostics and predictive behavior after type correctness is established.
 

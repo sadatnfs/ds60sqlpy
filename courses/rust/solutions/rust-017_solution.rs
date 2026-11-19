@@ -27,6 +27,22 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         let prices: [&dyn Pricer; 2] = [&flat, &capped];
         assert_eq!(prices.map(|price| price.cost(4)), [12, 10]);
     }
+
+    {
+        // Task 3: Independent construction
+        trait Formatter {
+            fn format(&self, value: u32) -> String;
+        }
+        struct Units;
+        impl Formatter for Units {
+            fn format(&self, value: u32) -> String {
+                format!("{value} units")
+            }
+        }
+        let formatter: &dyn Formatter = &Units;
+        assert_eq!(formatter.format(3), "3 units");
+        assert_eq!(formatter.format(3), formatter.format(3));
+    }
     println!("rust-017: passed");
     Ok(())
 }

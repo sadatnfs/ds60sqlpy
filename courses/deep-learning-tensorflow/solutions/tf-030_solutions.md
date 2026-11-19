@@ -4,7 +4,7 @@ Compare these answers only after an attempt or an explicit solution reveal. They
 
 ## Mechanism review
 
-A distributed or accumulated gradient must represent the intended global objective. If shards have different numbers of examples, averaging shard means equally weights shards rather than observations. A one-example shard with mean gradient2 and a three-example shard with mean6 combine to5 under an example mean, not4. Gradient accumulation has the same issue when microbatches differ in size. Accumulate gradient sums and counts, divide once, then apply one optimizer update. Applying an update after each microbatch is a different trajectory because later gradients use changed parameters. This lesson simulates all shards on one CPU and does not claim a distributed runtime was exercised.
+A distributed or accumulated gradient must represent the intended global objective. If shards have different numbers of examples, averaging shard means equally weights shards rather than observations. A one-example shard with mean gradient 2 and a three-example shard with mean 6 combine to 5 under an example mean, not 4. Gradient accumulation has the same issue when microbatches differ in size. Accumulate gradient sums and counts, divide once, then apply one optimizer update. Applying an update after each microbatch is a different trajectory because later gradients use changed parameters. This lesson simulates all shards on one CPU and does not claim a distributed runtime was exercised.
 
 **Shard:** A subset of observations processed as one partition.
 
@@ -18,7 +18,7 @@ The identity global_mean=sum(count*local_mean)/sum(count) is independent of a co
 
 ## Exercise 1: Weight shard means
 
-The question is: Combine means2,6 with counts1,3 and compare equal shard averaging.
+The question is: Combine means 2, 6 with counts 1, 3 and compare equal shard averaging.
 
 Multiplying each local mean by its count restores the gradient numerator. The final division then gives each example equal weight.
 
@@ -28,13 +28,13 @@ counts = np.array([1, 3])
 assert np.average(means, weights=counts) == 5 and means.mean() == 4
 ```
 
-**Expected:** global5; naive4.
+**Expected:** global 5; naive 4.
 
-**Verify:** Compare the computed values or written argument with global5; naive4.
+**Verify:** In a fresh process, the exercise checks confirm `np.average(means, weights=counts) == 5` and `means.mean() == 4`.
 
 ## Exercise 2: Recover a full-batch mean
 
-The question is: Partition gradients[2,4,6,8] into sizes 1 and3 and reconstruct their mean.
+The question is: Partition gradients [2, 4, 6, 8] into sizes 1 and 3 and reconstruct their mean.
 
 The explicit per-example values are an independent oracle for the shard calculation. A test that compares two formulas using the same wrong weights would miss the error.
 
@@ -45,13 +45,13 @@ recombined = sum(p.sum() for p in parts) / sum(len(p) for p in parts)
 assert recombined == g.mean() == 5
 ```
 
-**Expected:** both full and reconstructed means5.
+**Expected:** both full and reconstructed means 5.
 
-**Verify:** Compare the computed values or written argument with both full and reconstructed means5.
+**Verify:** In a fresh process, the exercise checks confirm `recombined == g.mean() == 5`.
 
 ## Exercise 3: Accumulate squared-loss gradients
 
-The question is: At w = 0 use x = [1, 2, 3, 4],y = 2x; compare full-batch gradient with sum-then-divide microbatches.
+The question is: At w = 0 use x = [1, 2, 3, 4], y = 2x; compare full-batch gradient with sum-then-divide microbatches.
 
 The variable remains fixed while all microbatch gradients are calculated. This is the condition under which accumulation matches the full-batch gradient.
 
@@ -70,13 +70,13 @@ for start, end in [(0, 1), (1, 4)]:
 assert float(full_g) == total / 4 == -30
 ```
 
-**Expected:** gradient-30 for both.
+**Expected:** gradient -30 for both.
 
-**Verify:** Compare the computed values or written argument with gradient-30 for both.
+**Verify:** In a fresh process, the exercise checks confirm `float(full_g) == total / 4 == -30`.
 
 ## Exercise 4: Apply exactly one update
 
-The question is: Use rate 0.01 with accumulated global gradient-30.
+The question is: Use rate 0.01 with accumulated global gradient -30.
 
 The update counter should increment once for this effective batch. Incrementing a learning-rate schedule once per microbatch changes the optimizer policy even if gradients are combined correctly.
 
@@ -85,13 +85,13 @@ w.assign_sub(0.01 * (total / 4))
 np.testing.assert_allclose(float(w), 0.3, atol=1e-6, rtol=0)
 ```
 
-**Expected:** updated weight.3.
+**Expected:** updated weight 0.3.
 
-**Verify:** Compare the computed values or written argument with updated weight.3.
+**Verify:** In a fresh process, the exercise checks confirm `float(w)` matches `0.3` within 1e-6.
 
 ## Exercise 5: Expose per-batch updates
 
-The question is: Update separately for the two microbatches and compare the final weight with.3.
+The question is: Update separately for the two microbatches and compare the final weight with 0.3.
 
 The second gradient uses the weight changed by the first update. This is ordinary minibatch training, not a numerical implementation of one full-batch step.
 
@@ -104,9 +104,9 @@ for start, end in [(0, 1), (1, 4)]:
 assert abs(float(other) - 0.3) > 1e-6
 ```
 
-**Expected:** endpoint differs from.3.
+**Expected:** endpoint differs from 0.3.
 
-**Verify:** Compare the computed values or written argument with endpoint differs from.3.
+**Verify:** In a fresh process, the exercise checks confirm `abs(float(other) - 0.3) > 1e-06`.
 
 ## Exercise 6: Handle an empty shard
 
@@ -121,9 +121,9 @@ assert count == 4 and sum(p.sum() for p in parts) / count == 5
 assert sum(len(p) for p in [np.array([])]) == 0
 ```
 
-**Expected:** empty shard contributes0; total remains5.
+**Expected:** empty shard contributes 0; total remains 5.
 
-**Verify:** Compare the computed values or written argument with empty shard contributes0; total remains5.
+**Verify:** In a fresh process, the exercise checks confirm `count == 4`, `sum((p.sum() for p in parts)) / count == 5` and `sum((len(p) for p in [np.array([])])) == 0`.
 
 ## Review after comparison
 

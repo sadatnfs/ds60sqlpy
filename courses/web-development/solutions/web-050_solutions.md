@@ -1,51 +1,43 @@
 # web-050: explanatory solutions
 
-Compare after your own attempt or an explicit solution reveal. This file explains the supplied deterministic fixtures. It does not claim that a learner or a production deployment passed.
-
-## Why the mechanism works
-
-Passwords should not be stored as plaintext or encrypted with a reversible key merely so the application can compare them. A password hash is designed to make verification possible without retaining the original password and to impose a computational cost on guessing. Use a maintained password-hashing API rather than inventing a hash-plus-salt scheme. The encoded result records the algorithm and parameters needed for verification.
-
-Authentication establishes an identity claim; it does not decide which objects that identity may access. A complete login flow also needs transport security, rate limiting, useful but nonrevealing errors, session rotation and account-recovery design. One successful hash comparison is only a primitive test, not a complete authentication system.
-
-Use password_hash and password_verify. Allow storage large enough for future encoded formats, and use password_needs_rehash during a deliberate migration policy. Algorithm support and cost depend on the prepared runtime; the example uses bcrypt with an explicit bounded teaching cost. Production parameters require current guidance and measurement. Bcrypt has a byte-length limit that must not be ignored when designing input policy.
+Open this after your own attempt. Each answer explains the lesson's synthetic fixtures; it does not show that your work or a deployment passed. The mechanism is explained in `courses/web-development/guides/web-050.md`.
 
 ## Exercise 1: Explain hashing versus reversible encryption for passwords.
 
-A password verifier needs a one-way verification representation, not recovery of the original secret.
+**Expected answer:** A password verifier needs a one-way verification representation, not recovery of the original secret.
 
-Trace the smallest example before editing. Name which values are source and which are observations.
+**Why:** Verification only needs to recompute and compare, so a one-way slow hash avoids storing anything that can be decrypted.
 
 ## Exercise 2: Verify both a correct and incorrect synthetic phrase.
 
-The library accepts only the correct candidate.
+**Expected evidence:** The library accepts only the correct candidate.
 
-Change only the named feature. Compare with the unchanged example and explain any unaffected behavior.
+**Why:** password_verify recomputes the hash using the algorithm, salt and parameters stored in the encoded string.
 
 ## Exercise 3: Build a password-verification demonstration without printing the hash or secret.
 
-The output reports the test result while keeping credential-shaped values out of logs.
+**Expected evidence:** The output reports the test result while keeping credential-shaped values out of logs.
 
-Sketch the structure or data contract first. Reuse the mechanism from the examples without copying the reference.
+**Why:** Hashes and passwords in logs give attackers offline guessing material.
 
 ## Exercise 4: Diagnose using a general fast hash such as SHA-256 for password storage.
 
-Fast general hashes do not provide a suitable password-guessing cost by themselves.
+**Expected answer:** Fast general hashes do not provide a suitable password-guessing cost by themselves.
 
-Keep the failing input. Identify the first layer where the observed result differs from the intended contract.
+**Why:** General-purpose hashes are designed to be fast, so attackers can test billions of guesses; password hashes add memory and time cost per guess.
 
-## Exercise 5: Explain an algorithm-specific input-length boundary.
+## Exercise 5: Explain an algorithm-specific input-length boundary and a hash that needs an upgrade.
 
-The application must account for byte limits such as bcrypt's limit and avoid silent truncation policies.
+**Expected answer:** bcrypt uses only the first 72 bytes, so the input policy must reject or document longer passphrases; password_needs_rehash returns true for a cost-10 bcrypt hash checked against the Argon2id options.
 
-Predict the boundary before running it. Add an explicit check or manual observation that would detect a regression.
+**Why:** bcrypt ignores bytes after the 72nd, and password_needs_rehash detects any algorithm or parameter change, so old hashes can be upgraded at the next login.
 
 ## Exercise 6: List the additional controls required around a real login.
 
-TLS, rate limits, session rotation, recovery, safe errors and authorization remain separate requirements.
+**Expected answer:** TLS, rate limits, session rotation, recovery, safe errors and authorization remain separate requirements.
 
-Explain your choice to someone who has not seen the code. Include one limitation and the evidence needed to remove it.
+**Why:** Credential stuffing, interception, session theft and account-recovery abuse need rate limits, TLS, session rotation and careful recovery design.
 
-## Reference comparison and limits
+## Reference comparison
 
-Read the separate executable reference, where supplied, only after retaining your attempt. Compare structure and decisions rather than matching every identifier. A different implementation is acceptable when it satisfies the same behavior, preserves accessibility and rejects the same invalid cases. The checked reference uses tiny synthetic inputs so that each transformation can be inspected. It is not a ready-to-deploy authenticated application. Server lifecycle, persistence, concurrency and security require their own integration evidence.
+Open `courses/web-development/solutions/web-050_solution.php` only after saving your attempt, and compare decisions rather than identifiers. A different implementation is acceptable when it shows the same behavior and rejects the same invalid cases. The reference checks only its named synthetic cases; server lifecycle, persistence, concurrency and security need their own integration evidence.

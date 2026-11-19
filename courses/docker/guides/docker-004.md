@@ -6,7 +6,7 @@ Beginner; about 100 minutes, with additional time for the optional host experime
 
 ## Learning objectives
 
-Write a four-step graceful shutdown sequence. Design a shutdown acceptance check for a writer. Explain the difference between a configuration, an observed process and evidence of the application's behavior.
+Write a four-step graceful shutdown sequence. Design a shutdown acceptance check for a writer. Use PID 1, signals and graceful shutdown accurately when you explain what you observed.
 
 ## Purpose, vocabulary and mental model
 
@@ -24,11 +24,11 @@ For a shutdown investigation record the main process, signal, elapsed time, exit
 
 ## How to use this lesson
 
-The classroom displays this guide and saves your worksheet. Its Run button does not control your Docker engine. Docker engine access is powerful host access, so the classroom deliberately receives no engine socket. Work through the supplied examples without starting anything, then use the optional host lab only in your own disposable project. Reading a command, parsing YAML and actually running the project are different forms of evidence.
+The classroom displays this guide and saves your worksheet, `courses/docker/lessons/docker-004.md`. Its Run button does not control your Docker engine. Docker engine access is powerful host access, so the classroom deliberately receives no engine socket. Work through the supplied examples without starting anything, then use the optional host lab only in your own disposable project. Reading a command, parsing YAML and actually running the project are different forms of evidence.
 
 Use Bash in Linux, macOS Terminal, or Ubuntu under WSL 2 on Windows. The supported engine runs Linux containers. The maintained fixture is `courses/docker/fixtures/compose-lab/`; its README explains copying it into a new ignored learner directory, checking the engine, building locally with visible logs, and using the fixed project name `ds60-docker-study`. The fixture uses port 18080 on host loopback. Stop if that project name or port belongs to unrelated work; choose a new project name consistently in your own copy. Never paste a command against a remote Docker context simply because it is currently selected.
 
-For Dockerfile examples, create a file named `Dockerfile` in a scratch project. YAML snippets describe a fragment unless explicitly called a complete file. Text transcripts are synthetic illustrations, not claims about your machine. Do not substitute a real password, token or private registry into a checked-in example.
+For Dockerfile examples, create a file named `Dockerfile` in a scratch project. YAML snippets describe a fragment unless explicitly called a complete file. Text transcripts are synthetic illustrations, not claims about your machine. Do not substitute a real password, token or private registry into a checked-in example. **How to use the lessons** in the [subject README](../README.md) collects these rules in one place.
 
 ## Worked example / walkthrough
 
@@ -57,58 +57,52 @@ docker compose -p ds60-docker-study ps -a
 
 ## Six progressive exercises
 
+For each exercise, name the object involved and the phase of its lifetime before changing anything, then vary only the condition the task names. Exercises that ask you to predict, explain, compare or diagnose keep their answers in the solutions file; the others show the evidence to look for.
+
 ### Exercise 1: Predict what happens when the main process exits.
 
-**Expected evidence:** The container enters an exited state.
-
-**Hint:** Identify the object and the phase of its lifetime before changing it. Use the relevant worked example, then vary only the condition named in this task.
+**Hint:** Ask what Docker watches to decide whether a container is running.
 
 ### Exercise 2: Compare exec-form and shell-form startup.
 
-**Expected evidence:** An argument array versus an intervening shell.
-
-**Hint:** Identify the object and the phase of its lifetime before changing it. Use the relevant worked example, then vary only the condition named in this task.
+**Hint:** Write the process tree for each form and find PID 1.
 
 ### Exercise 3: Write a four-step graceful shutdown sequence.
 
 **Expected evidence:** Stop new work, bound draining, close owned resources, exit.
 
-**Hint:** Identify the object and the phase of its lifetime before changing it. Use the relevant worked example, then vary only the condition named in this task.
+**Hint:** Start from the moment the stop signal arrives and end with the exit status.
 
 ### Exercise 4: Diagnose a service kept alive only by sleep.
 
-**Expected evidence:** The alive container does not prove the application is healthy.
-
-**Hint:** Identify the object and the phase of its lifetime before changing it. Use the relevant worked example, then vary only the condition named in this task.
+**Hint:** Check which process is PID 1 and what the server process is doing.
 
 ### Exercise 5: Explain why exit 137 is not a complete OOM diagnosis.
 
-**Expected evidence:** It identifies a termination pattern, not its unique cause.
-
-**Hint:** Identify the object and the phase of its lifetime before changing it. Use the relevant worked example, then vary only the condition named in this task.
+**Hint:** Compute 137 minus 128 and list what can send that signal.
 
 ### Exercise 6: Design a shutdown acceptance check for a writer.
 
 **Expected evidence:** Bounded stop, consistent persisted record and restart recovery.
 
-**Hint:** Identify the object and the phase of its lifetime before changing it. Use the relevant worked example, then vary only the condition named in this task.
+**Hint:** Stop the service in the middle of a write, then check the stored record and a restart.
 
 ## Common mistakes and diagnosis
 
-Start with the smallest observation that separates two plausible causes. An image inspection answers questions about the packaged filesystem and configuration; container inspection adds runtime mounts, network attachment and exit status. An application request adds another layer of evidence. A healthy container can still serve the wrong application result. Preserve the original failure and the exact changed field before retrying.
+Starting the server in the background and keeping the container alive with `sleep`. Using shell form, so a shell becomes PID 1 and may not forward SIGTERM. Reading exit code 137 as proof of an out-of-memory kill without checking the OOMKilled state.
 
-The boundary case in this chapter is: Diagnose a service kept alive only by sleep. Use its expected observation, The alive container does not prove the application is healthy., to avoid treating a successful command as proof of the wrong claim. Keep source edits in your own copy. Do not make a container privileged, mount the engine socket, disable all checks or delete every volume to make an example succeed.
+Exercise 4 is this chapter's boundary case: Diagnose a service kept alive only by sleep. Start with the smallest observation that separates two plausible causes. An image inspection answers questions about the packaged filesystem and configuration; container inspection adds runtime mounts, network attachment and exit status; an application request adds another layer, and a healthy container can still serve the wrong result. Preserve the original failure and the exact changed field before retrying. Keep source edits in your own copy. Do not make a container privileged, mount the engine socket, disable all checks or delete every volume to make an example succeed.
 
 ## Retrieval, transfer and next steps
 
-Close the explanations and draw the path from source files to image to container to the observation relevant here. Reconstruct the second worked example with one different value and predict what changes. Explain which state survives process restart, container recreation and image rebuild. If none of those operations applies to this mechanism, explain why.
+Close the explanations and draw the path from source files to image to container to the observation relevant here, using PID 1, signals, graceful shutdown, exec form and init process. Reconstruct worked example 2 (Observe a bounded stop) with one different value and predict what changes. Explain which state survives process restart, container recreation and image rebuild, or why none of those operations applies to this mechanism.
 
-Before proceeding, retain six evidence records. For the optional host project, use `docker compose -p ds60-docker-study down` from the fixture copy to stop its containers and remove its ordinary network. This command preserves named volumes. Volume deletion is a separate deliberate reset of that disposable lab after a backup or export, never a general cleanup step. The fixture README describes its exact scoped reset.
+When a host session ends, run `docker compose -p ds60-docker-study down` from your fixture copy. It removes the project's containers and network but keeps named volumes; deleting a volume is a separate, deliberate reset described in the fixture README.
 
 ## Primary references
 
-- [Official reference 1](https://docs.docker.com/reference/dockerfile/#entrypoint)
-- [Official reference 2](https://docs.docker.com/reference/cli/docker/container/stop/)
+- [Dockerfile reference: ENTRYPOINT](https://docs.docker.com/reference/dockerfile/#entrypoint)
+- [docker container stop reference](https://docs.docker.com/reference/cli/docker/container/stop/)
 
 ## Ask an AI tutor about this lesson
 

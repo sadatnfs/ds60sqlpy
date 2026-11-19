@@ -8,9 +8,11 @@ A map associates keys with values. Reading an absent key returns the value type'
 
 map[string]int declares string keys and integer values. value, ok := counts[key] distinguishes absence from zero. make initializes writable map storage. delete removes a key and is harmless if the key is absent. range gives key/value pairs in an unspecified order. Use sort.Strings on extracted keys before producing ordered output.
 
-## 1. Distinguish zero from missing
+## 1. Distinguish zero from missing: change one input
 
-Read present key zero and absent key missing with comma-ok.
+Copy worked example 1 into a scratch pad and change `m := map[string]int{"zero": 0}` to `m := map[string]int{"zero": 1}`. Before running, predict which check fails and which value it now sees; then run it and restore the original line.
+
+The unchanged code is worked example 1:
 
 ```go
 m := map[string]int{"zero": 0}
@@ -19,13 +21,15 @@ b, okB := m["missing"]
 check(a == b && okA && !okB, "presence")
 ```
 
-**Expected:** Both values are 0, but only zero is present.
+**Expected:** The changed run panics with `presence` because `a == b && okA && !okB` no longer holds. Restoring the original line brings back the worked observation: both values are 0, but only zero is present.
 
 A numeric value alone cannot represent both absence and an intentional zero without losing information.
 
-## 2. Build a frequency table
+## 2. Build a frequency table: debug a regression
 
-Count red, blue and red.
+A regression changed one token in worked example 2, so one line now reads `for _, v := range []string{"red!", "blue", "red"} {`. Run worked example 2 with that line, use the failure to locate the defect and repair it without changing the check.
+
+The unchanged code is worked example 2:
 
 ```go
 m := map[string]int{}
@@ -35,7 +39,7 @@ for _, v := range []string{"red", "blue", "red"} {
 check(m["red"] == 2 && m["blue"] == 1, "counts")
 ```
 
-**Expected:** red has count 2 and blue has count 1.
+**Expected:** Before the repair the program panics with `counts`; after it the line reads `for _, v := range []string{"red", "blue", "red"} {` again and red has count 2 and blue has count 1.
 
 Missing counts start at the zero value, which is useful here because zero is the correct additive identity.
 

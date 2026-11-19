@@ -10,7 +10,7 @@ This stage should be distinguished from explicitly requesting XLA compilation wi
 
 The fixture uses \(x\cdot x+1\) so eager output can be calculated independently. It compares eager and graph values, observes trace reuse and dtype specialization, and measures a small warmed-call interval. The timing boundary includes Python dispatch, tensor execution and NumPy materialization; it is not a GPU kernel benchmark. No measured speed ranking is claimed. A graph can add overhead for tiny work, while repeated larger computations may benefit from graph execution under a suitable runtime.
 
-An input signature is both a reuse policy and an interface contract. TensorSpec([None],float32) allows different vector lengths while fixing rank and dtype. None does not mean any rank or any type. Broadening a signature can reduce retracing, but it must still describe the inputs the function can correctly handle. Reusing a graph is useful only when its computation and boundary remain valid.
+An input signature is both a reuse policy and an interface contract. TensorSpec([None], float32) allows different vector lengths while fixing rank and dtype. None does not mean any rank or any type. Broadening a signature can reduce retracing, but it must still describe the inputs the function can correctly handle. Reusing a graph is useful only when its computation and boundary remain valid.
 
 **Trace:** Construction of a graph from Python execution and input signatures.
 
@@ -22,15 +22,15 @@ An input signature is both a reuse policy and an interface contract. TensorSpec(
 
 The decorator creates a polymorphic function wrapper. Its first compatible call traces the Python body using TensorFlow values and records operations in a graph. Concrete traces are selected using input structure, dtype and shape information, plus relevant Python arguments. experimental_get_tracing_count is an observation of traces created for this wrapper, not a count of tensor executions.
 
-For f(value)=value*value+1, float32 [1,2] gives [2,5]. Calling float32 [3,4] changes values while retaining the same shape and dtype, so the compatible trace can be reused and gives [10,17]. Calling float64 [1,2] changes the dtype contract and creates another trace in this fixture. The resulting tensor is float64; identical displayed values do not establish identical precision, kernel choice or performance.
+For f(value)=value*value+1, float32 [1, 2] gives [2, 5]. Calling float32 [3, 4] changes values while retaining the same shape and dtype, so the compatible trace can be reused and gives [10, 17]. Calling float64 [1, 2] changes the dtype contract and creates another trace in this fixture. The resulting tensor is float64; identical displayed values do not establish identical precision, kernel choice or performance.
 
-The second wrapper declares TensorSpec([None],tf.float32). Vectors of length two and three satisfy that contract, so both reuse the same declared graph interface. A rank-two array or float64 input does not satisfy it. An explicit signature can make such mistakes fail at the boundary rather than silently specializing a new graph.
+The second wrapper declares TensorSpec([None], tf.float32). Vectors of length two and three satisfy that contract, so both reuse the same declared graph interface. A rank-two array or float64 input does not satisfy it. An explicit signature can make such mistakes fail at the boundary rather than silently specializing a new graph.
 
 Materializing result.numpy() before stopping the clock ensures the measured host observation includes completion of the requested result. Warmup is performed before the interval so initial graph construction is not mixed into steady repeated calls. Still, ten calls are only a small diagnostic sample. The experiment does not isolate every layer of dispatch overhead or establish a distribution of production latency.
 
 ## Exercise 1: Check eager arithmetic
 
-The question is: Evaluate \(x\cdot x+1\) at float32[1,2].
+The question is: Evaluate \(x\cdot x+1\) at float32[1, 2].
 
 The arithmetic provides a simple independent oracle. Correctness must be established before timing a graph implementation.
 
@@ -40,9 +40,9 @@ eager = x * x + 1
 np.testing.assert_array_equal(eager.numpy(), [2, 5])
 ```
 
-**Expected:** output[2,5].
+**Expected:** output [2, 5].
 
-**Verify:** Compare the computed values or written argument with output[2,5].
+**Verify:** In a fresh process, the exercise checks confirm `eager.numpy()` equals `[2, 5]`.
 
 ## Exercise 2: Trace a graph and compare
 
@@ -63,11 +63,11 @@ assert first >= 1
 
 **Expected:** Graph output equals eager output; at least one trace exists. No XLA compilation is requested.
 
-**Verify:** Compare the computed values or written argument with Graph output equals eager output; at least one trace exists. No XLA compilation is requested.
+**Verify:** In a fresh process, the exercise checks confirm `f(x).numpy()` equals `eager.numpy()` and `first >= 1`.
 
 ## Exercise 3: Reuse an equal signature
 
-The question is: Call with float32[3,4] and inspect trace count.
+The question is: Call with float32[3, 4] and inspect trace count.
 
 Values change while shape and dtype remain the same. Reusing a trace demonstrates the intended separation between graph structure and tensor values.
 
@@ -77,13 +77,13 @@ np.testing.assert_array_equal(f(same_signature).numpy(), [10, 17])
 assert f.experimental_get_tracing_count() == first
 ```
 
-**Expected:** output[10,17]; trace count unchanged.
+**Expected:** output [10, 17]; trace count unchanged.
 
-**Verify:** Compare the computed values or written argument with output[10,17]; trace count unchanged.
+**Verify:** In a fresh process, the exercise checks confirm `f(same_signature).numpy()` equals `[10, 17]` and `f.experimental_get_tracing_count() == first`.
 
 ## Exercise 4: Change dtype deliberately
 
-The question is: Call with float64[1,2] and inspect trace count and output dtype.
+The question is: Call with float64[1, 2] and inspect trace count and output dtype.
 
 Dtype changes can affect kernels and arithmetic. Reporting them separately prevents an apparent performance regression from being attributed to values alone.
 
@@ -95,9 +95,9 @@ assert f.experimental_get_tracing_count() > first
 np.testing.assert_array_equal(output.numpy(), [2, 5])
 ```
 
-**Expected:** float64 result[2,5]; at least one new trace.
+**Expected:** float64 result [2, 5]; at least one new trace.
 
-**Verify:** Compare the computed values or written argument with float64 result[2,5]; at least one new trace.
+**Verify:** In a fresh process, the exercise checks confirm `output.dtype == tf.float64`; `f.experimental_get_tracing_count() > first` and `output.numpy()` equals `[2, 5]`.
 
 ## Exercise 5: Measure only warmed calls
 
@@ -121,7 +121,7 @@ for observed in observations:
 
 **Expected:** Ten finite [2,5] results and a nonnegative measured interval, without a speed-ranking claim.
 
-**Verify:** Compare the computed values or written argument with Ten finite [2,5] results and a nonnegative measured interval, without a speed-ranking claim.
+**Verify:** In a fresh process, the exercise checks confirm `len(observations) == 10`; `elapsed >= 0`; for every `observed` in `observations`, `np.isfinite(observed).all()` and for every `observed` in `observations`, `observed` equals `[2, 5]`.
 
 ## Exercise 6: Separate shape contracts
 
@@ -154,7 +154,7 @@ for incompatible in [
 
 **Expected:** One declared trace is reused for both lengths; incompatible rank or dtype is rejected.
 
-**Verify:** Compare the computed values or written argument with One declared trace is reused for both lengths; incompatible rank or dtype is rejected.
+**Verify:** In a fresh process, the exercise checks confirm `tuple(output.shape) == (3,)`; `g.experimental_get_tracing_count() == count` and for every looped case, `g(incompatible)` raises `(TypeError, ValueError)`.
 
 ## Review after comparison
 

@@ -1,6 +1,6 @@
 # rust-015: explanation and comparison
 
-Attempt the six guide tasks before opening this comparison. The executable reference is [rust-015_solution.rs](rust-015_solution.rs). Its assertions are always active under the prepared classroom compile settings.
+Attempt the six guide tasks before opening this comparison. The executable reference is [rust-015_solution.rs](rust-015_solution.rs). It runs both worked examples and the reference answers below, and its assertions are always active under the prepared classroom compile settings.
 
 ## Why the two examples differ
 
@@ -8,21 +8,60 @@ Attempt the six guide tasks before opening this comparison. The executable refer
 
 **Collect only explicitly accepted values:** Converting to Option is deliberate here because the separate count retains rejection evidence; a real importer may need the full reasons. Two accepted values and one rejection are accounted for.
 
-## Reason through the six tasks
+## Task answers
 
-1. **Predict and explain.** Trace the success, parse-error and domain-error paths.
+### Task 1: Predict and explain
 
-2. **Guided modification.** Add an application maximum quantity with a separate error category.
+Trace the success, parse-error and domain-error paths.
 
-3. **Independent construction.** Write a function using ? to compose two fallible steps.
+No separate reference answer has been written for this task. Example A is the evidence to compare with: Parsing establishes a representation; the second check enforces the domain. Malformed text and negative quantity preserve different reasons.
 
-4. **Diagnose a defect.** Diagnose replacing every Err with zero.
+### Task 2: Guided modification
 
-5. **Boundary evidence.** Test empty, zero, negative and overflowing textual input.
+Add an application maximum quantity with a separate error category.
 
-6. **Transfer and justify.** Choose a public error enum and explain which internal details should remain private.
+No separate reference answer has been written for this task. Start from Example B: Converting to Option is deliberate here because the separate count retains rejection evidence; a real importer may need the full reasons. Two accepted values and one rejection are accounted for.
 
-For tasks 1 and 2, use the checked values and mechanism trace in the two examples. For task 3, choose names that expose the input and result contract and retain the same invariants. For task 4, the diagnosed mistakes below supply a concrete wrong assumption: preserve its counterexample before repairing it. Task 5 needs an explicit expected value or documented rejection at the boundary, not just successful execution. For task 6, explain what changes in the new context and which part of the original mechanism remains applicable. Several representations may satisfy this transfer task; justify the choice rather than treating this reference as the only architecture.
+### Task 3: Independent construction
+
+Write a function using ? to compose two fallible steps.
+
+**Reference answer.** The same statements run as the `Task 3` block of the reference program; here they are wrapped in `main` as a complete file. It uses `parse_quantity` from the lesson's helpers, defined in the reference program.
+
+```rust
+fn main() -> Result<(), Box<dyn std::error::Error>> {
+    fn doubled_quantity(text: &str) -> Result<i32, &'static str> {
+        let value = parse_quantity(text)?;
+        value.checked_mul(2).ok_or("quantity too large")
+    }
+    assert_eq!(doubled_quantity("4"), Ok(8));
+    assert_eq!(doubled_quantity("bad"), Err("not an integer"));
+    assert_eq!(doubled_quantity("-3"), Err("negative quantity"));
+    Ok(())
+}
+```
+
+**Observe:** 4 doubles to Ok(8); bad text and -3 return their original errors.
+
+The ? operator returns the parse error unchanged, so each failure keeps the message of the step that produced it.
+
+### Task 4: Diagnose a defect
+
+Diagnose replacing every Err with zero.
+
+No reference answer has been written for this task yet. The wrong assumptions to look for are this lesson's pitfalls: Calling .ok discards the error reason. A catch-all fallback can turn data loss into success. Panic is generally the wrong interface for expected invalid external input.
+
+### Task 5: Boundary evidence
+
+Test empty, zero, negative and overflowing textual input.
+
+No reference answer has been written for this task yet. Write the expected value or documented rejection for each boundary before running it, and compare with the checks in Example A (Parse and validate separately) and Example B (Collect only explicitly accepted values).
+
+### Task 6: Transfer and justify
+
+Choose a public error enum and explain which internal details should remain private.
+
+No single reference answer exists: several designs can satisfy this transfer task. Justify yours against the mechanism described below and the vocabulary entry **Result**, and state one limitation of your choice.
 
 ## Mechanism and diagnostic reasoning
 
@@ -36,4 +75,4 @@ Calling .ok discards the error reason. A catch-all fallback can turn data loss i
 
 ## Review before continuing
 
-The reference checks the worked scenarios, including their boundary distinctions. Your independent and transfer artifacts may have additional checks. Compare observations rather than only source text. Preserve any new regression case you discover and explain why it would reject a plausible wrong implementation. External project steps require their own build and platform evidence and are not established by a portable reference passing.
+Run the reference and confirm that it prints `rust-015: passed`, then reconstruct one boundary case from memory and explain which check would reject a plausible wrong implementation. External project steps need their own build and platform evidence; a passing portable reference does not establish them.

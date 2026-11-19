@@ -52,6 +52,33 @@ The first two cases are worked examples; the remaining cases extend, debug,
 bound or transfer the mechanism. Supporting helper code is teaching material.
 The complete six-case reference and explanations remain a separate reveal.
 
+## Outcomes and derived practice
+
+`outcomes.py` holds one specific, observable outcome per lesson ID (plus an
+optional minutes override for the capstone); the renderer refuses a missing or
+templated outcome. The published `lab` and `verification` fields both come from
+the first independent investigation (case 3).
+
+Exercises 1 and 2 are derived from the worked examples rather than repeating
+them: exercise 1 changes one input of worked example 1 and asks for a prediction,
+exercise 2 shows a one-token regression of worked example 2 to diagnose. Every
+`Verify` line and hint names that case's own CHECK and a one-token edit that was
+executed and observed to make that CHECK fail. The observations live in
+`variants.json` and are refreshed after any case change:
+
+```sh
+python courses/c/authoring/qualify_variants.py
+```
+
+It needs a local Docker engine and the prepared `ds60sqlpy-worker-c17` image.
+Each candidate mutant is built with the classroom flags plus AddressSanitizer and
+UndefinedBehaviorSanitizer, and thread lessons are also built with
+ThreadSanitizer. A candidate with any sanitizer report, timeout or crash is
+rejected, so practice never asks a learner to run undefined behavior. Unmodified
+references must pass the same sanitized build first. Edits to real computation
+are preferred over edits to a CHECK's own comparison. Rendering never executes
+code and stops with a clear message if a case changed after its record was made.
+
 ## Shared maintenance gates
 
 Use [CONTRIBUTING](../../../CONTRIBUTING.md) for the prepared environment and

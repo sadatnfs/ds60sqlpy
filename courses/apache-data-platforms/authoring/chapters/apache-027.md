@@ -27,12 +27,23 @@ and waits for the two known historical data intervals. Each interval selects
 synthetic source orders using a half-open window \([a,b)\), writes a versioned
 partition and returns a small source-bound reference.
 
-A schedule shorthand alone is insufficient evidence of interval shape. Initial
-qualification of this selected release/configuration showed zero-duration trigger
-intervals for the daily shorthand. The project therefore selects the data-interval
-timetable explicitly and checks that each actual interval spans exactly one UTC
-day. It preserves that observed distinction rather than silently treating a green
-run as proof of a full-day population.
+<!-- include: projects/airflow/dags/classroom_workflows.py #orders_workflow python -->
+
+The `@dag` decorator turns `orders_workflow` into a DAG definition, and each
+`@task` function becomes a task. Calling `fail_once()` inside the DAG body does not
+run it: it returns a reference to the task's future result, and passing that
+reference to `write(...)` creates both the dependency and the XCom value that
+carries the selected day. `get_current_context()` gives a running task its
+`data_interval_start`, `data_interval_end` and `run_id`.
+
+A schedule shorthand alone is insufficient evidence of interval shape. In Airflow 3
+the `[scheduler] create_cron_data_intervals` option defaults to False, so a bare
+cron string or a shorthand such as `@daily` uses `CronTriggerTimetable`: each run's
+data interval has zero length and starts and ends at the trigger time. That is why
+a daily shorthand produced zero-duration intervals here. The project therefore
+selects `CronDataIntervalTimetable` explicitly and checks that each actual interval
+spans exactly one UTC day. It preserves that observed distinction rather than
+silently treating a green run as proof of a full-day population.
 
 The data interval identifies the records the run is meant to process. It is not
 the wall-clock time when a worker starts. For a daily schedule, a run normally
@@ -76,9 +87,10 @@ keep XCom values small and inspect task states separately from data quality.
 An orchestration success is not a scientific-validity guarantee for its output.
 
 **Interview discussion: what is the difference between logical date and execution
-time?** Logical date identifies the run in its scheduling model, often the interval
-start for a scheduled timetable; actual execution can occur later because of
-capacity, retries or backfill. These cases connect real interval-driven outputs
+time?** Logical date identifies the run in its scheduling model: it is the
+data-interval start under `CronDataIntervalTimetable`, and the trigger time under
+Airflow 3's default `CronTriggerTimetable`. Actual execution can occur later because
+of capacity, retries or backfill. These cases connect real interval-driven outputs
 to actual metadata and explain why wall-clock selection breaks reproducibility.
 
 The [complete Airflow workshop](../../projects/airflow/README.md) provides the maintained files, preparation, lifecycle and exact qualification boundaries for these cases.

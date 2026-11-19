@@ -1,4 +1,32 @@
-"""mle-002: worked starting point; complete the guide's six changes."""
+"""mle-002: both worked cases; complete the guide's six changes."""
+
+import numpy as np
+import pandas as pd
+
+
+def dataset():
+    rng = np.random.default_rng(17)
+    n = 120
+    usage = rng.uniform(1, 100, n)
+    tickets = rng.poisson(2, n)
+    region = np.where(np.arange(n) % 2 == 0, "north", "south")
+    logit = 0.9 * tickets - 0.035 * usage + (region == "north") * 0.3
+    probability = 1 / (1 + np.exp(-logit))
+    label = (rng.random(n) < probability).astype(int)
+    cutoff = np.arange(n) + 100
+    return pd.DataFrame(
+        {
+            "id": np.arange(n),
+            "customer_id": np.arange(n) % 12,
+            "cutoff": cutoff,
+            "available_at": cutoff - 2,
+            "label_available_at": cutoff + 4,
+            "usage": usage,
+            "tickets": tickets,
+            "region": region,
+            "label": label,
+        }
+    )
 
 
 def example_one():
@@ -19,8 +47,19 @@ def example_one():
     return {"eligible": [10, 30], "event_only_leak": 999}
 
 
+def example_two():
+    frame = dataset()
+    training_cutoff = 180
+    mature = frame[(frame.cutoff < training_cutoff) & (frame.label_available_at <= training_cutoff)]
+    premature = frame[frame.cutoff < training_cutoff]
+    assert len(mature) == 77 and len(premature) == 80
+    assert set(premature.id) - set(mature.id) == {77, 78, 79}
+    return {"mature_training_rows": 77, "not_yet_known_labels": [77, 78, 79]}
+
+
 if __name__ == "__main__":
     print(example_one())
+    print(example_two())
 
 # TODO 1: Make the revision known before cutoff 5.
 # TODO 2: Set known_at equal to the prediction cutoff.

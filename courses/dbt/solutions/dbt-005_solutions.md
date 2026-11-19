@@ -180,4 +180,4 @@ if __name__ == "__main__":
 
 ## Interpretation
 
-Define and test a source freshness policy with an explicit clock and response. Pair it with batch completeness and time-coverage checks appropriate to the consumer. Keep the local fixture evidence separate from claims about an actual upstream service.
+Pair it with batch completeness and time-coverage checks appropriate to the consumer. Keep the local fixture evidence separate from claims about an actual upstream service.

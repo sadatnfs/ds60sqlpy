@@ -41,6 +41,23 @@ internal static class Program {
       Check(found == 1, "first matching position");
       Check(!Array.Exists(values, value => value == 9), "absent target");
     }
+    {
+      // Task 3: Independent construction
+      bool TryFirstIndex(int[] items, int target, out int index) {
+        for (int i = 0; i < items.Length; i++) {
+          if (items[i] == target) {
+            index = i;
+            return true;
+          }
+        }
+        index = -1;
+        return false;
+      }
+      var values = new[] { 5, 7, 7 };
+      Check(TryFirstIndex(values, 7, out int at) && at == 1, "first match");
+      Check(!TryFirstIndex(values, 9, out _), "not found");
+      Check(!TryFirstIndex(Array.Empty<int>(), 1, out _), "empty input");
+    }
     Console.WriteLine("csharp-006: passed");
     await Task.CompletedTask;
   }

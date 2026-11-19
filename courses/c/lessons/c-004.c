@@ -1,13 +1,21 @@
 #include <stdio.h>
 
 int main(void) {
-  /* Exercise 1: Trace a prefix sum
-     Sum 2, 4 and 6 with a length-bounded loop.
-     Expected: The result is 12. */
+  /* Exercise 1: Trace a prefix sum: change one input
+     Copy worked example 1 into a scratch pad and change `int values[] = {2, 4,
+     6};` to `int values[] = {3, 4, 6};`. Before running, predict which CHECK
+     fails and which value it now sees; then run it and restore the original
+     line. Expected: The changed run stops with `Check failed` at the CHECK on
+     `sum == 12`. Restoring the original line brings back the worked
+     observation: the result is 12. */
 
-  /* Exercise 2: Handle zero iterations
-     Sum zero elements from a valid storage object.
-     Expected: The accumulator remains zero. */
+  /* Exercise 2: Handle zero iterations: debug a regression
+     A regression changed one token in worked example 2, so one line now reads
+     `for (size_t i = 0; i <= length; i++) {`. Run worked example 2 with that
+     line, use the failing CHECK to locate the defect and repair it without
+     changing the CHECK. Expected: Before the repair the run stops with `Check
+     failed` at the CHECK on `sum == 0`; after it the line reads `for (size_t i
+     = 0; i < length; i++) {` again and the accumulator remains zero. */
 
   /* Exercise 3: Find the first match
      Search 3, 8, 8 and stop on the first 8.

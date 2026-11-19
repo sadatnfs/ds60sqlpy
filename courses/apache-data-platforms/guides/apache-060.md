@@ -23,7 +23,10 @@ standalone offline workshop does not demonstrate hybrid routing or upsert. The
 following are prepared real-product experiments requiring their own owned data,
 configuration and native receipts.
 
-## Worked case A: divide an overlapping historical interval
+## Worked case A: divide an overlapping historical interval (design exercise)
+
+The workshop has no real-time route, so neither case in this chapter is executed.
+Each case states the configuration it would use and its written answer.
 
 Suppose the offline side contains orders through the end of day 1, while the
 real-time side includes day 1 and day 2. A naive union would count overlapping
@@ -37,19 +40,49 @@ boundary contributes once under the actual inclusive/exclusive rules of the
 pinned release. An off-by-one millisecond can hide when tests use only noon
 values far from the dividing point.
 
+In Pinot 1.5.1 the broker derives the boundary from the latest offline segment end
+time minus one day (minus one hour when the offline ingestion frequency is hourly).
+It sends the offline table the query with `event_ts <= boundary` added and the
+real-time table the query with `event_ts > boundary` added, then merges the results.
+The written answer for this fixture: if the latest offline event is
+2026-01-01T12:00:00Z, the boundary is 2025-12-31T12:00:00Z. The offline side then
+answers no rows, and the real-time side answers every day-1 and day-2 row, so each
+day-1 event is counted once, from its real-time copy. A controller call,
+`POST /tables/{tableName}/timeBoundary`, pins the boundary to the latest offline end
+time instead; it must be repeated after every newer offline upload.
+
 If a backfill ends earlier than expected, moving the boundary without complete
 coverage can omit data. If it advances into a region with uncommitted offline
 segments, the broker may exclude valid real-time contributions before their
 replacement is queryable. Treat boundary progression as a controlled publication
 step with completeness and availability evidence.
 
-## Worked case B: a later version changes current state
+## Worked case B: a later version changes current state (design exercise)
 
 Use a separate prepared upsert table with order ID as primary key and an explicit
-monotonic version column. Send ID 1 at version 1 with amount 4, then version 2
-with amount 6, then a delayed version 1. The current-state oracle expects amount 6.
-Record how the chosen configuration handles equal comparison values rather than
-assuming arrival order resolves every tie.
+monotonic version column. The schema adds `"primaryKeyColumns": ["id"]`, and the
+real-time table configuration adds:
+
+```json
+{
+  "upsertConfig": {
+    "mode": "FULL",
+    "comparisonColumns": ["version"]
+  },
+  "routing": {
+    "instanceSelectorType": "strictReplicaGroup"
+  }
+}
+```
+
+`FULL` replaces the whole stored row when a record for the same key arrives with a
+larger comparison value, and `strictReplicaGroup` routing keeps every segment of a
+partition on one server, which upsert requires. Send ID 1 at version 1 with amount 4, then version 2
+with amount 6, then a delayed version 1. The current-state oracle expects amount 6:
+the delayed record has a smaller comparison value than version 2, so it does not
+replace the stored row. Pinot documents that two records with the same key and the
+same comparison value have no determined order, so a tie needs its own rule rather
+than an assumption about arrival order.
 
 An append-only analytical table would legitimately retain multiple events for
 that sequence. Its sum answers a different question from the current-state upsert
@@ -58,7 +91,8 @@ both. Replacing events with current state can remove information required for
 auditing historical changes or computing a time-dependent metric.
 
 Primary-key partitioning matters because competing versions must meet the
-required upsert consistency boundary. Configuring an upsert mode does not repair
+required upsert consistency boundary: the Kafka producer must use the order ID as
+the message key so that every version of a key reaches the same partition. Configuring an upsert mode does not repair
 a producer that routes the same key inconsistently. Deletes and partial updates
 also have their own semantics. Test stale updates, ties, null fields and restart
 readback before relying on those behaviors in a data product.

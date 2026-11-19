@@ -6,7 +6,7 @@ Intermediate; about 100 minutes, with additional time for the optional host expe
 
 ## Learning objectives
 
-Design a two-platform evidence matrix. Write an honest portability claim. Explain the difference between a configuration, an observed process and evidence of the application's behavior.
+Design a two-platform evidence matrix. Write an honest portability claim. Use CPU architecture, image index and --platform accurately when you explain what you observed.
 
 ## Purpose, vocabulary and mental model
 
@@ -20,27 +20,28 @@ Cross-compilation and emulation are distinct strategies. A compiler may emit tar
 
 BuildKit exposes platform arguments such as BUILDPLATFORM and TARGETPLATFORM. A Dockerfile may choose a native builder stage and pass the target into a compiler. Do not use these names as a substitute for correct compiler flags. A multi-platform build also needs an output strategy compatible with your image store or a deliberate export.
 
-The course does not push images. For an optional local experiment, build one selected platform with `--load` when supported and inspect the result. Do not force a foreign platform on the ordinary classroom just to avoid investigating a missing dependency wheel.
+The course does not push images. For an optional local experiment, build one selected platform with `docker buildx build --platform linux/arm64 --load` and inspect the result. When the target differs from the host architecture, every RUN step executes under emulation: Docker Desktop includes QEMU emulation, while a Linux engine needs binfmt handlers installed first. A single-platform `--load` works with the default image store; loading a multi-platform index needs the containerd image store. Do not force a foreign platform on the ordinary classroom just to avoid investigating a missing dependency wheel.
 
 ## How to use this lesson
 
-The classroom displays this guide and saves your worksheet. Its Run button does not control your Docker engine. Docker engine access is powerful host access, so the classroom deliberately receives no engine socket. Work through the supplied examples without starting anything, then use the optional host lab only in your own disposable project. Reading a command, parsing YAML and actually running the project are different forms of evidence.
+The classroom displays this guide and saves your worksheet, `courses/docker/lessons/docker-017.md`. Its Run button does not control your Docker engine. Docker engine access is powerful host access, so the classroom deliberately receives no engine socket. Work through the supplied examples without starting anything, then use the optional host lab only in your own disposable project. Reading a command, parsing YAML and actually running the project are different forms of evidence.
 
 Use Bash in Linux, macOS Terminal, or Ubuntu under WSL 2 on Windows. The supported engine runs Linux containers. The maintained fixture is `courses/docker/fixtures/compose-lab/`; its README explains copying it into a new ignored learner directory, checking the engine, building locally with visible logs, and using the fixed project name `ds60-docker-study`. The fixture uses port 18080 on host loopback. Stop if that project name or port belongs to unrelated work; choose a new project name consistently in your own copy. Never paste a command against a remote Docker context simply because it is currently selected.
 
-For Dockerfile examples, create a file named `Dockerfile` in a scratch project. YAML snippets describe a fragment unless explicitly called a complete file. Text transcripts are synthetic illustrations, not claims about your machine. Do not substitute a real password, token or private registry into a checked-in example.
+For Dockerfile examples, create a file named `Dockerfile` in a scratch project. YAML snippets describe a fragment unless explicitly called a complete file. Text transcripts are synthetic illustrations, not claims about your machine. Do not substitute a real password, token or private registry into a checked-in example. **How to use the lessons** in the [subject README](../README.md) collects these rules in one place.
 
 ## Worked example / walkthrough
 
-### Worked example 1: Inspect architecture evidence
+### Worked example 1: Build and inspect one target platform
 
-Read an already built local image.
+From your fixture copy, build one explicit platform and read the result's platform metadata. The arm64 base image is downloaded if it is not already local.
 
 ```sh
-docker image inspect ds60-docker-study:local --format "{{.Os}}/{{.Architecture}}"
+docker buildx build --platform linux/arm64 --load -t ds60-docker-study:arm64 .
+docker image inspect ds60-docker-study:arm64 --format "{{.Os}}/{{.Architecture}}"
 ```
 
-**Expected observation:** A platform such as linux/arm64 or linux/amd64, matching the actual local build result.
+**Expected observation:** linux/arm64 whatever the host is; on an amd64 host the RUN steps executed under QEMU emulation, which shows the image was packaged for arm64, not that it performs well natively.
 
 ### Worked example 2: Read the index model
 
@@ -56,57 +57,51 @@ image index
 
 ## Six progressive exercises
 
+For each exercise, name the object involved and the phase of its lifetime before changing anything, then vary only the condition the task names. Exercises that ask you to predict, explain, compare or diagnose keep their answers in the solutions file; the others show the evidence to look for.
+
 ### Exercise 1: Predict whether Linux implies amd64.
 
-**Expected evidence:** No; operating system and architecture are separate axes.
-
-**Hint:** Identify the object and the phase of its lifetime before changing it. Use the relevant worked example, then vary only the condition named in this task.
+**Hint:** Read the platform string as two separate parts.
 
 ### Exercise 2: Classify cross-compilation and emulation.
 
-**Expected evidence:** Producing target code versus executing foreign code.
-
-**Hint:** Identify the object and the phase of its lifetime before changing it. Use the relevant worked example, then vary only the condition named in this task.
+**Hint:** Ask which machine executes the target instructions.
 
 ### Exercise 3: Design a two-platform evidence matrix.
 
 **Expected evidence:** Separate build and execution columns for amd64 and arm64.
 
-**Hint:** Identify the object and the phase of its lifetime before changing it. Use the relevant worked example, then vary only the condition named in this task.
+**Hint:** Give each platform separate build and run results.
 
 ### Exercise 4: Diagnose exec format error.
 
-**Expected evidence:** Inspect architecture and executable format before app logic.
-
-**Hint:** Identify the object and the phase of its lifetime before changing it. Use the relevant worked example, then vary only the condition named in this task.
+**Hint:** Compare the image's architecture with the host's.
 
 ### Exercise 5: Explain why multi-platform output is not always one --load result.
 
-**Expected evidence:** Exporter and image-store capabilities constrain output.
-
-**Hint:** Identify the object and the phase of its lifetime before changing it. Use the relevant worked example, then vary only the condition named in this task.
+**Hint:** Ask what the local image store can hold.
 
 ### Exercise 6: Write an honest portability claim.
 
 **Expected evidence:** Name the tested platform and label other platforms unqualified.
 
-**Hint:** Identify the object and the phase of its lifetime before changing it. Use the relevant worked example, then vary only the condition named in this task.
+**Hint:** Name only the platforms you actually built and ran.
 
 ## Common mistakes and diagnosis
 
-Start with the smallest observation that separates two plausible causes. An image inspection answers questions about the packaged filesystem and configuration; container inspection adds runtime mounts, network attachment and exit status. An application request adds another layer of evidence. A healthy container can still serve the wrong application result. Preserve the original failure and the exact changed field before retrying.
+Assuming Linux means amd64. Treating an emulated run as proof of native performance. Loading a multi-platform index into an image store that holds one platform.
 
-The boundary case in this chapter is: Diagnose exec format error. Use its expected observation, Inspect architecture and executable format before app logic., to avoid treating a successful command as proof of the wrong claim. Keep source edits in your own copy. Do not make a container privileged, mount the engine socket, disable all checks or delete every volume to make an example succeed.
+Exercise 4 is this chapter's boundary case: Diagnose exec format error. Start with the smallest observation that separates two plausible causes. An image inspection answers questions about the packaged filesystem and configuration; container inspection adds runtime mounts, network attachment and exit status; an application request adds another layer, and a healthy container can still serve the wrong result. Preserve the original failure and the exact changed field before retrying. Keep source edits in your own copy. Do not make a container privileged, mount the engine socket, disable all checks or delete every volume to make an example succeed.
 
 ## Retrieval, transfer and next steps
 
-Close the explanations and draw the path from source files to image to container to the observation relevant here. Reconstruct the second worked example with one different value and predict what changes. Explain which state survives process restart, container recreation and image rebuild. If none of those operations applies to this mechanism, explain why.
+Close the explanations and draw the path from source files to image to container to the observation relevant here, using CPU architecture, image index, --platform, emulation and cross-compilation. Reconstruct worked example 2 (Read the index model) with one different value and predict what changes. Explain which state survives process restart, container recreation and image rebuild, or why none of those operations applies to this mechanism.
 
-Before proceeding, retain six evidence records. For the optional host project, use `docker compose -p ds60-docker-study down` from the fixture copy to stop its containers and remove its ordinary network. This command preserves named volumes. Volume deletion is a separate deliberate reset of that disposable lab after a backup or export, never a general cleanup step. The fixture README describes its exact scoped reset.
+When a host session ends, run `docker compose -p ds60-docker-study down` from your fixture copy. It removes the project's containers and network but keeps named volumes; deleting a volume is a separate, deliberate reset described in the fixture README.
 
 ## Primary references
 
-- [Official reference 1](https://docs.docker.com/build/building/multi-platform/)
+- [Multi-platform builds](https://docs.docker.com/build/building/multi-platform/)
 
 ## Ask an AI tutor about this lesson
 

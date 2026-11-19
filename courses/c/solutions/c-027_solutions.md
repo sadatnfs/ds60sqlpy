@@ -8,9 +8,11 @@ Reliable tests target plausible defects rather than mirror the implementation li
 
 A function pointer supplies allocation behavior. The fixture allocator either delegates to malloc or returns NULL according to an explicit flag. The component validates and allocates before modifying the caller output pointer. Tests retain the previous output on failure. A useful oracle checks both the returned status and absence of unintended state changes; a nonzero exit alone cannot explain which invariant was violated.
 
-## Exercise 1: Exercise successful allocation
+## Exercise 1: Exercise successful allocation: predict an edited check
 
-Copy a tiny string using the working allocator.
+Copy worked example 1 into a scratch pad and change `CHECK(copy_with_allocator("abc", &out, controlled_alloc));` to `CHECK(copy_with_allocator("abc!", &out, controlled_alloc));` inside its CHECK. Before running, predict whether the CHECK still holds and explain why; then restore it.
+
+The unchanged code is worked example 1:
 
 ```c
 char *out = NULL;
@@ -20,13 +22,15 @@ CHECK(strcmp(out, "abc") == 0);
 free(out);
 ```
 
-**Expected:** The output owns an equal string.
+**Expected:** The changed run stops with `Check failed` at the CHECK on `strcmp(out, "abc") == 0`. Restoring the original line brings back the worked observation: the output owns an equal string.
 
 The test checks content and then releases the owned result.
 
-## Exercise 2: Inject allocation failure
+## Exercise 2: Inject allocation failure: debug a regression
 
-Configure the allocator to return NULL.
+A regression changed `fail_allocation = true;` to `fail_allocation = false;` in worked example 2. Run worked example 2 with that change, use the failing CHECK to explain the defect and repair it without changing the CHECK.
+
+The unchanged code is worked example 2:
 
 ```c
 char *out = NULL;
@@ -36,7 +40,7 @@ CHECK(out == NULL);
 fail_allocation = false;
 ```
 
-**Expected:** The copy fails and output remains NULL.
+**Expected:** Before the repair the run stops with `Check failed` at the CHECK on `!copy_with_allocator("abc", &out, controlled_alloc)`; after it the line reads `fail_allocation = true;` again and the copy fails and output remains NULL.
 
 No real memory pressure is required. The failure is reproducible and isolated to this operation.
 

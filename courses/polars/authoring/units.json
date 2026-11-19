@@ -2,6 +2,7 @@
   "id": "polars",
   "title": "Polars: columnar data engineering",
   "summary": "A complete route through typed tables, expression semantics, temporal correctness, lazy execution, Arrow interoperability, measured performance and validated data publication.",
+  "run_notice": "The inputs are small literal tables. Cases that demonstrate Parquet scans write their files into a temporary directory that is removed when the case returns. No account, network request or package download is involved.",
   "units": [
     {
       "id": "polars-001",
@@ -32,7 +33,8 @@
           "task": "Append an order with units 3 and price 4, then predict the total before running.",
           "check": "The total is 42 and there are 4 order rows.",
           "hint": "Compute the new row contribution first.",
-          "answer": "The additional revenue is 3*4=12;30+12=42. Preserve a unique order_id so row-level reconciliation remains possible."
+          "answer": "The additional revenue is \\(3 \\times 4 = 12\\), so the total is \\(30 + 12 = 42\\). Preserve a unique order_id so row-level reconciliation remains possible.",
+          "answer_code": "import polars as pl\n\nframe = pl.DataFrame({\"order_id\": [1, 2, 3], \"units\": [2, 1, 4], \"price\": [5, 8, 3]})\nextra = pl.DataFrame({\"order_id\": [4], \"units\": [3], \"price\": [4]})\norders = pl.concat([frame, extra]).with_columns(\n    (pl.col(\"units\") * pl.col(\"price\")).alias(\"revenue\")\n)\nassert orders.height == 4\nassert orders[\"revenue\"].sum() == 42"
         },
         {
           "title": "Choose a projection",
@@ -46,7 +48,8 @@
           "task": "Replace the final sum with a mean and describe its denominator.",
           "check": "Mean order revenue is 10.",
           "hint": "There are 3 orders, not 7 items.",
-          "answer": "The calculation is(10+8+12)/3. A mean per item would be 30/7 and answers a different question."
+          "answer": "The calculation is \\((10 + 8 + 12)/3 = 10\\). A mean per item would be 30/7 and answers a different question.",
+          "answer_code": "import polars as pl\n\nframe = pl.DataFrame({\"order_id\": [1, 2, 3], \"units\": [2, 1, 4], \"price\": [5, 8, 3]})\nresult = frame.with_columns((pl.col(\"units\") * pl.col(\"price\")).alias(\"revenue\"))\n# The denominator is the number of order rows (3), not the number of units (7).\nassert result.select(pl.col(\"revenue\").mean()).item() == 10.0"
         },
         {
           "title": "Keep raw state",
@@ -71,12 +74,12 @@
         }
       ],
       "diagnosis": "A ShapeError usually means constructor columns have different lengths. A missing-column error means the expression names a field unavailable in that context. Neither is fixed by converting all values to strings. If the total differs, inspect the row products and row count before modifying aggregation code. A successful sum also does not establish a valid revenue definition: negative quantities, repeated identifiers and mixed currencies are semantic cases that require explicit policy.",
-      "transfer": "Construct and verify a typed table with a stated row grain. For an independent case, use a small inventory table with units and cost, calculate stock value, and verify it with Python arithmetic. Preserve both raw and transformed frames so a reviewer can explain every changed field. This establishes a small data contract, not a guarantee that an arbitrary input file is clean.",
-      "lab": "Run the two complete local cases, then make and explain the six specified changes while preserving the stated row and type contracts.",
+      "transfer": "For an independent case, use a small inventory table with units and cost, calculate stock value, and verify it with Python arithmetic. Preserve both raw and transformed frames so a reviewer can explain every changed field. This establishes a small data contract, not a guarantee that an arbitrary input file is clean.",
+      "lab": "Add a revenue expression to a three-row orders table and confirm that it keeps one row per order and a total of 30, then filter to an empty frame and check that its Int64 and String schema survives.",
       "references": [
         [
-          "Polars documentation: Rows, columns, schemas and expressions",
-          "https://docs.pola.rs/user-guide/concepts/data-structures/"
+          "Polars user guide: Data types and structures",
+          "https://docs.pola.rs/user-guide/concepts/data-types-and-structures/"
         ],
         [
           "Polars Python API reference",
@@ -99,19 +102,19 @@
         {
           "title": "Parallel context versus sequential transformation",
           "explanation": "The first case updates x and calculates old_x_times_ten in the same call. The deliberately named output makes its dependency visible. A second pipeline creates another with_columns context, so the multiplication uses the updated x values. This is a minimal example of why argument order is not a substitute for a dependency graph.",
-          "expected": "The same-call multiplication is[10,20,30]; the staged multiplication is[20,30,40]."
+          "expected": "The same-call multiplication is [10, 20, 30]; the staged multiplication is [20, 30, 40]."
         },
         {
           "title": "Condition on a value and diagnose a missing field",
           "explanation": "The second case recognizes revenue only for paid rows. The predicate uses a literal string and the else branch returns a numeric zero. It separately demonstrates that naming an absent column raises a real error rather than producing an implicit all-null column.",
-          "expected": "Recognized amounts are[5,0,11]; selecting a missing column is rejected."
+          "expected": "Recognized amounts are [5, 0, 11]; selecting a missing column is rejected."
         }
       ],
       "exercises": [
         {
           "title": "Change the increment",
           "task": "Increment x by 2 before the dependent multiplication.",
-          "check": "The staged values are[30,40,50].",
+          "check": "The staged values are [30, 40, 50].",
           "hint": "The second context must see the new x.",
           "answer": "Use two with_columns calls and verify the final values; changing argument order inside one call does not create this dependency."
         },
@@ -120,7 +123,8 @@
           "task": "Keep x unchanged and create incremented_x.",
           "check": "Both x and incremented_x are visible.",
           "hint": "Use a new alias.",
-          "answer": "Compute (pl.col(\"x\")+1).alias(\"incremented_x\"). Retaining both fields makes a later comparison or audit straightforward."
+          "answer": "Compute (pl.col(\"x\")+1).alias(\"incremented_x\"). Retaining both fields makes a later comparison or audit straightforward.",
+          "answer_code": "import polars as pl\n\nframe = pl.DataFrame({\"x\": [1, 2, 3]})\noutput = frame.with_columns((pl.col(\"x\") + 1).alias(\"incremented_x\"))\nassert output.to_dict(as_series=False) == {\"x\": [1, 2, 3], \"incremented_x\": [2, 3, 4]}"
         },
         {
           "title": "Remove ambiguity",
@@ -148,15 +152,16 @@
           "task": "Write the same recognized amounts with a filter plus an aggregate.",
           "check": "The paid total is 16 in both implementations.",
           "hint": "Compare equivalent grains and denominators.",
-          "answer": "Filtering paid rows then summing amount matches the conditional sum. It does not return the same row-level table, because pending rows have been removed."
+          "answer": "Filtering paid rows then summing amount matches the conditional sum. It does not return the same row-level table, because pending rows have been removed.",
+          "answer_code": "import polars as pl\n\nframe = pl.DataFrame({\"status\": [\"paid\", \"pending\", \"paid\"], \"amount\": [5, 7, 11]})\nconditional = frame.select(\n    pl.when(pl.col(\"status\") == \"paid\").then(pl.col(\"amount\")).otherwise(0).sum()\n).item()\nfiltered = frame.filter(pl.col(\"status\") == \"paid\").select(pl.col(\"amount\").sum()).item()\nassert conditional == filtered == 16"
         }
       ],
       "diagnosis": "If an expression unexpectedly uses old values, inspect its context before suspecting nondeterministic execution. If a string causes a missing-column error, decide whether it represents a name or a literal. A conditional expression may still evaluate branches as expressions, so do not rely on it to protect an otherwise invalid operation. Make casts and denominator policies valid independently, then select the appropriate result.",
-      "transfer": "Build a transformation whose dependency stages are explicit. Apply the same reasoning to feature pipelines: a normalized value should reference the intended cleaned field, and training and serving must agree on that order. Use intermediate schemas and a small hand-calculated fixture to review the pipeline before optimizing it.",
-      "lab": "Run the two complete local cases, then make and explain the six specified changes while preserving the stated row and type contracts.",
+      "transfer": "Apply the same reasoning to feature pipelines: a normalized value should reference the intended cleaned field, and training and serving must agree on that order. Use intermediate schemas and a small hand-calculated fixture to review the pipeline before optimizing it.",
+      "lab": "Compare one with_columns call that reads the original x with two staged calls that read the updated x, then build a when/then recognized amount and observe the ColumnNotFoundError for a missing column.",
       "references": [
         [
-          "Polars documentation: Expression contexts and explicit dependencies",
+          "Polars user guide: Expressions and contexts",
           "https://docs.pola.rs/user-guide/concepts/expressions-and-contexts/"
         ],
         [
@@ -180,12 +185,12 @@
         {
           "title": "Separate missing input from invalid input",
           "explanation": "The first program keeps id and units_text, derives units, and creates separate invalid and missing subsets. It also executes the strict path to prove that the invalid token is rejected. This demonstrates a policy choice with observable consequences rather than silently using a permissive conversion.",
-          "expected": "Record 2 is malformed, record 3 is missing, and parsed units are[2,null,null,4]."
+          "expected": "Record 2 is malformed, record 3 is missing, and parsed units are [2, null, null, 4]."
         },
         {
           "title": "Decimal arithmetic and narrowing bounds",
           "explanation": "The second program constructs decimal values from strings, so binary approximation is not introduced before the Decimal object exists. It contrasts exact decimal addition with a narrowing integer conversion whose second value is outside the target range.",
-          "expected": "Decimal total is 0.30; the Int8 conversion gives[127,null]."
+          "expected": "Decimal total is 0.30; the Int8 conversion gives [127, null]."
         }
       ],
       "exercises": [
@@ -194,14 +199,16 @@
           "task": "Replace bad with a whitespace-only string and define its category.",
           "check": "Your policy explicitly classifies it before numeric conversion.",
           "hint": "Use string stripping while preserving the raw token.",
-          "answer": "A blank-after-trimming policy may convert it to missing. Keep an invalid_reason field so this is not confused with an unparseable nonblank token."
+          "answer": "A blank-after-trimming policy may convert it to missing. Keep an invalid_reason field so this is not confused with an unparseable nonblank token.",
+          "answer_code": "import polars as pl\n\nraw = pl.DataFrame({\"id\": [1, 2, 3, 4], \"units_text\": [\"2\", \"   \", None, \"4\"]})\nclassified = raw.with_columns(\n    pl.when(pl.col(\"units_text\").is_null())\n    .then(pl.lit(\"missing\"))\n    .when(pl.col(\"units_text\").str.strip_chars() == \"\")\n    .then(pl.lit(\"blank\"))\n    .otherwise(pl.lit(\"text\"))\n    .alias(\"category\")\n)\nassert classified[\"category\"].to_list() == [\"text\", \"blank\", \"missing\", \"text\"]"
         },
         {
           "title": "Keep a rejection denominator",
           "task": "Compute the malformed share of the original four records.",
           "check": "Malformed share is 1/4, separately from 1/4 missing.",
           "hint": "Use original row count.",
-          "answer": "The two rates have different categories. Using only accepted rows as denominator would overstate a rejection fraction."
+          "answer": "The two rates have different categories. Using only accepted rows as denominator would overstate a rejection fraction.",
+          "answer_code": "import polars as pl\n\nraw = pl.DataFrame({\"id\": [1, 2, 3, 4], \"units_text\": [\"2\", \"bad\", None, \"4\"]})\nparsed = raw.with_columns(pl.col(\"units_text\").cast(pl.Int64, strict=False).alias(\"units\"))\nshares = parsed.select(\n    (pl.col(\"units_text\").is_not_null() & pl.col(\"units\").is_null()).mean().alias(\"malformed\"),\n    pl.col(\"units_text\").is_null().mean().alias(\"missing\"),\n)\nassert shares.row(0) == (0.25, 0.25)"
         },
         {
           "title": "Make rejection fail closed",
@@ -212,10 +219,10 @@
         },
         {
           "title": "Investigate a bound",
-          "task": "Try values-129,-128,127,128 as Int8.",
-          "check": "Only-128 and 127 are representable.",
+          "task": "Try the values -129, -128, 127 and 128 as Int8.",
+          "check": "Only -128 and 127 are representable.",
           "hint": "Signed 8-bit values have 256 states.",
-          "answer": "The permitted interval is[-128,127]. Keep strict mode for a mandatory bound or retain null plus a rejection reason under a permissive policy."
+          "answer": "The permitted interval is [-128, 127]. Keep strict mode for a mandatory bound or retain null plus a rejection reason under a permissive policy."
         },
         {
           "title": "Avoid early float conversion",
@@ -233,13 +240,10 @@
         }
       ],
       "diagnosis": "A permissive cast that increases null counts is not automatically data loss: it may be correct rejection of bad text. It becomes an analysis defect when the original token, count or reason disappears. Check integer bounds before narrowing and retain exact input strings for decimal parsing. Locale-specific separators, percent signs and mixed units need explicit parsing rules; stripping every nondigit can manufacture plausible but incorrect numbers.",
-      "transfer": "Implement a parsing policy that preserves rejected evidence. Extend the fixture with one malformed token, one missing token and one out-of-range value, and reconcile every original identifier into exactly one outcome. For scientific measurements, also state approximation tolerance; for exact decimal quantities, state scale and rounding independently of display formatting.",
-      "lab": "Run the two complete local cases, then make and explain the six specified changes while preserving the stated row and type contracts.",
+      "transfer": "Extend the fixture with one malformed token, one missing token and one out-of-range value, and reconcile every original identifier into exactly one outcome. For scientific measurements, also state approximation tolerance; for exact decimal quantities, state scale and rounding independently of display formatting.",
+      "lab": "Parse text quantities with a non-strict cast, separate malformed tokens from missing ones, watch a strict cast reject the bad token, and check Decimal totals and Int8 narrowing.",
       "references": [
-        [
-          "Polars documentation: Types, parsing failures and exact numeric values",
-          "https://docs.pola.rs/user-guide/expressions/casting/"
-        ],
+        ["Polars user guide: Casting", "https://docs.pola.rs/user-guide/expressions/casting/"],
         [
           "Polars Python API reference",
           "https://docs.pola.rs/api/python/stable/reference/index.html"
@@ -261,7 +265,7 @@
         {
           "title": "Two kinds of missing numeric information",
           "explanation": "The first case separately counts the null and NaN, proves that fill_null leaves NaN untouched, and then applies a declared two-stage conversion. The assertions force the distinction to be visible instead of relying on a printed summary that might obscure it.",
-          "expected": "One null and one NaN are identified; the chosen final values are[1,0,0,4]."
+          "expected": "One null and one NaN are identified; the chosen final values are [1, 0, 0, 4]."
         },
         {
           "title": "Unknown predicates and filtering",
@@ -275,7 +279,8 @@
           "task": "Count observations that are neither null nor NaN.",
           "check": "The numeric fixture has 2 such values.",
           "hint": "Combine the two validity conditions explicitly.",
-          "answer": "Check is_not_null and invert is_nan with an appropriate null policy. Infinity is another category and would need an is_finite check if it is forbidden."
+          "answer": "Check is_not_null and invert is_nan with an appropriate null policy. Infinity is another category and would need an is_finite check if it is forbidden.",
+          "answer_code": "import polars as pl\n\nframe = pl.DataFrame({\"x\": [1.0, None, float(\"nan\"), 4.0]})\nobserved = frame.select(pl.col(\"x\").fill_nan(None).count()).item()\nassert observed == 2"
         },
         {
           "title": "Keep a missingness indicator",
@@ -289,7 +294,8 @@
           "task": "Compute the mean of the two observed finite values and compare with zero filling.",
           "check": "Observed mean is 2.5; zero-filled mean is 1.25.",
           "hint": "State which records contribute.",
-          "answer": "The numerical difference follows from both changed values and denominator. Neither estimate is universally correct without a missing-data model."
+          "answer": "The numerical difference follows from both changed values and denominator. Neither estimate is universally correct without a missing-data model.",
+          "answer_code": "import polars as pl\n\nframe = pl.DataFrame({\"x\": [1.0, None, float(\"nan\"), 4.0]})\nmeans = frame.select(\n    pl.col(\"x\").fill_nan(None).mean().alias(\"observed_mean\"),\n    pl.col(\"x\").fill_nan(None).fill_null(0).mean().alias(\"zero_filled_mean\"),\n)\nassert means.row(0) == (2.5, 1.25)"
         },
         {
           "title": "Retain unknown flags",
@@ -314,11 +320,11 @@
         }
       ],
       "diagnosis": "A surprising row loss may be caused by an unknown predicate, not a filtering bug. Inspect null counts before and after joins and casts. If a mean becomes NaN, count NaNs separately from nulls and trace the operation that introduced them. Do not apply a universal fill-zero policy to counts, measurements, labels and timestamps; they have different semantics.",
-      "transfer": "Explain how missingness changes a specific calculation. Build a table with observed, missing and invalid values, show each inclusion policy, and state which population the resulting statistic describes. Carry that accounting into downstream feature engineering so training and serving apply the same policy.",
-      "lab": "Run the two complete local cases, then make and explain the six specified changes while preserving the stated row and type contracts.",
+      "transfer": "Build a table with observed, missing and invalid values, show each inclusion policy, and state which population the resulting statistic describes. Carry that accounting into downstream feature engineering so training and serving apply the same policy.",
+      "lab": "Count null and NaN separately in a float column, apply an explicit fill policy for each, and trace which rows a filter keeps when the Boolean predicate is null.",
       "references": [
         [
-          "Polars documentation: Null, NaN and three-valued logic",
+          "Polars user guide: Missing data",
           "https://docs.pola.rs/user-guide/expressions/missing-data/"
         ],
         [
@@ -347,7 +353,7 @@
         {
           "title": "Preserve missingness in group summaries",
           "explanation": "The second case emits row count, observed count and mean together. The all-null group remains present, and its mean remains absent. That is evidence about measurement availability, not evidence that the underlying quantity equals zero.",
-          "expected": "Group A has 2 rows,1 observed value and mean 2; group B has 1 row,0 observed values and null mean."
+          "expected": "Group A has 2 rows, 1 observed value and mean 2; group B has 1 row, 0 observed values and null mean."
         }
       ],
       "exercises": [
@@ -363,7 +369,8 @@
           "task": "Add a group with 0 successes and 0 trials.",
           "check": "The output follows an explicit undefined-rate policy.",
           "hint": "A zero-trial group contains no rate evidence.",
-          "answer": "Return null or reject it with a reason; do not silently assign rate 0, which would claim observed failures."
+          "answer": "Return null or reject it with a reason; do not silently assign rate 0, which would claim observed failures.",
+          "answer_code": "import polars as pl\n\nframe = pl.DataFrame(\n    {\"group\": [\"A\", \"A\", \"B\", \"C\"], \"successes\": [1, 9, 1, 0], \"trials\": [1, 99, 2, 0]}\n)\nrates = (\n    frame.group_by(\"group\")\n    .agg(pl.col(\"successes\").sum(), pl.col(\"trials\").sum())\n    .with_columns(\n        pl.when(pl.col(\"trials\") > 0)\n        .then(pl.col(\"successes\") / pl.col(\"trials\"))\n        .otherwise(None)\n        .alias(\"rate\")\n    )\n    .sort(\"group\")\n)\n# Policy: a group with no trials has an undefined rate (null), not 0 and not NaN.\nassert rates[\"rate\"].to_list() == [0.1, 0.5, None]"
         },
         {
           "title": "Change the estimand",
@@ -395,11 +402,11 @@
         }
       ],
       "diagnosis": "A rate above 1 can indicate numerator/denominator mismatch or join fanout. A mean that changes after a harmless-looking reshape may have changed its weighting unit. Inspect group keys, original grain and counts before adjusting formulas. Never compare unsorted group outputs positionally unless row order is explicitly part of the contract.",
-      "transfer": "Build an aggregate whose numerator, denominator and weighting unit are explicit. Reconcile the totals independently with Python arithmetic, retain coverage counts, and then decide whether the result supports the intended comparison. Apply the same discipline to conversion rates, average losses and model-quality dashboards.",
-      "lab": "Run the two complete local cases, then make and explain the six specified changes while preserving the stated row and type contracts.",
+      "transfer": "Reconcile the totals independently with Python arithmetic, retain coverage counts, and then decide whether the result supports the intended comparison. Apply the same discipline to conversion rates, average losses and model-quality dashboards.",
+      "lab": "Pool successes and trials per group instead of averaging row rates, and summarize groups whose values are partly or wholly missing without losing their row and observation counts.",
       "references": [
         [
-          "Polars documentation: Aggregation grain and weighted quantities",
+          "Polars user guide: Aggregation",
           "https://docs.pola.rs/user-guide/expressions/aggregation/"
         ],
         [
@@ -451,14 +458,16 @@
           "task": "Return orders whose customers occur in the dimension without adding region.",
           "check": "Each matching order appears once.",
           "hint": "Use a semi join.",
-          "answer": "A semi join expresses existence directly. Joining and dropping columns afterward still permits fanout."
+          "answer": "A semi join expresses existence directly. Joining and dropping columns afterward still permits fanout.",
+          "answer_code": "import polars as pl\n\nfacts = pl.DataFrame({\"order_id\": [1, 2, 3], \"customer\": [10, 10, 20], \"amount\": [5, 7, 9]})\ndimension = pl.DataFrame({\"customer\": [10, 20], \"region\": [\"N\", \"S\"]})\nknown = facts.join(dimension, on=\"customer\", how=\"semi\")\nassert known.columns == [\"order_id\", \"customer\", \"amount\"]\nassert known.sort(\"order_id\")[\"order_id\"].to_list() == [1, 2, 3]\nduplicated = pl.concat([dimension, dimension.head(1)])\nassert facts.join(duplicated, on=\"customer\", how=\"semi\").height == 3"
         },
         {
           "title": "Audit unmatched rows",
           "task": "Add a customer 30 order and inspect it using an anti join.",
           "check": "The new order is explicitly listed.",
           "hint": "Use an identifier in the output.",
-          "answer": "The anti join produces a reviewable quarantine set. Decide whether the missing dimension is late, invalid or genuinely outside the domain."
+          "answer": "The anti join produces a reviewable quarantine set. Decide whether the missing dimension is late, invalid or genuinely outside the domain.",
+          "answer_code": "import polars as pl\n\nfacts = pl.DataFrame(\n    {\"order_id\": [1, 2, 3, 4], \"customer\": [10, 10, 20, 30], \"amount\": [5, 7, 9, 6]}\n)\ndimension = pl.DataFrame({\"customer\": [10, 20], \"region\": [\"N\", \"S\"]})\norphans = facts.join(dimension, on=\"customer\", how=\"anti\")\nassert orphans.to_dicts() == [{\"order_id\": 4, \"customer\": 30, \"amount\": 6}]"
         },
         {
           "title": "Handle duplicate history",
@@ -476,13 +485,10 @@
         }
       ],
       "diagnosis": "If the result has too many rows, inspect key multiplicities on both sides and calculate the expected product of counts for one key. If it has too few rows, inspect join type and the unmatched set. A post-join distinct operation can erase evidence while leaving incorrect aggregates; fix the relation and time contract before deduplicating the result.",
-      "transfer": "Enrich a fact table while proving its grain and totals remain valid. Extend the exercise with a legitimate historical dimension, then document the additional temporal rule required. Carry the same reconciliation into dbt tests and ML feature pipelines, where silent fanout can contaminate both training labels and online metrics.",
-      "lab": "Run the two complete local cases, then make and explain the six specified changes while preserving the stated row and type contracts.",
+      "transfer": "Extend the exercise with a legitimate historical dimension, then document the additional temporal rule required. Carry the same reconciliation into dbt tests and ML feature pipelines, where silent fanout can contaminate both training labels and online metrics.",
+      "lab": "Enrich orders with a validated many-to-one join, reproduce the fanout a duplicated dimension key causes, and audit membership with semi and anti joins under an explicit null-key policy.",
       "references": [
-        [
-          "Polars documentation: Joins, cardinality and reconciliation",
-          "https://docs.pola.rs/user-guide/transformations/joins/"
-        ],
+        ["Polars user guide: Joins", "https://docs.pola.rs/user-guide/transformations/joins/"],
         [
           "Polars Python API reference",
           "https://docs.pola.rs/api/python/stable/reference/index.html"
@@ -518,7 +524,8 @@
           "task": "Convert the same UTC observations to a second named timezone.",
           "check": "The instants and elapsed seconds stay unchanged.",
           "hint": "Change display, not source meaning.",
-          "answer": "Use convert_time_zone with a valid IANA zone. A timezone is not just a fixed UTC offset because historical and seasonal rules can differ."
+          "answer": "Use convert_time_zone with a valid IANA zone. A timezone is not just a fixed UTC offset because historical and seasonal rules can differ.",
+          "answer_code": "import polars as pl\n\nframe = pl.DataFrame({\"stamp\": [\"2024-03-10T06:30:00+00:00\", \"2024-03-10T07:30:00+00:00\"]})\nutc = frame.select(pl.col(\"stamp\").str.to_datetime(time_zone=\"UTC\").alias(\"utc\"))\ntokyo = utc.with_columns(pl.col(\"utc\").dt.convert_time_zone(\"Asia/Tokyo\").alias(\"tokyo\"))\nassert tokyo[\"tokyo\"].dt.hour().to_list() == [15, 16]\nassert tokyo[\"tokyo\"].dt.epoch(\"s\").to_list() == tokyo[\"utc\"].dt.epoch(\"s\").to_list()\nassert (tokyo[\"tokyo\"][1] - tokyo[\"tokyo\"][0]).total_seconds() == 3600"
         },
         {
           "title": "Explain a naive value",
@@ -532,7 +539,8 @@
           "task": "Add an observation exactly equal to end.",
           "check": "It belongs to the following period.",
           "hint": "Keep the end comparison strict.",
-          "answer": "The filter time < end excludes the boundary, which avoids double counting when the next period starts there."
+          "answer": "The filter time < end excludes the boundary, which avoids double counting when the next period starts there.",
+          "answer_code": "from datetime import UTC, datetime\n\nimport polars as pl\n\ntimes = [datetime(2024, 1, day, tzinfo=UTC) for day in (1, 2, 3, 3)]\nframe = pl.DataFrame({\"time\": times, \"amount\": [2, 3, 5, 7]})\nstart, end = times[0], times[2]\nperiod = frame.filter((pl.col(\"time\") >= start) & (pl.col(\"time\") < end))\nfollowing = frame.filter(pl.col(\"time\") >= end)\nassert period[\"amount\"].sum() == 5\nassert following[\"amount\"].to_list() == [5, 7]"
         },
         {
           "title": "Test a zero-length window",
@@ -557,11 +565,11 @@
         }
       ],
       "diagnosis": "If a duration differs by an hour, inspect timezone interpretation before adding a correction constant. If rows appear in two adjacent reports, check both endpoint operators. If an incremental job misses late records, its event-time window alone is not an ingestion policy. Print UTC instants, local displays and the exact window boundaries while diagnosing the issue.",
-      "transfer": "Define time semantics before aggregating a dataset. Use an explicit zone and interval convention, test the boundary observations and retain separate event and availability timestamps. Apply those rules consistently across training, dashboards and incremental data products.",
-      "lab": "Run the two complete local cases, then make and explain the six specified changes while preserving the stated row and type contracts.",
+      "transfer": "Use an explicit zone and interval convention, test the boundary observations and retain separate event and availability timestamps. Apply those rules consistently across training, dashboards and incremental data products.",
+      "lab": "Convert UTC timestamps across a daylight-saving change and compare displayed hours with elapsed seconds, then split events into half-open periods so a boundary event is counted once.",
       "references": [
         [
-          "Polars documentation: Time zones, elapsed time and interval boundaries",
+          "Polars user guide: Time zones",
           "https://docs.pola.rs/user-guide/transformations/time-series/timezones/"
         ],
         [
@@ -599,7 +607,8 @@
           "task": "Add a followup column to the wide fixture and unpivot it.",
           "check": "There are six long rows for two identifiers.",
           "hint": "Count identifiers times selected measurements.",
-          "answer": "Include followup in the on list. The expected count assumes every selected column is retained, including any explicit null values."
+          "answer": "Include followup in the on list. The expected count assumes every selected column is retained, including any explicit null values.",
+          "answer_code": "import polars as pl\n\nwide = pl.DataFrame({\"id\": [1, 2], \"before\": [10, 20], \"after\": [12, 18], \"followup\": [11, 19]})\nlong = wide.unpivot(\n    index=\"id\", on=[\"before\", \"after\", \"followup\"], variable_name=\"period\", value_name=\"value\"\n)\nassert long.height == 6\nassert long.group_by(\"id\").len().sort(\"id\")[\"len\"].to_list() == [3, 3]"
         },
         {
           "title": "Check cell identity",
@@ -613,7 +622,8 @@
           "task": "Aggregate the duplicated values 4 and 6 using both policies.",
           "check": "Sum is 10 and mean is 5.",
           "hint": "Different aggregation means different questions.",
-          "answer": "Choose sum for additive contributions and mean for repeated comparable measurements only when their weighting is justified. Do not infer the policy from the API."
+          "answer": "Choose sum for additive contributions and mean for repeated comparable measurements only when their weighting is justified. Do not infer the policy from the API.",
+          "answer_code": "import polars as pl\n\nduplicate = pl.DataFrame({\"id\": [1, 1], \"period\": [\"after\", \"after\"], \"value\": [4, 6]})\ntotal = duplicate.pivot(on=\"period\", index=\"id\", values=\"value\", aggregate_function=\"sum\")\naverage = duplicate.pivot(on=\"period\", index=\"id\", values=\"value\", aggregate_function=\"mean\")\nassert total[\"after\"].item() == 10\nassert average[\"after\"].item() == 5.0"
         },
         {
           "title": "Preserve missing values",
@@ -638,13 +648,10 @@
         }
       ],
       "diagnosis": "Unexpected duplicate errors often reveal a real ambiguity rather than a broken pivot. Diagnose the compound key before adding an aggregation. A changed total can also result from selecting the wrong measurement columns or filling absent cells. Compare counts, key sets and a few identified cells before comparing an entire printed table.",
-      "transfer": "Reshape a repeated-measurement dataset with a checked compound key. Demonstrate a round trip and one deliberate duplicate counterexample, then explain the chosen aggregation policy. The same reasoning applies to model comparison tables, experiment metrics and data marts.",
-      "lab": "Run the two complete local cases, then make and explain the six specified changes while preserving the stated row and type contracts.",
+      "transfer": "Demonstrate a round trip and one deliberate duplicate counterexample, then explain the chosen aggregation policy. The same reasoning applies to model comparison tables, experiment metrics and data marts.",
+      "lab": "Unpivot a paired before/after table and pivot it back to the identical frame, then show that duplicate id-period cells are rejected until an aggregation policy is chosen.",
       "references": [
-        [
-          "Polars documentation: Reshaping while preserving identity",
-          "https://docs.pola.rs/user-guide/transformations/pivot/"
-        ],
+        ["Polars user guide: Pivots", "https://docs.pola.rs/user-guide/transformations/pivot/"],
         [
           "Polars Python API reference",
           "https://docs.pola.rs/api/python/stable/reference/index.html"
@@ -694,7 +701,8 @@
           "task": "Compute the running value available before each event.",
           "check": "For A it is [null, 2, 7] before an explicit first-value policy.",
           "hint": "Shift the cumulative total within the same group.",
-          "answer": "A cumulative sum includes the current row. Shift it to represent prior history and explain whether a first event should map to zero or unknown."
+          "answer": "A cumulative sum includes the current row. Shift it to represent prior history and explain whether a first event should map to zero or unknown.",
+          "answer_code": "import polars as pl\n\nframe = pl.DataFrame(\n    {\n        \"id\": [3, 1, 2, 4],\n        \"customer\": [\"A\", \"A\", \"B\", \"A\"],\n        \"time\": [2, 1, 1, 3],\n        \"value\": [5, 2, 7, 4],\n    }\n)\noutput = frame.sort(\"customer\", \"time\", \"id\").with_columns(\n    pl.col(\"value\").cum_sum().shift(1).over(\"customer\").alias(\"running_before\")\n)\nassert output.filter(pl.col(\"customer\") == \"A\")[\"running_before\"].to_list() == [None, 2, 7]"
         },
         {
           "title": "Check group reset",
@@ -715,15 +723,16 @@
           "task": "Replace the mean window with group_by and inspect row counts.",
           "check": "The count changes from 3 to 2.",
           "hint": "A reduction returns one result per key.",
-          "answer": "Neither shape is inherently wrong. Choose the result grain needed by the next stage and verify key identity at that boundary."
+          "answer": "Neither shape is inherently wrong. Choose the result grain needed by the next stage and verify key identity at that boundary.",
+          "answer_code": "import polars as pl\n\nframe = pl.DataFrame({\"group\": [\"A\", \"A\", \"B\"], \"value\": [2.0, 6.0, 9.0]})\nwindow = frame.with_columns(pl.col(\"value\").mean().over(\"group\").alias(\"group_mean\"))\ngrouped = frame.group_by(\"group\").agg(pl.col(\"value\").mean().alias(\"group_mean\"))\nassert (window.height, grouped.height) == (3, 2)"
         }
       ],
       "diagnosis": "A plausible lag can still belong to a different customer. A cumulative sum can be deterministic but temporally invalid. Inspect grouping keys, timestamp ties and whether the current row should contribute. Keep first-event nulls visible until the missing-history policy is decided.",
-      "transfer": "Create row-preserving historical features with explicit ordering. Test shuffled inputs, entity boundaries and timestamp ties, then document whether each feature includes the current event. Extend the rule to an availability-time boundary before using the feature in model training.",
-      "lab": "Run the two complete local cases, then make and explain the six specified changes while preserving the stated row and type contracts.",
+      "transfer": "Test shuffled inputs, entity boundaries and timestamp ties, then document whether each feature includes the current event. Extend the rule to an availability-time boundary before using the feature in model training.",
+      "lab": "Sort events by customer and time before computing running and previous values with over, then center values on a group mean while keeping every input row.",
       "references": [
         [
-          "Polars documentation: Ordered windows and row-preserving statistics",
+          "Polars user guide: Window functions",
           "https://docs.pola.rs/user-guide/expressions/window-functions/"
         ],
         [
@@ -761,7 +770,8 @@
           "task": "Raise the amount threshold to 15.",
           "check": "Only id 3 remains with doubled value 40.",
           "hint": "State the expected rows before inspecting a plan.",
-          "answer": "A result assertion is the first correctness check. The optimizer may choose a different physical strategy without changing this answer."
+          "answer": "A result assertion is the first correctness check. The optimizer may choose a different physical strategy without changing this answer.",
+          "answer_code": "import tempfile\nfrom pathlib import Path\n\nimport polars as pl\n\nwith tempfile.TemporaryDirectory() as d:\n    path = Path(d) / \"events.parquet\"\n    pl.DataFrame({\"id\": [1, 2, 3], \"amount\": [5, 12, 20], \"unused\": [\"x\", \"y\", \"z\"]}).write_parquet(\n        path\n    )\n    query = (\n        pl.scan_parquet(path)\n        .filter(pl.col(\"amount\") >= 15)\n        .select(\"id\", (pl.col(\"amount\") * 2).alias(\"doubled\"))\n    )\n    assert query.collect().to_dict(as_series=False) == {\"id\": [3], \"doubled\": [40]}"
         },
         {
           "title": "Add an unused column",
@@ -782,7 +792,8 @@
           "task": "Change group A to values 1 and 11.",
           "check": "Its group mean is 6 and the strict >6 filter still rejects it.",
           "hint": "The comparison is strict.",
-          "answer": "The before-filtered pipeline would still keep A because it observes only 11. The boundary case demonstrates why order is semantically important."
+          "answer": "The before-filtered pipeline would still keep A because it observes only 11. The boundary case demonstrates why order is semantically important.",
+          "answer_code": "import polars as pl\n\nframe = pl.DataFrame({\"group\": [\"A\", \"A\", \"B\"], \"value\": [1, 11, 8]})\nmeans = frame.group_by(\"group\").agg(pl.col(\"value\").mean().alias(\"mean\")).sort(\"group\")\nassert means[\"mean\"].to_list() == [6.0, 8.0]\nassert means.filter(pl.col(\"mean\") > 6)[\"group\"].to_list() == [\"B\"]"
         },
         {
           "title": "Locate execution",
@@ -800,13 +811,10 @@
         }
       ],
       "diagnosis": "If a lazy pipeline appears fast, confirm that it was actually collected. If it reads more than expected, inspect where the file scan becomes an eager object and which expressions require extra columns. If an optimization attempt changes results, return to the row and group semantics before tuning execution settings.",
-      "transfer": "Explain a lazy query in terms of its requested result and observable execution plan. Produce an eager reference, a bounded lazy result and one deliberately non-equivalent rewrite. This prepares you to review performance changes without confusing optimization with a change in the analytical question.",
-      "lab": "Run the two complete local cases, then make and explain the six specified changes while preserving the stated row and type contracts.",
+      "transfer": "Produce an eager reference, a bounded lazy result and one deliberately non-equivalent rewrite. This prepares you to review performance changes without confusing optimization with a change in the analytical question.",
+      "lab": "Write a small Parquet file, build a lazy scan with a filter and projection, read its optimized plan, and show that filtering before or after a group mean changes the result.",
       "references": [
-        [
-          "Polars documentation: Lazy plans and optimizer reasoning",
-          "https://docs.pola.rs/user-guide/lazy/optimizations/"
-        ],
+        ["Polars user guide: Optimizations", "https://docs.pola.rs/user-guide/lazy/optimizations/"],
         [
           "Polars Python API reference",
           "https://docs.pola.rs/api/python/stable/reference/index.html"
@@ -856,14 +864,16 @@
           "task": "Check output id uniqueness after combining parts.",
           "check": "n_unique equals height for the valid fixture.",
           "hint": "Parts can overlap.",
-          "answer": "Add a duplicate id across two files to demonstrate the need for a global contract. Per-file uniqueness is insufficient."
+          "answer": "Add a duplicate id across two files to demonstrate the need for a global contract. Per-file uniqueness is insufficient.",
+          "answer_code": "import tempfile\nfrom pathlib import Path\n\nimport polars as pl\n\nwith tempfile.TemporaryDirectory() as d:\n    root = Path(d)\n    pl.DataFrame({\"id\": [1, 2], \"value\": [2.5, 3.5]}).write_parquet(root / \"part-a.parquet\")\n    pl.DataFrame({\"id\": [3], \"value\": [4.5]}).write_parquet(root / \"part-b.parquet\")\n    combined = pl.scan_parquet(str(root / \"part-*.parquet\")).collect()\n    assert combined[\"id\"].n_unique() == combined.height == 3"
         },
         {
           "title": "Track rejected coverage",
           "task": "Report accepted and rejected CSV counts.",
           "check": "Two accepted plus one rejected equals three source rows.",
           "hint": "Every source row needs an outcome.",
-          "answer": "Keep raw identifiers and reasons, then reconcile counts. If a policy imputes a value instead, record that category separately."
+          "answer": "Keep raw identifiers and reasons, then reconcile counts. If a policy imputes a value instead, record that category separately.",
+          "answer_code": "import tempfile\nfrom pathlib import Path\n\nimport polars as pl\n\nwith tempfile.TemporaryDirectory() as d:\n    path = Path(d) / \"raw.csv\"\n    path.write_text(\"id,amount\\n1,2\\n2,broken\\n3,4\\n\")\n    raw = pl.read_csv(path, schema_overrides={\"amount\": pl.String})\n    parsed = raw.with_columns(pl.col(\"amount\").cast(pl.Int64, strict=False).alias(\"parsed\"))\n    accepted = parsed.filter(pl.col(\"parsed\").is_not_null()).height\n    rejected = parsed.filter(pl.col(\"parsed\").is_null()).height\n    assert (accepted, rejected, raw.height) == (2, 1, 3)"
         },
         {
           "title": "Test a schema change",
@@ -881,13 +891,10 @@
         }
       ],
       "diagnosis": "A glob that includes an output directory can inflate every subsequent run. A CSV inference error can originate from a late malformed token rather than a completely wrong delimiter. Inspect selected paths, schemas and row accounting before adding broad ignore_errors behavior. Keep the example's temporary paths distinct from a learner's valuable files.",
-      "transfer": "Publish a small typed artifact with independently checked readback. Extend it to multiple input parts, a deliberate overlap and one malformed value. Describe which failures stop publication and which produce an explicit quarantine artifact; that decision becomes a testable contract in analytics engineering.",
-      "lab": "Run the two complete local cases, then make and explain the six specified changes while preserving the stated row and type contracts.",
+      "transfer": "Extend it to multiple input parts, a deliberate overlap and one malformed value. Describe which failures stop publication and which produce an explicit quarantine artifact; that decision becomes a testable contract in analytics engineering.",
+      "lab": "Combine two Parquet parts through scan_parquet and sink_parquet, verify the readback values and schema, and quarantine a malformed CSV amount instead of coercing it.",
       "references": [
-        [
-          "Polars documentation: Files, schema boundaries and columnar artifacts",
-          "https://docs.pola.rs/user-guide/io/parquet/"
-        ],
+        ["Polars user guide: Parquet", "https://docs.pola.rs/user-guide/io/parquet/"],
         [
           "Polars Python API reference",
           "https://docs.pola.rs/api/python/stable/reference/index.html"
@@ -944,7 +951,8 @@
           "task": "Add cancelled without changing the Enum.",
           "check": "Strict conversion rejects it.",
           "hint": "Unknown is not a synonym for null.",
-          "answer": "Use a separate quarantine reason or deliberately evolve the vocabulary. Silently mapping it to shipped would create a false business state."
+          "answer": "Use a separate quarantine reason or deliberately evolve the vocabulary. Silently mapping it to shipped would create a false business state.",
+          "answer_code": "import polars as pl\n\nstatus = pl.Enum([\"new\", \"paid\", \"shipped\"])\ntry:\n    pl.Series([\"new\", \"cancelled\"]).cast(status)\nexcept pl.exceptions.InvalidOperationError:\n    rejected = True\nelse:\n    rejected = False\nassert rejected"
         },
         {
           "title": "Compare sort policies",
@@ -962,11 +970,11 @@
         }
       ],
       "diagnosis": "Unexpected copies are a performance question, while changed values are a correctness question. Diagnose them with different evidence. If categorical comparisons fail, check vocabulary versions and unknown labels before comparing physical codes. Keep label semantics visible when crossing languages or serializing an artifact.",
-      "transfer": "Move a typed table across an Arrow boundary while preserving its logical contract. Document which properties were checked and which memory claims were not measured. Use explicit category vocabularies when business order matters, and test unknown-value handling as part of schema evolution.",
-      "lab": "Run the two complete local cases, then make and explain the six specified changes while preserving the stated row and type contracts.",
+      "transfer": "Document which properties were checked and which memory claims were not measured. Use explicit category vocabularies when business order matters, and test unknown-value handling as part of schema evolution.",
+      "lab": "Round-trip a table with a null through Arrow and confirm values and validity, then cast statuses to an ordered Enum and observe the rejection of an unknown category.",
       "references": [
         [
-          "Polars documentation: Arrow interoperability and categorical meaning",
+          "Polars user guide: Categorical data and enums",
           "https://docs.pola.rs/user-guide/expressions/categorical-data-and-enums/"
         ],
         [
@@ -995,7 +1003,7 @@
         {
           "title": "Preserve named structure and transform elements",
           "explanation": "The second case packs x and y into a point struct, reconstructs the columns and then doubles nested list values. It checks both identity preservation and the shape of the nested result.",
-          "expected": "The struct round trip equals its source; doubled lists are [[2,4],[6]]."
+          "expected": "The struct round trip equals its source; doubled lists are [[2, 4],[6]]."
         }
       ],
       "exercises": [
@@ -1004,7 +1012,8 @@
           "task": "Create separate counts for an empty list and a null list.",
           "check": "There is one of each.",
           "hint": "A list length of 0 is not a null length.",
-          "answer": "Use is_null and an explicit length comparison. Keep these categories separate in a coverage report."
+          "answer": "Use is_null and an explicit length comparison. Keep these categories separate in a coverage report.",
+          "answer_code": "import polars as pl\n\nframe = pl.DataFrame({\"order\": [1, 2, 3], \"items\": [[\"a\", \"b\"], [], None]})\ncounts = frame.select(\n    (pl.col(\"items\").list.len() == 0).sum().alias(\"empty_lists\"),\n    pl.col(\"items\").is_null().sum().alias(\"null_lists\"),\n)\nassert counts.row(0) == (1, 1)"
         },
         {
           "title": "Change the grain",
@@ -1018,7 +1027,8 @@
           "task": "Compute the original number of orders before exploding.",
           "check": "The count remains 3.",
           "hint": "Do not infer orders from item rows.",
-          "answer": "Item counts and order counts answer different questions. Retain an order-level table for denominators and join it carefully when summarizing items."
+          "answer": "Item counts and order counts answer different questions. Retain an order-level table for denominators and join it carefully when summarizing items.",
+          "answer_code": "import polars as pl\n\nframe = pl.DataFrame({\"order\": [1, 2, 3], \"items\": [[\"a\", \"b\"], [], None]})\norders_before = frame.select(pl.col(\"order\").n_unique()).item()\nexploded = frame.explode(\"items\")\nassert orders_before == 3\n# On polars 2.1.0 explode drops the empty-list order and keeps the null list as one null row.\nassert exploded[\"order\"].to_list() == [1, 1, 3]"
         },
         {
           "title": "Add a struct field",
@@ -1030,7 +1040,7 @@
         {
           "title": "Transform a nested value",
           "task": "Square each numeric element without a Python row loop.",
-          "check": "The lists become [[1,4],[9]].",
+          "check": "The lists become [[1, 4],[9]].",
           "hint": "Use list.eval with element expressions.",
           "answer": "pl.element()*pl.element() expresses the operation within each list. It preserves the list boundaries while changing the values."
         },
@@ -1043,11 +1053,11 @@
         }
       ],
       "diagnosis": "Unexpected row counts after explode usually indicate an unstated grain or empty-list policy. Missing struct fields indicate schema evolution or a spelling problem, not an invitation to select by position. Check nested dtypes before applying numeric expressions and retain collection-level identifiers for reconciliation.",
-      "transfer": "Normalize nested events with an explicit population and identity contract. Demonstrate empty, missing and repeated-element cases, then verify that any flattened table can still be related to its original records. This is essential for reliable event analytics and sequence-feature construction.",
-      "lab": "Run the two complete local cases, then make and explain the six specified changes while preserving the stated row and type contracts.",
+      "transfer": "Demonstrate empty, missing and repeated-element cases, then verify that any flattened table can still be related to its original records. This is essential for reliable event analytics and sequence-feature construction.",
+      "lab": "Count list lengths before exploding so empty and unknown item lists are excluded deliberately, then pack and unpack a struct and transform list elements with list.eval.",
       "references": [
         [
-          "Polars documentation: Nested data, lists and structs",
+          "Polars user guide: Lists and arrays",
           "https://docs.pola.rs/user-guide/expressions/lists-and-arrays/"
         ],
         [
@@ -1071,12 +1081,12 @@
         {
           "title": "Observe backward and forward matching",
           "explanation": "The first case uses integer times so every match can be checked by inspection. Backward matching selects the most recent eligible value; forward matching demonstrates the lookahead values that a prediction must not receive.",
-          "expected": "Backward values are [10,20,30]; forward values are [20,30,null]."
+          "expected": "Backward values are [10, 20, 30]; forward values are [20, 30, null]."
         },
         {
           "title": "Reject a late-known revision",
           "explanation": "At cutoff 5, the feature with event time 4 has not become known until 7. An event-time-only pipeline selects 999, while the two-clock policy correctly retains 10. At cutoff 9, value 30 is eligible under both clocks.",
-          "expected": "Available values are [10,30]; the leaking event-only result is [999,30]."
+          "expected": "Available values are [10, 30]; the leaking event-only result is [999, 30]."
         }
       ],
       "exercises": [
@@ -1085,7 +1095,8 @@
           "task": "Change tolerance from 2 to 0 in the first case.",
           "check": "No unequal-time feature is matched.",
           "hint": "A zero tolerance requires equal keys.",
-          "answer": "This is a stricter freshness rule, not necessarily a better model. State what should happen when no feature qualifies."
+          "answer": "This is a stricter freshness rule, not necessarily a better model. State what should happen when no feature qualifies.",
+          "answer_code": "import polars as pl\n\nrequests = pl.DataFrame({\"id\": [1, 2, 3], \"time\": [2, 5, 9]}).sort(\"time\")\nfeatures = pl.DataFrame({\"time\": [1, 4, 8], \"value\": [10, 20, 30]}).sort(\"time\")\nexact = requests.join_asof(features, on=\"time\", strategy=\"backward\", tolerance=0)\nassert exact[\"value\"].to_list() == [None, None, None]"
         },
         {
           "title": "Add an entity key",
@@ -1099,7 +1110,8 @@
           "task": "Move the late revision known time from 7 to 4.",
           "check": "It becomes eligible at cutoff 5.",
           "hint": "Apply the same inequality to both clocks.",
-          "answer": "The feature value 999 can then be selected legitimately under the fixture, though its plausibility would still require a data-quality check."
+          "answer": "The feature value 999 can then be selected legitimately under the fixture, though its plausibility would still require a data-quality check.",
+          "answer_code": "import polars as pl\n\nrequests = pl.DataFrame({\"request\": [1, 2], \"customer\": [10, 10], \"cutoff\": [5, 9]})\nfeatures = pl.DataFrame(\n    {\"customer\": [10, 10, 10], \"event\": [2, 4, 8], \"known\": [3, 4, 8], \"value\": [10, 999, 30]}\n)\navailable = (\n    requests.join(features, on=\"customer\")\n    .filter((pl.col(\"event\") <= pl.col(\"cutoff\")) & (pl.col(\"known\") <= pl.col(\"cutoff\")))\n    .sort(\"request\", \"event\", \"known\")\n    .group_by(\"request\", maintain_order=True)\n    .last()\n)\nassert available[\"value\"].to_list() == [999, 30]"
         },
         {
           "title": "Test exact boundaries",
@@ -1124,11 +1136,11 @@
         }
       ],
       "diagnosis": "A perfectly sorted as-of result can still leak late-known information. Diagnose direction, tolerance, entity keys and revision selection independently. Large candidate joins can also multiply rows; reduce only after applying the full eligibility rule, and verify one result per request before publication.",
-      "transfer": "Reconstruct features using only information eligible at each prediction time. Test a late arrival, a stale feature, a timestamp tie and an unmatched request. Carry those semantics into the later Feast and ML engineering lessons, where library behavior is checked against explicit temporal fixtures.",
-      "lab": "Run the two complete local cases, then make and explain the six specified changes while preserving the stated row and type contracts.",
+      "transfer": "Test a late arrival, a stale feature, a timestamp tie and an unmatched request. Carry those semantics into the later Feast and ML engineering lessons, where library behavior is checked against explicit temporal fixtures.",
+      "lab": "Match requests to features with backward and forward join_asof, then rebuild point-in-time features that require both event time and known time to precede each cutoff.",
       "references": [
         [
-          "Polars documentation: As-of joins and knowledge available at prediction time",
+          "Polars API reference: polars.DataFrame.join_asof",
           "https://docs.pola.rs/api/python/stable/reference/dataframe/api/polars.DataFrame.join_asof.html"
         ],
         [
@@ -1173,7 +1185,8 @@
           "task": "Use a nearly unique grouping key.",
           "check": "The result has many more groups.",
           "hint": "Batch processing can still accumulate group state.",
-          "answer": "Explain why group cardinality affects memory. Streaming does not erase the state required to retain a result for each key."
+          "answer": "Explain why group cardinality affects memory. Streaming does not erase the state required to retain a result for each key.",
+          "answer_code": "import polars as pl\n\nframe = pl.DataFrame({\"id\": range(1000), \"value\": [i % 7 for i in range(1000)]})\nfew = (\n    frame.lazy()\n    .group_by((pl.col(\"id\") % 5).alias(\"group\"))\n    .agg(pl.col(\"value\").sum())\n    .collect(engine=\"streaming\")\n)\nmany = (\n    frame.lazy()\n    .group_by((pl.col(\"id\") // 2).alias(\"pair\"))\n    .agg(pl.col(\"value\").sum())\n    .collect(engine=\"streaming\")\n)\nassert (few.height, many.height) == (5, 500)"
         },
         {
           "title": "Compare collect and sink",
@@ -1187,7 +1200,8 @@
           "task": "Add an ordered output requirement.",
           "check": "The result obeys the declared order.",
           "hint": "Ordering can require additional coordination and state.",
-          "answer": "Measure the query with that requirement included. Removing the sort to obtain a faster number changes the delivered contract."
+          "answer": "Measure the query with that requirement included. Removing the sort to obtain a faster number changes the delivered contract.",
+          "answer_code": "import polars as pl\n\nframe = pl.DataFrame({\"id\": range(1000), \"value\": [i % 7 for i in range(1000)]})\nordered = (\n    frame.lazy()\n    .group_by((pl.col(\"id\") % 5).alias(\"group\"))\n    .agg(pl.col(\"value\").sum())\n    .sort(\"group\")\n    .collect(engine=\"streaming\")\n)\nassert ordered[\"group\"].to_list() == [0, 1, 2, 3, 4]"
         },
         {
           "title": "Reject a false batch claim",
@@ -1205,13 +1219,10 @@
         }
       ],
       "diagnosis": "If a supposedly streaming job exhausts memory, inspect operator state, group cardinality, output materialization and accidental conversion into Python objects. If engines disagree, first compare schemas, ordering and floating tolerances before treating the difference as a speed result. Keep engine/version information with the observation.",
-      "transfer": "Evaluate a query under an explicit engine and resource contract. Demonstrate equal logical results, inspect output materialization, and state which scalability questions remain unmeasured. This is the foundation for honest performance engineering.",
-      "lab": "Run the two complete local cases, then make and explain the six specified changes while preserving the stated row and type contracts.",
+      "transfer": "Demonstrate equal logical results, inspect output materialization, and state which scalability questions remain unmeasured. This is the foundation for honest performance engineering.",
+      "lab": "Collect the same Parquet-backed aggregate with the in-memory and streaming engines, sink it to Parquet and compare, and contrast a row-wise map with a whole-input reduction.",
       "references": [
-        [
-          "Polars documentation: Streaming execution and bounded output",
-          "https://docs.pola.rs/user-guide/concepts/streaming/"
-        ],
+        ["Polars user guide: Streaming", "https://docs.pola.rs/user-guide/concepts/streaming/"],
         [
           "Polars Python API reference",
           "https://docs.pola.rs/api/python/stable/reference/index.html"
@@ -1233,21 +1244,22 @@
         {
           "title": "Compare equivalent native and Python functions",
           "explanation": "Squaring values has a direct native expression. The Python UDF is included to compare the result and inspect the library warning, not to recommend a slower spelling for ordinary arithmetic. Equality is established on the fixture before discussing cost.",
-          "expected": "Both implementations return [1,4,9]."
+          "expected": "Both implementations return [1, 4, 9]."
         },
         {
           "title": "Show a non-streamable transformation",
           "explanation": "The second case centers four values once globally and once within two batches. Both outputs sum to zero, so that aggregate check alone would miss the error. The individual values demonstrate the different transformation.",
-          "expected": "Global values are [-3,-2,-1,6]; batch-centered values are [-0.5,0.5,-3.5,3.5]."
+          "expected": "Global values are [-3, -2, -1, 6]; batch-centered values are [-0.5, 0.5, -3.5, 3.5]."
         }
       ],
       "exercises": [
         {
           "title": "Replace the UDF",
           "task": "Write the square operation using column expressions only.",
-          "check": "The values remain [1,4,9].",
+          "check": "The values remain [1, 4, 9].",
           "hint": "Use multiplication on the selected column.",
-          "answer": "The native expression keeps semantics visible to the engine. Removing Python callbacks is useful when the native operation actually expresses the same logic."
+          "answer": "The native expression keeps semantics visible to the engine. Removing Python callbacks is useful when the native operation actually expresses the same logic.",
+          "answer_code": "import polars as pl\n\nframe = pl.DataFrame({\"x\": [1, 2, 3]})\nnative = frame.select(pl.col(\"x\").pow(2).alias(\"square\"))\nassert native[\"square\"].to_list() == [1, 4, 9]"
         },
         {
           "title": "State a return type",
@@ -1258,7 +1270,7 @@
         },
         {
           "title": "Change batch boundaries",
-          "task": "Center [1,2,3,10] in a different partition.",
+          "task": "Center [1, 2, 3, 10] in a different partition.",
           "check": "The batchwise answer changes while the global answer does not.",
           "hint": "Try three values in the first batch.",
           "answer": "The batch mean depends on the partition. That is why a partition-independent declaration would be false for this implementation."
@@ -1286,11 +1298,11 @@
         }
       ],
       "diagnosis": "An inefficient-map warning is useful evidence that a native operation may exist. It is not proof that every UDF is wrong. A changed answer under batching is more serious: inspect hidden state, global reductions and schema promises. Do not disable validation flags solely to make a query execute.",
-      "transfer": "Use a Python UDF only with an explicit value, type and batching contract. Demonstrate equivalence to a trusted result on contrasting fixtures and identify which optimization claims are justified. Preserve a native implementation whenever it is clearer and semantically equivalent.",
-      "lab": "Run the two complete local cases, then make and explain the six specified changes while preserving the stated row and type contracts.",
+      "transfer": "Demonstrate equivalence to a trusted result on contrasting fixtures and identify which optimization claims are justified. Preserve a native implementation whenever it is clearer and semantically equivalent.",
+      "lab": "Show that a native square expression and a map_elements UDF agree on the fixture, then demonstrate how centering separate batches gives different values from centering the whole input.",
       "references": [
         [
-          "Polars documentation: Native expressions and the boundary of Python UDFs",
+          "Polars user guide: User-defined Python functions",
           "https://docs.pola.rs/user-guide/expressions/user-defined-python-functions/"
         ],
         [
@@ -1319,7 +1331,7 @@
         {
           "title": "Separate sequence from content",
           "explanation": "The second case compares a shuffled frame with a sorted one. Sorting the shuffled result establishes the same identified content, while the unsorted sequence may differ. The original frame also remains unchanged.",
-          "expected": "The sorted values are [1,2,3]; bag equality holds after sorting."
+          "expected": "The sorted values are [1, 2, 3]; bag equality holds after sorting."
         }
       ],
       "exercises": [
@@ -1335,14 +1347,16 @@
           "task": "Repeat at two declared input sizes.",
           "check": "Answers remain correct at both sizes.",
           "hint": "Keep the data-generation rule stable.",
-          "answer": "A scaling observation requires comparable work and resource settings. Two points do not establish a universal complexity curve or an operational capacity limit."
+          "answer": "A scaling observation requires comparable work and resource settings. Two points do not establish a universal complexity curve or an operational capacity limit.",
+          "answer_code": "import polars as pl\n\nfor size in (20_000, 200_000):\n    frame = pl.DataFrame({\"x\": [i % 101 for i in range(size)]})\n    answer = frame.lazy().filter(pl.col(\"x\") > 50).select(pl.col(\"x\").sum()).collect().item()\n    assert answer == sum(i % 101 for i in range(size) if i % 101 > 50)"
         },
         {
           "title": "Report variability",
           "task": "Keep every timing rather than only the fastest.",
           "check": "The raw repetitions and a summary are available.",
           "hint": "A median does not replace raw observations.",
-          "answer": "Report the distribution and context. Large variability may come from scheduling, I/O caches, compilation or background activity."
+          "answer": "Report the distribution and context. Large variability may come from scheduling, I/O caches, compilation or background activity.",
+          "answer_code": "from statistics import median\nfrom time import perf_counter\n\nimport polars as pl\n\nquery = (\n    pl.LazyFrame({\"x\": [i % 101 for i in range(20_000)]})\n    .filter(pl.col(\"x\") > 50)\n    .select(pl.col(\"x\").sum())\n)\ntimings = []\nfor _ in range(5):\n    start = perf_counter()\n    query.collect(engine=\"in-memory\")\n    timings.append(perf_counter() - start)\nreport = {\"raw_seconds\": timings, \"median_seconds\": median(timings)}\nassert len(report[\"raw_seconds\"]) == 5"
         },
         {
           "title": "Avoid a false memory claim",
@@ -1367,13 +1381,10 @@
         }
       ],
       "diagnosis": "Near-zero timings may indicate that execution was omitted. Very different answers indicate a correctness problem before they indicate a performance win. Avoid benchmark assertions such as always faster, and keep expensive experiments within declared limits. A slow first run may include compilation or initialization that later runs do not repeat.",
-      "transfer": "Produce a reviewable performance comparison with a correctness oracle. State the measured operation, data size, ordering requirement, cache regime and resource environment, and retain all repetitions. Use the result to choose the next experiment rather than treating a microbenchmark as a production guarantee.",
-      "lab": "Run the two complete local cases, then make and explain the six specified changes while preserving the stated row and type contracts.",
+      "transfer": "State the measured operation, data size, ordering requirement, cache regime and resource environment, and retain all repetitions. Use the result to choose the next experiment rather than treating a microbenchmark as a production guarantee.",
+      "lab": "Time five collects of a lazy query while asserting each answer against an independent Python calculation, and separate sequence equality from content equality after a shuffle.",
       "references": [
-        [
-          "Polars documentation: Performance measurements with correctness controls",
-          "https://docs.pola.rs/user-guide/lazy/execution/"
-        ],
+        ["Polars user guide: Query execution", "https://docs.pola.rs/user-guide/lazy/execution/"],
         [
           "Polars Python API reference",
           "https://docs.pola.rs/api/python/stable/reference/index.html"
@@ -1416,7 +1427,8 @@
           "task": "Write the complete row-accounting equation.",
           "check": "5 source rows = 3 accepted unique + 1 invalid + 1 duplicate.",
           "hint": "Keep categories mutually exclusive.",
-          "answer": "Apply classification in a documented order and verify identifiers in each outcome. Ambiguous overlap makes reported quality counts unreliable."
+          "answer": "Apply classification in a documented order and verify identifiers in each outcome. Ambiguous overlap makes reported quality counts unreliable.",
+          "answer_code": "import polars as pl\n\nraw = pl.DataFrame({\"event_id\": [1, 2, 2, 3, 4], \"amount_text\": [\"5\", \"7\", \"7\", \"bad\", \"9\"]})\nparsed = raw.with_columns(pl.col(\"amount_text\").cast(pl.Int64, strict=False).alias(\"amount\"))\ninvalid = parsed.filter(pl.col(\"amount\").is_null()).height\nvalid = parsed.filter(pl.col(\"amount\").is_not_null())\naccepted = valid.unique(subset=\"event_id\").height\nduplicates = valid.height - accepted\nassert (raw.height, accepted, invalid, duplicates) == (5, 3, 1, 1)\nassert raw.height == accepted + invalid + duplicates"
         },
         {
           "title": "Check final grain",
@@ -1430,7 +1442,8 @@
           "task": "Change the output bytes after writing its receipt.",
           "check": "The hash check detects the difference.",
           "hint": "A stored hash describes particular bytes.",
-          "answer": "Recompute and compare before consuming the artifact. A new matching hash written by the same attacker would need an authenticity boundary that this local example does not provide."
+          "answer": "Recompute and compare before consuming the artifact. A new matching hash written by the same attacker would need an authenticity boundary that this local example does not provide.",
+          "answer_code": "import hashlib\nimport tempfile\nfrom pathlib import Path\n\nimport polars as pl\n\nwith tempfile.TemporaryDirectory() as d:\n    path = Path(d) / \"features.parquet\"\n    pl.DataFrame({\"customer\": [10, 20], \"total\": [12, 9]}).write_parquet(path)\n    recorded = hashlib.sha256(path.read_bytes()).hexdigest()\n    pl.DataFrame({\"customer\": [10, 20], \"total\": [12, 10]}).write_parquet(path)\n    assert hashlib.sha256(path.read_bytes()).hexdigest() != recorded"
         },
         {
           "title": "Distinguish two equalities",
@@ -1448,13 +1461,10 @@
         }
       ],
       "diagnosis": "If counts do not reconcile, inspect classification order and duplicate semantics. If an output hash changes, determine whether bytes changed, the receipt is stale or a different encoding was produced. If a model receives future information, correct the temporal contract before improving model hyperparameters. Preserve rejected evidence and the publication decision.",
-      "transfer": "Publish a feature artifact with explicit derivation and consumption contracts. Extend the case with a conflicting duplicate and a late-known event, then document why publication is accepted or blocked. Use this result as a foundation for the analytics-engineering and ML-engineering paths rather than assuming a clean-looking table is a complete data product.",
-      "lab": "Run the two complete local cases, then make and explain the six specified changes while preserving the stated row and type contracts.",
+      "transfer": "Extend the case with a conflicting duplicate and a late-known event, then document why publication is accepted or blocked. Use this result as a foundation for the analytics-engineering and ML-engineering paths rather than assuming a clean-looking table is a complete data product.",
+      "lab": "Account for every raw event through quarantine and deduplication before aggregating per customer, then publish a Parquet feature file with a SHA-256 receipt and verify its readback.",
       "references": [
-        [
-          "Polars documentation: A validated event-to-feature publication",
-          "https://docs.pola.rs/user-guide/lazy/schemas/"
-        ],
+        ["Polars user guide: Schema", "https://docs.pola.rs/user-guide/lazy/schemas/"],
         [
           "Polars Python API reference",
           "https://docs.pola.rs/api/python/stable/reference/index.html"

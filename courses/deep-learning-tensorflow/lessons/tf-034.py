@@ -4,30 +4,31 @@ Answer-free learner worksheet. See the companion guide for worked examples.
 Copy to .learning before editing. Six independent attempts belong below.
 """
 
-# Exercise 1: Count errors by group
-# Use groupsA,A,B with predictions1,0,0 and truth1,1,0.
-# Expected: A1/2 errors; B0/1.
+# Exercise 1: Count errors for three groups
+# Use rows (ID, group, truth, prediction): a A 1 1, b A 0 1, c B 1 1, d B 0 0, e C 1 0, f
+# C 0 1, g C 1 1.
+# Expected: group A 1/2, group B 0/2, group C 2/3 errors.
 
-# Exercise 2: Expose duplicate confidence
-# Repeat the groupB row five times and compare row count with unique IDs.
-# Expected: 8 rows but only3 unique IDs.
+# Exercise 2: Deduplicate before reporting
+# Append three more copies of row g, then compare group C counts by row and by unique ID.
+# Expected: C has 6 rows but 3 unique IDs; the row-level error rate 2/6 understates the 2/3 rate by ID.
 
 # Exercise 3: Evaluate fixed perturbations
-# Use f(x)=x>=0 with base1 and perturbations-.1,-.9,-1.1.
-# Expected: first two retain class1; final perturbation changes to0.
+# Use f(x)=x>=0 with base 1 and perturbations -0.1, -0.9, -1.1.
+# Expected: first two retain class 1; final perturbation changes to 0.
 
 # Exercise 4: Keep severities separate
 # Record one severe failure and nine minor passes; count severe failures independently of
 # total pass rate.
-# Expected: 90percent passes and1 severe failure.
+# Expected: 90 percent passes and 1 severe failure.
 
 # Exercise 5: Write bounded claims
 # Create a model card naming the three unique units and untested conditions.
-# Expected: card includes count3 and an untested future-population condition.
+# Expected: card includes count 3 and an untested future-population condition.
 
 # Exercise 6: Reject an empty group rate
 # Compute a rate only when its group has observations.
-# Expected: empty group producesNone, not0.
+# Expected: empty group produces None, not 0.
 
 if __name__ == "__main__":
     print("Read the guide and implement the six exercises in your saved copy.")

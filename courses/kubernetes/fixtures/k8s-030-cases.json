@@ -16,7 +16,7 @@
     },
     {
       "exercise": 3,
-      "task": "Move the owned desired count from1 to2 and inspect the next two decisions.",
+      "task": "Move the owned desired count from 1 to 2 and inspect the next two decisions.",
       "expected": "update then no-op after observed state matches."
     },
     {

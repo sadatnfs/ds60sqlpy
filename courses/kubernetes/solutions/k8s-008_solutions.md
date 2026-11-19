@@ -12,7 +12,7 @@ A readiness failure does not itself restart a container. The restart count shoul
 
 **Expected:** no eligible ready backend UID, a bounded failed in-cluster client and Ready false for the intended selected Pods. The premise includes no old Ready replicas.
 
-**Verify:** compare intended/current Pods and restart baselines, inspect the probe failure and explicitly rule out an old ready ReplicaSet before requiring zero backends. If old ready Pods remain during a rolling change, the premise is false; the answer for Exercise5 applies instead.
+**Verify:** compare intended/current Pods and restart baselines, inspect the probe failure and explicitly rule out an old ready ReplicaSet before requiring zero backends. If old ready Pods remain during a rolling change, the premise is false; the answer for Exercise 5 applies instead.
 
 ### Exercise 2: Prove the healthy baseline
 

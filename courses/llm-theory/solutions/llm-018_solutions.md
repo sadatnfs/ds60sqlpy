@@ -18,7 +18,7 @@ model.train() declares training behavior. Adam operates on model.parameters(). z
 
 ## Exercise 1: Prepare a tiny training batch
 
-The question is: Use two four-token sequences and shifted labels with vocabulary16.
+The question is: Use two four-token sequences and shifted labels with vocabulary 16.
 
 The fixture is small enough to enumerate every target. The context length and vocabulary remain below the decoder limits.
 
@@ -31,9 +31,9 @@ targets = ids[:, 1:]
 assert tuple(inputs.shape) == (2, 3) and targets.numel() == 6
 ```
 
-**Expected:** inputs shape(2,3);6 active targets.
+**Expected:** inputs shape (2, 3); 6 active targets.
 
-**Verify:** Compare the computed values or written argument with inputs shape(2,3);6 active targets.
+**Verify:** In a fresh process, the exercise checks confirm `tuple(inputs.shape) == (2, 3)` and `targets.numel() == 6`.
 
 ## Exercise 2: Measure the initial objective
 
@@ -49,11 +49,11 @@ assert np.isfinite(initial) and initial > 0
 
 **Expected:** finite positive loss.
 
-**Verify:** Compare the computed values or written argument with finite positive loss.
+**Verify:** In a fresh process, the exercise checks confirm `np.isfinite(initial)` and `initial > 0`.
 
 ## Exercise 3: Perform twelve bounded updates
 
-The question is: Use Adam(.01), zero gradients each step, log losses and norms, and update exactly12 times.
+The question is: Use Adam(0.01), zero gradients each step, log losses and norms, and update exactly 12 times.
 
 The norm is captured before the optimizer mutates weights. Saving the entire short trace makes the first nonfinite or missing update visible.
 
@@ -78,7 +78,7 @@ assert len(losses) == 12 and np.isfinite(losses + norms).all() and max(norms) > 
 
 **Expected:** 12 finite losses and norms; at least one positive norm.
 
-**Verify:** Compare the computed values or written argument with 12 finite losses and norms; at least one positive norm.
+**Verify:** In a fresh process, the exercise checks confirm `len(losses) == 12`, `np.isfinite(losses + norms).all()` and `max(norms) > 0`.
 
 ## Exercise 4: Verify actual parameter change
 
@@ -92,7 +92,7 @@ assert not torch.equal(before, model.output.weight.detach())
 
 **Expected:** weights differ.
 
-**Verify:** Compare the computed values or written argument with weights differ.
+**Verify:** In a fresh process, the exercise checks confirm `not torch.equal(before, model.output.weight.detach())`.
 
 ## Exercise 5: Clear accumulated gradients
 
@@ -105,13 +105,13 @@ opt.zero_grad(set_to_none=True)
 assert all(p.grad is None for p in model.parameters())
 ```
 
-**Expected:** all gradientsNone.
+**Expected:** all gradients None.
 
-**Verify:** Compare the computed values or written argument with all gradientsNone.
+**Verify:** In a fresh process, the exercise checks confirm `all((p.grad is None for p in model.parameters()))`.
 
 ## Exercise 6: Report budget honestly
 
-The question is: Create a run record with12 completed updates and the declared200 maximum.
+The question is: Create a run record with 12 completed updates and the declared 200 maximum.
 
 Stopping a bounded diagnostic is not evidence of convergence. The report states what was executed and leaves held-out quality to a separate experiment.
 
@@ -128,7 +128,7 @@ assert report["steps"] <= report["maximum_steps"] and report["convergence_establ
 
 **Expected:** stopped_at12; no convergence claim.
 
-**Verify:** Compare the computed values or written argument with stopped_at12; no convergence claim.
+**Verify:** In a fresh process, the exercise checks confirm `report['steps'] <= report['maximum_steps']` and `report['convergence_established'] is False`.
 
 ## Review after comparison
 

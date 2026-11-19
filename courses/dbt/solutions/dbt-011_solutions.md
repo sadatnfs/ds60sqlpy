@@ -193,4 +193,4 @@ if __name__ == "__main__":
 
 ## Interpretation
 
-Define a model schema contract and verify both accepted and rejected changes. Keep the observed failure timing separate from broader transaction claims, and combine structural compatibility with semantic and publication checks.
+Keep the observed failure timing separate from broader transaction claims, and combine structural compatibility with semantic and publication checks.

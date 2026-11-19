@@ -8,9 +8,11 @@ const describes permitted access through a type-qualified expression. A pointer 
 
 const int *p reads as a pointer to a const-qualified int. int *const p is a const pointer to a mutable int. const int *const p combines both restrictions. Function parameters can use const for borrowed read-only arrays. A struct containing a pointer can still reference mutable storage even if the outer struct is accessed through a const pointer; deep ownership requires a broader design.
 
-## Exercise 1: Read through a const view
+## Exercise 1: Read through a const view: change one input
 
-Observe a mutable integer through const int pointer.
+Copy worked example 1 into a scratch pad and change `int value = 4;` to `int value = 5;`. Before running, predict which CHECK fails and which value it now sees; then run it and restore the original line.
+
+The unchanged code is worked example 1:
 
 ```c
 int value = 4;
@@ -18,13 +20,15 @@ const int *view = &value;
 CHECK(*view == 4);
 ```
 
-**Expected:** The read yields 4.
+**Expected:** The changed run stops with `Check failed` at the CHECK on `*view == 4`. Restoring the original line brings back the worked observation: the read yields 4.
 
 The view is read-only, but the underlying object was not defined const.
 
-## Exercise 2: Observe another valid mutation
+## Exercise 2: Observe another valid mutation: debug a regression
 
-Change the mutable object through its original name.
+A regression changed one token in worked example 2, so one line now reads `value = 8;`. Run worked example 2 with that line, use the failing CHECK to locate the defect and repair it without changing the CHECK.
+
+The unchanged code is worked example 2:
 
 ```c
 int value = 4;
@@ -33,7 +37,7 @@ value = 7;
 CHECK(*view == 7);
 ```
 
-**Expected:** The const view now reads 7.
+**Expected:** Before the repair the run stops with `Check failed` at the CHECK on `*view == 7`; after it the line reads `value = 7;` again and the const view now reads 7.
 
 Const access does not freeze a shared mutable object or create a snapshot.
 

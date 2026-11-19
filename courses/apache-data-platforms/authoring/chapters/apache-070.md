@@ -18,6 +18,11 @@ Running plan is payload preparation only. Actual GUIDs and lineage edges exist
 only after a separately prepared native server accepts the owned ingestion.
 No Python graph simulation is used as evidence of Atlas behavior.
 
+**Execution boundary.** Both cases read lineage that only a running Atlas server can
+return. In this repository `bash run.sh plan` shows the process entity whose
+`inputs` and `outputs` lists create the two edges; the edge sets below are the
+written answer to check on a separately prepared server.
+
 ## Worked case A: record an input-process-output path
 
 Submit the two datasets and process with references linking raw to transform and

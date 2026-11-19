@@ -15,15 +15,15 @@ Copy to .learning before editing. Six independent attempts belong below.
 # Exercise 3: Accumulate one full-batch gradient
 # At \(w=0\), use \(x=(1, 2, 3, 4)\) and \(y=2x\), accumulate squared-loss sums for shards
 # of sizes 1 and 3, and divide by the total sample count 4.
-# Expected: gradient-30, matching full-batch mean.
+# Expected: gradient -30, matching full-batch mean.
 
 # Exercise 4: Apply one accumulated update
-# Take SGD.01 after the global gradient is formed.
-# Expected: new weight.3.
+# Take one SGD step with learning rate 0.01 after the global gradient is formed.
+# Expected: new weight 0.3.
 
 # Exercise 5: Contrast separate microbatch updates
-# Reset w0and step after each shard mean instead.
-# Expected: endpoint differs from.3.
+# Reset w to 0 and step after each shard mean instead.
+# Expected: endpoint differs from 0.3.
 
 # Exercise 6: Represent empty-shard contributions
 # Combine an empty shard and the four real gradients using sums and counts.

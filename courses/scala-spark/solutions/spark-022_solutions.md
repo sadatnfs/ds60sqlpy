@@ -30,7 +30,7 @@ These checks establish the exact population before changing execution settings. 
 
 Require 1..16 shuffle partitions, set that configuration in the owned session and return key, n from groupBy/count. Execute the two-partition case under the supplied unique job group.
 
-**Expected:** Sorted output[(0,20),...,(999,20)], with total counts 20000 and an Exchange in the executed plan.
+**Expected:** Sorted output [(0,20),...,(999,20)], with total counts 20000 and an Exchange in the executed plan.
 
 ```scala
 def buildGrouped(source: DataFrame, partitions: Int): DataFrame = {
@@ -181,8 +181,8 @@ def work_model(reducers):
 
 The arithmetic explains why local aggregation and reduce partition count can matter while keeping estimates distinct from observed metrics. Hash distribution can be uneven and task overhead can offset smaller per-task state. The reference intentionally makes no faster/slower assertion. A useful tuning conclusion would require representative data, controlled repeats and measured task/spill distributions beyond this lesson.
 
-**Verification evidence:** Assert the two model tuples and print Spark 4.0.1, AQEfalse, local[2] with the distinct p2/p5 observations.
+**Verification evidence:** Assert the two model tuples and print Spark 4.0.1, AQE false, local[2] with the distinct p2/p5 observations.
 
 ## Execution and interpretation
 
-Run the complete reference in its prepared fixed worker. The small fixture is constructed inside the program,so opening a lesson does not fetch data. A final success line is printed only after the reference assertions complete. Plan observations,partition evidence and resource measurements apply to the actual local configuration; they do not establish cluster-scale performance. Session cleanup is explicit,and any additional owned file/query lifecycle is described in the lesson.
+Run the complete reference in its prepared fixed worker. The small fixture is constructed inside the program, so opening a lesson does not fetch data. A final success line is printed only after the reference assertions complete. Plan observations, partition evidence and resource measurements apply to the actual local configuration; they do not establish cluster-scale performance. Session cleanup is explicit, and any additional owned file/query lifecycle is described in the lesson.

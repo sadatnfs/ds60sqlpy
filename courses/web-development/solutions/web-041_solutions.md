@@ -1,51 +1,43 @@
 # web-041: explanatory solutions
 
-Compare after your own attempt or an explicit solution reveal. This file explains the supplied deterministic fixtures. It does not claim that a learner or a production deployment passed.
-
-## Why the mechanism works
-
-An interface describes operations a caller can rely on without selecting a specific implementation. Composition builds behavior from collaborating objects. Dependency injection means supplying a dependency rather than constructing an unknown global dependency inside the operation. These techniques help when a real boundary varies, such as storage or time, but unnecessary interfaces can add ceremony to a tiny fixed calculation.
-
-A test double supplies a controlled implementation for a test. An in-memory repository can verify application behavior without a database, but it does not prove SQL syntax, transactions or connection recovery. Keep unit evidence separate from integration evidence. The same interface can make both tests possible without pretending they are identical.
-
-Define a repository interface with a narrow operation such as countCompleted. The service receives that interface through its constructor. A memory implementation holds synthetic records for this lesson. The service can then be tested with known data and no network. Later PDO lessons qualify the database boundary separately.
+Open this after your own attempt. Each answer explains the lesson's synthetic fixtures; it does not show that your work or a deployment passed. The mechanism is explained in `courses/web-development/guides/web-041.md`.
 
 ## Exercise 1: Identify the dependency hidden by the interface.
 
-The application depends on progress-reading behavior, not a specific database implementation.
+**Expected answer:** The application depends on progress-reading behavior, not a specific database implementation.
 
-Trace the smallest example before editing. Name which values are source and which are observations.
+**Why:** The service depends only on the ability to count completed lessons, so any implementation of that method can be used.
 
 ## Exercise 2: Supply an in-memory store with a known count.
 
-The service output is deterministic and requires no external connection.
+**Expected evidence:** The service output is deterministic and requires no external connection.
 
-Change only the named feature. Compare with the unchanged example and explain any unaffected behavior.
+**Why:** An in-memory implementation makes the output deterministic and needs no database.
 
 ## Exercise 3: Build a summary service with an injected repository.
 
-The same service works with two controlled implementations that satisfy the interface.
+**Expected evidence:** The same service works with two controlled implementations that satisfy the interface.
 
-Sketch the structure or data contract first. Reuse the mechanism from the examples without copying the reference.
+**Why:** Constructor injection lets the same service run against different stores without code changes.
 
 ## Exercise 4: Diagnose a test double that returns impossible domain values.
 
-The double should preserve the relevant contract instead of making invalid states look normal.
+**Expected answer:** The double should preserve the relevant contract instead of making invalid states look normal.
 
-Keep the failing input. Identify the first layer where the observed result differs from the intended contract.
+**Why:** A test double should respect the domain rules; impossible values make tests pass for states that can never occur.
 
 ## Exercise 5: Test zero completed lessons.
 
-The summary handles an empty state without a special external dependency.
+**Expected evidence:** The summary handles an empty state without a special external dependency.
 
-Predict the boundary before running it. Add an explicit check or manual observation that would detect a regression.
+**Why:** The service must handle an empty state, and a controlled double makes that case easy to test.
 
 ## Exercise 6: Explain what remains untested by an in-memory repository.
 
-Database queries, schema constraints, transactions and connection behavior require integration tests.
+**Expected answer:** Database queries, schema constraints, transactions and connection behavior require integration tests.
 
-Explain your choice to someone who has not seen the code. Include one limitation and the evidence needed to remove it.
+**Why:** SQL correctness, constraints, transactions and connection failures need integration tests against the real database.
 
-## Reference comparison and limits
+## Reference comparison
 
-Read the separate executable reference, where supplied, only after retaining your attempt. Compare structure and decisions rather than matching every identifier. A different implementation is acceptable when it satisfies the same behavior, preserves accessibility and rejects the same invalid cases. The checked reference uses tiny synthetic inputs so that each transformation can be inspected. It is not a ready-to-deploy authenticated application. Server lifecycle, persistence, concurrency and security require their own integration evidence.
+Open `courses/web-development/solutions/web-041_solution.php` only after saving your attempt, and compare decisions rather than identifiers. A different implementation is acceptable when it shows the same behavior and rejects the same invalid cases. The reference checks only its named synthetic cases; server lifecycle, persistence, concurrency and security need their own integration evidence.

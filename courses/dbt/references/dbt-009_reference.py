@@ -84,9 +84,11 @@ def example_one():
     with tempfile.TemporaryDirectory() as d:
         sql = (
             "{{ config(materialized='incremental', unique_key='id', "
-            "incremental_strategy='delete+insert') }} select * from {{ "
-            "ref('events') }} {% if is_incremental() %} where "
-            "updated_at >= (select max(updated_at)-10 from {{ this }}) "
+            "incremental_strategy='delete+insert') }}\n"
+            "select *\n"
+            "from {{ ref('events') }}\n"
+            "{% if is_incremental() %}\n"
+            "    where updated_at >= (select max(updated_at) - 10 from {{ this }})\n"
             "{% endif %}"
         )
         p = project(
@@ -110,9 +112,11 @@ def example_two():
     with tempfile.TemporaryDirectory() as d:
         sql = (
             "{{ config(materialized='incremental', unique_key='id', "
-            "incremental_strategy='delete+insert') }} select * from {{ "
-            "ref('events') }} {% if is_incremental() %} where "
-            "updated_at >= (select max(updated_at)-10 from {{ this }}) "
+            "incremental_strategy='delete+insert') }}\n"
+            "select *\n"
+            "from {{ ref('events') }}\n"
+            "{% if is_incremental() %}\n"
+            "    where updated_at >= (select max(updated_at) - 10 from {{ this }})\n"
             "{% endif %}"
         )
         p = project(

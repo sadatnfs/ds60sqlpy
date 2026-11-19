@@ -22,7 +22,7 @@ The policy gives this condition independent force; a favorable mean effect canno
 
 ## 4. Interpret zero incidents
 
-The expression 1-alpha^(1/n) assumes independent representative Bernoulli trials. It is separate from the actual authored held-out ledger, which contains one critical failure, and supplies no real-population estimate.
+The expression \(1-\alpha^{1/n}\) assumes independent representative Bernoulli trials. It is separate from the actual authored held-out ledger, which contains one critical failure, and supplies no real-population estimate.
 
 **Expected observation:** Finite observations do not imply zero population risk.
 

@@ -8,9 +8,11 @@ C can write generic storage algorithms using void pointers and explicit element 
 
 void * can hold object pointers and convert back to an appropriate object pointer. unsigned char * supports bytewise stepping. A swap helper can exchange representations one byte at a time without allocating, provided its two regions are valid, equally sized and nonoverlapping. qsort receives element size explicitly; the comparator must cast each supplied pointer to the actual element type. Generic code still needs bounded size arithmetic.
 
-## Exercise 1: Swap integer objects
+## Exercise 1: Swap integer objects: change one input
 
-Exchange two ints using their exact object size.
+Copy worked example 1 into a scratch pad and change `int a = 2, b = 7;` to `int a = 3, b = 7;`. Before running, predict which CHECK fails and which value it now sees; then run it and restore the original line.
+
+The unchanged code is worked example 1:
 
 ```c
 int a = 2, b = 7;
@@ -18,13 +20,15 @@ swap_bytes(&a, &b, sizeof a);
 CHECK(a == 7 && b == 2);
 ```
 
-**Expected:** The values become 7 and 2.
+**Expected:** The changed run stops with `Check failed` at the CHECK on `a == 7 && b == 2`. Restoring the original line brings back the worked observation: the values become 7 and 2.
 
 The size comes from the actual object rather than a guessed platform width.
 
-## Exercise 2: Swap fixed byte arrays
+## Exercise 2: Swap fixed byte arrays: debug a regression
 
-Exchange two three-byte arrays.
+A regression changed one token in worked example 2, so one line now reads `unsigned char a[] = {2, 2, 3}, b[] = {4, 5, 6};`. Run worked example 2 with that line, use the failing CHECK to locate the defect and repair it without changing the CHECK.
+
+The unchanged code is worked example 2:
 
 ```c
 unsigned char a[] = {1, 2, 3}, b[] = {4, 5, 6};
@@ -32,7 +36,7 @@ swap_bytes(a, b, sizeof a);
 CHECK(a[0] == 4 && a[2] == 6 && b[0] == 1 && b[2] == 3);
 ```
 
-**Expected:** Their byte contents exchange exactly.
+**Expected:** Before the repair the run stops with `Check failed` at the CHECK on `a[0] == 4 && a[2] == 6 && b[0] == 1 && b[2] == 3`; after it the line reads `unsigned char a[] = {1, 2, 3}, b[] = {4, 5, 6};` again and their byte contents exchange exactly.
 
 The operation changes representation bytes without interpreting them as another type.
 

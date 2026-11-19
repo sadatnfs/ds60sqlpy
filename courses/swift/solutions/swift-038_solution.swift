@@ -26,6 +26,17 @@ struct LessonMain {
       }
       precondition(report == ["Overview", "Diagnostics"])
     }
+
+    do {
+      // Task 3: Independent construction
+      let hasWarnings = false
+      let report = sections {
+        "Summary"
+        "Totals"
+        if hasWarnings { "Warnings" }
+      }
+      precondition(report == ["Summary", "Totals"])
+    }
     print("swift-038: passed")
   }
 }

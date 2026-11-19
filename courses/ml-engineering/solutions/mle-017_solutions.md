@@ -94,4 +94,4 @@ if __name__ == "__main__":
 
 ## Interpretation
 
-Write a model card that is grounded in actual data, metrics and operational decisions. Retain slice denominators, stated limitations and a minimal input contract, and identify which external governance claims require separate review.
+Retain slice denominators, stated limitations and a minimal input contract, and identify which external governance claims require separate review.

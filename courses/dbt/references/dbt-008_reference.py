@@ -83,10 +83,11 @@ def rows(root, sql):
 def example_one():
     with tempfile.TemporaryDirectory() as d:
         sql = (
-            "{{ config(materialized='incremental') }} select * from {{ "
-            "ref('events') }} {% if is_incremental() %} where "
-            "updated_at > (select max(updated_at) from {{ this }}) {% "
-            "endif %}"
+            "{{ config(materialized='incremental') }}\n"
+            "select *\n"
+            "from {{ ref('events') }}\n"
+            "{% if is_incremental() %} where updated_at > (select max(updated_at) from {{ this }}) "
+            "{% endif %}"
         )
         p = project(d, models={"history": sql}, seeds={"events": "id,updated_at,amount\n1,10,5\n"})
         invoke(p, "build")
@@ -100,10 +101,11 @@ def example_one():
 def example_two():
     with tempfile.TemporaryDirectory() as d:
         sql = (
-            "{{ config(materialized='incremental') }} select * from {{ "
-            "ref('events') }} {% if is_incremental() %} where "
-            "updated_at > (select max(updated_at) from {{ this }}) {% "
-            "endif %}"
+            "{{ config(materialized='incremental') }}\n"
+            "select *\n"
+            "from {{ ref('events') }}\n"
+            "{% if is_incremental() %} where updated_at > (select max(updated_at) from {{ this }}) "
+            "{% endif %}"
         )
         p = project(
             d, models={"history": sql}, seeds={"events": "id,updated_at,amount\n1,10,5\n2,20,7\n"}

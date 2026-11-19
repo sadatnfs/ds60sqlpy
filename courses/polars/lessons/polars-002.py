@@ -1,4 +1,4 @@
-"""polars-002: worked starting point; complete the guide's six changes."""
+"""polars-002: both worked cases; complete the guide's six changes."""
 
 import polars as pl
 
@@ -16,8 +16,29 @@ def example_one():
     return {"parallel_context": output.to_dicts(), "explicit_dependency": sequential.to_dicts()}
 
 
+def example_two():
+    frame = pl.DataFrame({"status": ["paid", "pending", "paid"], "amount": [5, 7, 11]})
+    output = frame.select(
+        pl.when(pl.col("status") == pl.lit("paid"))
+        .then(pl.col("amount"))
+        .otherwise(pl.lit(0))
+        .alias("recognized")
+    )
+    assert output["recognized"].to_list() == [5, 0, 11]
+    assert frame.select(pl.lit("paid").alias("literal")).item() == "paid"
+    try:
+        frame.select(pl.col("missing"))
+    except pl.exceptions.ColumnNotFoundError:
+        rejected = True
+    else:
+        rejected = False
+    assert rejected
+    return {"recognized": output.to_dicts(), "missing_column_rejected": rejected}
+
+
 if __name__ == "__main__":
     print(example_one())
+    print(example_two())
 
 # TODO 1: Increment x by 2 before the dependent multiplication.
 # TODO 2: Keep x unchanged and create incremented_x.

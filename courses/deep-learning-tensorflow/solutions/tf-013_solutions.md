@@ -18,7 +18,7 @@ A binary logit is an unrestricted score whose sigmoid is a probability under the
 
 ## Exercise 1: Convert scores
 
-The question is: Convert logits[-2,0,2] into probabilities and inspect the central value.
+The question is: Convert logits [-2, 0, 2] into probabilities and inspect the central value.
 
 The sigmoid is monotonic, so ordering survives. A score of zero lies at the probability midpoint, which makes it a useful exact boundary fixture.
 
@@ -30,7 +30,7 @@ assert p[1] == 0.5 and np.all(np.diff(p) > 0)
 
 **Expected:** middle probability 0.5; probabilities increase.
 
-**Verify:** Compare the computed values or written argument with middle probability 0.5; probabilities increase.
+**Verify:** In a fresh process, the exercise checks confirm `p[1] == 0.5` and `np.all(np.diff(p) > 0)`.
 
 ## Exercise 2: Check the midpoint loss
 
@@ -45,11 +45,11 @@ np.testing.assert_allclose(loss.numpy(), [np.log(2)], atol=1e-6, rtol=0)
 
 **Expected:** loss \(\log(2)\) within 1e-6.
 
-**Verify:** Compare the computed values or written argument with loss \(\log(2)\) within 1e-6.
+**Verify:** In a fresh process, the exercise checks confirm `loss.numpy()` matches `[np.log(2)]` within 1e-6.
 
 ## Exercise 3: Move the threshold
 
-The question is: Compare decisions at thresholds.5 and.8 with >= ties.
+The question is: Compare decisions at thresholds 0.5 and 0.8, counting a probability equal to the threshold as positive.
 
 Only the middle decision changes. Save scores independently from decisions so threshold exploration does not look like a second model fitting operation.
 
@@ -58,13 +58,13 @@ assert (p >= 0.5).tolist() == [False, True, True]
 assert (p >= 0.8).tolist() == [False, False, True]
 ```
 
-**Expected:** decisions[False,True,True] versus[False,False,True].
+**Expected:** decisions [False, True, True] versus [False, False, True].
 
-**Verify:** Compare the computed values or written argument with decisions[False,True,True] versus[False,False,True].
+**Verify:** In a fresh process, the exercise checks confirm `(p >= 0.5).tolist() == [False, True, True]` and `(p >= 0.8).tolist() == [False, False, True]`.
 
 ## Exercise 4: Expose a convention mismatch
 
-The question is: Treat probability 0.5 as if it were a logit and compare the positive-label loss with log2.
+The question is: Treat probability 0.5 as if it were a logit and compare the positive-label loss with log 2.
 
 The mistaken argument is interpreted as a score favoring the positive class. The API cannot infer that the caller intended a probability; explicit naming and shape contracts are necessary.
 
@@ -75,13 +75,13 @@ wrong = float(
 assert abs(wrong - np.log(2)) > 0.1
 ```
 
-**Expected:** wrong loss differs from log2 by more than.1.
+**Expected:** wrong loss differs from log 2 by more than 0.1.
 
-**Verify:** Compare the computed values or written argument with wrong loss differs from log2 by more than.1.
+**Verify:** In a fresh process, the exercise checks confirm `abs(wrong - np.log(2)) > 0.1`.
 
 ## Exercise 5: Stress large scores
 
-The question is: Calculate losses for logits 1000,-1000 with labels1,0 using the logits-aware form.
+The question is: Calculate losses for logits 1000, -1000 with labels 1, 0 using the logits-aware form.
 
 A naive `log(sigmoid())` path can lose precision at extreme probabilities. The stable form handles the algebra before exponentiation creates overflow or logarithms receive rounded zero.
 
@@ -93,15 +93,15 @@ assert np.isfinite(stable).all()
 np.testing.assert_allclose(stable, [0, 0], atol=1e-6, rtol=0)
 ```
 
-**Expected:** both finite losses approximately0.
+**Expected:** both finite losses approximately 0.
 
-**Verify:** Compare the computed values or written argument with both finite losses approximately0.
+**Verify:** In a fresh process, the exercise checks confirm `np.isfinite(stable).all()` and `stable` matches `[0, 0]` within 1e-6.
 
 ## Exercise 6: Count decisions separately
 
-The question is: For labels[0,1,1], count errors under the two thresholds.
+The question is: For labels [0, 1, 1], count errors under the two thresholds.
 
-This count is a decision metric. It does not replace the probability loss and cannot show that threshold .5 is optimal for a different cost structure or population.
+This count is a decision metric. It does not replace the probability loss and cannot show that threshold 0.5 is optimal for a different cost structure or population.
 
 ```python
 labels = np.array([0, 1, 1])
@@ -109,9 +109,9 @@ assert np.count_nonzero((p >= 0.5) != labels) == 0
 assert np.count_nonzero((p >= 0.8) != labels) == 1
 ```
 
-**Expected:** 0 errors at.5 and 1 at.8 on this fixture.
+**Expected:** 0 errors at 0.5 and 1 at 0.8 on this fixture.
 
-**Verify:** Compare the computed values or written argument with 0 errors at.5 and 1 at.8 on this fixture.
+**Verify:** In a fresh process, the exercise checks confirm `np.count_nonzero((p >= 0.5) != labels) == 0` and `np.count_nonzero((p >= 0.8) != labels) == 1`.
 
 ## Review after comparison
 

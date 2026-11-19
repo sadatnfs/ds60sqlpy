@@ -7,7 +7,7 @@ from torch.nn import functional as F
 
 
 def verify():
-    # Exercise 1: Compare dot and cosine scores
+    # Worked example A: Compare dot and cosine scores
     anchor = torch.tensor([1.0, 0.0], dtype=torch.float64)
     positive = torch.tensor([1.0, 1.0], dtype=torch.float64)
     negative = torch.tensor([0.0, 1.0], dtype=torch.float64)
@@ -16,7 +16,7 @@ def verify():
         F.cosine_similarity(anchor, positive, dim=0).item(), 1 / np.sqrt(2), atol=1e-12, rtol=0
     )
 
-    # Exercise 2: Scale without changing direction
+    # Worked example B: Scale without changing direction
     scaled = 10 * positive
     assert torch.dot(anchor, scaled).item() == 10
     torch.testing.assert_close(
@@ -26,7 +26,7 @@ def verify():
         rtol=0,
     )
 
-    # Exercise 3: Calculate a two-candidate loss
+    # Worked example C: Calculate a two-candidate loss
     logits = torch.tensor([[1.0, 0.0]], dtype=torch.float64)
     np.testing.assert_allclose(
         F.cross_entropy(logits, torch.tensor([0])).item(), np.log1p(np.exp(-1)), atol=1e-12, rtol=0
@@ -51,6 +51,29 @@ def verify():
     warm = torch.softmax(logits, dim=1)
     cool = torch.softmax(logits / 0.5, dim=1)
     assert cool[0, 0] > warm[0, 0] and warm.argmax(1).item() == cool.argmax(1).item() == 0
+
+    # Exercise 1: Score a new pair
+    left = torch.tensor([3.0, 4.0], dtype=torch.float64)
+    right = torch.tensor([4.0, 3.0], dtype=torch.float64)
+    assert torch.dot(left, right).item() == 24
+    np.testing.assert_allclose(
+        F.cosine_similarity(left, right, dim=0).item(), 0.96, atol=1e-12, rtol=0
+    )
+
+    # Exercise 2: Predict scores after negation
+    assert torch.dot(left, -right).item() == -24
+    np.testing.assert_allclose(
+        F.cosine_similarity(left, -right, dim=0).item(), -0.96, atol=1e-12, rtol=0
+    )
+
+    # Exercise 3: Compute a three-candidate loss
+    three = torch.tensor([[2.0, 0.0, 0.0]], dtype=torch.float64)
+    np.testing.assert_allclose(
+        F.cross_entropy(three, torch.tensor([0])).item(),
+        np.log1p(2 * np.exp(-2)),
+        atol=1e-12,
+        rtol=0,
+    )
     return {"checks": 6, "status": "passed"}
 
 

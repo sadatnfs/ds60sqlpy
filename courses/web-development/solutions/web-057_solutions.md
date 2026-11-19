@@ -1,51 +1,43 @@
 # web-057: explanatory solutions
 
-Compare after your own attempt or an explicit solution reveal. This file explains the supplied deterministic fixtures. It does not claim that a learner or a production deployment passed.
-
-## Why the mechanism works
-
-The earlier PHP pads isolated language and application logic. A real HTTP lab adds a browser, request headers, cookies, server process and persistent storage. Each boundary introduces behavior that a pure function cannot prove. The maintained optional fixture runs a local PHP development server in its own Linux container and binds its published port to host loopback. It is a learning server, not an internet deployment.
-
-The fixture stores synthetic notes under an anonymous browser session. That demonstrates session continuity and separation, not verified user identity. A session cookie carries an identifier; the server stores the session and a random owner key. Prepared statements store notes in SQLite. A form includes a CSRF token, the server validates it before writing, and successful POST handling redirects to a GET page. Source, database and session state have distinct lifetimes.
-
-Read the fixture README and copy the lab into an ignored learner directory before editing. Its Compose project name is ds60-web-study and its loopback port is 18088. Inspect whether those names belong to existing work before starting. The fixture builds only when you deliberately run the documented command. It does not mount the Docker socket, contact the classroom database or expose a public port. Named volumes retain notes and sessions across container replacement; removing those volumes is a separate reset.
+Open this after your own attempt. Each answer explains the lesson's synthetic fixtures; it does not show that your work or a deployment passed. The mechanism is explained in `courses/web-development/guides/web-057.md`.
 
 ## Exercise 1: Draw the lifecycle from browser cookie to server session to stored note.
 
-The cookie identifies session state; the session supplies an owner key and CSRF token; the database stores the owned note.
+**Expected answer:** The cookie identifies session state; the session supplies an owner key and CSRF token; the database stores the owned note.
 
-Trace the smallest example before editing. Name which values are source and which are observations.
+**Why:** The cookie selects the server session, the session provides the owner key and CSRF token, and the database stores the note under that owner.
 
 ## Exercise 2: Inspect the real Content-Type and redirect status.
 
-Record actual response headers instead of inferring them from PHP source.
+**Expected evidence:** Record actual response headers instead of inferring them from PHP source.
 
-Change only the named feature. Compare with the unchanged example and explain any unaffected behavior.
+**Why:** Observed headers show what the server really sent, which can differ from what the source suggests.
 
 ## Exercise 3: Run the owned lab and create one synthetic note through the browser.
 
-The note survives a page reload and appears after a successful POST-redirect-GET sequence.
+**Expected evidence:** The note survives a page reload and appears after a successful POST-redirect-GET sequence.
 
-Sketch the structure or data contract first. Reuse the mechanism from the examples without copying the reference.
+**Why:** POST/redirect/GET makes the reload repeat a safe GET, so the note appears once and is not submitted twice.
 
 ## Exercise 4: Submit a request with a missing or wrong CSRF token.
 
-The server returns a rejection and inserts no note.
+**Expected evidence:** The server returns a rejection and inserts no note.
 
-Keep the failing input. Identify the first layer where the observed result differs from the intended contract.
+**Why:** The server compares the submitted token with the session token and rejects mismatches before writing.
 
 ## Exercise 5: Stop and resume the lab without deleting volumes.
 
-The same browser session can recover its notes while the named data and session volumes remain.
+**Expected evidence:** The same browser session can recover its notes while the named data and session volumes remain.
 
-Predict the boundary before running it. Add an explicit check or manual observation that would detect a regression.
+**Why:** Named volumes keep the database and session files, so the same browser session can see its notes after resume.
 
 ## Exercise 6: Explain which properties this local server has not qualified.
 
-It does not establish production TLS, verified accounts, multi-instance concurrency, internet hardening or high availability.
+**Expected answer:** It does not establish production TLS, verified accounts, multi-instance concurrency, internet hardening or high availability.
 
-Explain your choice to someone who has not seen the code. Include one limitation and the evidence needed to remove it.
+**Why:** Production needs TLS, verified accounts, horizontal scaling, hardening and monitored availability, none of which a loopback lab provides.
 
-## Reference comparison and limits
+## Comparing your worksheet
 
-Read the separate executable reference, where supplied, only after retaining your attempt. Compare structure and decisions rather than matching every identifier. A different implementation is acceptable when it satisfies the same behavior, preserves accessibility and rejects the same invalid cases. The checked reference uses tiny synthetic inputs so that each transformation can be inspected. It is not a ready-to-deploy authenticated application. Server lifecycle, persistence, concurrency and security require their own integration evidence.
+This lesson has no executable reference. Compare your worksheet with the answers above. The optional lab in `courses/web-development/fixtures/php-http-lab/` gives real request evidence only when you deliberately run it.

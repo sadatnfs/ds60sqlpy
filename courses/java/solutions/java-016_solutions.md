@@ -4,7 +4,7 @@ Open after an attempt or an explicit solution reveal. The executable reference r
 
 ## Mechanism review
 
-A path names a location; it is not the file contents or a guarantee that the location exists. Filesystem operations can fail because of permissions,missing parents,encoding errors or concurrent changes. Choose an explicit character encoding so text has the same meaning across machines. Temporary directories provide owned scratch space,while try-with-resources closes streams that otherwise retain file handles. Replacing a file atomically is a filesystem capability,not a universal property of every move. If atomic replacement is required,fail clearly when unsupported instead of silently claiming the same guarantee from a non-atomic fallback.
+A path names a location; it is not the file contents or a guarantee that the location exists. Filesystem operations can fail because of permissions, missing parents, encoding errors or concurrent changes. Choose an explicit character encoding so text has the same meaning across machines. Temporary directories provide owned scratch space, while try-with-resources closes streams that otherwise retain file handles. Replacing a file atomically is a filesystem capability, not a universal property of every move. If atomic replacement is required, fail clearly when unsupported instead of silently claiming the same guarantee from a non-atomic fallback.
 
 **Path:** A typed representation of a filesystem location.
 
@@ -14,13 +14,15 @@ A path names a location; it is not the file contents or a guarantee that the loc
 
 ## Reading the reference
 
-Path.resolve appends a child path,normalize removes lexicaldot segments,andtoRealPath consults the filesystem. Files.writeString/readString acceptStandardCharsets.UTF_8. Files.list andFiles.walk return streams that must close. Files.move with ATOMIC_MOVE requests atomicity and may throwAtomicMoveNotSupportedException. The helper creates one owned temporary directory and deletes only its contents in a finally block.
+Path.resolve appends a child path, normalize removes lexical dot segments, and toRealPath consults the filesystem. Files.writeString/readString accept StandardCharsets.UTF_8. Files.list and Files.walk return streams that must close. Files.move with ATOMIC_MOVE requests atomicity and may throw AtomicMoveNotSupportedException. The helper creates one owned temporary directory and deletes only its contents in a finally block.
 
-## Exercise 1: Round-trip explicit UTF-8
+## Exercise 1: Round-trip explicit UTF-8: change one input
 
-Task: Write Café and an emoji to an owned temporary file,then read it with UTF-8.
+Task: Close Example A and rebuild it in a fresh `Main.java`, keeping the assertion on `java.nio.file.Files.readString(path, java.nio.charset.StandardCharsets.UTF_8).equals(text)`. Then propose one input change that would make that assertion fail and explain why before trying it.
 
-Explicit encoding avoids dependence on platform defaults. The round trip tests both byte writing and reading,not just a String kept in memory.
+Explicit encoding avoids dependence on platform defaults. The round trip tests both byte writing and reading, not just a String kept in memory.
+
+The unchanged code is the part that Example A adds:
 
 ```java
 withTemp(root -> {
@@ -33,15 +35,17 @@ withTemp(root -> {
 });
 ```
 
-**Expected:** exact text equality.
+**Expected:** Your rebuild reproduces the worked observation (exact text equality), and your proposed change makes the assertion on `java.nio.file.Files.readString(path, java.nio.charset.StandardCharsets.UTF_8).equals(text)` fail.
 
-**Verify:** Compare the program values or named exception with exact text equality. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.
+**Verify:** Run the rebuild with `java -ea Main` first, then the changed copy, and keep both results. Name the value that makes `java.nio.file.Files.readString(path, java.nio.charset.StandardCharsets.UTF_8).equals(text)` false in the changed copy.
 
-## Exercise 2: Distinguish a path from existence
+## Exercise 2: Distinguish a path from existence: debug a regression
 
-Task: Resolve a missing child inside the temporary directory and inspect existence before creating it.
+Task: A regression changed one token in the code that Example B adds after Example A, so one line now reads `var missing = root.resolve("missing.txt!");`. Run Example B with that line, use the failing assertion to locate the defect and repair it without changing the assertion.
 
 Constructing a Path does not create a file. Keeping those actions separate prevents accidental assumptions about setup state.
+
+The unchanged code is the part that Example B adds:
 
 ```java
 withTemp(root -> {
@@ -51,15 +55,15 @@ withTemp(root -> {
 });
 ```
 
-**Expected:** path object exists;filesystem entry absent.
+**Expected:** Before the repair the run fails with an `AssertionError` from the assertion on `missing.getFileName().toString().equals("missing.txt") && !java.nio.file.Files.exists(missing)`; after it the line reads `var missing = root.resolve("missing.txt");` again and path object exists; filesystem entry absent.
 
-**Verify:** Compare the program values or named exception with path object exists;filesystem entry absent. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.
+**Verify:** Keep the failing and the repaired runs. Explain why the changed token alters the value tested by `missing.getFileName().toString().equals("missing.txt") && !java.nio.file.Files.exists(missing)` for this input.
 
 ## Exercise 3: Close a directory stream
 
-Task: Create two files and count them through atry-with-resourcesFiles.list stream.
+Task: Create two files and count them through a try-with-resources Files.list stream.
 
-The stream can hold a directory resource until closed. A terminal operation alone is not the ownership policy for anI/O-backed stream.
+The stream can hold a directory resource until closed. A terminal operation alone is not the ownership policy for an I/O-backed stream.
 
 ```java
 withTemp(root -> {
@@ -71,13 +75,13 @@ withTemp(root -> {
 });
 ```
 
-**Expected:** count2.
+**Expected:** count 2.
 
-**Verify:** Compare the program values or named exception with count2. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.
+**Verify:** Keep an assertion equivalent to `entries.count() == 2`. As a control, change `assert entries.count() == 2;` to `assert entries.count() != 2;` inside it: the run must fail with an `AssertionError`, which shows the assertion can fail. Restore it.
 
 ## Exercise 4: Request atomic replacement honestly
 
-Task: Write old and staged files,requestATOMIC_MOVE,then verify the selected outcome without claiming a fallback is atomic.
+Task: Write old and staged files, request ATOMIC_MOVE, then verify the selected outcome without claiming a fallback is atomic.
 
 The branch reports a capability limit rather than silently weakening the contract. Atomic replacement also does not by itself prove durable persistence after a power loss.
 
@@ -102,9 +106,9 @@ withTemp(root -> {
 });
 ```
 
-**Expected:** either targetnew with staged absent,or explicit unsupported result retaining old.
+**Expected:** either target new with staged absent, or explicit unsupported result retaining old.
 
-**Verify:** Compare the program values or named exception with either targetnew with staged absent,or explicit unsupported result retaining old. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.
+**Verify:** Keep an assertion equivalent to `java.nio.file.Files.readString(target).equals("new") && !java.nio.file.Files.exists(staged)`. As a control, change `java.nio.file.Files.writeString(staged, "new");` to `java.nio.file.Files.writeString(staged, "new!");`: the run must fail with an `AssertionError` from the assertion on `java.nio.file.Files.readString(target).equals("new") && !java.nio.file.Files.exists(staged)`. Restore the line before continuing.
 
 ## Exercise 5: Expose a lexical path escape
 
@@ -121,7 +125,7 @@ withTemp(root -> {
 
 **Expected:** normalized path is outside the root.
 
-**Verify:** Compare the program values or named exception with normalized path is outside the root. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.
+**Verify:** Keep an assertion equivalent to `!candidate.startsWith(root.normalize())`. As a control, change `assert !candidate.startsWith(root.normalize());` to `assert candidate.startsWith(root.normalize());` inside it: the run must fail with an `AssertionError`, which shows the assertion can fail. Restore it.
 
 ## Exercise 6: Verify cleanup after failure
 
@@ -145,7 +149,7 @@ assert propagated && created[0] != null && !java.nio.file.Files.exists(created[0
 
 **Expected:** original exception propagated; owned directory absent.
 
-**Verify:** Compare the program values or named exception with original exception propagated; owned directory absent. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.
+**Verify:** Keep an assertion equivalent to `propagated && created[0] != null && !java.nio.file.Files.exists(created[0])`. As a control, change `throw new java.io.IOException("fixture failure");` to `throw new java.io.IOException("fixture failure!");`: the run must fail with an `AssertionError` from the assertion on `propagated && created[0] != null && !java.nio.file.Files.exists(created[0])`. Restore the line before continuing.
 
 ## After comparing the answer
 

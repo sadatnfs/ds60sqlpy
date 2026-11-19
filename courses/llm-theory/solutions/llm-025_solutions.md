@@ -16,40 +16,40 @@ Memory estimates begin with tensor shapes and dtype sizes. An attention score ma
 
 For batch B, heads H, sequence length T, head width d and s bytes per element, scores contain \(B\cdot H\cdot T\cdot T\) elements. Full multi-head K/V storage contains \(2\cdot L\cdot B\cdot H\cdot T\cdot d\cdot s\) bytes across L layers. Model width is \(D=H\cdot d\); using D in place of d would count the heads twice. Convert bytes to KiB by dividing by 1024, not 1000. Change one dimension at a time to expose scaling.
 
-## Exercise 1: Count attention scores
+## Exercise 1: Count scores for a larger configuration
 
-The question is: Use batch1,heads2 and contexts16,32.
+The question is: Use batch 2, heads 4 and context 64 with 4-byte score elements.
 
-Both the query and key axes double, producing four times as many scores. The number of heads remains fixed.
-
-```python
-b, h = 1, 2
-counts = [b * h * t * t for t in [16, 32]]
-assert counts == [512, 2048]
-```
-
-**Expected:** 512 and2048 score elements.
-
-**Verify:** Compare the computed values or written argument with 512 and2048 score elements.
-
-## Exercise 2: Count raw cache bytes
-
-The question is: Use1 layer,2 heads,width per head16,float32 bytes4 and contexts16,32.
-
-The factor two counts keys and values. Each past position adds a fixed number of features, so doubling context doubles this raw storage.
+Score elements scale with batch, heads and the square of the context. Doubling the context alone would multiply this count by four.
 
 ```python
-cache = [2 * 1 * 1 * 2 * t * 16 * 4 for t in [16, 32]]
-assert cache == [4096, 8192]
+scores_big = 2 * 4 * 64 * 64
+assert scores_big == 32768 and scores_big * 4 == 131072
 ```
 
-**Expected:** 4096 and8192 bytes.
+**Expected:** 32768 score elements; 131072 bytes (128 KiB).
 
-**Verify:** Compare the computed values or written argument with 4096 and8192 bytes.
+**Verify:** In a fresh process, the exercise checks confirm `scores_big == 32768` and `scores_big * 4 == 131072`.
+
+## Exercise 2: Predict cache growth with depth and context
+
+The question is: Use 3 layers, 2 heads, width per head 16, 4-byte elements and contexts 48 and 96; compare with the growth of the score matrix.
+
+The factor 2 counts keys and values. The cache grows linearly with context and with layers, while the per-layer score matrix grows quadratically with context.
+
+```python
+cache3 = [2 * 3 * 1 * 2 * t * 16 * 4 for t in [48, 96]]
+assert cache3 == [36864, 73728] and cache3[1] == 2 * cache3[0]
+assert (1 * 2 * 96 * 96) // (1 * 2 * 48 * 48) == 4
+```
+
+**Expected:** 36864 and 73728 cache bytes; the cache doubles while score elements quadruple.
+
+**Verify:** In a fresh process, the exercise checks confirm `cache3 == [36864, 73728]`; `cache3[1] == 2 * cache3[0]` and `1 * 2 * 96 * 96 // (1 * 2 * 48 * 48) == 4`.
 
 ## Exercise 3: Compare element precision
 
-The question is: Calculate cache bytes at context32 using 2-byte versus 4-byte elements.
+The question is: Calculate cache bytes at context 32 using 2-byte versus 4-byte elements.
 
 A storage reduction does not establish an acceptable accuracy change. Precision policy requires separate numerical evaluation.
 
@@ -58,13 +58,13 @@ assert 2 * 1 * 1 * 2 * 32 * 16 * 2 == 4096
 assert 2 * 1 * 1 * 2 * 32 * 16 * 4 == 8192
 ```
 
-**Expected:** 4096 versus8192 bytes.
+**Expected:** 4096 versus 8192 bytes.
 
-**Verify:** Compare the computed values or written argument with 4096 versus8192 bytes.
+**Verify:** In a fresh process, the exercise checks confirm `2 * 1 * 1 * 2 * 32 * 16 * 2 == 4096` and `2 * 1 * 1 * 2 * 32 * 16 * 4 == 8192`.
 
 ## Exercise 4: Scale batch size
 
-The question is: Increase batch from 1 to3 with context32 and all other cache dimensions fixed.
+The question is: Increase batch from 1 to 3 with context 32 and all other cache dimensions fixed.
 
 Independent requests each need their own context state unless a documented sharing mechanism applies. Batching improves utilization in some systems but does not eliminate storage per request.
 
@@ -74,11 +74,11 @@ assert 2 * 1 * 3 * 2 * 32 * 16 * 4 == 24576
 
 **Expected:** 24576 raw cache bytes.
 
-**Verify:** Compare the computed values or written argument with 24576 raw cache bytes.
+**Verify:** In a fresh process, the exercise checks confirm `2 * 1 * 3 * 2 * 32 * 16 * 4 == 24576`.
 
 ## Exercise 5: Preserve total width
 
-The question is: Compare4 heads of width8 with2 heads of width16.
+The question is: Compare 4 heads of width 8 with 2 heads of width 16.
 
 Head count and head width must be considered together. Multiplying by model width and by head count would double-count features.
 
@@ -88,7 +88,7 @@ assert 2 * 4 * 32 * 8 * 4 == 2 * 2 * 32 * 16 * 4
 
 **Expected:** equal raw cache bytes for the same context.
 
-**Verify:** Compare the computed values or written argument with equal raw cache bytes for the same context.
+**Verify:** In a fresh process, the exercise checks confirm `2 * 4 * 32 * 8 * 4 == 2 * 2 * 32 * 16 * 4`.
 
 ## Exercise 6: State exclusions
 
@@ -105,9 +105,9 @@ estimate = {
 assert len(estimate["excludes"]) == 3 and not estimate["measured_peak"]
 ```
 
-**Expected:** record identifies parameters,temporary tensors,allocator overhead as excluded.
+**Expected:** record identifies parameters, temporary tensors, allocator overhead as excluded.
 
-**Verify:** Compare the computed values or written argument with record identifies parameters,temporary tensors,allocator overhead as excluded.
+**Verify:** In a fresh process, the exercise checks confirm `len(estimate['excludes']) == 3` and `not estimate['measured_peak']`.
 
 ## Review after comparison
 

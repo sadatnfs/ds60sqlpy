@@ -5,15 +5,59 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Print styles, progressive enhancement and resilient delivery: my attempt</title>
     <style>
-      /* Implement the lesson-specific CSS. Keep keyboard focus visible. */
+      /*
+        Worked example 1: A useful print view
+        @media print {
+          nav,
+          button {
+            display: none;
+          }
+          body {
+            color: black;
+            background: white;
+          }
+        }
+      */
+
+      /*
+        Worked example 2: Optional layout enhancement
+        .cards {
+          display: block;
+        }
+        @supports (display: grid) {
+          .cards {
+            display: grid;
+            gap: 1rem;
+          }
+        }
+      */
+
+      /* Write the CSS for the exercises here. Keep keyboard focus visible. */
     </style>
   </head>
   <body>
-    <!-- web-023: Build printable study notes with a useful baseline layout. -->
-    <!-- Save your prediction, then implement the six exercises from the guide. -->
+    <!--
+      web-023 exercises. Hints are in the guide; answers are in the solutions folder.
+      1. Identify content that must survive when scripts fail.
+      2. Add a print rule that removes only irrelevant controls.
+      3. Build printable study notes with a useful baseline layout.
+      4. Diagnose a print rule that hides the main region.
+      5. Inspect multiple pages of print preview.
+      6. Explain what a feature query proves and what it does not.
+    -->
     <main>
-      <h1>Print styles, progressive enhancement and resilient delivery</h1>
-      <!-- Build your own document here. The reference is separate. -->
+      <nav aria-label="Notes"><a href="#notes">Read notes</a></nav>
+      <article id="notes">
+        <h1>Printable study notes</h1>
+        <section>
+          <h2>Principle</h2>
+          <p>Preserve useful content before adding presentation.</p>
+        </section>
+        <section>
+          <h2>Evidence</h2>
+          <p>Inspect both screen and print output.</p>
+        </section>
+      </article>
     </main>
   </body>
 </html>

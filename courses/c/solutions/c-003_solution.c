@@ -52,12 +52,12 @@ int main(void) {
     CHECK(value == 7);
   }
 
-  /* Transfer assignment diagnosis */
+  /* Transfer integer promotion */
   {
-    int x = 0;
-    x = 3;
-    bool same = (x == 3);
-    CHECK(same && x == 3);
+    unsigned char a = 200, b = 100;
+    int sum = a + b;
+    unsigned char stored = (unsigned char)(a + b);
+    CHECK(sum == 300 && stored == 44);
   }
   puts("All lesson checks passed.");
   return 0;

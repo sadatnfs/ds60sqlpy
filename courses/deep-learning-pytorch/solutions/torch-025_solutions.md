@@ -24,11 +24,11 @@ For nonzero vectors a and b, the dot product is \(\sum_i a_i b_i\) and cosine is
 
 A zero vector has no direction. PyTorch's normalization/similarity APIs use an epsilon convention for numerical stability; receiving a finite number from that convention does not make a zero vector semantically informative. If the application requires directional similarity, validate finite nonzero norms and define a refusal or fallback policy. The paired TensorFlow chapter's explicit zero-norm rejection is a data contract, not a claim that every framework cosine API raises automatically. [PyTorch 2.9 normalize](https://docs.pytorch.org/docs/2.9/generated/torch.nn.functional.normalize.html).
 
-Let candidates have scores s_j and let candidate 0 be the positive. For temperature \(\tau>0\), define \(p_j=\frac{\exp(s_j/\tau)}{\sum_k\exp(s_k/\tau)}\). The loss is \(-\log p_0=\operatorname{logsumexp}(s/\tau)-\frac{s_0}{\tau}\). Stable cross entropy computes this without manually exponentiating large logits. With scores[1, 0] and tau 1, p_0≈0.731059 and loss≈0.313262, which equals \(\log(1+\exp(-1))\). With tau 0.5, the effective logits are[2, 0], p_0≈0.880797 and loss≈0.126928.
+Let candidates have scores s_j and let candidate 0 be the positive. For temperature \(\tau>0\), define \(p_j=\frac{\exp(s_j/\tau)}{\sum_k\exp(s_k/\tau)}\). The loss is \(-\log p_0=\operatorname{logsumexp}(s/\tau)-\frac{s_0}{\tau}\). Stable cross entropy computes this without manually exponentiating large logits. With scores [1, 0] and tau 1, p_0≈0.731059 and loss≈0.313262, which equals \(\log(1+\exp(-1))\). With tau 0.5, the effective logits are [2, 0], p_0≈0.880797 and loss≈0.126928.
 
-Positive temperature scaling preserves the ranking of fixed scores. It changes probabilities and the derivative \(\frac{\partial L}{\partial s_{j}}=\frac{p_{j}-y_{j}}{\tau}\). Lower temperature does not guarantee a larger gradient on every example, because the probabilities also change. For this already-correct pair, the positive-score derivative is approximately-0.268941 at tau 1 and-0.238406 at tau 0.5. Hard or incorrectly ranked examples can behave differently. Treat temperature as an objective and calibration choice, not a universal gradient amplifier.
+Positive temperature scaling preserves the ranking of fixed scores. It changes probabilities and the derivative \(\frac{\partial L}{\partial s_{j}}=\frac{p_{j}-y_{j}}{\tau}\). Lower temperature does not guarantee a larger gradient on every example, because the probabilities also change. For this already-correct pair, the positive-score derivative is approximately -0.268941 at tau 1 and -0.238406 at tau 0.5. Hard or incorrectly ranked examples can behave differently. Treat temperature as an objective and calibration choice, not a universal gradient amplifier.
 
-The reference trains neither candidate vector in its projection check. It defines q=aP with an identity 2×2 trainable P, then uses the fixed positive and negative vectors as candidates. At tau 1, let \(c=\frac{1}{1+\exp(1)}\)≈0.268941. The query derivative is -c[1, 1]+c[0, 1]=[-c, 0]. Since a=[1, 0], the projection derivative is the outer product \(a^{\mathsf T}[-c,0]\), or[[-c, 0], [0, 0]]. Only the first projection row receives this contribution. This exact analytic matrix is stronger explanatory evidence than the reference's broad finite/nonzero assertion.
+The reference trains neither candidate vector in its projection check. It defines q=aP with an identity 2×2 trainable P, then uses the fixed positive and negative vectors as candidates. At tau 1, let \(c=\frac{1}{1+\exp(1)}\)≈0.268941. The query derivative is -c[1, 1]+c[0, 1]=[-c, 0]. Since a=[1, 0], the projection derivative is the outer product \(a^{\mathsf T}[-c,0]\), or [[-c, 0], [0, 0]]. Only the first projection row receives this contribution. This exact analytic matrix is stronger explanatory evidence than the reference's broad finite/nonzero assertion.
 
 A shared encoder applied to the anchor and both candidates would have additional gradient paths. A symmetric contrastive objective would also evaluate reverse-direction comparisons. Those are different experiments from this one-branch projection check. The unchanged reference calls backward but does not take a projection optimizer step, so its evidence is differentiability and a local gradient, not a completed representation-learning run.
 
@@ -38,67 +38,60 @@ If a positive and negative are literally the same vector under the same scoring 
 
 Several relevant candidates may require a multi-positive objective or a relevance-aware sampling policy rather than marking all but one as negative. Evaluation should keep the intended corpus, candidate count and exclusions visible. A high score is not an external truth label, and embeddings from different model/tokenizer/normalization versions should not be mixed merely because their dimensions match. Record the representation-space identity with any saved retrieval index.
 
-## Exercise 1: Compare dot and cosine scores
+## Exercise 1: Score a new pair
 
-The question is: Use anchor[1, 0], positive[1, 1], negative[0, 1].
+The question is: Compute the dot product and cosine similarity of [3, 4] and [4, 3].
 
-The positive vector is not parallel to the anchor, so its cosine is below one. Equal-looking scalar scores from different similarity definitions need not mean the same relationship.
+Both vectors have norm 5, so the cosine is 24/25.
 
 ```python
-anchor = torch.tensor([1.0, 0.0], dtype=torch.float64)
-positive = torch.tensor([1.0, 1.0], dtype=torch.float64)
-negative = torch.tensor([0.0, 1.0], dtype=torch.float64)
-assert torch.dot(anchor, positive).item() == 1 and torch.dot(anchor, negative).item() == 0
+left = torch.tensor([3.0, 4.0], dtype=torch.float64)
+right = torch.tensor([4.0, 3.0], dtype=torch.float64)
+assert torch.dot(left, right).item() == 24
+np.testing.assert_allclose(F.cosine_similarity(left, right, dim=0).item(), 0.96, atol=1e-12, rtol=0)
+```
+
+**Expected:** dot 24; cosine 0.96.
+
+**Verify:** In a fresh process, the exercise checks confirm `torch.dot(left, right).item() == 24` and `F.cosine_similarity(left, right, dim=0).item()` matches `0.96` within 1e-12.
+
+## Exercise 2: Predict scores after negation
+
+The question is: Negate the second vector and recompute both scores.
+
+Negation reverses direction, so both scores change sign while the magnitudes stay the same.
+
+```python
+assert torch.dot(left, -right).item() == -24
 np.testing.assert_allclose(
-    F.cosine_similarity(anchor, positive, dim=0).item(), 1 / np.sqrt(2), atol=1e-12, rtol=0
+    F.cosine_similarity(left, -right, dim=0).item(), -0.96, atol=1e-12, rtol=0
 )
 ```
 
-**Expected:** dots 1, 0; cosines 1/sqrt 2, 0.
+**Expected:** dot -24; cosine -0.96.
 
-**Verify:** Compare the computed values or written argument with dots 1, 0; cosines 1/sqrt 2, 0.
+**Verify:** In a fresh process, the exercise checks confirm `torch.dot(left, -right).item() == -24` and `F.cosine_similarity(left, -right, dim=0).item()` matches `-0.96` within 1e-12.
 
-## Exercise 2: Scale without changing direction
+## Exercise 3: Compute a three-candidate loss
 
-The question is: Multiply the positive vector by 10 and compare scores.
+The question is: Use logits [2, 0, 0] with target 0.
 
-Normalization removes positive scale from this comparison. A model trained with unnormalized dot products may intentionally use magnitude, so normalization is a modeling choice.
-
-```python
-scaled = 10 * positive
-assert torch.dot(anchor, scaled).item() == 10
-torch.testing.assert_close(
-    F.cosine_similarity(anchor, scaled, dim=0),
-    F.cosine_similarity(anchor, positive, dim=0),
-    atol=1e-12,
-    rtol=0,
-)
-```
-
-**Expected:** dot becomes 10; cosine unchanged.
-
-**Verify:** Compare the computed values or written argument with dot becomes 10; cosine unchanged.
-
-## Exercise 3: Calculate a two-candidate loss
-
-The question is: Use logits[1, 0] with target 0.
-
-The loss depends on the relative score advantage. It does not verify whether the supplied positive and negative labels are semantically correct.
+Each extra negative candidate adds its exponential to the denominator, so the loss grows with the candidate count.
 
 ```python
-logits = torch.tensor([[1.0, 0.0]], dtype=torch.float64)
+three = torch.tensor([[2.0, 0.0, 0.0]], dtype=torch.float64)
 np.testing.assert_allclose(
-    F.cross_entropy(logits, torch.tensor([0])).item(), np.log1p(np.exp(-1)), atol=1e-12, rtol=0
+    F.cross_entropy(three, torch.tensor([0])).item(), np.log1p(2 * np.exp(-2)), atol=1e-12, rtol=0
 )
 ```
 
-**Expected:** cross entropy \(\log(1+\exp(-1))\).
+**Expected:** cross entropy \(\log(1+2e^{-2})\), about 0.2395, within 1e-12.
 
-**Verify:** Compare the computed values or written argument with cross entropy \(\log(1+\exp(-1))\).
+**Verify:** In a fresh process, the exercise checks confirm `F.cross_entropy(three, torch.tensor([0])).item()` matches `np.log1p(2 * np.exp(-2))` within 1e-12.
 
 ## Exercise 4: Inspect a projection gradient
 
-The question is: Create a trainable 2 x2identity projection and back propagate the positive-versus-negative objective.
+The question is: Create a trainable 2-by-2 identity projection and backpropagate the positive-versus-negative objective.
 
 This is an actual gradient path through the representation. It establishes the optimization mechanism, not held-out retrieval quality.
 
@@ -116,7 +109,7 @@ assert (
 
 **Expected:** finite nonzero projection gradient.
 
-**Verify:** Compare the computed values or written argument with finite nonzero projection gradient.
+**Verify:** In a fresh process, the exercise checks confirm `projection.grad is not None`, `torch.isfinite(projection.grad).all()` and `torch.count_nonzero(projection.grad) > 0`.
 
 ## Exercise 5: Detect contradictory candidate identity
 
@@ -131,11 +124,11 @@ assert pair["positive"] == pair["negative"]
 
 **Expected:** identity collision detected.
 
-**Verify:** Compare the computed values or written argument with identity collision detected.
+**Verify:** In a fresh process, the exercise checks confirm `pair['positive'] == pair['negative']`.
 
 ## Exercise 6: Separate temperature from ranking
 
-The question is: Compare softmax[1, 0] at temperatures 1 and.5.
+The question is: Compare the softmax of logits [1, 0] at temperatures 1 and 0.5.
 
 Temperature changes confidence concentration and gradients. It does not supply additional relevance evidence or guarantee calibration.
 
@@ -147,7 +140,7 @@ assert cool[0, 0] > warm[0, 0] and warm.argmax(1).item() == cool.argmax(1).item(
 
 **Expected:** positive probability increases; argmax remains 0.
 
-**Verify:** Compare the computed values or written argument with positive probability increases; argmax remains 0.
+**Verify:** In a fresh process, the exercise checks confirm `cool[0, 0] > warm[0, 0]` and `warm.argmax(1).item() == cool.argmax(1).item() == 0`.
 
 ## Review after comparison
 

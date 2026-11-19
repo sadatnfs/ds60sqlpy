@@ -198,4 +198,4 @@ if __name__ == "__main__":
 
 ## Interpretation
 
-Use data tests as explicit evidence for a declared contract. Demonstrate a known violation, inspect the materialized state and repair the source or transformation without weakening the assertion. Carry test outcomes into the later publication decision.
+Demonstrate a known violation, inspect the materialized state and repair the source or transformation without weakening the assertion. Carry test outcomes into the later publication decision.

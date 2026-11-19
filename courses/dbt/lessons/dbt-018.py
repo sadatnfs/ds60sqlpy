@@ -1,4 +1,4 @@
-"""dbt-018: worked starting point; complete the guide's six changes."""
+"""dbt-018: both worked cases; complete the guide's six changes."""
 
 import json
 import os
@@ -92,7 +92,7 @@ def package_project(directory):
     local = p / "local_packages/classroom_utils"
     (local / "macros").mkdir(parents=True)
     (local / "dbt_project.yml").write_text(
-        "name: classroom_utils\nversion: '1.0'\nconfig-version: 2\nmacro-paths: [macros]\n"
+        'name: classroom_utils\nversion: "1.0"\nconfig-version: 2\nmacro-paths: [macros]\n'
     )
     (local / "macros/add_one.sql").write_text(
         "{% macro add_one(value) %} (({{ value }}) + 1) {% endmacro %}"
@@ -112,8 +112,23 @@ def example_one():
         return {"local_package_used": True, "answer": 42, "lock_written": True}
 
 
+def example_two():
+    with tempfile.TemporaryDirectory() as d:
+        p = package_project(d)
+        invoke(p, "compile", succeeds=False)
+        invoke(p, "deps")
+        invoke(p, "compile")
+        compiled = (p / "target/compiled/classroom/models/answer.sql").read_text()
+        assert "41" in compiled and "+ 1" in compiled
+        return {
+            "missing_preparation_rejected": True,
+            "local_dependency_preparation_sufficient": True,
+        }
+
+
 if __name__ == "__main__":
     print(example_one())
+    print(example_two())
 
 # TODO 1: Find the package name and macro namespace.
 # TODO 2: Change the local macro to add 2 and rebuild.

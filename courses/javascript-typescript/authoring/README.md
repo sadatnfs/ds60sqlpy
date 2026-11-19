@@ -34,6 +34,41 @@ owned observers/animation work when the page leaves. The real classroom checker
 covers this boundary, then a separate read-only phase checks original records
 and final pads after actual container replacement.
 
+Each lesson's worked example 2 is published as a complete preview program:
+`d3_extension.worked_program` wraps the example body in the same setup as the
+reference (`host`, `output`, `check` and an accessible `svg` in `#chart`), and the
+body must draw marks and check its claim with `check`. Worked example 1 stays a
+short snippet but must declare everything it uses. Per-task hints are the first
+sentence of each task's explanation, and reference links are labeled by
+documentation set and page.
+
+## Outcomes and derived practice
+
+`outcomes.py` holds one specific outcome for every ID from js-001 to js-066 and
+optional `MINUTES` overrides (the D3 capstone). Both renderers refuse a missing or
+templated outcome. The published `lab` and `verification` fields both come from
+exercise or task 3.
+
+For js-001 to js-042, Exercises 1 and 2 are derived from Examples A and B instead
+of repeating them, and every `Verify` line and progressive hint names that
+exercise's own check. Where recorded, they also name a one-token edit that was
+executed and observed to make that check fail. The observations live in
+`variants.json` and are refreshed after any exercise change:
+
+```sh
+python courses/javascript-typescript/authoring/qualify_variants.py
+```
+
+It needs a local Docker engine and the prepared `ds60sqlpy-worker-javascript-node`
+and `ds60sqlpy-worker-typescript-node` images. Programs run offline with the
+classroom's Node flags, and TypeScript is compiled first with the classroom's
+strict NodeNext `tsc` flags. Unmodified references must pass first; a mutant counts
+only when an assertion of the targeted exercise fails, not on a compile error,
+timeout or other exception. The three browser reading lessons (js-029 to js-031)
+have no Node runtime, so their practice is phrased as browser observations.
+Rendering never executes code and stops with a clear message if an exercise
+changed after its record was made.
+
 ## Shared maintenance gates
 
 Use [CONTRIBUTING](../../../CONTRIBUTING.md) for the prepared environment and

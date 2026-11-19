@@ -24,9 +24,7 @@ The pooled rate is \(\widehat p=\frac{\sum_i s_i}{\sum_i n_i}\). The equal-row r
 
 ## Run the lesson
 
-Open this subject in `/classroom`, then show its code and notes. The prepared `data-engineering` worker runs `main.py` in a fresh temporary directory. The examples use installed packages and synthetic local fixtures; no account, cloud service, network request or package download is required. Save source and notes before switching lessons. Temporary databases, project files and tracking artifacts are recreated by each complete program and removed after the job. The classroom retains the submitted source and bounded output, not an indefinitely running external service. The guide distinguishes this local execution from the deployment decisions that need an owned production environment.
-
-
+Open `polars-005` in `/classroom`. Its starter `main.py` contains both worked cases, "Pool trials rather than average row rates" and "Preserve missingness in group summaries", and prints the dictionary each case returns. The prepared `data-engineering` worker runs it in a fresh temporary directory. An `AssertionError` means that an observation differs from the case's stated contract. The inputs are small literal tables. Cases that demonstrate Parquet scans write their files into a temporary directory that is removed when the case returns. No account, network request or package download is involved. Save source and notes before switching lessons.
 
 ## Worked case 1: Pool trials rather than average row rates
 
@@ -64,12 +62,11 @@ if __name__ == "__main__":
     print(example_one())
 ```
 
-
 ## Worked case 2: Preserve missingness in group summaries
 
 The second case emits row count, observed count and mean together. The all-null group remains present, and its mean remains absent. That is evidence about measurement availability, not evidence that the underlying quantity equals zero.
 
-**Expected evidence:** Group A has 2 rows,1 observed value and mean 2; group B has 1 row,0 observed values and null mean.
+**Expected evidence:** Group A has 2 rows, 1 observed value and mean 2; group B has 1 row, 0 observed values and null mean.
 
 ```python
 import polars as pl
@@ -96,11 +93,9 @@ if __name__ == "__main__":
     print(example_two())
 ```
 
-
 ## Practice
 
-Make each requested change in a saved copy. Compare both the expected result and the deliberately changed assumption. The separate reference explains the answers.
-
+The starter contains both worked cases, so a task can change either one. Make each change in a saved copy, run it, and compare the printed result with the task's check before opening the separate explained answers.
 
 ### 1. Compute a global rate
 
@@ -110,7 +105,6 @@ Pool all three rate rows without grouping.
 
 **Hint:** Sum both counts before division.
 
-
 ### 2. Find a zero denominator
 
 Add a group with 0 successes and 0 trials.
@@ -118,7 +112,6 @@ Add a group with 0 successes and 0 trials.
 **Check:** The output follows an explicit undefined-rate policy.
 
 **Hint:** A zero-trial group contains no rate evidence.
-
 
 ### 3. Change the estimand
 
@@ -128,7 +121,6 @@ Describe when an equal-group average would be appropriate.
 
 **Hint:** Weighting is part of the scientific question.
 
-
 ### 4. Audit row grain
 
 Compare input row count with the number of group keys.
@@ -136,7 +128,6 @@ Compare input row count with the number of group keys.
 **Check:** Three input rows reduce to 2 groups.
 
 **Hint:** A grouping operation changes output identity.
-
 
 ### 5. Report precision inputs
 
@@ -146,7 +137,6 @@ Keep success and trial counts beside each estimated rate.
 
 **Hint:** A displayed percentage alone loses information.
 
-
 ### 6. Handle an all-null group
 
 Decide whether to retain group B in the measurement summary.
@@ -155,20 +145,19 @@ Decide whether to retain group B in the measurement summary.
 
 **Hint:** Do not impute without a model.
 
-
 ## Diagnose errors and misleading results
 
 A rate above 1 can indicate numerator/denominator mismatch or join fanout. A mean that changes after a harmless-looking reshape may have changed its weighting unit. Inspect group keys, original grain and counts before adjusting formulas. Never compare unsorted group outputs positionally unless row order is explicitly part of the contract.
 
 ## Transfer to independent work
 
-Build an aggregate whose numerator, denominator and weighting unit are explicit. Reconcile the totals independently with Python arithmetic, retain coverage counts, and then decide whether the result supports the intended comparison. Apply the same discipline to conversion rates, average losses and model-quality dashboards.
+Reconcile the totals independently with Python arithmetic, retain coverage counts, and then decide whether the result supports the intended comparison. Apply the same discipline to conversion rates, average losses and model-quality dashboards.
 
 ## Primary references
 
-- [Polars documentation: Aggregation grain and weighted quantities](https://docs.pola.rs/user-guide/expressions/aggregation/)
+- [Polars user guide: Aggregation](https://docs.pola.rs/user-guide/expressions/aggregation/)
 - [Polars Python API reference](https://docs.pola.rs/api/python/stable/reference/index.html)
 
 ## Tutor guidance
 
-Use the repository learning-companion skill for `polars-005`. Inspect the learner's own source and observations, ask for an explanation of the relevant data or state contract, and give a focused hint. Separate an assertion on this fixture from a claim about an external dataset or deployed service.
+Use the repository's `$guide-ds60sqlpy-learning` skill (`.agents/skills/guide-ds60sqlpy-learning/SKILL.md`) for `polars-005`. Inspect the learner's own source and printed output first. Ask for an explanation of group_by, denominator, weighted rates, row count and observed count in their own words, then give one focused hint at a time. Keep an assertion on this synthetic fixture separate from a claim about an external dataset or deployed service.

@@ -63,7 +63,7 @@ def main():
     close(simulate(3.0, steps=1), -2.0)
     assert math.exp(-3.0) > 0.0
 
-    print("jax-020" + ": 8 asserted cases passed")
+    print("jax-020: 8 asserted cases passed")
 
 
 if __name__ == "__main__":

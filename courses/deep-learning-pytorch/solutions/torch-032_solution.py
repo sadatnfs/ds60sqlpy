@@ -9,7 +9,7 @@ from pathlib import Path
 
 
 def verify():
-    # Exercise 1: Create a known inference model
+    # Worked example A: Create a known inference model
     model = nn.Linear(2, 1, bias=False)
     with torch.no_grad():
         model.weight.copy_(torch.tensor([[2.0, -1.0]]))
@@ -18,7 +18,7 @@ def verify():
     expected = model(x).detach()
     assert expected.tolist() == [[0.0], [2.0]]
 
-    # Exercise 2: Round-trip named state
+    # Worked example B: Round-trip named state
     temporary = tempfile.TemporaryDirectory()
     folder = Path(temporary.name)
     state_path = folder / "weights.pt"
@@ -28,7 +28,7 @@ def verify():
     restored.eval()
     torch.testing.assert_close(restored(x), expected, atol=1e-6, rtol=0)
 
-    # Exercise 3: Save an exported program
+    # Worked example C: Save an exported program
     program = torch.export.export(model, (x,), strict=True)
     export_path = folder / "model.pt2"
     torch.export.save(program, export_path)
@@ -77,6 +77,29 @@ def verify():
     torch.testing.assert_close(dynamic(three), restored(three), atol=1e-6, rtol=0)
     temporary.cleanup()
     assert not folder.exists()
+
+    # Exercise 1: Predict a new inference output
+    other_model = nn.Linear(2, 1, bias=False)
+    with torch.no_grad():
+        other_model.weight.copy_(torch.tensor([[1.0, 3.0]]))
+    other_model.eval()
+    rows = torch.tensor([[1.0, 2.0], [3.0, 4.0]])
+    assert other_model(rows).tolist() == [[7.0], [15.0]]
+
+    # Exercise 2: Load state into matching and mismatched modules
+    copy_model = nn.Linear(2, 1, bias=False)
+    copy_model.load_state_dict(other_model.state_dict())
+    torch.testing.assert_close(copy_model(rows), other_model(rows), atol=0, rtol=0)
+    try:
+        nn.Linear(2, 1).load_state_dict(other_model.state_dict())
+    except RuntimeError:
+        pass
+    else:
+        raise AssertionError("missing bias accepted")
+
+    # Exercise 3: Export the new model in memory
+    exported_other = torch.export.export(other_model, (rows,), strict=True).module()
+    torch.testing.assert_close(exported_other(rows), other_model(rows), atol=1e-6, rtol=0)
     return {"checks": 6, "status": "passed"}
 
 

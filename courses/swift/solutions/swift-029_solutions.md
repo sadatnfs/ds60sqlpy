@@ -1,6 +1,6 @@
 # swift-029: explanation and comparison
 
-Attempt the six guide tasks before opening this comparison. The executable reference is [swift-029_solution.swift](swift-029_solution.swift). Its assertions are always active under the prepared classroom compile settings.
+Attempt the six guide tasks before opening this comparison. The executable reference is [swift-029_solution.swift](swift-029_solution.swift). It runs both worked examples and the reference answers below, and its assertions are always active under the prepared classroom compile settings.
 
 ## Why the two examples differ
 
@@ -8,21 +8,79 @@ Attempt the six guide tasks before opening this comparison. The executable refer
 
 **Handle an empty group:** The empty path needs no special background work or timer. No admitted children produces the identity result zero.
 
-## Reason through the six tasks
+## Task answers
 
-1. **Predict and explain.** Identify who owns each task and the result array.
+### Task 1: Predict and explain
 
-2. **Guided modification.** Attach input indices and reconstruct submission ordering.
+Identify who owns each task and the result array.
 
-3. **Independent construction.** Implement bounded admission for a small list with at most two outstanding children.
+No separate reference answer has been written for this task. Example A is the evidence to compare with: Independent values cross the boundary, and the parent alone mutates the result array. Sorted results are deterministic despite unspecified completion order.
 
-4. **Diagnose a defect.** Diagnose concurrent mutation of a shared result array inside child tasks.
+### Task 2: Guided modification
 
-5. **Boundary evidence.** Test empty input and a failing child using a throwing group.
+Attach input indices and reconstruct submission ordering.
 
-6. **Transfer and justify.** Choose a concurrency bound for an I/O workload and explain its resource basis.
+No separate reference answer has been written for this task. Start from Example B: The empty path needs no special background work or timer. No admitted children produces the identity result zero.
 
-For tasks 1 and 2, use the checked values and mechanism trace in the two examples. For task 3, choose names that expose the input and result contract and retain the same invariants. For task 4, the diagnosed mistakes below supply a concrete wrong assumption: preserve its counterexample before repairing it. Task 5 needs an explicit expected value or documented rejection at the boundary, not just successful execution. For task 6, explain what changes in the new context and which part of the original mechanism remains applicable. Several representations may satisfy this transfer task; justify the choice rather than treating this reference as the only architecture.
+### Task 3: Independent construction
+
+Implement bounded admission for a small list with at most two outstanding children.
+
+**Reference answer.** It runs as the `Task 3` block of the reference program.
+
+```swift
+let inputs = [1, 2, 3, 4, 5]
+let (results, peak) = await withTaskGroup(
+  of: Int.self, returning: ([Int], Int).self
+) { group in
+  var next = 0
+  var outstanding = 0
+  var peak = 0
+  var collected: [Int] = []
+  while next < inputs.count && outstanding < 2 {
+    let value = inputs[next]
+    group.addTask { value * 10 }
+    next += 1
+    outstanding += 1
+    peak = max(peak, outstanding)
+  }
+  while let finished = await group.next() {
+    collected.append(finished)
+    outstanding -= 1
+    if next < inputs.count {
+      let value = inputs[next]
+      group.addTask { value * 10 }
+      next += 1
+      outstanding += 1
+      peak = max(peak, outstanding)
+    }
+  }
+  return (collected.sorted(), peak)
+}
+precondition(results == [10, 20, 30, 40, 50] && peak == 2)
+```
+
+**Observe:** All five inputs are processed, and at most two child tasks were ever outstanding.
+
+A new child is added only after group.next() returns a finished one, so admission is bounded by construction, not by timing.
+
+### Task 4: Diagnose a defect
+
+Diagnose concurrent mutation of a shared result array inside child tasks.
+
+No reference answer has been written for this task yet. The wrong assumptions to look for are this lesson's pitfalls: Group completion order is unspecified. Cancellation is cooperative and does not instantly kill children. Avoid unbounded child creation for large inputs.
+
+### Task 5: Boundary evidence
+
+Test empty input and a failing child using a throwing group.
+
+No reference answer has been written for this task yet. Write the expected value or documented rejection for each boundary before running it, and compare with the checks in Example A (Collect results without assuming order) and Example B (Handle an empty group).
+
+### Task 6: Transfer and justify
+
+Choose a concurrency bound for an I/O workload and explain its resource basis.
+
+No single reference answer exists: several designs can satisfy this transfer task. Justify yours against the mechanism described below and the vocabulary entry **Child task**, and state one limitation of your choice.
 
 ## Mechanism and diagnostic reasoning
 
@@ -36,4 +94,4 @@ Group completion order is unspecified. Cancellation is cooperative and does not 
 
 ## Review before continuing
 
-The reference checks the worked scenarios, including their boundary distinctions. Your independent and transfer artifacts may have additional checks. Compare observations rather than only source text. Preserve any new regression case you discover and explain why it would reject a plausible wrong implementation. External project steps require their own build and platform evidence and are not established by a portable reference passing.
+Run the reference and confirm that it prints `swift-029: passed`, then reconstruct one boundary case from memory and explain which check would reject a plausible wrong implementation. External project steps need their own build and platform evidence; a passing portable reference does not establish them.

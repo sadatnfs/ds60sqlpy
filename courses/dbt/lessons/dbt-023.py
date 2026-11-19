@@ -1,4 +1,4 @@
-"""dbt-023: worked starting point; complete the guide's six changes."""
+"""dbt-023: both worked cases; complete the guide's six changes."""
 
 import os
 import tempfile
@@ -88,9 +88,9 @@ def example_one():
             d,
             models={
                 "events": (
-                    "{{ config(materialized='table') }} select range as id, "
-                    "range % 5 as segment, range % 7 as amount from "
-                    "range(10000)"
+                    "{{ config(materialized='table') }}\n"
+                    "select range as id, range % 5 as segment, range % 7 as amount\n"
+                    "from range(10000)"
                 )
             },
         )
@@ -116,8 +116,28 @@ def example_one():
         }
 
 
+def example_two():
+    with tempfile.TemporaryDirectory() as d:
+        p = project(
+            d,
+            models={
+                "events": "select * from (values (1, 5), (1, 5), (2, 7)) as t(id, amount)",
+                "incorrect_fast_path": "select distinct id, amount from {{ ref('events') }}",
+            },
+        )
+        invoke(p, "build")
+        assert rows(p, "select sum(amount) from events") == [(17,)]
+        assert rows(p, "select sum(amount) from incorrect_fast_path") == [(12,)]
+        return {
+            "multiset_total": 17,
+            "changed_semantics_total": 12,
+            "not_a_valid_performance_comparison": True,
+        }
+
+
 if __name__ == "__main__":
     print(example_one())
+    print(example_two())
 
 # TODO 1: Include the dbt build in a separate timing.
 # TODO 2: Repeat the query at another bounded size.

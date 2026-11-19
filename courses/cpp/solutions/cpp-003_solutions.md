@@ -6,7 +6,7 @@ Compare after an attempt or an explicit reveal. The [guide](../guides/cpp-003.md
 
 The type of an expression controls its arithmetic before assignment. `7/2` divides integers and discards the fractional part, so assigning that result to double later cannot restore the lost half. Converting an operand before division changes the operation. `static_cast<double>(7)/2` therefore differs from `static_cast<double>(7/2)`.
 
-`int` is a signed integer type with implementation-dependent width; do not assume it always has32 bits. `long long` has at least64 bits. `std::int64_t` names an exact64-bit signed type when provided. `std::size_t` is an unsigned size/index type. A cast requests a conversion; it does not validate the original value. First reject a negative external count, then validate the target range where necessary, then convert. Use small fixtures and explicit bounds before reasoning about larger products.
+`int` is a signed integer type with implementation-dependent width; do not assume it always has 32 bits. `long long` has at least 64 bits. `std::int64_t` names an exact 64-bit signed type when provided. `std::size_t` is an unsigned size/index type. A cast requests a conversion; it does not validate the original value. First reject a negative external count, then validate the target range where necessary, then convert. Use small fixtures and explicit bounds before reasoning about larger products.
 
 - **integer division:** division of integral operands with discarded fractional part
 - **conversion:** changing the representation/type of a value
@@ -62,11 +62,11 @@ Integer operands request integer division. One floating operand changes the oper
 
 **Inputs/evidence:** For cpp-003 Exercise 2, static_cast<double>(7)/2 versus static_cast<double>(7/2).
 
-**Expected result/shape:** For cpp-003 Exercise 2, 3.5 versus3.0.
+**Expected result/shape:** For cpp-003 Exercise 2, 3.5 versus 3.0.
 
 **Verify:** For cpp-003 Exercise 2, assert both results and identify the inner expression evaluated first.
 
-The parentheses make the operation order explicit. The late cast converts the already computed3 to 3.0; it cannot recreate a lost fractional part.
+The parentheses make the operation order explicit. The late cast converts the already computed 3 to 3.0; it cannot recreate a lost fractional part.
 
 ### Exercise 3: Guard a signed count
 
@@ -74,7 +74,7 @@ The parentheses make the operation order explicit. The late cast converts the al
 
 **Expected result/shape:** For cpp-003 Exercise 3, rejected; no unsigned index or allocation follows.
 
-**Verify:** For cpp-003 Exercise 3, inspect the guard-before-cast order and a nonnegative control case3.
+**Verify:** For cpp-003 Exercise 3, inspect the guard-before-cast order and a nonnegative control case 3.
 
 Unsigned conversion can make negative values very large. A precondition is about input meaning, not merely whether the compiler accepts a cast.
 
@@ -82,7 +82,7 @@ Unsigned conversion can make negative values very large. A precondition is about
 
 **Inputs/evidence:** For cpp-003 Exercise 4, 1000000LL*10000LL.
 
-**Expected result/shape:** For cpp-003 Exercise 4, 10000000000 in a64-bit-capable type.
+**Expected result/shape:** For cpp-003 Exercise 4, 10000000000 in a 64-bit-capable type.
 
 **Verify:** For cpp-003 Exercise 4, assert the exact number; explain why casting an overflowing int product afterward is too late.
 
@@ -94,7 +94,7 @@ The literal suffixes make the multiplication wide. A wide destination alone does
 
 **Expected result/shape:** For cpp-003 Exercise 5, 200 cents.
 
-**Verify:** For cpp-003 Exercise 5, assert integral result200 and label its unit explicitly.
+**Verify:** For cpp-003 Exercise 5, assert integral result 200 and label its unit explicitly.
 
 An integer has an exact representation for these cents values. A later lesson can introduce decimal rules; this fixture does not need binary fractional money.
 
@@ -102,7 +102,7 @@ An integer has an exact representation for these cents values. A later lesson ca
 
 **Inputs/evidence:** For cpp-003 Exercise 6, positive=3, known representable by size_t.
 
-**Expected result/shape:** For cpp-003 Exercise 6, count 3; zero would also be valid, while-1 is not.
+**Expected result/shape:** For cpp-003 Exercise 6, count 3; zero would also be valid, while -1 is not.
 
 **Verify:** For cpp-003 Exercise 6, test 3 and 0 after validation and explain that arbitrary huge values still need a range check.
 

@@ -2,11 +2,11 @@
 
 ## Level and prerequisites
 
-Advanced, approximately 120 minutes. Prerequisites: `swift-047`
+Advanced, approximately 180 minutes. Prerequisites: `swift-047`
 
 ## Learning objectives
 
-Build and test JourneyCore, then run the complete JourneyApp on a prepared Apple destination. Then deliver a project README with architecture, actual platform evidence, accessibility observations, recovery policy and one independently implemented extension.
+Build and test a complete offline-first study planner across the portable core and the Apple app. The central exercise is task 3: Build and test JourneyCore, then run the complete JourneyApp on a prepared Apple destination.
 
 ## Purpose and mental model
 
@@ -107,7 +107,7 @@ struct LessonMain {
 
 6. **Transfer and justify.** Deliver a project README with architecture, actual platform evidence, accessibility observations, recovery policy and one independently implemented extension.
 
-For each task, keep a short evidence table: input or initial state, prediction, observed value or diagnostic, and the rule that explains it. The guided examples establish mechanisms; the independent and transfer tasks require your own representation and explanation. Use the separate solution after attempting the task, then close it and reconstruct one boundary case.
+For each task, keep a short evidence table: input or initial state, prediction, observed value or diagnostic, and the rule that explains it. The guided examples establish mechanisms; the independent and transfer tasks require your own representation and explanation. The separate explanation gives an executed reference answer where one has been written and says plainly where none exists yet. Open it only after your own attempt, then close it and reconstruct one boundary case.
 
 ## Common pitfalls and diagnosis
 
@@ -117,9 +117,9 @@ A useful regression case distinguishes the intended rule from the tempting wrong
 
 ## Progressive hints
 
-1. Name the input, output and invariant using the vocabulary above. Reproduce Example A before changing two things at once.
-2. Compare the changed condition in Example B. Identify the first line whose behavior differs and state why.
-3. Reduce your independent task to a normal case, an empty or boundary case, and an invalid case. Write expected observations before inspecting the reference.
+1. Reproduce Example A (Produce a stable completion summary) before changing anything, and confirm its observation: One of two uniquely identified items is complete.
+2. Compare Example B (Preserve identity across a value update) with Example A and name the first line whose behavior differs. Its observation is: The update retains identity and the prior snapshot.
+3. Before opening the explanation, test your task 3 attempt against this lesson's main pitfall: A passing portable reference does not qualify simulator interaction or app signing.
 
 ## Self-check and next step
 
@@ -127,7 +127,7 @@ Explain Offline-first, Acceptance evidence, Extension boundary without reading t
 
 ## Sources and execution boundary
 
-[Official language or framework documentation](https://docs.swift.org/swift-book/documentation/the-swift-programming-language/). The prose, small fixtures and task designs in this chapter are original. Documentation links provide additional API detail, not a dependency fetched by the classroom. Runtime qualification is recorded separately by the repository validation workflow. Reading a guide, compiling a reference, running its assertions and completing an external project are distinct achievements.
+[Official language or framework documentation](https://docs.swift.org/swift-book/documentation/the-swift-programming-language/). The prose, small fixtures and task designs in this chapter are original. Documentation links provide additional API detail, not a dependency fetched by the classroom. Reading a guide, compiling a reference, running its assertions and completing an external project are distinct achievements.
 
 ## Ask an AI tutor about this lesson
 

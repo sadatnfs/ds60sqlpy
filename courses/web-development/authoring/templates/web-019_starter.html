@@ -5,15 +5,45 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Pseudo-classes, pseudo-elements and stateful styling: my attempt</title>
     <style>
-      /* Implement the lesson-specific CSS. Keep keyboard focus visible. */
+      /*
+        Worked example 1: A focused group and an invalid field
+        .field:focus-within {
+          border-color: #0753a4;
+        }
+        .field:has(input:user-invalid) {
+          border-color: #9c3200;
+        }
+      */
+
+      /*
+        Worked example 2: A native checked state
+        input:checked + span {
+          font-weight: 700;
+        }
+      */
+
+      /* Write the CSS for the exercises here. Keep keyboard focus visible. */
     </style>
   </head>
   <body>
-    <!-- web-019: Build a preferences list whose selected state is visible and semantic. -->
-    <!-- Save your prediction, then implement the six exercises from the guide. -->
+    <!--
+      web-019 exercises. Hints are in the guide; answers are in the solutions folder.
+      1. Distinguish a condition selector from generated content.
+      2. Add focus-within feedback around a labeled input.
+      3. Build a preferences list whose selected state is visible and semantic.
+      4. Remove an essential instruction placed only in ::before and restore it as HTML.
+      5. Operate the controls without hover.
+      6. Explain why CSS state cannot authorize a server action.
+    -->
     <main>
-      <h1>Pseudo-classes, pseudo-elements and stateful styling</h1>
-      <!-- Build your own document here. The reference is separate. -->
+      <h1>Visible preferences</h1>
+      <fieldset>
+        <legend>Practice reminders</legend>
+        <label class="field">
+          <input type="checkbox" checked /><span>Include a boundary case</span>
+        </label>
+        <label class="field"> <input type="checkbox" /><span>Review earlier notes</span> </label>
+      </fieldset>
     </main>
   </body>
 </html>

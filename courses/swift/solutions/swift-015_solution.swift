@@ -16,6 +16,17 @@ struct LessonMain {
       factor = 5
       precondition(scale(3) == 6 && factor == 5)
     }
+
+    do {
+      // Task 3: Independent construction
+      func transformAll(_ values: [Int], _ change: (Int) -> Int) -> [Int] {
+        var result: [Int] = []
+        for value in values { result.append(change(value)) }
+        return result
+      }
+      let scaled = transformAll([1, 2, 3]) { $0 * 10 }
+      precondition(scaled == [10, 20, 30])
+    }
     print("swift-015: passed")
   }
 }

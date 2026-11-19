@@ -16,7 +16,7 @@ A gated feed-forward network multiplies two projections. SwiGLU uses SiLU(xWg) e
 
 **RMSNorm:** Normalization by root-mean-square magnitude without mean subtraction.
 
-**SwiGLU:** A gated feed-forward transformation using aSiLU-activated gate.
+**SwiGLU:** A gated feed-forward transformation using a SiLU-activated gate.
 
 **Jacobian:** The matrix of output sensitivities to input coordinates.
 
@@ -26,7 +26,7 @@ All examples use float64 and small feature widths. RMSNorm computes \(\frac{x}{\
 
 ## Exercise 1: Compare RMSNorm and LayerNorm
 
-The question is: Normalize vector [3, 4] with unit gain and epsilon 1e-8.
+The question is: Normalize the vector [3, 4] with unit gain and epsilon 1e-8.
 
 The two methods normalize different statistics. Equal output shape does not imply that one is a drop-in numerical replacement for the other.
 
@@ -43,7 +43,7 @@ np.testing.assert_allclose(
 
 **Expected:** RMSNorm mean nonzero; LayerNorm mean approximately 0.
 
-**Verify:** Compare the computed values or written argument with RMSNorm mean nonzero; LayerNorm mean approximately 0.
+**Verify:** In a fresh process, the exercise checks confirm `abs(rms.mean().item()) > 0.5`; `centered.mean().item()` matches `0` within 1e-12 and `rms.detach().numpy()` matches `np.array([3.0, 4.0]) / np.sqrt(12.5 + 1e-08)` within 1e-12.
 
 ## Exercise 2: Trace pre/post residual Jacobians
 
@@ -66,13 +66,13 @@ torch.testing.assert_close(
 
 **Expected:** pre-norm Jacobian is identity; post-norm Jacobian annihilates a constant feature shift.
 
-**Verify:** Compare the computed values or written argument with pre-norm Jacobian is identity; post-norm Jacobian annihilates a constant feature shift.
+**Verify:** In a fresh process, the exercise checks confirm `pre` matches `torch.eye(3, dtype=torch.float64)` within 1e-12 and `post @ torch.ones(3, dtype=torch.float64)` matches `torch.zeros(3, dtype=torch.float64)` within 1e-10.
 
 ## Exercise 3: Calculate a SwiGLU gate derivative
 
 The question is: Use scalar \(g=0\), \(u=2\) and output SiLU(g)*u.
 
-At zero, SiLU has derivative one-half. Multiplication by up2 gives gate gradient 1, while the up branch sees the zero gate value. A connected zero gradient is not a missing path.
+At zero, SiLU has derivative one-half. Multiplication by up 2 gives gate gradient 1, while the up branch sees the zero gate value. A connected zero gradient is not a missing path.
 
 ```python
 gate = torch.tensor(0.0, dtype=torch.float64, requires_grad=True)
@@ -84,11 +84,11 @@ assert output.item() == 0 and gate.grad.item() == 1 and up.grad.item() == 0
 
 **Expected:** output 0; gradient with respect to g is 1; with respect to u is 0.
 
-**Verify:** Compare the computed values or written argument with output 0; gradient with respect to g is 1; with respect to u is 0.
+**Verify:** In a fresh process, the exercise checks confirm `output.item() == 0`, `gate.grad.item() == 1` and `up.grad.item() == 0`.
 
 ## Exercise 4: Check the RMSNorm Jacobian formula
 
-The question is: Compare autograd with \(J=\frac{I}{r}-\frac{xx^{\mathsf T}}{d\cdot {r}^{3}}\) at x=[1, 2, 3].
+The question is: Compare autograd with \(J=\frac{I}{r}-\frac{xx^{\mathsf T}}{d\cdot {r}^{3}}\) at x = [1, 2, 3].
 
 The derivative contains a direct coordinate term andacoupling term through the sharedRMSdenominator. Omitting the coupling would treat normalization as constant scaling and produce incorrect gradients.
 
@@ -103,13 +103,13 @@ torch.testing.assert_close(automatic, analytic, atol=1e-10, rtol=0)
 
 **Expected:** matrices agree within 1e-10.
 
-**Verify:** Compare the computed values or written argument with matrices agree within 1e-10.
+**Verify:** In a fresh process, the exercise checks confirm `automatic` matches `analytic` within 1e-10.
 
 ## Exercise 5: Match feed-forward parameter budgets
 
 The question is: Compare plain FFN model width \(d=4\), hidden 6 with SwiGLU hidden width 4, excluding biases; execute a gated block with input and output width 4.
 
-Matching hidden widths would not match parameter counts. The2/3 width relation is a budget arithmetic rule here, not a universal model-quality prescription.
+Matching hidden widths would not match parameter counts. The 2/3 width relation is a budget arithmetic rule here, not a universal model-quality prescription.
 
 ```python
 d = 4
@@ -126,11 +126,11 @@ assert tuple(result.shape) == (2, 4) and torch.isfinite(result).all()
 
 **Expected:** both 48 weight entries; output shape(2, 4).
 
-**Verify:** Compare the computed values or written argument with both 48 weight entries; output shape(2, 4).
+**Verify:** In a fresh process, the exercise checks confirm `2 * d * plain_hidden == 3 * d * gated_hidden == 48`; `tuple(result.shape) == (2, 4)` and `torch.isfinite(result).all()`.
 
 ## Exercise 6: Test invariance and zero-vector boundaries
 
-The question is: Shift x=[1, 2, 3] by 5, compare the two normalizers, and normalize zero.
+The question is: Shift x = [1, 2, 3] by 5, compare the two normalizers, and normalize zero.
 
 Epsilon handles zero magnitude, but does not create the mean-subtraction invariance thatRMSNorm deliberately omits. These invariants clarify what information each normalizer removes.
 
@@ -143,7 +143,7 @@ assert torch.isfinite(rms_norm(torch.zeros(3, dtype=torch.float64))).all()
 
 **Expected:** LayerNorm shift invariant; RMSNorm changes; both zero cases finite.
 
-**Verify:** Compare the computed values or written argument with LayerNorm shift invariant; RMSNorm changes; both zero cases finite.
+**Verify:** In a fresh process, the exercise checks confirm `layer_norm(base + 5)` matches `layer_norm(base)` within 1e-12; `not torch.allclose(rms_norm(base + 5), rms_norm(base))` and `torch.isfinite(rms_norm(torch.zeros(3, dtype=torch.float64))).all()`.
 
 ## Review after comparison
 

@@ -1,11 +1,19 @@
 // Answer-free learner source. Save your own copy before editing.
-// Exercise 1: Call a pure function
-// Use add with 2, 3 and with negative 1, 1.
-// Expected: 5 and 0.
+// Exercise 1: Call a pure function: predict an edited check
+// Copy Example A into a scratch `main.mjs` and change `assert.equal(add(-1, 1), 0);` to
+// `assert.equal(add(-2, 1), 0);` inside its check. Before running it, predict whether the
+// check still passes and explain why; then restore it.
+// Expected: The changed run fails with an `AssertionError` at the check
+// `assert.equal(add(-1, 1), 0)`. Restoring the original line brings back the worked
+// observation: 5 and 0.
 
-// Exercise 2: Build independent closures
-// Create two counters; increment the first twice and the second once.
-// Expected: first 1, 2; second 1.
+// Exercise 2: Build independent closures: diagnose an edited check
+// A careless edit changed a check in Example B so that it reads `assert.equal(second(),
+// 2);`. Run Example B with that line, explain why the edited check now fails for the same
+// program state, and restore it.
+// Expected: Before the repair the run fails with an `AssertionError` at the check
+// `assert.equal(second(), 1)`; after it the line reads `assert.equal(second(), 1);` again
+// and first 1, 2; second 1.
 
 // Exercise 3: Compare let and var loop capture
 // Create three closures in a let loop and three in a var loop.

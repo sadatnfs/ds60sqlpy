@@ -1,4 +1,4 @@
-"""mle-001: worked starting point; complete the guide's six changes."""
+"""mle-001: both worked cases; complete the guide's six changes."""
 
 import hashlib
 import json
@@ -57,8 +57,27 @@ def example_one():
     return {"contract": contract, "records": len(frame), "contract_hash": digest(contract)}
 
 
+def example_two():
+    dependencies = {
+        "validate": set(),
+        "features": {"validate"},
+        "train": {"features"},
+        "evaluate": {"train"},
+        "publish": {"evaluate"},
+    }
+    completed = {"validate", "features", "train"}
+    ready = sorted(
+        name
+        for name, parents in dependencies.items()
+        if name not in completed and parents <= completed
+    )
+    assert ready == ["evaluate"] and "publish" not in ready
+    return {"ready": ready, "publication_requires_evaluation": True}
+
+
 if __name__ == "__main__":
     print(example_one())
+    print(example_two())
 
 # TODO 1: Describe whose decisions the rows represent.
 # TODO 2: Add a feature-list validation that rejects label.

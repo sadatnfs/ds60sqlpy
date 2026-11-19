@@ -37,6 +37,13 @@ internal static class Program {
             "filtered mutation");
       Check(before.Length == 4, "snapshot retained");
     }
+    {
+      // Task 3: Independent construction
+      var original = new List<int> { -1, 2, -3, 4 };
+      List<int> positives = original.Where(value => value > 0).ToList();
+      Check(positives.SequenceEqual(new[] { 2, 4 }), "filtered copy");
+      Check(original.Count == 4 && original[0] == -1, "original unchanged");
+    }
     Console.WriteLine("csharp-009: passed");
     await Task.CompletedTask;
   }

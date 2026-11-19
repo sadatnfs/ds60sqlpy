@@ -104,7 +104,7 @@ def example_two():
     with tempfile.TemporaryDirectory() as d:
         p = project(
             d,
-            models={"total": "select sum(amount)*2 as amount from {{ ref('orders') }}"},
+            models={"total": "select sum(amount) * 2 as amount from {{ ref('orders') }}"},
             seeds={"orders": "id,amount\n1,5\n2,7\n"},
         )
         (p / "tests").mkdir()

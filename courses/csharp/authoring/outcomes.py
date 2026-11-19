@@ -1,0 +1,58 @@
+"""Lesson outcomes for the C# route: one observable ability per lesson.
+
+render.py requires an entry for every lesson and rejects an outcome that repeats the
+transfer task. MINUTES overrides the default duration for the capstone.
+"""
+
+OUTCOMES = {
+    1: "Build and run Program.cs and check a computed result instead of trusting printed text.",
+    2: "Choose numeric types deliberately, convert explicitly and parse text with TryParse instead of exceptions.",
+    3: "Detect integer overflow with checked arithmetic and calculate money with decimal and a named rounding rule.",
+    4: "Compare, transform and measure strings with explicit culture and Unicode policies.",
+    5: "Write complete, non-overlapping decisions with if statements and switch expressions, including boundary values.",
+    6: "Write loops with a stated invariant and termination condition, including empty and not-found cases.",
+    7: "Write methods with validated parameters and explicit return contracts that reject invalid input.",
+    8: "Tell array aliases from copies and traverse rectangular arrays with bounds taken from the data.",
+    9: "Filter and mutate lists safely, telling capacity from count and copies from in-place changes.",
+    10: "Count and deduplicate with dictionaries and sets under an explicit comparer, keeping a present zero distinct from absence.",
+    11: "Represent missing information with nullable types and keep missing, zero and present values distinct.",
+    12: "Predict copying and sharing for structs and classes and choose the right kind for a value or shared state.",
+    13: "Encapsulate state in a class whose constructor and methods keep its invariants on every path.",
+    14: "Use records and structs for value equality and explain what a shallow with-copy shares.",
+    15: "Model explicit states with records and pattern matching so each state carries only its own data.",
+    16: "Build a validated inventory importer that reports accepted totals and rejected lines deterministically.",
+    17: "Program against an interface so different policies can be substituted without changing the consumer.",
+    18: "Write generic types and methods whose constraints state exactly the capabilities they need.",
+    19: "Use delegates, closures and events, including what a closure captures and how to unsubscribe.",
+    20: "Write LINQ queries and predict when deferred execution observes later source changes.",
+    21: "Group and join data at an explicit grain without duplicating or dropping records.",
+    22: "Write lazy iterators with yield return and validate their arguments at the call boundary.",
+    23: "Throw and catch exceptions that keep invalid input, environment failures and their causes distinct.",
+    24: "Release disposable resources deterministically with using, including when an exception occurs.",
+    25: "Read and write files with explicit encodings inside an owned temporary folder that is always cleaned up.",
+    26: "Serialize JSON contracts and validate decoded data before trusting it.",
+    27: "Represent instants and durations with DateTimeOffset and format them independently of culture.",
+    28: "Write table-driven tests with boundary cases that a plausible wrong implementation fails.",
+    29: "Write async methods that await results, propagate failures and keep input order with Task.WhenAll.",
+    30: "Cancel work cooperatively with CancellationToken while keeping already committed results.",
+    31: "Connect producers and consumers through bounded channels with explicit completion.",
+    32: "Build a deterministic, cancellable import service that keeps per-item results and rejection counts.",
+    33: "Protect compound invariants with a lock so concurrent updates never expose a half-finished change.",
+    34: "Use Interlocked and concurrent collections with pure update functions for correct concurrent counts.",
+    35: "Use Span and ReadOnlySpan to slice data without copying while respecting their lifetime rules.",
+    36: "Rent and return pooled buffers with finally and reason about retained memory.",
+    37: "Compare an algorithm's work with and without an index while keeping the same equality policy.",
+    38: "Validate bounded input with non-backtracking regular expressions and separate domain rules.",
+    39: "Call HTTP services through an injected HttpClient and test status and content contracts offline.",
+    40: "Separate a domain core from its adapters so validation and time are testable without infrastructure.",
+    41: "Design an HTTP API contract and run it in the prepared ASP.NET project with real responses.",
+    42: "Apply allowlists and redaction at trust boundaries so errors stay useful without leaking secrets.",
+    43: "Explain restore, build, run and publish, and check the target framework a build actually produced.",
+    44: "Emit structured events and counts that account for every submitted record.",
+    45: "Weigh reflection against typed access and explain what trimming and AOT require.",
+    46: "Use C# 12 to 14 features such as collection expressions, primary constructors and null-conditional assignment where they make code clearer.",
+    47: "Make retried operations idempotent by storing receipts and rejecting conflicting reuse of an identifier.",
+    48: "Build, test and review a complete .NET data application across a domain library and an API adapter.",
+}
+
+MINUTES = {48: 180}

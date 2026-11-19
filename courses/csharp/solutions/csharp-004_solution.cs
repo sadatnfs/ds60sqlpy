@@ -34,6 +34,15 @@ internal static class Program {
       Check(symbol.EnumerateRunes().Count() == 1, "Unicode scalar");
       Check(Encoding.UTF8.GetByteCount(symbol) == 4, "UTF-8 bytes");
     }
+    {
+      // Task 3: Independent construction
+      bool SameKey(string left, string right) {
+        return string.Equals(left, right, StringComparison.OrdinalIgnoreCase);
+      }
+      Check(SameKey("Report-ID", "report-id"), "case-insensitive match");
+      Check(!SameKey("report-id", "report_id"), "different characters differ");
+      Check(SameKey("i", "I"), "ordinal policy, no culture rules");
+    }
     Console.WriteLine("csharp-004: passed");
     await Task.CompletedTask;
   }

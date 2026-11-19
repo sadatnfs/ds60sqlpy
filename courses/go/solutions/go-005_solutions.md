@@ -8,9 +8,11 @@ An array includes its length in its type and owns a fixed sequence of elements. 
 
 []int constructs a slice type; [3]int constructs an array type. values[a:b] selects indices a through b-1. len is the visible element count and cap is the maximum length before reallocation is required. copy(dst,src) copies the smaller length and returns that count. append returns a new slice descriptor, so retain the returned value. A nil slice has length zero and can be appended to.
 
-## 1. Observe shared storage
+## 1. Observe shared storage: change one input
 
-Take the first two elements of 1, 2, 3 and change the first through the slice.
+Copy worked example 1 into a scratch pad and change `view[0] = 9` to `view[1] = 9`. Before running, predict which check fails and which value it now sees; then run it and restore the original line.
+
+The unchanged code is worked example 1:
 
 ```go
 values := []int{1, 2, 3}
@@ -19,13 +21,15 @@ view[0] = 9
 check(values[0] == 9, "alias")
 ```
 
-**Expected:** The original first element becomes 9.
+**Expected:** The changed run panics with `alias` because `values[0] == 9` no longer holds. Restoring the original line brings back the worked observation: the original first element becomes 9.
 
 Slicing constructs a view over existing storage. It does not give the new variable independent ownership of its elements.
 
-## 2. Make an independent copy
+## 2. Make an independent copy: debug a regression
 
-Copy 1, 2, 3 into a new slice and mutate that copy.
+A regression changed one token in worked example 2, so one line now reads `values := []int{2, 2, 3}`. Run worked example 2 with that line, use the failure to locate the defect and repair it without changing the check.
+
+The unchanged code is worked example 2:
 
 ```go
 values := []int{1, 2, 3}
@@ -34,7 +38,7 @@ cloned[0] = 9
 check(values[0] == 1 && cloned[0] == 9, "copy")
 ```
 
-**Expected:** The original stays 1 while the copy starts 9.
+**Expected:** Before the repair the program panics with `copy`; after it the line reads `values := []int{1, 2, 3}` again and the original stays 1 while the copy starts 9.
 
 Appending into initially nil storage allocates enough backing storage for these nonempty values. Nested pointers would still require a deeper copy policy.
 

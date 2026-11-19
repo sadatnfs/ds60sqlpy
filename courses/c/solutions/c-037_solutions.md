@@ -8,27 +8,31 @@ A mutex protects shared state only when every relevant reader and writer follows
 
 pthread_mutex_lock and unlock delimit the protected region. pthread_cond_wait expects the mutex to be locked, releases it while waiting, and reacquires it before returning. while(!ready) wait is the correct shape for this fixture. Signal after updating the protected state. Join the worker before destroying synchronization objects. A sleep cannot replace the predicate protocol.
 
-## Exercise 1: Protect a shared count
+## Exercise 1: Protect a shared count: predict an edited check
 
-Run four threads doing one hundred locked increments each.
+Copy worked example 1 into a scratch pad and change `CHECK(locked_total(4, 100) == 400);` to `CHECK(locked_total(5, 100) == 400);` inside its CHECK. Before running, predict whether the CHECK still holds and explain why; then restore it.
+
+The unchanged code is worked example 1:
 
 ```c
 CHECK(locked_total(4, 100) == 400);
 ```
 
-**Expected:** The final count is 400.
+**Expected:** The changed run stops with `Check failed` at the CHECK on `locked_total(4, 100) == 400`. Restoring the original line brings back the worked observation: the final count is 400.
 
 Every increment is inside the same critical section, and the parent joins all writers before reading the final value.
 
-## Exercise 2: Handle one worker
+## Exercise 2: Handle one worker: diagnose an edited check
 
-Run one worker doing seven increments.
+A careless edit changed the CHECK in worked example 2 so that it reads `CHECK(locked_total(2, 7) == 7);`. Run worked example 2 with that line, explain why the edited CHECK now fails for the same program state, and restore it.
+
+The unchanged code is worked example 2:
 
 ```c
 CHECK(locked_total(1, 7) == 7);
 ```
 
-**Expected:** The result is 7.
+**Expected:** Before the repair the run stops with `Check failed` at the CHECK on `locked_total(1, 7) == 7`; after it the line reads `CHECK(locked_total(1, 7) == 7);` again and the result is 7.
 
 The sequential boundary exercises the same synchronization implementation without depending on contention.
 

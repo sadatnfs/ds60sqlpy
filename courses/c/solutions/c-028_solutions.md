@@ -8,28 +8,32 @@ A multi-file C project separates declarations in headers from definitions in sou
 
 A header declares a function prototype under an include guard. One .c file defines that function, and a caller includes the header. Compile each source with -c to produce an object, then link the objects into one executable. Put libraries after the objects that reference them when the linker requires left-to-right resolution. The browser pad remains one main.c; the separate fixture demonstrates actual headers, source files, tests and a Makefile.
 
-## Exercise 1: Call a declared API
+## Exercise 1: Call a declared API: change one input
 
-Use the stats_sum prototype before its definition.
+Copy worked example 1 into a scratch pad and change `int values[] = {2, 4, 6};` to `int values[] = {3, 4, 6};`. Before running, predict which CHECK fails and which value it now sees; then run it and restore the original line.
+
+The unchanged code is worked example 1:
 
 ```c
 int values[] = {2, 4, 6};
 CHECK(stats_sum(values, 3) == 12);
 ```
 
-**Expected:** Summing 2, 4, 6 returns 12.
+**Expected:** The changed run stops with `Check failed` at the CHECK on `stats_sum(values, 3) == 12`. Restoring the original line brings back the worked observation: summing 2, 4, 6 returns 12.
 
 A compatible declaration lets the compiler validate the call independently of where the definition appears.
 
-## Exercise 2: Use an empty API contract
+## Exercise 2: Use an empty API contract: diagnose an edited check
 
-Sum a zero-length view.
+A careless edit changed the CHECK in worked example 2 so that it reads `CHECK(stats_sum(NULL, 0) != 0);`. Run worked example 2 with that line, explain why the edited CHECK now fails for the same program state, and restore it.
+
+The unchanged code is worked example 2:
 
 ```c
 CHECK(stats_sum(NULL, 0) == 0);
 ```
 
-**Expected:** The result is zero.
+**Expected:** Before the repair the run stops with `Check failed` at the CHECK on `stats_sum(NULL, 0) == 0`; after it the line reads `CHECK(stats_sum(NULL, 0) == 0);` again and the result is zero.
 
 The interface explicitly permits this empty case and the implementation makes no pointer access.
 

@@ -18,7 +18,7 @@ TinyDecoder.forward accepts new IDs and optional past K/V. It concatenates along
 
 ## Exercise 1: Compute a full-prefix oracle
 
-The question is: Initialize seed7 decoder and evaluate IDs2,5,7,3 at once.
+The question is: Initialize the seed-7 decoder and evaluate IDs 2, 5, 7, 3 at once.
 
 The reference recomputes the complete context without relying on cached state. It provides a separate path for checking the incremental implementation.
 
@@ -32,9 +32,9 @@ with torch.no_grad():
 assert tuple(full.shape) == (1, 4, 16)
 ```
 
-**Expected:** logits shape(1,4,16).
+**Expected:** logits shape (1, 4, 16).
 
-**Verify:** Compare the computed values or written argument with logits shape(1,4,16).
+**Verify:** In a fresh process, the exercise checks confirm `tuple(full.shape) == (1, 4, 16)`.
 
 ## Exercise 2: Run one token at a time
 
@@ -55,7 +55,7 @@ torch.testing.assert_close(incremental, full, atol=1e-6, rtol=0)
 
 **Expected:** incremental logits match full within 1e-6.
 
-**Verify:** Compare the computed values or written argument with incremental logits match full within 1e-6.
+**Verify:** In a fresh process, the exercise checks confirm `incremental` matches `full` within 1e-6.
 
 ## Exercise 3: Inspect cache growth
 
@@ -67,13 +67,13 @@ The time dimension grows with consumed tokens. The head and feature dimensions a
 assert tuple(cache["k"].shape) == tuple(cache["v"].shape) == (1, 2, 4, 16)
 ```
 
-**Expected:** cache shape(1,2,4,16).
+**Expected:** cache shape (1, 2, 4, 16).
 
-**Verify:** Compare the computed values or written argument with cache shape(1,2,4,16).
+**Verify:** In a fresh process, the exercise checks confirm `tuple(cache['k'].shape) == tuple(cache['v'].shape) == (1, 2, 4, 16)`.
 
 ## Exercise 4: Bind ownership
 
-The question is: Associate the cache with requestA and modelv1; reject requestB.
+The question is: Associate the cache with request A and model v1; reject request B.
 
 The numerical decoder cannot infer which person or request owns a tensor. Ownership belongs at the caller boundary and must be tested explicitly.
 
@@ -98,7 +98,7 @@ else:
 
 **Expected:** ValueError for foreign request.
 
-**Verify:** Compare the computed values or written argument with ValueError for foreign request.
+**Verify:** In a fresh process, the exercise checks confirm `acquire(owned, 'A', 'v1') is cache` and `acquire(owned, 'B', 'v1')` raises `ValueError`.
 
 ## Exercise 5: Start a fresh request empty
 
@@ -114,11 +114,11 @@ torch.testing.assert_close(fresh, full[:, :1], atol=1e-6, rtol=0)
 
 **Expected:** logits match the original first position.
 
-**Verify:** Compare the computed values or written argument with logits match the original first position.
+**Verify:** In a fresh process, the exercise checks confirm `fresh` matches `full[:, :1]` within 1e-6.
 
 ## Exercise 6: Invalidate after a model change
 
-The question is: Attempt to use the v1-owned cache with versionv2.
+The question is: Attempt to use the v1-owned cache with version v2.
 
 Keys and values were computed using specific weights and tokenization. Reusing them after either changes can produce inconsistent inference even if the dimensions remain compatible.
 
@@ -133,7 +133,7 @@ else:
 
 **Expected:** ValueError for stale version.
 
-**Verify:** Compare the computed values or written argument with ValueError for stale version.
+**Verify:** In a fresh process, the exercise checks confirm `acquire(owned, 'A', 'v2')` raises `ValueError`.
 
 ## Review after comparison
 

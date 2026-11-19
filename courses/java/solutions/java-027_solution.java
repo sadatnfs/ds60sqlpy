@@ -90,13 +90,15 @@ public class Main {
   public static void main(String[] args) throws Exception {
     // Exercise 1: Compile a literal application
     try (BuildFixture fixture = new BuildFixture()) {
-      assert fixture.compile() == 0;
+      int compiled = fixture.compile();
+      assert compiled == 0;
       assert java.nio.file.Files.isRegularFile(fixture.classes.resolve("Hello.class"));
     }
 
     // Exercise 2: Create a runnable archive
     try (BuildFixture fixture = new BuildFixture()) {
-      assert fixture.compile() == 0;
+      int compiled = fixture.compile();
+      assert compiled == 0;
       var jar = fixture.pack("one.jar");
       try (var archive = new java.util.jar.JarFile(jar.toFile())) {
         assert archive.getJarEntry("Hello.class") != null;
@@ -106,7 +108,8 @@ public class Main {
 
     // Exercise 3: Compare two builds with fixed metadata
     try (BuildFixture fixture = new BuildFixture()) {
-      assert fixture.compile() == 0;
+      int compiled = fixture.compile();
+      assert compiled == 0;
       var a = fixture.pack("a.jar");
       var b = fixture.pack("b.jar");
       assert Arrays.equals(
@@ -121,8 +124,10 @@ public class Main {
 
     // Exercise 4: Execute the packaged entrypoint
     try (BuildFixture fixture = new BuildFixture()) {
-      assert fixture.compile() == 0;
-      assert fixture.run(fixture.pack("run.jar")).strip().equals("build-ok");
+      int compiled = fixture.compile();
+      assert compiled == 0;
+      String output = fixture.run(fixture.pack("run.jar"));
+      assert output.strip().equals("build-ok");
     }
 
     // Exercise 5: Detect a changed source identity

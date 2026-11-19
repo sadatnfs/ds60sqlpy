@@ -8,9 +8,11 @@ The capstone combines parsing, range checks, bounded storage, deterministic aggr
 
 parse_record separates a bounded name from a complete decimal value using strtol and an end pointer. summarize stages row count and total, checks addition before updating, and commits only when every row is valid. The output remains unchanged on failure. The separately prepared stats project illustrates headers and tests; this capstone keeps its full deterministic data path within the ordinary one-file pad.
 
-## Exercise 1: Summarize valid records
+## Exercise 1: Summarize valid records: change one input
 
-Process alpha,3 and beta,4.
+Copy worked example 1 into a scratch pad and change `const char *rows[] = {"alpha,3", "beta,4"};` to `const char *rows[] = {"alpha,4", "beta,4"};`. Before running, predict which CHECK fails and which value it now sees; then run it and restore the original line.
+
+The unchanged code is worked example 1:
 
 ```c
 const char *rows[] = {"alpha,3", "beta,4"};
@@ -18,13 +20,15 @@ struct Summary out = {0};
 CHECK(summarize(rows, 2, &out) && out.rows == 2 && out.total == 7);
 ```
 
-**Expected:** Two rows produce total 7.
+**Expected:** The changed run stops with `Check failed` at the CHECK on `summarize(rows, 2, &out) && out.rows == 2 && out.total == 7`. Restoring the original line brings back the worked observation: two rows produce total 7.
 
 The total represents the complete accepted batch, not merely a successful prefix.
 
-## Exercise 2: Reject a malformed record
+## Exercise 2: Reject a malformed record: debug a regression
 
-Process one valid record followed by a negative count.
+A regression changed one token in worked example 2, so one line now reads `struct Summary out = {10, 99};`. Run worked example 2 with that line, use the failing CHECK to locate the defect and repair it without changing the CHECK.
+
+The unchanged code is worked example 2:
 
 ```c
 const char *rows[] = {"alpha,3", "beta,-1"};
@@ -32,7 +36,7 @@ struct Summary out = {9, 99};
 CHECK(!summarize(rows, 2, &out) && out.rows == 9 && out.total == 99);
 ```
 
-**Expected:** The batch fails and the previous summary remains unchanged.
+**Expected:** Before the repair the run stops with `Check failed` at the CHECK on `!summarize(rows, 2, &out) && out.rows == 9 && out.total == 99`; after it the line reads `struct Summary out = {9, 99};` again and the batch fails and the previous summary remains unchanged.
 
 Staging prevents a partial total from masquerading as a successful batch result.
 

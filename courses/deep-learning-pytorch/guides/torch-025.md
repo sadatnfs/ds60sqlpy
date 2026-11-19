@@ -6,7 +6,13 @@ Advanced; approximately 120 minutes. Direct prerequisites: `torch-024`. The prer
 
 ## Learning objectives
 
-Embedding objectives teach a representation to preserve selected relationships. The central investigation is concrete: Use anchor[1, 0], positive[1, 1], negative[0, 1]. The finish condition is dots 1, 0; cosines 1/sqrt 2, 0. positive probability increases; argmax remains 0. A useful explanation connects the calculation to the reason it is needed, rather than treating a function name as a definition.
+Train and audit an embedding objective by separating dot products, cosine similarity, temperature and candidate identities.
+
+Central investigation: Score an anchor against one positive and one negative vector, rescale the positive, compute the two-candidate loss and vary the temperature.
+
+Finish condition: Dot scores are 1 and 0 with cosines \(\frac{1}{\sqrt{2}}\) and 0, scaling the positive by 10 changes only the dot score, the loss is \(\log(1+\exp(-1))\), temperature 0.5 raises the positive probability without changing the argmax, and a shared document ID is detected.
+
+The worked examples demonstrate the mechanism; exercises 1-3 transfer it to new inputs and exercises 4-6 extend it to failures and boundary cases. A useful explanation connects the calculation to the reason it is needed, rather than treating a function name as a definition.
 
 ## Purpose and mental model
 
@@ -50,11 +56,11 @@ For nonzero vectors a and b, the dot product is \(\sum_i a_i b_i\) and cosine is
 
 A zero vector has no direction. PyTorch's normalization/similarity APIs use an epsilon convention for numerical stability; receiving a finite number from that convention does not make a zero vector semantically informative. If the application requires directional similarity, validate finite nonzero norms and define a refusal or fallback policy. The paired TensorFlow chapter's explicit zero-norm rejection is a data contract, not a claim that every framework cosine API raises automatically. [PyTorch 2.9 normalize](https://docs.pytorch.org/docs/2.9/generated/torch.nn.functional.normalize.html).
 
-Let candidates have scores s_j and let candidate 0 be the positive. For temperature \(\tau>0\), define \(p_j=\frac{\exp(s_j/\tau)}{\sum_k\exp(s_k/\tau)}\). The loss is \(-\log p_0=\operatorname{logsumexp}(s/\tau)-\frac{s_0}{\tau}\). Stable cross entropy computes this without manually exponentiating large logits. With scores[1, 0] and tau 1, p_0≈0.731059 and loss≈0.313262, which equals \(\log(1+\exp(-1))\). With tau 0.5, the effective logits are[2, 0], p_0≈0.880797 and loss≈0.126928.
+Let candidates have scores s_j and let candidate 0 be the positive. For temperature \(\tau>0\), define \(p_j=\frac{\exp(s_j/\tau)}{\sum_k\exp(s_k/\tau)}\). The loss is \(-\log p_0=\operatorname{logsumexp}(s/\tau)-\frac{s_0}{\tau}\). Stable cross entropy computes this without manually exponentiating large logits. With scores [1, 0] and tau 1, p_0≈0.731059 and loss≈0.313262, which equals \(\log(1+\exp(-1))\). With tau 0.5, the effective logits are [2, 0], p_0≈0.880797 and loss≈0.126928.
 
-Positive temperature scaling preserves the ranking of fixed scores. It changes probabilities and the derivative \(\frac{\partial L}{\partial s_{j}}=\frac{p_{j}-y_{j}}{\tau}\). Lower temperature does not guarantee a larger gradient on every example, because the probabilities also change. For this already-correct pair, the positive-score derivative is approximately-0.268941 at tau 1 and-0.238406 at tau 0.5. Hard or incorrectly ranked examples can behave differently. Treat temperature as an objective and calibration choice, not a universal gradient amplifier.
+Positive temperature scaling preserves the ranking of fixed scores. It changes probabilities and the derivative \(\frac{\partial L}{\partial s_{j}}=\frac{p_{j}-y_{j}}{\tau}\). Lower temperature does not guarantee a larger gradient on every example, because the probabilities also change. For this already-correct pair, the positive-score derivative is approximately -0.268941 at tau 1 and -0.238406 at tau 0.5. Hard or incorrectly ranked examples can behave differently. Treat temperature as an objective and calibration choice, not a universal gradient amplifier.
 
-The reference trains neither candidate vector in its projection check. It defines q=aP with an identity 2×2 trainable P, then uses the fixed positive and negative vectors as candidates. At tau 1, let \(c=\frac{1}{1+\exp(1)}\)≈0.268941. The query derivative is -c[1, 1]+c[0, 1]=[-c, 0]. Since a=[1, 0], the projection derivative is the outer product \(a^{\mathsf T}[-c,0]\), or[[-c, 0], [0, 0]]. Only the first projection row receives this contribution. This exact analytic matrix is stronger explanatory evidence than the reference's broad finite/nonzero assertion.
+The reference trains neither candidate vector in its projection check. It defines q=aP with an identity 2×2 trainable P, then uses the fixed positive and negative vectors as candidates. At tau 1, let \(c=\frac{1}{1+\exp(1)}\)≈0.268941. The query derivative is -c[1, 1]+c[0, 1]=[-c, 0]. Since a=[1, 0], the projection derivative is the outer product \(a^{\mathsf T}[-c,0]\), or [[-c, 0], [0, 0]]. Only the first projection row receives this contribution. This exact analytic matrix is stronger explanatory evidence than the reference's broad finite/nonzero assertion.
 
 A shared encoder applied to the anchor and both candidates would have additional gradient paths. A symmetric contrastive objective would also evaluate reverse-direction comparisons. Those are different experiments from this one-branch projection check. The unchanged reference calls backward but does not take a projection optimizer step, so its evidence is differentiability and a local gradient, not a completed representation-learning run.
 
@@ -85,7 +91,7 @@ np.testing.assert_allclose(
 )
 ```
 
-**Expected:** dots 1, 0; cosines 1/sqrt 2, 0.
+**Expected:** dots 1, 0; cosines \(\frac{1}{\sqrt{2}}\), 0.
 
 ### Example B: Scale without changing direction
 
@@ -119,33 +125,33 @@ np.testing.assert_allclose(
 
 ## Prediction before your attempt
 
-For the supplied fixture, name the input unit, the intermediate state and the final quantity that changes. Predict one normal result and one failure result before touching the code. In particular, explain this lesson's acceptance condition in your own words: dots 1, 0; cosines 1/sqrt 2, 0. positive probability increases; argmax remains 0. Preserve the prediction beside your later observations so a correction is visible. A copied expected value is not a derivation.
+For the supplied fixture, name the input unit, the intermediate state and the final quantity that changes. Predict one normal result and one failure result before touching the code. In particular, explain this lesson's acceptance condition in your own words: Dot scores are 1 and 0 with cosines \(\frac{1}{\sqrt{2}}\) and 0, scaling the positive by 10 changes only the dot score, the loss is \(\log(1+\exp(-1))\), temperature 0.5 raises the positive probability without changing the argmax, and a shared document ID is detected. Preserve the prediction beside your later observations so a correction is visible. A copied expected value is not a derivation.
 
 ## Exercises
 
-1. **Compare dot and cosine scores.** Use anchor[1, 0], positive[1, 1], negative[0, 1].
-   **Expected:** dots 1, 0; cosines 1/sqrt 2, 0.
-   **Verify:** Save the assertion results for exercise 1, including dots 1, 0; cosines 1/sqrt 2, 0.
+1. **Score a new pair.** Compute the dot product and cosine similarity of [3, 4] and [4, 3].
+   **Expected:** dot 24; cosine 0.96.
+   **Verify:** In a fresh process, the exercise checks confirm `torch.dot(left, right).item() == 24` and `F.cosine_similarity(left, right, dim=0).item()` matches `0.96` within 1e-12.
 
-2. **Scale without changing direction.** Multiply the positive vector by 10 and compare scores.
-   **Expected:** dot becomes 10; cosine unchanged.
-   **Verify:** Save the assertion results for exercise 2, including dot becomes 10; cosine unchanged.
+2. **Predict scores after negation.** Negate the second vector and recompute both scores.
+   **Expected:** dot -24; cosine -0.96.
+   **Verify:** In a fresh process, the exercise checks confirm `torch.dot(left, -right).item() == -24` and `F.cosine_similarity(left, -right, dim=0).item()` matches `-0.96` within 1e-12.
 
-3. **Calculate a two-candidate loss.** Use logits[1, 0] with target 0.
-   **Expected:** cross entropy \(\log(1+\exp(-1))\).
-   **Verify:** Save the assertion results for exercise 3, including cross entropy \(\log(1+\exp(-1))\).
+3. **Compute a three-candidate loss.** Use logits [2, 0, 0] with target 0.
+   **Expected:** cross entropy \(\log(1+2e^{-2})\), about 0.2395, within 1e-12.
+   **Verify:** In a fresh process, the exercise checks confirm `F.cross_entropy(three, torch.tensor([0])).item()` matches `np.log1p(2 * np.exp(-2))` within 1e-12.
 
-4. **Inspect a projection gradient.** Create a trainable 2 x2identity projection and back propagate the positive-versus-negative objective.
+4. **Inspect a projection gradient.** Create a trainable 2-by-2 identity projection and backpropagate the positive-versus-negative objective.
    **Expected:** finite nonzero projection gradient.
-   **Verify:** Save the assertion results for exercise 4, including finite nonzero projection gradient.
+   **Verify:** In a fresh process, the exercise checks confirm `projection.grad is not None`, `torch.isfinite(projection.grad).all()` and `torch.count_nonzero(projection.grad) > 0`.
 
 5. **Detect contradictory candidate identity.** Assign the same document ID to positive and negative roles.
    **Expected:** identity collision detected.
-   **Verify:** Save the assertion results for exercise 5, including identity collision detected.
+   **Verify:** In a fresh process, the exercise checks confirm `pair['positive'] == pair['negative']`.
 
-6. **Separate temperature from ranking.** Compare softmax[1, 0] at temperatures 1 and.5.
+6. **Separate temperature from ranking.** Compare the softmax of logits [1, 0] at temperatures 1 and 0.5.
    **Expected:** positive probability increases; argmax remains 0.
-   **Verify:** Save the assertion results for exercise 6, including positive probability increases; argmax remains 0.
+   **Verify:** In a fresh process, the exercise checks confirm `cool[0, 0] > warm[0, 0]` and `warm.argmax(1).item() == cool.argmax(1).item() == 0`.
 
 ## Common pitfalls and diagnosis
 
@@ -159,7 +165,7 @@ First draw the state described in the vocabulary section. Next use the smallest 
 
 ## Self-check and retrieval
 
-Close both worked examples. Explain Contrastive objective, Cosine similarity, False negative using the lesson fixture. Reconstruct one computation from its inputs. Then change one input while retaining the mechanism and predict whether the conclusion survives. Write which part is guaranteed by the code and which part would need new observations. This last distinction prevents a tiny deterministic teaching example from being presented as evidence about an unseen population or a production model.
+Close all three worked examples. Explain Contrastive objective, Cosine similarity, False negative using the lesson fixture. Reconstruct one computation from its inputs. Then change one input while retaining the mechanism and predict whether the conclusion survives. Write which part is guaranteed by the code and which part would need new observations. This last distinction prevents a tiny deterministic teaching example from being presented as evidence about an unseen population or a production model.
 
 ## Next step
 
@@ -167,7 +173,7 @@ Revisit the direct prerequisite `torch-024` if the calculation cannot be reconst
 
 ## Sources and verification status
 
-API and mechanism reference: [PyTorch2.9 reference](https://docs.pytorch.org/docs/2.9/index.html), reviewed 2026-10-22. The fixture, examples, counterexamples and exercise design are original course material. See [validation](../../../docs/validation.md) for execution gates. Check CI artifacts for the exact revision and platform to determine which runtime checks actually ran; authored content alone does not establish runtime execution.
+API and mechanism reference: [PyTorch 2.9 reference](https://docs.pytorch.org/docs/2.9/index.html), reviewed 2026-10-22. The fixture, examples, counterexamples and exercise design are original course material. See [validation](../../../docs/validation.md) for execution gates. Check CI artifacts for the exact revision and platform to determine which runtime checks actually ran; authored content alone does not establish runtime execution.
 
 ## Interview reasoning with worked answers
 

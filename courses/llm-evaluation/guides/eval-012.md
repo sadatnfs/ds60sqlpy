@@ -173,6 +173,16 @@ Provide only a two-dimensional matrix to the helper.
 - [Experimental design foundations](../../../courses/statistics-ml/chapters/13-classical-experimental-design.md)
 - [HELM system configuration and evaluation](https://arxiv.org/abs/2211.09110)
 
-## Study companion
+## Ask an AI tutor about this lesson
 
-Use the repository learning-companion skill with this lesson ID and your own source/output. Ask for clarification of the estimand, probability distribution, data split or gradient before a hint. Keep claims about the authored fixture separate from claims requiring real population or model evidence.
+```text
+Use the checked-in $guide-ds60sqlpy-learning skill for eval-012, Prompt, model and seed effects.
+Read courses/llm-evaluation/guides/eval-012.md and courses/llm-evaluation/lessons/eval-012.py. Direct prerequisites: eval-006, eval-011.
+Ask me to state the estimand, probability distribution, data split or gradient
+before giving a hint. Review my attempt at the six investigations one at a time,
+give one hint, and ask for the printed evidence.
+Keep courses/llm-evaluation/solutions/ closed until I attempt or explicitly request comparison.
+Keep claims about the authored fixture separate from claims that need real
+population or model evidence. Done when I can reproduce both worked programs,
+pass the six investigations and explain one failure case.
+```

@@ -95,4 +95,4 @@ if __name__ == "__main__":
 
 ## Interpretation
 
-Monitor operations, data contracts and mature outcomes as distinct signals. Keep their denominators and scopes explicit, and connect each to a reviewed response. The real local service demonstrates actual process metrics and stale-feature rejection without claiming production-scale observability.
+Keep their denominators and scopes explicit, and connect each to a reviewed response. The real local service demonstrates actual process metrics and stale-feature rejection without claiming production-scale observability.

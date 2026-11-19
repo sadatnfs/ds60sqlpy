@@ -51,70 +51,56 @@ weights_only=True restricts the object forms used by the local tensor-and-primit
 
 Finally, the tested boundary is a completed torch.save followed by a fresh-process load. It does not inject a crash halfway through writing or prove power-loss durability. A persistent production checkpoint needs its own staged-publication, integrity and retention procedure. The local directory is owned and disposable, and the successful test removes it. Next-step parity is valuable evidence for this exact transition and environment, not a promise of bitwise agreement across versions, hardware or nondeterministic pipelines.
 
-## Exercise 1: Create nontrivial training state
+## Exercise 1: Predict Adam's first step
 
-The question is: Take two Adam updates of a zero-weight linear model onx 1, 2 and y 2 x.
+The question is: From a fresh make_state(), take one step with zero noise and compare the weight with the learning rate 0.05.
 
-Saving before any updates would not test nonzero optimizer moments. Two steps create history that a fresh optimizer lacks.
+After bias correction the first Adam update is the learning rate times g/(|g|+eps), so its size is about 0.05 whatever the gradient magnitude.
 
 ```python
-torch.manual_seed(7)
-model, optimizer = make_state()
-for _ in range(2):
-    step(model, optimizer, torch.zeros((2, 1)))
-parameter = next(model.parameters())
-assert optimizer.state[parameter]["step"].item() == 2 and parameter.item() > 0
+fresh_model, fresh_adam = make_state()
+step(fresh_model, fresh_adam, torch.zeros((2, 1)))
+np.testing.assert_allclose(fresh_model.weight.item(), 0.05, atol=1e-6, rtol=0)
 ```
 
-**Expected:** optimizer step 2 and positive weight.
+**Expected:** weight 0.05 within 1e-6.
 
-**Verify:** Compare the computed values or written argument with optimizer step 2 and positive weight.
+**Verify:** In a fresh process, the exercise checks confirm `fresh_model.weight.item()` matches `0.05` within 1e-06.
 
-## Exercise 2: Save the complete local contract
+## Exercise 2: Inspect the new optimizer state
 
-The question is: Write model, optimizer, RNG and data_position2 into an owned temporary checkpoint.
+The question is: List the state entries Adam stores for that parameter after one step.
 
-The state dictionary values are serialized at this point. The checkpoint is local and trusted; the example does not load arbitrary external pick led objects.
-
-```python
-temporary = tempfile.TemporaryDirectory()
-folder = Path(temporary.name)
-path = folder / "checkpoint.pt"
-checkpoint = {
-    "model": model.state_dict(),
-    "optimizer": optimizer.state_dict(),
-    "rng": torch.get_rng_state(),
-    "data_position": 2,
-}
-torch.save(checkpoint, path)
-assert path.is_file() and checkpoint["data_position"] == 2
-```
-
-**Expected:** file exists and metadata position 2.
-
-**Verify:** Compare the computed values or written argument with file exists and metadata position 2.
-
-## Exercise 3: Record uninterrupted continuation
-
-The question is: Draw three random values, then a small target perturbation, and perform the third update.
-
-The order of random draws is part of the continuation contract. Restoring only the seed without the consumed generator state would not reproduce this point.
+These moment estimates and the step count determine the next update, so a restart must restore them.
 
 ```python
-probe = torch.rand(3)
-noise = torch.rand((2, 1)) * 0.01
-step(model, optimizer, noise)
-expected = parameter.item()
+fresh_param = next(fresh_model.parameters())
 assert (
-    torch.isfinite(probe).all()
-    and optimizer.state[parameter]["step"].item() == 3
-    and np.isfinite(expected)
+    set(fresh_adam.state[fresh_param]) == {"step", "exp_avg", "exp_avg_sq"}
+    and fresh_adam.state[fresh_param]["step"].item() == 1
 )
 ```
 
-**Expected:** finite weight, step 3, and saved three-value random probe.
+**Expected:** keys step, exp_avg and exp_avg_sq; step equals 1.
 
-**Verify:** Compare the computed values or written argument with finite weight, step 3, and saved three-value random probe.
+**Verify:** In a fresh process, the exercise checks confirm `set(fresh_adam.state[fresh_param]) == {'step', 'exp_avg', 'exp_avg_sq'}` and `fresh_adam.state[fresh_param]['step'].item() == 1`.
+
+## Exercise 3: Replay a saved random state
+
+The question is: Save torch.get_rng_state(), draw three values, restore the state and draw again.
+
+Restoring the generator state reproduces later random draws such as dropout masks or data noise.
+
+```python
+saved_rng = torch.get_rng_state()
+first_draw = torch.rand(3)
+torch.set_rng_state(saved_rng)
+assert torch.equal(torch.rand(3), first_draw)
+```
+
+**Expected:** the two draws are identical.
+
+**Verify:** In a fresh process, the exercise checks confirm `torch.equal(torch.rand(3), first_draw)`.
 
 ## Exercise 4: Restore in a fresh interpreter
 
@@ -151,7 +137,7 @@ assert restored["position"] == 3
 
 **Expected:** probe matches and next weight agrees within 1e-6; position 3.
 
-**Verify:** Compare the computed values or written argument with probe matches and next weight agrees within 1e-6; position 3.
+**Verify:** In a fresh process, the exercise checks confirm `not (result.returncode)`, `restored['probe']` matches `probe.tolist()` exactly, `restored['weight']` matches `expected` within 1e-06 and `restored['position'] == 3`.
 
 ## Exercise 5: Expose a weights-only restart
 
@@ -169,7 +155,7 @@ assert abs(weights_only.weight.item() - expected) > 1e-6
 
 **Expected:** next weight differs from full-state continuation.
 
-**Verify:** Compare the computed values or written argument with next weight differs from full-state continuation.
+**Verify:** In a fresh process, the exercise checks confirm `abs(weights_only.weight.item() - expected) > 1e-06`.
 
 ## Exercise 6: Verify cleanup and bounded claims
 
@@ -190,7 +176,7 @@ assert receipt["cpu_next_step_checked"] and not receipt["distributed_restart_ver
 
 **Expected:** directory absent; no distributed-loader claim.
 
-**Verify:** Compare the computed values or written argument with directory absent; no distributed-loader claim.
+**Verify:** In a fresh process, the exercise checks confirm `not folder.exists()`, `receipt['cpu_next_step_checked']` and `not receipt['distributed_restart_verified']`.
 
 ## Review after comparison
 

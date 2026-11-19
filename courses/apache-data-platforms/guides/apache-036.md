@@ -31,6 +31,40 @@ and aborts. The read_committed reader must include the first and exclude the
 second; the read_uncommitted reader must include both. The program compares exact
 key/value lists, so an accidental empty topic cannot pass the visibility check.
 
+The three transactions are written once, when the topic is empty:
+
+From [`projects/streaming/TransactionProbe.java`](../projects/streaming/TransactionProbe.java):
+
+```java
+private static void produceWhenEmpty() throws Exception {
+  if (lastOffset() != 0) {
+    return; // Retain existing evidence; validation below rejects partial or unexpected data.
+  }
+  try (var producer = new KafkaProducer<String, String>(producerProperties())) {
+    producer.initTransactions();
+    producer.beginTransaction();
+    producer
+      .send(new ProducerRecord<>(TOPIC, "order-1", "committed-a"))
+      .get(10, TimeUnit.SECONDS);
+    producer.commitTransaction();
+    producer.beginTransaction();
+    producer.send(new ProducerRecord<>(TOPIC, "order-2", "aborted-b")).get(10, TimeUnit.SECONDS);
+    producer.abortTransaction();
+    producer.beginTransaction();
+    producer
+      .send(new ProducerRecord<>(TOPIC, "same-business-id", "duplicate-business-call"))
+      .get(10, TimeUnit.SECONDS);
+    producer
+      .send(new ProducerRecord<>(TOPIC, "same-business-id", "duplicate-business-call"))
+      .get(10, TimeUnit.SECONDS);
+    producer.commitTransaction();
+  }
+}
+```
+
+The readers differ only in `isolation.level`: `read_committed` skips records from
+aborted transactions, and `read_uncommitted` returns every record in the log.
+
 Control records occupy log positions without being ordinary application records.
 Therefore an end offset need not equal the number of data records a consumer
 returns. The Java reader advances through the actual partition positions with a

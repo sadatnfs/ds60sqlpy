@@ -11,6 +11,9 @@ import textwrap
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[3]
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+
+from case_files import render_case  # noqa: E402
 
 
 def format_python(source: str) -> str:
@@ -56,17 +59,24 @@ def format_python(source: str) -> str:
     return result.stdout
 
 
-def extract_case(source: str, function: str) -> str:
+def extract_case(
+    source: str,
+    functions: str | list[str],
+    *,
+    exclude: tuple[str, ...] = (),
+    runnable: bool = True,
+) -> str:
+    names = [functions] if isinstance(functions, str) else list(functions)
     tree = ast.parse(source)
     definitions = {n.name: n for n in tree.body if isinstance(n, (ast.FunctionDef, ast.ClassDef))}
-    required = {function}
+    required = set(names)
     while True:
         previous = set(required)
         for name in previous:
             required.update(
                 n.id
                 for n in ast.walk(definitions[name])
-                if isinstance(n, ast.Name) and n.id in definitions
+                if isinstance(n, ast.Name) and n.id in definitions and n.id not in exclude
             )
         if previous == required:
             break
@@ -76,9 +86,42 @@ def extract_case(source: str, function: str) -> str:
             isinstance(node, (ast.FunctionDef, ast.ClassDef)) and node.name in required
         ):
             parts.append(ast.get_source_segment(source, node) or "")
-    return format_python(
-        "\n\n".join(parts) + f'\n\nif __name__ == "__main__":\n    print({function}())\n'
-    )
+    trailer = ""
+    if runnable:
+        calls = "".join(f"    print({name}())\n" for name in names)
+        trailer = f'\n\nif __name__ == "__main__":\n{calls}'
+    return format_python("\n\n".join(parts) + trailer)
+
+
+def helper_calls(source: str, function: str, helpers: tuple[str, ...]) -> list[str]:
+    tree = ast.parse(source)
+    definitions = {n.name: n for n in tree.body if isinstance(n, ast.FunctionDef)}
+    seen, pending, used = set(), [function], []
+    while pending:
+        name = pending.pop()
+        if name in seen:
+            continue
+        seen.add(name)
+        for node in ast.walk(definitions[name]):
+            if isinstance(node, ast.Name) and node.id in definitions:
+                if node.id in helpers:
+                    if node.id not in used:
+                        used.append(node.id)
+                else:
+                    pending.append(node.id)
+    return [name for name in helpers if name in used]
+
+
+def spoken_list(items: list[str]) -> str:
+    return items[0] if len(items) == 1 else ", ".join(items[:-1]) + " and " + items[-1]
+
+
+def answer_block(task: dict) -> str:
+    code = task.get("answer_code")
+    if not code:
+        return ""
+    language, text = ("python", code) if isinstance(code, str) else (code["language"], code["code"])
+    return f"\n\n```{language}\n{text.rstrip()}\n```"
 
 
 def render(base: Path) -> dict[Path, str]:
@@ -95,7 +138,7 @@ def render(base: Path) -> dict[Path, str]:
         ast.parse(source)
         assert len(unit["worked"]) == 2 and len(unit["exercises"]) == 6
         assert len({x["title"] for x in unit["exercises"]}) == 6
-        assert "—" not in json.dumps(unit, ensure_ascii=False)
+        assert "\u2014" not in json.dumps(unit, ensure_ascii=False)
         prerequisites = ", ".join(f"`{v}`" for v in unit["prerequisites"])
         intro = (
             f"# {key}: {unit['title']}\n\n"
@@ -107,20 +150,14 @@ def render(base: Path) -> dict[Path, str]:
         )
         if unit.get("math"):
             intro += "## Mathematical interpretation\n\n" + unit["math"].strip() + "\n\n"
+        first_title, second_title = (case["title"] for case in unit["worked"])
         intro += (
-            "## Run the lesson\n\nOpen this subject in `/classroom`, then show its code and notes. "
-            "The prepared `data-engineering` worker runs `main.py` in a fresh temporary directory. "
-            "The examples use installed packages and synthetic local "
-            "fixtures; no account, cloud service, "
-            "network request or package download is required. Save "
-            "source and notes before switching lessons. "
-            "Temporary databases, project files and tracking artifacts "
-            "are recreated by each complete program "
-            "and removed after the job. The classroom retains the "
-            "submitted source and bounded output, not an "
-            "indefinitely running external service. The guide "
-            "distinguishes this local execution from the "
-            "deployment decisions that need an owned production environment.\n\n"
+            f"## Run the lesson\n\nOpen `{key}` in `/classroom`. Its starter `main.py` contains "
+            f'both worked cases, "{first_title}" and "{second_title}", and prints the dictionary '
+            "each case returns. The prepared `data-engineering` worker runs it in a fresh "
+            "temporary directory. An `AssertionError` means that an observation differs from "
+            f"the case's stated contract. {config['run_notice']} Save source and notes before "
+            "switching lessons.\n\n"
         )
         if unit.get("sql_variant"):
             intro = intro.replace("## Run the lesson", "## Full-project Python workspace")
@@ -149,37 +186,54 @@ def render(base: Path) -> dict[Path, str]:
                 "the model-only pad does not pretend to edit those files.\n\n"
             )
         sections = [intro]
+        harness = config.get("case_harness")
         for index, case in enumerate(unit["worked"], 1):
-            program = extract_case(source, "example_one" if index == 1 else "example_two")
+            function = "example_one" if index == 1 else "example_two"
+            body = f"## Worked case {index}: {case['title']}\n\n{case['explanation']}\n\n"
+            note = ""
+            if harness:
+                first = key == harness["introduced_in"] and index == 1
+                helpers = tuple(harness["helpers"])
+                program = extract_case(
+                    source, function, exclude=() if first else helpers, runnable=first
+                )
+                body += render_case(source, function, include_skeleton=first) + "\n\n"
+                used = spoken_list(
+                    [f"`{name}`" for name in helper_calls(source, function, helpers)]
+                )
+                template = harness["first_note"] if first else harness["note"]
+                note = template.format(key=key, helpers=used) + "\n\n"
+            else:
+                program = extract_case(source, function)
             sections.append(
-                f"## Worked case {index}: {case['title']}\n\n{case['explanation']}\n\n"
-                f"**Expected evidence:** {case['expected']}\n\n```python\n{program}```\n"
+                body + f"**Expected evidence:** {case['expected']}\n\n{note}```python\n{program}```"
             )
         sections.append(
-            "## Practice\n\nMake each requested change in a saved copy. Compare both the expected "
-            "result and the deliberately changed assumption. The "
-            "separate reference explains the "
-            "answers.\n"
+            "## Practice\n\nThe starter contains both worked cases, so a task can change either "
+            "one. Make each change in a saved copy, run it, and compare the printed result with "
+            "the task's check before opening the separate explained answers."
         )
         for index, task in enumerate(unit["exercises"], 1):
             sections.append(
                 f"### {index}. {task['title']}\n\n{task['task']}\n\n"
-                f"**Check:** {task['check']}\n\n**Hint:** {task['hint']}\n"
+                f"**Check:** {task['check']}\n\n**Hint:** {task['hint']}"
             )
         sections += [
             "## Diagnose errors and misleading results\n\n" + unit["diagnosis"],
             "## Transfer to independent work\n\n" + unit["transfer"],
             "## Primary references\n\n"
             + "\n".join(f"- [{label}]({url})" for label, url in unit["references"]),
-            f"## Tutor guidance\n\nUse the repository learning-companion skill for `{key}`. "
-            "Inspect the learner's own source and observations, ask "
-            "for an explanation of the relevant "
-            "data or state contract, and give a focused hint. Separate "
-            "an assertion on this fixture "
-            "from a claim about an external dataset or deployed service.",
+            "## Tutor guidance\n\nUse the repository's `$guide-ds60sqlpy-learning` skill "
+            f"(`.agents/skills/guide-ds60sqlpy-learning/SKILL.md`) for `{key}`. Inspect the "
+            "learner's own source and printed output first. Ask for an explanation of "
+            f"{spoken_list(unit['concepts'])} in their own words, then give one focused hint at a "
+            "time. Keep an assertion on this synthetic fixture separate from a claim about an "
+            "external dataset or deployed service.",
         ]
-        result[base / "guides" / f"{key}.md"] = "\n\n".join(sections).rstrip() + "\n"
-        starter = extract_case(source, "example_one")
+        result[base / "guides" / f"{key}.md"] = (
+            "\n\n".join(section.strip() for section in sections) + "\n"
+        )
+        starter = extract_case(source, ["example_one", "example_two"])
         tasks = "\n".join(
             textwrap.fill(
                 task["task"], width=96, initial_indent=f"# TODO {i}: ", subsequent_indent="#    "
@@ -187,7 +241,7 @@ def render(base: Path) -> dict[Path, str]:
             for i, task in enumerate(unit["exercises"], 1)
         )
         result[base / "lessons" / f"{key}.py"] = format_python(
-            f'"""{key}: worked starting point; complete the guide\'s six changes."""\n\n'
+            f'"""{key}: both worked cases; complete the guide\'s six changes."""\n\n'
             + starter
             + "\n"
             + tasks
@@ -200,7 +254,8 @@ def render(base: Path) -> dict[Path, str]:
         ]
         for i, task in enumerate(unit["exercises"], 1):
             answers.append(
-                f"## {i}. {task['title']}\n\n{task['answer']}\n\n**Expected:** {task['check']}"
+                f"## {i}. {task['title']}\n\n{task['answer']}{answer_block(task)}\n\n"
+                f"**Expected:** {task['check']}"
             )
         answers += [
             "## Complete reference\n\n```python\n" + source + "```",
@@ -220,8 +275,9 @@ def render(base: Path) -> dict[Path, str]:
                 "outcome": unit["outcome"],
                 "lab": unit["lab"],
                 "verification": (
-                    f"Run the assertions and inspect {key} reference checks passed. "
-                    "Interpret the counterexample in the guide."
+                    "Run the starter and compare both printed results with the guide. "
+                    f"Worked case 1: {unit['worked'][0]['expected']} "
+                    f"Worked case 2: {unit['worked'][1]['expected']}"
                 ),
             }
         )

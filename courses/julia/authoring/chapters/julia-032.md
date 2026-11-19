@@ -28,7 +28,7 @@ The second complete program captures a Plotly comparison of final observations a
 
 The reference injects a duplicate ID, a late feature, a late final label and a nonfinite predictor. Each is rejected. This is stronger than merely checking that a normal CSV file can be parsed. Keep these failures visible in the learner's own extension. A transformation that silently removes difficult rows should be treated as a protocol change with explicit denominators.
 
-The Plotly helper is classroom infrastructure, not a general Julia plotting package. It captures a bounded data artifact for the browser. Source execution, figure capture, browser rendering and saved receipts remain distinct acceptance layers. Outside the classroom, choose and prepare a plotting library explicitly rather than assuming this helper exists.
+The Plotly helper is classroom infrastructure, not a general Julia plotting package. It captures a bounded data artifact for the browser. Source execution, figure capture, browser rendering and saved run output remain distinct acceptance layers. Outside the classroom, choose and prepare a plotting library explicitly rather than assuming this helper exists.
 
 ## The final memo and next steps
 

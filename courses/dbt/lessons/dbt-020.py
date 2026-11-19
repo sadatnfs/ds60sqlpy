@@ -1,4 +1,4 @@
-"""dbt-020: worked starting point; complete the guide's six changes."""
+"""dbt-020: both worked cases; complete the guide's six changes."""
 
 import os
 import shutil
@@ -93,7 +93,8 @@ def targets(p):
 def example_one():
     with tempfile.TemporaryDirectory() as d:
         p = project(
-            d, models={"base": "select 1 as x", "child": "select x+10 as x from {{ ref('base') }}"}
+            d,
+            models={"base": "select 1 as x", "child": "select x + 10 as x from {{ ref('base') }}"},
         )
         targets(p)
         invoke(p, "build", "--target", "prod")
@@ -114,8 +115,39 @@ def example_one():
         return {"deferred_parent": "prod.base", "child": 11, "dev_parent_not_built": True}
 
 
+def example_two():
+    with tempfile.TemporaryDirectory() as d:
+        p = project(
+            d, models={"base": "select 1 as x", "child": "select x + 1 as x from {{ ref('base') }}"}
+        )
+        targets(p)
+        invoke(p, "build", "--target", "prod")
+        state = p / "prod_state"
+        state.mkdir()
+        shutil.copyfile(p / "target/manifest.json", state / "manifest.json")
+        (p / "models/base.sql").write_text("select 100 as x")
+        invoke(p, "build", "--target", "dev")
+        invoke(p, "run", "--target", "dev", "--select", "child", "--defer", "--state", str(state))
+        assert rows(p, "select x from dev.child") == [(101,)]
+        invoke(
+            p,
+            "run",
+            "--target",
+            "dev",
+            "--select",
+            "child",
+            "--defer",
+            "--favor-state",
+            "--state",
+            str(state),
+        )
+        assert rows(p, "select x from dev.child") == [(2,)]
+        return {"existing_dev_parent": 101, "favor_state_parent": 2}
+
+
 if __name__ == "__main__":
     print(example_one())
+    print(example_two())
 
 # TODO 1: Read the child's compiled relation name.
 # TODO 2: Leave an old target relation before a deferred build.

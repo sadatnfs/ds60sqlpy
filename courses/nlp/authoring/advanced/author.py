@@ -8,6 +8,7 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 from scripts.format_inline_code import canonical_markdown  # noqa: E402
+from verify_lines import VERIFY  # noqa: E402
 
 BASE = ROOT / "courses/nlp"
 PLAN = json.loads((BASE / "track.json").read_text())["lessons"]
@@ -42,7 +43,7 @@ def author(n, overview, sections, examples, exercises, learner, solution, interv
             f"### Exercise {i}: {title}",
             task,
             f"**Expected:** {expected}",
-            f"**Verify:** {expected} Retain the actual values or failure evidence and explain the relevant input boundary.",
+            f"**Verify:** {VERIFY[(n, i)]}",
             f"**Hints:** {hints}",
         ]
     lines += ["## Interview reasoning"]

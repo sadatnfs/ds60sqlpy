@@ -30,6 +30,42 @@ finite, so the checker can require every identifier exactly once and reconcile
 the final total independently. It observes a real completed checkpoint before
 interrupting the owned TaskManager.
 
+The job enables checkpoints every 200 ms with `environment.enableCheckpointing(200)`,
+and the workshop configuration chooses where they are kept:
+
+From [`projects/flink/conf/config.yaml`](../projects/flink/conf/config.yaml):
+
+```yaml
+state.backend.type: hashmap
+state.checkpoints.dir: file:///state/checkpoints
+state.savepoints.dir: file:///state/savepoints
+execution.checkpointing.num-retained: 2
+execution.checkpointing.checkpoints-after-tasks-finish.enabled: true
+```
+
+The running sum lives in keyed managed state, so a checkpoint records it together
+with the source position:
+
+From [`projects/flink/src/WorkshopJobs.java`](../projects/flink/src/WorkshopJobs.java):
+
+```java
+public static final class ManagedTotal extends RichMapFunction<Long, String> {
+
+  private transient ValueState<Long> total;
+
+  public void open(OpenContext context) throws Exception {
+    total = getRuntimeContext().getState(new ValueStateDescriptor<>("sum", Types.LONG));
+  }
+
+  public String map(Long id) throws Exception {
+    Long prior = total.value();
+    long next = (prior == null ? 0 : prior) + id + 1;
+    total.update(next);
+    return id + "," + next;
+  }
+}
+```
+
 After the explicit TaskManager restart, the job's recovery evidence must identify
 an actual restored checkpoint, not merely a new successful run. The final sink
 readback must preserve the expected source population and total. A request ID,

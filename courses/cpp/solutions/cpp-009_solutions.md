@@ -8,9 +8,9 @@ Authored beta reference, checked 2026-10-22. These answers correspond to the six
 
 The answer is `snapshot.at(0)==3`, `alias.at(0)==4` and `values.size()==2`.
 
-`auto snapshot = values` creates a vector value with independent elements. `const auto& alias = values` binds another access path to the existing vector. Assignment through `values` changes that existing vector, so the alias sees4. `const` forbids mutation through `alias`; it does not prohibit all other valid access paths from changing the same object.
+`auto snapshot = values` creates a vector value with independent elements. `const auto& alias = values` binds another access path to the existing vector. Assignment through `values` changes that existing vector, so the alias sees 4. `const` forbids mutation through `alias`; it does not prohibit all other valid access paths from changing the same object.
 
-**Expected:** an explicit check for each value and size exits0. A drawing has two owning vector boxes and an arrow from `alias` to the original box. The objects' addresses need not have any particular relationship.
+**Expected:** an explicit check for each value and size exits 0. A drawing has two owning vector boxes and an arrow from `alias` to the original box. The objects' addresses need not have any particular relationship.
 
 **Verify:** changing the original again changes the alias observation but leaves the copied snapshot unchanged. Replacing the copy declaration with a reference changes this result, which is a useful controlled counterexample.
 
@@ -47,7 +47,7 @@ bool replace_at(std::vector<int> &readings, std::size_t index,
 
 The mutable reference is intentional: this task changes the caller's vector. The guard includes equality because `size()` is one past the final element. Nothing is inserted and no vector capacity change is needed.
 
-**Expected:** index 1 changes `{4,7,9}` to `{4,8,9}` and returns true. Index3 and empty/index 0 return false without mutation.
+**Expected:** index 1 changes `{4,7,9}` to `{4,8,9}` and returns true. Index 3 and empty/index 0 return false without mutation.
 
 **Verify:** compare both the Boolean and the complete vector for all three fixtures. Checking only a returned flag would miss a function that mutates before rejecting. Using unchecked indexing before the guard would violate the contract even if one run appeared correct.
 
@@ -96,7 +96,7 @@ std::optional<int> checked_read(const std::vector<int> &readings,
 
 Include `<utility>` for `std::in_range`. This tests negative or too-large values before converting them. The second guard asks a different question: even if the type can represent the index, does this particular vector contain that position? Returning an optional value creates an independent integer result rather than exporting a borrowed element reference.
 
-**Expected:** index 1 yields7; -1, size 3/index 3 and empty/index 0 yield no value. The input remains unchanged.
+**Expected:** index 1 yields 7; -1, size 3/index 3 and empty/index 0 yield no value. The input remains unchanged.
 
 **Verify:** all four published read checks pass, and the learner states both guard purposes. A cast-first implementation is fragile on a narrower index type: a large external integer can wrap into a small index. A supported 64-bit build alone does not prove that such a cast-first implementation is portable.
 
@@ -170,7 +170,7 @@ With the exercise option enabled, the intended acceptance is two passing CTest t
 
 ## Review rubric and retrieval
 
-A strong explanation names the owner, the lifetime, the access contract and the observable boundary. Use the learner rubric: at least 8/10, all fourteen function checks, safe Exercise4 variants and an independent transfer explanation. A learner who copied these implementations but cannot explain why `index==size()` fails, why `const` does not freeze aliases or why a dangling read is not a valid experiment needs another prediction/transfer attempt.
+A strong explanation names the owner, the lifetime, the access contract and the observable boundary. Use the learner rubric: at least 8/10, all fourteen function checks, safe Exercise 4 variants and an independent transfer explanation. A learner who copied these implementations but cannot explain why `index==size()` fails, why `const` does not freeze aliases or why a dangling read is not a valid experiment needs another prediction/transfer attempt.
 
 Next, replace the integer fixtures with a small record containing an ID and reading. Explain which part of the design changes and which ownership/boundary arguments remain. No new solution is automatically revealed by finishing this page.
 

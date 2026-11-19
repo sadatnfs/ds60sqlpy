@@ -29,6 +29,69 @@ consumer with the same group ID reads them again. The oracle compares exact
 key/value lists, rather than merely finding at least one row. The log retained
 the records and the group had no committed progress that advanced past them.
 
+Each read in the probe uses these consumer settings and this bounded loop:
+
+From [`projects/streaming/ConsumerProbe.java`](../projects/streaming/ConsumerProbe.java):
+
+```java
+private static Properties settings(String group) {
+  var p = new Properties();
+  p.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, "kafka:9092");
+  p.put(ConsumerConfig.GROUP_ID_CONFIG, group);
+  p.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class.getName());
+  p.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class.getName());
+  p.put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, "false");
+  p.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
+  p.put(ConsumerConfig.REQUEST_TIMEOUT_MS_CONFIG, "5000");
+  p.put(ConsumerConfig.DEFAULT_API_TIMEOUT_MS_CONFIG, "10000");
+  p.put(ConsumerConfig.MAX_POLL_RECORDS_CONFIG, "10");
+  p.put(ConsumerConfig.FETCH_MAX_BYTES_CONFIG, "65536");
+  p.put(ConsumerConfig.MAX_PARTITION_FETCH_BYTES_CONFIG, "65536");
+  return p;
+}
+
+private static List<String> read(String group, boolean commit) {
+  var rows = new ArrayList<String>();
+  try (var consumer = new KafkaConsumer<String, String>(settings(group))) {
+    consumer.assign(PARTITIONS);
+    var end = consumer.endOffsets(PARTITIONS, Duration.ofSeconds(10));
+    long deadline = System.nanoTime() + Duration.ofSeconds(20).toNanos();
+    while (true) {
+      boolean complete = true;
+      for (var partition : PARTITIONS) {
+        complete &= consumer.position(partition, Duration.ofSeconds(5)) >= end.get(partition);
+      }
+      if (complete) {
+        break;
+      }
+      if (System.nanoTime() >= deadline) {
+        throw new IllegalStateException("Read deadline");
+      }
+      for (var record : consumer.poll(Duration.ofMillis(250))) {
+        rows.add(record.key() + "|" + record.value());
+        if (rows.size() > 3) {
+          throw new IllegalStateException("Unexpected source records");
+        }
+      }
+    }
+    if (commit) {
+      var offsets = new HashMap<TopicPartition, OffsetAndMetadata>();
+      for (var partition : PARTITIONS) {
+        offsets.put(partition, new OffsetAndMetadata(consumer.position(partition)));
+      }
+      consumer.commitSync(offsets, Duration.ofSeconds(10));
+    }
+  }
+  Collections.sort(rows);
+  return rows;
+}
+```
+
+`enable.auto.commit=false` means that progress is recorded only by the explicit
+`commitSync` call, and `auto.offset.reset=earliest` decides where a group with no
+committed position starts. The committed value is the next position to read, not
+the offset of the last record processed.
+
 This resembles a process interruption before its commit, but the probe uses an
 orderly close with auto-commit disabled to make the boundary deterministic. It
 does not claim an injected kernel crash or a filesystem durability test. A real

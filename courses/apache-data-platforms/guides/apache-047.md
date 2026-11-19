@@ -50,8 +50,54 @@ source advances watermark 2000, the real timers report west total 9 and east tot
 under their own deadlines. The operator clears their totals after emitting the
 inactivity observations.
 
+The keyed function keeps one total and one pending timer per key, replaces the
+timer on every event and emits the total when the watermark passes the deadline:
+
+From [`projects/flink/src/WorkshopJobs.java`](../projects/flink/src/WorkshopJobs.java):
+
+```java
+public static final class Inactivity extends KeyedProcessFunction<String, Event, String> {
+
+  private transient ValueState<Long> total;
+  private transient ValueState<Long> activeTimer;
+
+  public void open(OpenContext context) throws Exception {
+    total = getRuntimeContext().getState(new ValueStateDescriptor<>("total", Types.LONG));
+    activeTimer = getRuntimeContext().getState(
+      new ValueStateDescriptor<>("active-timer", Types.LONG)
+    );
+  }
+
+  public void processElement(Event event, Context context, Collector<String> output)
+    throws Exception {
+    if (event.timestamp < context.timerService().currentWatermark()) {
+      context.output(LATE, event);
+      return;
+    }
+    Long prior = total.value();
+    long next = (prior == null ? 0 : prior) + event.amount;
+    total.update(next);
+    Long oldTimer = activeTimer.value();
+    if (oldTimer != null) context.timerService().deleteEventTimeTimer(oldTimer);
+    long timer = event.timestamp + 500;
+    activeTimer.update(timer);
+    context.timerService().registerEventTimeTimer(timer);
+    output.collect("update," + event.key + "," + event.id + "," + next);
+  }
+
+  public void onTimer(long timestamp, OnTimerContext context, Collector<String> output)
+    throws Exception {
+    Long current = activeTimer.value();
+    if (current == null || current != timestamp) return;
+    output.collect("timer," + context.getCurrentKey() + "," + timestamp + "," + total.value());
+    activeTimer.clear();
+    total.clear();
+  }
+}
+```
+
 A subsequent east event at 2500 therefore starts a fresh total 3, with deadline 3000.
-Watermark4000 fires that timer. The checker expects the fresh total rather than 14,
+Watermark 4000 fires that timer. The checker expects the fresh total rather than 14,
 which would reveal that the prior inactive state was accidentally retained. It
 also ensures the obsolete east 1500 timer did not create an extra observation.
 

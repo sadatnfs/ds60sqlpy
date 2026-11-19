@@ -1,22 +1,22 @@
 # spark-011: PySpark bridge: Python values versus Spark Columns
 
-Authored paired Scala/PySpark teaching content. The default fixtures are tiny,local and deterministic. Runtime acceptance,logical correctness and learner understanding remain separate evidence.
+Authored paired Scala/PySpark teaching content. The default fixtures are tiny, local and deterministic. Runtime acceptance, logical correctness and learner understanding remain separate evidence.
 
 ## Level and prerequisites
 
-Beginner; approximately 120 minutes. Direct design prerequisites: `spark-001`, `python-10`. The prepared baseline is Spark 4.0.1,Scala binary2.13,JDK 17 and Python 3.12. Read the [execution baseline](../execution-baseline.md); a proposed future tuple is not a runtime receipt.
+Beginner; approximately 75 minutes. Direct prerequisites: `spark-001`, `python-10`. The prepared baseline is Spark 4.0.1, Scala binary 2.13, JDK 17 and Python 3.12. Read the [execution baseline](../execution-baseline.md).
 
 ## How to run this lesson
 
-Open `spark-011` in the classroom and choose the Scala or PySpark implementation you understand. Prepare only its fixed `spark-local-scala` or `spark-local-python` profile,save your pad and run the complete source. Scala stages as `Main.scala` with `object Main`; Python stages as `main.py` with a main guard. Each program creates its own local[2] session,disables the UI,binds the driver to loopback and stops the session in finally. No external dataset,package download,JDBC connection or cloud service is requested.
+Open `spark-011` in the classroom and choose the Scala or PySpark implementation you understand. Prepare only its fixed `spark-local-scala` or `spark-local-python` profile, save your pad and run the complete source. Scala stages as `Main.scala` with `object Main`; Python stages as `main.py` with a main guard. Each program creates its own local[2] session, disables the UI, binds the driver to loopback and stops the session in finally. No external dataset, package download, JDBC connection or cloud service is requested.
 
 The [Scala learner](../lessons/spark-011.scala) and [PySpark learner](../lessons/spark-011.py) run two complete demonstrations and retain six explicit task stubs. Use the [explained solutions](../solutions/spark-011_solutions.md) only after an attempt or an explicit worked comparison; the [Scala reference](../solutions/spark-011_solution.scala) and [PySpark reference](../solutions/spark-011_solution.py) contain complete assertions. A bounded collect is used only for the declared tiny fixture; do not copy it onto an unbounded or large production table.
 
 ## Learning objectives
 
 - Translate known Python collections and tests into explicit Spark expressions while keeping Python and engine execution distinct.
-- State the input and output grain,schema,NULL policy and ordering before executing a transformation.
-- Compare each language implementation with independent literal expectations,not only with the other implementation.
+- State the input and output grain, schema, NULL policy and ordering before executing a transformation.
+- Compare each language implementation with independent literal expectations, not only with the other implementation.
 
 ## Vocabulary and concepts
 
@@ -40,7 +40,7 @@ select constructs output columns and can preserve or change which identity is vi
 
 The helper `ids` collects only this four-row fixture after ordering by event_id. This bounded demonstration is not a pattern for collecting a large table into driver memory. A real large-data operation should retain distributed outputs or apply an explicit admission and result-size policy. The ordering is part of the output contract because DataFrame row order is not implied by construction or partition arrival.
 
-SQL and DataFrame expressions use the same Spark engine but offer different syntax. The final exercise registers an owned session-local temporary view and writes SELECT, FROM, WHERE and ORDER BY explicitly. Both language implementations compare against the literal IDs[2,4]. Agreement between SQL and Columns alone would not rule out a shared wrong threshold or missingness policy.
+SQL and DataFrame expressions use the same Spark engine but offer different syntax. The final exercise registers an owned session-local temporary view and writes SELECT, FROM, WHERE and ORDER BY explicitly. Both language implementations compare against the literal IDs [2, 4]. Agreement between SQL and Columns alone would not rule out a shared wrong threshold or missingness policy.
 
 This bridge assumes the existing Python testing lesson and does not require completing every Scala foundation first. The paired Scala code is a syntax comparison and optional second implementation. The common SparkSession lesson next makes the schema, action and lifecycle contracts explicit for both entry routes.
 
@@ -158,7 +158,7 @@ Implement aboveTen/above_ten returning a Spark Column for amount_cents>10. Do no
 
 Return the ordered event IDs selected by aboveTen from this tiny fixture. Preserve both equal-valued 20-cent events and leave raw unchanged.
 
-**Expected result/shape:** The result is[2,4], and raw still contains IDs[1,2,3,4]. Projecting amount and calling distinct is not an acceptable implementation.
+**Expected result/shape:** The result is [2, 4], and raw still contains IDs [1, 2, 3, 4]. Projecting amount and calling distinct is not an acceptable implementation.
 
 **Verify:** Compare the selected IDs with literals and independently check all four raw IDs.
 
@@ -188,7 +188,7 @@ Return ordered IDs with a known amount at least 10 and event_id less than 4. Com
 
 Return a DataFrame with event_id and amount_plus_one=amount_cents+1, without filling NULL or dropping identity. Keep a Long-compatible integer result.
 
-**Expected result/shape:** Ordered rows are(1,1),(2,21),(3, NULL),(4,21). The two 21 values remain separate events and unknown remains unknown.
+**Expected result/shape:** Ordered rows are (1,1),(2,21),(3, NULL),(4,21). The two 21 values remain separate events and unknown remains unknown.
 
 **Verify:** Compare every ordered row with literal expected values, including the NULL position.
 
@@ -198,9 +198,9 @@ Return a DataFrame with event_id and amount_plus_one=amount_cents+1, without fil
 
 Register a session-local temporary view and return ordered IDs from SQL SELECT/WHERE amount_cents>10. Compare SQL and DataFrame paths to the literal expected IDs rather than only to one another.
 
-**Expected result/shape:** Both paths return [2,4]. The temporary view exists only in this owned session and no external database connection is opened.
+**Expected result/shape:** Both paths return [2, 4]. The temporary view exists only in this owned session and no external database connection is opened.
 
-**Verify:** Assert SQL IDs and selectedIds against [2,4] independently, then let the complete program stop its session in finally.
+**Verify:** Assert SQL IDs and selectedIds against [2, 4] independently, then let the complete program stop its session in finally.
 
 **Progressive hint:** The SQL query uses the same explicit threshold, NULL behavior and ORDER BY event_id.
 
@@ -210,11 +210,11 @@ If Python reports that a Column cannot be converted to bool, inspect and/or/not 
 
 ## Self-check
 
-Explain the contract of `aboveTen` / `above_ten` without reading its solution. Trace the specified boundary case,then explain the final exercise's evidence and limitation. Identify where a transformation builds a plan and where an action requests execution. Retain exact values or operator evidence rather than treating a successful process exit as proof of the whole learning objective.
+Explain the contract of `aboveTen` / `above_ten` without reading its solution. Trace the specified boundary case, then explain the final exercise's evidence and limitation. Identify where a transformation builds a plan and where an action requests execution. Retain exact values or operator evidence rather than treating a successful process exit as proof of the whole learning objective.
 
 ## Next step
 
-Use the [course route](../README.md) to continue. Paired-language agreement is useful only when both outputs also satisfy the independent fixture contract. Keep runtime/profile receipts separate from any cluster-performance or production-recovery claim.
+Use the [course route](../README.md) to continue. Paired-language agreement is useful only when both outputs also satisfy the independent fixture contract. A successful local run is not evidence of cluster performance or production recovery.
 
 ## Primary sources and official APIs
 
@@ -226,8 +226,8 @@ Use the [course route](../README.md) to continue. Paired-language agreement is u
 
 ```text
 Use $guide-ds60sqlpy-learning to coach me through spark-011: PySpark bridge: Python values versus Spark Columns.
-Read courses/scala-spark/guides/spark-011.md and courses/scala-spark/lessons/spark-011.py;the paired sources are courses/scala-spark/lessons/spark-011.scala and courses/scala-spark/lessons/spark-011.py.
-Direct prerequisites: spark-001, python-10. Explain the schema,row grain and new Scala/Python/Spark syntax,ask me to predict a concrete result,then inspect my attempt. Give one hint at a time,review exact result and boundary evidence,and ask retrieval questions in my own words. Do not read solutions/ until I ask or have made an honest attempt.
-Use only the prepared local[2] worker profile and owned job scratch. Do not download dependencies,start a remote service,reset existing checkpoints or alter unrelated learner work.
+Read courses/scala-spark/guides/spark-011.md and courses/scala-spark/lessons/spark-011.py; the paired sources are courses/scala-spark/lessons/spark-011.scala and courses/scala-spark/lessons/spark-011.py.
+Direct prerequisites: spark-001, python-10. Explain the schema, row grain and new Scala/Python/Spark syntax, ask me to predict a concrete result, then inspect my attempt. Give one hint at a time, review exact result and boundary evidence, and ask retrieval questions in my own words. Do not read solutions/ until I ask or have made an honest attempt.
+Use only the prepared local[2] worker profile and owned job scratch. Do not download dependencies, start a remote service, reset existing checkpoints or alter unrelated learner work.
 Done when all six contracts have inspected evidence and I can explain the stated assumptions and a meaningful failure case.
 ```

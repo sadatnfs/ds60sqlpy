@@ -24,6 +24,18 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             1
         );
     }
+
+    {
+        // Task 3: Independent construction
+        use arrow::array::{Array, Float64Array};
+        fn summary(values: &Float64Array) -> (usize, usize, usize) {
+            let valid = values.len() - values.null_count();
+            let finite = values.iter().flatten().filter(|v| v.is_finite()).count();
+            (valid, values.null_count(), finite)
+        }
+        let values = Float64Array::from(vec![Some(1.5), None, Some(f64::NAN), Some(2.0)]);
+        assert_eq!(summary(&values), (3, 1, 2));
+    }
     println!("rust-038: passed");
     Ok(())
 }

@@ -1,22 +1,22 @@
 # spark-038: Observability: plans, progress, event logs and incidents
 
-Authored paired Scala/PySpark teaching content. The default fixtures are tiny,local and deterministic. Runtime acceptance,logical correctness and learner understanding remain separate evidence.
+Authored paired Scala/PySpark teaching content. The default fixtures are tiny, local and deterministic. Runtime acceptance, logical correctness and learner understanding remain separate evidence.
 
 ## Level and prerequisites
 
-Advanced; approximately 120 minutes. Direct design prerequisites: `spark-037`. The prepared baseline is Spark4.0.1,Scala binary2.13,JDK17 and Python3.12. Read the [execution baseline](../execution-baseline.md);a proposed future tuple is not a runtime receipt.
+Advanced; approximately 105 minutes. Direct prerequisites: `spark-037`. The prepared baseline is Spark 4.0.1, Scala binary 2.13, JDK 17 and Python 3.12. Read the [execution baseline](../execution-baseline.md).
 
 ## How to run this lesson
 
-Open `spark-038` in the classroom and choose the Scala or PySpark implementation you understand. Prepare only its fixed `spark-local-scala` or `spark-local-python` profile,save your pad and run the complete source. Scala stages as `Main.scala` with `object Main`;Python stages as `main.py` with a main guard. Each program creates its own local[2] session,disables the UI,binds the driver to loopback and stops the session in finally. No external dataset,package download,JDBC connection or cloud service is requested.
+Open `spark-038` in the classroom and choose the Scala or PySpark implementation you understand. Prepare only its fixed `spark-local-scala` or `spark-local-python` profile, save your pad and run the complete source. Scala stages as `Main.scala` with `object Main`;Python stages as `main.py` with a main guard. Each program creates its own local[2] session, disables the UI, binds the driver to loopback and stops the session in finally. No external dataset, package download, JDBC connection or cloud service is requested.
 
-The [Scala learner](../lessons/spark-038.scala) and [PySpark learner](../lessons/spark-038.py) run two complete demonstrations and retain six explicit task stubs. Use the [explained solutions](../solutions/spark-038_solutions.md) only after an attempt or an explicit worked comparison;the [Scala reference](../solutions/spark-038_solution.scala) and [PySpark reference](../solutions/spark-038_solution.py) contain complete assertions. A bounded collect is used only for the declared tiny fixture;do not copy it onto an unbounded or large production table.
+The [Scala learner](../lessons/spark-038.scala) and [PySpark learner](../lessons/spark-038.py) run two complete demonstrations and retain six explicit task stubs. Use the [explained solutions](../solutions/spark-038_solutions.md) only after an attempt or an explicit worked comparison; the [Scala reference](../solutions/spark-038_solution.scala) and [PySpark reference](../solutions/spark-038_solution.py) contain complete assertions. A bounded collect is used only for the declared tiny fixture; do not copy it onto an unbounded or large production table.
 
 ## Learning objectives
 
 - Turn a slow or stalled job report into a bounded evidence-based diagnosis.
-- State the input and output grain,schema,NULL policy and ordering before executing a transformation.
-- Compare each language implementation with independent literal expectations,not only with the other implementation.
+- State the input and output grain, schema, NULL policy and ordering before executing a transformation.
+- Compare each language implementation with independent literal expectations, not only with the other implementation.
 
 ## Vocabulary and concepts
 
@@ -40,13 +40,13 @@ The actual query reads three occurrences:1:100,1:100,2:200. Native streaming ded
 
 numInputRows describes admitted input work for the reported trigger. State operators report their own row counts and memoryUsedBytes. A sink's numOutputRows can be unavailable or represented by a negative sentinel, depending on its implementation. Missing is not zero. The reference preserves that distinction and uses a separate data readback for the exact application result.
 
-State memory is not driver RSS, executor heap size, total container memory or a cloud charge. It is one implementation-specific operator observation. Compare it with state rows, keys, watermark progress and the actual configured retention policy before deciding that growth is abnormal. An increasing state-row count can be expected when new keys arrive and no eviction exists;deleting checkpoints is not an acceptable response to an unexplained graph.
+State memory is not driver RSS, executor heap size, total container memory or a cloud charge. It is one implementation-specific operator observation. Compare it with state rows, keys, watermark progress and the actual configured retention policy before deciding that growth is abnormal. An increasing state-row count can be expected when new keys arrive and no eviction exists; deleting checkpoints is not an acceptable response to an unexplained graph.
 
 A separate empty AvailableNow run admits no source rows and terminates. That is a valid finite no-work result. It may have no progress records or no readable Parquet product. The code does not manufacture a schema by reading an empty output path. An active long-running query with zero input is a different operational situation:inspect upstream supply, source discovery, permissions and offsets before blaming compute capacity.
 
 ## Three seeded incident records
 
-The skew fixture has task runtimes[100,100,10000]milliseconds in one stage. The max-to-median ratio is 100, but the observation alone does not establish the cause. One partition may contain a hot key, or the task may be slowed by storage or another resource. A reversible check is to inspect key/partition work distribution and compare the heavy task's input/shuffle work. Success means a changed plan or partition policy preserves the output oracle while reducing the documented imbalance, not merely hiding the slow task from the chart.
+The skew fixture has task runtimes [100, 100, 10000] milliseconds in one stage. The max-to-median ratio is 100, but the observation alone does not establish the cause. One partition may contain a hot key, or the task may be slowed by storage or another resource. A reversible check is to inspect key/partition work distribution and compare the heavy task's input/shuffle work. Success means a changed plan or partition policy preserves the output oracle while reducing the documented imbalance, not merely hiding the slow task from the chart.
 
 The state fixture reports retained rows 10,100,1000 while the recorded watermark remains unchanged. This motivates checking event-time parsing, the watermark column, new-key rate and retention semantics. It is not proof of a memory leak. The success condition should name expected eviction or bounded key growth under a defined late-event policy, with exact output consequences reviewed.
 
@@ -56,7 +56,7 @@ These three records are stored in the case ledger as synthetic diagnostic inputs
 
 ## Plans, event logs and data handling
 
-A logical plan explains the requested operators;an executed plan and metrics describe a particular run. Neither is a substitute for output correctness. Classic JVM plan APIs used elsewhere in this track are version-pinned diagnostics and are not assumed available through Spark Connect. The UI is disabled in the course profile, so the lesson does not require a screenshot or expose a new listener.
+A logical plan explains the requested operators; an executed plan and metrics describe a particular run. Neither is a substitute for output correctness. Classic JVM plan APIs used elsewhere in this track are version-pinned diagnostics and are not assumed available through Spark Connect. The UI is disabled in the course profile, so the lesson does not require a screenshot or expose a new listener.
 
 Event logs can preserve execution history when explicitly enabled before application startup. They can also contain paths, SQL text and configuration. This lesson reviews sanitized supplied task-event fields rather than enabling a history server or exporting complete logs. The allowlist exercise keeps only declared IDs, timing and row-count fields from a fake credential-bearing record. It does not pretend to be a general enterprise redaction policy.
 
@@ -175,7 +175,7 @@ Run the supplied three-occurrence stream with ID deduplication and return a boun
 
 ### Exercise 2: Interpret state and sink metrics with units
 
-Require a state operator and a nonnegative memory-used measurement;preserve unknown or negative sink-row sentinel values as unavailable.
+Require a state operator and a nonnegative memory-used measurement; preserve unknown or negative sink-row sentinel values as unavailable.
 
 **Expected result/shape:** State memory is reported in bytes. A missing or negative sink output count is not converted into zero.
 
@@ -191,13 +191,13 @@ Add a new ID 3:300 and restart the same compatible checkpoint.
 
 **Verify:** Compare actual state totals, query identity and exact committed rows.
 
-**Progressive hint:** New retained keys explain growth here;growth alone is not evidence of a leak.
+**Progressive hint:** New retained keys explain growth here; growth alone is not evidence of a leak.
 
 ### Exercise 4: Distinguish empty input from a stuck query
 
 Run a separate AvailableNow query over an empty owned input directory.
 
-**Expected result/shape:** Zero admitted rows and a terminated query;state/sink metrics may be absent.
+**Expected result/shape:** Zero admitted rows and a terminated query; state/sink metrics may be absent.
 
 **Verify:** Assert zero input and termination without fabricating an output Parquet schema.
 
@@ -207,7 +207,7 @@ Run a separate AvailableNow query over an empty owned input directory.
 
 For the explicitly synthetic incident fixtures, choose one reversible check for skew, growing state and zero admitted input.
 
-**Expected result/shape:** Inspect key/partition distribution;inspect watermark/key-retention policy;inspect source discovery respectively.
+**Expected result/shape:** Inspect key/partition distribution; inspect watermark/key-retention policy; inspect source discovery respectively.
 
 **Verify:** Compare the three exact recommendations and state one success observation for each.
 
@@ -219,7 +219,7 @@ Keep only stage_id, task_id, run_ms and input_records from a supplied task-event
 
 **Expected result/shape:** Exact four-field record, with fake token/password absent.
 
-**Verify:** Assert field set and values;do not print the unfiltered input.
+**Verify:** Assert field set and values; do not print the unfiltered input.
 
 **Progressive hint:** Allowlisting is safer than trying to guess every sensitive field name.
 
@@ -229,11 +229,11 @@ Do not call zero input a compute bottleneck without checking source progress. Do
 
 ## Self-check
 
-Explain the contract of `capture` / `capture` without reading its solution. Trace the specified boundary case,then explain the final exercise's evidence and limitation. Identify where a transformation builds a plan and where an action requests execution. Retain exact values or operator evidence rather than treating a successful process exit as proof of the whole learning objective.
+Explain the contract of `capture` / `capture` without reading its solution. Trace the specified boundary case, then explain the final exercise's evidence and limitation. Identify where a transformation builds a plan and where an action requests execution. Retain exact values or operator evidence rather than treating a successful process exit as proof of the whole learning objective.
 
 ## Next step
 
-Use the [course route](../README.md) to continue. Paired-language agreement is useful only when both outputs also satisfy the independent fixture contract. Keep runtime/profile receipts separate from any cluster-performance or production-recovery claim.
+Use the [course route](../README.md) to continue. Paired-language agreement is useful only when both outputs also satisfy the independent fixture contract. A successful local run is not evidence of cluster performance or production recovery.
 
 ## Primary sources and official APIs
 
@@ -245,8 +245,8 @@ Use the [course route](../README.md) to continue. Paired-language agreement is u
 
 ```text
 Use $guide-ds60sqlpy-learning to coach me through spark-038: Observability: plans, progress, event logs and incidents.
-Read courses/scala-spark/guides/spark-038.md and courses/scala-spark/lessons/spark-038.py;the paired sources are courses/scala-spark/lessons/spark-038.scala and courses/scala-spark/lessons/spark-038.py.
-Direct prerequisites: spark-037. Explain the schema,row grain and new Scala/Python/Spark syntax,ask me to predict a concrete result,then inspect my attempt. Give one hint at a time,review exact result and boundary evidence,and ask retrieval questions in my own words. Do not read solutions/ until I ask or have made an honest attempt.
-Use only the prepared local[2] worker profile and owned job scratch. Do not download dependencies,start a remote service,reset existing checkpoints or alter unrelated learner work.
+Read courses/scala-spark/guides/spark-038.md and courses/scala-spark/lessons/spark-038.py; the paired sources are courses/scala-spark/lessons/spark-038.scala and courses/scala-spark/lessons/spark-038.py.
+Direct prerequisites: spark-037. Explain the schema, row grain and new Scala/Python/Spark syntax, ask me to predict a concrete result, then inspect my attempt. Give one hint at a time, review exact result and boundary evidence, and ask retrieval questions in my own words. Do not read solutions/ until I ask or have made an honest attempt.
+Use only the prepared local[2] worker profile and owned job scratch. Do not download dependencies, start a remote service, reset existing checkpoints or alter unrelated learner work.
 Done when all six contracts have inspected evidence and I can explain the stated assumptions and a meaningful failure case.
 ```

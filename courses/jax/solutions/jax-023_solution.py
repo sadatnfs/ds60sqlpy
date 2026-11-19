@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import math
 import numpy as np
 import jax
 import jax.numpy as jnp
@@ -70,7 +69,7 @@ def main():
     close(solution, [2 / 3, 2.0])
     close(jnp.array([3.0, 3.0]) * solution, right)
 
-    print("jax-023" + ": 8 asserted cases passed")
+    print("jax-023: 8 asserted cases passed")
 
 
 if __name__ == "__main__":

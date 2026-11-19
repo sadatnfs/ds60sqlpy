@@ -38,6 +38,20 @@ internal static class Program {
       source.Emit();
       Check(calls == 1, "unsubscribe ends observation");
     }
+    {
+      // Task 3: Independent construction
+      int[] Transform(int[] values, Func<int, int> change) {
+        var result = new int[values.Length];
+        for (int i = 0; i < values.Length; i++) {
+          result[i] = change(values[i]);
+        }
+        return result;
+      }
+      int[] input = { 1, 2, 3 };
+      int[] scaled = Transform(input, value => value * 10);
+      Check(scaled.SequenceEqual(new[] { 10, 20, 30 }), "delegate applied");
+      Check(input[0] == 1, "input unchanged");
+    }
     Console.WriteLine("csharp-019: passed");
     await Task.CompletedTask;
   }

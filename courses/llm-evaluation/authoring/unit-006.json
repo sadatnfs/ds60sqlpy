@@ -9,6 +9,7 @@
     "confidence interval"
   ],
   "outcome": "Compute paired and family-level uncertainty while distinguishing a randomization null, a bootstrap approximation and a deployment claim.",
+  "verification": "Vanishing differences give an exact tail of 1, four favorable pairs give 2/16 = 0.125, relabeling leaves the two-sided p-value unchanged, the two quantile conventions give about +/-0.925 and +/-1, and three families have 27 ordered bootstrap draws.",
   "level": "intermediate",
   "runtime": "python-core",
   "minutes": 120,

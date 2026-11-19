@@ -18,7 +18,7 @@ Use torch.save on a dictionary containing model state and optimizer state. Load 
 
 ## Exercise 1: Create Adam history
 
-The question is: Take two float32 Adam updates of(w-2)² fromw0.
+The question is: Take two float32 Adam updates of (w-2)² from w=0.
 
 The checkpoint must contain nontrivial history. Saving before the first update would not distinguish a full optimizer restore from a fresh optimizer.
 
@@ -32,9 +32,9 @@ for _ in range(2):
 assert w.item() > 0 and opt.state[w]["step"].item() == 2
 ```
 
-**Expected:** positive weight and optimizer step2.
+**Expected:** positive weight and optimizer step 2.
 
-**Verify:** Compare the computed values or written argument with positive weight and optimizer step2.
+**Verify:** In a fresh process, the exercise checks confirm `w.item() > 0` and `opt.state[w]['step'].item() == 2`.
 
 ## Exercise 2: Save a trusted local checkpoint
 
@@ -52,7 +52,7 @@ saved = w.item()
 
 **Expected:** checkpoint file exists.
 
-**Verify:** Compare the computed values or written argument with checkpoint file exists.
+**Verify:** In a fresh process, the exercise checks confirm `path.is_file()`.
 
 ## Exercise 3: Calculate the uninterrupted next step
 
@@ -68,9 +68,9 @@ expected = w.item()
 assert opt.state[w]["step"].item() == 3 and expected != saved
 ```
 
-**Expected:** step3 and changed weight.
+**Expected:** step 3 and changed weight.
 
-**Verify:** Compare the computed values or written argument with step3 and changed weight.
+**Verify:** In a fresh process, the exercise checks confirm `opt.state[w]['step'].item() == 3` and `expected != saved`.
 
 ## Exercise 4: Restore in a new interpreter
 
@@ -103,7 +103,7 @@ np.testing.assert_allclose(restored["weight"], expected, atol=1e-6, rtol=0)
 
 **Expected:** child weight agrees within 1e-6.
 
-**Verify:** Compare the computed values or written argument with child weight agrees within 1e-6.
+**Verify:** In a fresh process, the exercise checks confirm `not (result.returncode)` and `restored['weight']` matches `expected` within 1e-6.
 
 ## Exercise 5: Expose weights-only continuation
 
@@ -121,11 +121,11 @@ assert abs(fresh_w.item() - expected) > 1e-6
 
 **Expected:** weight differs from full-state continuation.
 
-**Verify:** Compare the computed values or written argument with weight differs from full-state continuation.
+**Verify:** In a fresh process, the exercise checks confirm `abs(fresh_w.item() - expected) > 1e-06`.
 
 ## Exercise 6: Verify evaluation and cleanup
 
-The question is: Use Dropout(.5) in eval mode on ones and remove only the owned temporary checkpoint.
+The question is: Use Dropout(0.5) in eval mode on ones and remove only the owned temporary checkpoint.
 
 Evaluation mode disables this stochastic layer. Cleanup is confined to the temporary fixture and never deletes learner checkpoints or progress.
 
@@ -140,7 +140,7 @@ assert not path.exists()
 
 **Expected:** dropout returns ones; temporary path absent.
 
-**Verify:** Compare the computed values or written argument with dropout returns ones; temporary path absent.
+**Verify:** In a fresh process, the exercise checks confirm `torch.equal(drop(ones), ones)` and `not path.exists()`.
 
 ## Review after comparison
 

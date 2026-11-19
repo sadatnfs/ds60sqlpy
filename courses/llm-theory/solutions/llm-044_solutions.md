@@ -26,7 +26,7 @@ The RoPE helper pairs adjacent features and uses inverse frequencies base**(-2*i
 
 ## Exercise 1: Rotate a two-dimensional vector
 
-The question is: Rotate[1, 0] by \(\frac{\pi}{2}\) and check length preservation.
+The question is: Rotate [1, 0] by \(\frac{\pi}{2}\) and check length preservation.
 
 A rotation changes direction while preserving the Euclidean norm. This separates position encoding from arbitrary magnitude scaling.
 
@@ -37,13 +37,13 @@ np.testing.assert_allclose(rotated, [0, 1], atol=1e-12, rtol=0)
 np.testing.assert_allclose(np.linalg.norm(rotated), 1, atol=1e-12, rtol=0)
 ```
 
-**Expected:** approximately[0, 1]; norm 1.
+**Expected:** approximately [0, 1]; norm 1.
 
-**Verify:** Compare the computed values or written argument with approximately[0, 1]; norm 1.
+**Verify:** In a fresh process, the exercise checks confirm `rotated` matches `[0, 1]` within 1e-12 and `np.linalg.norm(rotated)` matches `1` within 1e-12.
 
 ## Exercise 2: Verify the relative dot-product identity
 
-The question is: Use q[1, 2], k[3, -1], angles \(m=0.3\), \(n=1.1\).
+The question is: Use q = [1, 2], k = [3, -1] and angles m = 0.3, n = 1.1.
 
 The transpose of a rotation is its inverse, so the absolute angles combine into their difference. This is an algebraic property, not a measured long-context quality result.
 
@@ -59,13 +59,13 @@ np.testing.assert_allclose(left, right, atol=1e-12, rtol=0)
 
 **Expected:** dot(Rm q, Rn k)=dot(q, R(n-m)k) within 1e-12.
 
-**Verify:** Compare the computed values or written argument with dot(Rm q, Rn k)=dot(q, R(n-m)k) within 1e-12.
+**Verify:** In a fresh process, the exercise checks confirm `left` matches `right` within 1e-12.
 
 ## Exercise 3: Inspect an ALiBi causal row
 
-The question is: Use zero content scores for query position 2, keys 0, 1, 2 and slope log 2.
+The question is: Use zero content scores for query position 2, keys 0, 1, 2 and slope \(\log 2\).
 
-The distance penalties produce exponentials1/4, \(\frac{1}{2}\), 1 before normalization. The current key receives the largest weight under this illustrative slope.
+The distance penalties produce exponentials 1/4, \(\frac{1}{2}\), 1 before normalization. The current key receives the largest weight under this illustrative slope.
 
 ```python
 positions = np.arange(3)
@@ -75,9 +75,9 @@ weights = mass / mass.sum()
 np.testing.assert_allclose(weights, [1 / 7, 2 / 7, 4 / 7], atol=1e-12, rtol=0)
 ```
 
-**Expected:** normalized weights[1/7, \(\frac{2}{7}\), 4/7].
+**Expected:** normalized weights [1/7, \(\frac{2}{7}\), 4/7].
 
-**Verify:** Compare the computed values or written argument with normalized weights[1/7, \(\frac{2}{7}\), 4/7].
+**Verify:** In a fresh process, the exercise checks confirm `weights` matches `[1 / 7, 2 / 7, 4 / 7]` within 1e-12.
 
 ## Exercise 4: Apply multi-frequency RoPE
 
@@ -97,9 +97,9 @@ np.testing.assert_allclose(
 np.testing.assert_allclose(10000.0 ** (-2 * np.arange(2) / 4), [1, 0.01], atol=1e-12, rtol=0)
 ```
 
-**Expected:** frequencies 1, .01; each pair norm preserved.
+**Expected:** frequencies 1 and 0.01; each pair norm preserved.
 
-**Verify:** Compare the computed values or written argument with frequencies 1, .01; each pair norm preserved.
+**Verify:** In a fresh process, the exercise checks confirm `np.linalg.norm(encoded.reshape(2, 2, 2), axis=-1)` matches `np.linalg.norm(values.reshape(2, 2, 2), axis=-1)` within 1e-12 and `10000.0 ** (-2 * np.arange(2) / 4)` matches `[1, 0.01]` within 1e-12.
 
 ## Exercise 5: Catch a cache offset reset
 
@@ -116,9 +116,9 @@ np.testing.assert_allclose(incremental, full[2:], atol=1e-12, rtol=0)
 assert not np.allclose(reset, full[2:])
 ```
 
-**Expected:** correct incremental encoding matches full encoding; reset differs.
+**Expected:** correct incremental encoding matches full encoding; the reset differs.
 
-**Verify:** Compare the computed values or written argument with correct incremental encoding matches full encoding; reset differs.
+**Verify:** In a fresh process, the exercise checks confirm `incremental` matches `full[2:]` within 1e-12 and `not np.allclose(reset, full[2:])`.
 
 ## Exercise 6: Separate computability from extrapolation evidence
 
@@ -141,7 +141,7 @@ else:
 
 **Expected:** finite vector; long_context_quality_verified=False; odd width rejected.
 
-**Verify:** Compare the computed values or written argument with finite vector; long_context_quality_verified=False; odd width rejected.
+**Verify:** In a fresh process, the exercise checks confirm `np.isfinite(far).all()`; `not report['long_context_quality_verified']` and `rope(np.ones((1, 3)), np.array([0]))` raises `ValueError`.
 
 ## Review after comparison
 

@@ -15,7 +15,7 @@ Atomicity prevents torn or lost updates to the counter itself. Publication asks 
 
 An atomic operation makes an access to that atomic object indivisible under its specified ordering. It does not automatically protect every nearby variable. Counting independent events and publishing a non-atomic payload are different problems, so the examples deliberately use two different synchronization arguments.
 
-For the counter, each fetch_add contributes one increment. Two workers each add1000, and main joins both before checking2000. Relaxed ordering is enough for the counter's atomic updates because no additional payload visibility is being communicated through each increment. join supplies completion before the final observation. Replacing fetch_add with an unsynchronized read-modify-write on an ordinary int would permit lost updates and a data race.
+For the counter, each fetch_add contributes one increment. Two workers each add 1000, and main joins both before checking 2000. Relaxed ordering is enough for the counter's atomic updates because no additional payload visibility is being communicated through each increment. join supplies completion before the final observation. Replacing fetch_add with an unsynchronized read-modify-write on an ordinary int would permit lost updates and a data race.
 
 Publication uses a separate payload and ready flag. The producer writes payload=7 and then performs a release store of true. The consumer loops until an acquire load observes that publication, then reads payload. The release/acquire relationship orders the earlier payload write before the consumer's later read. This is an inter-thread visibility argument, not merely a promise that the flag eventually changes.
 
@@ -25,7 +25,7 @@ Memory ordering is easy to overcomplicate. A mutex can be clearer when multiple 
 
 ## Debugging the contract
 
-If the counter is sometimes below2000, inspect whether every increment is one atomic read-modify-write and whether workers are joined. If the payload has no ordering relationship, do not trust repeated successful runs. Find the release store and the acquire load that actually observes it. If several fields must change consistently, consider a mutex instead of treating each field as an unrelated atomic and hoping the combined state is coherent.
+If the counter is sometimes below 2000, inspect whether every increment is one atomic read-modify-write and whether workers are joined. If the payload has no ordering relationship, do not trust repeated successful runs. Find the release store and the acquire load that actually observes it. If several fields must change consistently, consider a mutex instead of treating each field as an unrelated atomic and hoping the combined state is coherent.
 <!-- depth:end -->
 
 ## Worked example 1
@@ -53,7 +53,7 @@ Run two workers with 1000 increments each.
 
 **Reasoning:** Atomic read-modify-write prevents lost increments.
 
-**Verify:** Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.
+**Verify:** Assert `count.load() == 2000` only after both `a.join()` and `b.join()`, as Worked example 1 does.
 
 ## Exercise 2: Explain relaxed
 
@@ -63,7 +63,7 @@ State why relaxed suffices for the isolated counter.
 
 **Reasoning:** Atomicity and visibility ordering solve different problems.
 
-**Verify:** Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.
+**Verify:** Check that your statement notes that no other variable is read based on `count`, and that the final read happens after `join()`, which already synchronizes.
 
 ## Exercise 3: Trace publication
 
@@ -73,7 +73,7 @@ Draw payload write, release store, acquire load and payload read.
 
 **Reasoning:** The acquire must observe the relevant release.
 
-**Verify:** Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.
+**Verify:** Check that the drawing has `payload = 7` before the release store, the acquire load that sees `true` before the payload read, and an arrow from the store to that load.
 
 ## Exercise 4: Reject a data race
 
@@ -83,7 +83,7 @@ Review plain shared int increments without synchronization.
 
 **Reasoning:** Observed success cannot legalize a data race.
 
-**Verify:** Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.
+**Verify:** If your host supports `-fsanitize=thread`, build the reviewed code in a scratch copy and confirm ThreadSanitizer reports a data race even when the printed total happens to be correct.
 
 ## Exercise 5: Test zero workers
 
@@ -93,7 +93,7 @@ Set work count to zero and inspect the counter.
 
 **Reasoning:** Initial atomic state is a valid boundary.
 
-**Verify:** Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.
+**Verify:** Set both loop bounds to 0 and assert `count.load() == 0` after both joins; no other data depends on this value.
 
 ## Exercise 6: Transfer multiple fields
 
@@ -103,4 +103,4 @@ Publish two fields behind one ready release/acquire pair.
 
 **Reasoning:** Do not mutate the payload again without a new protocol.
 
-**Verify:** Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.
+**Verify:** Write both fields before `ready.store(true, std::memory_order_release)` and assert both values after the acquire loop exits, as Worked example 2 does for `payload == 7`.

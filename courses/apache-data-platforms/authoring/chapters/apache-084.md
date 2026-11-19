@@ -14,7 +14,7 @@ retention rules. Qualified metadata identity prevents a lineage edge from
 accidentally connecting the wrong asset.
 
 The course offers an actual Hive/Metastore prepared route and an explicitly
-separate Atlas REST/native-server alternative. No automatic Hive 4.2/Atlas 2.5hook
+separate Atlas REST/native-server alternative. No automatic Hive 4.2/Atlas 2.5 hook
 compatibility is inferred. Manual registration must describe its actual source
 and scope rather than claiming complete instrumented runtime lineage.
 

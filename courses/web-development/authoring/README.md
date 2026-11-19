@@ -4,7 +4,10 @@
 worked snippets, exercise prompts and explanations, direct prerequisites and
 references. `templates/` owns the complete answer-free HTML/PHP starters and
 separate executable references. Templates are ordinary formatted source files,
-not encoded strings hidden inside a generator. The optional HTTP fixture is
+not encoded strings hidden inside a generator. A starter lists the lesson's six
+exercises, keeps the worked examples as comments and supplies a small synthetic
+fixture; some fixtures contain the deliberate defect that an exercise asks the
+learner to diagnose, such as a fragment link without a matching id. The optional HTTP fixture is
 maintained directly under `../fixtures/php-http-lab/`.
 
 From the repository root:

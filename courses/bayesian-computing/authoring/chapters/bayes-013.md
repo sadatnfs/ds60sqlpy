@@ -40,7 +40,7 @@ Coefficient priors have units. A standard-normal prior on a predictor measured i
 
 Strong posterior correlation can make numerical exploration inefficient. Reparameterization, orthogonal designs or an adapted metric may help. Those computational choices should preserve the intended target density. Changing the prior merely to obtain easier diagnostics changes the statistical model and should be reported as such.
 
-Review diagnostic quantities for both individual coefficients and important contrasts. A sampler may estimate a stable prediction well while poorly characterizing a broad, scientifically relevant direction. Effective sample size and Monte Carlo error are quantity-specific, and a single average across parameters can conceal the important failure.
+Review diagnostic quantities for both individual coefficients and important contrasts. A sampler may estimate a stable prediction well while poorly characterizing a broad, scientifically relevant direction. Effective sample size and Monte Carlo error are quantity-specific, and a single average across parameters can conceal the important failure. The program reports the minimum bulk effective sample size across coefficients for that reason; a weakly identified coefficient is usually the one that falls below 100 per chain or pushes R-hat above 1.01.
 
 ## Answered scientific discussion
 

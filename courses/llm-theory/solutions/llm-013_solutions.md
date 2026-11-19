@@ -14,40 +14,43 @@ A decoder can have perfect causal attention and still be evaluated on leaked dat
 
 ## Reading the implementation
 
-For token sequence ids, use ids[:-1] as inputs and ids[1:] as targets. Hash raw or explicitly normalized text according to a declared policy. Compare both exact hashes and known family IDs across partitions; exact hashing cannot detect paraphrases on its own. Validate disjoint groups before fitting any vocabulary or count model.
+For token sequence ids, use ids[:-1] as inputs and ids [1:] as targets. Hash raw or explicitly normalized text according to a declared policy. Compare both exact hashes and known family IDs across partitions; exact hashing cannot detect paraphrases on its own. Validate disjoint groups before fitting any vocabulary or count model.
 
-## Exercise 1: Construct next-token pairs
+## Exercise 1: Shift a batch of two sequences
 
-The question is: Shift IDs[2,5,7,3] into input and label arrays.
+The question is: Shift IDs [[4, 1, 6, 2, 9], [3, 3, 8, 0, 5]] along the time axis into inputs and labels.
 
-There are three target events in a four-token sequence. The final token has no next token unless an explicit end marker is included in the original sequence.
-
-```python
-ids = np.array([2, 5, 7, 3])
-inputs = ids[:-1]
-labels = ids[1:]
-np.testing.assert_array_equal(inputs, [2, 5, 7])
-np.testing.assert_array_equal(labels, [5, 7, 3])
-```
-
-**Expected:** inputs[2,5,7],labels[5,7,3].
-
-**Verify:** Compare the computed values or written argument with inputs[2,5,7],labels[5,7,3].
-
-## Exercise 2: Expose identity labels
-
-The question is: Compare copied-input labels with the proper shifted targets.
-
-A model trained to reproduce its current token is not being tested on next-token prediction. A causal mask allows the current input, so it cannot detect this objective error.
+The shift is applied to the time axis of every sequence; the batch axis is untouched. Each sequence loses one prediction target because its final token has no successor.
 
 ```python
-copied = inputs.copy()
-assert np.count_nonzero(copied != labels) == 3
+batch = np.array([[4, 1, 6, 2, 9], [3, 3, 8, 0, 5]])
+x_in = batch[:, :-1]
+y_out = batch[:, 1:]
+assert x_in.shape == y_out.shape == (2, 4)
+np.testing.assert_array_equal(y_out, [[1, 6, 2, 9], [3, 8, 0, 5]])
 ```
 
-**Expected:** all three copied labels differ from the target fixture.
+**Expected:** inputs and labels both shape (2, 4); labels [[1, 6, 2, 9], [3, 8, 0, 5]].
 
-**Verify:** Compare the computed values or written argument with all three copied labels differ from the target fixture.
+**Verify:** In a fresh process, the exercise checks confirm `x_in.shape == y_out.shape == (2, 4)` and `y_out` equals `[[1, 6, 2, 9], [3, 8, 0, 5]]`.
+
+## Exercise 2: Predict a partly hidden label bug
+
+The question is: For the second sequence, compare copied-input labels with the shifted targets and predict how many positions agree.
+
+A repeated token makes the identity-label bug agree with the true target at one position. A check that only looked for any agreement would pass; counting all disagreements still exposes the bug.
+
+```python
+row = batch[1]
+copied_row = row[:-1]
+target_row = row[1:]
+assert int(np.count_nonzero(copied_row == target_row)) == 1
+assert int(np.count_nonzero(copied_row != target_row)) == 3
+```
+
+**Expected:** copied labels agree once (the repeated 3) and differ at the other 3 positions.
+
+**Verify:** In a fresh process, the exercise checks confirm `int(np.count_nonzero(copied_row == target_row)) == 1` and `int(np.count_nonzero(copied_row != target_row)) == 3`.
 
 ## Exercise 3: Detect exact duplicates
 
@@ -66,11 +69,11 @@ assert {hash_text(t) for t in train.values()} & {hash_text(t) for t in valid.val
 
 **Expected:** same SHA256 despite different filenames.
 
-**Verify:** Compare the computed values or written argument with same SHA256 despite different filenames.
+**Verify:** In a fresh process, the exercise checks confirm `{hash_text(t) for t in train.values()} & {hash_text(t) for t in valid.values()}`.
 
 ## Exercise 4: Detect family leakage
 
-The question is: Assign documentsa andb to familyF across train and validation.
+The question is: Assign documents a and b to family F across train and validation.
 
 Known source families can catch related material that hashes differently. The grouping policy should be frozen before outcome inspection.
 
@@ -79,13 +82,13 @@ families = {"a": "F", "b": "F", "c": "G"}
 assert {families["a"]} & {families["b"]} == {"F"}
 ```
 
-**Expected:** family intersection containsF.
+**Expected:** family intersection contains F.
 
-**Verify:** Compare the computed values or written argument with family intersection containsF.
+**Verify:** In a fresh process, the exercise checks confirm `{families['a']} & {families['b']} == {'F'}`.
 
 ## Exercise 5: Freeze a vocabulary
 
-The question is: Fit a vocabulary from training words alpha,beta and encode validation-only gamma without adding it.
+The question is: Fit a vocabulary from training words alpha, beta and encode validation-only gamma without adding it.
 
 A vocabulary update during validation changes the fitted representation. Unknown-token handling must be an explicit frozen policy.
 
@@ -96,13 +99,13 @@ unknown = vocab.get("gamma", -1)
 assert unknown == -1 and vocab == before
 ```
 
-**Expected:** vocabulary remains alpha,beta; gamma is unknown.
+**Expected:** vocabulary remains alpha, beta; gamma is unknown.
 
-**Verify:** Compare the computed values or written argument with vocabulary remains alpha,beta; gamma is unknown.
+**Verify:** In a fresh process, the exercise checks confirm `unknown == -1` and `vocab == before`.
 
 ## Exercise 6: Count active targets
 
-The question is: Count targets across documents of lengths4 and2 without creating a transition between documents.
+The question is: Count targets across documents of lengths 4 and 2 without creating a transition between documents.
 
 Concatenating documents without a boundary policy invents a transition from the end of one source to the start of another. Per-document pairing preserves the declared prediction unit.
 
@@ -112,9 +115,9 @@ pairs = [(a, b) for doc in documents for a, b in zip(doc[:-1], doc[1:])]
 assert len(pairs) == 4 and (3, 8) not in pairs
 ```
 
-**Expected:** \(3+1=4\) targets, not5.
+**Expected:** \(3+1=4\) targets, not 5.
 
-**Verify:** Compare the computed values or written argument with \(3+1=4\) targets, not5.
+**Verify:** In a fresh process, the exercise checks confirm `len(pairs) == 4` and `(3, 8) not in pairs`.
 
 ## Review after comparison
 

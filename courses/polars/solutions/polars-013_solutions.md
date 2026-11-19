@@ -9,6 +9,17 @@ The executable reference contains the two complete worked cases with assertions.
 
 Use is_null and an explicit length comparison. Keep these categories separate in a coverage report.
 
+```python
+import polars as pl
+
+frame = pl.DataFrame({"order": [1, 2, 3], "items": [["a", "b"], [], None]})
+counts = frame.select(
+    (pl.col("items").list.len() == 0).sum().alias("empty_lists"),
+    pl.col("items").is_null().sum().alias("null_lists"),
+)
+assert counts.row(0) == (1, 1)
+```
+
 **Expected:** There is one of each.
 
 ## 2. Change the grain
@@ -20,6 +31,17 @@ Add a stable item position or item identifier when the source contract supports 
 ## 3. Keep order-level metrics
 
 Item counts and order counts answer different questions. Retain an order-level table for denominators and join it carefully when summarizing items.
+
+```python
+import polars as pl
+
+frame = pl.DataFrame({"order": [1, 2, 3], "items": [["a", "b"], [], None]})
+orders_before = frame.select(pl.col("order").n_unique()).item()
+exploded = frame.explode("items")
+assert orders_before == 3
+# On polars 2.1.0 explode drops the empty-list order and keeps the null list as one null row.
+assert exploded["order"].to_list() == [1, 1, 3]
+```
 
 **Expected:** The count remains 3.
 
@@ -33,7 +55,7 @@ A schema version should explain the added field and its units. Positional unpack
 
 pl.element()*pl.element() expresses the operation within each list. It preserves the list boundaries while changing the values.
 
-**Expected:** The lists become [[1,4],[9]].
+**Expected:** The lists become [[1, 4],[9]].
 
 ## 6. Test null nested elements
 
@@ -85,4 +107,4 @@ if __name__ == "__main__":
 
 ## Interpretation
 
-Normalize nested events with an explicit population and identity contract. Demonstrate empty, missing and repeated-element cases, then verify that any flattened table can still be related to its original records. This is essential for reliable event analytics and sequence-feature construction.
+Demonstrate empty, missing and repeated-element cases, then verify that any flattened table can still be related to its original records. This is essential for reliable event analytics and sequence-feature construction.

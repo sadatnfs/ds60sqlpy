@@ -6,11 +6,53 @@ Read this tutorial in the classroom. Its commands run only in the separately pre
 
 ## Separate the process from the machine
 
+The beginner stage here refers to deployment experience. The chapter assumes the driver, executor and cluster-manager vocabulary from the advanced `spark-030` architecture lesson, and it starts from that vocabulary rather than teaching Spark itself.
+
 A Spark application has one driver, which creates its session and schedules work, and executors, which run tasks. A cluster manager allocates those executors. In Standalone, the master knows available workers; a worker launches executor processes. A worker is therefore not an executor and a container is not a physical machine. Two worker containers on this laptop share its CPU, memory, storage and failure domain.
 
 The word client describes driver placement. In client deploy mode, the submitting process contains the driver. In cluster deploy mode, the manager starts a driver elsewhere. A separate Docker driver container still uses client mode. A notebook kernel usually contains a client-mode driver. Spark Connect is a different client/server API boundary and is not the execution path in this workshop.
 
 Read a port as a destination belonging to one process. The master listens on 7077 for Spark traffic and its own UI on 8080. An application driver uses 4040 for its UI by default. Driver RPC and block transfers are separate channels; this project fixes its driver RPC at 39000 and driver block manager at 39001. A browser port does not substitute for either.
+
+The workshop's own submit call in `lab.py` runs `spark-submit` inside the driver container through the saved Compose command (`cmd`) and spells out the master URL, the client deploy mode and both fixed driver ports:
+
+From [`projects/cluster-lab/lab.py`](../projects/cluster-lab/lab.py):
+
+```python
+options = [
+    "--hold-seconds",
+    str(args.hold_seconds),
+    "--partition-seconds",
+    str(args.partition_seconds),
+]
+if args.allow_one_worker:
+    options.append("--allow-one-worker")
+run(
+    [
+        *cmd,
+        "exec",
+        "-T",
+        "driver",
+        "/opt/spark/bin/spark-submit",
+        "--master",
+        "spark://master:7077",
+        "--deploy-mode",
+        "client",
+        "--conf",
+        "spark.driver.host=driver",
+        "--conf",
+        "spark.driver.bindAddress=0.0.0.0",
+        "--conf",
+        "spark.driver.port=39000",
+        "--conf",
+        "spark.driver.blockManager.port=39001",
+        "/lab/app/bounded_job.py",
+        *options,
+    ],
+    env=env,
+    timeout=360,
+)
+```
 
 ## Worked case A: trace a separate driver
 

@@ -18,7 +18,7 @@ Create two independent models from the same state_dict. Use dropout-free evaluat
 
 ## Exercise 1: Clone the initial state
 
-The question is: Build two identical decoders with seed9 and copy one state into the other.
+The question is: Build two identical decoders with seed 9 and copy one state into the other.
 
 Independent model objects avoid shared mutation. Copying the state establishes a fair starting point for the update intervention.
 
@@ -34,11 +34,11 @@ y = torch.tensor([[2, 3, 4]])
 
 **Expected:** all parameter tensors initially equal.
 
-**Verify:** Compare the computed values or written argument with all parameter tensors initially equal.
+**Verify:** In a fresh process, the exercise checks confirm `all((torch.equal(a, b) for a, b in zip(trained.parameters(), control.parameters())))`.
 
 ## Exercise 2: Run a no-update control
 
-The question is: Compute the same loss5 times without backward or step.
+The question is: Compute the same loss 5 times without backward or step.
 
 Repeated execution is not training. The control demonstrates the difference without relying on log messages or an optimizer object merely existing.
 
@@ -56,11 +56,11 @@ assert len(set(values)) == 1 and all(
 
 **Expected:** all losses equal; weights unchanged.
 
-**Verify:** Compare the computed values or written argument with all losses equal; weights unchanged.
+**Verify:** In a fresh process, the exercise checks confirm `len(set(values)) == 1` and `all((torch.equal(v, before[k]) for k, v in control.state_dict().items()))`.
 
 ## Exercise 3: Train the repeated batch
 
-The question is: Apply30 Adam(.02) updates to the other model, using the same batch each time.
+The question is: Apply 30 Adam(0.02) updates to the other model, using the same batch each time.
 
 The comparison is local to one known batch. A loss decrease proves that this loop can adjust its prediction of exposed transitions, not that the dataset is appropriate.
 
@@ -79,11 +79,11 @@ assert np.isfinite(curve).all() and curve[-1] < curve[0]
 
 **Expected:** final batch loss below its initial loss.
 
-**Verify:** Compare the computed values or written argument with final batch loss below its initial loss.
+**Verify:** In a fresh process, the exercise checks confirm `np.isfinite(curve).all()` and `curve[-1] < curve[0]`.
 
 ## Exercise 4: Check the class axis
 
-The question is: Inspect logits before flattening and verify vocabulary dimension16.
+The question is: Inspect logits before flattening and verify vocabulary dimension 16.
 
 Cross entropy needs one score per class for each active target. Flattening before checking axes can conceal swapped time and vocabulary dimensions.
 
@@ -92,9 +92,9 @@ z, _ = trained(x)
 assert tuple(z.shape) == (1, 3, 16)
 ```
 
-**Expected:** shape(1,3,16).
+**Expected:** shape (1, 3, 16).
 
-**Verify:** Compare the computed values or written argument with shape(1,3,16).
+**Verify:** In a fresh process, the exercise checks confirm `tuple(z.shape) == (1, 3, 16)`.
 
 ## Exercise 5: Verify the control stayed isolated
 
@@ -108,7 +108,7 @@ assert all(torch.equal(v, before[k]) for k, v in control.state_dict().items())
 
 **Expected:** every control tensor unchanged.
 
-**Verify:** Compare the computed values or written argument with every control tensor unchanged.
+**Verify:** In a fresh process, the exercise checks confirm `all((torch.equal(v, before[k]) for k, v in control.state_dict().items()))`.
 
 ## Exercise 6: Limit the conclusion
 
@@ -128,7 +128,7 @@ assert report["heldout_count"] == 0 and not report["generalization_established"]
 
 **Expected:** heldout_count0 and generalization_establishedFalse.
 
-**Verify:** Compare the computed values or written argument with heldout_count0 and generalization_establishedFalse.
+**Verify:** In a fresh process, the exercise checks confirm `report['heldout_count'] == 0` and `not report['generalization_established']`.
 
 ## Review after comparison
 

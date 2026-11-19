@@ -18,20 +18,20 @@
     {
       "title": "Trace a matrix step",
       "task": "Compute the two entries before running the first case.",
-      "expected": "The final vector is[11,11].",
+      "expected": "The final vector is `[11, 11]`.",
       "hint": "Multiply rows by the input, then add bias.",
-      "answer": "The products[10,12] plus[1,-1] give[11,11]."
+      "answer": "The products `[10, 12]` plus `[1, -1]` give `[11, 11]`."
     },
     {
       "title": "Repeat with new inputs",
-      "task": "Reuse the destination for input[1,2].",
-      "expected": "The new vector is[5,5].",
+      "task": "Reuse the destination for input `[1, 2]`.",
+      "expected": "The new vector is `[5, 5]`.",
       "hint": "Ensure old output is overwritten.",
       "answer": "Multiplication overwrites both entries before adding the bias."
     },
     {
       "title": "Debug a width mismatch",
-      "task": "Pass a2-by -3 matrix and a length 2 input.",
+      "task": "Pass a 2-by-3 matrix and a length 2 input.",
       "expected": "DimensionMismatch occurs before output mutation.",
       "hint": "Snapshot the destination first.",
       "answer": "The declared matrix width must equal input length; validation preserves the previous output here."

@@ -1,4 +1,4 @@
-"""polars-012: worked starting point; complete the guide's six changes."""
+"""polars-012: both worked cases; complete the guide's six changes."""
 
 import polars as pl
 import pyarrow as pa
@@ -15,8 +15,25 @@ def example_one():
     return {"arrow_schema": str(arrow.schema), "round_trip": True, "nulls": 1}
 
 
+def example_two():
+    status = pl.Enum(["new", "paid", "shipped"])
+    frame = pl.DataFrame({"status": ["shipped", "new", "paid"]}).with_columns(
+        pl.col("status").cast(status)
+    )
+    assert frame.sort("status")["status"].cast(pl.String).to_list() == ["new", "paid", "shipped"]
+    try:
+        pl.Series(["unknown"]).cast(status)
+    except pl.exceptions.InvalidOperationError:
+        rejected = True
+    else:
+        rejected = False
+    assert rejected
+    return {"business_order": ["new", "paid", "shipped"], "unknown_rejected": rejected}
+
+
 if __name__ == "__main__":
     print(example_one())
+    print(example_two())
 
 # TODO 1: Explain why a null is separate from a numeric payload value.
 # TODO 2: State what the round-trip test actually proves.

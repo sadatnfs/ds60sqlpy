@@ -6,7 +6,7 @@ These answers explain the stated synthetic and scoped runtime contracts. Static 
 
 A rollout creates or replaces workload replicas; a traffic change determines which ready backends receive requests. Those operations are related but different. A Deployment can finish creating a candidate while the Service still selects only the stable release. Conversely, broadening a selector can send requests to a candidate before the team has collected the intended application evidence.
 
-The host fixture has hello-stable and hello-candidate Deployments with distinct release labels. Both use the same preloaded0.2 image, but /message returns hello or reviewer through a fixed environment value. This is a configuration-release rehearsal. It does not demonstrate a binary image upgrade, and /version remains the legacy fixture version string for both. A real two-image rehearsal requires separately qualified, preloaded image identities.
+The host fixture has hello-stable and hello-candidate Deployments with distinct release labels. Both use the same preloaded 0.2 image, but /message returns hello or reviewer through a fixed environment value. This is a configuration-release rehearsal. It does not demonstrate a binary image upgrade, and /version remains the legacy fixture version string for both. A real two-image rehearsal requires separately qualified, preloaded image identities.
 
 A release gate states what must be true before changing traffic and what triggers rollback. For this small fixture, require the expected candidate marker, zero unexpected payloads and zero errors in a declared finite request sample. That sample is evidence about the observed requests, not a proof of all future behavior or an exact traffic-share guarantee.
 

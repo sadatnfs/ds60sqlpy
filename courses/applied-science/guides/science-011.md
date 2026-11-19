@@ -29,7 +29,11 @@ For left-truncated observations with entry times \(e_i\), conditioning on surviv
 
 A Weibull distribution adds shape \(k>0\) and scale \(s>0\). Its log survival is \(-(t/s)^k\), and its log hazard is \(\log k-\log s+(k-1)(\log t-\log s)\). The code supplies an analytic gradient and fits both positive parameters on a log scale, using the event contribution \(\delta_i\log h(t_i)\) plus log survival for every row. It records optimizer status and gradient norm, and checks that the fitted likelihood is at least as good as the exponential starting point, since the exponential model is the Weibull case \(k=1\).
 
-An **accelerated failure-time** interpretation models how covariates multiply the time scale, often through a linear model for log time. A proportional-hazards interpretation models a hazard multiplier. Some families support relationships between these parameterizations, but their coefficients should not be interchanged without deriving the mapping.
+An **accelerated failure-time** (AFT) model lets a covariate multiply the time scale. With a binary covariate \(x_i\), the program sets \(\log s_i=b_0+b_1x_i\), so every quantile of the treated survival distribution is \(e^{b_1}\) times the corresponding control quantile; \(e^{b_1}\) is the time ratio. With cumulative hazard \(H_i=(t_i/s_i)^k\), the derivative of the negative log likelihood with respect to each log scale is \(k(\delta_i-H_i)\), and the chain rule multiplies it by 1 for \(b_0\) and by \(x_i\) for \(b_1\). The code supplies that analytic gradient to the optimizer.
+
+The fixture makes the answer checkable. Control durations are 1, 2, 3, 5 and 7 with events at 1, 2 and 5; treated durations are exactly twice as long with the same censoring pattern. For a fixed shape \(k\), the scale MLE of one group is \(\left(\sum_i t_i^k/\sum_i\delta_i\right)^{1/k}\), so doubling every duration doubles the scale and the fitted time ratio is exactly 2 whatever shape is estimated. The program asserts that ratio and compares \(e^{b_0}\) with the closed-form control scale, about 5.63 at the fitted shape of about 1.29.
+
+A Weibull AFT model is also a proportional-hazards model: \(h(t\mid x)=kt^{k-1}e^{-k(b_0+b_1x)}\), so the same coefficient gives the hazard ratio \(e^{-kb_1}=2^{-k}\), about 0.41 here. Treated units fail at a lower instantaneous rate because their time scale is stretched. The two summaries describe one fitted model, but their coefficients are not interchangeable without this derivation, and outside the Weibull family (including its exponential special case) an AFT model generally has no proportional-hazards form.
 
 ## Diagnostics and numerical safeguards
 
@@ -80,6 +84,27 @@ def weibull_nll_gradient(theta, time, event):
     return objective, np.array([derivative_shape, derivative_scale])
 
 
+def weibull_aft_nll_gradient(theta, time, event, covariate):
+    """Weibull AFT model with log scale b0 + b1 * covariate; theta is (log shape, b0, b1)."""
+    t, d, x = (np.asarray(value, float) for value in (time, event, covariate))
+    shape = np.exp(theta[0])
+    log_scale = theta[1] + theta[2] * x
+    ratio = np.log(t) - log_scale
+    hazard_integral = np.exp(shape * ratio)
+    log_hazard = theta[0] - log_scale + (shape - 1) * ratio
+    objective = -float(np.sum(d * log_hazard - hazard_integral))
+    derivative_shape = -np.sum(d * (1 + shape * ratio) - shape * ratio * hazard_integral)
+    # Each log scale enters with derivative shape * (event - cumulative hazard).
+    residual = shape * (d - hazard_integral)
+    return objective, np.array([derivative_shape, np.sum(residual), np.sum(residual * x)])
+
+
+def group_scale(time, event, shape):
+    """Closed-form Weibull scale MLE for one group at a fixed shape."""
+    t, d = np.asarray(time, float), np.asarray(event, float)
+    return float((np.sum(t**shape) / np.sum(d)) ** (1 / shape))
+
+
 def run_cases():
     t = np.array([1.0, 2.0, 4.0, 5.0, 8.0])
     d = np.array([1, 1, 0, 1, 0])
@@ -101,6 +126,25 @@ def run_cases():
     gradient_norm = float(np.linalg.norm(fit.jac))
     assert fit.success and gradient_norm < 1e-5
     assert fit.fun <= weibull_nll_gradient(initial, t, d)[0] + 1e-7
+
+    # An AFT covariate multiplies the time scale. Every treated duration is twice its
+    # control counterpart with the same censoring, so the exact time ratio is 2.
+    control = np.array([1.0, 2.0, 3.0, 5.0, 7.0])
+    control_event = np.array([1, 1, 0, 1, 0])
+    x = np.r_[np.zeros(5), np.ones(5)]
+    times, events = np.r_[control, 2 * control], np.r_[control_event, control_event]
+    aft = optimize.minimize(
+        lambda theta: weibull_aft_nll_gradient(theta, times, events, x),
+        np.zeros(3),
+        jac=True,
+        method="BFGS",
+        options={"gtol": 1e-8},
+    )
+    aft_shape, time_ratio = float(np.exp(aft.x[0])), float(np.exp(aft.x[2]))
+    aft_gradient_norm = float(np.linalg.norm(aft.jac))
+    assert aft.success and aft_gradient_norm < 1e-5
+    assert np.isclose(time_ratio, 2.0, rtol=1e-6)
+    assert np.isclose(np.exp(aft.x[1]), group_scale(control, control_event, aft_shape), rtol=1e-6)
     return dict(
         censored_rate=rate,
         naive_rate=naive,
@@ -109,6 +153,11 @@ def run_cases():
         optimizer_success=bool(fit.success),
         optimizer_message=str(fit.message),
         gradient_norm=gradient_norm,
+        aft_shape=aft_shape,
+        aft_control_scale=float(np.exp(aft.x[1])),
+        aft_time_ratio=time_ratio,
+        aft_hazard_ratio=time_ratio**-aft_shape,
+        aft_gradient_norm=aft_gradient_norm,
     )
 
 

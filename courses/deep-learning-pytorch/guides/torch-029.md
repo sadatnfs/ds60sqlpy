@@ -6,13 +6,19 @@ Advanced; approximately 120 minutes. Direct prerequisites: `torch-028`. The prer
 
 ## Learning objectives
 
-Numerical stability concerns how an equivalent mathematical expression behaves in a finite representation. The central investigation is concrete: Exponentiate float32 logits 1000, 999 directly. The finish condition is both exponentials infinite. ValueError before loss evaluation. A useful explanation connects the calculation to the reason it is needed, rather than treating a function name as a definition.
+Compute softmax losses stably and compare floating-point formats by their range and precision before choosing mixed precision.
+
+Central investigation: Exponentiate float32 logits 1000 and 999 directly, then compute the same loss, probabilities and gradients with stable operations.
+
+Finish condition: Direct exponentials overflow to infinity, the stable loss equals \(\log(1+\exp(-1))\) within 1e-6, shifted logits give probabilities that match within 1e-6, gradients are finite and sum to about 0, bfloat16 has a larger range than float16, and a NaN logit raises ValueError.
+
+The worked examples demonstrate the mechanism; exercises 1-3 transfer it to new inputs and exercises 4-6 extend it to failures and boundary cases. A useful explanation connects the calculation to the reason it is needed, rather than treating a function name as a definition.
 
 ## Purpose and mental model
 
-Numerical stability concerns how an equivalent mathematical expression behaves in a finite representation. Logits 1000, 999 define a valid two-class distribution, but directly exponentiating them overflows common floating-point types. Subtracting a shared maximum before softmax preserves the distribution. CrossEntropyLoss and log sum exp implement stable combined operations that avoid unnecessary probability round trips.
+Numerical stability concerns how an equivalent mathematical expression behaves in a finite representation. Logits 1000, 999 define a valid two-class distribution, but directly exponentiating them overflows common floating-point types. Subtracting a shared maximum before softmax preserves the distribution. CrossEntropyLoss and logsumexp implement stable combined operations that avoid unnecessary probability round trips.
 
-Precision and range differ across float16, bfloat 16, float32 and float64. Automatic mixed precision selects operation dtypes under a backend policy; gradient scaling addresses underflow in certain training paths. Those mechanisms require hardware-specific validation. This default CPU lesson checks stable objectives and dtype limits without claiming GPU speed or a qualified mixed-precision training configuration. A stable loss can still optimize the wrong labels or denominator, so numerical and semantic checks remain separate.
+Precision and range differ across float16, bfloat16, float32 and float64. Automatic mixed precision selects operation dtypes under a backend policy; gradient scaling addresses underflow in certain training paths. Those mechanisms require hardware-specific validation. This default CPU lesson checks stable objectives and dtype limits without claiming GPU speed or a qualified mixed-precision training configuration. A stable loss can still optimize the wrong labels or denominator, so numerical and semantic checks remain separate.
 
 ## Design decisions and when to use this method
 
@@ -50,7 +56,7 @@ Use F.cross_entropy on raw logits and torch.logsumexp for a stable log normalize
 
 For logits z=[1000, 999], the first-class probability is \(\frac{\exp(1000)}{\exp(1000)+\exp(999)}\). Dividing numerator and denominator by \(\exp(1000)\) gives \(\frac{1}{1+\exp(-1)}\), approximately 0.731059. The other probability is approximately 0.268941. The mathematical ratio is well defined even though directly materializing \(\exp(1000)\) overflows the types used in the counterexample.
 
-More generally, subtracting the same finite m from every logit preserves softmax in exact arithmetic. Choosing \(m=\max(z)\) makes every shifted exponent at most one and at least one exactly one. For the target 0 loss, the shifted form is \(\log(1+\exp(-1))\), approximately 0.313262. The gradient is p-one_hot(target), or approximately[-0.268941, 0.268941]. Its entries sum to zero because a common logit shift does not change the objective. This gives an independent forward and backward contract.
+More generally, subtracting the same finite m from every logit preserves softmax in exact arithmetic. Choosing \(m=\max(z)\) makes every shifted exponent at most zero, so every shifted exponential is at most one and at least one equals one. For the target 0 loss, the shifted form is \(\log(1+\exp(-1))\), approximately 0.313262. The gradient is p-one_hot(target), or approximately [-0.268941, 0.268941]. Its entries sum to zero because a common logit shift does not change the objective. This gives an independent forward and backward contract.
 
 Stability is more specific than a function name. logsumexp avoids raw exponential overflow, but computing a large logsumexp value and then subtracting a nearly equal large target logit can still lose precision. A fused logits loss or log_softmax formulation can preserve the small relative difference more directly. Similarly, computing a tiny probability and then taking its log can underflow where a direct log-probability calculation remains finite. Inspect intermediate representation rather than assuming algebraic equivalence implies equal floating-point error.
 
@@ -58,16 +64,16 @@ Range and precision are different properties:
 
 | Type | Approximate maximum finite magnitude | Relative spacing near one |
 | --- | --- | --- |
-| float16 | 65, 504 | \({2}^{-10}\) |
-| bfloat 16 | \(3.39\cdot {10}^{38}\) | \({2}^{-7}\) |
+| float16 | 65504 | \({2}^{-10}\) |
+| bfloat16 | \(3.39\cdot {10}^{38}\) | \({2}^{-7}\) |
 | float32 | \(3.4\cdot {10}^{38}\) | \({2}^{-23}\) |
 | float64 | \(1.8\cdot {10}^{308}\) | \({2}^{-52}\) |
 
-bfloat 16 has a much wider exponent range than float16 but fewer fraction bits. A value can avoid overflow while still be represented coarsely. Epsilon near one is not a universal absolute tolerance for all magnitudes or all algorithms. Summation length, conditioning, cancellation and the operations actually performed matter. [PyTorch 2.9 numerical accuracy](https://docs.pytorch.org/docs/2.9/notes/numerical_accuracy.html).
+bfloat16 has a much wider exponent range than float16 but fewer fraction bits. A value can avoid overflow while still be represented coarsely. Epsilon near one is not a universal absolute tolerance for all magnitudes or all algorithms. Summation length, conditioning, cancellation and the operations actually performed matter. [PyTorch 2.9 numerical accuracy](https://docs.pytorch.org/docs/2.9/notes/numerical_accuracy.html).
 
-Shift invariance also has a finite-representation limit. If a huge common offset has already rounded two distinct logits to the same stored value, subtracting their maximum cannot recover the lost difference. The lesson's1000 and 999 remain distinct and are therefore an appropriate stability fixture. A NaN input is a different case: maximum subtraction does not repair it, and the explicit validator rejects it before evaluating the objective.
+Shift invariance also has a finite-representation limit. If a huge common offset has already rounded two distinct logits to the same stored value, subtracting their maximum cannot recover the lost difference. The lesson's 1000 and 999 remain distinct and are therefore an appropriate stability fixture. A NaN input is a different case: maximum subtraction does not repair it, and the explicit validator rejects it before evaluating the objective.
 
-Autocast selects operation dtypes according to a backend policy. It is not equivalent to converting every model tensor and intermediate to float16. Some operations may run or accumulate in higher precision, while others use a lower-precision path. Eligibility and kernel behavior are device/version specific. A CPU bfloat 16 path and a CUDA float16 path therefore need separate acceptance rather than one generic mixed-precision label. [PyTorch 2.9 AMP](https://docs.pytorch.org/docs/2.9/amp.html).
+Autocast selects operation dtypes according to a backend policy. It is not equivalent to converting every model tensor and intermediate to float16. Some operations may run or accumulate in higher precision, while others use a lower-precision path. Eligibility and kernel behavior are device/version specific. A CPU bfloat16 path and a CUDA float16 path therefore need separate acceptance rather than one generic mixed-precision label. [PyTorch 2.9 AMP](https://docs.pytorch.org/docs/2.9/amp.html).
 
 Gradient scaling addresses another boundary. Multiplying a scalar loss by s multiplies its derivatives by s. An update workflow can compute those scaled derivatives, unscale them back to ordinary units, and detect nonfinite values before an optimizer step. This can protect some small backward values from underflow. It cannot recover information already lost in the forward pass or make an invalid loss meaningful.
 
@@ -119,33 +125,33 @@ torch.testing.assert_close(
 
 ## Prediction before your attempt
 
-For the supplied fixture, name the input unit, the intermediate state and the final quantity that changes. Predict one normal result and one failure result before touching the code. In particular, explain this lesson's acceptance condition in your own words: both exponentials infinite. ValueError before loss evaluation. Preserve the prediction beside your later observations so a correction is visible. A copied expected value is not a derivation.
+For the supplied fixture, name the input unit, the intermediate state and the final quantity that changes. Predict one normal result and one failure result before touching the code. In particular, explain this lesson's acceptance condition in your own words: Direct exponentials overflow to infinity, the stable loss equals \(\log(1+\exp(-1))\) within 1e-6, shifted logits give probabilities that match within 1e-6, gradients are finite and sum to about 0, bfloat16 has a larger range than float16, and a NaN logit raises ValueError. Preserve the prediction beside your later observations so a correction is visible. A copied expected value is not a derivation.
 
 ## Exercises
 
-1. **Expose naive overflow.** Exponentiate float32 logits 1000, 999 directly.
-   **Expected:** both exponentials infinite.
-   **Verify:** Save the assertion results for exercise 1, including both exponentials infinite.
+1. **Find the float64 overflow boundary.** Exponentiate float64 values 709 and 710.
+   **Expected:** \(e^{709}\) is finite (about 8.2e307); \(e^{710}\) overflows to inf.
+   **Verify:** In a fresh process, the exercise checks confirm `torch.isfinite(grown[0])` and `torch.isinf(grown[1])`.
 
-2. **Compute a stable class loss.** Use target 0 with the same logits.
-   **Expected:** loss \(\log(1+\exp(-1))\) within 1e-6.
-   **Verify:** Save the assertion results for exercise 2, including loss \(\log(1+\exp(-1))\) within 1e-6.
+2. **Compute a stable loss for target 1.** Use float32 logits [1000, 998] with target class 1.
+   **Expected:** loss \(\log(1+e^{2})\), about 2.1269, within 1e-5.
+   **Verify:** In a fresh process, the exercise checks confirm `F.cross_entropy(wide_logits, torch.tensor([1])).item()` matches `np.log1p(np.exp(2))` within 1e-05.
 
-3. **Check shift invariance.** Compare softmax 1000, 999 with softmax 0, -1.
-   **Expected:** probabilities match within 1e-6.
-   **Verify:** Save the assertion results for exercise 3, including probabilities match within 1e-6.
+3. **Check a new shift.** Compare the softmax of [1000, 998] with the softmax of [5, 3].
+   **Expected:** both are about [0.8808, 0.1192] and match within 1e-6.
+   **Verify:** In a fresh process, the exercise checks confirm `torch.softmax(wide_logits[0], 0)` matches `torch.softmax(torch.tensor([5.0, 3.0]), 0)` within 1e-06 and `torch.softmax(torch.tensor([5.0, 3.0]), 0)[0].item()` matches `1 / (1 + np.exp(-2))` within 1e-06.
 
 4. **Inspect stable gradients.** Differentiate the target 0 loss with respect to both logits.
    **Expected:** finite gradients summing approximately 0.
-   **Verify:** Save the assertion results for exercise 4, including finite gradients summing approximately 0.
+   **Verify:** In a fresh process, the exercise checks confirm `torch.isfinite(values.grad).all()` and `values.grad.sum().item()` matches `0` within 1e-06.
 
-5. **Compare dtype ranges explicitly.** Inspect float16 and bfloat 16 maximum values and float32 epsilon.
-   **Expected:** bfloat 16 range exceeds float16; float32 epsilon positive.
-   **Verify:** Save the assertion results for exercise 5, including bfloat 16 range exceeds float16; float32 epsilon positive.
+5. **Compare dtype ranges explicitly.** Inspect float16 and bfloat16 maximum values and float32 epsilon.
+   **Expected:** bfloat16 range exceeds float16; float32 epsilon positive.
+   **Verify:** In a fresh process, the exercise checks confirm `torch.finfo(torch.bfloat16).max > torch.finfo(torch.float16).max` and `torch.finfo(torch.float32).eps > 0`.
 
-6. **Reject a nonfinite input contract.** Pass aN aN logit through an explicit finite-input validator.
+6. **Reject a nonfinite input contract.** Pass a NaN logit through an explicit finite-input validator.
    **Expected:** ValueError before loss evaluation.
-   **Verify:** Save the assertion results for exercise 6, including ValueError before loss evaluation.
+   **Verify:** In a fresh process, the exercise checks confirm `checked_loss(torch.tensor([[0.0, float('nan')]]), torch.tensor([0]))` raises `ValueError`.
 
 ## Common pitfalls and diagnosis
 
@@ -159,7 +165,7 @@ First draw the state described in the vocabulary section. Next use the smallest 
 
 ## Self-check and retrieval
 
-Close both worked examples. Explain Overflow, Log-sum-exp, Mixed precision using the lesson fixture. Reconstruct one computation from its inputs. Then change one input while retaining the mechanism and predict whether the conclusion survives. Write which part is guaranteed by the code and which part would need new observations. This last distinction prevents a tiny deterministic teaching example from being presented as evidence about an unseen population or a production model.
+Close all three worked examples. Explain Overflow, Log-sum-exp, Mixed precision using the lesson fixture. Reconstruct one computation from its inputs. Then change one input while retaining the mechanism and predict whether the conclusion survives. Write which part is guaranteed by the code and which part would need new observations. This last distinction prevents a tiny deterministic teaching example from being presented as evidence about an unseen population or a production model.
 
 ## Next step
 
@@ -167,7 +173,7 @@ Revisit the direct prerequisite `torch-028` if the calculation cannot be reconst
 
 ## Sources and verification status
 
-API and mechanism reference: [PyTorch2.9 reference](https://docs.pytorch.org/docs/2.9/index.html), reviewed 2026-10-22. The fixture, examples, counterexamples and exercise design are original course material. See [validation](../../../docs/validation.md) for execution gates. Check CI artifacts for the exact revision and platform to determine which runtime checks actually ran; authored content alone does not establish runtime execution.
+API and mechanism reference: [PyTorch 2.9 reference](https://docs.pytorch.org/docs/2.9/index.html), reviewed 2026-10-22. The fixture, examples, counterexamples and exercise design are original course material. See [validation](../../../docs/validation.md) for execution gates. Check CI artifacts for the exact revision and platform to determine which runtime checks actually ran; authored content alone does not establish runtime execution.
 
 ## Interview reasoning with worked answers
 

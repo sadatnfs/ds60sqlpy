@@ -8,7 +8,7 @@ Explain which work a timing includes, inspect type inference and measure a small
 
 ## Classroom execution
 
-Choose **Julia language and scientific computing** in `/classroom`, open this unit, and select its prepared `julia` runtime. The worker starts a fresh `main.jl` process with two Julia threads, a fixed package environment, no startup file and offline package settings. Both worked examples are complete under that environment. Save your current pad before replacing it. No package, model or dataset is fetched by a lesson.
+Open `julia-025` in `/classroom` with its prepared `julia` runtime. Worked case A (inspect a bounded kernel) and worked case B (report measurements without ranking noise) are complete programs: save your current pad, paste one of them and press Run. The learner file contains the six investigations below; the explained reference ends by printing `julia-025: all reference checks passed`. The [course overview](../README.md) describes the shared runtime: a fresh offline `main.jl` process with two threads and a fixed package environment.
 
 ## Compilation is part of the execution model
 
@@ -109,17 +109,17 @@ Comparing a cold call against a warm one rewards the order of measurement. Compa
 
 ### 1. Trace the accumulator
 
-Trace total after each element of [1.0,2.0,3.0].
+Trace `total` after each element of `[1.0, 2.0, 3.0]`.
 
-**Expected:** The values are 1,5,14.
+**Expected:** The values are 1, 5 and 14.
 
 **Hint:** Square each item before adding.
 
 ### 2. Preserve precision
 
-Run sum_squares on Float32[1,2].
+Run `sum_squares` on `Float32[1, 2]`.
 
-**Expected:** The result is Float32(5).
+**Expected:** The result is `Float32(5)`.
 
 **Hint:** Inspect typeof as well as value.
 
@@ -133,7 +133,7 @@ Measure lengths 100 and 10000 after warmup.
 
 ### 4. Diagnose invalid science
 
-Pass [NaN] and explain why inference still succeeds.
+Pass `[NaN]` and explain why inference still succeeds.
 
 **Expected:** The numerical result is NaN.
 
@@ -163,4 +163,4 @@ Identify which parsing, fitting and plotting boundaries you would measure.
 
 ## Study companion
 
-Use the repository learning-companion skill with this lesson ID, your prediction and your actual source/output. Ask for a diagnosis of the first incorrect type, shape, state transition or assumption. Keep observed execution distinct from a timing claim, inferred mathematical result or external deployment.
+A repository-aware assistant with the learning-companion skill can review `julia-025` with you. Give it your prediction for one investigation, your source and the actual output, and ask it to find the first incorrect assumption about inference, specialization, warm measurements, allocation or profiling.

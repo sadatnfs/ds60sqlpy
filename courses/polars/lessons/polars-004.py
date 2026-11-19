@@ -1,4 +1,4 @@
-"""polars-004: worked starting point; complete the guide's six changes."""
+"""polars-004: both worked cases; complete the guide's six changes."""
 
 import math
 
@@ -16,8 +16,21 @@ def example_one():
     return {"missing_categories": {"null": 1, "nan": 1}, "policy_values": cleaned["x"].to_list()}
 
 
+def example_two():
+    frame = pl.DataFrame({"id": [1, 2, 3], "flag": [True, False, None]})
+    assert frame.filter(pl.col("flag"))["id"].to_list() == [1]
+    assert frame.filter(pl.col("flag").fill_null(True))["id"].to_list() == [1, 3]
+    truth = pl.DataFrame({"a": [True, False, None], "b": [None, None, False]}).select(
+        (pl.col("a") & pl.col("b")).alias("and"), (pl.col("a") | pl.col("b")).alias("or")
+    )
+    assert truth["and"].to_list() == [None, False, False]
+    assert truth["or"].to_list() == [True, None, None]
+    return {"filter_true": [1], "three_valued_logic": truth.to_dicts()}
+
+
 if __name__ == "__main__":
     print(example_one())
+    print(example_two())
 
 # TODO 1: Count observations that are neither null nor NaN.
 # TODO 2: Add a flag before replacing absent values.

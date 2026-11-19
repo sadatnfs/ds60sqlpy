@@ -16,8 +16,8 @@ Assume enforced NorthViewer policy on the analytical model; all available dates;
 
 This expected row combines numerical parity with a policy boundary. It does not certify either on a live model until actual evidence is recorded.
 
-- North permits Ada and Cy, giving revenue 51 +56 =107.
-- Their product quantities are 5 Notebook,5 Pen and 2 Mug, costing 10 +5 +10 =25.
+- North permits Ada and Cy, giving revenue 51 + 56 = 107.
+- Their product quantities are 5 Notebook,5 Pen and 2 Mug, costing 10 + 5 + 10 = 25.
 - Both cost forms agree; a real security restriction must remain after ordinary Customer-filter removal.
 
 ### Case B: Expected SouthViewer regression row
@@ -40,7 +40,7 @@ North plus South reconciles to the unrestricted 187 revenue and 44 cost in this 
 
 Reconcile the two role-specific cost rows.
 
-25 +19 =44, matching the unrestricted constant-product-cost calculation.
+25 + 19 = 44, matching the unrestricted constant-product-cost calculation.
 
 ### Exercise 2
 

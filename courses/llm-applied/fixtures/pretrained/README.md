@@ -72,11 +72,13 @@ Then build the separate recipe image:
 docker build --progress=plain -f courses/llm-applied/fixtures/pretrained/Dockerfile.optional -t ds60-pretrained-recipe:local courses/llm-applied/fixtures/pretrained
 ```
 
-The image reuses local `ds60sqlpy-worker-llm-torch-cpu:0.3.0`, then installs the
+The image reuses local `ds60sqlpy-worker-llm-torch-cpu:1.4.0`, then installs the
 complete `requirements.arm64.lock` or `requirements.amd64.lock` with required
 hashes and binary wheels. Torch 2.9.1 is CPU-only. Transformers 4.57.1,
 TRL 0.24.0 and PEFT 0.17.1 are explicit version choices. No CUDA dependency tree is
-installed by this recipe. `pip check` must pass during the build.
+installed by this recipe. `pip check` must pass during the build. The recipe
+intentionally pins the Transformers 4.57 line; an upgrade to 5.x must rerun the
+chat-template prefix and label-mask checks before any training result is reused.
 
 The [direct declaration](pyproject.toml), [full arm64 lock](requirements.arm64.lock)
 and [full amd64 lock](requirements.amd64.lock) are distinct: the declaration

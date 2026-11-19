@@ -1,4 +1,9 @@
-"""polars-018: worked starting point; complete the guide's six changes."""
+"""polars-018: both worked cases; complete the guide's six changes."""
+
+import hashlib
+import json
+import tempfile
+from pathlib import Path
 
 import polars as pl
 
@@ -29,8 +34,29 @@ def example_one():
     return {"result": result.to_dicts(), "rejected": 1, "duplicate_rows": 1}
 
 
+def example_two():
+    with tempfile.TemporaryDirectory() as d:
+        path = Path(d) / "features.parquet"
+        frame = pl.DataFrame({"customer": [10, 20], "total": [12, 9]})
+        frame.write_parquet(path)
+        receipt = {
+            "grain": "one row per customer",
+            "rows": 2,
+            "sha256": hashlib.sha256(path.read_bytes()).hexdigest(),
+            "schema": {k: str(v) for k, v in frame.schema.items()},
+        }
+        receipt_path = Path(d) / "receipt.json"
+        receipt_path.write_text(json.dumps(receipt, sort_keys=True))
+        restored = json.loads(receipt_path.read_text())
+        assert restored["sha256"] == hashlib.sha256(path.read_bytes()).hexdigest()
+        assert pl.read_parquet(path).equals(frame)
+        assert frame["customer"].n_unique() == frame.height
+        return {"receipt": restored, "readback_matches": True}
+
+
 if __name__ == "__main__":
     print(example_one())
+    print(example_two())
 
 # TODO 1: Change one repeated event amount while keeping its id.
 # TODO 2: Write the complete row-accounting equation.

@@ -12,9 +12,15 @@ From the repository root:
 
 Choose **R** in the classroom directory. The launcher prepares missing local images and retains this project selection for later resumes. Keep the same custom project name if you use one. See the [front README](../../README.md) for Docker setup on macOS/Linux and Windows through WSL 2. You do not need a host R installation.
 
-Use the classroom's R language pad and prepared r-statistics profile. Each run evaluates one main.R script in a fresh offline R process. Define every required input in the script; earlier runs do not leave live variables behind. Save source and notes separately from run receipts. No package installation or data download is needed for these examples.
+Use the classroom's R language pad and prepared r-statistics profile. Each run evaluates one main.R script in a fresh offline R process. Define every required input in the script; earlier runs do not leave live variables behind. Save source and notes separately from saved run output. No package installation or data download is needed for these examples.
 
 Base plot calls are captured as PNG figures. Explicitly print ggplot2 and Plotly objects in scripts: print(chart). The classroom retains at most two figures per run; Plotly figures use the prepared interactive browser renderer. A temporary file created inside a run is not automatically a persistent download. Keep the supplied examples self-contained and use the saved source, notes and supported figure/result views for retained work.
+
+Compare your implementation with the reference only after retaining your own attempt. Different readable implementations can satisfy the same behavioral contract. Inspect type, shape, missingness and boundary behavior alongside printed numbers. A successful exit checks only the properties a program actually asserts; it does not establish general correctness or mastery.
+
+The prepared environment uses R 4.6.1, R6 2.6.1, S7 0.2.2, ggplot2 4.0.3 and Plotly 4.12.1. These original examples use the checked-in dependency contract; external package changes require a fresh compatibility check.
+
+Each guide ends with an optional prompt for a repository-aware AI tutor that names the chapter and its concepts; the guides are complete without it.
 
 ## Course map
 

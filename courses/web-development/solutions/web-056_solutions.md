@@ -1,51 +1,43 @@
 # web-056: explanatory solutions
 
-Compare after your own attempt or an explicit solution reveal. This file explains the supplied deterministic fixtures. It does not claim that a learner or a production deployment passed.
-
-## Why the mechanism works
-
-The application core coordinates a use case without pretending to be an HTTP server. It receives a trusted actor identity and untrusted proposed values, validates the proposal, writes through a repository and returns a result. Keeping these boundaries visible makes it possible to reason about what is trusted and which failures prevent a write.
-
-This milestone combines the earlier mechanisms in a small study planner. The database is disposable SQLite memory. The input is synthetic. Validation rejects unsupported topics and out-of-range durations. A prepared statement stores an accepted plan under the supplied actor. A query scopes retrieval by that actor. Rendering and HTTP adaptation remain separate so the same core can later be integrated and tested through a real server.
-
-Write the acceptance matrix before implementation: a valid plan is stored once, invalid input stores nothing, one actor cannot read another's plan, and output has a clear type contract. A production service would add session verification, CSRF where relevant, idempotency, concurrent behavior, migrations and operational controls. Do not infer those properties from this small core.
+Open this after your own attempt. Each answer explains the lesson's synthetic fixtures; it does not show that your work or a deployment passed. The mechanism is explained in `courses/web-development/guides/web-056.md`.
 
 ## Exercise 1: Draw the trust boundary around actor identity and form values.
 
-The adapter verifies identity; the application validates proposed domain values.
+**Expected answer:** The adapter verifies identity; the application validates proposed domain values.
 
-Trace the smallest example before editing. Name which values are source and which are observations.
+**Why:** Identity comes from the adapter after verification, while form values are untrusted proposals that the application validates.
 
 ## Exercise 2: Write the acceptance matrix before implementing the service.
 
-Normal, invalid and cross-owner cases have explicit observations.
+**Expected evidence:** Normal, invalid and cross-owner cases have explicit observations.
 
-Change only the named feature. Compare with the unchanged example and explain any unaffected behavior.
+**Why:** An acceptance matrix written first prevents the tests from simply copying what the implementation does.
 
 ## Exercise 3: Build a tested planner core with validation and prepared storage.
 
-Accepted plans persist in the disposable database and rejected inputs create no rows.
+**Expected evidence:** Accepted plans persist in the disposable database and rejected inputs create no rows.
 
-Sketch the structure or data contract first. Reuse the mechanism from the examples without copying the reference.
+**Why:** Validating before mutation means a rejected request leaves no partial rows.
 
 ## Exercise 4: Diagnose a service that writes before validating all fields.
 
-Move complete validation before mutation or ensure a correctly owned transaction aborts the entire unit.
+**Expected answer:** Move complete validation before mutation or ensure a correctly owned transaction aborts the entire unit.
 
-Keep the failing input. Identify the first layer where the observed result differs from the intended contract.
+**Why:** A write before validation completes can leave partial state unless one transaction rolls it back.
 
 ## Exercise 5: Test cross-owner retrieval and an invalid duration.
 
-No other actor's row is exposed and the invalid request changes no stored state.
+**Expected evidence:** No other actor's row is exposed and the invalid request changes no stored state.
 
-Predict the boundary before running it. Add an explicit check or manual observation that would detect a regression.
+**Why:** Owner scoping hides other actors' rows, and an invalid request must leave the row count unchanged.
 
 ## Exercise 6: Explain the remaining work before this core becomes a deployed application.
 
-Real HTTP, session, CSRF, persistence, concurrency, accessibility and operational acceptance remain separate integration tasks.
+**Expected answer:** Real HTTP, session, CSRF, persistence, concurrency, accessibility and operational acceptance remain separate integration tasks.
 
-Explain your choice to someone who has not seen the code. Include one limitation and the evidence needed to remove it.
+**Why:** Real HTTP handling, sessions, CSRF, durable storage, concurrency, accessibility and operations each need their own acceptance tests.
 
-## Reference comparison and limits
+## Reference comparison
 
-Read the separate executable reference, where supplied, only after retaining your attempt. Compare structure and decisions rather than matching every identifier. A different implementation is acceptable when it satisfies the same behavior, preserves accessibility and rejects the same invalid cases. The checked reference uses tiny synthetic inputs so that each transformation can be inspected. It is not a ready-to-deploy authenticated application. Server lifecycle, persistence, concurrency and security require their own integration evidence.
+Open `courses/web-development/solutions/web-056_solution.php` only after saving your attempt, and compare decisions rather than identifiers. A different implementation is acceptable when it shows the same behavior and rejects the same invalid cases. The reference checks only its named synthetic cases; server lifecycle, persistence, concurrency and security need their own integration evidence.

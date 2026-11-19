@@ -170,7 +170,7 @@ For the supplied fixture, name the input unit, the intermediate state and the fi
 
 ## Exercises
 
-1. **Quantize a fixed matrix.** QuantizeW[[.1, -.9], [1.7, -.2]] with scale \(\frac{1.7}{7}\) andnearest-even rounding.
+1. **Quantize a fixed matrix.** Quantize W = [[0.1, -0.9], [1.7, -0.2]] with scale \(\frac{1.7}{7}\) and round-half-to-even.
    **Expected:** codes[[0, -4], [7, -1]].
    **Verify:** Save the assertion results for exercise 1, including codes[[0, -4], [7, -1]].
 

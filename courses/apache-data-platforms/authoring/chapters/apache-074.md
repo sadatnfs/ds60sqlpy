@@ -6,7 +6,7 @@ stale or unavailable. Likewise, a responsive search service does not prove that
 all graph mutations were durably recorded. Recovery needs a coordinated plan
 for the actual selected backend and index implementation.
 
-The pinned2.5.0 source provides graph/index configuration choices with specific
+The pinned 2.5.0 source provides graph/index configuration choices with specific
 component versions. The prepared native-server runbook requires recording those
 choices, their durable directories and backup procedures. A general Atlas label
 is not enough to reconstruct a deployment. Default local server execution remains
@@ -17,6 +17,11 @@ cache, a local graph directory, an external HBase deployment and a search index
 have different recovery properties. Containers sharing one engine also share
 one physical failure domain. A successful process replacement on that engine
 cannot establish independent-host disaster recovery.
+
+**Execution boundary.** Restart retention and search lag can only be observed on a
+running Atlas server and its graph and index services, none of which the
+repository provides. Treat the observations below as the record to collect on a
+prepared server.
 
 ## Worked case A: retain entities and lineage through restart
 

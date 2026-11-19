@@ -20,9 +20,7 @@ perf_counter measures elapsed time around the actual collect call. Record the en
 
 ## Run the lesson
 
-Open this subject in `/classroom`, then show its code and notes. The prepared `data-engineering` worker runs `main.py` in a fresh temporary directory. The examples use installed packages and synthetic local fixtures; no account, cloud service, network request or package download is required. Save source and notes before switching lessons. Temporary databases, project files and tracking artifacts are recreated by each complete program and removed after the job. The classroom retains the submitted source and bounded output, not an indefinitely running external service. The guide distinguishes this local execution from the deployment decisions that need an owned production environment.
-
-
+Open `polars-017` in `/classroom`. Its starter `main.py` contains both worked cases, "Measure completed work with an independent answer" and "Separate sequence from content", and prints the dictionary each case returns. The prepared `data-engineering` worker runs it in a fresh temporary directory. An `AssertionError` means that an observation differs from the case's stated contract. The inputs are small literal tables. Cases that demonstrate Parquet scans write their files into a temporary directory that is removed when the case returns. No account, network request or package download is involved. Save source and notes before switching lessons.
 
 ## Worked case 1: Measure completed work with an independent answer
 
@@ -60,12 +58,11 @@ if __name__ == "__main__":
     print(example_one())
 ```
 
-
 ## Worked case 2: Separate sequence from content
 
 The second case compares a shuffled frame with a sorted one. Sorting the shuffled result establishes the same identified content, while the unsorted sequence may differ. The original frame also remains unchanged.
 
-**Expected evidence:** The sorted values are [1,2,3]; bag equality holds after sorting.
+**Expected evidence:** The sorted values are [1, 2, 3]; bag equality holds after sorting.
 
 ```python
 import polars as pl
@@ -85,11 +82,9 @@ if __name__ == "__main__":
     print(example_two())
 ```
 
-
 ## Practice
 
-Make each requested change in a saved copy. Compare both the expected result and the deliberately changed assumption. The separate reference explains the answers.
-
+The starter contains both worked cases, so a task can change either one. Make each change in a saved copy, run it, and compare the printed result with the task's check before opening the separate explained answers.
 
 ### 1. Include file I/O
 
@@ -99,7 +94,6 @@ Move fixture creation outside timing and measure a fresh file scan separately.
 
 **Hint:** Setup and timed work are different phases.
 
-
 ### 2. Vary scale
 
 Repeat at two declared input sizes.
@@ -107,7 +101,6 @@ Repeat at two declared input sizes.
 **Check:** Answers remain correct at both sizes.
 
 **Hint:** Keep the data-generation rule stable.
-
 
 ### 3. Report variability
 
@@ -117,7 +110,6 @@ Keep every timing rather than only the fastest.
 
 **Hint:** A median does not replace raw observations.
 
-
 ### 4. Avoid a false memory claim
 
 Explain why estimated_size is not process peak memory.
@@ -125,7 +117,6 @@ Explain why estimated_size is not process peak memory.
 **Check:** The answer names temporary and runtime overhead.
 
 **Hint:** Buffer size is one component.
-
 
 ### 5. Preserve sorting cost
 
@@ -135,7 +126,6 @@ Compare two queries whose consumers require ordered rows.
 
 **Hint:** Equivalent values alone are insufficient.
 
-
 ### 6. Write a bounded conclusion
 
 Summarize what the benchmark demonstrates.
@@ -144,20 +134,19 @@ Summarize what the benchmark demonstrates.
 
 **Hint:** Do not generalize from one machine.
 
-
 ## Diagnose errors and misleading results
 
 Near-zero timings may indicate that execution was omitted. Very different answers indicate a correctness problem before they indicate a performance win. Avoid benchmark assertions such as always faster, and keep expensive experiments within declared limits. A slow first run may include compilation or initialization that later runs do not repeat.
 
 ## Transfer to independent work
 
-Produce a reviewable performance comparison with a correctness oracle. State the measured operation, data size, ordering requirement, cache regime and resource environment, and retain all repetitions. Use the result to choose the next experiment rather than treating a microbenchmark as a production guarantee.
+State the measured operation, data size, ordering requirement, cache regime and resource environment, and retain all repetitions. Use the result to choose the next experiment rather than treating a microbenchmark as a production guarantee.
 
 ## Primary references
 
-- [Polars documentation: Performance measurements with correctness controls](https://docs.pola.rs/user-guide/lazy/execution/)
+- [Polars user guide: Query execution](https://docs.pola.rs/user-guide/lazy/execution/)
 - [Polars Python API reference](https://docs.pola.rs/api/python/stable/reference/index.html)
 
 ## Tutor guidance
 
-Use the repository learning-companion skill for `polars-017`. Inspect the learner's own source and observations, ask for an explanation of the relevant data or state contract, and give a focused hint. Separate an assertion on this fixture from a claim about an external dataset or deployed service.
+Use the repository's `$guide-ds60sqlpy-learning` skill (`.agents/skills/guide-ds60sqlpy-learning/SKILL.md`) for `polars-017`. Inspect the learner's own source and printed output first. Ask for an explanation of benchmark, cache regime, median, result equality and memory estimate in their own words, then give one focused hint at a time. Keep an assertion on this synthetic fixture separate from a claim about an external dataset or deployed service.

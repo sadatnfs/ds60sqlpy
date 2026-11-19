@@ -1,54 +1,68 @@
 """Complete offline worked example. See the matching tutorial for assumptions."""
 
 import numpy as np
-from sklearn.ensemble import RandomForestRegressor
-from sklearn.metrics import mean_squared_error
+from scipy import optimize, special
+from sklearn.metrics import brier_score_loss, log_loss
 
 
-def tree_fixture():
-    rng = np.random.default_rng(1903)
-    x = rng.normal(size=(360, 6))
-    y = 3 * x[:, 0] + 2 * x[:, 1] ** 2 + rng.normal(scale=0.5, size=len(x))
-    return x, y
+def logistic_objective(beta, design, outcome):
+    eta = design @ beta
+    return np.sum(np.logaddexp(0, eta) - outcome * eta)
 
 
 def case_03():
-    x, y = tree_fixture()
-    results = []
-    models = []
-    for candidates in (1, 3, 6):
-        for leaf in (2, 8):
-            model = RandomForestRegressor(
-                n_estimators=48,
-                max_features=candidates,
-                min_samples_leaf=leaf,
-                oob_score=True,
-                random_state=1903,
-                n_jobs=1,
-            ).fit(x[:180], y[:180])
-            validation = mean_squared_error(y[180:270], model.predict(x[180:270]))
-            results.append((candidates, leaf, validation))
-            models.append(model)
-    chosen = int(np.argmin([row[2] for row in results]))
-    model = models[chosen]
-    predictions = np.array([tree.predict(x[270:]) for tree in model.estimators_])
-    errors = predictions - y[270:]
-    correlation = np.corrcoef(errors)
-    corr = correlation[np.triu_indices(len(predictions), 1)].mean()
-    assert np.allclose(predictions.mean(axis=0), model.predict(x[270:]))
-    bootstrap = np.random.default_rng(3).integers(0, 6, 6)
-    oob = np.setdiff1d(np.arange(6), np.unique(bootstrap))
-    assert not set(oob) & set(bootstrap)
+    rng = np.random.default_rng(1102)
+    x = rng.normal(size=(500, 2))
+    design = np.column_stack([np.ones(len(x)), x])
+    y = rng.binomial(1, special.expit(design @ np.array([-0.4, 1.0, -0.7])))
+    train, test = np.arange(350), np.arange(350, 500)
+
+    def objective(b):
+        return logistic_objective(b, design[train], y[train])
+
+    def gradient(b):
+        return design[train].T @ (special.expit(design[train] @ b) - y[train])
+
+    fit = optimize.minimize(objective, np.zeros(3), jac=gradient, method="BFGS")
+    assert fit.success and np.linalg.norm(gradient(fit.x)) < 1e-4
+    p = special.expit(design[train] @ fit.x)
+    hessian = design[train].T @ ((p * (1 - p))[:, None] * design[train])
+    covariance = np.linalg.solve(hessian, np.eye(3))
+    se = np.sqrt(np.diag(covariance))
+    test_p = special.expit(design[test] @ fit.x)
+    threshold = 2 / (2 + 8)
+    decisions = test_p > threshold
+    cost = np.mean(2 * (decisions & (y[test] == 0)) + 8 * (~decisions & (y[test] == 1)))
+    bins = np.digitize(test_p, [0.2, 0.4, 0.6, 0.8])
+    calibration = [
+        (
+            int(b),
+            int((bins == b).sum()),
+            float(test_p[bins == b].mean()),
+            float(y[test][bins == b].mean()),
+        )
+        for b in np.unique(bins)
+    ]
+    # Equal baseline strata in both arms: marginal and conditional OR can still differ.
+    baseline = np.array([-2.0, 2.0])
+    p0, p1 = special.expit(baseline).mean(), special.expit(baseline + np.log(2)).mean()
+    marginal_or = p1 / (1 - p1) / (p0 / (1 - p0))
+    assert 1 < marginal_or < 2
+    separated = np.array([-2.0, -1.0, 1.0, 2.0])[:, None]
+    labels = np.array([0, 0, 1, 1])
+    assert logistic_objective([8], separated, labels) < logistic_objective([4], separated, labels)
     result = {
-        "validation_candidates": results,
-        "chosen": results[chosen][:2],
-        "test_mse": mean_squared_error(y[270:], model.predict(x[270:])),
-        "test_tree_error_correlation": corr,
-        "oob_score": model.oob_score_,
-        "tiny_bootstrap_indices": bootstrap.tolist(),
-        "tiny_oob_indices": oob.tolist(),
+        "coefficients": fit.x.tolist(),
+        "model_se": se.tolist(),
+        "slope1_or_ci95": np.exp(fit.x[1] + np.array([-1, 1]) * 1.96 * se[1]).tolist(),
+        "test_log_loss": log_loss(y[test], test_p),
+        "test_brier": brier_score_loss(y[test], test_p),
+        "cost_at_02": cost,
+        "calibration_bins": calibration,
+        "conditional_or": 2.0,
+        "marginal_or": marginal_or,
     }
-    print("03 forest selection:", result)
+    print("03 logistic model to decision:", result)
     return result
 
 

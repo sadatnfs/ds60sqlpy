@@ -7,5 +7,15 @@ const fixture = [
 ];
 console.table(fixture);
 // Derive your traces, caption and native source table from fixture.
-// Complete the six guide tasks in your own saved source.
+// TODO 1: Trace chronology.
+// TODO 2: Compute errors.
+// TODO 3: Construct the band.
+// TODO 4: Diagnose a gap.
+// TODO 5: Distinguish interval types.
+// TODO 6: Transfer to delayed labels.
+const traces = [];
+const layout = { title: { text: "Describe the measured quantity and its units" } };
+if (typeof Plotly !== "undefined" && traces.length > 0) {
+  Plotly.newPlot(document.getElementById("chart"), traces, layout);
+}
 console.log("Fixture loaded; derive the figure and its checks from the guide tasks.");

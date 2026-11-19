@@ -17,6 +17,21 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             &DataType::Timestamp(TimeUnit::Millisecond, Some("UTC".into()))
         );
     }
+
+    {
+        // Task 3: Independent construction
+        use arrow::datatypes::{DataType, Field, Schema, TimeUnit};
+        use std::collections::HashMap;
+        let unit = HashMap::from([("unit".to_string(), "kg".to_string())]);
+        let mass = Field::new("mass", DataType::Float64, false);
+        let mass = mass.with_metadata(unit);
+        let precision = DataType::Timestamp(TimeUnit::Millisecond, Some("UTC".into()));
+        let time = Field::new("measured_at", precision.clone(), false);
+        let schema = Schema::new(vec![mass, time]);
+        let recorded = schema.field(0).metadata().get("unit");
+        assert_eq!(recorded.map(String::as_str), Some("kg"));
+        assert_eq!(schema.field(1).data_type(), &precision);
+    }
     println!("rust-044: passed");
     Ok(())
 }

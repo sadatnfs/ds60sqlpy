@@ -63,7 +63,7 @@ add(
 add(
     "Filesystems, paths and owned cleanup",
     """A filesystem path is a name interpreted by a filesystem, not proof of ownership or permission. Logical path cleaning removes redundant components but does not prevent symlink escapes or authorize deletion. The io/fs interfaces let programs consume files without depending on a particular disk layout. A deterministic in-memory filesystem makes success, missing-file and malformed-path behavior easy to inspect. When real temporary files are needed, create a unique owned directory, defer its cleanup and never infer ownership from a familiar filename. Persistent learner work belongs in the classroom storage layer; a worker scratch file is temporary and should not be treated as saved progress.""",
-    """fs.ReadFile accepts an fs.FS and a slash-separated relative path. fs.ValidPath rejects empty paths, leading slashes and dot-dot components under the logical contract. fstest.MapFS provides test files in memory. errors.Is(err, fs.ErrNotExist) detects a missing-file cause across wrapping. filepath.Clean alone is normalization, not a containment security boundary.""",
+    """fs.ReadFile accepts an fs.FS and a slash-separated relative path. fs.ValidPath rejects empty paths, leading slashes and dot-dot components under the logical contract. fstest.MapFS provides test files in memory. errors.Is(err, fs.ErrNotExist) detects a missing-file cause across wrapping. filepath.Clean alone is normalization, not a containment security boundary. fs.Sub narrows the names a consumer sees, but its safety depends on the filesystem underneath. For a real directory, os.OpenRoot returns an os.Root whose methods refuse any name that resolves outside that directory, including through symbolic links.""",
     [
         ("Filesystem interface", "An abstraction for relative file operations."),
         ("Path confinement", "Restricting access to an explicitly allowed tree."),
@@ -106,14 +106,14 @@ add(
             "An empty file and a missing file are different states. Collapsing both into an empty string loses evidence needed for diagnosis.",
         ),
         E(
-            "Transfer a subtree boundary",
-            "Create an fs.Sub rooted at data and read only its relative item.",
-            "item.txt is readable within the logical subtree.",
-            r"""files:=fstest.MapFS{"data/item.txt":&fstest.MapFile{Data:[]byte("7")}};sub,err:=fs.Sub(files,"data");check(err==nil,"sub root");v,err:=fs.ReadFile(sub,"item.txt");check(err==nil&&string(v)=="7","sub read")""",
-            "A subtree abstraction simplifies names for a consumer. Its security properties depend on the underlying filesystem implementation, so do not equate every fs.Sub with a hardened sandbox.",
+            "Transfer confinement to a real directory with os.Root",
+            "Open an owned temporary directory as an os.Root, create item.txt through it, then try to open ../outside.txt through the same root.",
+            "item.txt is created inside the root and the escaping name is rejected.",
+            r"""dir,err:=os.MkdirTemp("","lesson-root-");check(err==nil,"owned directory");defer os.RemoveAll(dir);root,err:=os.OpenRoot(dir);check(err==nil,"open root");defer root.Close();file,err:=root.Create("item.txt");check(err==nil,"create inside");check(file.Close()==nil,"close");_,err=root.Open("../outside.txt");check(err!=nil,"escape rejected")""",
+            "os.Root, added in Go 1.24, resolves every name beneath the directory it was opened on and refuses names, including symbolic links, that would leave it. fs.ValidPath and fs.Sub only describe names; os.Root enforces confinement on the host filesystem. The deferred RemoveAll releases only the directory this case created.",
         ),
     ],
-    imports="io/fs testing/fstest errors",
+    imports="io/fs testing/fstest errors os",
     source="https://pkg.go.dev/io/fs",
 )
 

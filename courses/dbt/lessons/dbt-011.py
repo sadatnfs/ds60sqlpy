@@ -1,4 +1,4 @@
-"""dbt-011: worked starting point; complete the guide's six changes."""
+"""dbt-011: both worked cases; complete the guide's six changes."""
 
 import os
 import tempfile
@@ -106,8 +106,38 @@ def example_one():
         return {"declared_columns": ["id:integer", "amount:bigint"], "row": [1, 42]}
 
 
+def example_two():
+    with tempfile.TemporaryDirectory() as d:
+        schema = {
+            "models": [
+                {
+                    "name": "contracted",
+                    "config": {"materialized": "table", "contract": {"enforced": True}},
+                    "columns": [
+                        {"name": "id", "data_type": "integer"},
+                        {"name": "amount", "data_type": "bigint"},
+                    ],
+                }
+            ]
+        }
+        p = project(
+            d, models={"contracted": "select 1::integer as id, 42::bigint as amount"}, schema=schema
+        )
+        invoke(p, "build")
+        (p / "models/contracted.sql").write_text(
+            "select 1::integer as id, 'bad'::varchar as amount"
+        )
+        invoke(p, "run", succeeds=False)
+        assert rows(p, "select amount from contracted") == [(42,)]
+        return {
+            "incompatible_schema_rejected": True,
+            "previous_relation_retained_for_this_failure": True,
+        }
+
+
 if __name__ == "__main__":
     print(example_one())
+    print(example_two())
 
 # TODO 1: Delete amount from the model output.
 # TODO 2: Add an undeclared field and inspect enforcement.

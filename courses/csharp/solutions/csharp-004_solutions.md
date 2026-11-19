@@ -1,6 +1,6 @@
 # csharp-004: explanation and comparison
 
-Attempt the six guide tasks before opening this comparison. The executable reference is [csharp-004_solution.cs](csharp-004_solution.cs). Its assertions are always active under the prepared classroom compile settings.
+Attempt the six guide tasks before opening this comparison. The executable reference is [csharp-004_solution.cs](csharp-004_solution.cs). It runs both worked examples and the reference answers below, and its assertions are always active under the prepared classroom compile settings.
 
 ## Why the two examples differ
 
@@ -8,21 +8,56 @@ Attempt the six guide tasks before opening this comparison. The executable refer
 
 **Choose the counting unit:** The fixture disproves the assumption that Length is a universal character count. One scalar occupies two UTF-16 units and four UTF-8 bytes.
 
-## Reason through the six tasks
+## Task answers
 
-1. **Predict and explain.** Predict both string values after ToUpperInvariant and explain ownership of the result.
+### Task 1: Predict and explain
 
-2. **Guided modification.** Build an interpolated label containing a count and a unit.
+Predict both string values after ToUpperInvariant and explain ownership of the result.
 
-3. **Independent construction.** Implement case-insensitive machine-key comparison with an explicit policy.
+No separate reference answer has been written for this task. Example A is the evidence to compare with: Assignment of the returned value is necessary to keep a transformation. An explicit comparison policy prevents dependence on ambient culture. The original remains data while the result is DATA.
 
-4. **Diagnose a defect.** Diagnose code that takes one char from the emoji and assumes it is a complete symbol.
+### Task 2: Guided modification
 
-5. **Boundary evidence.** Compare ASCII, an emoji and a combining-mark sequence using code units and text elements.
+Build an interpolated label containing a count and a unit.
 
-6. **Transfer and justify.** Design a text-field limit and explain whether its contract measures bytes, scalars or user-visible graphemes.
+No separate reference answer has been written for this task. Start from Example B: The fixture disproves the assumption that Length is a universal character count. One scalar occupies two UTF-16 units and four UTF-8 bytes.
 
-For tasks 1 and 2, use the checked values and mechanism trace in the two examples. For task 3, choose names that expose the input and result contract and retain the same invariants. For task 4, the diagnosed mistakes below supply a concrete wrong assumption: preserve its counterexample before repairing it. Task 5 needs an explicit expected value or documented rejection at the boundary, not just successful execution. For task 6, explain what changes in the new context and which part of the original mechanism remains applicable. Several representations may satisfy this transfer task; justify the choice rather than treating this reference as the only architecture.
+### Task 3: Independent construction
+
+Implement case-insensitive machine-key comparison with an explicit policy.
+
+**Reference answer.** It runs as the `Task 3` block of the reference program.
+
+```csharp
+bool SameKey(string left, string right) {
+  return string.Equals(left, right, StringComparison.OrdinalIgnoreCase);
+}
+Check(SameKey("Report-ID", "report-id"), "case-insensitive match");
+Check(!SameKey("report-id", "report_id"), "different characters differ");
+Check(SameKey("i", "I"), "ordinal policy, no culture rules");
+```
+
+**Observe:** Keys that differ only by ASCII case match; a different separator does not.
+
+OrdinalIgnoreCase compares machine keys by code unit with simple case folding, so the result does not depend on the current culture.
+
+### Task 4: Diagnose a defect
+
+Diagnose code that takes one char from the emoji and assumes it is a complete symbol.
+
+No reference answer has been written for this task yet. The wrong assumptions to look for are this lesson's pitfalls: Indexing a string can split a surrogate pair. Invariant casing is useful for stable transformations but is not a universal user-language display rule. Normalization and comparison are separate policies.
+
+### Task 5: Boundary evidence
+
+Compare ASCII, an emoji and a combining-mark sequence using code units and text elements.
+
+No reference answer has been written for this task yet. Write the expected value or documented rejection for each boundary before running it, and compare with the checks in Example A (Immutable transformations) and Example B (Choose the counting unit).
+
+### Task 6: Transfer and justify
+
+Design a text-field limit and explain whether its contract measures bytes, scalars or user-visible graphemes.
+
+No single reference answer exists: several designs can satisfy this transfer task. Justify yours against the mechanism described below and the vocabulary entry **Code unit**, and state one limitation of your choice.
 
 ## Mechanism and diagnostic reasoning
 
@@ -36,4 +71,4 @@ Indexing a string can split a surrogate pair. Invariant casing is useful for sta
 
 ## Review before continuing
 
-The reference checks the worked scenarios, including their boundary distinctions. Your independent and transfer artifacts may have additional checks. Compare observations rather than only source text. Preserve any new regression case you discover and explain why it would reject a plausible wrong implementation. External project steps require their own build and platform evidence and are not established by a portable reference passing.
+Run the reference and confirm that it prints `csharp-004: passed`, then reconstruct one boundary case from memory and explain which check would reject a plausible wrong implementation. External project steps need their own build and platform evidence; a passing portable reference does not establish them.

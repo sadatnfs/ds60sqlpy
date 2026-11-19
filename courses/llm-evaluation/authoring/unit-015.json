@@ -9,6 +9,7 @@
     "guardrails"
   ],
   "outcome": "Monitor mature cohorts and service behavior without confusing delayed outcomes or changing traffic with model improvement.",
+  "verification": "Immature labels give accuracy 1 at coverage 0.5 while the mature cohort gives accuracy 0.5 at coverage 1; identical distributions have JS divergence 0 and disjoint support log 2; an alert triggers a composition and coverage check before any degradation claim.",
   "level": "advanced",
   "runtime": "python-core",
   "minutes": 120,

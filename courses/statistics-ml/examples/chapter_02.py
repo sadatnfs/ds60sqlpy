@@ -9,7 +9,7 @@ def projection_and_rank():
     assert np.allclose(x.T @ residual, 0, atol=1e-12)
     redundant = np.column_stack([x, 2 * x[:, 1]])
     assert np.linalg.matrix_rank(redundant) == 2
-    print("Coefficients:", beta, "rank with duplicate direction:", 2)
+    print("Coefficients:", beta, "rank with duplicate direction:", np.linalg.matrix_rank(redundant))
 
 
 def gradients_and_information():

@@ -1,4 +1,4 @@
-"""mle-016: worked starting point; complete the guide's six changes."""
+"""mle-016: both worked cases; complete the guide's six changes."""
 
 import contextlib
 import hashlib
@@ -32,8 +32,21 @@ def example_one():
         return {"failed_candidate_kept_active_v1": True}
 
 
+def example_two():
+    with tempfile.TemporaryDirectory() as d:
+        root = Path(d)
+        for version, weight in [("v1", 2.0), ("v2", 3.0), ("v1", 2.0)]:
+            model = {"weight": weight}
+            encoded = json.dumps(model, sort_keys=True).encode()
+            activate(root, version, model, hashlib.sha256(encoded).hexdigest())
+        assert json.loads((root / "current.json").read_text())["version"] == "v1"
+        assert not (root / "current.pending").exists()
+        return {"deliberate_pointer_rollback": True, "accepted_version": "v1"}
+
+
 if __name__ == "__main__":
     print(example_one())
+    print(example_two())
 
 # TODO 1: List the checks that must precede pointer replacement.
 # TODO 2: Keep the rejected candidate and its diagnostic in an owned review area.

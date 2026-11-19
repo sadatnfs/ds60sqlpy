@@ -30,7 +30,7 @@ The output preserves unavailable information while retaining the eligible count.
 
 An absent return and a missing measurement should not be conflated accidentally.
 
-**Expected observation:** The former returns 7; the latter retains nothing.
+**Expected observation:** The former returns 7; the latter retains `nothing`.
 
 ## 6. Assess a real policy
 

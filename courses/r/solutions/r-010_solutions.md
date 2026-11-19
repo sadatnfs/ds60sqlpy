@@ -16,15 +16,11 @@ Count rows and columns in a three-record two-field table.
 
 nrow is three and ncol is two.
 
-**Expected evidence:** nrow is three and ncol is two.
-
 ### Exercise 2
 
 Add a derived amount_with_fee column.
 
 Each row retains its ID and gains amount plus the declared fee.
-
-**Expected evidence:** Each row retains its ID and gains amount plus the declared fee.
 
 ### Exercise 3
 
@@ -32,15 +28,11 @@ Validate a nonmissing unique ID column.
 
 Use !anyNA(id) and !anyDuplicated(id).
 
-**Expected evidence:** Use !anyNA(id) and !anyDuplicated(id).
-
 ### Exercise 4
 
 Diagnose sorting only the amount column in place.
 
 Sort entire rows with an order index.
-
-**Expected evidence:** Sort entire rows with an order index.
 
 ### Exercise 5
 
@@ -48,16 +40,12 @@ Select zero rows while preserving columns and types.
 
 The result has zero rows and the original schema.
 
-**Expected evidence:** The result has zero rows and the original schema.
-
 ### Exercise 6
 
 Distinguish repeated order IDs from duplicate line IDs.
 
 A multi-line order can repeat OrderID while each LineID must remain unique.
 
-**Expected evidence:** A multi-line order can repeat OrderID while each LineID must remain unique.
-
 ## What the checks establish
 
-The reference contains explicit behavioral assertions for its small synthetic inputs. A passing run establishes those assertions in the reported environment. It does not prove correctness for every input, statistical validity for an unrelated population, or compatibility with untested package versions.
+The reference makes 6 `stopifnot()` checks on its small synthetic inputs. A passing run establishes those assertions in the reported environment. It does not prove correctness for every input, statistical validity for an unrelated population, or compatibility with untested package versions.

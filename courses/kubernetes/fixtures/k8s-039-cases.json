@@ -6,22 +6,22 @@
   "cases": [
     {
       "exercise": 1,
-      "task": "Name learner,host operator and unrelated tenant, with their trusted capabilities.",
+      "task": "Name learner, host operator and unrelated tenant, with their trusted capabilities.",
       "expected": "Actors and assets are explicit rather than a blanket secure claim."
     },
     {
       "exercise": 2,
-      "task": "Map foreign namespace,privileged,hostPath,unapproved image,foreign service account and shell command to rejections.",
+      "task": "Map foreign namespace, privileged, hostPath, unapproved image, foreign service account and shell command to rejections.",
       "expected": "Every field has a named closed-schema or ownership rule."
     },
     {
       "exercise": 3,
-      "task": "Explain why tokens,engine sockets and ambient kubeconfig stay outside learner artifacts.",
+      "task": "Explain why tokens, engine sockets and ambient kubeconfig stay outside learner artifacts.",
       "expected": "No alternate path around the bounded operation API."
     },
     {
       "exercise": 4,
-      "task": "Compare CPU limits,quota,deadlines and NetworkPolicy.",
+      "task": "Compare CPU limits, quota, deadlines and NetworkPolicy.",
       "expected": "Each constrains a different resource or traffic dimension."
     },
     {

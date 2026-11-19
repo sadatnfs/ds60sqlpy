@@ -156,4 +156,4 @@ if __name__ == "__main__":
 
 ## Interpretation
 
-Populate a real online feature store and enforce a consumer freshness contract. Test missing, stale, future and boundary values, then connect only accepted features to the model interface. Preserve the declared clock when moving from a fixed fixture to a running service.
+Test missing, stale, future and boundary values, then connect only accepted features to the model interface. Preserve the declared clock when moving from a fixed fixture to a running service.

@@ -16,9 +16,9 @@
         "Host",
         "ES module"
       ],
-      "outcome": "JavaScript is a language; Node and browsers are hosts that provide different APIs around it.",
-      "lab": "Check that the prepared runtime is Node 24 and that process exists.",
-      "verification": "major version 24; process.release.name is node. observed value 7 after await."
+      "outcome": "Identify the host running a module, separate language features from host APIs and await a real Promise result.",
+      "lab": "Calculate 2+3 and compare the numeric result with a string.",
+      "verification": "number 5; not strictly equal to string 5."
     },
     {
       "id": "js-002",
@@ -35,9 +35,9 @@
         "Safe integer",
         "BigInt"
       ],
-      "outcome": "JavaScript values have runtime types, and operators can perform implicit conversion.",
-      "lab": "Compare 2+3, 2+string 3, and Number(string 3)+2.",
-      "verification": "5, string 23, and 5. valid 12 accepted; invalid cases throw."
+      "outcome": "Predict coercion and equality results, expose floating-point approximation and reject ambiguous numeric input.",
+      "lab": "Use NaN, +0 and -0 with strict equality and Object.is.",
+      "verification": "NaN!==NaN; Object.is(NaN, NaN) is true; +0===-0; Object.is distinguishes zeros."
     },
     {
       "id": "js-003",
@@ -54,9 +54,9 @@
         "Loop invariant",
         "Nullish fallback"
       ],
-      "outcome": "Control flow decides which expressions execute and how many times.",
-      "lab": "Inspect Boolean conversions of 0, empty string, empty array and empty object.",
-      "verification": "false, false, true, true. extra undefined element exposes the off-by-one."
+      "outcome": "Write conditions and loops that keep valid zeros, handle empty collections and make an off-by-one boundary observable.",
+      "lab": "Sum 2, 4, 6 and record the accumulator after each iteration.",
+      "verification": "prefixes 2, 6, 12."
     },
     {
       "id": "js-004",
@@ -73,9 +73,9 @@
         "Default parameter",
         "Receiver"
       ],
-      "outcome": "Functions define reusable computations, and lexical scope determines which bindings a function can read.",
-      "lab": "Use add with 2, 3 and with negative 1, 1.",
-      "verification": "5 and 0. TypeError for 0 and 1.5; step 2 yields 2, 4."
+      "outcome": "Write pure functions and independent closures, explain let versus var capture and validate a factory's configuration.",
+      "lab": "Create three closures in a let loop and three in a var loop.",
+      "verification": "let returns 0, 1, 2; var returns 3, 3, 3."
     },
     {
       "id": "js-005",
@@ -92,9 +92,9 @@
         "Shallow copy",
         "Mutation"
       ],
-      "outcome": "Array operations differ in whether they mutate the container, return a new container or reuse referenced objects.",
-      "lab": "Double 1, 2, 3, 4 and keep results above 4.",
-      "verification": "6, 8; original array unchanged. edited record changes; original record stays 1."
+      "outcome": "Transform arrays without mutating their input, supply safe reduction identities and avoid default sort coercion.",
+      "lab": "Sort 10, 2, 1 with default and numeric comparators.",
+      "verification": "default 1, 10, 2; numeric 1, 2, 10."
     },
     {
       "id": "js-006",
@@ -111,9 +111,9 @@
         "Destructuring",
         "Shallow freeze"
       ],
-      "outcome": "Objects associate property keys with values and can inherit properties through a prototype chain.",
-      "lab": "Create a child inheriting kind and owning name.",
-      "verification": "kind found by in but not hasOwn; name is own. values 1 then 2; getter executed twice."
+      "outcome": "Distinguish own from inherited properties, copy objects deliberately and use null-prototype dictionaries for arbitrary keys.",
+      "lab": "Read missing count and explicit null count with default 0.",
+      "verification": "missing becomes 0; null remains null."
     },
     {
       "id": "js-007",
@@ -130,9 +130,9 @@
         "Multiplicity",
         "Membership"
       ],
-      "outcome": "Map and Set provide collection contracts different from plain object records.",
-      "lab": "Create two {id: 1} objects and use them as Map keys.",
-      "verification": "size 2 and separate values. b, a, c."
+      "outcome": "Choose Map or Set for identity-sensitive data, count events and tell a stored zero from an absent key.",
+      "lab": "Build a frequency Map for red, blue, red.",
+      "verification": "red 2, blue 1."
     },
     {
       "id": "js-008",
@@ -149,9 +149,9 @@
         "Normalization",
         "Pattern escaping"
       ],
-      "outcome": "JavaScript strings are sequences of UTF-16 code units.",
-      "lab": "Inspect A followed by one emoji.",
-      "verification": "length 3; spread count 2. item_1 accepted; oversized input rejected."
+      "outcome": "Count and compare Unicode text correctly and write bounded, Unicode-aware regular expressions without hidden cursor state.",
+      "lab": "Escape a.b+ and match it exactly rather than interpreting dot and plus.",
+      "verification": "literal accepted; axbb rejected."
     },
     {
       "id": "js-009",
@@ -168,9 +168,9 @@
         "Domain invariant",
         "Failure category"
       ],
-      "outcome": "Errors should distinguish an invalid request from an expected missing result and an operational failure.",
-      "lab": "Validate id A, quantity 2, price 125 and calculate integer cents.",
-      "verification": "total 250; fresh accepted object. input unchanged."
+      "outcome": "Validate parsed input explicitly, reject wrong shapes and unsafe numbers, and translate errors while keeping their cause.",
+      "lab": "Try quantity 0, quantity 1.5 and negative price.",
+      "verification": "RangeError for each."
     },
     {
       "id": "js-010",
@@ -187,9 +187,9 @@
         "Resolution",
         "Module cache"
       ],
-      "outcome": "A module is both a namespace and a dependency boundary.",
-      "lab": "Import a mutable counter and its increment function, then inspect the count before and after incrementing.",
-      "verification": "count changes from 0 to 1 through the imported namespace. TypeError; exported value remains 3."
+      "outcome": "Explain live bindings, module caching and relative resolution, and diagnose a missing dependency in an ES module graph.",
+      "lab": "Import one URL twice and compare the namespace and exported object.",
+      "verification": "both namespace and object identities are shared."
     },
     {
       "id": "js-011",
@@ -206,9 +206,9 @@
         "Suspension",
         "Iterator closing"
       ],
-      "outcome": "An iterable describes how to obtain an iterator.",
-      "lab": "Create a generator, inspect its trace, then request one value.",
-      "verification": "trace is empty before next; then started, with value 2. empty array for 0; RangeError for -1 and 1.5."
+      "outcome": "Write lazy iterators and generators that close on early exit and validate their configuration.",
+      "lab": "Consume one generator twice, then create a second generator.",
+      "verification": "first pass is 0,1,2; second is empty; fresh pass repeats 0,1,2."
     },
     {
       "id": "js-012",
@@ -225,9 +225,9 @@
         "Microtask",
         "Promise composition"
       ],
-      "outcome": "A Promise records one eventual settlement: fulfillment with a value or rejection with a reason.",
-      "lab": "Record executor, synchronous continuation and then reaction.",
-      "verification": "executor, sync, reaction. sync,promise,microtask,timer."
+      "outcome": "Predict Promise and microtask ordering and combine Promises with all, allSettled and race correctly.",
+      "lab": "Resolve the second deferred Promise first, then the first.",
+      "verification": "result remains first,second."
     },
     {
       "id": "js-013",
@@ -242,11 +242,12 @@
         "Cooperative cancellation",
         "Abort signal",
         "Deadline",
-        "Cleanup ownership"
+        "Cleanup ownership",
+        "Disposable"
       ],
-      "outcome": "Cancellation is a request communicated to cooperating code.",
-      "lab": "Start a timer with a signal, abort it, and inspect the rejection.",
-      "verification": "AbortError with the original reason as cause. combined signal is aborted with deadline reason."
+      "outcome": "Cancel async work cooperatively with AbortSignal and release timers and listeners exactly once, including with using.",
+      "lab": "Run the custom operation without aborting, then abort its signal after completion.",
+      "verification": "value 7; started,completed,cleaned exactly once."
     },
     {
       "id": "js-014",
@@ -263,9 +264,9 @@
         "Index",
         "Heap invariant"
       ],
-      "outcome": "An algorithm is a rule for transforming an input into a result; complexity describes how its required work grows with input size.",
-      "lab": "Find the first insertion position for 4 in 1,4,4,8 and inspect the visited intervals.",
-      "verification": "index 1; intervals shrink to the first duplicate. all invariants hold; invalid value throws."
+      "outcome": "Implement lower-bound search and a binary heap, cover boundary cases and count comparisons instead of timing them.",
+      "lab": "Search empty input, then targets below and above a sorted input.",
+      "verification": "positions 0,0,3."
     },
     {
       "id": "js-015",
@@ -282,9 +283,9 @@
         "Regression",
         "Async test lifetime"
       ],
-      "outcome": "Tests make a behavioral claim executable.",
-      "lab": "Start a real node --test process asserting add(2,3)=5.",
-      "verification": "child exit status 0; one passing test. two tests pass without shared mutable state."
+      "outcome": "Write node:test suites that fail on wrong results, await asynchronous checks and keep fixtures independent.",
+      "lab": "Declare an async test that awaits Promise resolution before checking the value.",
+      "verification": "child exit status 0."
     },
     {
       "id": "js-016",
@@ -301,9 +302,9 @@
         "Exclusive creation",
         "Resource lifetime"
       ],
-      "outcome": "A filesystem path names a resource in a host filesystem.",
-      "lab": "Write one line containing an emoji, then compare text length and byte length.",
-      "verification": "text round-trips; UTF-8 byte length exceeds code-unit length. no lines."
+      "outcome": "Read, write and stream UTF-8 files safely, refuse accidental overwrites and close file handles with await using.",
+      "lab": "Create a file exclusively twice and inspect its unchanged content.",
+      "verification": "second creation rejects with EEXIST; original first remains."
     },
     {
       "id": "js-017",
@@ -320,9 +321,9 @@
         "Query encoding",
         "Application validation"
       ],
-      "outcome": "HTTP transfers representations between a client and a server using a method, target, headers, status and body.",
-      "lab": "GET /sum with a=2 and b=3 and inspect status, content type and JSON.",
-      "verification": "status 200; application/json; total 5. status 400 rather than a rounded success value."
+      "outcome": "Serve and request an owned local HTTP endpoint, encode URLs with the URL API and reject invalid query input.",
+      "lab": "Round-trip a query containing spaces, ampersand and equals without contacting a server.",
+      "verification": "the value round-trips as one parameter."
     },
     {
       "id": "js-018",
@@ -339,9 +340,9 @@
         "Failure atomicity",
         "Process boundary"
       ],
-      "outcome": "A reliable command-line program has an input contract, an output contract and a failure contract.",
-      "lab": "Send two rows worth 250 and 300 cents to the CLI.",
-      "verification": "exit 0; stdout is exactly one JSON result with 2 rows and 550 cents; stderr empty. exit 2 with input limit diagnostic; stdout empty."
+      "outcome": "Build a command-line data tool with a strict argument, input and error contract tested through a real child process.",
+      "lab": "Send a valid first row and malformed JSON on line 2.",
+      "verification": "exit 2; stdout empty; stderr identifies line 2."
     },
     {
       "id": "js-019",
@@ -358,9 +359,9 @@
         "Erasure",
         "Unknown boundary"
       ],
-      "outcome": "TypeScript adds a static checker to JavaScript.",
-      "lab": "Define a function accepting two numbers and returning their sum; inspect its runtime value.",
-      "verification": "sum 5 with runtime typeof number. 12 doubles to 24; string 12 and Infinity reject."
+      "outcome": "Annotate and narrow TypeScript values, explain type erasure and tell type stripping in Node from type checking with tsc.",
+      "lab": "Use const for a fixed tag and let for a changing text value.",
+      "verification": "fixed tag remains ready; mutable text can change to done."
     },
     {
       "id": "js-020",
@@ -377,9 +378,9 @@
         "Discriminant",
         "Exhaustiveness"
       ],
-      "outcome": "A union type describes a value that may belong to one of several alternatives.",
-      "lab": "Format both successful value 7 and a failure message.",
-      "verification": "value:7 and error:offline. runtime fallback throws rather than fabricating success."
+      "outcome": "Model results with discriminated unions, narrow them safely and make a missing variant a compile-time error.",
+      "lab": "Demonstrate that a failure branch cannot read value.",
+      "verification": "expected compiler error on value; valid failure formatting remains unchanged."
     },
     {
       "id": "js-021",
@@ -396,9 +397,9 @@
         "Readonly view",
         "Optional property"
       ],
-      "outcome": "TypeScript object types describe the properties an operation requires.",
-      "lab": "Pass a wider named object with id and count to a function requiring only id.",
-      "verification": "label A; original count remains 2. new array 2,4; input remains 1,2."
+      "outcome": "Write structural object types and explain optional, readonly and aliasing behavior at runtime.",
+      "lab": "Use a nullish fallback on an optional count.",
+      "verification": "absent becomes 10; explicit 0 remains 0."
     },
     {
       "id": "js-022",
@@ -415,9 +416,9 @@
         "Keyof",
         "Indexed access type"
       ],
-      "outcome": "Generics express a relationship between types across a reusable operation.",
-      "lab": "Pass a number and an object through identity.",
-      "verification": "number remains 7; object is the same reference. expected compile error for returning a fabricated length-only object."
+      "outcome": "Write generic functions whose constraints connect inputs to precise result types without unsafe casts.",
+      "lab": "Read the first item from a nonempty and an empty readonly array.",
+      "verification": "4 and undefined."
     },
     {
       "id": "js-023",
@@ -434,9 +435,9 @@
         "Distributivity",
         "Type derivation"
       ],
-      "outcome": "Type operators can derive one static description from another, reducing duplicated declarations that drift apart.",
-      "lab": "Create a boolean flag type from id and count fields.",
-      "verification": "id true and count false; a missing flag is a compile error. valid table remains usable; misspelled literal key is a compiler error."
+      "outcome": "Derive types with mapped, conditional and utility types and check configuration objects with satisfies.",
+      "lab": "Define both conditional utilities and demonstrate their different assignment behavior.",
+      "verification": "whole-union array accepts mixed values; distributed array rejects them."
     },
     {
       "id": "js-024",
@@ -453,9 +454,9 @@
         "Domain validation",
         "Diagnostic path"
       ],
-      "outcome": "An external payload should enter typed code as unknown.",
-      "lab": "Parse an order with two line items and inspect the typed success.",
-      "verification": "success with total quantity 5; independent copied item records. every malformed fixture is rejected; an empty items array remains valid."
+      "outcome": "Validate unknown JSON at runtime into trusted typed values and report precise nested failures.",
+      "lab": "Parse malformed JSON and valid JSON null.",
+      "verification": "codes json and schema respectively."
     },
     {
       "id": "js-025",
@@ -472,9 +473,9 @@
         "Emitted extension",
         "NoEmitOnError"
       ],
-      "outcome": "TypeScript source participates in two related dependency graphs: the compiler resolves source and declarations while checking, and Node resolves emitted JavaScript while running.",
-      "lab": "Compile a main module importing twice from ./math.mjs and run it.",
-      "verification": "both processes succeed; output 8; math.mjs is emitted. value dependency remains; runtime prints ready:A."
+      "outcome": "Compile and run multi-module TypeScript under NodeNext and explain emitted extensions, type-only imports and specifiers.",
+      "lab": "Assign text to a number in a fresh project.",
+      "verification": "TS2322; nonzero compiler status; no compiled main.mjs."
     },
     {
       "id": "js-026",
@@ -491,9 +492,9 @@
         "Composition",
         "Interface"
       ],
-      "outcome": "Classes combine state with operations that preserve invariants.",
-      "lab": "Start with 100 cents, deposit 50 and withdraw 30.",
-      "verification": "balance 120; no enumerable balance field. ordinary property 999; private cents remain 2."
+      "outcome": "Design classes with private state, injected collaborators and invariants that reject invalid transitions.",
+      "lab": "Try a negative deposit and an overdraw.",
+      "verification": "both throw; balance stays 100."
     },
     {
       "id": "js-027",
@@ -510,9 +511,9 @@
         "Error translation",
         "Batch outcome policy"
       ],
-      "outcome": "Promise<T> describes a fulfilled value.",
-      "lab": "Look up a known id and an absent id.",
-      "verification": "known value 7; absent error not_found. expected diagnostics for value before await or before narrowing."
+      "outcome": "Type async workflows that narrow results, translate cancellation and keep every batch outcome.",
+      "lab": "Abort a real timer-backed operation.",
+      "verification": "failure result cancelled."
     },
     {
       "id": "js-028",
@@ -529,9 +530,9 @@
         "Dynamic programming",
         "Recurrence"
       ],
-      "outcome": "Types clarify an algorithm's interface, but correctness depends on its invariant.",
-      "lab": "Search a graph with two equal-length routes from A to D.",
-      "verification": "A,B,D under the stated neighbor order. RangeError for all invalid configurations; empty denominations cannot make 1."
+      "outcome": "Implement breadth-first search and dynamic programming that handle cycles, disconnection and unreachable amounts.",
+      "lab": "Search A to C through A-B-A cycles and check source-to-source.",
+      "verification": "A,B,C and A."
     },
     {
       "id": "js-029",
@@ -548,9 +549,9 @@
         "Delegation",
         "Focus"
       ],
-      "outcome": "The Document Object Model is a live tree of nodes exposed by the browser.",
-      "lab": "Open the complete snippet, activate Add twice by pointer and once by keyboard, then inspect the count.",
-      "verification": "count 3; button remains keyboard reachable. null is detected before accessing a property."
+      "outcome": "Build accessible DOM interactions with native controls, event delegation and listener cleanup.",
+      "lab": "Create a new list item with button B after the listener is installed and activate it.",
+      "verification": "the existing ancestor listener reports B without a new per-button listener."
     },
     {
       "id": "js-030",
@@ -567,9 +568,9 @@
         "Persistence",
         "Origin"
       ],
-      "outcome": "A form is a structured input interface, not merely a collection of text boxes.",
-      "lab": "Save the snippet as HTML and submit name Ada and quantity 2, then try an invalid quantity.",
-      "verification": "valid output Ada: 2; invalid input produces no accepted state. owned key absent; unrelated key unchanged."
+      "outcome": "Validate forms and persist versioned state in browser storage, handling failures and changes from other tabs.",
+      "lab": "Reject malformed JSON or a stored version other than 1 before rendering.",
+      "verification": "invalid saved state is diagnosed and does not become accepted application state."
     },
     {
       "id": "js-031",
@@ -586,9 +587,9 @@
         "URL policy",
         "Content Security Policy"
       ],
-      "outcome": "Rendering untrusted text is a data-versus-code boundary.",
-      "lab": "Save the snippet and inspect the resulting DOM and visible title.",
-      "verification": "the angle-bracket text is visible; no img element is created. no claim that CSP authenticates callers, CORS authorizes actions, or meta implements frame-ancestors."
+      "outcome": "Render untrusted text and links safely and explain what a Content Security Policy does and does not block.",
+      "lab": "Inspect the reference HTML and load its external script and stylesheet under the meta policy.",
+      "verification": "local resources load; no inline handlers or eval are needed."
     },
     {
       "id": "js-032",
@@ -605,9 +606,9 @@
         "Pipeline",
         "Partial output"
       ],
-      "outcome": "A stream transports chunks incrementally between a producer and a consumer.",
-      "lab": "Uppercase two byte chunks and collect the transformed output.",
-      "verification": "ABCD after successful pipeline completion. pipeline rejects with AbortError; generator finally runs."
+      "outcome": "Build stream pipelines that respect backpressure, propagate failures and abort cleanly.",
+      "lab": "Use an async source that yields once then throws.",
+      "verification": "pipeline rejects with source failed; sink is destroyed."
     },
     {
       "id": "js-033",
@@ -624,9 +625,9 @@
         "Transfer",
         "Worker lifecycle"
       ],
-      "outcome": "An async function does not automatically move CPU work off the main JavaScript thread.",
-      "lab": "Sum integers 1 through 10000 in a worker and inspect its thread id.",
-      "verification": "sum 50005000; worker thread id positive. DataCloneError before useful worker execution."
+      "outcome": "Move CPU-bound work to worker threads, transfer or clone data deliberately and handle worker errors and termination.",
+      "lab": "Send an object, mutate the worker copy and compare the original.",
+      "verification": "worker returns 9; parent remains 1."
     },
     {
       "id": "js-034",
@@ -643,9 +644,9 @@
         "Retention",
         "Event-loop delay"
       ],
-      "outcome": "Performance measurement begins with a correctness contract and a question.",
-      "lab": "Sum a fixed numeric range and record elapsed duration.",
-      "verification": "correct sum 50005000; finite nonnegative elapsed time. monitor disabled afterward; sample count reported honestly."
+      "outcome": "Measure performance with repeated checked samples and bounded event-loop observations without overclaiming.",
+      "lab": "Populate and clear a Map while recording memory counters.",
+      "verification": "entry count 100 then 0; valid counters, with no asserted memory drop."
     },
     {
       "id": "js-035",
@@ -662,9 +663,9 @@
         "Timezone",
         "Locale formatting"
       ],
-      "outcome": "A date-time problem can involve an instant, a calendar date, a local clock reading or a duration.",
-      "lab": "Parse UTC midnight and the equivalent previous-day offset representation.",
-      "verification": "equal timestamps and UTC ISO output. NaN timestamp; toISOString and invalid timezone construction throw RangeError."
+      "outcome": "Handle instants, offsets, daylight-saving gaps and locale formatting without parsing displayed text.",
+      "lab": "Accept leap-day 2024-02-29 and reject 2023-02-29, slash format and month 13.",
+      "verification": "only the valid strict date is accepted."
     },
     {
       "id": "js-036",
@@ -681,9 +682,9 @@
         "Engine declaration",
         "Content identity"
       ],
-      "outcome": "A package is a public interface plus the files and metadata needed to implement it.",
-      "lab": "Create a package with exports pointing at index.mjs and import its version value.",
-      "verification": "actual child prints 1. child exits successfully for twice(0)=0 and twice(-2)=-4."
+      "outcome": "Design a package with explicit exports, detect tampered sources by digest and keep a versioned behavior contract.",
+      "lab": "Attempt a package-name import of private.mjs even though the file exists.",
+      "verification": "nonzero child status with ERR_PACKAGE_PATH_NOT_EXPORTED."
     },
     {
       "id": "js-037",
@@ -700,9 +701,9 @@
         "Idempotency key",
         "Bounded concurrency"
       ],
-      "outcome": "A retry is a new attempt after an uncertain or failed operation.",
-      "lab": "Fail twice transiently, then succeed, using random value 0.5 and a recording wait.",
-      "verification": "three attempts; delays 50 and 100; result ready. original reason rejects; attempts remain 0."
+      "outcome": "Retry network calls with jitter and idempotency keys, bound concurrency and honor cancellation.",
+      "lab": "Submit the same key and payload twice to the local store.",
+      "verification": "one side effect; identical returned receipt."
     },
     {
       "id": "js-038",
@@ -719,9 +720,9 @@
         "Versioned schema",
         "Transport/domain agreement"
       ],
-      "outcome": "A typed API contract connects request validation, domain behavior, transport status and response decoding.",
-      "lab": "Send 2 and 3 through the handler, JSON round-trip its reply, then decode it.",
-      "verification": "status 200 and decoded total 5. bad_request response does not echo the supplied value."
+      "outcome": "Design a typed API contract with stable error envelopes and test that client and server agree.",
+      "lab": "Use an unknown path and an unsupported method.",
+      "verification": "404 not_found versus 405 method_not_allowed."
     },
     {
       "id": "js-039",
@@ -738,9 +739,9 @@
         "Functional core",
         "Replay"
       ],
-      "outcome": "A state machine makes allowed transitions explicit.",
-      "lab": "Start a queued job and complete it with value 7.",
-      "verification": "succeeded with attempt 1 and value 7. input unchanged; new object returned; NaN rejects."
+      "outcome": "Model a job lifecycle as a pure state machine with a retry budget, terminal cancellation and deterministic replay.",
+      "lab": "Fail three started attempts and try to retry once more.",
+      "verification": "attempt 3 remains failed; further retry rejects."
     },
     {
       "id": "js-040",
@@ -757,9 +758,9 @@
         "Conflict",
         "Structured event"
       ],
-      "outcome": "A local service combines transport handling with domain state and resource ownership.",
-      "lab": "POST item A with value 2, then GET the list.",
-      "verification": "201 created; subsequent 200 list contains exactly A. matching id and status; server no longer listening."
+      "outcome": "Build and test a local HTTP service that validates input before changing state and cleans up its listeners.",
+      "lab": "Create A with value 2, then try A with value 9.",
+      "verification": "second request 409; stored value remains 2."
     },
     {
       "id": "js-041",
@@ -776,9 +777,9 @@
         "Aggregation state",
         "Resource budget"
       ],
-      "outcome": "An analytics pipeline combines framing, parsing, validation and aggregation.",
-      "lab": "Decode rows for groups A and B from three-byte chunks and aggregate their values.",
-      "verification": "A count 2 sum 5; B count 1 sum 4; zero rejected. zero accepted with one rejected versus zero accepted with zero rejected."
+      "outcome": "Build a streaming TypeScript analytics pipeline that quarantines bad lines and enforces input budgets.",
+      "lab": "Use an emoji group and split every UTF-8 byte.",
+      "verification": "group name remains intact with sum 7."
     },
     {
       "id": "js-042",
@@ -795,9 +796,9 @@
         "Artifact verification",
         "Compatibility gate"
       ],
-      "outcome": "A release is a specific artifact with a reproducible behavior contract, not merely a folder that once worked during development.",
-      "lab": "Create the authored bundle, verify hashes and run its self-test in a child.",
-      "verification": "three checks passed; actual Node version reported. matching policy passes; mismatched policy throws."
+      "outcome": "Build, verify and run a release bundle that rejects tampered bytes and gates its runtime against an explicit policy.",
+      "lab": "Replace one file entry with ../outside.txt.",
+      "verification": "path is rejected before any outside file is read."
     },
     {
       "id": "js-043",
@@ -815,9 +816,9 @@
         "selection",
         "visual encoding"
       ],
-      "outcome": "Explain why position and length suit count comparison.",
+      "outcome": "Map a count to the length of an SVG bar, place marks in a viewBox and label each mark with its value.",
       "lab": "Create three labeled bars from a saved blank pad.",
-      "verification": "A common baseline supports meaningful magnitude comparison."
+      "verification": "Exactly three rectangles with matching labels and counts."
     },
     {
       "id": "js-044",
@@ -834,9 +835,9 @@
         "enter",
         "exit"
       ],
-      "outcome": "Apply the same pattern to an HTML list.",
+      "outcome": "Render with data joins so repeated draws add, update and remove exactly the marks the current data needs.",
       "lab": "Write a render function using a data join.",
-      "verification": "Current records reconcile to current list items."
+      "verification": "Repeated calls produce exactly one mark per current record."
     },
     {
       "id": "js-045",
@@ -853,9 +854,9 @@
         "ordering",
         "reconciliation"
       ],
-      "outcome": "Transfer identity reasoning to a live leaderboard.",
+      "outcome": "Use keyed joins so each mark keeps its entity identity through reordering, and reject duplicate IDs.",
       "lab": "Implement a keyed redraw with two records.",
-      "verification": "Scores change and ranks reorder while participant IDs remain stable."
+      "verification": "Node identity and current data values both match expectations."
     },
     {
       "id": "js-046",
@@ -872,9 +873,9 @@
         "linear scale",
         "band scale"
       ],
-      "outcome": "Defend a scale choice for signed residuals.",
+      "outcome": "Choose and configure linear and band scales, invert positions and keep an honest zero baseline.",
       "lab": "Build a scale-based bar chart.",
-      "verification": "A diverging domain with visible zero and explicit units."
+      "verification": "Bar geometry derives from a zero baseline and a named domain."
     },
     {
       "id": "js-047",
@@ -891,9 +892,9 @@
         "format",
         "units"
       ],
-      "outcome": "Design axes for counts and rates side by side.",
+      "outcome": "Build labeled axes with deliberate ticks and number formats that match the data's representation.",
       "lab": "Build a labeled quantitative axis.",
-      "verification": "Separate unit labels and denominators make the comparison explicit."
+      "verification": "Visible quantity, units and correctly formatted tick values."
     },
     {
       "id": "js-048",
@@ -910,9 +911,9 @@
         "missingness",
         "rollup"
       ],
-      "outcome": "Transfer the pipeline to a rate metric.",
+      "outcome": "Parse inline CSV, separate missing from invalid values and aggregate at an explicit grain before charting.",
       "lab": "Parse and aggregate the inline fixture.",
-      "verification": "Validate numerator and denominator at a defined grain before division."
+      "verification": "A totals to 5 and B totals to 4 from valid rows."
     },
     {
       "id": "js-049",
@@ -929,9 +930,9 @@
         "line generator",
         "missing interval"
       ],
-      "outcome": "Explain interpolation limits for irregular observations.",
+      "outcome": "Draw a UTC time-series line that stays in time order and shows missing observations as gaps.",
       "lab": "Build a UTC line chart with a gap.",
-      "verification": "Connecting samples is a visual assumption, not evidence between measurements."
+      "verification": "Time-ordered points and separate defined segments."
     },
     {
       "id": "js-050",
@@ -948,9 +949,9 @@
         "overplotting",
         "correlation"
       ],
-      "outcome": "Explain a correlation without claiming causation.",
+      "outcome": "Build a scatterplot whose size encoding is proportional to area and handle overplotted points.",
       "lab": "Build a three-variable scatterplot.",
-      "verification": "Describe association and identify alternative explanations."
+      "verification": "Position and area mappings have named units and a size explanation."
     },
     {
       "id": "js-051",
@@ -967,9 +968,9 @@
         "bin",
         "density"
       ],
-      "outcome": "Compare two groups with different sample sizes.",
+      "outcome": "Build histograms with explicit bin boundaries and explain how bin choices and densities change the shape.",
       "lab": "Build the explicit-boundary count histogram.",
-      "verification": "Choose counts or normalized density according to the comparison question."
+      "verification": "Five bins with counts 1, 2, 1, 0, 2."
     },
     {
       "id": "js-052",
@@ -986,9 +987,9 @@
         "interval",
         "sampling uncertainty"
       ],
-      "outcome": "Design a comparison of two estimated effects.",
+      "outcome": "Compute quartiles, draw a box plot and present interval estimates without confusing spread with uncertainty.",
       "lab": "Draw a labeled box and median.",
-      "verification": "Show estimates, interval method, units and a meaningful zero reference."
+      "verification": "The box endpoints map to Q1 and Q3 and the line maps to median."
     },
     {
       "id": "js-053",
@@ -1005,9 +1006,9 @@
         "normalization",
         "denominator"
       ],
-      "outcome": "Choose grouped or stacked bars for subgroup comparison.",
+      "outcome": "Build stacked and grouped bar charts and keep totals, shares and denominators explicit.",
       "lab": "Build a two-series stacked chart.",
-      "verification": "Use shared baselines when precise subgroup comparison is the primary task."
+      "verification": "Segment heights match component values and total heights match row sums."
     },
     {
       "id": "js-054",
@@ -1024,9 +1025,9 @@
         "render contract",
         "empty state"
       ],
-      "outcome": "Plan real narrow-screen acceptance.",
+      "outcome": "Write a reusable chart component with an explicit render contract, empty state and responsive sizing.",
       "lab": "Implement a reusable bar renderer.",
-      "verification": "Readable labels, no clipping, keyboard access and stable data meaning."
+      "verification": "Explicit inputs, keyed marks and a documented empty state."
     },
     {
       "id": "js-055",
@@ -1043,9 +1044,9 @@
         "interruption",
         "reduced motion"
       ],
-      "outcome": "Defend when to use a static update.",
+      "outcome": "Animate updates with bounded, interruptible transitions that await completion and respect reduced motion.",
       "lab": "Implement a bounded transition with completion checks.",
-      "verification": "Prefer immediate clarity when motion adds no explanatory value."
+      "verification": "Final geometry is asserted only after the transition ends."
     },
     {
       "id": "js-056",
@@ -1062,9 +1063,9 @@
         "tooltip",
         "keyboard focus"
       ],
-      "outcome": "Review focus and announcement behavior.",
+      "outcome": "Add pointer and keyboard interaction that share one action and render tooltip text safely.",
       "lab": "Build an accessible selection list beside the chart.",
-      "verification": "Focus stays predictable and the live summary is concise."
+      "verification": "Native buttons are reachable and reveal exact record values."
     },
     {
       "id": "js-057",
@@ -1081,9 +1082,9 @@
         "linked view",
         "state"
       ],
-      "outcome": "Design a two-chart coordination rule.",
+      "outcome": "Link a brush to another view by converting pixel ranges to data values and handling a cleared selection.",
       "lab": "Link a brush to a textual record list.",
-      "verification": "One shared selected-ID set drives both views."
+      "verification": "The list and visual selection describe the same IDs."
     },
     {
       "id": "js-058",
@@ -1100,9 +1101,9 @@
         "viewport",
         "reset"
       ],
-      "outcome": "Review zoom for a long time series.",
+      "outcome": "Implement zoom and pan that rescale axes from the transform and restore the original view on reset.",
       "lab": "Implement linked mark and axis zooming.",
-      "verification": "Bounds, clipping, readable ticks and accessible alternate controls."
+      "verification": "Both use the same rescaled view."
     },
     {
       "id": "js-059",
@@ -1119,9 +1120,9 @@
         "tree layout",
         "link"
       ],
-      "outcome": "Design a collapsible taxonomy state model.",
+      "outcome": "Turn nested data into a hierarchy and render a labeled tree layout with correct node and link counts.",
       "lab": "Render a labeled left-to-right tree.",
-      "verification": "Stable node IDs and explicit collapsed sets preserve identity."
+      "verification": "Links connect the matching source and target nodes."
     },
     {
       "id": "js-060",
@@ -1138,9 +1139,9 @@
         "area",
         "tiling"
       ],
-      "outcome": "Design a changing treemap with identity preserved.",
+      "outcome": "Build a treemap from leaf values without double counting and judge when area suits the comparison.",
       "lab": "Render labeled leaf rectangles.",
-      "verification": "Stable keys, explicit updates and a readable alternate value list."
+      "verification": "Bounds are finite and widths/heights are nonnegative."
     },
     {
       "id": "js-061",
@@ -1157,9 +1158,9 @@
         "mutation",
         "layout convergence"
       ],
-      "outcome": "Choose a strategy for a dense network.",
+      "outcome": "Run a seeded, bounded force simulation on copied nodes and links and validate the graph before layout.",
       "lab": "Build a bounded three-node network.",
-      "verification": "Filter or aggregate according to an analytical question."
+      "verification": "All positions are finite and every link resolves to known IDs."
     },
     {
       "id": "js-062",
@@ -1176,9 +1177,9 @@
         "projection",
         "geoPath"
       ],
-      "outcome": "Plan a real boundary-data integration.",
+      "outcome": "Project GeoJSON points with an explicit projection and check longitude-latitude order and distortion.",
       "lab": "Render the synthetic point collection.",
-      "verification": "Source/license, date, stable IDs, topology and projection checks."
+      "verification": "One finite path per feature with descriptive labels."
     },
     {
       "id": "js-063",
@@ -1195,9 +1196,9 @@
         "geographic join",
         "missing data"
       ],
-      "outcome": "Explain ecological inference limits.",
+      "outcome": "Build a choropleth of rates joined by stable IDs, keeping zero, missing and invalid denominators distinct.",
       "lab": "Build a stable-ID choropleth join.",
-      "verification": "Regional summaries do not automatically describe individuals."
+      "verification": "Every feature is matched or explicitly listed as missing."
     },
     {
       "id": "js-064",
@@ -1214,9 +1215,9 @@
         "hit testing",
         "quadtree"
       ],
-      "outcome": "Design an accessible large-scatter interface.",
+      "outcome": "Draw many points on a canvas at the right pixel ratio and hit-test them with a quadtree.",
       "lab": "Draw 100 bounded points and a textual summary.",
-      "verification": "Canvas marks plus keyboard filtering, summary and exact-record access."
+      "verification": "The Canvas is visible and the count is available as text."
     },
     {
       "id": "js-065",
@@ -1233,15 +1234,15 @@
         "cross-filter",
         "single source of truth"
       ],
-      "outcome": "Design a reproducible saved view.",
+      "outcome": "Drive coordinated dashboard views from one state object with pure derivations and explicit denominators.",
       "lab": "Build two coordinated views from one state.",
-      "verification": "Record data identity, filters, units and aggregation policy."
+      "verification": "Bars and summary report the same selected records and total."
     },
     {
       "id": "js-066",
       "title": "D3 capstone: an accessible, tested analytical dashboard",
       "level": "advanced",
-      "minutes": 110,
+      "minutes": 180,
       "prerequisites": [
         "js-065"
       ],
@@ -1252,9 +1253,9 @@
         "data provenance",
         "visual regression"
       ],
-      "outcome": "Defend the finished analysis and its evidence limits.",
+      "outcome": "Build and defend an accessible, tested analytical dashboard with independent checks and stated evidence limits.",
       "lab": "Build a complete accessible dashboard from a blank pad.",
-      "verification": "Explain data grain, cleaning, scales, aggregation, interactions and untested surfaces."
+      "verification": "Controls, marks, text values and summary agree."
     }
   ],
   "sources": [

@@ -9,7 +9,7 @@ def main():
     assert {"pod-a", "foreign-c"} != ready
     ports = {"http": 8080}
     assert ports["http"] == 8080
-    print("k8s-007 synthetic selector,port and endpoint-identity checks passed")
+    print("k8s-007 synthetic selector, port and endpoint-identity checks passed")
 
 
 if __name__ == "__main__":

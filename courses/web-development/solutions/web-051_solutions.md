@@ -1,51 +1,43 @@
 # web-051: explanatory solutions
 
-Compare after your own attempt or an explicit solution reveal. This file explains the supplied deterministic fixtures. It does not claim that a learner or a production deployment passed.
-
-## Why the mechanism works
-
-PDO is a database access interface with drivers for particular engines. The classroom prepares PDO SQLite so examples can use an in-memory database without credentials or network access. PostgreSQL and SQLite differ in types, SQL features and concurrency, so a SQLite pass does not prove PostgreSQL behavior. Revisit the SQL route for relational design and engine-specific queries.
-
-A prepared statement separates the fixed query structure from parameter values. A value containing a quote or SQL-looking text remains a value when bound correctly. Parameters cannot stand in for arbitrary identifiers, keywords or sort directions. Dynamic column selection needs an explicit allowlist that maps a choice to trusted SQL structure. Escaping HTML output is a separate boundary after fetching data.
-
-Create a PDO connection with exception error mode, create a tiny schema and prepare an INSERT. Execute it with a parameter map, then prepare a SELECT using a value predicate. Keep the database handle local to this run. The example's table is disposable in-memory state, not the learner's persistent classroom database.
+Open this after your own attempt. Each answer explains the lesson's synthetic fixtures; it does not show that your work or a deployment passed. The mechanism is explained in `courses/web-development/guides/web-051.md`.
 
 ## Exercise 1: Explain what a prepared value parameter can and cannot replace.
 
-It represents data values, not arbitrary table names, column names or SQL keywords.
+**Expected answer:** It represents data values, not arbitrary table names, column names or SQL keywords.
 
-Trace the smallest example before editing. Name which values are source and which are observations.
+**Why:** A bound parameter is always a value, so it cannot name a table, a column or an SQL keyword.
 
 ## Exercise 2: Insert a title containing an apostrophe.
 
-The stored value round-trips exactly through a bound parameter.
+**Expected evidence:** The stored value round-trips exactly through a bound parameter.
 
-Change only the named feature. Compare with the unchanged example and explain any unaffected behavior.
+**Why:** The driver sends the value separately from the SQL text, so the apostrophe needs no manual escaping.
 
 ## Exercise 3: Build a local PDO note store with prepared insert and lookup.
 
-The expected record is retrieved and SQL-looking text remains data.
+**Expected evidence:** The expected record is retrieved and SQL-looking text remains data.
 
-Sketch the structure or data contract first. Reuse the mechanism from the examples without copying the reference.
+**Why:** Prepared statements keep SQL structure fixed while values vary, so SQL-looking text stays data.
 
 ## Exercise 4: Diagnose concatenating an untrusted sort key into SQL.
 
-Map the choice through an explicit trusted allowlist rather than treating it as a bindable value.
+**Expected answer:** Map the choice through an explicit trusted allowlist rather than treating it as a bindable value.
 
-Keep the failing input. Identify the first layer where the observed result differs from the intended contract.
+**Why:** Identifiers cannot be bound, so an allowlist that maps user choices to fixed column names is the safe boundary.
 
 ## Exercise 5: Test an empty result and an attack-shaped title.
 
-No-match behavior is explicit and the table remains intact after storing the title.
+**Expected evidence:** No-match behavior is explicit and the table remains intact after storing the title.
 
-Predict the boundary before running it. Add an explicit check or manual observation that would detect a regression.
+**Why:** fetch returns false for no row, which must be handled, and the attack-shaped title is stored as plain text.
 
 ## Exercise 6: Explain which checks must be repeated when moving to PostgreSQL.
 
-Driver behavior, schema types, SQL syntax, transactions and concurrency need engine-specific integration evidence.
+**Expected answer:** Driver behavior, schema types, SQL syntax, transactions and concurrency need engine-specific integration evidence.
 
-Explain your choice to someone who has not seen the code. Include one limitation and the evidence needed to remove it.
+**Why:** Types, SQL dialect, isolation levels, locking and connection behavior differ, so PostgreSQL needs its own integration tests.
 
-## Reference comparison and limits
+## Reference comparison
 
-Read the separate executable reference, where supplied, only after retaining your attempt. Compare structure and decisions rather than matching every identifier. A different implementation is acceptable when it satisfies the same behavior, preserves accessibility and rejects the same invalid cases. The checked reference uses tiny synthetic inputs so that each transformation can be inspected. It is not a ready-to-deploy authenticated application. Server lifecycle, persistence, concurrency and security require their own integration evidence.
+Open `courses/web-development/solutions/web-051_solution.php` only after saving your attempt, and compare decisions rather than identifiers. A different implementation is acceptable when it shows the same behavior and rejects the same invalid cases. The reference checks only its named synthetic cases; server lifecycle, persistence, concurrency and security need their own integration evidence.

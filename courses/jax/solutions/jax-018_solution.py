@@ -83,7 +83,7 @@ def main():
         [1.0, 0.5, 0.25],
     )
 
-    print("jax-018" + ": 8 asserted cases passed")
+    print("jax-018: 8 asserted cases passed")
 
 
 if __name__ == "__main__":

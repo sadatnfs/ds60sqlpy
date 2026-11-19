@@ -8,7 +8,7 @@ Use explicit random generators, compare simulation with analytic quantities and 
 
 ## Classroom execution
 
-Choose **Julia language and scientific computing** in `/classroom`, open this unit, and select its prepared `julia` runtime. The worker starts a fresh `main.jl` process with two Julia threads, a fixed package environment, no startup file and offline package settings. Both worked examples are complete under that environment. Save your current pad before replacing it. No package, model or dataset is fetched by a lesson.
+Open `julia-020` in `/classroom` with its prepared `julia` runtime. Worked case A (compare a sample with a known model) and worked case B (probabilities and stable tail calculations) are complete programs: save your current pad, paste one of them and press Run. The learner file contains the six investigations below; the explained reference ends by printing `julia-020: all reference checks passed`. One program in this unit publishes a bounded Plotly figure with its description and exact table. The [course overview](../README.md) describes the shared runtime: a fresh offline `main.jl` process with two threads and a fixed package environment.
 
 ## Randomness needs an explicit role
 
@@ -20,7 +20,7 @@ Monte Carlo error comes from using finitely many draws. For independent draws wi
 
 ## Worked case A: compare a sample with a known model
 
-The first example samples a Normal distribution with mean 2 and standard deviation 3 using an explicit generator. A second generator with the same seed reproduces those draws in this runtime. The program compares the sample mean with the analytic mean using a deliberately broad, stated Monte Carlo bound. It also reports the standard-error scale instead of claiming an exact estimate.
+The first example samples a Normal distribution with mean 2 and standard deviation 3 using an explicit `Xoshiro` generator, the algorithm behind Julia's default random-number generator since Julia 1.7. A second generator with the same seed reproduces those draws in this runtime. `MersenneTwister` remains available when older code must reproduce a stream recorded with it. The program compares the sample mean with the analytic mean using a deliberately broad, stated Monte Carlo bound. It also reports the standard-error scale instead of claiming an exact estimate.
 
 ```julia
 using Test
@@ -31,8 +31,8 @@ using .DS60Plots
 
 function worked_a()
     distribution = Normal(2, 3)
-    first = rand(MersenneTwister(42), distribution, 4000)
-    second = rand(MersenneTwister(42), distribution, 4000)
+    first = rand(Xoshiro(42), distribution, 4000)
+    second = rand(Xoshiro(42), distribution, 4000)
     standard_error = 3 / sqrt(length(first))
     @test first == second
     @test mean(distribution) == 2
@@ -62,7 +62,7 @@ function worked_b()
     @test mean(distribution) == 2
     @test var(distribution) ≈ 1.6
     @test pdf(distribution, 0) ≈ 0.8^10
-    sample = rand(MersenneTwister(7), distribution, 2000)
+    sample = rand(Xoshiro(7), distribution, 2000)
     values = collect(0:10)
     exact = pdf.(distribution, values)
     empirical = [count(==(value), sample) / length(sample) for value in values]
@@ -121,7 +121,7 @@ The examples establish explicit-state sampling, analytic comparisons and bounded
 
 ### 1. State the parameterization
 
-Construct Normal(2,3).
+Construct `Normal(2, 3)`.
 
 **Expected:** The mean is 2 and variance 9.
 
@@ -174,4 +174,4 @@ Compare empirical frequencies with the exact Binomial masses.
 
 ## Study companion
 
-Use the repository learning-companion skill with this lesson ID, your prediction and your actual source/output. Ask for a diagnosis of the first incorrect type, shape, state transition or assumption. Keep observed execution distinct from a timing claim, inferred mathematical result or external deployment.
+A repository-aware assistant with the learning-companion skill can review `julia-020` with you. Give it your prediction for one investigation, your source and the actual output, and ask it to find the first incorrect assumption about Random, Distributions, Monte Carlo, tail probability or Plotly.

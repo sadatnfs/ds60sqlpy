@@ -1,13 +1,23 @@
 #include <stdio.h>
 
 int main(void) {
-  /* Exercise 1: Join one calculation
-     Start a thread squaring input 7 and join it.
-     Expected: The retained result is 49. */
+  /* Exercise 1: Join one calculation: change one input
+     Copy worked example 1 into a scratch pad and change `struct Work work =
+     {.input = 7, .output = 0};` to `struct Work work = {.input = 8, .output =
+     0};`. Before running, predict which CHECK fails and which value it now
+     sees; then run it and restore the original line. Expected: The changed run
+     stops with `Check failed` at the CHECK on `work.output == 49`. Restoring
+     the original line brings back the worked observation: the retained result
+     is 49. */
 
-  /* Exercise 2: Keep separate arguments
-     Start two workers with inputs 2 and 3.
-     Expected: Their independent outputs are 4 and 9. */
+  /* Exercise 2: Keep separate arguments: debug a regression
+     A regression changed one token in worked example 2, so one line now reads
+     `struct Work work[2] = {{3, 0}, {3, 0}};`. Run worked example 2 with that
+     line, use the failing CHECK to locate the defect and repair it without
+     changing the CHECK. Expected: Before the repair the run stops with `Check
+     failed` at the CHECK on `work[0].output == 4 && work[1].output == 9`; after
+     it the line reads `struct Work work[2] = {{2, 0}, {3, 0}};` again and their
+     independent outputs are 4 and 9. */
 
   /* Exercise 3: Retrieve a stable pointer result
      Have the worker return its caller-owned argument pointer.

@@ -14,17 +14,17 @@
   "exercises": [
     {
       "title": "Derive an oracle",
-      "task": "Compute probabilities for[2,5,3] by hand.",
-      "expected": "The result is[0.2,0.5,0.3].",
+      "task": "Compute probabilities for weights `[2, 5, 3]` by hand.",
+      "expected": "The result is `[0.2, 0.5, 0.3]`.",
       "hint": "The total is 10.",
       "answer": "The hand-derived asymmetric case prevents a uniform-output bug from passing."
     },
     {
       "title": "Diagnose overflow",
-      "task": "Explain why direct sum([1e308,1e308]) is dangerous.",
+      "task": "Explain why direct `sum([1e308, 1e308])` is dangerous.",
       "expected": "The sum exceeds Float64 range.",
       "hint": "The desired probabilities are still well-defined.",
-      "answer": "Scaling by the maximum gives[1,1], then divides by 2 without overflowing."
+      "answer": "Scaling by the maximum gives `[1, 1]`, then divides by 2 without overflowing."
     },
     {
       "title": "Test a permutation",

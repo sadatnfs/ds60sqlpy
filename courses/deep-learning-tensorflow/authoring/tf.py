@@ -16,7 +16,7 @@ add(
         ex(
             "Count updates",
             "Partition IDs 1..6 into batches of size two; retain each batch and count one update per batch.",
-            "batches [[1,2],[3,4],[5,6]] and 3 updates.",
+            "batches [[1, 2], [3, 4], [5, 6]] and 3 updates.",
             """ids=list(range(1,7)); batches=[ids[i:i+2] for i in range(0,6,2)]
 assert batches==[[1,2],[3,4],[5,6]]""",
             "The counter measures updates, not observations. Concatenating the three batches recovers the six original identities exactly once. This check detects both an omitted final slice and a loop that increments once per record.",
@@ -24,7 +24,7 @@ assert batches==[[1,2],[3,4],[5,6]]""",
         ex(
             "Retain a remainder",
             "Partition five IDs by two and compare with explicitly dropping the short batch.",
-            "sizes [2,2,1]; dropping retains only IDs1..4.",
+            "sizes [2, 2, 1]; dropping retains only IDs 1..4.",
             """ids=list(range(1,6)); batches=[ids[i:i+2] for i in range(0,5,2)]
 assert list(map(len,batches))==[2,2,1]
 assert sum((b for b in batches if len(b)==2),[])==[1,2,3,4]""",
@@ -32,7 +32,7 @@ assert sum((b for b in batches if len(b)==2),[])==[1,2,3,4]""",
         ),
         ex(
             "Trace weight state",
-            "Implement three batch updates for x=1..6,y=2x,w=0,rate=.01; record the weight before each update.",
+            "Implement three batch updates for x=1..6, y=2x, w=0, rate=0.01; record the weight before each update.",
             "3 finite, nonidentical updated weights.",
             """x=tf.constant([1.,2.,3.,4.,5.,6.]); y=2*x; w=tf.Variable(0.); history=[]
 for i in range(0,6,2):
@@ -45,7 +45,7 @@ assert len(set(history))==3""",
         ex(
             "Compare batch policies",
             "Repeat one epoch with sizes one and three from exactly w=0; compare update counts and endpoint weights.",
-            "6 versus2 steps and different endpoint weights.",
+            "6 versus 2 steps and different endpoint weights.",
             """def train(size):
     w=tf.Variable(0.); steps=0
     for i in range(0,6,size):
@@ -58,7 +58,7 @@ assert (na,nb)==(6,2) and abs(a-b)>1e-6""",
         ),
         ex(
             "Preserve pairs",
-            "Shuffle IDs with permutation [5,0,4,1,3,2] and apply the same permutation to inputs and targets.",
+            "Shuffle IDs with permutation [5, 0, 4, 1, 3, 2] and apply the same permutation to inputs and targets.",
             "Every shuffled target equals twice its paired input.",
             """order=tf.constant([5,0,4,1,3,2]); sx=tf.gather(x,order); sy=tf.gather(y,order)
 np.testing.assert_allclose(sy.numpy(),2*sx.numpy())
@@ -67,8 +67,8 @@ assert not np.allclose(y.numpy(),2*sx.numpy())""",
         ),
         ex(
             "Aggregate unequal batches",
-            "Combine batch mean losses2 and8 with counts2 and 1; compare mean-of-means with the record mean.",
-            "record mean4; unweighted batch mean5.",
+            "Combine batch mean losses 2 and 8 with counts 2 and 1; compare the mean of means with the record mean.",
+            "record mean 4; unweighted batch mean 5.",
             """assert (2*2+8*1)/3==4
 assert (2+8)/2==5""",
             "The correct epoch statistic counts examples. Batch means hide their denominators. Reconstruct sums by multiplying each mean by its batch count, sum those numerators, then divide by total examples.",
@@ -89,8 +89,8 @@ add(
     [
         ex(
             "Partition accounts",
-            "Use account IDs A,A,B,B,C,C,D,D with values1,3,5,7,20,22,30,32; train on A,B.",
-            "train mean4 and validation IDs C,D.",
+            "Use account IDs A, A, B, B, C, C, D, D with values 1, 3, 5, 7, 20, 22, 30, 32; train on A, B.",
+            "train mean 4 and validation IDs C, D.",
             """groups=np.array(list('AABBCCDD')); x=np.array([1.,3.,5.,7.,20.,22.,30.,32.])
 train=np.isin(groups,['A','B']); valid=~train; mean=x[train].mean()
 assert mean==4 and set(groups[valid])=={'C','D'}""",
@@ -98,8 +98,8 @@ assert mean==4 and set(groups[valid])=={'C','D'}""",
         ),
         ex(
             "Expose global fitting",
-            "Change the last validation value to3200 and compare train-only and global means.",
-            "training mean stays4; global mean changes.",
+            "Change the last validation value to 3200 and compare train-only and global means.",
+            "training mean stays 4; global mean changes.",
             """changed=x.copy(); changed[-1]=3200
 assert changed[train].mean()==mean
 assert changed.mean()!=x.mean()""",
@@ -108,15 +108,15 @@ assert changed.mean()!=x.mean()""",
         ex(
             "Find crossing groups",
             "Assign alternating rows to train and validation and inspect intersections.",
-            "A,B,C,D all cross the split.",
+            "A, B, C, D all cross the split.",
             """wrong=np.arange(8)%2==0
 assert set(groups[wrong]) & set(groups[~wrong])==set('ABCD')""",
             "A row split can look balanced while violating the intended unit. Set intersection exposes the repeated accounts; disjoint row indices alone do not prove disjoint entities.",
         ),
         ex(
             "Apply frozen centering",
-            "Center both partitions with training mean4 and compare validation centered values.",
-            "validation values16,18,26,28.",
+            "Center both partitions with training mean 4 and compare validation centered values.",
+            "validation values 16, 18, 26, 28.",
             """np.testing.assert_array_equal(x[valid]-mean,[16,18,26,28])
 assert (x[train]-mean).mean()==0""",
             "Only the training values are guaranteed to have centered mean zero. Forcing validation to mean zero would estimate a new statistic and erase a potentially meaningful distribution shift.",
@@ -133,8 +133,8 @@ assert validation_error>0 and hashlib.sha256(json.dumps(ids).encode()).hexdigest
         ),
         ex(
             "Transfer to unseen accounts",
-            "Add account E with value1000 only to evaluation; specify whether its normalization can update the training mean.",
-            "transformed value996; fitted mean remains4.",
+            "Add account E with value 1000 only to evaluation; specify whether its normalization can update the training mean.",
+            "transformed value 996; fitted mean remains 4.",
             """new_value=1000-mean
 assert new_value==996 and mean==4""",
             "A deployment input is transformed using the fitted state. Updating the mean online is a separate algorithm requiring an explicit policy and new evaluation; it is not a harmless formatting adjustment.",
@@ -145,7 +145,7 @@ assert new_value==996 and mean==4""",
 add(
     "tf-011",
     """Keras packages the same computation that the earlier tape lesson exposed. Dense computes a matrix product and optionally adds a bias. Compile selects the loss and optimizer but does not itself update weights. Training evaluates the forward function, reduces the loss, differentiates and applies the optimizer. To compare a high-level API with the hand-derived update, every relevant choice must match: no intercept, a zero initial weight, mean squared error, full-batch SGD and the same rate. Otherwise a difference may reflect a different model or objective instead of an API bug. Evaluation must be distinguished from a training call because it should not apply gradients.""",
-    """Input(shape=(1,)) excludes the batch dimension. Dense(1,use_bias=False) creates a single trainable scalar kernel. Reshape the three observations to (3,1), matching targets exactly. Compile uses SGD(.1) with loss='mse'. train_on_batch executes one full-batch step without a data-shuffle dependency. get_weights returns NumPy copies useful for comparison. A new model is required for each independent control.""",
+    """Input(shape=(1,)) excludes the batch dimension. Dense(1, use_bias=False) creates a single trainable scalar kernel. Reshape the three observations to (3, 1), matching targets exactly. Compile uses SGD(0.1) with loss='mse'. train_on_batch executes one full-batch step without a data-shuffle dependency. get_weights returns NumPy copies useful for comparison. A new model is required for each independent control. fit(x, y, epochs=1, batch_size=3, shuffle=False, verbose=0) runs the same full-batch step through the standard training loop and returns a History object whose loss entry is the mean loss computed during the epoch, before that epoch's update.""",
     [
         ("Dense", "An affine feature transformation with tracked weights."),
         ("Compile", "Configuration of loss, optimizer and metrics."),
@@ -155,7 +155,7 @@ add(
         ex(
             "Construct a scalar model",
             "Create a zero-initialized single-unit model without bias and inspect its parameter count.",
-            "one parameter and all initial predictions0.",
+            "one parameter and all initial predictions 0.",
             """model=tf.keras.Sequential([tf.keras.Input(shape=(1,)),tf.keras.layers.Dense(1,use_bias=False,kernel_initializer='zeros')])
 x=np.array([[1.],[2.],[3.]],dtype='float32'); y=2*x
 assert model.count_params()==1
@@ -164,8 +164,8 @@ np.testing.assert_array_equal(model(x).numpy(),np.zeros((3,1)))""",
         ),
         ex(
             "Audit the first update",
-            "Compile with mean squared error and SGD(.1), then call train_on_batch once.",
-            "kernel28/15 and post-update loss56/675 within1e-6.",
+            "Compile with mean squared error and SGD(0.1), then call train_on_batch once.",
+            "kernel 28/15 and post-update loss 56/675 within 1e-6.",
             """model.compile(optimizer=tf.keras.optimizers.SGD(.1),loss='mse')
 model.train_on_batch(x,y)
 np.testing.assert_allclose(model.get_weights()[0],[[28/15]],atol=1e-6,rtol=0)
@@ -174,8 +174,8 @@ np.testing.assert_allclose(np.mean((model(x).numpy()-y)**2),56/675,atol=1e-6,rto
         ),
         ex(
             "Inspect forward shape",
-            "Pass two observations [[4],[5]] through the trained model and inspect output axes.",
-            "shape(2,1), predictions112/15 and28/3.",
+            "Pass two observations [[4], [5]] through the trained model and inspect output axes.",
+            "shape (2, 1), predictions 112/15 and 28/3.",
             """pred=model(np.array([[4.],[5.]],dtype='float32')).numpy()
 assert pred.shape==(2,1)
 np.testing.assert_allclose(pred[:,0],[112/15,28/3],atol=1e-6,rtol=0)""",
@@ -192,7 +192,7 @@ np.testing.assert_array_equal(before,model.get_weights()[0])""",
         ex(
             "Show the extra intercept",
             "Construct an otherwise equivalent Dense layer with bias enabled and count trainable scalars.",
-            "2 parameters; bias starts0.",
+            "2 parameters; bias starts 0.",
             """with_bias=tf.keras.Sequential([tf.keras.Input(shape=(1,)),tf.keras.layers.Dense(1,kernel_initializer='zeros',bias_initializer='zeros')])
 assert with_bias.count_params()==2
 np.testing.assert_array_equal(with_bias.get_weights()[1],[0])""",
@@ -201,7 +201,7 @@ np.testing.assert_array_equal(with_bias.get_weights()[1],[0])""",
         ex(
             "Compare the scalar oracle",
             "Compute the first gradient directly from NumPy residuals and inputs, without Keras.",
-            "gradient-56/3 and update28/15.",
+            "gradient -56/3 and update 28/15.",
             """grad=2*np.mean((0*x-y)*x)
 np.testing.assert_allclose(grad,-56/3,atol=1e-6,rtol=0)
 np.testing.assert_allclose(-.1*grad,28/15,atol=1e-6,rtol=0)""",
@@ -226,8 +226,8 @@ add(
     [
         ex(
             "Freeze six records",
-            "Create the three-feature fixture below, assign IDs0..3 to train and 4..5 to holdout, and calculate targets.",
-            "targets[0,2,-1,1,2,4], disjoint IDs.",
+            "Create the three-feature fixture below, assign IDs 0..3 to train and 4..5 to holdout, and calculate targets.",
+            "targets [0, 2, -1, 1, 2, 4], disjoint IDs.",
             """x=np.array([[0,0,0],[1,0,0],[0,1,0],[0,0,1],[1,1,1],[2,1,1]],dtype='float32'); y=x@np.array([[2.],[-1.],[1.]],dtype='float32')
 train=[0,1,2,3]; test=[4,5]
 assert not set(train)&set(test)
@@ -237,14 +237,14 @@ np.testing.assert_array_equal(y[:,0],[0,2,-1,1,2,4])""",
         ex(
             "Measure the baseline",
             "Use the training mean to predict both held-out targets and compute squared error.",
-            "training mean.5; holdout MSE7.25.",
+            "training mean 0.5; holdout MSE 7.25.",
             """mean=float(y[train].mean()); baseline=float(np.mean((y[test]-mean)**2))
 assert mean==.5 and baseline==7.25""",
             "Using the held-out mean would give the baseline access to assessment targets. Both the baseline and learned model must be evaluated on identical held-out IDs to support comparison.",
         ),
         ex(
             "Train a bounded model",
-            "Initialize a three-by-one kernel at zero and make exactly100 full-training SGD updates at rate 0.1.",
+            "Initialize a three-by-one kernel at zero and make exactly 100 full-training SGD updates at rate 0.1.",
             "100 updates; finite weights; training error below its initial value.",
             """w=tf.Variable(tf.zeros((3,1))); tx=tf.constant(x[train]); ty=tf.constant(y[train]); initial=float(tf.reduce_mean(ty**2))
 for step in range(100):
@@ -256,8 +256,8 @@ assert step+1==100 and train_error<initial and np.isfinite(w.numpy()).all()""",
         ),
         ex(
             "Open the holdout once",
-            "Compute held-out MSE after the fixed100 updates and compare it with the frozen baseline.",
-            "holdout error below7.25 on the two supplied records.",
+            "Compute held-out MSE after the fixed 100 updates and compare it with the frozen baseline.",
+            "holdout error below 7.25 on the two supplied records.",
             """test_error=float(np.mean((x[test]@w.numpy()-y[test])**2))
 assert test_error<baseline
 report={'train_mse':train_error,'test_mse':test_error,'test_count':2,'steps':100}
@@ -266,8 +266,8 @@ assert report['test_count']==2""",
         ),
         ex(
             "Preserve arithmetic evidence",
-            "Derive a one-feature pilot update from x = [1, 2, 3] and target2x at w = 0,rate 0.1.",
-            "weight28/15 and loss56/675.",
+            "Derive a one-feature pilot update from x = [1, 2, 3] and target 2x at w = 0, rate 0.1.",
+            "weight 28/15 and loss 56/675.",
             """pilot=np.array([1.,2.,3.]); gradient=2*np.mean((-2*pilot)*pilot); updated=-.1*gradient
 np.testing.assert_allclose([updated,np.mean((updated*pilot-2*pilot)**2)],[28/15,56/675],atol=1e-12,rtol=0)""",
             "A scalar diagnostic is a separate implementation check, not an alternative score for the three-feature model. Keeping both prevents an impressive-looking fit from concealing a broken update.",
@@ -275,7 +275,7 @@ np.testing.assert_allclose([updated,np.mean((updated*pilot-2*pilot)**2)],[28/15,
         ex(
             "Reject a false conclusion",
             "Construct a report containing split IDs, errors, step count and limitations; refuse a production-quality claim from two holdout rows.",
-            "report names2 holdout records and makes no population guarantee.",
+            "report names 2 holdout records and makes no population guarantee.",
             """report.update(train_ids=train,test_ids=test,limitation='Two synthetic holdout rows do not establish population reliability.')
 assert report['test_ids']==[4,5] and 'do not establish' in report['limitation']""",
             "A reproducible experiment may still be too small for the intended decision. The correct result can be a limited demonstration with explicit next evidence, rather than an unsupported release recommendation.",
@@ -296,8 +296,8 @@ add(
     [
         ex(
             "Convert scores",
-            "Convert logits[-2,0,2] into probabilities and inspect the central value.",
-            "middle probability.5; probabilities increase.",
+            "Convert logits [-2, 0, 2] into probabilities and inspect the central value.",
+            "middle probability 0.5; probabilities increase.",
             """z=tf.constant([-2.,0.,2.]); p=tf.math.sigmoid(z).numpy()
 assert p[1]==.5 and np.all(np.diff(p)>0)""",
             "The sigmoid is monotonic, so ordering survives. A score of zero lies at the probability midpoint, which makes it a useful exact boundary fixture.",
@@ -305,42 +305,42 @@ assert p[1]==.5 and np.all(np.diff(p)>0)""",
         ex(
             "Check the midpoint loss",
             "Calculate positive-label binary cross entropy at zero logit.",
-            "loss log(2) within1e-6.",
+            "loss log(2) within 1e-6.",
             """loss=tf.nn.sigmoid_cross_entropy_with_logits(labels=tf.constant([1.]),logits=tf.constant([0.]))
 np.testing.assert_allclose(loss.numpy(),[np.log(2)],atol=1e-6,rtol=0)""",
             "A fifty-fifty prediction assigns probability one half to either outcome. Its negative logarithm provides an independent reference that does not depend on a trained model.",
         ),
         ex(
             "Move the threshold",
-            "Compare decisions at thresholds.5 and.8 with >= ties.",
-            "decisions[False,True,True] versus[False,False,True].",
+            "Compare decisions at thresholds 0.5 and 0.8, counting a probability equal to the threshold as positive.",
+            "decisions [False, True, True] versus [False, False, True].",
             """assert (p>=.5).tolist()==[False,True,True]
 assert (p>=.8).tolist()==[False,False,True]""",
             "Only the middle decision changes. Save scores independently from decisions so threshold exploration does not look like a second model fitting operation.",
         ),
         ex(
             "Expose a convention mismatch",
-            "Treat probability.5 as if it were a logit and compare the positive-label loss with log2.",
-            "wrong loss differs from log2 by more than.1.",
+            "Treat probability 0.5 as if it were a logit and compare the positive-label loss with log 2.",
+            "wrong loss differs from log 2 by more than 0.1.",
             """wrong=float(tf.nn.sigmoid_cross_entropy_with_logits(labels=tf.constant(1.),logits=tf.constant(.5)))
 assert abs(wrong-np.log(2))>.1""",
             "The mistaken argument is interpreted as a score favoring the positive class. The API cannot infer that the caller intended a probability; explicit naming and shape contracts are necessary.",
         ),
         ex(
             "Stress large scores",
-            "Calculate losses for logits 1000,-1000 with labels1,0 using the logits-aware form.",
-            "both finite losses approximately0.",
+            "Calculate losses for logits 1000, -1000 with labels 1, 0 using the logits-aware form.",
+            "both finite losses approximately 0.",
             """stable=tf.nn.sigmoid_cross_entropy_with_logits(labels=tf.constant([1.,0.]),logits=tf.constant([1000.,-1000.])).numpy()
 assert np.isfinite(stable).all(); np.testing.assert_allclose(stable,[0,0],atol=1e-6,rtol=0)""",
             "A naive log(sigmoid()) path can lose precision at extreme probabilities. The stable form handles the algebra before exponentiation creates overflow or logarithms receive rounded zero.",
         ),
         ex(
             "Count decisions separately",
-            "For labels[0,1,1], count errors under the two thresholds.",
-            "0 errors at.5 and 1 at.8 on this fixture.",
+            "For labels [0, 1, 1], count errors under the two thresholds.",
+            "0 errors at 0.5 and 1 at 0.8 on this fixture.",
             """labels=np.array([0,1,1]); assert np.count_nonzero((p>=.5)!=labels)==0
 assert np.count_nonzero((p>=.8)!=labels)==1""",
-            "This count is a decision metric. It does not replace the probability loss and cannot show that threshold .5 is optimal for a different cost structure or population.",
+            "This count is a decision metric. It does not replace the probability loss and cannot show that threshold 0.5 is optimal for a different cost structure or population.",
         ),
     ],
     TF,
@@ -348,8 +348,8 @@ assert np.count_nonzero((p>=.8)!=labels)==1""",
 )
 add(
     "tf-014",
-    """Multiclass and multilabel prediction answer different questions. In a multiclass task exactly one class is chosen, so a softmax distributes one unit of probability across mutually exclusive outcomes. In a multilabel task several labels may hold at once, so each label gets its own binary decision. A tensor with three outputs does not by itself tell you which task is intended. The target contract determines the activation, loss and denominator. Integer sparse targets name one class index; a vector such as [1,0,1] names two independently present labels. Converting one task into the other changes the meaning of the data.""",
-    """Sparse categorical cross entropy takes class indices with shape(batch,), alongside logits shaped(batch,classes). Sigmoid cross entropy instead takes a binary matrix matching logits. Softmax reduces across the class axis. Explicitly check which axes a loss function reduces before comparing mean losses, particularly when multilabel losses are averaged across both labels and examples.""",
+    """Multiclass and multilabel prediction answer different questions. In a multiclass task exactly one class is chosen, so a softmax distributes one unit of probability across mutually exclusive outcomes. In a multilabel task several labels may hold at once, so each label gets its own binary decision. A tensor with three outputs does not by itself tell you which task is intended. The target contract determines the activation, loss and denominator. Integer sparse targets name one class index; a vector such as [1, 0, 1] names two independently present labels. Converting one task into the other changes the meaning of the data.""",
+    """Sparse categorical cross entropy takes class indices with shape(batch,), alongside logits shaped(batch, classes). Sigmoid cross entropy instead takes a binary matrix matching logits. Softmax reduces across the class axis. Explicitly check which axes a loss function reduces before comparing mean losses, particularly when multilabel losses are averaged across both labels and examples.""",
     [
         ("Multiclass", "One outcome among mutually exclusive categories."),
         ("Multilabel", "Independent binary outcomes that may coexist."),
@@ -358,16 +358,16 @@ add(
     [
         ex(
             "Uniform class uncertainty",
-            "Compute sparse cross entropy for target1 and three zero logits.",
+            "Compute sparse cross entropy for target 1 and three zero logits.",
             "loss log(3).",
             """logits=tf.zeros((1,3)); loss=tf.nn.sparse_softmax_cross_entropy_with_logits(labels=[1],logits=logits)
 np.testing.assert_allclose(loss.numpy(),[np.log(3)],atol=1e-6,rtol=0)""",
-            "Three equal scores create a uniform distribution. The target probability is one third, so the negative log likelihood is log3, independent of which class index is chosen.",
+            "Three equal scores create a uniform distribution. The target probability is one third, so the negative log likelihood is log 3, independent of which class index is chosen.",
         ),
         ex(
             "Independent labels",
-            "Calculate sigmoid probabilities for three zero logits and labels[1,0,1].",
-            "three probabilities.5 with total1.5.",
+            "Calculate sigmoid probabilities for three zero logits and labels [1, 0, 1].",
+            "three probabilities 0.5 with total 1.5.",
             """probs=tf.math.sigmoid(logits).numpy()
 np.testing.assert_array_equal(probs,[[.5,.5,.5]])
 assert probs.sum()==1.5""",
@@ -375,16 +375,16 @@ assert probs.sum()==1.5""",
         ),
         ex(
             "Contrast target shapes",
-            "Build sparse targets[2,0] and multilabel targets[[1,0,1],[0,1,0]].",
-            "shapes(2,) and(2,3).",
+            "Build sparse targets [2, 0] and multilabel targets [[1, 0, 1], [0, 1, 0]].",
+            "shapes (2,) and (2, 3).",
             """sparse=np.array([2,0],dtype=np.int32); multi=np.array([[1,0,1],[0,1,0]],dtype=np.float32)
 assert sparse.shape==(2,) and multi.shape==(2,3)""",
             "A class index is a category identity, not a magnitude. The multilabel row contains three observations of presence. Keeping these shapes explicit prevents unintended broadcasting.",
         ),
         ex(
             "Verify softmax mass",
-            "Apply softmax to[[2,0,-2]] and compare its sum with sigmoid output.",
-            "softmax sum1; sigmoid sum1.5.",
+            "Apply softmax to [[2, 0, -2]] and compare its sum with sigmoid output.",
+            "softmax sum 1; sigmoid sum 1.5.",
             """z=tf.constant([[2.,0.,-2.]])
 np.testing.assert_allclose(tf.nn.softmax(z).numpy().sum(),1,atol=1e-6,rtol=0)
 np.testing.assert_allclose(tf.math.sigmoid(z).numpy().sum(),1.5,atol=1e-6,rtol=0)""",
@@ -393,7 +393,7 @@ np.testing.assert_allclose(tf.math.sigmoid(z).numpy().sum(),1.5,atol=1e-6,rtol=0
         ex(
             "Choose the denominator",
             "Compute binary cross entropy for two three-label rows of zero logits; compare sum with entry mean.",
-            "sum6log2; meanlog2.",
+            "sum 6 log 2; mean log 2.",
             """losses=tf.nn.sigmoid_cross_entropy_with_logits(labels=tf.constant(multi),logits=tf.zeros((2,3))).numpy()
 np.testing.assert_allclose([losses.sum(),losses.mean()],[6*np.log(2),np.log(2)],atol=1e-6,rtol=0)""",
             "There are six binary entries but only two records. A mean per record of summed labels differs from a mean per binary entry by three. State the intended objective instead of comparing unlabelled loss numbers.",
@@ -401,7 +401,7 @@ np.testing.assert_allclose([losses.sum(),losses.mean()],[6*np.log(2),np.log(2)],
         ex(
             "Reject an impossible class",
             "Validate a sparse class index before lookup in a three-class vocabulary.",
-            "index3 is outside legal indices0,1,2.",
+            "index 3 is outside legal indices 0, 1, 2.",
             """def validate_class(value):
     if not isinstance(value,int) or isinstance(value,bool) or not 0<=value<3: raise ValueError('class index')
     return value
@@ -418,7 +418,7 @@ else: raise AssertionError('accepted unknown class')""",
 add(
     "tf-015",
     """A data pipeline is part of the statistical experiment. It determines which records arrive, in what order, under which transformation and how many times. tf.data represents that sequence lazily. Constructing a Dataset is not evidence that its elements were visited. Carry record IDs through transformations so cardinality and pairing remain inspectable. A training-derived mean can be applied during mapping, but validation records must not participate in estimating it. Batching creates a new leading axis, and prefetch overlaps preparation with consumption without changing the desired order. This tiny pipeline uses literal arrays and no file or network side effects.""",
-    """from_tensor_slices slices the leading axis of each tuple component together. map receives one ID and one value; arithmetic can use a frozen scalar mean. batch(2,drop_remainder=False) retains the final singleton. as_numpy_iterator materializes values for small teaching assertions, not an approach for collecting an unbounded production dataset. prefetch(1) limits the look-ahead buffer.""",
+    """from_tensor_slices slices the leading axis of each tuple component together. map receives one ID and one value; arithmetic can use a frozen scalar mean. batch (2, drop_remainder=False) retains the final singleton. as_numpy_iterator materializes values for small teaching assertions, not an approach for collecting an unbounded production dataset. prefetch(1) limits the look-ahead buffer. shuffle(5, seed=7, reshuffle_each_iteration=False) draws from a five-record buffer, so it can reorder the whole fixture; the seed fixes that order and reshuffle_each_iteration=False repeats it on every traversal.""",
     [
         ("Cardinality", "Number of dataset elements at a specific pipeline stage."),
         ("Map", "A transformation applied to each element."),
@@ -427,8 +427,8 @@ add(
     [
         ex(
             "Observe batches",
-            "Build a dataset from IDs0..4 and values1..5, then batch by2.",
-            "batch sizes[2,2,1].",
+            "Build a dataset from IDs 0..4 and values 1..5, then batch by 2.",
+            "batch sizes [2, 2, 1].",
             """ds=tf.data.Dataset.from_tensor_slices((np.arange(5),np.arange(1,6,dtype='float32')))
 batches=list(ds.batch(2).as_numpy_iterator())
 assert [len(ids) for ids,values in batches]==[2,2,1]""",
@@ -436,17 +436,17 @@ assert [len(ids) for ids,values in batches]==[2,2,1]""",
         ),
         ex(
             "Apply training statistics",
-            "Use values1,2,3 to fit mean 2, then transform all five values without refitting.",
-            "centered values[-1,0,1,2,3].",
+            "Use values 1, 2, 3 to fit mean 2, then transform all five values without refitting.",
+            "centered values [-1, 0, 1, 2, 3].",
             """mean=np.mean([1.,2.,3.]); centered=ds.map(lambda i,v:(i,v-tf.cast(mean,tf.float32)))
 values=np.array([float(v) for i,v in centered.as_numpy_iterator()])
 np.testing.assert_array_equal(values,[-1,0,1,2,3])""",
-            "The held-out values4 and5 are transformed with the same mean. Their transformed average is not zero, which is expected when a frozen training transformation meets a different subset.",
+            "The held-out values 4 and 5 are transformed with the same mean. Their transformed average is not zero, which is expected when a frozen training transformation meets a different subset.",
         ),
         ex(
             "Retain IDs through mapping",
-            "Reassemble the IDs after centering, batching and prefetch1.",
-            "IDs0,1,2,3,4 in order.",
+            "Reassemble the IDs after centering, batching and prefetch 1.",
+            "IDs 0, 1, 2, 3, 4 in order.",
             """got=np.concatenate([i for i,v in centered.batch(2).prefetch(1).as_numpy_iterator()])
 np.testing.assert_array_equal(got,np.arange(5))""",
             "Value-only comparisons cannot detect reordered or duplicated observations when values repeat. IDs provide an independent conservation check across the pipeline.",
@@ -454,7 +454,7 @@ np.testing.assert_array_equal(got,np.arange(5))""",
         ex(
             "Compare explicit dropping",
             "Use drop_remainder=True and report which record disappears.",
-            "sizes[2,2]; ID4 absent.",
+            "sizes [2, 2]; ID 4 absent.",
             """dropped=list(ds.batch(2,drop_remainder=True).as_numpy_iterator())
 assert [len(i) for i,v in dropped]==[2,2]
 assert np.concatenate([i for i,v in dropped]).tolist()==[0,1,2,3]""",
@@ -472,7 +472,7 @@ assert a==b==[(0,1.),(1,2.),(2,3.),(3,4.),(4,5.)]""",
         ),
         ex(
             "Check paired transformation",
-            "Scale values by2 and preserve IDs, then verify the value relation2*(ID+1).",
+            "Scale values by 2 and preserve IDs, then verify the value relation 2*(ID+1).",
             "all five pairs satisfy the relation.",
             """scaled=ds.map(lambda i,v:(i,2*v))
 assert all(float(v)==2*(int(i)+1) for i,v in scaled.as_numpy_iterator())""",
@@ -485,17 +485,17 @@ assert all(float(v)==2*(int(i)+1) for i,v in scaled.as_numpy_iterator())""",
 add(
     "tf-016",
     """Stacking affine layers without an intervening nonlinearity still produces an affine function. XOR asks for opposite labels at the diagonally opposite corners of a square, a pattern one affine threshold cannot separate. Two rectified differences create the needed representation: h1=max(x1-x2,0), h2=max(x2-x1,0). Their sum is one exactly when the inputs differ. This hand-built network separates representational capacity from optimization. If the construction works but a fitted model does not, the architecture may be capable while the training procedure failed. Initialization changes the starting state and symmetry of fitting; it cannot repair an architecture that lacks the required function.""",
-    """A Dense transform computes X@W. The chosen columns of W form x1-x2 and x2-x1. ReLU applies max(z,0) independently, then reduce_sum combines the hidden units. Before fitting, evaluate all four binary inputs. The affine contradiction comes from summing inequalities at the two positive and two negative corners, so it does not depend on testing many random initializations.""",
+    """A Dense transform computes X@W. The chosen columns of W form x1-x2 and x2-x1. ReLU applies max(z, 0) independently, then reduce_sum combines the hidden units. Before fitting, evaluate all four binary inputs. The affine contradiction comes from summing inequalities at the two positive and two negative corners, so it does not depend on testing many random initializations.""",
     [
         ("Nonlinearity", "A transformation that cannot be represented by a single affine map."),
-        ("ReLU", "The rectified linear function max(z,0)."),
+        ("ReLU", "The rectified linear function max(z, 0)."),
         ("Capacity", "The set of functions a model architecture can represent."),
     ],
     [
         ex(
             "Construct XOR",
-            "Evaluate two rectified differences on inputs(0,0),(0,1),(1,0),(1,1).",
-            "outputs[0,1,1,0].",
+            "Evaluate two rectified differences on inputs (0, 0), (0, 1), (1, 0), (1, 1).",
+            "outputs [0, 1, 1, 0].",
             """x=tf.constant([[0.,0.],[0.,1.],[1.,0.],[1.,1.]])
 w=tf.constant([[1.,-1.],[-1.,1.]])
 h=tf.nn.relu(x@w); output=tf.reduce_sum(h,axis=1)
@@ -505,22 +505,22 @@ np.testing.assert_array_equal(output.numpy(),[0,1,1,0])""",
         ex(
             "Remove the nonlinearity",
             "Sum the two raw difference columns before applying a threshold.",
-            "all four sums0.",
+            "all four sums 0.",
             """np.testing.assert_array_equal(tf.reduce_sum(x@w,axis=1).numpy(),[0,0,0,0])""",
             "The columns cancel exactly. The ReLU was the step that prevented the positive and negative differences from cancelling, rather than merely adding an extra layer name.",
         ),
         ex(
             "Compose affine matrices",
             "Multiply two fixed matrices and verify that a two-layer linear computation equals one matrix product.",
-            "two paths agree within1e-6.",
+            "two paths agree within 1e-6.",
             """a=tf.constant([[1.,2.],[3.,4.]]); b=tf.constant([[2.],[-1.]])
 np.testing.assert_allclose(((x@a)@b).numpy(),(x@(a@b)).numpy(),atol=1e-6,rtol=0)""",
             "Associativity collapses linear layers. Bias terms can also be combined, so adding affine depth alone does not overcome the XOR separation problem.",
         ),
         ex(
             "Inspect a dead region",
-            "Evaluate ReLU and its tape gradient at-2 and+2.",
-            "values[0,2], gradients[0,1].",
+            "Evaluate ReLU and its tape gradient at -2 and+2.",
+            "values [0, 2], gradients [0, 1].",
             """z=tf.Variable([-2.,2.])
 with tf.GradientTape() as tape: total=tf.reduce_sum(tf.nn.relu(z))
 np.testing.assert_array_equal(tf.nn.relu(z).numpy(),[0,2]); np.testing.assert_array_equal(tape.gradient(total,z).numpy(),[0,1])""",
@@ -536,8 +536,8 @@ features=tf.nn.relu(x@same).numpy(); np.testing.assert_array_equal(features[:,0]
         ),
         ex(
             "Transfer outside the corners",
-            "Evaluate the fixed construction at(.2,.8) and(.8,.2), and state what it computes away from binary inputs.",
-            "both outputs.6; function is absolute difference.",
+            "Evaluate the fixed construction at (0.2, 0.8) and (0.8, 0.2), and state what it computes away from binary inputs.",
+            "both outputs 0.6; function is absolute difference.",
             """q=tf.constant([[.2,.8],[.8,.2]])
 np.testing.assert_allclose(tf.reduce_sum(tf.nn.relu(q@w),axis=1).numpy(),[.6,.6],atol=1e-6,rtol=0)""",
             "The exact network computes absolute difference on continuous inputs. Calling it XOR outside the binary domain would conceal an assumption about the input space.",
@@ -549,7 +549,7 @@ np.testing.assert_allclose(tf.reduce_sum(tf.nn.relu(q@w),axis=1).numpy(),[.6,.6]
 add(
     "tf-017",
     """Regularization changes the training objective or the training computation. An L1 penalty sums absolute weights; an L2 penalty here sums squared weights, with its coefficient declared separately. These quantities differ from data loss and have different scaling. Dropout randomly removes activations during training while rescaling retained values; evaluation normally uses the unmodified activations. A random training call should be tested through invariants such as allowed output values and shape, not a hardcoded random bit pattern across platforms. Evaluation behavior should be deterministic for this isolated layer. None of these mechanisms automatically proves improved generalization.""",
-    """reduce_sum(abs(w)) and reduce_sum(square(w)) implement the declared penalty conventions. Add lambda*penalty to data loss only when that is the intended objective. Dropout(rate=.5) with training=True maps each unit input to0 or2. training=False returns the input. Keras regularizer conventions and optimizer weight decay should be checked explicitly instead of being assumed interchangeable.""",
+    """reduce_sum(abs(w)) and reduce_sum(square(w)) implement the declared penalty conventions. Add lambda*penalty to data loss only when that is the intended objective. Dropout(rate=0.5) with training=True maps each unit input to 0 or 2. training=False returns the input. Keras regularizer conventions and optimizer weight decay should be checked explicitly instead of being assumed interchangeable.""",
     [
         ("Penalty", "A parameter-dependent term added to an objective."),
         ("Dropout", "A stochastic training transformation that zeroes activations."),
@@ -558,15 +558,15 @@ add(
     [
         ex(
             "Calculate penalties",
-            "Compute L1 and squared L2 sums for weights[1,-2].",
-            "L1=3; squaredL2=5.",
+            "Compute L1 and squared L2 sums for weights [1, -2].",
+            "L1=3; squared L2=5.",
             """w=tf.constant([1.,-2.]); l1=float(tf.reduce_sum(tf.abs(w))); l2=float(tf.reduce_sum(w*w))
 assert (l1,l2)==(3.,5.)""",
             "The name L2 can mean a norm or a squared penalty in different contexts. This exercise explicitly uses the sum of squares, avoiding an unexplained square root or half factor.",
         ),
         ex(
             "Switch dropout to evaluation",
-            "Apply dropout.5 twice to ones with training=False.",
+            "Apply dropout 0.5 twice to ones with training=False.",
             "both outputs equal the input.",
             """layer=tf.keras.layers.Dropout(.5); x=tf.ones((4,8)); a=layer(x,training=False); b=layer(x,training=False)
 np.testing.assert_array_equal(a.numpy(),x.numpy()); np.testing.assert_array_equal(b.numpy(),x.numpy())""",
@@ -575,32 +575,32 @@ np.testing.assert_array_equal(a.numpy(),x.numpy()); np.testing.assert_array_equa
         ex(
             "Inspect training invariants",
             "Call the same dropout layer with training=True and examine allowed output values.",
-            "shape(4,8), values only0 or2.",
+            "shape (4, 8), values only 0 or 2.",
             """train=layer(x,training=True).numpy()
 assert train.shape==(4,8) and set(np.unique(train))<={0.,2.}""",
             "The retained activations are scaled to keep their expectation unchanged. A finite fixture may coincidentally keep or drop many values; requiring an exact mask would overconstrain the test.",
         ),
         ex(
             "Separate objective terms",
-            "Combine data loss2 with coefficient.1 times squaredL2 and report both components.",
-            "data2, penalty.5, total2.5.",
+            "Combine data loss 2 with coefficient 0.1 times squared L2 and report both components.",
+            "data 2, penalty 0.5, total 2.5.",
             """data_loss=2.; coefficient=.1; penalty=coefficient*l2
 assert penalty==.5 and data_loss+penalty==2.5""",
             "Logging only the total makes it hard to distinguish predictive error from a changing regularization cost. The coefficient is part of the objective definition.",
         ),
         ex(
             "Differentiate the penalty",
-            "Differentiate.1*sum(w²) at[1,-2].",
-            "gradient[.2,-.4].",
+            "Differentiate 0.1*sum(w²) at [1, -2].",
+            "gradient [0.2, -0.4].",
             """v=tf.Variable([1.,-2.])
 with tf.GradientTape() as tape: penalty=.1*tf.reduce_sum(v*v)
 np.testing.assert_allclose(tape.gradient(penalty,v).numpy(),[.2,-.4],atol=1e-6,rtol=0)""",
-            "The derivative is2*lambda*w under the stated convention. A half-scaled penalty would have a different gradient, so a coefficient cannot be copied blindly between definitions.",
+            "The derivative is 2*lambda*w under the stated convention. A half-scaled penalty would have a different gradient, so a coefficient cannot be copied blindly between definitions.",
         ),
         ex(
             "Scale weights deliberately",
             "Double both weights and compare the new penalties with the original values.",
-            "L1 doubles to6; squaredL2 quadruples to20.",
+            "L1 doubles to 6; squared L2 quadruples to 20.",
             """assert float(tf.reduce_sum(tf.abs(2*w)))==6
 assert float(tf.reduce_sum((2*w)**2))==20""",
             "The different scaling explains why the penalties discourage large coefficients differently. This arithmetic does not establish which choice will work better on an unseen dataset.",
@@ -614,7 +614,7 @@ import tf018
 add(
     "tf-019",
     """Convolutional layers reuse a small kernel at many positions. Each output sees a local patch, so the kernel has fewer parameters than an unconstrained map from every input pixel to every output pixel. TensorFlow applies cross-correlation: it slides the kernel without rotating it. A mathematical convolution would reverse spatial axes. Channels and batches add axes but do not change the basic local dot product. VALID padding includes only patches entirely inside the image; SAME padding inserts boundary values under a defined convention. The output shape depends on input size, kernel size, stride and padding, not on the apparent visual size of a plotted image.""",
-    """tf.nn.conv2d expects image shape(batch,height,width,channels) and filter shape(height,width,input_channels,output_channels). A3x3 single-channel image and2x2 kernel with stride1 and VALID padding produce shape(1,2,2,1). The first result is1-5=-4. Rotating the kernel changes that sign. Keep the batch/channel singleton axes visible when checking shapes.""",
+    """tf.nn.conv2d expects image shape(batch, height, width, channels) and filter shape(height, width, input_channels, output_channels). A 3x3 single-channel image and 2x2 kernel with stride 1 and VALID padding produce shape (1, 2, 2, 1). The first result is 1-5=-4. Rotating the kernel changes that sign. Keep the batch/channel singleton axes visible when checking shapes.""",
     [
         ("Kernel", "Shared weights applied to each local patch."),
         ("Stride", "Distance between adjacent kernel positions."),
@@ -623,8 +623,8 @@ add(
     [
         ex(
             "Compute local differences",
-            "Apply kernel[[1,0],[0,-1]] to the image1..9 arranged3x3.",
-            "all four outputs-4.",
+            "Apply kernel [[1, 0], [0, -1]] to the image 1..9 arranged 3x3.",
+            "all four outputs -4.",
             """image=tf.reshape(tf.range(1,10,dtype=tf.float32),(1,3,3,1)); kernel=tf.reshape(tf.constant([1.,0.,0.,-1.]),(2,2,1,1))
 out=tf.nn.conv2d(image,kernel,strides=1,padding='VALID')
 np.testing.assert_array_equal(out.numpy().reshape(2,2),np.full((2,2),-4))""",
@@ -640,16 +640,16 @@ np.testing.assert_array_equal(changed.numpy().reshape(2,2),np.full((2,2),4))""",
         ),
         ex(
             "Count output positions",
-            "Compare VALID stride1 and stride2.",
-            "shapes(1,2,2,1) and(1,1,1,1).",
+            "Compare VALID stride 1 and stride 2.",
+            "shapes (1, 2, 2, 1) and (1, 1, 1, 1).",
             """assert tuple(out.shape)==(1,2,2,1)
 assert tuple(tf.nn.conv2d(image,kernel,strides=2,padding='VALID').shape)==(1,1,1,1)""",
             "A larger stride visits fewer legal patch starts. Shape arithmetic is a useful first check before interpreting any learned filter values.",
         ),
         ex(
             "Trace one pixel influence",
-            "Add10 to the top-left image pixel and inspect which output changes.",
-            "only output[0,0] increases10.",
+            "Add 10 to the top-left image pixel and inspect which output changes.",
+            "only output [0, 0] increases 10.",
             """changed_image=image.numpy().copy(); changed_image[0,0,0,0]+=10
 delta=tf.nn.conv2d(changed_image,kernel,strides=1,padding='VALID').numpy()-out.numpy()
 np.testing.assert_array_equal(delta.reshape(2,2),[[10,0],[0,0]])""",
@@ -657,7 +657,7 @@ np.testing.assert_array_equal(delta.reshape(2,2),[[10,0],[0,0]])""",
         ),
         ex(
             "Count shared parameters",
-            "Construct a bias-free Conv2D layer with2 filters of size2x2 on one input channel.",
+            "Construct a bias-free Conv2D layer with 2 filters of size 2x2 on one input channel.",
             "8 trainable scalars regardless of image height.",
             """layer=tf.keras.layers.Conv2D(2,2,use_bias=False); layer(image)
 assert layer.count_params()==8""",
@@ -665,7 +665,7 @@ assert layer.count_params()==8""",
         ),
         ex(
             "Add a constant image offset",
-            "Add100 to every pixel and compare outputs under the zero-sum kernel.",
+            "Add 100 to every pixel and compare outputs under the zero-sum kernel.",
             "output unchanged.",
             """offset=tf.nn.conv2d(image+100,kernel,strides=1,padding='VALID')
 np.testing.assert_array_equal(offset.numpy(),out.numpy())""",
@@ -687,8 +687,8 @@ add(
     [
         ex(
             "Compare two reductions",
-            "Pool patch[[1,3],[2,4]] with a2x2 window.",
-            "max4; average2.5.",
+            "Pool patch [[1, 3], [2, 4]] with a2x2 window.",
+            "max 4; average 2.5.",
             """x=tf.constant([[[[1.],[3.]],[[2.],[4.]]]])
 assert float(tf.nn.max_pool2d(x,2,2,'VALID')[0,0,0,0])==4
 assert float(tf.nn.avg_pool2d(x,2,2,'VALID')[0,0,0,0])==2.5""",
@@ -697,7 +697,7 @@ assert float(tf.nn.avg_pool2d(x,2,2,'VALID')[0,0,0,0])==2.5""",
         ex(
             "Inspect a flip",
             "Flip the patch horizontally and inspect every pixel.",
-            "rows[3,1] and[4,2].",
+            "rows [3, 1] and [4, 2].",
             """flipped=tf.image.flip_left_right(x)
 np.testing.assert_array_equal(flipped.numpy().reshape(2,2),[[3,1],[4,2]])""",
             "The operation reverses columns, not rows. Naming the width axis prevents a mistaken vertical transformation from silently changing a directional task.",
@@ -711,8 +711,8 @@ np.testing.assert_array_equal(flipped.numpy().reshape(2,2),[[3,1],[4,2]])""",
         ),
         ex(
             "Expose discarded information",
-            "Change the nonmaximum pixel1 to0 and recompute both pools.",
-            "max still4; average2.25.",
+            "Change the nonmaximum pixel 1 to 0 and recompute both pools.",
+            "max still 4; average 2.25.",
             """altered=tf.constant([[[[0.],[3.]],[[2.],[4.]]]])
 assert float(tf.nn.max_pool2d(altered,2,2,'VALID')[0,0,0,0])==4
 assert float(tf.nn.avg_pool2d(altered,2,2,'VALID')[0,0,0,0])==2.25""",
@@ -742,7 +742,7 @@ assert mirror['left']=='right' and mirror[mirror['left']]=='left' """,
 add(
     "tf-021",
     """A padded sequence contains both real observations and artificial storage positions. An embedding lookup turns token IDs into vectors, but padding does not become a real token merely because it has a vector. Carry a valid-token mask alongside the sequence. When averaging token losses, divide by the number of valid targets rather than the padded length. Appending more padding should leave the score unchanged. Some layers propagate Keras masks, while custom arithmetic must apply them explicitly. This lesson treats token zero as padding under a declared vocabulary policy; another vocabulary may assign zero a real meaning.""",
-    """The boolean comparison ids!=0 identifies valid tokens. tf.gather selects embedding rows in token order. tf.where(mask,loss,0) suppresses padding contributions, then reduce_sum(mask) supplies the denominator. Reject a completely padded sequence because it has no observed target loss. Avoid assuming that a numerical zero vector is an adequate replacement for an explicit mask.""",
+    """The boolean comparison ids!=0 identifies valid tokens. tf.gather selects embedding rows in token order. tf.where(mask, loss, 0) suppresses padding contributions, then reduce_sum(mask) supplies the denominator. Reject a completely padded sequence because it has no observed target loss. Avoid assuming that a numerical zero vector is an adequate replacement for an explicit mask.""",
     [
         ("Padding", "Artificial positions added to equalize storage shapes."),
         ("Embedding", "A learned or fixed vector table indexed by token ID."),
@@ -751,8 +751,8 @@ add(
     [
         ex(
             "Mark valid positions",
-            "Use token IDs[2,3,0] with zero declared padding.",
-            "mask[True,True,False], count2.",
+            "Use token IDs [2, 3, 0] with zero declared padding.",
+            "mask [True, True, False], count 2.",
             """ids=tf.constant([2,3,0]); mask=ids!=0
 assert mask.numpy().tolist()==[True,True,False]
 assert int(tf.reduce_sum(tf.cast(mask,tf.int32)))==2""",
@@ -760,8 +760,8 @@ assert int(tf.reduce_sum(tf.cast(mask,tf.int32)))==2""",
         ),
         ex(
             "Normalize masked losses",
-            "Use token losses[log2,log2,100] and exclude the padding position.",
-            "masked meanlog2; padding loss100 has no effect.",
+            "Use token losses[log 2, log 2,100] and exclude the padding position.",
+            "masked mean log 2; padding loss 100 has no effect.",
             """losses=tf.constant([np.log(2),np.log(2),100.],dtype=tf.float64)
 mean=tf.reduce_sum(tf.where(mask,losses,0.))/tf.reduce_sum(tf.cast(mask,tf.float64))
 np.testing.assert_allclose(float(mean),np.log(2),atol=1e-12,rtol=0)""",
@@ -769,8 +769,8 @@ np.testing.assert_allclose(float(mean),np.log(2),atol=1e-12,rtol=0)""",
         ),
         ex(
             "Check embedding axes",
-            "Lookup IDs[2,3,0] in a fixed4x2 table.",
-            "output shape(3,2); first row[2,2].",
+            "Lookup IDs [2, 3, 0] in a fixed 4x2 table.",
+            "output shape (3, 2); first row [2, 2].",
             """table=tf.constant([[0.,0.],[1.,0.],[2.,2.],[3.,-1.]])
 emb=tf.gather(table,ids)
 assert tuple(emb.shape)==(3,2); np.testing.assert_array_equal(emb.numpy()[0],[2,2])""",
@@ -779,7 +779,7 @@ assert tuple(emb.shape)==(3,2); np.testing.assert_array_equal(emb.numpy()[0],[2,
         ex(
             "Append padding",
             "Add two padding IDs and arbitrary corresponding losses, then recalculate the masked mean.",
-            "mean unchanged atlog2.",
+            "mean unchanged at \\(\\log 2\\).",
             """extended=tf.constant([2,3,0,0,0]); m=extended!=0; l=tf.constant([np.log(2),np.log(2),100.,200.,300.],tf.float64)
 v=tf.reduce_sum(tf.where(m,l,0.))/tf.reduce_sum(tf.cast(m,tf.float64))
 np.testing.assert_allclose(float(v),float(mean),atol=1e-12,rtol=0)""",
@@ -787,8 +787,8 @@ np.testing.assert_allclose(float(v),float(mean),atol=1e-12,rtol=0)""",
         ),
         ex(
             "Select the last valid state",
-            "For token states[[2,2],[3,-1],[99,99]], select the final valid position.",
-            "state[3,-1], not padding state[99,99].",
+            "For token states [[2, 2], [3, -1], [99, 99]], select the final valid position.",
+            "state [3, -1], not padding state [99, 99].",
             """states=tf.constant([[2.,2.],[3.,-1.],[99.,99.]])
 valid_states=tf.boolean_mask(states,mask)
 np.testing.assert_array_equal(valid_states[-1].numpy(),[3,-1])""",
@@ -823,8 +823,8 @@ add(
     [
         ex(
             "Calculate uniform mixtures",
-            "Use zero3x2 queries and keys with V[[2,0],[0,2],[6,6]].",
-            "outputs[[2,0],[1,1],[8/3,8/3]].",
+            "Use zero 3x2 queries and keys with V[[2, 0], [0, 2], [6, 6]].",
+            "outputs [[2,0],[1,1],[8/3,8/3]].",
             """q=np.zeros((3,2)); v=np.array([[2.,0.],[0.,2.],[6.,6.]])
 out=attention(q,q,v).numpy()
 np.testing.assert_allclose(out,[[2,0],[1,1],[8/3,8/3]],atol=1e-6,rtol=0)""",
@@ -832,8 +832,8 @@ np.testing.assert_allclose(out,[[2,0],[1,1],[8/3,8/3]],atol=1e-6,rtol=0)""",
         ),
         ex(
             "Perturb the future",
-            "Replace only the third value with[100,200].",
-            "first two rows unchanged; final row[34,202/3].",
+            "Replace only the third value with [100,200].",
+            "first two rows unchanged; final row [34,202/3].",
             """future=v.copy(); future[2]=[100,200]; changed=attention(q,q,future).numpy()
 np.testing.assert_allclose(changed[:2],out[:2],atol=1e-6,rtol=0)
 np.testing.assert_allclose(changed[2],[34,202/3],atol=1e-6,rtol=0)""",
@@ -841,7 +841,7 @@ np.testing.assert_allclose(changed[2],[34,202/3],atol=1e-6,rtol=0)""",
         ),
         ex(
             "Recompute every prefix",
-            "For prefix lengths1,2,3 run the function anew on sliced Q,K,V.",
+            "For prefix lengths 1, 2, 3 run the function anew on sliced Q, K, V.",
             "all prefix outputs match the full early rows.",
             """for cut in range(1,4):
     prefix=attention(q[:cut],q[:cut],v[:cut]).numpy()
@@ -850,16 +850,16 @@ np.testing.assert_allclose(changed[2],[34,202/3],atol=1e-6,rtol=0)""",
         ),
         ex(
             "Expose post-softmax masking",
-            "Multiply uniform1/3 weights by a triangle without renormalizing.",
-            "row sums[1/3,2/3,1].",
+            "Multiply uniform 1/3 weights by a triangle without renormalizing.",
+            "row sums [1/3, 2/3, 1].",
             """broken=np.ones((3,3))/3*np.tri(3)
 np.testing.assert_allclose(broken.sum(1),[1/3,2/3,1],atol=1e-12,rtol=0)""",
             "Zeros in forbidden positions do not prove a valid probability distribution. Masking after normalization leaves insufficient mass on early rows and changes their output scale.",
         ),
         ex(
             "Use nonuniform scores",
-            "Set Q=K[[1,0],[0,1],[1,1]] and repeat the prefix test.",
-            "prefix comparisons pass within1e-6.",
+            "Set Q=K[[1, 0], [0, 1], [1, 1]] and repeat the prefix test.",
+            "prefix comparisons pass within 1e-6.",
             """non=np.array([[1.,0.],[0.,1.],[1.,1.]])
 full=attention(non,non,v).numpy()
 for cut in range(1,4): np.testing.assert_allclose(attention(non[:cut],non[:cut],v[:cut]).numpy(),full[:cut],atol=1e-6,rtol=0)""",
@@ -891,7 +891,7 @@ for cut in range(1,4): np.testing.assert_allclose(attention(non[:cut],non[:cut],
 add(
     "tf-023",
     """An optimization loop can run without updating the intended parameter. A forward value calculated outside GradientTape may be disconnected even when its numeric value is correct. None means no recorded path, while a zero tensor means a recorded derivative evaluated to zero. Treating both as zero hides a model-construction failure. The loop must calculate loss inside the tape, request gradients for the intended variables, reject missing gradients, apply an update and recompute the post-update loss. A logged pre-update loss and post-update weight belong to different states. Tracing with tf.function changes how Python builds operations, so debug the eager state sequence first.""",
-    """Use a new tape for every step. w.assign_sub(rate*gradient) mutates the tracked variable. Keep before/after weights as Python floats only for logging; converting the forward result to a NumPy value inside the loss would sever differentiation. Recompute yhat after assignment. The scalar pilot has a closed-form recurrence w_next=w-.1*(28/3)*(w-2).""",
+    """Use a new tape for every step. w.assign_sub(rate*gradient) mutates the tracked variable. Keep before/after weights as Python floats only for logging; converting the forward result to a NumPy value inside the loss would sever differentiation. Recompute yhat after assignment. The scalar pilot has a closed-form recurrence \\(w_{\\mathrm{next}}=w-0.1\\cdot \\frac{28}{3}\\cdot (w-2)\\).""",
     [
         ("Disconnected gradient", "No recorded differentiable path to the requested variable."),
         ("Zero gradient", "A connected derivative whose current value is zero."),
@@ -905,12 +905,12 @@ add(
             """w=tf.Variable(0.,dtype=tf.float64); outside=(w-2)**2
 with tf.GradientTape() as tape: loss=outside
 assert tape.gradient(loss,w) is None""",
-            "The tape cannot reconstruct operations it never recorded. The numerical loss4 alone does not reveal this missing dependency.",
+            "The tape cannot reconstruct operations it never recorded. The numerical loss 4 alone does not reveal this missing dependency.",
         ),
         ex(
             "Distinguish an actual zero",
-            "Compute the same objective inside the tape atw2.",
-            "gradient is a tensor equal0.",
+            "Compute the same objective inside the tape at w=2.",
+            "gradient is a tensor equal 0.",
             """optimum=tf.Variable(2.,dtype=tf.float64)
 with tf.GradientTape() as tape: loss=(optimum-2)**2
 g=tape.gradient(loss,optimum); assert g is not None and float(g)==0""",
@@ -918,19 +918,19 @@ g=tape.gradient(loss,optimum); assert g is not None and float(g)==0""",
         ),
         ex(
             "Repair two updates",
-            "Use x = [1, 2, 3],y = 2x,w = 0 and rate 0.1 for exactly 2 steps.",
-            "weight448/225 within1e-12.",
+            "Use x = [1, 2, 3], y = 2x, w = 0 and rate 0.1 for exactly 2 steps.",
+            "weight 448/225 within 1e-12.",
             """x=tf.constant([1.,2.,3.],tf.float64); y=2*x; w=tf.Variable(0.,dtype=tf.float64); history=[]
 for _ in range(2):
     with tf.GradientTape() as tape: loss=tf.reduce_mean((w*x-y)**2)
     g=tape.gradient(loss,w); assert g is not None
     w.assign_sub(.1*g); history.append(float(w))
 np.testing.assert_allclose(float(w),448/225,atol=1e-12,rtol=0)""",
-            "The first update is28/15 and the second moves closer to2. This exact recurrence tests the loop order independently of framework metrics.",
+            "The first update is 28/15 and the second moves closer to 2. This exact recurrence tests the loop order independently of framework metrics.",
         ),
         ex(
             "Recompute loss after assignment",
-            "Compare the two-step loss with the one-step loss56/675.",
+            "Compare the two-step loss with the one-step loss 56/675.",
             "two-step loss is smaller and nonnegative.",
             """after=float(tf.reduce_mean((w*x-y)**2))
 assert 0<=after<56/675""",
@@ -949,7 +949,7 @@ assert not bool(tf.reduce_all(tf.math.is_finite(g))) and float(w)==saved""",
         ex(
             "Compare an analytic recurrence",
             "Calculate both updates with plain Python and compare each state with the tape trace.",
-            "both recorded states match within1e-12.",
+            "both recorded states match within 1e-12.",
             """oracle=0.; expected=[]
 for _ in range(2): oracle-=.1*(28/3)*(oracle-2); expected.append(oracle)
 np.testing.assert_allclose(history,expected,atol=1e-12,rtol=0)""",
@@ -962,7 +962,7 @@ np.testing.assert_allclose(history,expected,atol=1e-12,rtol=0)""",
 add(
     "tf-024",
     """A classifier experiment needs more than an accuracy number. Define which rows are independent, freeze training/validation/test groups, fit preprocessing only on training data and choose decisions before opening the test partition. The fixture uses the sign of a geometric coordinate so its labels can be inspected directly. A tiny linear sigmoid classifier is sufficient; extra hidden layers are optional, not a requirement. Confusion counts retain the error types and must sum to the test cardinality. Per-group reporting reveals failures that an aggregate can hide. A capstone is complete when its data and evaluation contracts are defensible, even if its measured score is disappointing.""",
-    """Binary logits feed sigmoid cross entropy during training. After a fixed step budget, classify with logit>=0, equivalent to probability>=.5. Compute true-positive, false-positive, true-negative and false-negative counts with boolean masks. Keep counts as integers and divide only after establishing their denominators. Save the split IDs before any training operation.""",
+    """Binary logits feed sigmoid cross entropy during training. After a fixed step budget, classify with logit>=0, equivalent to probability>=0.5. Compute true-positive, false-positive, true-negative and false-negative counts with boolean masks. Keep counts as integers and divide only after establishing their denominators. Save the split IDs before any training operation.""",
     [
         ("Confusion counts", "Counts of correct and incorrect positive and negative decisions."),
         ("Decision policy", "A frozen rule converting scores into predictions."),
@@ -971,8 +971,8 @@ add(
     [
         ex(
             "Freeze geometry and groups",
-            "Use training points[-2,-1,1,2], labels[0,0,1,1]; hold out[-3,3].",
-            "4 train and2 test records with no shared IDs.",
+            "Use training points [-2, -1, 1, 2], labels [0, 0, 1, 1]; hold out [-3, 3].",
+            "4 train and 2 test records with no shared IDs.",
             """x=np.array([[-2.],[-1.],[1.],[2.]],dtype='float32'); y=np.array([[0.],[0.],[1.],[1.]],dtype='float32')
 test_x=np.array([[-3.],[3.]],dtype='float32'); test_y=np.array([0,1]); train_ids={'a','b','c','d'}; test_ids={'e','f'}
 assert not train_ids&test_ids and len(test_ids)==2""",
@@ -981,7 +981,7 @@ assert not train_ids&test_ids and len(test_ids)==2""",
         ex(
             "Fit training preprocessing",
             "Calculate training mean and standard deviation, then apply them to both sets.",
-            "mean0; scale sqrt2.5; test transformed symmetrically.",
+            "mean 0; scale \\(\\sqrt{2.5}\\); test transformed symmetrically.",
             """mean=x.mean(0); scale=x.std(0); tx=(x-mean)/scale; vx=(test_x-mean)/scale
 np.testing.assert_allclose(scale,[np.sqrt(2.5)],atol=1e-6,rtol=0)
 assert mean[0]==0 and vx[0,0]==-vx[1,0]""",
@@ -989,7 +989,7 @@ assert mean[0]==0 and vx[0,0]==-vx[1,0]""",
         ),
         ex(
             "Train within a fixed budget",
-            "Initialize one weight 0 and run40 full-batch SGD steps at rate 0.1 using binary logits loss.",
+            "Initialize one weight 0 and run 40 full-batch SGD steps at rate 0.1 using binary logits loss.",
             "40 finite updates and positive final weight.",
             """w=tf.Variable([[0.]],dtype=tf.float32)
 for step in range(40):
@@ -1000,8 +1000,8 @@ assert step+1==40 and float(w[0,0])>0 and np.isfinite(w.numpy()).all()""",
         ),
         ex(
             "Account for every test row",
-            "Threshold final test logits at0 and compute all four confusion counts.",
-            "TP1,TN1,FP0,FN0; total2.",
+            "Threshold final test logits at 0 and compute all four confusion counts.",
+            "TP1, TN1, FP0, FN0; total 2.",
             """pred=(vx@w.numpy()).ravel()>=0; truth=test_y.astype(bool)
 counts={'tp':int(np.sum(pred&truth)),'tn':int(np.sum(~pred&~truth)),'fp':int(np.sum(pred&~truth)),'fn':int(np.sum(~pred&truth))}
 assert counts=={'tp':1,'tn':1,'fp':0,'fn':0} and sum(counts.values())==2""",
@@ -1009,8 +1009,8 @@ assert counts=={'tp':1,'tn':1,'fp':0,'fn':0} and sum(counts.values())==2""",
         ),
         ex(
             "Compare a baseline",
-            "Predict class0 for every held-out row and report its error count beside the model.",
-            "baseline1 error; model0 on2 records.",
+            "Predict class 0 for every held-out row and report its error count beside the model.",
+            "baseline 1 error; model 0 on 2 records.",
             """baseline=np.zeros(2,dtype=bool)
 assert np.count_nonzero(baseline!=truth)==1 and np.count_nonzero(pred!=truth)==0""",
             "The baseline uses the same held-out observations and decision unit. Its simplicity makes the gain interpretable, but the tiny count leaves substantial uncertainty.",
@@ -1018,7 +1018,7 @@ assert np.count_nonzero(baseline!=truth)==1 and np.count_nonzero(pred!=truth)==0
         ex(
             "Expose a subgroup failure",
             "Assign test groups negative and positive; flip only the positive prediction and report group errors.",
-            "negative0/1; positive1/1.",
+            "negative 0/1; positive 1/1.",
             """broken=pred.copy(); broken[1]=False
 report={g:(int(broken[i]!=truth[i]),1) for i,g in enumerate(['negative','positive'])}
 assert report=={'negative':(0,1),'positive':(1,1)}""",
@@ -1031,7 +1031,7 @@ assert report=={'negative':(0,1),'positive':(1,1)}""",
 add(
     "tf-025",
     """An embedding objective encourages relationships between representations. Dot products depend on both direction and magnitude, whereas cosine divides by both vector norms and measures direction. A positive pair is declared related; a negative pair is declared unrelated under a sampling policy. That policy is part of the task. If a duplicate of the positive is labelled negative, the objective asks the model to satisfy contradictory evidence. A numerical loss can still be finite in this situation, so inspect identities before optimizing. The three fixed vectors let you calculate every score and show why a higher dot product is not always stronger directional similarity.""",
-    """reduce_sum(a*b) is a dot product for equal-length vectors. Divide by norm(a)*norm(b) for cosine and reject a zero norm. A two-candidate contrastive loss can be written as sparse softmax cross entropy with target index0. Temperature divides scores before normalization. It changes the sharpness of probabilities and the scale of gradients, not which candidate initially ranks first.""",
+    """reduce_sum(a*b) is a dot product for equal-length vectors. Divide by norm(a)*norm(b) for cosine and reject a zero norm. A two-candidate contrastive loss can be written as sparse softmax cross entropy with target index 0. Temperature divides scores before normalization. It changes the sharpness of probabilities and the scale of gradients, not which candidate initially ranks first.""",
     [
         ("Positive pair", "Two examples declared related by the training task."),
         ("Negative pair", "An example pair declared unrelated under a sampling policy."),
@@ -1040,8 +1040,8 @@ add(
     [
         ex(
             "Compare similarity measures",
-            "Use anchor[1,0],positive[1,1],negative[0,1]; compute dots and cosines.",
-            "dots1,0; cosines1/sqrt2,0.",
+            "Use anchor [1, 0], positive [1, 1], negative [0, 1]; compute dots and cosines.",
+            "dots 1, 0; cosines \\(1/\\sqrt{2}\\), 0.",
             """a=np.array([1.,0.]); pos=np.array([1.,1.]); neg=np.array([0.,1.])
 assert (a@pos,a@neg)==(1,0)
 np.testing.assert_allclose([(a@pos)/(np.linalg.norm(a)*np.linalg.norm(pos)),a@neg],[1/np.sqrt(2),0],atol=1e-12,rtol=0)""",
@@ -1049,8 +1049,8 @@ np.testing.assert_allclose([(a@pos)/(np.linalg.norm(a)*np.linalg.norm(pos)),a@ne
         ),
         ex(
             "Scale a candidate",
-            "Multiply the positive vector by10 and compare dot product and cosine.",
-            "dot10; cosine unchanged.",
+            "Multiply the positive vector by 10 and compare dot product and cosine.",
+            "dot 10; cosine unchanged.",
             """scaled=10*pos
 assert a@scaled==10
 np.testing.assert_allclose((a@scaled)/(np.linalg.norm(a)*np.linalg.norm(scaled)),1/np.sqrt(2),atol=1e-12,rtol=0)""",
@@ -1058,8 +1058,8 @@ np.testing.assert_allclose((a@scaled)/(np.linalg.norm(a)*np.linalg.norm(scaled))
         ),
         ex(
             "Calculate a contrastive loss",
-            "Use logits[1,0] with the positive at index0.",
-            "losslog(1+exp(-1)).",
+            "Use logits [1, 0] with the positive at index 0.",
+            "loss \\(\\log(1+e^{-1})\\).",
             """loss=tf.nn.sparse_softmax_cross_entropy_with_logits(labels=[0],logits=[[1.,0.]])
 np.testing.assert_allclose(loss.numpy(),[np.log1p(np.exp(-1))],atol=1e-6,rtol=0)""",
             "The loss encourages the positive score to exceed the negative score. It does not independently establish that the selected negative is semantically unrelated.",
@@ -1074,8 +1074,8 @@ assert duplicate and positive_id==negative_id""",
         ),
         ex(
             "Observe temperature",
-            "Compare softmax[1,0] at temperatures1 and.5.",
-            "positive probability increases at.5; ranking stays0 first.",
+            "Compare softmax[1, 0] at temperatures 1 and 0.5.",
+            "positive probability increases at 0.5; ranking stays 0 first.",
             """p1=tf.nn.softmax([1.,0.]).numpy(); p2=tf.nn.softmax(np.array([1.,0.],dtype='float32')/.5).numpy()
 assert p2[0]>p1[0] and int(p1.argmax())==int(p2.argmax())==0""",
             "A lower positive temperature sharpens this distribution. It is not a source of additional evidence and must not be confused with a calibrated probability of semantic truth.",
@@ -1109,7 +1109,7 @@ add(
     [
         ex(
             "Create an identity residual",
-            "Call a width2 residual with zero kernel on[[1,2],[3,4]].",
+            "Call a width 2 residual with zero kernel on [[1, 2], [3, 4]].",
             "output equals input; one tracked kernel.",
             """layer=Residual(); x=tf.constant([[1.,2.],[3.,4.]]); out=layer(x)
 np.testing.assert_array_equal(out.numpy(),x.numpy()); assert len(layer.trainable_variables)==1""",
@@ -1118,7 +1118,7 @@ np.testing.assert_array_equal(out.numpy(),x.numpy()); assert len(layer.trainable
         ex(
             "Reuse the state",
             "Call the layer on another batch of the same width and compare variable object identity.",
-            "same variable object and variable count1.",
+            "same variable object and variable count 1.",
             """variable=layer.trainable_variables[0]; layer(tf.constant([[9.,8.]]))
 assert layer.trainable_variables[0] is variable and len(layer.trainable_variables)==1""",
             "A new batch should change transient activations, not create a new model. Object identity complements a parameter count, since replacing one variable with another could preserve the count.",
@@ -1126,13 +1126,13 @@ assert layer.trainable_variables[0] is variable and len(layer.trainable_variable
         ex(
             "Assign a known transform",
             "Set the kernel to identity and inspect the residual output.",
-            "output2*x.",
+            "output 2*x.",
             """layer.kernel.assign(tf.eye(2)); np.testing.assert_array_equal(layer(x).numpy(),2*x.numpy())""",
             "The branch now reproduces the input, and the residual adds the original input again. The exact doubling exposes the addition instead of relying on random weights.",
         ),
         ex(
             "Reject an incompatible width",
-            "Call the built width2 layer with a width3 input.",
+            "Call the built width 2 layer with a width 3 input.",
             "ValueError naming feature width.",
             """try: layer(tf.ones((1,3)))
 except ValueError: pass
@@ -1142,7 +1142,7 @@ else: raise AssertionError('width mismatch accepted')""",
         ex(
             "Check branch gradients",
             "Differentiate the sum of output entries with respect to the kernel.",
-            "gradient matrix[[4,4],[6,6]].",
+            "gradient matrix [[4, 4], [6, 6]].",
             """with tf.GradientTape() as tape: total=tf.reduce_sum(layer(x))
 g=tape.gradient(total,layer.kernel)
 np.testing.assert_array_equal(g.numpy(),[[4,4],[6,6]])""",
@@ -1150,8 +1150,8 @@ np.testing.assert_array_equal(g.numpy(),[[4,4],[6,6]])""",
         ),
         ex(
             "Count parameters by width",
-            "Build a separate width3 layer and count its square kernel entries.",
-            "9 parameters; width2 layer remains4.",
+            "Build a separate width 3 layer and count its square kernel entries.",
+            "9 parameters; width 2 layer remains 4.",
             """other=Residual(); other(tf.ones((1,3)))
 assert other.count_params()==9 and layer.count_params()==4""",
             "Parameter growth is quadratic in this dense branch width. Batch size does not contribute to the count because the same kernel is shared across observations.",
@@ -1171,7 +1171,7 @@ assert other.count_params()==9 and layer.count_params()==4""",
 add(
     "tf-027",
     """Transfer learning reuses a representation for a related task. Freezing a base means its parameters should not receive optimizer updates while a new head learns from its outputs. The base can still perform computation; frozen does not mean bypassed. Normalization and dropout also have mode-dependent behavior, so a frozen base should be called with a deliberate training flag. Here a small deterministic two-feature transform stands in for the locally trained base from the classifier capstone. No pretrained weights are downloaded. A relabelled target tests whether the new head can change without altering the base. Unfreezing is a new phase with an explicit optimizer policy.""",
-    """Set base.trainable=False before constructing the training variable list. Use base(x,training=False) to preserve its inference behavior. Train only head.trainable_variables. Snapshot all base weights before the update and compare arrays afterward. When unfreezing, use a new optimizer or explicitly build optimizer state for the newly trainable variables rather than assuming an old optimizer knows them.""",
+    """Set base.trainable=False before constructing the training variable list. Use base(x, training=False) to preserve its inference behavior. Train only head.trainable_variables. Snapshot all base weights before the update and compare arrays afterward. When unfreezing, use a new optimizer or explicitly build optimizer state for the newly trainable variables rather than assuming an old optimizer knows them.""",
     [
         ("Base", "The reused representation-producing part of a model."),
         ("Head", "A task-specific output mapping trained on that representation."),
@@ -1189,7 +1189,7 @@ np.testing.assert_array_equal(base(x).numpy(),x.numpy()); assert not base.traina
         ),
         ex(
             "Train a new head",
-            "Attach a zero-initialized one-unit head; fit targets[1,2,3] for one SGD step.",
+            "Attach a zero-initialized one-unit head; fit targets [1, 2, 3] for one SGD step.",
             "at least one head coefficient changes.",
             """head=tf.keras.layers.Dense(1,use_bias=False,kernel_initializer='zeros'); features=base(x,training=False); head(features); before=head.get_weights()[0].copy(); target=tf.constant([[1.],[2.],[3.]])
 with tf.GradientTape() as tape: loss=tf.reduce_mean((head(features)-target)**2)
@@ -1237,7 +1237,7 @@ tf.keras.optimizers.SGD(.01).apply_gradients(zip(grads,variables))""",
 add(
     "tf-028",
     """A training checkpoint is more than a weight file. Adam keeps moving estimates of gradients and squared gradients, plus an update counter. Two runs with identical weights but different optimizer state can take different next steps. A restart test therefore compares an uninterrupted next update with a restored next update on the identical batch and dtype. Restoring in a new process tests reconstruction rather than accidental reuse of in-memory objects. Checkpoints are temporary in this lesson and are removed when the context exits. This validates a small deterministic CPU case; it does not promise bitwise reproducibility across hardware, versions or nondeterministic data pipelines.""",
-    """Create the variable and optimizer, then build optimizer slots before restoring. tf.train.Checkpoint tracks both. save writes a numbered checkpoint prefix; restore(...).assert_consumed() detects missing tracked state. The child process constructs fresh objects and takes exactly one further update. Compare float32 weights with tolerance1e-6. A weights-only control resets optimizer history and should diverge on this fixture.""",
+    """Create the variable and optimizer, then build optimizer slots before restoring. tf.train.Checkpoint tracks both. save writes a numbered checkpoint prefix; restore(...).assert_consumed() detects missing tracked state. The child process constructs fresh objects and takes exactly one further update. Compare float32 weights with tolerance 1e-6. A weights-only control resets optimizer history and should diverge on this fixture.""",
     [
         ("Optimizer state", "Accumulated information used to choose the next update."),
         ("Checkpoint", "Saved state sufficient for a declared continuation contract."),
@@ -1246,15 +1246,15 @@ add(
     [
         ex(
             "Create nontrivial optimizer state",
-            "Take two Adam steps on(w-2)² fromw0 and inspect iterations.",
-            "iteration count2 and positive weight.",
+            "Take two Adam steps on (w-2)² from w=0 and inspect iterations.",
+            "iteration count 2 and positive weight.",
             """w,opt=make_state(); step(w,opt); step(w,opt)
 assert int(opt.iterations)==2 and float(w)>0""",
             "A checkpoint made before any updates would not test restoration of nonzero moment estimates. Two steps create state that a fresh optimizer does not possess.",
         ),
         ex(
             "Save both state components",
-            "Save a checkpoint containingw and Adam into a TemporaryDirectory.",
+            "Save a checkpoint containing w and Adam into a TemporaryDirectory.",
             "checkpoint index exists; no course source file is written.",
             """temporary=tempfile.TemporaryDirectory(); folder=Path(temporary.name)
 checkpoint=tf.train.Checkpoint(weight=w,optimizer=opt); prefix=checkpoint.save(str(folder/'state'))
@@ -1264,7 +1264,7 @@ assert Path(prefix+'.index').is_file()""",
         ex(
             "Calculate the uninterrupted control",
             "Snapshot the saved weight and take one further step without restoring.",
-            "iteration count3; weight changes.",
+            "iteration count 3; weight changes.",
             """saved=float(w); step(w,opt); expected=float(w)
 assert int(opt.iterations)==3 and expected!=saved""",
             "The control defines the next-step behavior before the restart comparison. It uses the same target, rate and optimizer configuration as the child process.",
@@ -1272,7 +1272,7 @@ assert int(opt.iterations)==3 and expected!=saved""",
         ex(
             "Restore in a fresh process",
             "Launch the existing interpreter with fresh variable/Adam objects, restore the saved prefix and take one step.",
-            "child weight matches control within1e-6; child iterations3.",
+            "child weight matches control within 1e-6; child iterations 3.",
             '''program=textwrap.dedent("""
 import json,sys,tensorflow as tf
 w=tf.Variable(0.,dtype=tf.float32); opt=tf.keras.optimizers.Adam(.1); opt.build([w])
@@ -1291,7 +1291,7 @@ np.testing.assert_allclose(restored['weight'],expected,atol=1e-6,rtol=0); assert
         ex(
             "Expose a weights-only restart",
             "Set a fresh Adam variable to the saved weight without restoring optimizer moments, then take one step.",
-            "next weight differs from the full-state control by more than1e-6.",
+            "next weight differs from the full-state control by more than 1e-6.",
             """weights_only,fresh=make_state(); weights_only.assign(saved); step(weights_only,fresh)
 assert abs(float(weights_only)-expected)>1e-6 and int(fresh.iterations)==1""",
             "The reset update counter and moments change Adam update even though the initial weight matches. This is why a model prediction parity does not establish training-resumption parity.",
@@ -1315,8 +1315,8 @@ def step(w,opt):
 )
 add(
     "tf-029",
-    """Floating-point arithmetic has a finite representable range. The probabilities implied by logits[1000,999] are well defined, but exponentiating those scores directly overflows ordinary floating-point types. Subtracting the maximum leaves the softmax unchanged because a common multiplicative factor cancels between numerator and denominator. A stable cross entropy works with shifted logits or a log-sum-exp expression, avoiding an unnecessary probability round trip. Numeric precision is a separate concern from objective correctness: a stable implementation can still optimize the wrong labels or denominator. Mixed precision may improve performance on some hardware, but this CPU fixture makes no speed claim.""",
-    """Use tf.nn.sparse_softmax_cross_entropy_with_logits for the combined stable calculation. In NumPy, logaddexp(0,-1) gives the positive-first-class loss. finite checks should include gradients as well as forward outputs. float16 overflows at much smaller exponent arguments than float64. Compare using absolute tolerances appropriate to the dtype instead of exact equality for transcendental functions.""",
+    """Floating-point arithmetic has a finite representable range. The probabilities implied by logits [1000,999] are well defined, but exponentiating those scores directly overflows ordinary floating-point types. Subtracting the maximum leaves the softmax unchanged because a common multiplicative factor cancels between numerator and denominator. A stable cross entropy works with shifted logits or a log-sum-exp expression, avoiding an unnecessary probability round trip. Numeric precision is a separate concern from objective correctness: a stable implementation can still optimize the wrong labels or denominator. Mixed precision may improve performance on some hardware, but this CPU fixture makes no speed claim.""",
+    """Use tf.nn.sparse_softmax_cross_entropy_with_logits for the combined stable calculation. In NumPy, logaddexp(0, -1) gives the positive-first-class loss. finite checks should include gradients as well as forward outputs. float16 overflows at much smaller exponent arguments than float64. Compare using absolute tolerances appropriate to the dtype instead of exact equality for transcendental functions.""",
     [
         ("Overflow", "A finite mathematical result exceeds the numeric representation."),
         ("Log-sum-exp", "A stable way to calculate the logarithm of a sum of exponentials."),
@@ -1325,7 +1325,7 @@ add(
     [
         ex(
             "Expose naive overflow",
-            "Exponentiate NumPy logits[1000,999] directly under an explicit error-state context.",
+            "Exponentiate NumPy logits [1000,999] directly under an explicit error-state context.",
             "both exponentials are infinite.",
             """z=np.array([1000.,999.])
 with np.errstate(over='ignore'): naive=np.exp(z)
@@ -1334,23 +1334,23 @@ assert np.isinf(naive).all()""",
         ),
         ex(
             "Calculate stable loss",
-            "Use a logits-aware TensorFlow loss for target0.",
-            "losslog(1+exp(-1)) within1e-6.",
+            "Use a logits-aware TensorFlow loss for target 0.",
+            "loss \\(\\log(1+e^{-1})\\) within 1e-6.",
             """loss=tf.nn.sparse_softmax_cross_entropy_with_logits(labels=[0],logits=tf.constant([[1000.,999.]]))
 np.testing.assert_allclose(loss.numpy(),[np.logaddexp(0,-1)],atol=1e-6,rtol=0)""",
             "The meaningful quantity is the difference between scores, not their shared offset. The stable form keeps that difference available without constructing enormous exponentials.",
         ),
         ex(
             "Check shift invariance",
-            "Compare softmax[1000,999] with softmax[0,-1].",
-            "probabilities agree within1e-6.",
+            "Compare softmax[1000,999] with softmax[0, -1].",
+            "probabilities agree within 1e-6.",
             """np.testing.assert_allclose(tf.nn.softmax(z).numpy(),tf.nn.softmax([0.,-1.]).numpy(),atol=1e-6,rtol=0)""",
             "A common score shift cancels from the normalized distribution. This metamorphic property can catch an implementation that normalizes the wrong axis or clips scores inconsistently.",
         ),
         ex(
             "Inspect gradients",
-            "Differentiate the stable target0 loss with respect to both logits.",
-            "finite gradients summing approximately0.",
+            "Differentiate the stable target 0 loss with respect to both logits.",
+            "finite gradients summing approximately 0.",
             """v=tf.Variable([[1000.,999.]])
 with tf.GradientTape() as tape: objective=tf.reduce_mean(tf.nn.sparse_softmax_cross_entropy_with_logits(labels=[0],logits=v))
 g=tape.gradient(objective,v).numpy()
@@ -1359,7 +1359,7 @@ assert np.isfinite(g).all(); np.testing.assert_allclose(g.sum(),0,atol=1e-6,rtol
         ),
         ex(
             "Separate precision policies",
-            "Compare float16 and float64 exponentiation of20.",
+            "Compare float16 and float64 exponentiation of 20.",
             "float16 overflows; float64 remains finite.",
             """with np.errstate(over='ignore'): low=np.exp(np.float16(20))
 high=np.exp(np.float64(20))
@@ -1386,7 +1386,7 @@ np.testing.assert_allclose(stable(z).sum(),1,atol=1e-12,rtol=0)""",
 )
 add(
     "tf-030",
-    """A distributed or accumulated gradient must represent the intended global objective. If shards have different numbers of examples, averaging shard means equally weights shards rather than observations. A one-example shard with mean gradient2 and a three-example shard with mean6 combine to5 under an example mean, not4. Gradient accumulation has the same issue when microbatches differ in size. Accumulate gradient sums and counts, divide once, then apply one optimizer update. Applying an update after each microbatch is a different trajectory because later gradients use changed parameters. This lesson simulates all shards on one CPU and does not claim a distributed runtime was exercised.""",
+    """A distributed or accumulated gradient must represent the intended global objective. If shards have different numbers of examples, averaging shard means equally weights shards rather than observations. A one-example shard with mean gradient 2 and a three-example shard with mean 6 combine to 5 under an example mean, not 4. Gradient accumulation has the same issue when microbatches differ in size. Accumulate gradient sums and counts, divide once, then apply one optimizer update. Applying an update after each microbatch is a different trajectory because later gradients use changed parameters. This lesson simulates all shards on one CPU and does not claim a distributed runtime was exercised.""",
     """The identity global_mean=sum(count*local_mean)/sum(count) is independent of a communication library. tf.reduce_sum exposes numerators. Hold weights fixed while accumulating gradients, then assign once. A regularization term needs a deliberate global scaling convention so it is not accidentally multiplied by the number of shards. The examples distinguish mathematical reduction from runtime placement.""",
     [
         ("Shard", "A subset of observations processed as one partition."),
@@ -1396,16 +1396,16 @@ add(
     [
         ex(
             "Weight shard means",
-            "Combine means2,6 with counts1,3 and compare equal shard averaging.",
-            "global5; naive4.",
+            "Combine means 2, 6 with counts 1, 3 and compare equal shard averaging.",
+            "global 5; naive 4.",
             """means=np.array([2.,6.]); counts=np.array([1,3])
 assert np.average(means,weights=counts)==5 and means.mean()==4""",
             "Multiplying each local mean by its count restores the gradient numerator. The final division then gives each example equal weight.",
         ),
         ex(
             "Recover a full-batch mean",
-            "Partition gradients[2,4,6,8] into sizes 1 and3 and reconstruct their mean.",
-            "both full and reconstructed means5.",
+            "Partition gradients [2, 4, 6, 8] into sizes 1 and 3 and reconstruct their mean.",
+            "both full and reconstructed means 5.",
             """g=np.array([2.,4.,6.,8.]); parts=[g[:1],g[1:]]
 recombined=sum(p.sum() for p in parts)/sum(len(p) for p in parts)
 assert recombined==g.mean()==5""",
@@ -1413,8 +1413,8 @@ assert recombined==g.mean()==5""",
         ),
         ex(
             "Accumulate squared-loss gradients",
-            "At w = 0 use x = [1, 2, 3, 4],y = 2x; compare full-batch gradient with sum-then-divide microbatches.",
-            "gradient-30 for both.",
+            "At w = 0 use x = [1, 2, 3, 4], y = 2x; compare full-batch gradient with sum-then-divide microbatches.",
+            "gradient -30 for both.",
             """x=tf.constant([1.,2.,3.,4.]); y=2*x; w=tf.Variable(0.)
 with tf.GradientTape() as tape: full=tf.reduce_mean((w*x-y)**2)
 full_g=tape.gradient(full,w); total=0.
@@ -1426,15 +1426,15 @@ assert float(full_g)==total/4==-30""",
         ),
         ex(
             "Apply exactly one update",
-            "Use rate 0.01 with accumulated global gradient-30.",
-            "updated weight.3.",
+            "Use rate 0.01 with accumulated global gradient -30.",
+            "updated weight 0.3.",
             """w.assign_sub(.01*(total/4)); np.testing.assert_allclose(float(w),.3,atol=1e-6,rtol=0)""",
             "The update counter should increment once for this effective batch. Incrementing a learning-rate schedule once per microbatch changes the optimizer policy even if gradients are combined correctly.",
         ),
         ex(
             "Expose per-batch updates",
-            "Update separately for the two microbatches and compare the final weight with.3.",
-            "endpoint differs from.3.",
+            "Update separately for the two microbatches and compare the final weight with 0.3.",
+            "endpoint differs from 0.3.",
             """other=tf.Variable(0.)
 for start,end in [(0,1),(1,4)]:
     with tf.GradientTape() as tape: loss=tf.reduce_mean((other*x[start:end]-y[start:end])**2)
@@ -1445,7 +1445,7 @@ assert abs(float(other)-.3)>1e-6""",
         ex(
             "Handle an empty shard",
             "Combine an empty shard and the four real gradients using sums and counts; reject a globally empty batch.",
-            "empty shard contributes0; total remains5.",
+            "empty shard contributes 0; total remains 5.",
             """parts=[np.array([],dtype=float),g]
 count=sum(len(p) for p in parts)
 assert count==4 and sum(p.sum() for p in parts)/count==5
@@ -1468,8 +1468,8 @@ add(
     [
         ex(
             "Check eager arithmetic",
-            "Evaluate x*x+1 at float32[1,2].",
-            "output[2,5].",
+            "Evaluate x*x+1 at float32[1, 2].",
+            "output [2, 5].",
             """x=tf.constant([1.,2.],tf.float32); eager=x*x+1
 np.testing.assert_array_equal(eager.numpy(),[2,5])""",
             "The arithmetic provides a simple independent oracle. Correctness must be established before timing a graph implementation.",
@@ -1486,16 +1486,16 @@ assert first>=1""",
         ),
         ex(
             "Reuse an equal signature",
-            "Call with float32[3,4] and inspect trace count.",
-            "output[10,17]; trace count unchanged.",
+            "Call with float32[3, 4] and inspect trace count.",
+            "output [10, 17]; trace count unchanged.",
             """np.testing.assert_array_equal(f(tf.constant([3.,4.],tf.float32)).numpy(),[10,17])
 assert f.experimental_get_tracing_count()==first""",
             "Values change while shape and dtype remain the same. Reusing a trace demonstrates the intended separation between graph structure and tensor values.",
         ),
         ex(
             "Change dtype deliberately",
-            "Call with float64[1,2] and inspect trace count and output dtype.",
-            "float64 result[2,5]; at least one new trace.",
+            "Call with float64[1, 2] and inspect trace count and output dtype.",
+            "float64 result [2, 5]; at least one new trace.",
             """out=f(tf.constant([1.,2.],tf.float64))
 assert out.dtype==tf.float64 and f.experimental_get_tracing_count()>first
 np.testing.assert_array_equal(out.numpy(),[2,5])""",
@@ -1514,8 +1514,8 @@ assert elapsed>=0 and np.isfinite(result).all()""",
         ),
         ex(
             "Separate shape contracts",
-            "Create a function with a variable-length float32 vector signature; call lengths2 and3.",
-            "one trace reused; outputs have lengths2 and3.",
+            "Create a function with a variable-length float32 vector signature; call lengths2 and 3.",
+            "one trace reused; outputs have lengths2 and 3.",
             """@tf.function(input_signature=[tf.TensorSpec([None],tf.float32)])
 def g(value): return value*value+1
 g(tf.constant([1.,2.])); count=g.experimental_get_tracing_count()
@@ -1528,8 +1528,8 @@ assert tuple(g(tf.constant([1.,2.,3.])).shape)==(3,) and g.experimental_get_trac
 )
 add(
     "tf-032",
-    """Saving has two distinct purposes: preserving a trainable Keras model and exporting an inference interface. The .keras format preserves a Keras model configuration and state; model.export creates an inference artifact that can be loaded through SavedModel. Keras3 does not use model.save(directory) as the export workflow. Prediction parity must be checked after reconstruction, ideally in a fresh process. Matching predictions says nothing about whether optimizer state can resume the same next update, which is the separate checkpoint lesson. This fixture has one fixed weight and a known signature, so failures can be attributed to persistence and interface behavior rather than training randomness.""",
-    """Save the built model to a path ending.keras. Load it with tf.keras.models.load_model. Export to a different owned directory and load it with tf.saved_model.load; call its serve endpoint. TemporaryDirectory owns both outputs. The child process accepts only the two local artifact paths created by the parent and prints predictions as JSON. Compare using float32 tolerance1e-6.""",
+    """Saving has two distinct purposes: preserving a trainable Keras model and exporting an inference interface. The .keras format preserves a Keras model configuration and state; model.export creates an inference artifact that can be loaded through SavedModel. Keras 3 does not use model.save(directory) as the export workflow. Prediction parity must be checked after reconstruction, ideally in a fresh process. Matching predictions says nothing about whether optimizer state can resume the same next update, which is the separate checkpoint lesson. This fixture has one fixed weight and a known signature, so failures can be attributed to persistence and interface behavior rather than training randomness.""",
+    """Save the built model to a path ending.keras. Load it with tf.keras.models.load_model. Export to a different owned directory and load it with tf.saved_model.load; call its serve endpoint. TemporaryDirectory owns both outputs. The child process accepts only the two local artifact paths created by the parent and prints predictions as JSON. Compare using float32 tolerance 1e-6.""",
     [
         ("Serialization", "Encoding model configuration and state into a recoverable artifact."),
         ("Export", "Publishing a fixed inference interface and its state."),
@@ -1538,8 +1538,8 @@ add(
     [
         ex(
             "Create a fixed inference model",
-            "Set a bias-free Dense weight to2 and predict on 1,3.",
-            "predictions2,6.",
+            "Set a bias-free Dense weight to 2 and predict on 1, 3.",
+            "predictions 2, 6.",
             """model=tf.keras.Sequential([tf.keras.Input(shape=(1,)),tf.keras.layers.Dense(1,use_bias=False,kernel_initializer=tf.keras.initializers.Constant(2.))])
 x=np.array([[1.],[3.]],dtype='float32'); expected=model(x).numpy()
 np.testing.assert_array_equal(expected,[[2],[6]])""",
@@ -1548,7 +1548,7 @@ np.testing.assert_array_equal(expected,[[2],[6]])""",
         ex(
             "Round-trip .keras",
             "Save and reload the model in a temporary directory.",
-            "reloaded predictions match within1e-6.",
+            "reloaded predictions match within 1e-6.",
             """temporary=tempfile.TemporaryDirectory(); folder=Path(temporary.name); keras_path=folder/'model.keras'; model.save(keras_path)
 loaded=tf.keras.models.load_model(keras_path)
 np.testing.assert_allclose(loaded(x).numpy(),expected,atol=1e-6,rtol=0)""",
@@ -1566,7 +1566,7 @@ np.testing.assert_allclose(exported.serve(tf.constant(x)).numpy(),expected,atol=
         ex(
             "Check both in a fresh process",
             "Load the .keras model and exported endpoint in a child interpreter and compare their outputs.",
-            "both child outputs[[2],[6]].",
+            "both child outputs [[2], [6]].",
             '''program=textwrap.dedent("""
 import json,sys,tensorflow as tf
 x=tf.constant([[1.],[3.]])
@@ -1585,7 +1585,7 @@ np.testing.assert_allclose(a,expected,atol=1e-6,rtol=0); np.testing.assert_allcl
         ex(
             "Check a new batch length",
             "Use three valid rows instead of two with the restored model.",
-            "output shape(3,1), predictions0,4,8.",
+            "output shape (3, 1), predictions 0, 4, 8.",
             """new=loaded(np.array([[0.],[2.],[4.]],dtype='float32')).numpy()
 assert new.shape==(3,1); np.testing.assert_array_equal(new[:,0],[0,4,8])""",
             "The feature width stays fixed while batch length varies. This confirms the intended leading-axis flexibility, not support for arbitrary feature dimensions.",
@@ -1604,7 +1604,7 @@ assert new.shape==(3,1); np.testing.assert_array_equal(new[:,0],[0,4,8])""",
 add(
     "tf-033",
     """Inference is a function with a data contract, not just a call to model.predict. The model expects a nonempty batch of two finite float32 features per record and accepts at most four records. Inputs outside that boundary should receive named failures rather than silent coercion. Batching should preserve record identity: predicting one record alone or alongside others should give the same result for this stateless model. This local contract does not start a server or claim security isolation. It establishes a small, reviewable boundary that an eventual service would need to enforce consistently.""",
-    """np.asarray inspects the incoming data without automatically changing its dtype. Check rank, feature width, batch limit and finiteness before converting to a tensor. A fixed coefficient vector[2,-1] gives an independent expected output. Returning a new array prevents a caller from mutating stored input through a shared view. Validation order should make errors predictable enough to diagnose.""",
+    """np.asarray inspects the incoming data without automatically changing its dtype. Check rank, feature width, batch limit and finiteness before converting to a tensor. A fixed coefficient vector [2, -1] gives an independent expected output. Returning a new array prevents a caller from mutating stored input through a shared view. Validation order should make errors predictable enough to diagnose.""",
     [
         ("Inference contract", "Accepted inputs and guaranteed output structure for prediction."),
         ("Batch limit", "Maximum number of observations accepted in one call."),
@@ -1613,8 +1613,8 @@ add(
     [
         ex(
             "Predict a valid batch",
-            "Predict for float32 rows[1,2],[3,4].",
-            "outputs 0,2 with shape(2,).",
+            "Predict for float32 rows [1, 2], [3, 4].",
+            "outputs 0, 2 with shape (2,).",
             """x=np.array([[1,2],[3,4]],dtype='float32'); result=predict(x)
 np.testing.assert_array_equal(result,[0,2]); assert result.shape==(2,)""",
             "The reference coefficient vector makes output arithmetic transparent. Shape validation ensures the result is one scalar per input record.",
@@ -1629,7 +1629,7 @@ np.testing.assert_array_equal(single,result)""",
         ),
         ex(
             "Reject empty and oversized batches",
-            "Pass shapes(0,2) and(5,2).",
+            "Pass shapes (0, 2) and (5, 2).",
             "ValueError with batch in the message.",
             """for bad in [np.empty((0,2),dtype='float32'),np.zeros((5,2),dtype='float32')]:
     try: predict(bad)
@@ -1639,7 +1639,7 @@ np.testing.assert_array_equal(single,result)""",
         ),
         ex(
             "Reject wrong feature structure",
-            "Pass a vector[1,2] and a matrix with three columns.",
+            "Pass a vector [1, 2] and a matrix with three columns.",
             "ValueError with shape in the message.",
             """for bad in [np.array([1,2],dtype='float32'),np.zeros((2,3),dtype='float32')]:
     try: predict(bad)
@@ -1691,25 +1691,25 @@ add(
     [
         ex(
             "Count errors by group",
-            "Use groupsA,A,B with predictions1,0,0 and truth1,1,0.",
-            "A1/2 errors; B0/1.",
+            "Use groups A, A, B with predictions 1, 0, 0 and truth 1, 1, 0.",
+            "group A: 1/2 errors; group B: 0/1.",
             """rows=[('a','A',1,1),('b','A',1,0),('c','B',0,0)]
 report={g:(sum(t!=p for i,k,t,p in rows if k==g),sum(k==g for i,k,t,p in rows)) for g in ['A','B']}
 assert report=={'A':(1,2),'B':(0,1)}""",
-            "Both numerator and denominator are visible. Reporting only rates would conceal the fact that groupB has a single observation.",
+            "Both numerator and denominator are visible. Reporting only rates would conceal the fact that group B has a single observation.",
         ),
         ex(
             "Expose duplicate confidence",
-            "Repeat the groupB row five times and compare row count with unique IDs.",
-            "8 rows but only3 unique IDs.",
+            "Repeat the group B row five times and compare row count with unique IDs.",
+            "8 rows but only 3 unique IDs.",
             """repeated=rows+[rows[-1]]*5
 assert len(repeated)==8 and len({r[0] for r in repeated})==3""",
             "Duplicating a correct observation can improve a row-weighted score without testing a new case. Identity-aware evaluation prevents artificial increases in apparent evidence.",
         ),
         ex(
             "Evaluate fixed perturbations",
-            "Use f(x)=x>=0 with base1 and perturbations-.1,-.9,-1.1.",
-            "first two retain class1; final perturbation changes to0.",
+            "Use f(x)=x>=0 with base 1 and perturbations -0.1, -0.9, -1.1.",
+            "first two retain class 1; final perturbation changes to 0.",
             """base=1.; shifts=[-.1,-.9,-1.1]; pred=[int(base+s>=0) for s in shifts]
 assert pred==[1,1,0]""",
             "The last perturbation crosses the defined decision boundary. Whether it is a robustness failure depends on whether the label is supposed to remain unchanged under that shift.",
@@ -1717,7 +1717,7 @@ assert pred==[1,1,0]""",
         ex(
             "Keep severities separate",
             "Record one severe failure and nine minor passes; count severe failures independently of total pass rate.",
-            "90percent passes and 1 severe failure.",
+            "90 percent passes and 1 severe failure.",
             """severity=['minor']*9+['severe']; passed=[True]*9+[False]
 assert sum(passed)/len(passed)==.9
 assert sum(s=='severe' and not p for s,p in zip(severity,passed))==1""",
@@ -1726,7 +1726,7 @@ assert sum(s=='severe' and not p for s,p in zip(severity,passed))==1""",
         ex(
             "Write bounded claims",
             "Create a model card naming the three unique units and untested conditions.",
-            "card includes count3 and an untested future-population condition.",
+            "card includes count 3 and an untested future-population condition.",
             """card={'evaluation_units':3,'intended_use':'synthetic teaching','untested':['future population','private training data'],'privacy_guarantee':False}
 assert card['evaluation_units']==3 and 'future population' in card['untested'] and card['privacy_guarantee'] is False""",
             "Explicit limitations constrain how the results may be used. Declaring a missing guarantee is more informative than an unqualified claim that the model was checked.",
@@ -1734,7 +1734,7 @@ assert card['evaluation_units']==3 and 'future population' in card['untested'] a
         ex(
             "Reject an empty group rate",
             "Compute a rate only when its group has observations.",
-            "empty group producesNone, not0.",
+            "empty group produces None, not 0.",
             """def rate(errors,count): return None if count==0 else errors/count
 assert rate(0,0) is None and rate(0,1)==0""",
             "No observations and zero observed failures are different states. Mapping both to zero would make an untested group look perfectly reliable.",
@@ -1747,15 +1747,15 @@ add(
     """A model comparison should preserve pairing: both models predict the same held-out identities. Subtract each record loss before summarizing so shared difficulty remains represented. Resampling the pairs approximates variability under a stated sampling assumption; resampling each model separately discards their dependence. A fixed seed makes the teaching calculation reproducible, but it does not make a small sample representative. If related observations share a group, resample groups rather than pretending every row is independent. Model selection belongs on validation data. Opening the final test and then changing configuration consumes it as a selection source, even if the resulting number is still called test error.""",
     """Align dictionaries by stable IDs and verify equal key sets. Compute per-ID squared errors for each model and their difference. np.random.default_rng provides a local seeded generator. Sample integer indices with replacement and apply the same indices to the paired difference vector. A percentile interval describes this resampling calculation under its assumptions, not a universal confidence guarantee.""",
     [
-        ("Paired difference", "LossA minus lossB for the same observation."),
+        ("Paired difference", "Loss A minus loss B for the same observation."),
         ("Bootstrap", "Resampling observed units with replacement."),
         ("Selection leakage", "Using assessment outcomes to choose the evaluated configuration."),
     ],
     [
         ex(
             "Align by identity",
-            "Use trutha0,b1,c2 and two prediction dictionaries with different insertion order.",
-            "paired differences[-1,0,-1].",
+            "Use truth a=0, b=1, c=2 and two prediction dictionaries with different insertion order.",
+            "paired differences [-1, 0, -1].",
             """truth={'a':0.,'b':1.,'c':2.}; a={'a':0.,'b':2.,'c':2.}; b={'c':3.,'a':1.,'b':2.}
 ids=sorted(truth); diff=np.array([(a[i]-truth[i])**2-(b[i]-truth[i])**2 for i in ids])
 np.testing.assert_array_equal(diff,[-1,0,-1])""",
@@ -1764,21 +1764,21 @@ np.testing.assert_array_equal(diff,[-1,0,-1])""",
         ex(
             "Calculate the mean difference",
             "Average the three paired loss differences and interpret its sign.",
-            "mean-2/3; modelA has lower MSE on this fixture.",
+            "mean -2/3; model A has lower MSE on this fixture.",
             """np.testing.assert_allclose(diff.mean(),-2/3,atol=1e-12,rtol=0)""",
             "The sign depends on the declared subtraction order. A negative A-minus-B loss difference favors A for this metric and sample only.",
         ),
         ex(
             "Resample paired units",
-            "Draw1000 bootstrap index rows with seed7 and average each selected difference vector.",
-            "1000 finite estimates within[-1,0].",
+            "Draw 1000 bootstrap index rows with seed 7 and average each selected difference vector.",
+            "1000 finite estimates within [-1, 0].",
             """rng=np.random.default_rng(7); indices=rng.integers(0,len(diff),size=(1000,len(diff))); estimates=diff[indices].mean(1)
 assert estimates.shape==(1000,) and np.isfinite(estimates).all() and estimates.min()>=-1 and estimates.max()<=0""",
             "Sampling one difference vector automatically preserves pairing. The attainable bounds are known from the fixture, so they independently check the implementation.",
         ),
         ex(
             "Reproduce the resampling",
-            "Repeat with a fresh seed7 generator and compare the entire estimate vector.",
+            "Repeat with a fresh seed 7 generator and compare the entire estimate vector.",
             "exact same estimates.",
             """again=np.random.default_rng(7).integers(0,3,size=(1000,3))
 np.testing.assert_array_equal(diff[again].mean(1),estimates)""",
@@ -1786,7 +1786,7 @@ np.testing.assert_array_equal(diff[again].mean(1),estimates)""",
         ),
         ex(
             "Refuse mismatched IDs",
-            "Remove predictionc from one model and check alignment before computing differences.",
+            "Remove prediction c from one model and check alignment before computing differences.",
             "key-set mismatch detected.",
             """missing={k:v for k,v in b.items() if k!='c'}
 assert set(missing)!=set(truth)""",
@@ -1816,8 +1816,8 @@ add(
     [
         ex(
             "Build a literal model bundle",
-            "Create a float32 two-feature model with coefficient[2,-1] and schema width2.",
-            "probe[3,4] predicts2.",
+            "Create a float32 two-feature model with coefficient [2, -1] and schema width 2.",
+            "probe [3, 4] predicts 2.",
             """weights=np.array([[2.],[-1.]],dtype='float32'); schema={'features':['a','b'],'dtype':'float32','width':2}
 model=tf.keras.Sequential([tf.keras.Input(shape=(2,)),tf.keras.layers.Dense(1,use_bias=False)]); model.layers[0].set_weights([weights])
 np.testing.assert_array_equal(model(np.array([[3,4]],dtype='float32')).numpy(),[[2]])""",
@@ -1825,8 +1825,8 @@ np.testing.assert_array_equal(model(np.array([[3,4]],dtype='float32')).numpy(),[
         ),
         ex(
             "Freeze and hash a split manifest",
-            "Hash train IDs[a,b] and test IDs[c,d] using canonical JSON.",
-            "disjoint IDs and a64-character SHA256.",
+            "Hash train IDs [a, b] and test IDs [c, d] using canonical JSON.",
+            "disjoint IDs and a 64-character SHA256.",
             """import hashlib,json
 split={'train':['a','b'],'test':['c','d']}; payload=json.dumps(split,sort_keys=True,separators=(',',':')).encode(); digest=hashlib.sha256(payload).hexdigest()
 assert not set(split['train'])&set(split['test']) and len(digest)==64""",
@@ -1843,15 +1843,15 @@ assert other!=digest""",
         ex(
             "Block incompatible schemas",
             "Compare an incoming three-feature schema with the frozen two-feature schema before prediction.",
-            "schema gate isFalse.",
+            "schema gate is False.",
             """incoming={'features':['a','b','c'],'dtype':'float32','width':3}
 assert incoming!=schema""",
             "A model might accept a tensor through unintended broadcasting or fail later with a low-level error. A named schema gate explains the problem before executing the wrong interpretation.",
         ),
         ex(
             "Make the decision fail closed",
-            "Evaluate required gates with an unexecuted restart proof represented asNone, then with an actual failed schema gate.",
-            "both decisionsno-go.",
+            "Evaluate required gates with an unexecuted restart proof represented as None, then with an actual failed schema gate.",
+            "both decisions no-go.",
             """gates={'prediction':True,'split':True,'restart':None,'schema':True}
 assert not all(value is True for value in gates.values())
 gates.update(restart=True,schema=False); assert not all(value is True for value in gates.values())""",
@@ -1860,7 +1860,7 @@ gates.update(restart=True,schema=False); assert not all(value is True for value 
         ex(
             "Retain a rollback decision",
             "Construct a release record with previous artifact ID, holdout count and limits; keep no-go when any gate fails.",
-            "decisionno-go and previous artifactv1 retained.",
+            "decision no-go and previous artifact v1 retained.",
             """record={'candidate':'v2','previous':'v1','holdout_count':2,'decision':'go' if all(v is True for v in gates.values()) else 'no-go','limits':['synthetic fixture only']}
 assert record['decision']=='no-go' and record['previous']=='v1' and record['holdout_count']==2""",
             "A release record should explain what can be restored and why a candidate was blocked. A failed capstone check is useful evidence, not an invitation to bypass the gate.",

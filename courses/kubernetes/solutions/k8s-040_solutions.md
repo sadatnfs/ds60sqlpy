@@ -26,7 +26,7 @@ The hypotheses connect symptoms to mechanisms. A Ready Pod weakens some crash ex
 
 The controlled one-fault trace supports a narrow causal explanation. In a real incident, the same correlation would require checking concurrent changes and alternative causes rather than assuming the teacher-supplied synthetic control conditions.
 
-**Expected:** Selector changes at 10; zero endpoints observed at 15 while readiness remains1.
+**Expected:** Selector changes at 10; zero endpoints observed at 15 while readiness remains 1.
 
 ## Exercise 4: Apply the minimal bounded repair
 

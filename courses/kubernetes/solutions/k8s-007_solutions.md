@@ -20,7 +20,7 @@ A selector is a set query over labels. It does not establish ownership by itself
 
 The chain connects client-facing and backend ports. A Service object can exist even if this mapping is wrong, so object creation alone is insufficient routing evidence.
 
-**Expected:** Client8080 -> targetPort http -> container8080.
+**Expected:** Client 8080 -> targetPort http -> container 8080.
 
 ## Exercise 3: Count unique backends
 
@@ -32,7 +32,7 @@ Multiple slices or IP families can repeat a Pod identity. Set comparison avoids 
 
 The negative case tests the connection between selection and routing. A later successful Run is a fresh operation with its own UIDs, not evidence that the earlier Service persisted and was patched.
 
-**Expected:** No matching ready backends; bounded failure and cleanup; restored source can pass separately.
+**Expected:** The unchanged starter has no matching ready backends and fails within its bound, with cleanup; the restored source can pass in a separate Run.
 
 ## Exercise 5: Verify an independent client
 

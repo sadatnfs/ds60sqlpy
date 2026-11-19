@@ -1,6 +1,6 @@
 # csharp-011: explanation and comparison
 
-Attempt the six guide tasks before opening this comparison. The executable reference is [csharp-011_solution.cs](csharp-011_solution.cs). Its assertions are always active under the prepared classroom compile settings.
+Attempt the six guide tasks before opening this comparison. The executable reference is [csharp-011_solution.cs](csharp-011_solution.cs). It runs both worked examples and the reference answers below, and its assertions are always active under the prepared classroom compile settings.
 
 ## Why the two examples differ
 
@@ -8,21 +8,59 @@ Attempt the six guide tasks before opening this comparison. The executable refer
 
 **Distinguish zero from missing:** Pattern matching unwraps only the present case, giving a nonnullable variable inside that branch. A measured zero and an unknown measurement produce distinct descriptions.
 
-## Reason through the six tasks
+## Task answers
 
-1. **Predict and explain.** Predict nullable length and its fallback for null and empty text.
+### Task 1: Predict and explain
 
-2. **Guided modification.** Use a visible unknown label rather than a numeric sentinel.
+Predict nullable length and its fallback for null and empty text.
 
-3. **Independent construction.** Write a formatter preserving missing, zero and positive measurements.
+No separate reference answer has been written for this task. Example A is the evidence to compare with: Conditional access propagates missing information until a boundary deliberately chooses a display representation. The optional length is absent, not zero.
 
-4. **Diagnose a defect.** Diagnose using ! to suppress a warning on an actually null value.
+### Task 2: Guided modification
 
-5. **Boundary evidence.** Test whitespace-only text separately from null and empty text.
+Use a visible unknown label rather than a numeric sentinel.
 
-6. **Transfer and justify.** Design an import field whose missing value has different meaning from an explicit zero or empty value.
+No separate reference answer has been written for this task. Start from Example B: Pattern matching unwraps only the present case, giving a nonnullable variable inside that branch. A measured zero and an unknown measurement produce distinct descriptions.
 
-For tasks 1 and 2, use the checked values and mechanism trace in the two examples. For task 3, choose names that expose the input and result contract and retain the same invariants. For task 4, the diagnosed mistakes below supply a concrete wrong assumption: preserve its counterexample before repairing it. Task 5 needs an explicit expected value or documented rejection at the boundary, not just successful execution. For task 6, explain what changes in the new context and which part of the original mechanism remains applicable. Several representations may satisfy this transfer task; justify the choice rather than treating this reference as the only architecture.
+### Task 3: Independent construction
+
+Write a formatter preserving missing, zero and positive measurements.
+
+**Reference answer.** It runs as the `Task 3` block of the reference program.
+
+```csharp
+string Format(int? value) {
+  if (value is null) {
+    return "missing";
+  }
+  return value.Value == 0 ? "zero" : $"{value.Value} units";
+}
+Check(Format(null) == "missing", "missing stays missing");
+Check(Format(0) == "zero", "zero is a measurement");
+Check(Format(5) == "5 units", "positive measurement");
+```
+
+**Observe:** null, 0 and 5 are formatted as missing, zero and 5 units.
+
+The nullable parameter keeps absence separate from zero, and each of the three cases has its own text.
+
+### Task 4: Diagnose a defect
+
+Diagnose using ! to suppress a warning on an actually null value.
+
+No reference answer has been written for this task yet. The wrong assumptions to look for are this lesson's pitfalls: A warning suppression is not validation. Null, empty and whitespace-only text are different states. Returning a fallback too early can irreversibly discard useful information.
+
+### Task 5: Boundary evidence
+
+Test whitespace-only text separately from null and empty text.
+
+No reference answer has been written for this task yet. Write the expected value or documented rejection for each boundary before running it, and compare with the checks in Example A (Carry absence through a computation) and Example B (Distinguish zero from missing).
+
+### Task 6: Transfer and justify
+
+Design an import field whose missing value has different meaning from an explicit zero or empty value.
+
+No single reference answer exists: several designs can satisfy this transfer task. Justify yours against the mechanism described below and the vocabulary entry **Null**, and state one limitation of your choice.
 
 ## Mechanism and diagnostic reasoning
 
@@ -36,4 +74,4 @@ A warning suppression is not validation. Null, empty and whitespace-only text ar
 
 ## Review before continuing
 
-The reference checks the worked scenarios, including their boundary distinctions. Your independent and transfer artifacts may have additional checks. Compare observations rather than only source text. Preserve any new regression case you discover and explain why it would reject a plausible wrong implementation. External project steps require their own build and platform evidence and are not established by a portable reference passing.
+Run the reference and confirm that it prints `csharp-011: passed`, then reconstruct one boundary case from memory and explain which check would reject a plausible wrong implementation. External project steps need their own build and platform evidence; a passing portable reference does not establish them.

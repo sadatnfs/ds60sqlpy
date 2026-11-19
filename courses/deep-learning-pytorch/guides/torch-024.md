@@ -6,7 +6,13 @@ Intermediate; approximately 210 minutes. Direct prerequisites: `torch-023`. The 
 
 ## Learning objectives
 
-A classifier capstone must connect the task definition to training and evaluation evidence. The central investigation is concrete: Use training x-2, -1, 1, 2 with labels 0, 0, 1, 1 and test x-3, 3. The finish condition is 4training records, 2test records. negative 0/1errors; positive \(\frac{1}{1}\). A useful explanation connects the calculation to the reason it is needed, rather than treating a function name as a definition.
+Train and evaluate a small logistic classifier with training-only normalization, a confusion table, a baseline and group-level error counts.
+
+Central investigation: Normalize four training points, train 40 SGD steps on binary logits and threshold two test points at logit 0.
+
+Finish condition: Normalization uses mean 0 and scale \(\sqrt{2.5}\), the trained weight is positive and finite, the test confusion counts are TP 1, TN 1, FP 0 and FN 0, the constant baseline makes 1 error, and the group report shows 0 of 1 and 1 of 1 wrong after the flip.
+
+The worked examples demonstrate the mechanism; exercises 1-3 transfer it to new inputs and exercises 4-6 extend it to failures and boundary cases. A useful explanation connects the calculation to the reason it is needed, rather than treating a function name as a definition.
 
 ## Purpose and mental model
 
@@ -50,9 +56,9 @@ Use X shaped (4, 1), floating binary targets and nn.Linear(1, 1, bias=False). Ca
 
 The training values `[-2, -1, 1, 2]` have mean zero and squared deviations summing to ten. Population variance divides by four, giving 2.5 and scale \(\sqrt{2.5}\). PyTorch's `correction=0` matches NumPy's default used in the paired TensorFlow guide. Using the default sample correction would divide by three and produce \(\sqrt{\frac{10}{3}}\). Both scales are mathematically meaningful statistics, but they define different model inputs and update trajectories. Equal final class labels would not prove framework parity.
 
-The stored model weight has shape(1, 1), inputs and targets have shape(4, 1), and logits have shape(4, 1). The bias is deliberately absent. Binary cross-entropy with logits is applied directly to those logits. Applying sigmoid first and then passing its output to the logits loss would change the objective. A target shaped(4, ) is also a different interface from(4, 1), even when it contains the same four numbers; preserve the declared axes rather than relying on broadcasting or reshaping after a failure.
+The stored model weight has shape (1, 1), inputs and targets have shape (4, 1), and logits have shape (4, 1). The bias is deliberately absent. Binary cross-entropy with logits is applied directly to those logits. Applying sigmoid first and then passing its output to the logits loss would change the objective. A target shaped (4, ) is also a different interface from (4, 1), even when it contains the same four numbers; preserve the declared axes rather than relying on broadcasting or reshaping after a failure.
 
-For one normalized feature t and label y, the logit is \(z=\mathrm{wt}\) and the loss derivative with respect to w is \((\operatorname{sigmoid}(z)-y)t\). At \(w=0\), all probabilities are one-half. Writing \(s=\sqrt{2.5}\), the four derivative contributions are \(\frac{-1}{s}\), -1/(2s), -1/(2s), \(\frac{-1}{s}\). Their mean is -3/(4s), approximately-0.474342. The first SGD step at 0.1 therefore makes w approximately 0.0474342. This analytic sign and scale explain why the later fixed 40-step run should have a positive finite weight.
+For one normalized feature t and label y, the logit is \(z=\mathrm{wt}\) and the loss derivative with respect to w is \((\operatorname{sigmoid}(z)-y)t\). At \(w=0\), all probabilities are one-half. Writing \(s=\sqrt{2.5}\), the four derivative contributions are \(\frac{-1}{s}\), -1/(2s), -1/(2s), \(\frac{-1}{s}\). Their mean is -3/(4s), approximately -0.474342. The first SGD step at 0.1 therefore makes w approximately 0.0474342. This analytic sign and scale explain why the later fixed 40-step run should have a positive finite weight.
 
 The data are separable under this one-feature rule. In an unregularized logistic model, continued loss reduction can push the weight larger without a finite optimum that must be reached. Forty steps are a declared computational budget, not evidence of convergence or a reason to repeat training until a preferred test score appears. If early stopping or hyperparameters are to be selected, they need a separate selection procedure and data boundary.
 
@@ -92,7 +98,7 @@ test_ids = {"e", "f"}
 assert not train_ids & test_ids and len(test_ids) == 2
 ```
 
-**Expected:** 4training records, 2test records.
+**Expected:** 4 training records, 2 test records.
 
 ### Example B: Fit explicit normalization
 
@@ -107,7 +113,7 @@ assert mean.item() == 0
 np.testing.assert_allclose(scale.item(), np.sqrt(2.5), atol=1e-6, rtol=0)
 ```
 
-**Expected:** mean 0; scale sqrt 2.5.
+**Expected:** mean 0; scale \(\sqrt{2.5}\).
 
 ### Example C: Train a fixed classifier
 
@@ -130,37 +136,37 @@ assert model.weight.item() > 0 and torch.isfinite(model.weight).all()
 
 ## Prediction before your attempt
 
-For the supplied fixture, name the input unit, the intermediate state and the final quantity that changes. Predict one normal result and one failure result before touching the code. In particular, explain this lesson's acceptance condition in your own words: 4training records, 2test records. negative 0/1errors; positive \(\frac{1}{1}\). Preserve the prediction beside your later observations so a correction is visible. A copied expected value is not a derivation.
+For the supplied fixture, name the input unit, the intermediate state and the final quantity that changes. Predict one normal result and one failure result before touching the code. In particular, explain this lesson's acceptance condition in your own words: Normalization uses mean 0 and scale \(\sqrt{2.5}\), the trained weight is positive and finite, the test confusion counts are TP 1, TN 1, FP 0 and FN 0, the constant baseline makes 1 error, and the group report shows 0 of 1 and 1 of 1 wrong after the flip. Preserve the prediction beside your later observations so a correction is visible. A copied expected value is not a derivation.
 
 ## Exercises
 
-1. **Freeze the geometric task.** Use training x-2, -1, 1, 2 with labels 0, 0, 1, 1 and test x-3, 3.
-   **Expected:** 4training records, 2test records.
-   **Verify:** Save the assertion results for exercise 1, including 4training records, 2test records.
+1. **Fit normalization on new training values.** Use training inputs 0, 2, 4, 6, compute the mean and population standard deviation, and transform the test input 8.
+   **Expected:** mean 3; scale \(\sqrt{5}\); transformed test value \(\sqrt{5}\), about 2.2361.
+   **Verify:** In a fresh process, the exercise checks confirm `centre.item() == 3`, `spread.item()` matches `np.sqrt(5)` within 1e-06 and `((torch.tensor([[8.0]]) - centre) / spread).item()` matches `np.sqrt(5)` within 1e-06.
 
-2. **Fit explicit normalization.** Calculate training mean and population standard deviation.
-   **Expected:** mean 0; scale sqrt 2.5.
-   **Verify:** Save the assertion results for exercise 2, including mean 0; scale sqrt 2.5.
+2. **Count a new confusion table.** Compare predictions True, False, True, True with truth True, False, False, True.
+   **Expected:** TP 2, TN 1, FP 1, FN 0.
+   **Verify:** In a fresh process, the exercise checks confirm `counts == {'TP': 2, 'TN': 1, 'FP': 1, 'FN': 0}`.
 
-3. **Train a fixed classifier.** Zero-initialize the weight and run 40 SGD with rate 0.1 steps with binary logits loss.
-   **Expected:** positive finite weight after 40 updates.
-   **Verify:** Save the assertion results for exercise 3, including positive finite weight after 40 updates.
+3. **Classify with a fixed weight.** With weight 2 and no bias, classify the normalized inputs -1.5, -0.2, 0 and 0.4 at logit 0, counting 0 as positive.
+   **Expected:** False, False, True, True.
+   **Verify:** In a fresh process, the exercise checks confirm `(logits_t >= 0).tolist() == [False, False, True, True]`.
 
 4. **Account for every test prediction.** Threshold test logits at 0 and calculate confusion counts.
    **Expected:** TP 1, TN 1, FP 0, FN 0, total 2.
-   **Verify:** Save the assertion results for exercise 4, including TP 1, TN 1, FP 0, FN 0, total 2.
+   **Verify:** In a fresh process, the exercise checks confirm `counts == {'tp': 1, 'tn': 1, 'fp': 0, 'fn': 0}` and `sum(counts.values()) == 2`.
 
 5. **Compare a constant baseline.** Predict class 0 for both test rows and count mistakes.
    **Expected:** baseline 1 error; model 0 on this fixture.
-   **Verify:** Save the assertion results for exercise 5, including baseline 1 error; model 0 on this fixture.
+   **Verify:** In a fresh process, the exercise checks confirm `int((baseline != truth).sum()) == 1` and `int((prediction != truth).sum()) == 0`.
 
 6. **Reveal a group-specific failure.** Flip only the positive group decision and report group counts.
-   **Expected:** negative 0/1errors; positive \(\frac{1}{1}\).
-   **Verify:** Save the assertion results for exercise 6, including negative 0/1errors; positive \(\frac{1}{1}\).
+   **Expected:** negative class: 0 of 1 wrong; positive class: 1 of 1 wrong.
+   **Verify:** In a fresh process, the exercise checks confirm `report == {'negative': (0, 1), 'positive': (1, 1)}`.
 
 ## Common pitfalls and diagnosis
 
-If a paired-framework weight differs, check `correction=0`, initialization, loss reduction, target shape and update count before assuming a backend defect. Compute the first derivative -3/(4sqrt(2.5)) and inspect its sign. If the model predicts both classes incorrectly, verify that thresholding uses logits rather than a second sigmoid interpretation and that truth rows retain their identity order.
+If a paired-framework weight differs, check `correction=0`, initialization, loss reduction, target shape and update count before assuming a backend defect. Compute the first derivative -3/(4 \(\sqrt{2.5}\)) and inspect its sign. If the model predicts both classes incorrectly, verify that thresholding uses logits rather than a second sigmoid interpretation and that truth rows retain their identity order.
 
 If confusion counts do not sum to two, inspect Boolean complements, shape broadcasting and missing rows. If a subgroup report lacks its denominator, it is incomplete. If a result looks exceptionally strong, revisit the public geometric rule, tiny visible holdout and extrapolation range before calling it population evidence. A failed data or evaluation boundary is a no-go result even when the arithmetic accuracy is perfect.
 
@@ -170,7 +176,7 @@ First draw the state described in the vocabulary section. Next use the smallest 
 
 ## Self-check and retrieval
 
-Close both worked examples. Explain Confusion matrix, Frozen threshold, Population standard deviation using the lesson fixture. Reconstruct one computation from its inputs. Then change one input while retaining the mechanism and predict whether the conclusion survives. Write which part is guaranteed by the code and which part would need new observations. This last distinction prevents a tiny deterministic teaching example from being presented as evidence about an unseen population or a production model.
+Close all three worked examples. Explain Confusion matrix, Frozen threshold, Population standard deviation using the lesson fixture. Reconstruct one computation from its inputs. Then change one input while retaining the mechanism and predict whether the conclusion survives. Write which part is guaranteed by the code and which part would need new observations. This last distinction prevents a tiny deterministic teaching example from being presented as evidence about an unseen population or a production model.
 
 ## Next step
 
@@ -178,7 +184,7 @@ Revisit the direct prerequisite `torch-023` if the calculation cannot be reconst
 
 ## Sources and verification status
 
-API and mechanism reference: [PyTorch2.9 reference](https://docs.pytorch.org/docs/2.9/index.html), reviewed 2026-10-22. The fixture, examples, counterexamples and exercise design are original course material. See [validation](../../../docs/validation.md) for execution gates. Check CI artifacts for the exact revision and platform to determine which runtime checks actually ran; authored content alone does not establish runtime execution.
+API and mechanism reference: [PyTorch 2.9 reference](https://docs.pytorch.org/docs/2.9/index.html), reviewed 2026-10-22. The fixture, examples, counterexamples and exercise design are original course material. See [validation](../../../docs/validation.md) for execution gates. Check CI artifacts for the exact revision and platform to determine which runtime checks actually ran; authored content alone does not establish runtime execution.
 
 ## Interview reasoning with worked answers
 

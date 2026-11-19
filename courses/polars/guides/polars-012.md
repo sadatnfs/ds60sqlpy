@@ -20,9 +20,7 @@ to_arrow returns an Arrow Table; pl.from_arrow constructs a Polars result. Arrow
 
 ## Run the lesson
 
-Open this subject in `/classroom`, then show its code and notes. The prepared `data-engineering` worker runs `main.py` in a fresh temporary directory. The examples use installed packages and synthetic local fixtures; no account, cloud service, network request or package download is required. Save source and notes before switching lessons. Temporary databases, project files and tracking artifacts are recreated by each complete program and removed after the job. The classroom retains the submitted source and bounded output, not an indefinitely running external service. The guide distinguishes this local execution from the deployment decisions that need an owned production environment.
-
-
+Open `polars-012` in `/classroom`. Its starter `main.py` contains both worked cases, "Preserve values and validity" and "Encode a closed ordered vocabulary", and prints the dictionary each case returns. The prepared `data-engineering` worker runs it in a fresh temporary directory. An `AssertionError` means that an observation differs from the case's stated contract. The inputs are small literal tables. Cases that demonstrate Parquet scans write their files into a temporary directory that is removed when the case returns. No account, network request or package download is involved. Save source and notes before switching lessons.
 
 ## Worked case 1: Preserve values and validity
 
@@ -49,7 +47,6 @@ def example_one():
 if __name__ == "__main__":
     print(example_one())
 ```
-
 
 ## Worked case 2: Encode a closed ordered vocabulary
 
@@ -81,11 +78,9 @@ if __name__ == "__main__":
     print(example_two())
 ```
 
-
 ## Practice
 
-Make each requested change in a saved copy. Compare both the expected result and the deliberately changed assumption. The separate reference explains the answers.
-
+The starter contains both worked cases, so a task can change either one. Make each change in a saved copy, run it, and compare the printed result with the task's check before opening the separate explained answers.
 
 ### 1. Inspect a null bitmap conceptually
 
@@ -95,7 +90,6 @@ Explain why a null is separate from a numeric payload value.
 
 **Hint:** A missing value is not necessarily a special numeric sentinel.
 
-
 ### 2. Avoid a zero-copy claim
 
 State what the round-trip test actually proves.
@@ -103,7 +97,6 @@ State what the round-trip test actually proves.
 **Check:** It proves logical equality on the fixture.
 
 **Hint:** No allocation measurement was made.
-
 
 ### 3. Add a valid category
 
@@ -113,7 +106,6 @@ Extend the allowed states with returned.
 
 **Hint:** Vocabulary evolution changes the schema.
 
-
 ### 4. Reject an unknown category
 
 Add cancelled without changing the Enum.
@@ -121,7 +113,6 @@ Add cancelled without changing the Enum.
 **Check:** Strict conversion rejects it.
 
 **Hint:** Unknown is not a synonym for null.
-
 
 ### 5. Compare sort policies
 
@@ -131,7 +122,6 @@ Compare business-order and alphabetical sorting.
 
 **Hint:** Sort String and Enum representations separately.
 
-
 ### 6. Design an interchange contract
 
 List what a receiver needs beyond an Arrow object.
@@ -140,20 +130,19 @@ List what a receiver needs beyond an Arrow object.
 
 **Hint:** A transport format cannot define domain meaning.
 
-
 ## Diagnose errors and misleading results
 
 Unexpected copies are a performance question, while changed values are a correctness question. Diagnose them with different evidence. If categorical comparisons fail, check vocabulary versions and unknown labels before comparing physical codes. Keep label semantics visible when crossing languages or serializing an artifact.
 
 ## Transfer to independent work
 
-Move a typed table across an Arrow boundary while preserving its logical contract. Document which properties were checked and which memory claims were not measured. Use explicit category vocabularies when business order matters, and test unknown-value handling as part of schema evolution.
+Document which properties were checked and which memory claims were not measured. Use explicit category vocabularies when business order matters, and test unknown-value handling as part of schema evolution.
 
 ## Primary references
 
-- [Polars documentation: Arrow interoperability and categorical meaning](https://docs.pola.rs/user-guide/expressions/categorical-data-and-enums/)
+- [Polars user guide: Categorical data and enums](https://docs.pola.rs/user-guide/expressions/categorical-data-and-enums/)
 - [Polars Python API reference](https://docs.pola.rs/api/python/stable/reference/index.html)
 
 ## Tutor guidance
 
-Use the repository learning-companion skill for `polars-012`. Inspect the learner's own source and observations, ask for an explanation of the relevant data or state contract, and give a focused hint. Separate an assertion on this fixture from a claim about an external dataset or deployed service.
+Use the repository's `$guide-ds60sqlpy-learning` skill (`.agents/skills/guide-ds60sqlpy-learning/SKILL.md`) for `polars-012`. Inspect the learner's own source and printed output first. Ask for an explanation of Arrow, validity bitmap, Enum, category order and round trip in their own words, then give one focused hint at a time. Keep an assertion on this synthetic fixture separate from a claim about an external dataset or deployed service.

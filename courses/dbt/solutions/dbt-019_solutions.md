@@ -169,4 +169,4 @@ if __name__ == "__main__":
 
 ## Interpretation
 
-Run a project against an explicitly identified owned target and verify its actual destination. Preserve calculation semantics across routing changes, reject unknown environments and document the additional isolation requirements of real deployments.
+Preserve calculation semantics across routing changes, reject unknown environments and document the additional isolation requirements of real deployments.

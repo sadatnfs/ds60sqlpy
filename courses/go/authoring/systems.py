@@ -84,31 +84,31 @@ add(
             "The values describe this executed binary. They do not establish compatibility with another platform.",
         ),
         E(
-            "Validate a supported deployment tuple",
-            "Check linux/amd64 and linux/arm64 against an explicit target set.",
-            "Both tuples are admitted.",
-            r"""allowed:=map[string]bool{"linux/amd64":true,"linux/arm64":true};check(allowed["linux/amd64"]&&allowed["linux/arm64"],"targets")""",
-            "A declared target set is a configuration contract. Each image architecture still needs real build and execution evidence.",
+            "Validate the running deployment tuple",
+            "Check the worker's own GOOS/GOARCH pair against an explicit linux/amd64 and linux/arm64 target set.",
+            "The running Linux tuple is admitted.",
+            r"""allowed:=map[string]bool{"linux/amd64":true,"linux/arm64":true};target:=runtime.GOOS+"/"+runtime.GOARCH;check(allowed[target],"running target")""",
+            "A declared target set is a configuration contract, and the classroom worker is a Linux container on amd64 or arm64, so its own tuple must be in the set. Each additional image architecture still needs its own build and execution evidence.",
         ),
         E(
             "Refuse an unsupported tuple",
-            "Check an unrelated target against the same set.",
-            "The unsupported target is rejected.",
-            r"""allowed:=map[string]bool{"linux/amd64":true,"linux/arm64":true};check(!allowed["plan9/386"],"unsupported")""",
-            "Explicit rejection is clearer than silently choosing an incompatible artifact.",
+            "Check plan9/386 and an incomplete linux tuple with the same lookup, keeping linux/arm64 as the control.",
+            "Both unsupported tuples are rejected while linux/arm64 is admitted.",
+            r"""allowed:=map[string]bool{"linux/amd64":true,"linux/arm64":true};supported:=func(goos,goarch string)bool{return allowed[goos+"/"+goarch]};check(!supported("plan9","386")&&!supported("linux","")&&supported("linux","arm64"),"unsupported")""",
+            "Explicit rejection is clearer than silently choosing an incompatible artifact. The admitted control proves the lookup is not simply rejecting everything.",
         ),
         E(
             "Model stop-accepting before drain",
-            "Transition a service state from accepting to draining to stopped.",
-            "No new work is admitted once draining begins.",
-            r"""s:=ServiceState{Accepting:true,Active:2};s.Accepting=false;check(!s.Accepting&&s.Active==2,"drain start");s.Active=0;check(!s.Accepting&&s.Active==0,"stopped")""",
+            "Start with two active tasks, drain the service, try to admit a third task, then finish both tasks.",
+            "The third task is refused once draining begins, and the service stops only after both tasks finish.",
+            r"""s:=ServiceState{Accepting:true,Active:2};s.Drain();check(!s.Admit()&&s.Active==2,"drain start");s.Finish();s.Finish();check(!s.Accepting&&s.Active==0,"stopped")""",
             "Stopping admission and completing in-flight work are different steps. A single stopped flag cannot explain partial shutdown.",
         ),
         E(
             "Retain unfinished work evidence",
-            "Apply a shutdown budget that ends before two tasks finish.",
-            "The remaining task count stays visible.",
-            r"""s:=ServiceState{Accepting:false,Active:2};s.Active--;check(s.Active==1,"unfinished work")""",
+            "Admit one more task to a service already running one, drain it, and allow a shutdown budget of one completion.",
+            "One of the two tasks remains unfinished and visible.",
+            r"""s:=ServiceState{Accepting:true,Active:1};check(s.Admit()&&s.Active==2,"admitted");s.Drain();budget:=1;for i:=0;i<budget;i++{s.Finish()};check(s.Active==1,"unfinished work")""",
             "A timeout must not manufacture completion. Real services should retain or report recoverable work according to their delivery guarantees.",
         ),
         E(
@@ -120,7 +120,10 @@ add(
         ),
     ],
     imports="runtime",
-    helper="type ServiceState struct{Accepting bool;Active int}",
+    helper="""type ServiceState struct{Accepting bool;Active int}
+func (s *ServiceState) Admit() bool {if !s.Accepting{return false};s.Active++;return true}
+func (s *ServiceState) Drain() {s.Accepting=false}
+func (s *ServiceState) Finish() {if s.Active>0{s.Active--}}""",
     source="https://go.dev/doc/install/source#environment",
     boundary="The pad compiles and executes one file in Linux Docker. Real container-build and OS-signal exercises belong in the Docker module or an explicitly prepared project. The pad does not receive an engine socket, arbitrary process arguments or cgo support.",
 )
@@ -151,30 +154,30 @@ add(
         ),
         E(
             "Separate name and incarnation",
-            "Construct two objects sharing name but having different UIDs.",
-            "Their names match but identities differ.",
-            r"""a:=Metadata{Name:"demo",Namespace:"lesson",UID:"old"};b:=Metadata{Name:"demo",Namespace:"lesson",UID:"new"};check(a.Name==b.Name&&a.UID!=b.UID,"incarnation")""",
+            "Decode two objects that share namespace and name but carry different UIDs.",
+            "Their names match but their identities differ.",
+            r"""var a,b Deployment;errA:=json.Unmarshal([]byte(`{"metadata":{"name":"demo","namespace":"lesson","uid":"old"}}`),&a);errB:=json.Unmarshal([]byte(`{"metadata":{"name":"demo","namespace":"lesson","uid":"new"}}`),&b);check(errA==nil&&errB==nil,"decode");check(a.Metadata.Name==b.Metadata.Name&&a.Metadata.UID!=b.Metadata.UID,"incarnation")""",
             "Cleanup based only on name can delete a replacement object that the operation never owned.",
         ),
         E(
             "Keep namespaces in a key",
-            "Build keys for the same name in two namespaces.",
-            "The keys are different.",
-            r"""a,b:="alpha/demo","beta/demo";check(a!=b,"namespace key")""",
+            "Build keys with one function for the same name in two namespaces.",
+            "The key is alpha/demo for the first object and differs from the second object's key.",
+            r"""key:=func(m Metadata)string{return m.Namespace+"/"+m.Name};a:=Metadata{Name:"demo",Namespace:"alpha"};b:=Metadata{Name:"demo",Namespace:"beta"};check(key(a)=="alpha/demo"&&key(a)!=key(b),"namespace key")""",
             "Names are unique within a namespaced resource scope, not across the whole cluster.",
         ),
         E(
             "Treat versions as opaque",
-            "Store a nonnumeric resourceVersion token and compare it for equality.",
-            "The exact token is retained.",
-            r"""m:=Metadata{Version:"opaque-v7"};check(m.Version=="opaque-v7","opaque version")""",
-            "Do not increment, subtract or numerically order resourceVersion. Its supported meaning is defined by API operations.",
+            "Decode resourceVersion tokens 10 and 9 and compare them as the strings they are.",
+            "Both tokens are retained exactly; they differ, and string order even places 10 before 9, so only equality is meaningful.",
+            r"""var a,b Metadata;errA:=json.Unmarshal([]byte(`{"resourceVersion":"10"}`),&a);errB:=json.Unmarshal([]byte(`{"resourceVersion":"9"}`),&b);check(errA==nil&&errB==nil,"decode");check(a.Version=="10"&&a.Version!=b.Version&&a.Version<b.Version,"opaque version")""",
+            "Do not increment, subtract or numerically order resourceVersion. Its supported meaning is defined by API operations, and comparing tokens as text produces an order with no meaning.",
         ),
         E(
             "Transfer readiness reasoning",
-            "Compare desired 3 with ready 3 and then ready 2.",
+            "Apply one readiness predicate to desired 3 with ready 3 and then ready 2.",
             "Only the equal complete state satisfies this simplified predicate.",
-            r"""wanted:=3;check(wanted==3&&3==wanted,"ready");check(2!=wanted,"not ready")""",
+            r"""complete:=func(d Deployment)bool{return d.Spec.Replicas!=nil&&d.Status.Ready==*d.Spec.Replicas};want:=3;var d Deployment;d.Spec.Replicas=&want;d.Status.Ready=3;check(complete(d),"ready");d.Status.Ready=2;check(!complete(d),"not ready")""",
             "A real Deployment readiness check also considers generation and conditions. This count comparison is only one part of that contract.",
         ),
     ],
@@ -343,10 +346,10 @@ add(
         ),
         E(
             "Retain another field",
-            "Change one scalar while keeping a separate owner label.",
-            "The unrelated label is unchanged.",
-            r"""labels:=map[string]string{"owner":"other"};s:=Versioned{Value:1,Version:"x"};check(versionUpdate(&s,"x",2,"y")==nil&&labels["owner"]=="other","field scope")""",
-            "Real patches and apply operations should be scoped to fields the controller owns. This fixture makes that responsibility explicit without emulating field management.",
+            "Update the value of an object that also carries an owner label, using its current token.",
+            "The value and token change while the owner label is unchanged.",
+            r"""s:=Versioned{Value:1,Version:"x",Labels:map[string]string{"owner":"other"}};check(versionUpdate(&s,"x",2,"y")==nil&&s.Value==2&&s.Version=="y"&&s.Labels["owner"]=="other","field scope")""",
+            "Real patches and apply operations should be scoped to fields the controller owns. Here the label lives in the updated object itself, so the check shows that versionUpdate wrote only the fields it is responsible for.",
         ),
         E(
             "Transfer bounded conflict handling",
@@ -358,7 +361,7 @@ add(
     ],
     imports="errors",
     helper="""var ErrConflict=errors.New("conflict")
-type Versioned struct{Value int;Version string}
+type Versioned struct{Value int;Version string;Labels map[string]string}
 func versionUpdate(s *Versioned,observed string,value int,next string)error{if s.Version!=observed{return ErrConflict};s.Value=value;s.Version=next;return nil}""",
     source="https://kubernetes.io/docs/reference/using-api/api-concepts/#resource-versions",
 )
@@ -471,10 +474,10 @@ add(
         ),
         E(
             "Transfer a total budget",
-            "Allow at most three attempts and count admitted retries.",
-            "Exactly three attempts are admitted.",
-            r"""admitted:=0;for attempt:=0;attempt<5;attempt++{if attempt<3{admitted++}};check(admitted==3,"budget")""",
-            "A delay cap bounds waiting per retry, while an attempt or elapsed-time budget bounds total work. Both are separate policies.",
+            "Spend a total waiting budget of 10 units on retries whose delays come from delay(attempt).",
+            "Three retries fit (1+2+4=7 units); the fourth delay of 8 would exceed the budget.",
+            r"""spent,attempts:=0,0;for attempt:=0;;attempt++{d:=delay(attempt);if spent+d>10{break};spent+=d;attempts++};check(attempts==3&&spent==7,"budget")""",
+            "A delay cap bounds waiting per retry, while an attempt or elapsed-time budget bounds total work. Both are separate policies, and the total budget is checked before a delay is spent.",
         ),
     ],
     helper="""func delay(attempt int)int{if attempt<0{return 1};if attempt>=3{return 8};return 1<<attempt}
@@ -570,23 +573,23 @@ add(
         ),
         E(
             "Represent a stale view",
-            "Keep cache version a while a server model has version b.",
-            "The versions differ without implying a failed write.",
-            r"""cache:=Cached{Version:"a"};server:=Cached{Version:"b"};check(cache.Version!=server.Version,"stale view")""",
+            "Deliver only the first of two watch events to a cache that starts at version a.",
+            "The cache shows b while the server's latest version is already c.",
+            r"""cache:=Cached{Version:"a"};events:=[]Cached{{Version:"b"},{Version:"c"}};delivered:=1;for _,event:=range events[:delivered]{cache=event};check(cache.Version=="b"&&events[len(events)-1].Version=="c","stale view")""",
             "A lagging cache and a successful server update can coexist. Immediate reread from the same cache is not a strong write-confirmation test.",
         ),
         E(
             "Gate on initial synchronization",
-            "Inspect a false cache-synced flag before processing.",
-            "The worker does not claim readiness.",
-            r"""synced:=false;ready:=synced;check(!ready,"initial sync")""",
+            "Offer one item to a processor before and after the cache reports synced.",
+            "No item is processed before the cache reports synced; one item is processed afterward.",
+            r"""processed:=0;process:=func(synced bool)bool{if !synced{return false};processed++;return true};check(!process(false)&&processed==0,"initial sync");check(process(true)&&processed==1,"after sync")""",
             "A started goroutine is not evidence that its initial list has completed. Production code waits on the actual synchronization function.",
         ),
         E(
             "Queue identities instead of objects",
-            "Store a namespace/name key derived from a snapshot.",
-            "The key remains usable after the object value changes.",
-            r"""key:="lesson/demo";version:="a";version="b";check(key=="lesson/demo"&&version=="b","key identity")""",
+            "Queue the key of a cached object, then let the store receive a newer version before the key is processed.",
+            "The queued key reads the latest object, version b, not the snapshot taken when it was queued.",
+            r"""store:=map[string]Cached{"lesson/demo":{Version:"a"}};queue:=[]string{"lesson/demo"};store["lesson/demo"]=Cached{Version:"b"};check(store[queue[0]].Version=="b","key identity")""",
             "The next reconciliation obtains current state for the key. Retaining an event object as permanent truth would preserve stale assumptions.",
         ),
         E(
@@ -818,10 +821,10 @@ add(
         ),
         E(
             "Keep dry-run side effects absent",
-            "Evaluate the same policy in dry-run mode.",
-            "The decision is computed with zero external effects.",
-            r"""d:=admit("r5",2,5,true);check(d.Allowed&&d.SideEffects==0,"dry run")""",
-            "This pure validator has no external effects in either mode. Real webhooks must accurately declare and respect their side-effect contract.",
+            "Evaluate the same allowed request once in dry-run mode and once for real.",
+            "Both decisions allow the request; only the real evaluation records a side effect.",
+            r"""d:=admit("r5",2,5,true);live:=admit("r6",2,5,false);check(d.Allowed&&d.SideEffects==0&&live.Allowed&&live.SideEffects==1,"dry run")""",
+            "This validator records one audit side effect for an allowed real request and none for dry run. Real webhooks must declare their side-effect class accurately and skip side effects when the request is a dry run.",
         ),
         E(
             "Transfer missing identity refusal",
@@ -832,7 +835,7 @@ add(
         ),
     ],
     helper="""type Decision struct{UID string;Allowed bool;Reason string;SideEffects int}
-func admit(uid string,replicas,maximum int,dryRun bool)Decision{d:=Decision{UID:uid};if uid==""{d.Reason="request UID required";return d};if replicas<0||replicas>maximum{d.Reason="replicas outside allowed range";return d};d.Allowed=true;return d}""",
+func admit(uid string,replicas,maximum int,dryRun bool)Decision{d:=Decision{UID:uid};if uid==""{d.Reason="request UID required";return d};if replicas<0||replicas>maximum{d.Reason="replicas outside allowed range";return d};d.Allowed=true;if !dryRun{d.SideEffects++};return d}""",
     source="https://kubernetes.io/docs/reference/access-authn-authz/extensible-admission-controllers/",
 )
 
@@ -883,13 +886,13 @@ add(
         ),
         E(
             "Transfer source-bound evidence",
-            "Bind a synthetic receipt to its lesson ID and source digest label.",
-            "Both identifiers survive comparison.",
-            r"""receipt:=map[string]string{"lesson":"go-047","source":"reviewed-fixture"};check(receipt["lesson"]=="go-047"&&receipt["source"]=="reviewed-fixture","receipt identity")""",
-            "This small metadata check illustrates binding, not a cryptographic receipt implementation. The classroom records actual source hashes separately.",
+            "Bind a synthetic receipt to its lesson ID and the SHA-256 digest of the exact source text, then compare it with a source that has one extra byte.",
+            "The receipt matches the exact source and rejects the changed source.",
+            r"""source:="package main\n";digest:=func(text string)string{return fmt.Sprintf("%x",sha256.Sum256([]byte(text)))};receipt:=map[string]string{"lesson":"go-047","source":digest(source)};check(receipt["lesson"]=="go-047"&&receipt["source"]==digest(source)&&receipt["source"]!=digest(source+" "),"receipt identity")""",
+            "Binding evidence to a digest of the exact bytes means a later edit cannot reuse an old result. This small check illustrates the binding; the classroom records actual source hashes separately.",
         ),
     ],
-    imports="context errors",
+    imports="context errors crypto/sha256",
     helper="""var ErrForbidden=errors.New("forbidden")
 type FakeReader struct{Value,Calls int;Err error}
 func(f *FakeReader)Read(ctx context.Context)(int,error){f.Calls++;return f.Value,f.Err}

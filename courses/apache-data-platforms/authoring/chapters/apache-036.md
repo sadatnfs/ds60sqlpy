@@ -27,6 +27,13 @@ and aborts. The read_committed reader must include the first and exclude the
 second; the read_uncommitted reader must include both. The program compares exact
 key/value lists, so an accidental empty topic cannot pass the visibility check.
 
+The three transactions are written once, when the topic is empty:
+
+<!-- include: projects/streaming/TransactionProbe.java from="private static void produceWhenEmpty()" until="private static List<String> read(" java -->
+
+The readers differ only in `isolation.level`: `read_committed` skips records from
+aborted transactions, and `read_uncommitted` returns every record in the log.
+
 Control records occupy log positions without being ordinary application records.
 Therefore an end offset need not equal the number of data records a consumer
 returns. The Java reader advances through the actual partition positions with a

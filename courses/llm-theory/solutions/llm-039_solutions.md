@@ -14,39 +14,39 @@ Finite robustness and safety evaluations describe observed behavior on specified
 
 ## Reading the implementation
 
-Read the supplied rows as family,group,count,failures,severity. Calculate rates only with nonzero counts. Keep severe failures visible even when overall success is high. For a counterfactual pair, list the changed attribute and the behavior that should remain stable. An untested group receives an unknown result, not a zero failure rate. State the scope and the next evidence needed in the conclusion.
+Read the supplied rows as family, group, count, failures, severity. Calculate rates only with nonzero counts. Keep severe failures visible even when overall success is high. For a counterfactual pair, list the changed attribute and the behavior that should remain stable. An untested group receives an unknown result, not a zero failure rate. State the scope and the next evidence needed in the conclusion.
 
-## Exercise 1: Read group denominators
+## Exercise 1: Compare uneven denominators
 
-The question is: GroupA has0 failures in10 cases;groupB has0 in1. Compare what is established.
+The question is: Group D has 1 failure in 50 cases; group E has 0 failures in 5. Compare the observed rates and what each establishes.
 
-Equal observed rates do not imply equal uncertainty. The denominator is a central part of the result and should remain visible in a report.
+A lower observed rate on a much smaller denominator is weak evidence. Report both counts so a reader can see how little E was tested.
 
 ```text
-A: failures0,count10,observed rate0/10
-B: failures0,count1,observed rate0/1
-Neither establishes a zero population failure probability.
+D: failures 1, count 50, observed rate 1/50 = 0.02
+E: failures 0, count 5, observed rate 0/5
+A zero count in 5 cases does not establish that E is safer than D.
 ```
 
-**Expected:** both observed zero;B has much less evidence.
+**Expected:** D observed 1/50 = 0.02; E observed 0/5; five cases do not show that E is safer than D.
 
-**Verify:** Compare the computed values or written argument with both observed zero;B has much less evidence.
+**Verify:** Check that 1/50 is written as 0.02 (2 percent), that both denominators 50 and 5 are reported, and that the answer does not rank E above D.
 
-## Exercise 2: Expose a severe failure
+## Exercise 2: Recompute a gate with two severe failures
 
-The question is: Nine minor cases pass and one severe case fails. Calculate total pass rate and state the release implication under a no-severe-failure gate.
+The question is: Eighteen minor cases pass and two severe cases fail. Calculate the pass rate and the gate result.
 
-Averages cannot override an explicitly required critical condition. The decision rule should be established before seeing which case failed.
+The pass rate matches the earlier case, yet the decision depends on the severe-failure count, which is now two. An aggregate rate cannot replace the gate.
 
 ```text
-Pass rate = 9/10 = 90percent
-Severe failures = 1
+Pass rate = 18/20 = 90 percent
+Severe failures = 2
 Required severe-failure gate = fail
 ```
 
-**Expected:** 90percent passes;gate fails.
+**Expected:** 18/20 = 90 percent passes; 2 severe failures; the gate fails.
 
-**Verify:** Compare the computed values or written argument with 90percent passes;gate fails.
+**Verify:** Check that the pass rate is 18/20 = 0.9 and that the gate decision is taken from the severe-failure count 2, not from the 90 percent pass rate.
 
 ## Exercise 3: Analyze a counterfactual pair
 
@@ -64,23 +64,23 @@ Observed eligibility: opposite
 
 **Expected:** inconsistency requires investigation under this fixture rubric.
 
-**Verify:** Compare the computed values or written argument with inconsistency requires investigation under this fixture rubric.
+**Verify:** Check that the record holds qualifications identical, names the single changed field and contrasts the expected equal eligibility with the observed opposite outcomes.
 
 ## Exercise 4: Handle an untested group
 
-The question is: GroupC hascount0. Decide what rate and claim to report.
+The question is: Group C has count 0. Decide what rate and claim to report.
 
 Reporting zero would turn absence of observations into apparent success. A missing group should remain a visible gap in the evidence.
 
 ```text
-Group C: count0,failuresnot observed
+Group C: count 0, failures not observed
 Rate: undefined
 Claim: no evaluation evidence for this group
 ```
 
-**Expected:** rate unknown;group untested.
+**Expected:** rate unknown; group untested.
 
-**Verify:** Compare the computed values or written argument with rate unknown;group untested.
+**Verify:** Check that group C reports count 0 with an undefined rate, not 0 percent or a pass, and that the claim says no evaluation evidence exists for the group.
 
 ## Exercise 5: Separate families from paraphrases
 
@@ -89,14 +89,14 @@ The question is: Twenty prompts are paraphrases of one attack family. State the 
 Repeated variants can reveal local sensitivity, but they do not expand conceptual coverage as much as new families. The evaluation unit must match the conclusion.
 
 ```text
-Prompt variants:20
-Independent authored families:1
-Report both; do not claim20 independent threat classes.
+Prompt variants: 20
+Independent authored families: 1
+Report both; do not claim 20 independent threat classes.
 ```
 
-**Expected:** one tested family,twenty variants.
+**Expected:** one tested family, twenty variants.
 
-**Verify:** Compare the computed values or written argument with one tested family,twenty variants.
+**Verify:** Check that the report carries both counts, 20 variants and 1 independent family, and never presents the variants as 20 threat classes.
 
 ## Exercise 6: Write a finite claim
 
@@ -113,7 +113,7 @@ Next evidence: investigate the failure and evaluate additional independent famil
 
 **Expected:** conclusion rejects a universal safety guarantee.
 
-**Verify:** Compare the computed values or written argument with conclusion rejects a universal safety guarantee.
+**Verify:** Check that the conclusion mentions the one severe failure, the untested group C and the no-go decision, and that it limits the claim to this finite suite.
 
 ## Review after comparison
 

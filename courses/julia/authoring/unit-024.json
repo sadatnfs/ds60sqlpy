@@ -15,7 +15,7 @@
     {
       "title": "Refine the time step",
       "task": "Compare Euler with 4 and 20 steps for rate 1.",
-      "expected": "The fine final value is closer to exp(-1).",
+      "expected": "The fine final value is closer to `exp(-1)`.",
       "hint": "Use the analytic solution as an independent reference.",
       "answer": "This checks the stated smooth problem and does not imply that every refinement improves every numerical task."
     },
@@ -28,7 +28,7 @@
     },
     {
       "title": "Require a root bracket",
-      "task": "Try x squared plus 1 on[-1,1].",
+      "task": "Try x squared plus 1 on the bracket from -1 to 1.",
       "expected": "The helper rejects the absent sign change.",
       "hint": "The bracketing invariant must hold before iteration.",
       "answer": "A numerical routine cannot create a real root where the stated evidence does not support one."

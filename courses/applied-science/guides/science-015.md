@@ -1,6 +1,6 @@
 # science-015: Logged-policy evaluation, support and variance control
 
-Tutorial mode. Stage: intermediate. Direct prerequisites: `science-013`, `statistics-science-005`.
+Tutorial mode. Stage: intermediate. Direct prerequisites: `science-013`, `statistics-017`.
 
 ## Logged behavior is selected by a policy
 

@@ -33,6 +33,32 @@ fixture is empty. Two belong to alpha on the same day and one belongs to beta.
 The query supplies both partition-key fields and returns alpha's orders in
 clustering order: order 3 before order 1, with amounts 7 and 4.
 
+The client creates the keyspace and the query-first table with these CQL
+statements:
+
+From [`projects/cassandra/client.py`](../projects/cassandra/client.py):
+
+```python
+if local["data_center"] != "datacenter1":
+    raise AssertionError("Pinned single-datacenter fixture changed")
+session.execute(
+    "CREATE KEYSPACE IF NOT EXISTS ds60_orders WITH replication = "
+    "{'class':'NetworkTopologyStrategy','datacenter1':1}"
+)
+session.execute(
+    "CREATE TABLE IF NOT EXISTS ds60_orders.by_customer "
+    "(customer_id text, day_bucket date, ordered_at timestamp, order_id int, amount int, "
+    "PRIMARY KEY ((customer_id, day_bucket), ordered_at, order_id)) "
+    "WITH CLUSTERING ORDER BY (ordered_at DESC, order_id ASC)"
+)
+```
+
+`PRIMARY KEY ((customer_id, day_bucket), ordered_at, order_id)` makes the pair
+`(customer_id, day_bucket)` the partition key, which decides the replica that stores
+a row, and `ordered_at, order_id` the clustering columns, which order rows inside
+that partition. A lookup that supplies both partition-key values reads one
+partition.
+
 This result is local to that selected partition. It is not a global ordering of
 every customer's orders. Asking for a month may require up to the month's daily
 buckets and an application-level merge or a different table design. Query fanout
@@ -56,6 +82,26 @@ A query selecting amount 7 without the required partition key has a different
 access shape. The unindexed fixture rejects that request rather than pretending
 it is a cheap point lookup. The client checks the actual filtering diagnostic,
 so an unrelated network or syntax failure cannot satisfy this negative case.
+
+After a bounded clustering-range read, the check sends the filter and accepts only the expected diagnostic:
+
+From [`projects/cassandra/client.py`](../projects/cassandra/client.py):
+
+```python
+window = list(session.execute(ID_QUERY + " AND ordered_at >= '2026-01-01T00:30:00Z'"))
+if window != [{"order_id": 3}]:
+    raise AssertionError("Bounded clustering timestamp range changed")
+try:
+    session.execute("SELECT * FROM ds60_orders.by_customer WHERE amount=7")
+except InvalidRequest as error:
+    if "filtering" not in str(error).lower():
+        raise
+else:
+    raise AssertionError("Unapproved unindexed filter unexpectedly accepted")
+```
+
+Cassandra refuses the query because `amount` is neither a key column nor indexed;
+adding `ALLOW FILTERING` would make it scan every partition instead.
 
 Adding ALLOW FILTERING is not a general performance fix. It can authorize work
 whose cost depends on how much data must be examined instead of the small number

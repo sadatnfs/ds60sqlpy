@@ -6,13 +6,13 @@ The executable reference is `julia-025_reference.jl`. Its checks cover the state
 
 The accumulator is Float64 throughout; the final value is 14.
 
-**Expected observation:** The values are 1,5,14.
+**Expected observation:** The values are 1, 5 and 14.
 
 ## 2. Preserve precision
 
-zero(T) and floating multiplication preserve the specified small-case element arithmetic.
+`zero(T)` and floating multiplication preserve the specified small-case element arithmetic.
 
-**Expected observation:** The result is Float32(5).
+**Expected observation:** The result is `Float32(5)`.
 
 ## 3. Change workload size
 

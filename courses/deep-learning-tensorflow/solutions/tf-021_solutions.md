@@ -14,11 +14,11 @@ A padded sequence contains both real observations and artificial storage positio
 
 ## Reading the implementation
 
-The boolean comparison ids!=0 identifies valid tokens. tf.gather selects embedding rows in token order. tf.where(mask,loss,0) suppresses padding contributions, then reduce_sum(mask) supplies the denominator. Reject a completely padded sequence because it has no observed target loss. Avoid assuming that a numerical zero vector is an adequate replacement for an explicit mask.
+The boolean comparison ids!=0 identifies valid tokens. tf.gather selects embedding rows in token order. tf.where(mask, loss, 0) suppresses padding contributions, then reduce_sum(mask) supplies the denominator. Reject a completely padded sequence because it has no observed target loss. Avoid assuming that a numerical zero vector is an adequate replacement for an explicit mask.
 
 ## Exercise 1: Mark valid positions
 
-The question is: Use token IDs[2,3,0] with zero declared padding.
+The question is: Use token IDs [2, 3, 0] with zero declared padding.
 
 The mask derives from vocabulary semantics, not from the magnitude of an embedding vector. A real token could legitimately have a zero vector.
 
@@ -29,13 +29,13 @@ assert mask.numpy().tolist() == [True, True, False]
 assert int(tf.reduce_sum(tf.cast(mask, tf.int32))) == 2
 ```
 
-**Expected:** mask[True,True,False], count2.
+**Expected:** mask [True, True, False], count 2.
 
-**Verify:** Compare the computed values or written argument with mask[True,True,False], count2.
+**Verify:** In a fresh process, the exercise checks confirm `mask.numpy().tolist() == [True, True, False]` and `int(tf.reduce_sum(tf.cast(mask, tf.int32))) == 2`.
 
 ## Exercise 2: Normalize masked losses
 
-The question is: Use token losses[log2,log2,100] and exclude the padding position.
+The question is: Use token losses[log 2, log 2,100] and exclude the padding position.
 
 The numerator and denominator must use the same participation policy. Zeroing the padding loss but dividing by three would understate the mean valid-token loss.
 
@@ -45,13 +45,13 @@ mean = tf.reduce_sum(tf.where(mask, losses, 0.0)) / tf.reduce_sum(tf.cast(mask, 
 np.testing.assert_allclose(float(mean), np.log(2), atol=1e-12, rtol=0)
 ```
 
-**Expected:** masked meanlog2; padding loss100 has no effect.
+**Expected:** masked mean log 2; padding loss 100 has no effect.
 
-**Verify:** Compare the computed values or written argument with masked meanlog2; padding loss100 has no effect.
+**Verify:** In a fresh process, the exercise checks confirm `float(mean)` matches `np.log(2)` within 1e-12.
 
 ## Exercise 3: Check embedding axes
 
-The question is: Lookup IDs[2,3,0] in a fixed4x2 table.
+The question is: Lookup IDs [2, 3, 0] in a fixed 4x2 table.
 
 Lookup preserves token order and appends the feature dimension. It does not mix tokens or establish any language understanding by itself.
 
@@ -62,9 +62,9 @@ assert tuple(emb.shape) == (3, 2)
 np.testing.assert_array_equal(emb.numpy()[0], [2, 2])
 ```
 
-**Expected:** output shape(3,2); first row[2,2].
+**Expected:** output shape (3, 2); first row [2, 2].
 
-**Verify:** Compare the computed values or written argument with output shape(3,2); first row[2,2].
+**Verify:** In a fresh process, the exercise checks confirm `tuple(emb.shape) == (3, 2)` and `emb.numpy()[0]` equals `[2, 2]`.
 
 ## Exercise 4: Append padding
 
@@ -80,13 +80,13 @@ v = tf.reduce_sum(tf.where(m, l, 0.0)) / tf.reduce_sum(tf.cast(m, tf.float64))
 np.testing.assert_allclose(float(v), float(mean), atol=1e-12, rtol=0)
 ```
 
-**Expected:** mean unchanged atlog2.
+**Expected:** mean unchanged at \(\log 2\).
 
-**Verify:** Compare the computed values or written argument with mean unchanged atlog2.
+**Verify:** In a fresh process, the exercise checks confirm `float(v)` matches `float(mean)` within 1e-12.
 
 ## Exercise 5: Select the last valid state
 
-The question is: For token states[[2,2],[3,-1],[99,99]], select the final valid position.
+The question is: For token states [[2, 2], [3, -1], [99, 99]], select the final valid position.
 
 Indexing the last stored row confuses a padding slot with the last observation. The explicit mask keeps that distinction visible.
 
@@ -96,9 +96,9 @@ valid_states = tf.boolean_mask(states, mask)
 np.testing.assert_array_equal(valid_states[-1].numpy(), [3, -1])
 ```
 
-**Expected:** state[3,-1], not padding state[99,99].
+**Expected:** state [3, -1], not padding state [99, 99].
 
-**Verify:** Compare the computed values or written argument with state[3,-1], not padding state[99,99].
+**Verify:** In a fresh process, the exercise checks confirm `valid_states[-1].numpy()` equals `[3, -1]`.
 
 ## Exercise 6: Refuse an empty denominator
 
@@ -125,7 +125,7 @@ else:
 
 **Expected:** ValueError for zero valid positions.
 
-**Verify:** Compare the computed values or written argument with ValueError for zero valid positions.
+**Verify:** In a fresh process, the exercise checks confirm `masked_mean([1, 2], [False, False])` raises `ValueError`.
 
 ## Review after comparison
 

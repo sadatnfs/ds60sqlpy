@@ -8,7 +8,7 @@ An ordinary init container completes before the application containers start. It
 
 The supplied real Pod manifest is an explicit host-lab example. The browser adapter does not admit initContainers, emptyDir or arbitrary command bodies. A teacher must review the exact fixed commands and provide the owned capability before live use. The finite example writes the Pod UID into a marker, then deliberately makes the reader fail once and succeed on its next container attempt.
 
-The marker makes lifetime observable:it matches the same Pod UID across the application restart and changes when a new Pod is created. A constant hello marker alone would be weaker evidence because a new init container could recreate identical bytes after replacement.
+The marker makes lifetime observable: it matches the same Pod UID across the application restart and changes when a new Pod is created. A constant hello marker alone would be weaker evidence because a new init container could recreate identical bytes after replacement.
 
 ## Exercise 1: Draw container order
 
@@ -24,7 +24,7 @@ The mount links the containers to one Pod-owned volume. Read-only root filesyste
 
 ## Exercise 3: Observe one application restart
 
-The first application exit2 triggers OnFailure restart. Its marker and flag remain in the Pod volume, so the next attempt can distinguish itself. Actual timing and status must be observed rather than copied from this trace.
+The first application exit 2 triggers OnFailure restart. Its marker and flag remain in the Pod volume, so the next attempt can distinguish itself. Actual timing and status must be observed rather than copied from this trace.
 
 **Expected:** Same Pod UID/marker across the failed first and successful next application attempt.
 

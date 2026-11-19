@@ -22,6 +22,17 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         assert_eq!(accepted, vec![2, 3]);
         assert_eq!(inputs.len() - accepted.len(), 1);
     }
+
+    {
+        // Task 3: Independent construction
+        fn doubled_quantity(text: &str) -> Result<i32, &'static str> {
+            let value = parse_quantity(text)?;
+            value.checked_mul(2).ok_or("quantity too large")
+        }
+        assert_eq!(doubled_quantity("4"), Ok(8));
+        assert_eq!(doubled_quantity("bad"), Err("not an integer"));
+        assert_eq!(doubled_quantity("-3"), Err("negative quantity"));
+    }
     println!("rust-015: passed");
     Ok(())
 }

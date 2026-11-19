@@ -115,7 +115,7 @@ assert(raw == Seq(1, 2, 3, 4))
 
 For bounded nonnegative event amounts and nonblank IDs, compute naive delivered cents over attempts and logical once-per-ID cents when attempts>0. Reject conflicting amounts for one ID and negative attempt counts. This is a pure ledger calculation, not a real sink.
 
-**Expected:** Records(a,100),(b,50),(a,100) with two attempts give naive 500, logical 150. Zero attempts gives (0,0); same ID with 100 and 101 is rejected.
+**Expected:** Records (a,100), (b,50), (a,100) with two attempts give naive 500, logical 150. Zero attempts gives (0,0); same ID with 100 and 101 is rejected.
 
 ```scala
 def retryTotals(records: Seq[(String, Long)], attempts: Int): (Long, Long) = {

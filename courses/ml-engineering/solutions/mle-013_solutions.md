@@ -105,4 +105,4 @@ if __name__ == "__main__":
 
 ## Interpretation
 
-Define checkpoint and retry behavior using artifact identities. Demonstrate a known interruption and an input change, then map those contracts to a real orchestrator with separate persistence and execution evidence.
+Demonstrate a known interruption and an input change, then map those contracts to a real orchestrator with separate persistence and execution evidence.

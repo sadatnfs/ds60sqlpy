@@ -20,6 +20,29 @@ independent restore experiment and cleanup scoped to that disposable project.
 The first build needs the base image; prepared runs stay local and never push.
 Use Bash on Linux/macOS or Ubuntu inside WSL 2 on Windows.
 
+## How to use the lessons
+
+The classroom displays each guide and saves your worksheet. Its Run button does
+not control your Docker engine: engine access is powerful host access, so the
+classroom deliberately receives no engine socket. Work through the worked
+examples without starting anything, then use the optional host lab only in your
+own disposable project. Reading a command, parsing YAML and actually running the
+project are different forms of evidence.
+
+Use Bash in Linux, macOS Terminal, or Ubuntu under WSL 2 on Windows; the
+supported engine runs Linux containers. The maintained fixture is
+`fixtures/compose-lab/`. Its README explains copying it into a new ignored
+learner directory, checking the engine, building locally with visible logs and
+using the fixed project name `ds60-docker-study` on host loopback port 18080.
+Stop if that project name or port belongs to unrelated work, and choose a new
+project name consistently in your own copy. Never run a command against a
+remote Docker context simply because it is currently selected.
+
+For Dockerfile examples, create a file named `Dockerfile` in a scratch project.
+YAML snippets describe a fragment unless a lesson calls them a complete file.
+Text transcripts are synthetic illustrations, not claims about your machine. Do
+not substitute a real password, token or private registry into an example.
+
 ## Lesson route
 
 | Lesson | Topic | Stage |

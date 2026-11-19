@@ -31,7 +31,7 @@ Assume a role-restricted Viewer with the declared NorthViewer RLS policy enforce
 These expected values belong in a real role-test matrix. Their presence in a source file does not prove that the external role was configured or applied.
 
 - The security policy permits Customer 10 and 30 only.
-- The expected fact population totals 51 +56 =107.
+- The expected fact population totals 51 + 56 = 107.
 - Removing ordinary Customer filters must not remove the security restriction.
 
 ## Explained practice answers

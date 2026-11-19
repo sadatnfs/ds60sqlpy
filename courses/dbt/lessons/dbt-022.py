@@ -1,10 +1,11 @@
-"""dbt-022: worked starting point; complete the guide's six changes."""
+"""dbt-022: both worked cases; complete the guide's six changes."""
 
 import json
 import os
 import tempfile
 from pathlib import Path
 
+import duckdb
 import yaml
 
 
@@ -75,6 +76,11 @@ def invoke(root, *arguments, succeeds=True):
     return result
 
 
+def rows(root, sql):
+    with duckdb.connect(str(root / "warehouse.duckdb"), read_only=False) as connection:
+        return connection.execute(sql).fetchall()
+
+
 def artifact(root, name):
     return json.loads((root / "target" / name).read_text())
 
@@ -94,8 +100,26 @@ def example_one():
         return {"template_compiled": True, "database_binding_rejected": True}
 
 
+def example_two():
+    with tempfile.TemporaryDirectory() as d:
+        p = project(
+            d,
+            models={"total": "select sum(amount) * 2 as amount from {{ ref('orders') }}"},
+            seeds={"orders": "id,amount\n1,5\n2,7\n"},
+        )
+        (p / "tests").mkdir()
+        (p / "tests/reconcile.sql").write_text(
+            "select * from {{ ref('total') }} where amount != 12"
+        )
+        invoke(p, "build", succeeds=False)
+        assert rows(p, "select amount from total") == [(24,)]
+        assert "fail" in [r["status"] for r in artifact(p, "run_results.json")["results"]]
+        return {"sql_executed": True, "wrong_quantity": 24, "independent_expected_quantity": 12}
+
+
 if __name__ == "__main__":
     print(example_one())
+    print(example_two())
 
 # TODO 1: Identify which layer rejects the missing-column model.
 # TODO 2: Replace a valid ref with an undefined macro.

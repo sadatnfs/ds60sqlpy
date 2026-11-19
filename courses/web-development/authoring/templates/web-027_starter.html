@@ -5,15 +5,46 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Accessible form feedback with a pure validation function: my attempt</title>
     <style>
-      /* Implement the lesson-specific CSS. Keep keyboard focus visible. */
+      /* Write the CSS for the exercises here. Keep keyboard focus visible. */
     </style>
   </head>
   <body>
-    <!-- web-027: Build a local form with preserved input and linked validation feedback. -->
-    <!-- Save your prediction, then implement the six exercises from the guide. -->
+    <!--
+      web-027 exercises. Hints are in the guide; answers are in the solutions folder.
+      1. Predict Number('') and explain the validation hazard.
+      2. Add the upper-bound case to a validation table.
+      3. Build a local form with preserved input and linked validation feedback.
+      4. Diagnose a message shown visually but not associated with its control.
+      5. Test empty, whitespace, negative, nonnumeric, hexadecimal (0x1e), exponent (1e2),
+         fractional (7.5) and valid values.
+      6. Explain which validation logic must be repeated on the server.
+    -->
     <main>
-      <h1>Accessible form feedback with a pure validation function</h1>
-      <!-- Build your own document here. The reference is separate. -->
+      <h1>Plan one study session</h1>
+      <p>
+        <label for="minutes">Minutes, 5 to 120</label>
+        <input id="minutes" inputmode="numeric" value="30" />
+        <button id="validate" type="button">Check locally</button>
+      </p>
+      <p id="error" role="status"></p>
     </main>
+    <script>
+      "use strict";
+
+      // Worked example 1: A testable rule
+      // function validate(value) {
+      //   const text = value.trim();
+      //   if (text === '') return 'Enter minutes.';
+      //   if (!/^\d{1,3}$/.test(text)) return 'Use whole minutes from 5 to 120.';
+      //   const minutes = Number(text);
+      //   return minutes >= 5 && minutes <= 120 ? '' : 'Use 5 to 120 minutes.';
+      // }
+
+      // Worked example 2: Safe feedback
+      // error.textContent = message;
+      // input.setAttribute('aria-invalid', message ? 'true' : 'false');
+
+      // Write the JavaScript for the exercises here.
+    </script>
   </body>
 </html>

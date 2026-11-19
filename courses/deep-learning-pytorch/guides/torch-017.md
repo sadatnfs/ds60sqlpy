@@ -6,7 +6,13 @@ Intermediate; approximately 120 minutes. Direct prerequisites: `torch-016`. The 
 
 ## Learning objectives
 
-Regularization and training mode affect different parts of the experiment. The central investigation is concrete: Use weights 1, -2 and compute L1 and squared L2 sums. The finish condition is \(L_{1}=3\); squared \(L_{2}=5\). output still requires grad; backward gives ones. A useful explanation connects the calculation to the reason it is needed, rather than treating a function name as a definition.
+Separate explicit regularization penalties from Dropout's train and eval behavior and check each with exact values.
+
+Central investigation: Compute L1 and squared L2 penalties for weights [1, -2], run Dropout(0.5) in eval and train mode and differentiate the penalty.
+
+Finish condition: L1 is 3 and squared L2 is 5, eval-mode Dropout returns its input exactly, train mode outputs only 0 or 2, a 0.1 coefficient adds a penalty of 0.5 for a total of 2.5, and the penalty gradient is [0.2, -0.4].
+
+The worked examples demonstrate the mechanism; exercises 1-3 transfer it to new inputs and exercises 4-6 extend it to failures and boundary cases. A useful explanation connects the calculation to the reason it is needed, rather than treating a function name as a definition.
 
 ## Purpose and mental model
 
@@ -42,11 +48,11 @@ Run the three worked blocks in order in one scratch file; later blocks reuse the
 
 ## Syntax anatomy and reasoning sequence
 
-nn.Dropout(p=.5) scales retained training activations by \(\frac{1}{1-p}\). Call train or eval to select behavior. Compute sum(abs(w)) and \(\operatorname{sum}({w}^{2})\) for declared penalty conventions, then multiply by an explicit coefficient. A half-scaled squared penalty would have a different derivative. Keep metrics and penalty components separate in logs.
+nn.Dropout(\(p=0.5\)) scales retained training activations by \(\frac{1}{1-p}\). Call train or eval to select behavior. Compute sum(abs(w)) and \(\operatorname{sum}({w}^{2})\) for declared penalty conventions, then multiply by an explicit coefficient. A half-scaled squared penalty would have a different derivative. Keep metrics and penalty components separate in logs.
 
 ## Derive the objective, random transformation and gradient
 
-The fixture has w=[1, -2]. The absolute-value sum is three, the squared-value sum is five, and the Euclidean norm is \(\sqrt{5}\). These are different quantities. This chapter's squared L2 penalty is lambda times the sum of squared weights, without a one-half factor. At \(\lambda=0.1\) it contributes 0.5 to the objective and gradient[0.2, -0.4]. Doubling both weights doubles the L1 sum to six but quadruples the squared sum to twenty. That scale dependence matters when preprocessing changes the meaning of a unit weight.
+The fixture has w=[1, -2]. The absolute-value sum is three, the squared-value sum is five, and the Euclidean norm is \(\sqrt{5}\). These are different quantities. This chapter's squared L2 penalty is lambda times the sum of squared weights, without a one-half factor. At \(\lambda=0.1\) it contributes 0.5 to the objective and gradient [0.2, -0.4]. Doubling both weights doubles the L1 sum to six but quadruples the squared sum to twenty. That scale dependence matters when preprocessing changes the meaning of a unit weight.
 
 Suppose one coordinate has data gradient \(g=0.3\), parameter \(w=1\) and learning rate \(\eta=0.1\). Ordinary SGD on data loss plus \(0.1\cdot {w}^{2}\) uses total gradient \(0.3+0.2=0.5\) and gives w'=0.95. The update can also be written (1-2*eta*lambda)w-eta*g. An SGD weight-decay coefficient 0.2 corresponds to this particular explicit penalty convention. A coefficient 0.1 would correspond to a half-scaled objective and would instead give 0.96 for this example. A shared name or numeric coefficient does not fix the objective's convention.
 
@@ -114,37 +120,37 @@ sampled = drop(x)
 assert tuple(sampled.shape) == (4, 8) and set(sampled.unique().tolist()) <= {0.0, 2.0}
 ```
 
-**Expected:** shape(4, 8); only 0 or2.
+**Expected:** shape (4, 8); only 0 or 2.
 
 ## Prediction before your attempt
 
-For the supplied fixture, name the input unit, the intermediate state and the final quantity that changes. Predict one normal result and one failure result before touching the code. In particular, explain this lesson's acceptance condition in your own words: \(L_{1}=3\); squared \(L_{2}=5\). output still requires grad; backward gives ones. Preserve the prediction beside your later observations so a correction is visible. A copied expected value is not a derivation.
+For the supplied fixture, name the input unit, the intermediate state and the final quantity that changes. Predict one normal result and one failure result before touching the code. In particular, explain this lesson's acceptance condition in your own words: L1 is 3 and squared L2 is 5, eval-mode Dropout returns its input exactly, train mode outputs only 0 or 2, a 0.1 coefficient adds a penalty of 0.5 for a total of 2.5, and the penalty gradient is [0.2, -0.4]. Preserve the prediction beside your later observations so a correction is visible. A copied expected value is not a derivation.
 
 ## Exercises
 
-1. **Calculate two penalties.** Use weights 1, -2 and compute L1 and squared L2 sums.
-   **Expected:** \(L_{1}=3\); squared \(L_{2}=5\).
-   **Verify:** Save the assertion results for exercise 1, including \(L_{1}=3\); squared \(L_{2}=5\).
+1. **Compute penalties for a new vector.** Use weights 3, -4, 0 and compute the L1 and squared L2 sums.
+   **Expected:** L1 = 7; squared L2 = 25.
+   **Verify:** In a fresh process, the exercise checks confirm `penalized.abs().sum().item() == 7` and `penalized.square().sum().item() == 25`.
 
-2. **Check evaluation dropout.** Apply Dropout.5 in eval mode to ones twice.
-   **Expected:** both outputs exactly ones.
-   **Verify:** Save the assertion results for exercise 2, including both outputs exactly ones.
+2. **Predict train-mode values for p=0.25.** Apply Dropout(0.25) in train mode to a (3, 5) tensor of ones and inspect every value.
+   **Expected:** shape (3, 5); each value is 0 or 4/3.
+   **Verify:** In a fresh process, the exercise checks confirm `tuple(kept.shape) == (3, 5)` and `all((value == 0 or abs(value - 4 / 3) < 1e-06 for value in kept.flatten().tolist()))`.
 
-3. **Check training invariants.** Switch the same layer to train mode and inspect output values.
-   **Expected:** shape(4, 8); only 0 or2.
-   **Verify:** Save the assertion results for exercise 3, including shape(4, 8); only 0 or2.
+3. **Confirm eval disables the new rate.** Switch the same Dropout(0.25) layer to eval mode and apply it to the ones tensor.
+   **Expected:** output exactly equals the input.
+   **Verify:** In a fresh process, the exercise checks confirm `torch.equal(quarter(torch.ones((3, 5))), torch.ones((3, 5)))`.
 
-4. **Separate data and penalty terms.** Combine data loss 2 with coefficient.1 times squared L2.
-   **Expected:** penalty.5; total 2.5.
-   **Verify:** Save the assertion results for exercise 4, including penalty.5; total 2.5.
+4. **Separate data and penalty terms.** Combine data loss 2 with coefficient 0.1 times squared L2.
+   **Expected:** penalty 0.5; total 2.5.
+   **Verify:** In a fresh process, the exercise checks confirm `penalty.item() == 0.5` and `(data_loss + penalty).item() == 2.5`.
 
-5. **Differentiate the explicit penalty.** Differentiate \(0.1\cdot \operatorname{sum}(v\cdot v)\) at v=[1, -2].
-   **Expected:** gradient [.2, -.4].
-   **Verify:** Save the assertion results for exercise 5, including gradient [.2, -.4].
+5. **Differentiate the explicit penalty.** Differentiate 0 \(0.1\cdot \operatorname{sum}(v\cdot v)\) at v=[1, -2].
+   **Expected:** gradient [0.2, -0.4].
+   **Verify:** In a fresh process, the exercise checks confirm `v.grad` matches `torch.tensor([0.2, -0.4])` within 1e-06.
 
 6. **Keep mode separate from gradients.** Set Dropout to eval and pass a requires_grad input.
    **Expected:** output still requires grad; backward gives ones.
-   **Verify:** Save the assertion results for exercise 6, including output still requires grad; backward gives ones.
+   **Verify:** In a fresh process, the exercise checks confirm `observed.requires_grad` and `torch.equal(differentiable.grad, torch.ones(3))`.
 
 ## Common pitfalls and diagnosis
 
@@ -158,7 +164,7 @@ First draw the state described in the vocabulary section. Next use the smallest 
 
 ## Self-check and retrieval
 
-Close both worked examples. Explain Regularization penalty, Dropout mode, Weight decay using the lesson fixture. Reconstruct one computation from its inputs. Then change one input while retaining the mechanism and predict whether the conclusion survives. Write which part is guaranteed by the code and which part would need new observations. This last distinction prevents a tiny deterministic teaching example from being presented as evidence about an unseen population or a production model.
+Close all three worked examples. Explain Regularization penalty, Dropout mode, Weight decay using the lesson fixture. Reconstruct one computation from its inputs. Then change one input while retaining the mechanism and predict whether the conclusion survives. Write which part is guaranteed by the code and which part would need new observations. This last distinction prevents a tiny deterministic teaching example from being presented as evidence about an unseen population or a production model.
 
 ## Next step
 
@@ -166,7 +172,7 @@ Revisit the direct prerequisite `torch-016` if the calculation cannot be reconst
 
 ## Sources and verification status
 
-API and mechanism reference: [PyTorch2.9 reference](https://docs.pytorch.org/docs/2.9/index.html), reviewed 2026-10-22. The fixture, examples, counterexamples and exercise design are original course material. See [validation](../../../docs/validation.md) for execution gates. Check CI artifacts for the exact revision and platform to determine which runtime checks actually ran; authored content alone does not establish runtime execution.
+API and mechanism reference: [PyTorch 2.9 reference](https://docs.pytorch.org/docs/2.9/index.html), reviewed 2026-10-22. The fixture, examples, counterexamples and exercise design are original course material. See [validation](../../../docs/validation.md) for execution gates. Check CI artifacts for the exact revision and platform to determine which runtime checks actually ran; authored content alone does not establish runtime execution.
 
 ## Interview reasoning with worked answers
 

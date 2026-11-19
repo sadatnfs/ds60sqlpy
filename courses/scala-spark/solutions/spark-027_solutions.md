@@ -8,7 +8,7 @@ Read the [guide](../guides/spark-027.md) and attempt one language first. The [Sc
 
 Keep rows whose amount is nonnegative or NULL, then return entity_id, segment, doubled=amount*2. Preserve duplicate occurrences and unknown values.
 
-**Expected:** Seven rows, known total 130 and oneNULL doubled value. The negative entity 6 row is excluded.
+**Expected:** Seven rows, known total 130 and one NULL doubled value. The negative entity 6 row is excluded.
 
 ```scala
 def transform(source: DataFrame): DataFrame = {
@@ -25,7 +25,7 @@ def transform(source):
     )
 ```
 
-The predicate makes unknown-amount retention a policy rather than an accident of three-valued logic. Arithmetic preservesNULL instead of manufacturing zero. No deduplication is requested, so identical source occurrences remain identical output occurrences. Aggregate checks provide a readable first diagnostic while the later bag oracle checks every occurrence.
+The predicate makes unknown-amount retention a policy rather than an accident of three-valued logic. Arithmetic preserves NULL instead of manufacturing zero. No deduplication is requested, so identical source occurrences remain identical output occurrences. Aggregate checks provide a readable first diagnostic while the later bag oracle checks every occurrence.
 
 **Verification evidence:** Assert population, total and unknown count, then compare with the literal golden relation in later tasks.
 
@@ -112,13 +112,13 @@ def cached_summary(frame):
 
 The sequence distinguishes marking a relation for persistence from computing and reusing it. The captured plan belongs to a consumer while the cache is active. Finally-based blocking unpersist makes cleanup observable after the helper returns. This teaches a lifecycle contract without asserting that caching a seven-row relation is faster or representative of production economics.
 
-**Verification evidence:** Assert result values, cache-scan evidence and post-returnStorageLevel.NONE. Do not use a timing threshold.
+**Verification evidence:** Assert result values, cache-scan evidence and post-return StorageLevel.NONE. Do not use a timing threshold.
 
 ### Exercise 5: Release persistence when a consumer fails
 
 Persist and materialize the relation, then raise an injected failure before a later consumer. Unpersist in finally and verify the original error reaches the caller.
 
-**Expected:** The injected_after_materialize error is observed and storage level isNONE afterward. Correct uncached output still passes the golden oracle.
+**Expected:** The injected_after_materialize error is observed and storage level is NONE afterward. Correct uncached output still passes the golden oracle.
 
 ```scala
 def failingReuse(frame: DataFrame): Unit = {
@@ -164,10 +164,10 @@ def difference_counts(actual, expected):
     return actual.exceptAll(expected).count(), expected.exceptAll(actual).count()
 ```
 
-The negative control proves that the oracle protects occurrence multiplicity rather than only value membership. There are no new distinct values, so a set comparator would miss the error. Directional bag counts explain the failure as two missing occurrences, which is more useful than a generic mismatch message when diagnosing an accidentalDISTINCT or deduplication step.
+The negative control proves that the oracle protects occurrence multiplicity rather than only value membership. There are no new distinct values, so a set comparator would miss the error. Directional bag counts explain the failure as two missing occurrences, which is more useful than a generic mismatch message when diagnosing an accidental DISTINCT or deduplication step.
 
 **Verification evidence:** Assert(0,2), count 5 and the explicit negative-control rejection.
 
 ## Execution and interpretation
 
-Run the complete reference in its prepared fixed worker. The small fixture is constructed inside the program,so opening a lesson does not fetch data. A final success line is printed only after the reference assertions complete. Plan observations,partition evidence and resource measurements apply to the actual local configuration; they do not establish cluster-scale performance. Session cleanup is explicit,and any additional owned file/query lifecycle is described in the lesson.
+Run the complete reference in its prepared fixed worker. The small fixture is constructed inside the program, so opening a lesson does not fetch data. A final success line is printed only after the reference assertions complete. Plan observations, partition evidence and resource measurements apply to the actual local configuration; they do not establish cluster-scale performance. Session cleanup is explicit, and any additional owned file/query lifecycle is described in the lesson.

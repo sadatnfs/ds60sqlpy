@@ -29,7 +29,7 @@ The parser converts each explicit offset into a common instant representation. L
 
 Return ordered(event_id, formatted_clock) pairs for a requested zone, formatting yyyy-MM-dd HH: mm: ss. Set the zone only during materialization and restore the previous setting in finally.
 
-**Expected:** Events 2 and 3 render 08:30 and 09:30 underUTC but both 01:30 underAmerica/Los_Angeles. Session zone is UTC afterward.
+**Expected:** Events 2 and 3 render 08:30 and 09:30 under UTC but both 01:30 under America/Los_Angeles. Session zone is UTC afterward.
 
 ```scala
 def renderClock(events: DataFrame, zone: String): Seq[(Long, String)] = {
@@ -71,9 +71,9 @@ The same instants produce different display labels, and two distinct instants ca
 
 ### Exercise 3: Filter a complete local day with instant boundaries
 
-Select events in the half-open interval[2024-11-03T07:00:00Z,2024-11-04T08:00:00Z). Return all event columns.
+Select events in the half-open interval [2024-11-03T07:00:00Z,2024-11-04T08:00:00Z). Return all event columns.
 
-**Expected:** Ordered event IDs[1,2,3,5]. Lower-bound ID 1 included, upper-bound ID 4 excluded and prior-second ID 6 excluded.
+**Expected:** Ordered event IDs [1, 2, 3, 5]. Lower-bound ID 1 included, upper-bound ID 4 excluded and prior-second ID 6 excluded.
 
 ```scala
 def localDay(events: DataFrame): DataFrame = {
@@ -96,7 +96,7 @@ The condition expresses membership in a reporting interval independently of a di
 
 ### Exercise 4: Keep an unresolved local timestamp as local fields
 
-Under bothUTC and America/Los_Angeles, cast 2024-11-03 01:30:00 explicitly to TIMESTAMP_NTZ, inspect its schema and render it as a string. Restore the prior zone.
+Under both UTC and America/Los_Angeles, cast 2024-11-03 01:30:00 explicitly to TIMESTAMP_NTZ, inspect its schema and render it as a string. Restore the prior zone.
 
 **Expected:** Both outputs are 2024-11-03 01:30:00 and the type is timestamp_ntz. No epoch or unique instant is claimed.
 
@@ -197,10 +197,10 @@ def parse_ledger(spark):
     )
 ```
 
-Try parsing exposes malformed input as data so a controlled ingestion boundary can retain its reason. RawNULL still needs a separate category because no invalid textual timestamp was supplied. The accepted count and full reason ledger reconcile the population, preventing a downstream time filter from silently discarding rejected records and calling the remaining count complete.
+Try parsing exposes malformed input as data so a controlled ingestion boundary can retain its reason. Raw NULL still needs a separate category because no invalid textual timestamp was supplied. The accepted count and full reason ledger reconcile the population, preventing a downstream time filter from silently discarding rejected records and calling the remaining count complete.
 
 **Verification evidence:** Assert all reason rows, one known timestamp and unchanged ANSI setting.
 
 ## Execution and interpretation
 
-Run the complete reference in its prepared fixed worker. The small fixture is constructed inside the program,so opening a lesson does not fetch data. A final success line is printed only after the reference assertions complete. Plan observations,partition evidence and resource measurements apply to the actual local configuration; they do not establish cluster-scale performance. Session cleanup is explicit,and any additional owned file/query lifecycle is described in the lesson.
+Run the complete reference in its prepared fixed worker. The small fixture is constructed inside the program, so opening a lesson does not fetch data. A final success line is printed only after the reference assertions complete. Plan observations, partition evidence and resource measurements apply to the actual local configuration; they do not establish cluster-scale performance. Session cleanup is explicit, and any additional owned file/query lifecycle is described in the lesson.

@@ -43,57 +43,56 @@ A framework comparison is another controlled experiment. Match record identities
 
 A defensible card ends with a bounded conclusion and the next evidence needed. For this fixture: arithmetic and procedure can be checked; population reliability remains unestablished. For a later deployment: define the independent unit, intended operating range, error costs and operational acceptance before treating a model score as permission to use it.
 
-## Exercise 1: Define a prediction unit
+## Exercise 1: Name the unit for grouped rows
 
-The question is: Use three training points(1, 2), (2, 4), (3, 6) and four untouched points(4, 8)..(7, 14); name one row as the prediction unit.
+The question is: A table has six rows from three customers, two rows per customer, and the task predicts next month's spend for each customer. Name the prediction unit and the unit that must stay together in a split.
 
-The unit determines the denominator and split design. If several rows later belong to one person or account, the independence assumption must be revisited.
-
-```text
-Training IDs: t1,t2,t3
-Holdout IDs: h4,h5,h6,h7
-Input: scalar x
-Target: scalar y in the same declared target unit
-Prediction unit: one identified row
-```
-
-**Expected:** 3 training rows, 4 holdout rows, one prediction per row.
-
-**Verify:** Compare the computed values or written argument with 3 training rows, 4 holdout rows, one prediction per row.
-
-## Exercise 2: Calculate a mean baseline
-
-The question is: Use training targets 2, 4, 6 to predict the constant training mean on holdout 8, 10, 12, 14.
-
-The baseline uses no holdout target to fit its constant. A baseline fitted to the holdout mean would contaminate the comparison.
+The row count overstates the evidence when rows share an identity. Grouping the split by customer keeps one customer's history from appearing on both sides.
 
 ```text
-Training mean=(2+4+6)/3=4
-Holdout residuals=4,6,8,10
-Squared errors=16,36,64,100
-MSE=216/4=54
+Rows: 6 (c1, c1, c2, c2, c3, c3)
+Prediction unit: one customer-month forecast
+Split unit: customer; both rows of a customer go to the same side
+Independent units available: 3
 ```
 
-**Expected:** mean 4; holdout squared errors 16, 36, 64, 100; MSE 54.
+**Expected:** prediction unit: one customer for the next month; split unit: customer, so 3 independent units rather than 6 rows.
 
-**Verify:** Compare the computed values or written argument with mean 4; holdout squared errors 16, 36, 64, 100; MSE 54.
+**Verify:** Your worksheet names the customer as both the prediction and split unit and states the count 3; a split that places c1 rows on both sides is marked invalid.
 
-## Exercise 3: Separate an exact relation from learned evidence
+## Exercise 2: Recompute a training-only baseline
 
-The question is: Compare a hand-specified rule y=2x with a model trained on the three points.
+The question is: Use training targets 1, 3, 5 to predict a constant on holdout targets 7 and 9. Report the constant, the holdout residuals and the holdout MSE.
 
-A correct formula is useful as an oracle. It must not be presented as a trained-model result when no training occurred.
+The constant comes only from training targets. Using the holdout mean 8 would give MSE 1 but would make the holdout part of fitting.
 
 ```text
-Rule: yhat=2*x
-Holdout predictions:8,10,12,14
-Fixture error:0
-Training execution evidence: absent unless an actual optimizer run is recorded
+Training mean=(1+3+5)/3=3
+Holdout residuals=7-3, 9-3 = 4, 6
+Squared errors=16, 36
+MSE=52/2=26
 ```
 
-**Expected:** the hand rule predicts the fixture exactly but was not learned by running an optimizer.
+**Expected:** constant 3; residuals 4 and 6; squared errors 16 and 36; MSE 26.
 
-**Verify:** Compare the computed values or written argument with the hand rule predicts the fixture exactly but was not learned by running an optimizer.
+**Verify:** Your table shows the mean 3 computed from training targets only and the two squared errors summing to 52 over a denominator of 2; a version that uses the holdout mean 8 is labeled leaked.
+
+## Exercise 3: Classify evidence for a generated fixture
+
+The question is: A notebook reports zero error for the rule y = 3x on points that were generated from y = 3x, and it contains no optimizer log. Classify what the zero error establishes.
+
+Agreement between a rule and the process that generated its test points is an arithmetic check. A training claim needs a recorded optimizer run, and a population claim needs independent data.
+
+```text
+Rule source: written by hand, identical to the generator
+Observed error: 0 on generated points
+Training evidence: absent (no initial state, updates or final state recorded)
+Population evidence: absent (no independent sample)
+```
+
+**Expected:** an analytic oracle consistent with the generator; no training evidence; no evidence about unseen data.
+
+**Verify:** Your answer separates the three evidence types and names the missing optimizer record and missing independent sample as the two absent items.
 
 ## Exercise 4: Audit selection leakage
 
@@ -109,7 +108,7 @@ Repair: treat these observations as validation and reserve new final data
 
 **Expected:** holdout was used for selection; new untouched assessment needed.
 
-**Verify:** Compare the computed values or written argument with holdout was used for selection; new untouched assessment needed.
+**Verify:** Your timeline shows the holdout score influencing the learning-rate change and relabels that data as validation; the report names a new untouched set as the only valid final assessment.
 
 ## Exercise 5: Align a framework comparison
 
@@ -125,7 +124,7 @@ Do not infer equivalence from a matching first scalar alone.
 
 **Expected:** same data pairing, dtype, initial weight, loss reduction, rate and optimizer rule.
 
-**Verify:** Compare the computed values or written argument with same data pairing, dtype, initial weight, loss reduction, rate and optimizer rule.
+**Verify:** Your checklist names all six contracts (pairing, dtype, initial weight, reduction, rate and optimizer rule) and orders the comparisons forward loss, gradient, updated weight and new loss.
 
 ## Exercise 6: Bound the conclusion
 
@@ -141,7 +140,7 @@ Next evidence: representative independent units and task-specific acceptance tes
 
 **Expected:** report says arithmetic/software checked; population reliability unestablished.
 
-**Verify:** Compare the computed values or written argument with report says arithmetic/software checked; population reliability unestablished.
+**Verify:** Your report contains one sentence on what the CPU run checked and one listing unestablished properties, and contains no production-quality claim.
 
 ## Review after comparison
 

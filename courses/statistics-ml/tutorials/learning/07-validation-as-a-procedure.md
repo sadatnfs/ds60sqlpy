@@ -1,6 +1,6 @@
 # Evaluate everything that learns from data
 
-Tutorial ID: `statistics-learning-007`. Prerequisites: `statistics-learning-003`, `statistics-learning-004`, `statistics-learning-006`, `statistics-022`. Complete program: [learning_06.py](examples/learning_06.py).
+Tutorial ID: `statistics-learning-007`. Prerequisites: `statistics-learning-003`, `statistics-learning-004`, `statistics-learning-006`, `statistics-022`. Complete program: [learning_07.py](examples/learning_07.py).
 
 ## What does the split represent?
 

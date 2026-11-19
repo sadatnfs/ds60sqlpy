@@ -4,7 +4,7 @@ Compare these answers only after an attempt or an explicit solution reveal. They
 
 ## Mechanism review
 
-A preference objective compares two responses under a chosen and rejected label. A DPO-style margin subtracts the reference-policy log-probability difference from the current-policy difference, then scales by beta. A logistic loss rewards a positive margin for the chosen response. Equal margins give log2 loss. Reversing labels reverses the margin. These labels express a preference under a collection process; they do not automatically encode truth, harmlessness or universal user agreement. This worksheet calculates a fixed offline objective and does not run reinforcement learning, call a reward service or train a production model.
+A preference objective compares two responses under a chosen and rejected label. A DPO-style margin subtracts the reference-policy log-probability difference from the current-policy difference, then scales by beta. A logistic loss rewards a positive margin for the chosen response. Equal margins give log 2 loss. Reversing labels reverses the margin. These labels express a preference under a collection process; they do not automatically encode truth, harmlessness or universal user agreement. This worksheet calculates a fixed offline objective and does not run reinforcement learning, call a reward service or train a production model.
 
 **Preference pair:** Two candidate responses labelled chosen and rejected.
 
@@ -14,40 +14,43 @@ A preference objective compares two responses under a chosen and rejected label.
 
 ## Reading the implementation
 
-Let margin=beta*((policy_chosen-policy_rejected)-(reference_chosen-reference_rejected)). The negative log sigmoid equals logaddexp(0,-margin), which is stable for large magnitudes. Log probabilities are sequence scores under a declared tokenization and length policy. Keep those conventions fixed when comparing pairs, because length changes can affect sequence log probability.
+Let margin=beta*((policy_chosen-policy_rejected)-(reference_chosen-reference_rejected)). The negative log sigmoid equals logaddexp(0, -margin), which is stable for large magnitudes. Log probabilities are sequence scores under a declared tokenization and length policy. Keep those conventions fixed when comparing pairs, because length changes can affect sequence log probability.
 
-## Exercise 1: Evaluate equal margins
+## Exercise 1: Compute a margin from log probabilities
 
-The question is: Set both policy and reference chosen-minus-rejected differences to1 with beta.1.
+The question is: Use policy log probabilities -1 (chosen) and -4 (rejected), reference -2 and -3, and beta 0.25.
 
-Equal relative preferences cancel even though absolute sequence log probabilities differ. The objective compares a change in preference relative to the reference.
-
-```python
-margin = 0.1 * ((-2 - (-3)) - (-4 - (-5)))
-loss = np.logaddexp(0, -margin)
-assert margin == 0
-np.testing.assert_allclose(loss, np.log(2), atol=1e-12, rtol=0)
-```
-
-**Expected:** margin0 and loss log 2.
-
-**Verify:** Compare the computed values or written argument with margin0 and loss log 2.
-
-## Exercise 2: Favor the chosen response
-
-The question is: Use policy difference2,reference difference 0,beta.5.
-
-A positive adjusted margin reduces the logistic loss. This expresses agreement with the supplied preference label, not independent correctness.
+The policy prefers the chosen answer by 3 while the reference prefers it by 1, so the relative preference is 2 before scaling by beta. Any positive margin gives a loss below the zero-margin value \(\log 2\).
 
 ```python
-margin = 0.5 * (2 - 0)
-loss = np.logaddexp(0, -margin)
-np.testing.assert_allclose(loss, np.log1p(np.exp(-1)), atol=1e-12, rtol=0)
+margin2 = 0.25 * ((-1 - (-4)) - (-2 - (-3)))
+loss2 = np.logaddexp(0, -margin2)
+assert margin2 == 0.5
+np.testing.assert_allclose(loss2, np.log1p(np.exp(-0.5)), atol=1e-12, rtol=0)
+assert loss2 < np.log(2)
 ```
 
-**Expected:** margin1;loss \(\log(1+e^{-1})\).
+**Expected:** margin 0.5; loss \(\log(1+e^{-0.5})\approx 0.474\), below \(\log 2\).
 
-**Verify:** Compare the computed values or written argument with margin1;loss \(\log(1+e^{-1})\).
+**Verify:** In a fresh process, the exercise checks confirm `margin2 == 0.5`, `loss2` matches `np.log1p(np.exp(-0.5))` within 1e-12 and `loss2 < np.log(2)`.
+
+## Exercise 2: Predict the effect of beta
+
+The question is: Keep the same log probabilities and raise beta to 1. Predict the margin and whether the loss rises or falls.
+
+Beta scales the same relative preference, so a larger beta makes a positive margin look more decisive and lowers the loss. It also makes a negative margin more costly.
+
+```python
+margin3 = 1.0 * ((-1 - (-4)) - (-2 - (-3)))
+loss3 = np.logaddexp(0, -margin3)
+assert margin3 == 2
+np.testing.assert_allclose(loss3, np.log1p(np.exp(-2)), atol=1e-12, rtol=0)
+assert loss3 < loss2
+```
+
+**Expected:** margin 2; loss \(\log(1+e^{-2})\approx 0.127\), smaller than at beta 0.25.
+
+**Verify:** In a fresh process, the exercise checks confirm `margin3 == 2`, `loss3` matches `np.log1p(np.exp(-2))` within 1e-12 and `loss3 < loss2`.
 
 ## Exercise 3: Reverse the labels
 
@@ -61,13 +64,13 @@ reversed_loss = np.logaddexp(0, -reversed_margin)
 assert reversed_margin == -1 and reversed_loss > loss
 ```
 
-**Expected:** margin-1 and larger loss.
+**Expected:** margin -1 and larger loss.
 
-**Verify:** Compare the computed values or written argument with margin-1 and larger loss.
+**Verify:** In a fresh process, the exercise checks confirm `reversed_margin == -1` and `reversed_loss > loss`.
 
 ## Exercise 4: Check numeric stability
 
-The question is: Evaluate margins1000 and-1000 withlogaddexp.
+The question is: Evaluate margins 1000 and -1000 with logaddexp.
 
 A naive `log(sigmoid())` calculation may underflow at extreme margins. The stable form computes the same objective without an unnecessary probability round trip.
 
@@ -77,13 +80,13 @@ assert np.isfinite(values).all()
 np.testing.assert_allclose(values, [0, 1000], atol=1e-12, rtol=0)
 ```
 
-**Expected:** finite losses approximately0 and1000.
+**Expected:** finite losses approximately 0 and 1000.
 
-**Verify:** Compare the computed values or written argument with finite losses approximately0 and1000.
+**Verify:** In a fresh process, the exercise checks confirm `np.isfinite(values).all()` and `values` matches `[0, 1000]` within 1e-12.
 
 ## Exercise 5: Track pair identity
 
-The question is: Store response IDsr1,r2 and a preference label; reverse the label while retaining both identities.
+The question is: Store response IDs r1, r2 and a preference label; reverse the label while retaining both identities.
 
 Keeping scores keyed by response identity prevents an array-order error from changing which text a probability belongs to.
 
@@ -94,9 +97,9 @@ flipped = {"chosen": pair["rejected"], "rejected": pair["chosen"]}
 assert flipped["chosen"] == "r2" and scores["r1"] == -2
 ```
 
-**Expected:** chosen identity changes tor2; scores remain keyed by ID.
+**Expected:** chosen identity changes to r2; scores remain keyed by ID.
 
-**Verify:** Compare the computed values or written argument with chosen identity changes tor2; scores remain keyed by ID.
+**Verify:** In a fresh process, the exercise checks confirm `flipped['chosen'] == 'r2'` and `scores['r1'] == -2`.
 
 ## Exercise 6: Limit the claim
 
@@ -109,9 +112,9 @@ report = {"preference_agreement": True, "factuality_verified": False, "online_rl
 assert not report["factuality_verified"] and not report["online_rl_executed"]
 ```
 
-**Expected:** preference agreementTrue,factuality_verifiedFalse.
+**Expected:** preference agreement True, factuality_verified False.
 
-**Verify:** Compare the computed values or written argument with preference agreementTrue,factuality_verifiedFalse.
+**Verify:** In a fresh process, the exercise checks confirm `not report['factuality_verified']` and `not report['online_rl_executed']`.
 
 ## Review after comparison
 

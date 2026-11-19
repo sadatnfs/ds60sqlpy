@@ -1,6 +1,6 @@
 # swift-037: explanation and comparison
 
-Attempt the six guide tasks before opening this comparison. The executable reference is [swift-037_solution.swift](swift-037_solution.swift). Its assertions are always active under the prepared classroom compile settings.
+Attempt the six guide tasks before opening this comparison. The executable reference is [swift-037_solution.swift](swift-037_solution.swift). It runs both worked examples and the reference answers below, and its assertions are always active under the prepared classroom compile settings.
 
 ## Why the two examples differ
 
@@ -8,21 +8,54 @@ Attempt the six guide tasks before opening this comparison. The executable refer
 
 **Retain valid interior values:** The projected information explains the policy without exposing mutable internal storage. A valid interior value is unchanged and the projection exposes the range.
 
-## Reason through the six tasks
+## Task answers
 
-1. **Predict and explain.** Trace initialization and both setter calls.
+### Task 1: Predict and explain
 
-2. **Guided modification.** Change the allowed range and update boundary tests.
+Trace initialization and both setter calls.
 
-3. **Independent construction.** Create a wrapper with an explicit normalization policy for a local display field.
+No separate reference answer has been written for this task. Example A is the evidence to compare with: The wrapper enforces a deliberate display range at every assignment. Assignments are clamped into zero through ten.
 
-4. **Diagnose a defect.** Explain why silently clamping a payment amount would be misleading.
+### Task 2: Guided modification
 
-5. **Boundary evidence.** Test both endpoints and one value outside each.
+Change the allowed range and update boundary tests.
 
-6. **Transfer and justify.** Choose a wrapper or explicit validation method based on whether assignment can fail meaningfully.
+No separate reference answer has been written for this task. Start from Example B: The projected information explains the policy without exposing mutable internal storage. A valid interior value is unchanged and the projection exposes the range.
 
-For tasks 1 and 2, use the checked values and mechanism trace in the two examples. For task 3, choose names that expose the input and result contract and retain the same invariants. For task 4, the diagnosed mistakes below supply a concrete wrong assumption: preserve its counterexample before repairing it. Task 5 needs an explicit expected value or documented rejection at the boundary, not just successful execution. For task 6, explain what changes in the new context and which part of the original mechanism remains applicable. Several representations may satisfy this transfer task; justify the choice rather than treating this reference as the only architecture.
+### Task 3: Independent construction
+
+Create a wrapper with an explicit normalization policy for a local display field.
+
+**Reference answer.** It runs as the `Task 3` block of the reference program.
+
+```swift
+var label = DisplayLabel()
+label.title = "  Report  "
+precondition(label.title == "Report")
+precondition(DisplayLabel(title: " x ").title == "x")
+```
+
+**Observe:** Both assignment and initialization store the trimmed text Report and x.
+
+The wrapper applies one normalization policy in its setter, and init(wrappedValue:) routes initial values through the same setter.
+
+### Task 4: Diagnose a defect
+
+Explain why silently clamping a payment amount would be misleading.
+
+No reference answer has been written for this task yet. The wrong assumptions to look for are this lesson's pitfalls: A wrapper is not a substitute for validating external input. Hidden side effects make ordinary-looking assignment hard to reason about. Document projection and mutation semantics.
+
+### Task 5: Boundary evidence
+
+Test both endpoints and one value outside each.
+
+No reference answer has been written for this task yet. Write the expected value or documented rejection for each boundary before running it, and compare with the checks in Example A (Apply a bounded display policy) and Example B (Retain valid interior values).
+
+### Task 6: Transfer and justify
+
+Choose a wrapper or explicit validation method based on whether assignment can fail meaningfully.
+
+No single reference answer exists: several designs can satisfy this transfer task. Justify yours against the mechanism described below and the vocabulary entry **Property wrapper**, and state one limitation of your choice.
 
 ## Mechanism and diagnostic reasoning
 
@@ -36,4 +69,4 @@ A wrapper is not a substitute for validating external input. Hidden side effects
 
 ## Review before continuing
 
-The reference checks the worked scenarios, including their boundary distinctions. Your independent and transfer artifacts may have additional checks. Compare observations rather than only source text. Preserve any new regression case you discover and explain why it would reject a plausible wrong implementation. External project steps require their own build and platform evidence and are not established by a portable reference passing.
+Run the reference and confirm that it prints `swift-037: passed`, then reconstruct one boundary case from memory and explain which check would reject a plausible wrong implementation. External project steps need their own build and platform evidence; a passing portable reference does not establish them.

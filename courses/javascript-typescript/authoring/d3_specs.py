@@ -27,9 +27,32 @@ This lesson first uses a simple multiplier rather than a scale to expose the ari
     ),
     (
         "Remember SVG vertical direction",
-        "These two centers have increasing y downward.",
-        "const centers = [{x: 40, y: 30}, {x: 40, y: 80}];\nconsole.log(centers[1].y > centers[0].y);",
-        "The second point is lower, even though its y value is larger.",
+        "These two circles share x; the second has the larger y value.",
+        """const centers = [
+  { label: "first", x: 120, y: 90 },
+  { label: "second", x: 120, y: 240 },
+];
+svg
+  .selectAll("circle")
+  .data(centers)
+  .join("circle")
+  .attr("cx", (d) => d.x)
+  .attr("cy", (d) => d.y)
+  .attr("r", 18)
+  .attr("fill", "#2563eb");
+svg
+  .selectAll("text")
+  .data(centers)
+  .join("text")
+  .attr("x", (d) => d.x + 30)
+  .attr("y", (d) => d.y + 5)
+  .text((d) => `${d.label}: y = ${d.y}`);
+const [firstTop, secondTop] = svg
+  .selectAll("circle")
+  .nodes()
+  .map((node) => node.getBoundingClientRect().top);
+check(secondTop > firstTop, "A larger y value should be drawn lower");""",
+        "Two labeled circles appear in #chart; the second, with the larger y value 240, is drawn below the first.",
     ),
     [
         (
@@ -112,15 +135,55 @@ A render function should produce the intended state when called again. Calling a
 An attribute callback `(d, i) => ...` receives the record as d and its current group index as i. Returning undefined for a required coordinate can remove or invalidate the intended attribute. Inspect the derived values before blaming SVG rendering.""",
     (
         "Reconcile a changing count",
-        "This fragment assumes an existing svg selection.",
-        'function draw(values) {\n  svg.selectAll("circle").data(values).join("circle").attr("r", d => d);\n}\ndraw([5, 10, 15]);\ndraw([8, 12]);',
+        "This complete snippet creates its own SVG and draws twice.",
+        """const svg = d3.select("#chart").append("svg").attr("viewBox", "0 0 640 360");
+function draw(values) {
+  svg
+    .selectAll("circle")
+    .data(values)
+    .join("circle")
+    .attr("cx", (d, i) => 80 + i * 120)
+    .attr("cy", 180)
+    .attr("r", (d) => d);
+}
+draw([5, 10, 15]);
+draw([8, 12]);
+console.log(svg.selectAll("circle").nodes().map((node) => node.getAttribute("r")));""",
         "Two circles remain; their radii are 8 and 12.",
     ),
     (
         "Contrast unconditional append",
-        "This is the bug to reason about, not the reference strategy.",
-        'for (const value of [5, 10]) {\n  svg.append("circle").attr("r", value);\n}',
-        "Calling this loop twice creates four circles because it does not reconcile existing nodes.",
+        "The top row appends on every call; the bottom row uses a join. Both are drawn twice with the same values.",
+        """const appendAll = (values) => {
+  for (const value of values) {
+    svg
+      .append("circle")
+      .attr("class", "appended")
+      .attr("cx", 80 + value * 30)
+      .attr("cy", 110)
+      .attr("r", value * 2)
+      .attr("fill", "#dc2626")
+      .attr("fill-opacity", 0.4);
+  }
+};
+const draw = (values) =>
+  svg
+    .selectAll("circle.joined")
+    .data(values)
+    .join("circle")
+    .attr("class", "joined")
+    .attr("cx", (d) => 80 + d * 30)
+    .attr("cy", 250)
+    .attr("r", (d) => d * 2)
+    .attr("fill", "#2563eb")
+    .attr("fill-opacity", 0.4);
+appendAll([5, 10]);
+appendAll([5, 10]);
+draw([5, 10]);
+draw([5, 10]);
+check(svg.selectAll("circle.appended").size() === 4, "Unconditional append duplicates marks");
+check(svg.selectAll("circle.joined").size() === 2, "A join keeps one mark per value");""",
+        "The top row looks like two darker circles but holds four nodes, two drawn over two; the joined bottom row holds exactly two.",
     ),
     [
         (
@@ -204,15 +267,51 @@ Duplicate keys violate the intended one-entity-one-node relationship. D3 has def
 Sort a copied array when you want display order without mutating a source collection owned elsewhere. Keep the key based on identity rather than the value being sorted. A value can change while the entity remains the same.""",
     (
         "Match by stable ID",
-        "The key does not depend on array position.",
-        'svg.selectAll("circle").data([{id:"A",v:2},{id:"B",v:4}], d=>d.id).join("circle");',
-        "One node per ID, with identity available across later updates.",
+        "The key does not depend on array position. This snippet creates its own SVG.",
+        """const svg = d3.select("#chart").append("svg").attr("viewBox", "0 0 640 360");
+const circles = svg
+  .selectAll("circle")
+  .data(
+    [
+      { id: "A", v: 2 },
+      { id: "B", v: 4 },
+    ],
+    (d) => d.id,
+  )
+  .join("circle")
+  .attr("cx", (d, i) => 120 + i * 200)
+  .attr("cy", 180)
+  .attr("r", (d) => d.v * 10);
+console.log(circles.data().map((d) => d.id));""",
+        "One node per ID, A and B, with identity available across later updates.",
     ),
     (
         "Reject duplicate identity",
-        "A short check makes the assumption inspectable.",
-        'const rows = [{id:"A"},{id:"A"}];\nconst unique = new Set(rows.map(d=>d.id)).size === rows.length;\nconsole.log(unique);',
-        "false; decide how to repair the input rather than drawing ambiguous entities.",
+        "A short check finds the ambiguous ID before any mark is drawn.",
+        """const rows = [
+  { id: "A", value: 2 },
+  { id: "A", value: 4 },
+  { id: "B", value: 3 },
+];
+const ids = rows.map((d) => d.id);
+const duplicates = [...new Set(ids.filter((id, i) => ids.indexOf(id) !== i))];
+check(duplicates.join(",") === "A", "Expected A to be the duplicated ID");
+const drawable = rows.filter((d) => !duplicates.includes(d.id));
+svg
+  .selectAll("circle")
+  .data(drawable, (d) => d.id)
+  .join("circle")
+  .attr("cx", 200)
+  .attr("cy", 160)
+  .attr("r", (d) => d.value * 15)
+  .attr("fill", "#0f766e");
+svg
+  .append("text")
+  .attr("x", 40)
+  .attr("y", 320)
+  .text(`Not drawn: duplicate ID ${duplicates.join(", ")}`);
+check(svg.selectAll("circle").size() === 1, "Only the unambiguous record is drawn");""",
+        "Only B is drawn; a visible note reports that ID A was duplicated and withheld until the input is repaired.",
     ),
     [
         (
@@ -303,9 +402,26 @@ For the example, domain `[0,10]` and range `[40,600]` maps 0 to 40, 5 to 320 and
     ),
     (
         "Lay out categories",
-        "A band scale allocates positions and width together.",
-        'const x=d3.scaleBand().domain(["A","B","C"]).range([40,600]).padding(0.2);\nconsole.log(x("A") < x("B"), x.bandwidth() > 0);',
-        "Both comparisons are true; an unknown category returns undefined.",
+        "A band scale allocates positions and width together; a linear scale gives each bar its height from a zero baseline.",
+        """const x = d3.scaleBand().domain(["A", "B", "C"]).range([40, 600]).padding(0.2);
+const values = new Map([
+  ["A", 3],
+  ["B", 7],
+  ["C", 5],
+]);
+const y = d3.scaleLinear().domain([0, 8]).range([320, 40]);
+svg
+  .selectAll("rect")
+  .data(x.domain())
+  .join("rect")
+  .attr("x", (d) => x(d))
+  .attr("width", x.bandwidth())
+  .attr("y", (d) => y(values.get(d)))
+  .attr("height", (d) => y(0) - y(values.get(d)))
+  .attr("fill", "#2563eb");
+check(x("A") < x("B") && x.bandwidth() > 0, "Bands are ordered and have positive width");
+check(x("D") === undefined, "An unknown category has no band");""",
+        'Three bars share one band width in domain order; x("D") is undefined, so an unknown category gets no position.',
     ),
     [
         (
@@ -393,9 +509,19 @@ Use a visible axis title and a chart description. Avoid assuming that a bare dol
     ),
     (
         "Use explicit ticks for a teaching chart",
-        "The same scale drives marks and axis.",
-        'const x=d3.scaleLinear().domain([0,10]).range([60,600]);\nsvg.append("g").attr("transform","translate(0,300)").call(d3.axisBottom(x).tickValues([0,5,10]));',
-        "Three labeled tick positions align with the scale endpoints and midpoint.",
+        "The same scale drives the axis and the mark placed above it.",
+        """const x = d3.scaleLinear().domain([0, 10]).range([60, 600]);
+const axis = svg
+  .append("g")
+  .attr("transform", "translate(0,300)")
+  .call(d3.axisBottom(x).tickValues([0, 5, 10]));
+svg.append("circle").attr("cx", x(5)).attr("cy", 250).attr("r", 8).attr("fill", "#dc2626");
+const labels = axis
+  .selectAll(".tick text")
+  .nodes()
+  .map((node) => node.textContent);
+check(labels.join(",") === "0,5,10", "Expected exactly three explicit tick labels");""",
+        "An axis with exactly three labeled ticks, 0, 5 and 10, and a red mark directly above the 5 tick.",
     ),
     [
         (
@@ -482,9 +608,37 @@ Aggregation changes the row grain. A transaction table has one row per event; a 
     ),
     (
         "Aggregate a known grain",
-        "Each input row is one event.",
-        'const totals=d3.rollup([{g:"A",v:2},{g:"A",v:3},{g:"B",v:4}], rows=>d3.sum(rows,d=>d.v), d=>d.g);\nconsole.log(totals.get("A"));',
-        "5, from exactly two A events.",
+        "Each input row is one event, so a group total is a sum over its events.",
+        """const events = [
+  { g: "A", v: 2 },
+  { g: "A", v: 3 },
+  { g: "B", v: 4 },
+];
+const totals = d3.rollup(
+  events,
+  (rows) => d3.sum(rows, (d) => d.v),
+  (d) => d.g,
+);
+check(totals.get("A") === 5 && totals.get("B") === 4, "Each group total sums its own events");
+const x = d3.scaleLinear().domain([0, 6]).range([0, 480]);
+const groups = [...totals.keys()];
+svg
+  .selectAll("rect")
+  .data(groups)
+  .join("rect")
+  .attr("x", 100)
+  .attr("y", (d, i) => 80 + i * 100)
+  .attr("height", 50)
+  .attr("width", (d) => x(totals.get(d)))
+  .attr("fill", "#7c3aed");
+svg
+  .selectAll("text")
+  .data(groups)
+  .join("text")
+  .attr("x", 20)
+  .attr("y", (d, i) => 112 + i * 100)
+  .text((d) => `${d}: ${totals.get(d)}`);""",
+        "Two bars labeled A: 5 and B: 4; the A total comes from exactly two events.",
     ),
     [
         (
@@ -580,9 +734,32 @@ A null value must be rejected explicitly because `Number(null)` becomes zero. So
     ),
     (
         "Break a line at missing data",
-        "This fragment uses already defined x and y scales.",
-        "const line=d3.line().defined(d=>d.value!==null).x(d=>x(d.date)).y(d=>y(d.value));",
-        "A null observation splits the line instead of drawing a false zero or connecting through it.",
+        "The defined predicate accepts only finite values, so the null observation splits the line.",
+        """const series = [
+  { date: new Date("2024-01-01T00:00:00Z"), value: 3 },
+  { date: new Date("2024-01-02T00:00:00Z"), value: 5 },
+  { date: new Date("2024-01-03T00:00:00Z"), value: null },
+  { date: new Date("2024-01-04T00:00:00Z"), value: 4 },
+  { date: new Date("2024-01-05T00:00:00Z"), value: 6 },
+];
+const x = d3
+  .scaleUtc()
+  .domain(d3.extent(series, (d) => d.date))
+  .range([60, 600]);
+const y = d3.scaleLinear().domain([0, 8]).range([320, 40]);
+const line = d3
+  .line()
+  .defined((d) => Number.isFinite(d.value))
+  .x((d) => x(d.date))
+  .y((d) => y(d.value));
+const path = svg
+  .append("path")
+  .attr("d", line(series))
+  .attr("fill", "none")
+  .attr("stroke", "#2563eb")
+  .attr("stroke-width", 3);
+check(path.attr("d").split("M").length - 1 === 2, "The gap should split the line into two segments");""",
+        "A line with a visible break at January 3: its path starts two separate segments instead of dropping to zero or bridging the gap.",
     ),
     [
         (
@@ -671,9 +848,40 @@ The reference validates finite positions and the area relationship for magnitude
     ),
     (
         "Detect duplicate coordinates",
-        "Repeated positions can hide observations.",
-        "const points=[{x:1,y:2},{x:1,y:2},{x:2,y:3}];\nconsole.log(new Set(points.map(d=>`${d.x},${d.y}`)).size);",
-        "Two unique positions for three records.",
+        "Repeated positions can hide observations, so this view counts records per position and sizes each circle by area.",
+        """const points = [
+  { x: 1, y: 2 },
+  { x: 1, y: 2 },
+  { x: 2, y: 3 },
+];
+const x = d3.scaleLinear().domain([0, 3]).range([60, 600]);
+const y = d3.scaleLinear().domain([0, 4]).range([320, 40]);
+const counts = [
+  ...d3.rollup(
+    points,
+    (rows) => rows.length,
+    (d) => d.x,
+    (d) => d.y,
+  ),
+].flatMap(([px, byY]) => [...byY].map(([py, n]) => ({ px, py, n })));
+check(counts.length === 2, "Three records share two positions");
+svg
+  .selectAll("circle")
+  .data(counts)
+  .join("circle")
+  .attr("cx", (d) => x(d.px))
+  .attr("cy", (d) => y(d.py))
+  .attr("r", (d) => 10 * Math.sqrt(d.n))
+  .attr("fill", "#0f766e")
+  .attr("fill-opacity", 0.7);
+svg
+  .selectAll("text")
+  .data(counts)
+  .join("text")
+  .attr("x", (d) => x(d.px) + 20)
+  .attr("y", (d) => y(d.py) + 5)
+  .text((d) => `n = ${d.n}`);""",
+        "Two circles labeled n = 2 and n = 1; the repeated position is drawn once, with an area proportional to its two records.",
     ),
     [
         (
@@ -755,9 +963,25 @@ Test boundary values explicitly. The sample `[0,2,2,4,9,10]` produces counts `[1
     ),
     (
         "Compute one density height",
-        "This is an analytical quantity, not a plotting coordinate.",
-        "const count=2, sampleSize=6, width=2;\nconsole.log(count/(sampleSize*width));",
-        "1/6 per unit; the bin area is 1/3.",
+        "Each bar's height is its count divided by sample size times bin width, so bar areas add up to 1.",
+        """const values = [0, 2, 2, 4, 9, 10];
+const bins = d3.bin().domain([0, 10]).thresholds([2, 4, 6, 8])(values);
+const density = (bin) => bin.length / (values.length * (bin.x1 - bin.x0));
+const x = d3.scaleLinear().domain([0, 10]).range([60, 600]);
+const y = d3.scaleLinear().domain([0, 0.2]).range([320, 40]);
+svg
+  .selectAll("rect")
+  .data(bins)
+  .join("rect")
+  .attr("x", (d) => x(d.x0) + 1)
+  .attr("width", (d) => x(d.x1) - x(d.x0) - 2)
+  .attr("y", (d) => y(density(d)))
+  .attr("height", (d) => y(0) - y(density(d)))
+  .attr("fill", "#2563eb");
+const area = d3.sum(bins, (d) => density(d) * (d.x1 - d.x0));
+check(Math.abs(density(bins[1]) - 1 / 6) < 1e-12, "Bin [2, 4) has density 1/6");
+check(Math.abs(area - 1) < 1e-12, "Density areas sum to 1");""",
+        "Five density bars; the [2, 4) bar has height 1/6 per unit and the bar areas sum to 1.",
     ),
     [
         (
@@ -832,9 +1056,32 @@ For a supplied interval, check lower <= estimate <= upper before drawing a segme
     ),
     (
         "Validate an interval before rendering",
-        "This does not calculate the interval statistically.",
-        "const estimate={value:0.2,lower:-0.1,upper:0.5};\nconsole.log(estimate.lower<=estimate.value && estimate.value<=estimate.upper);",
-        "true; the supplied interval crosses zero.",
+        "This does not calculate the interval statistically; it checks the supplied one and then draws it.",
+        """const estimate = { value: 0.2, lower: -0.1, upper: 0.5 };
+check(
+  estimate.lower <= estimate.value && estimate.value <= estimate.upper,
+  "The estimate must lie inside its interval",
+);
+const x = d3.scaleLinear().domain([-0.5, 1]).range([60, 600]);
+svg
+  .append("line")
+  .attr("x1", x(0))
+  .attr("x2", x(0))
+  .attr("y1", 60)
+  .attr("y2", 300)
+  .attr("stroke", "#9ca3af");
+svg
+  .append("line")
+  .attr("x1", x(estimate.lower))
+  .attr("x2", x(estimate.upper))
+  .attr("y1", 180)
+  .attr("y2", 180)
+  .attr("stroke", "#111827")
+  .attr("stroke-width", 3);
+svg.append("circle").attr("cx", x(estimate.value)).attr("cy", 180).attr("r", 7).attr("fill", "#dc2626");
+svg.append("text").attr("x", 60).attr("y", 330).text("Estimate 0.2, interval -0.1 to 0.5");
+check(x(estimate.lower) < x(0) && x(0) < x(estimate.upper), "The interval crosses the zero line");""",
+        "A horizontal interval from -0.1 to 0.5 with a point at 0.2 that crosses the grey zero line; the first check passes only because the supplied interval contains its estimate.",
     ),
     [
         (
@@ -927,9 +1174,31 @@ A zero total has no meaningful fraction composition unless a policy is stated. M
     ),
     (
         "Compare counts and shares",
-        "The same share can represent different totals.",
-        "const rows=[{a:2,b:3},{a:20,b:30}];\nconsole.log(rows.map(d=>d.a/(d.a+d.b)));",
-        "0.4 and 0.4 despite totals 5 and 50.",
+        "The same share can represent very different totals, so the labels keep the counts visible.",
+        """const rows = [
+  { label: "small", a: 2, b: 3 },
+  { label: "large", a: 20, b: 30 },
+];
+const shares = rows.map((d) => d.a / (d.a + d.b));
+check(shares.join(",") === "0.4,0.4", "Both rows have the same share");
+const x = d3.scaleLinear().domain([0, 1]).range([160, 600]);
+svg
+  .selectAll("rect")
+  .data(rows)
+  .join("rect")
+  .attr("x", x(0))
+  .attr("y", (d, i) => 80 + i * 120)
+  .attr("height", 50)
+  .attr("width", (d) => x(d.a / (d.a + d.b)) - x(0))
+  .attr("fill", "#2563eb");
+svg
+  .selectAll("text")
+  .data(rows)
+  .join("text")
+  .attr("x", 20)
+  .attr("y", (d, i) => 112 + i * 120)
+  .text((d) => `${d.label}: ${d.a} of ${d.a + d.b}`);""",
+        "Two equally long share bars, 40 percent each, whose labels show different totals: 2 of 5 and 20 of 50.",
     ),
     [
         (
@@ -1008,15 +1277,45 @@ The reference renders into a caller-owned group and updates a keyed join. It che
 A ResizeObserver can detect actual container size, but it has a lifecycle and can trigger repeated callbacks. Disconnect it when the component is removed. The reference uses two explicit widths for deterministic acceptance; a real responsive integration should also be manually tested at narrow and wide browser sizes.""",
     (
         "Define a small render contract",
-        "The function signature makes dependencies visible.",
-        'function renderBars(group, rows, width){\n  if(!(width>0)) throw new Error("positive width required");\n  // Derive scales and reconcile only nodes owned by this component.\n}',
-        "The caller supplies current rows and dimensions; the function does not fetch or use hidden app state.",
+        "The function signature makes dependencies visible, and invalid geometry fails before any drawing.",
+        """function renderBars(group, rows, width) {
+  if (!(width > 0)) throw new Error("positive width required");
+  // Derive scales and reconcile only nodes owned by this component.
+  return rows.length;
+}
+try {
+  renderBars(null, [], 0);
+} catch (error) {
+  console.log(error.message);
+}""",
+        "positive width required: the caller supplies current rows and dimensions, and the function does not fetch or use hidden app state.",
     ),
     (
         "Separate empty state from invalid geometry",
-        "An empty dataset needs no min/max domain calculation.",
-        'if(rows.length===0){\n  group.selectAll("rect").remove();\n  group.selectAll("text.empty").data([null]).join("text").attr("class","empty").text("No observations");\n}',
-        "A visible no-data message replaces stale marks.",
+        "Two bars from an earlier render are replaced by an empty state; an empty dataset needs no min or max domain calculation.",
+        """const group = svg.append("g").attr("transform", "translate(40,40)");
+group
+  .selectAll("rect")
+  .data([3, 6])
+  .join("rect")
+  .attr("y", (d, i) => i * 40)
+  .attr("height", 30)
+  .attr("width", (d) => d * 40)
+  .attr("fill", "#2563eb");
+const rows = [];
+if (rows.length === 0) {
+  group.selectAll("rect").remove();
+  group
+    .selectAll("text.empty")
+    .data([null])
+    .join("text")
+    .attr("class", "empty")
+    .attr("y", 20)
+    .text("No observations");
+}
+check(group.selectAll("rect").size() === 0, "Stale bars must be removed");
+check(group.select("text.empty").text() === "No observations", "The empty state must be visible");""",
+        "The two earlier bars disappear and the visible text No observations replaces them.",
     ),
     [
         (
@@ -1114,15 +1413,30 @@ Reduced-motion preferences should lead to a useful static or immediate update. D
 For deterministic testing, assert the final value after awaiting the promise, not after guessing a sleep duration. Timing varies across machines and background tabs. The reference does not run an infinite animation loop.""",
     (
         "Await the actual completion",
-        "The mark is already selected.",
-        'await mark.transition("update").duration(120).attr("cx",300).end();\nconsole.log(mark.attr("cx"));',
+        "This snippet creates its own mark, then awaits the named transition's end.",
+        """const svg = d3.select("#chart").append("svg").attr("viewBox", "0 0 640 360");
+const mark = svg.append("circle").attr("cx", 80).attr("cy", 180).attr("r", 20);
+await mark.transition("update").duration(120).attr("cx", 300).end();
+console.log(mark.attr("cx"));""",
         "300 after successful completion, rather than an intermediate coordinate.",
     ),
     (
         "Respect reduced motion",
-        "The data update still happens.",
-        'const reduced=matchMedia("(prefers-reduced-motion: reduce)").matches;\nconst duration=reduced?0:120;',
-        "The same final chart state with motion disabled when requested.",
+        "The data update still happens; only its animation depends on the user's preference.",
+        """const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
+const mark = svg.append("circle").attr("cx", 320).attr("cy", 180).attr("r", 12).attr("fill", "#7c3aed");
+await mark
+  .transition("grow")
+  .duration(reduced ? 0 : 120)
+  .attr("r", 48)
+  .end();
+svg
+  .append("text")
+  .attr("x", 40)
+  .attr("y", 320)
+  .text(reduced ? "Reduced motion: updated without animation" : "Animated for 120 ms");
+check(+mark.attr("r") === 48, "Both paths must reach the same final radius");""",
+        "The circle ends with radius 48 either way; with reduced motion requested it changes at once and the caption says so.",
     ),
     [
         (
@@ -1199,14 +1513,48 @@ The reference draws circles and creates native buttons beneath the SVG. Both poi
     (
         "Insert a label as text",
         "This preserves literal characters rather than parsing markup.",
-        'd3.select(host).append("p").text("<strong>sample</strong>");',
-        "The angle-bracket text appears literally; no strong element is created.",
+        """d3.select("#chart").append("p").text("<strong>sample</strong>");
+console.log(document.querySelector("#chart strong") === null);""",
+        "true: the angle-bracket text appears literally and no strong element is created.",
     ),
     (
         "Share one action between input methods",
-        "A native button handles keyboard activation.",
-        'button.addEventListener("click",()=>selectRow(row));\nmark.on("pointerenter",()=>selectRow(row));',
-        "Both paths update the same selected record and summary.",
+        "Native buttons handle keyboard activation; pointer entry on a circle calls the same action.",
+        """const rows = [
+  { id: "A", value: 3 },
+  { id: "B", value: 5 },
+];
+let selected = null;
+const summary = d3.select(host).append("p").attr("role", "status");
+const marks = svg
+  .selectAll("circle")
+  .data(rows)
+  .join("circle")
+  .attr("cx", (d, i) => 180 + i * 260)
+  .attr("cy", 180)
+  .attr("r", (d) => d.value * 10)
+  .attr("fill", "#2563eb")
+  .attr("stroke-width", 4)
+  .on("pointerenter", (event, d) => selectRow(d));
+function selectRow(row) {
+  selected = row.id;
+  summary.text(`Selected ${row.id}: ${row.value}`);
+  marks.attr("stroke", (d) => (d.id === selected ? "#111827" : "none"));
+}
+const buttons = d3
+  .select(host)
+  .append("div")
+  .selectAll("button")
+  .data(rows)
+  .join("button")
+  .attr("type", "button")
+  .text((d) => `Select ${d.id}`)
+  .on("click", (event, d) => selectRow(d));
+buttons.nodes()[1].click();
+check(selected === "B" && summary.text() === "Selected B: 5", "A button click uses the shared action");
+marks.nodes()[0].dispatchEvent(new PointerEvent("pointerenter"));
+check(selected === "A", "Pointer entry uses the same action");""",
+        "Two circles and two native buttons; activating Select B or moving the pointer onto a circle updates the same status text and outline.",
     ),
     [
         (
@@ -1303,9 +1651,27 @@ The reference uses inclusive data bounds and a preset range from 2 to 4. It call
     ),
     (
         "Handle clearing explicitly",
-        "The policy here treats a cleared brush as all records.",
-        "function selected(rows,range){return range===null?rows:rows.filter(d=>d.x>=range[0]&&d.x<=range[1]);}",
-        "Clearing restores the full record set rather than reusing stale bounds.",
+        "The policy here treats a cleared brush as all records, and the highlight shows each state.",
+        """const rows = [1, 3, 5, 7, 9].map((value, i) => ({ id: `r${i}`, x: value }));
+const x = d3.scaleLinear().domain([0, 10]).range([50, 550]);
+function selected(records, range) {
+  return range === null ? records : records.filter((d) => d.x >= range[0] && d.x <= range[1]);
+}
+const dots = svg
+  .selectAll("circle")
+  .data(rows)
+  .join("circle")
+  .attr("cx", (d) => x(d.x))
+  .attr("cy", 180)
+  .attr("r", 12);
+function show(range) {
+  const chosen = new Set(selected(rows, range).map((d) => d.id));
+  dots.attr("fill", (d) => (chosen.has(d.id) ? "#2563eb" : "#d1d5db"));
+  return chosen.size;
+}
+check(show([x.invert(150), x.invert(350)]) === 2, "The range 2 to 6 selects two records");
+check(show(null) === 5, "A cleared brush restores every record");""",
+        "Five circles; with the range 2 to 6 applied two are highlighted, and after clearing all five are highlighted again.",
     ),
     [
         (
@@ -1402,9 +1768,23 @@ Set explicit extent and scaleExtent for predictable behavior. The reference appl
     ),
     (
         "Derive an axis from the view",
-        "The original scale remains available for reset.",
-        "const view=transform.rescaleX(base);\naxis.call(d3.axisBottom(view));",
-        "Ticks represent the transformed data domain rather than the unchanged original domain.",
+        "The zoom transform rescales a copy of the base scale; the original remains available for reset.",
+        """const base = d3.scaleLinear().domain([0, 10]).range([0, 600]);
+const transform = d3.zoomIdentity.translate(-300, 0).scale(2);
+const view = transform.rescaleX(base);
+svg
+  .append("g")
+  .attr("transform", "translate(20,300)")
+  .call(d3.axisBottom(view).ticks(5));
+svg
+  .append("circle")
+  .attr("cx", 20 + view(5))
+  .attr("cy", 200)
+  .attr("r", 8)
+  .attr("fill", "#dc2626");
+check(view.domain().join(",") === "2.5,7.5", "The zoomed view shows 2.5 to 7.5");
+check(base.domain().join(",") === "0,10", "The base scale is unchanged for reset");""",
+        "An axis whose ticks run from 2.5 to 7.5, with the mark for 5 at its center, while the base scale still spans 0 to 10.",
     ),
     [
         (
@@ -1497,9 +1877,34 @@ The reference visualizes a small learning taxonomy. Labels explain the nodes, an
     ),
     (
         "Distinguish topology from magnitude",
-        "A tree layout does not require a size value.",
-        "d3.tree().size([250,450])(root);\nconsole.log(root.children.every(d=>d.depth===1));",
-        "true; depth is a structural property.",
+        "A tree layout positions nodes by structure alone; this one is drawn top-down.",
+        """const root = d3.hierarchy({ name: "Root", children: [{ name: "A" }, { name: "B" }] });
+d3.tree().size([400, 200])(root);
+const g = svg.append("g").attr("transform", "translate(120,60)");
+g.selectAll("line")
+  .data(root.links())
+  .join("line")
+  .attr("x1", (d) => d.source.x)
+  .attr("y1", (d) => d.source.y)
+  .attr("x2", (d) => d.target.x)
+  .attr("y2", (d) => d.target.y)
+  .attr("stroke", "#9ca3af");
+g.selectAll("circle")
+  .data(root.descendants())
+  .join("circle")
+  .attr("cx", (d) => d.x)
+  .attr("cy", (d) => d.y)
+  .attr("r", 8)
+  .attr("fill", "#0f766e");
+g.selectAll("text")
+  .data(root.descendants())
+  .join("text")
+  .attr("x", (d) => d.x + 12)
+  .attr("y", (d) => d.y + 4)
+  .text((d) => d.data.name);
+check(root.children.every((d) => d.depth === 1), "Children of the root have depth 1");
+check(root.descendants().every((d) => d.value === undefined), "No size value was needed");""",
+        "A top-down tree with Root above A and B, both at depth 1, laid out without any size value.",
     ),
     [
         (
@@ -1600,9 +2005,24 @@ Sort deliberately if stable ordering matters. Updating values can substantially 
     ),
     (
         "Read rectangle geometry",
-        "Bounds are positions, not direct widths.",
-        "const leaf={x0:10,x1:110,y0:20,y1:70};\nconsole.log(leaf.x1-leaf.x0,leaf.y1-leaf.y0);",
-        "Width100 and height50.",
+        "A layout supplies bounds; width and height are differences between them.",
+        """const leaf = { name: "A", x0: 10, x1: 110, y0: 20, y1: 70 };
+const g = svg.append("g").attr("transform", "translate(40,40)");
+const rect = g
+  .append("rect")
+  .attr("x", leaf.x0)
+  .attr("y", leaf.y0)
+  .attr("width", leaf.x1 - leaf.x0)
+  .attr("height", leaf.y1 - leaf.y0)
+  .attr("fill", "#2563eb");
+g.append("text")
+  .attr("x", leaf.x0 + 8)
+  .attr("y", leaf.y0 + 30)
+  .attr("fill", "white")
+  .text(`${leaf.name}: ${leaf.x1 - leaf.x0} x ${leaf.y1 - leaf.y0}`);
+const box = rect.node().getBBox();
+check(box.width === 100 && box.height === 50, "Width and height come from bound differences");""",
+        "One 100 by 50 rectangle starting at (10, 20) inside its group, labeled A: 100 x 50.",
     ),
     [
         (
@@ -1688,14 +2108,52 @@ Render links from their resolved source and target nodes and render labeled circ
     (
         "Preserve source ownership",
         "The simulation receives its own mutable copies.",
-        "const nodes=sourceNodes.map(d=>({...d}));\nconst links=sourceLinks.map(d=>({...d}));",
-        "Layout mutation does not add x/y fields to the original source objects.",
+        """const sourceNodes = [{ id: "A" }, { id: "B" }];
+const sourceLinks = [{ source: "A", target: "B" }];
+const nodes = sourceNodes.map((d) => ({ ...d }));
+const links = sourceLinks.map((d) => ({ ...d }));
+nodes[0].x = 100;
+console.log("x" in sourceNodes[0], links[0] !== sourceLinks[0]);""",
+        "false true: adding x to the copy leaves the source node unchanged, and each link is a separate object.",
     ),
     (
         "Bound simulation work",
-        "A fixed tick count replaces an unbounded animation loop.",
-        "const simulation=d3.forceSimulation(nodes).randomSource(d3.randomLcg(0.5)).stop();\nsimulation.tick(80);",
-        "The simulation advances80 steps and has no running timer afterward.",
+        "A seeded simulation advances a fixed number of ticks and is drawn once, with no running timer.",
+        """const nodes = [{ id: "A" }, { id: "B" }];
+const links = [{ source: "A", target: "B" }];
+const simulation = d3
+  .forceSimulation(nodes)
+  .randomSource(d3.randomLcg(0.5))
+  .force(
+    "link",
+    d3
+      .forceLink(links)
+      .id((d) => d.id)
+      .distance(160),
+  )
+  .force("center", d3.forceCenter(320, 180))
+  .stop();
+simulation.tick(80);
+svg
+  .selectAll("line")
+  .data(links)
+  .join("line")
+  .attr("x1", (d) => d.source.x)
+  .attr("y1", (d) => d.source.y)
+  .attr("x2", (d) => d.target.x)
+  .attr("y2", (d) => d.target.y)
+  .attr("stroke", "#9ca3af");
+svg
+  .selectAll("circle")
+  .data(nodes)
+  .join("circle")
+  .attr("cx", (d) => d.x)
+  .attr("cy", (d) => d.y)
+  .attr("r", 14)
+  .attr("fill", "#7c3aed");
+check(nodes.every((d) => Number.isFinite(d.x) && Number.isFinite(d.y)), "Every node has a finite position");
+check(Math.abs(Math.hypot(nodes[0].x - nodes[1].x, nodes[0].y - nodes[1].y) - 160) < 1, "The link keeps its distance");""",
+        "Two connected nodes about 160 units apart, drawn once after 80 seeded ticks; nothing keeps animating afterward.",
     ),
     [
         (
@@ -1812,9 +2270,22 @@ Check that all projected coordinates are finite and within the intended view. A 
     ),
     (
         "Project the origin",
-        "A known center provides a useful anchor.",
-        "const projection=d3.geoMercator().center([0,0]).scale(100).translate([320,180]);\nconsole.log(projection([0,0]));",
-        "Approximately[320,180].",
+        "A known center provides a useful anchor for the projection.",
+        """const projection = d3.geoMercator().center([0, 0]).scale(100).translate([320, 180]);
+const origin = projection([0, 0]);
+check(Math.abs(origin[0] - 320) < 1e-9 && Math.abs(origin[1] - 180) < 1e-9, "The center projects to the translate point");
+svg
+  .append("path")
+  .attr("d", d3.geoPath(projection)(d3.geoGraticule10()))
+  .attr("fill", "none")
+  .attr("stroke", "#d1d5db");
+svg.append("circle").attr("cx", origin[0]).attr("cy", origin[1]).attr("r", 6).attr("fill", "#dc2626");
+svg
+  .append("text")
+  .attr("x", origin[0] + 10)
+  .attr("y", origin[1] - 10)
+  .text("longitude 0, latitude 0");""",
+        "A Mercator graticule with a red point at longitude 0, latitude 0, drawn at (320, 180) as configured by center and translate.",
     ),
     [
         (
@@ -1914,9 +2385,34 @@ The reference uses synthetic planar regions with `geoIdentity`, so the lesson is
     ),
     (
         "Distinguish missing and zero",
-        "Map membership is separate from a numeric value.",
-        'const values=new Map([["A",0]]);\nconsole.log(values.has("A"),values.has("B"));',
-        "A is measured zero; B has no supplied record.",
+        "Map membership is separate from a numeric value, and the drawing keeps the two cases visibly different.",
+        """const regions = ["A", "B", "C"];
+const values = new Map([
+  ["A", 0],
+  ["C", 0.3],
+]);
+const color = d3.scaleSequential(d3.interpolateBlues).domain([0, 0.5]);
+svg
+  .selectAll("rect")
+  .data(regions)
+  .join("rect")
+  .attr("x", (d, i) => 60 + i * 180)
+  .attr("y", 100)
+  .attr("width", 150)
+  .attr("height", 120)
+  .attr("fill", (d) => (values.has(d) ? color(values.get(d)) : "white"))
+  .attr("stroke", "#111827")
+  .attr("stroke-dasharray", (d) => (values.has(d) ? null : "6 4"));
+svg
+  .selectAll("text")
+  .data(regions)
+  .join("text")
+  .attr("x", (d, i) => 70 + i * 180)
+  .attr("y", 250)
+  .text((d) => (values.has(d) ? `${d}: ${values.get(d)}` : `${d}: no data`));
+check(values.has("A") && values.get("A") === 0, "A is a measured zero");
+check(!values.has("B"), "B has no supplied record");""",
+        "Three regions: A filled as a measured zero, C shaded for 0.3, and B drawn white with a dashed outline and labeled no data.",
     ),
     [
         (
@@ -2012,15 +2508,44 @@ Performance depends on data size, transformations, layout, rendering and interac
 The reference draws a bounded grid of100 points and performs a known nearest-point lookup. It does not benchmark a million records or claim universal Canvas superiority. The SVG is hidden for this lesson because the output is the Canvas plus a textual summary.""",
     (
         "Separate display and backing dimensions",
-        "Logical size remains320 by180.",
-        'const ratio=Math.min(devicePixelRatio||1,2);\ncanvas.width=320*ratio; canvas.height=180*ratio;\ncanvas.style.width="320px"; canvas.style.height="180px";\ncontext.setTransform(ratio,0,0,ratio,0,0);',
-        "Drawing coordinates stay logical while the backing bitmap gains resolution.",
+        "Logical size remains 320 by 180. This snippet creates its own canvas.",
+        """const canvas = d3.select("#chart").append("canvas").node();
+const context = canvas.getContext("2d");
+const ratio = Math.min(devicePixelRatio || 1, 2);
+canvas.width = 320 * ratio;
+canvas.height = 180 * ratio;
+canvas.style.width = "320px";
+canvas.style.height = "180px";
+context.setTransform(ratio, 0, 0, ratio, 0, 0);
+console.log(canvas.width / ratio, canvas.height / ratio);""",
+        "320 180: drawing coordinates stay logical while the backing bitmap gains resolution.",
     ),
     (
         "Find a nearby point",
-        "The query is in the same coordinate system as the data.",
-        'const tree=d3.quadtree().x(d=>d.x).y(d=>d.y).addAll([{id:"A",x:10,y:10},{id:"B",x:90,y:90}]);\nconsole.log(tree.find(12,11).id);',
-        "A.",
+        "The quadtree query uses the same coordinate system as the points drawn on the canvas.",
+        """const points = [
+  { id: "A", x: 10, y: 10 },
+  { id: "B", x: 90, y: 90 },
+];
+const canvas = d3.select(host).append("canvas").attr("width", 320).attr("height", 180).node();
+const context = canvas.getContext("2d");
+context.fillStyle = "#2563eb";
+for (const point of points) {
+  context.beginPath();
+  context.arc(point.x, point.y, 6, 0, 2 * Math.PI);
+  context.fill();
+}
+const tree = d3
+  .quadtree()
+  .x((d) => d.x)
+  .y((d) => d.y)
+  .addAll(points);
+const hit = tree.find(12, 11);
+check(hit.id === "A", "The query near (12, 11) finds A");
+context.strokeStyle = "#dc2626";
+context.strokeRect(hit.x - 10, hit.y - 10, 20, 20);
+check(tree.find(50, 50, 5) === undefined, "A small search radius rejects distant queries");""",
+        "Two dots on a canvas; A is outlined in red because the query at (12, 11) returns it, while a query at (50, 50) with radius 5 returns nothing.",
     ),
     [
         (
@@ -2106,15 +2631,49 @@ Pure transformation functions are easier to test than event-heavy code. A filter
 The reference links a category filter to bars and a numeric summary. Programmatic control activation checks state wiring, while manual keyboard review checks the actual user experience. Saving a dashboard view should record filter values and data identity, not only a screenshot.""",
     (
         "Derive data without mutation",
-        "The filter is a pure computation.",
-        'const derive=(rows,state)=>rows.filter(d=>state.group==="all"||d.group===state.group);',
-        "Source rows remain unchanged; the output reflects the current group choice.",
+        "The filter is a pure computation over its inputs.",
+        """const derive = (rows, state) => rows.filter((d) => state.group === "all" || d.group === state.group);
+const source = [
+  { id: 1, group: "A" },
+  { id: 2, group: "B" },
+];
+const view = derive(source, { group: "A" });
+console.log(view.map((d) => d.id), source.length);""",
+        "[1] and 2: the view reflects the group choice while both source rows remain unchanged.",
     ),
     (
         "Make denominator explicit",
-        "Two summaries answer different questions.",
-        "const selectedRate=selectedEvents/selectedEligible;\nconst populationShare=selectedEvents/allEvents;",
-        "A within-group rate differs from a share of all events.",
+        "Two summaries of the same selection answer different questions, so both are drawn and labeled.",
+        """const rows = [
+  ...[true, false].map((event, i) => ({ id: `a${i}`, group: "A", event })),
+  ...[true, true, true, false, false, false].map((event, i) => ({ id: `b${i}`, group: "B", event })),
+];
+const selected = rows.filter((d) => d.group === "A");
+const selectedEvents = selected.filter((d) => d.event).length;
+const allEvents = rows.filter((d) => d.event).length;
+const summaries = [
+  { label: "Rate within A", value: selectedEvents / selected.length },
+  { label: "A share of all events", value: selectedEvents / allEvents },
+];
+check(summaries[0].value === 0.5 && summaries[1].value === 0.25, "The two denominators differ");
+const x = d3.scaleLinear().domain([0, 1]).range([0, 360]);
+svg
+  .selectAll("rect")
+  .data(summaries)
+  .join("rect")
+  .attr("x", 240)
+  .attr("y", (d, i) => 80 + i * 110)
+  .attr("height", 50)
+  .attr("width", (d) => x(d.value))
+  .attr("fill", "#0f766e");
+svg
+  .selectAll("text")
+  .data(summaries)
+  .join("text")
+  .attr("x", 20)
+  .attr("y", (d, i) => 112 + i * 110)
+  .text((d) => `${d.label}: ${d3.format(".0%")(d.value)}`);""",
+        "Two bars from the same selection: the rate within A is 50% (1 of 2 eligible records), while A's share of all events is 25% (1 of 4).",
     ),
     [
         (
@@ -2212,15 +2771,63 @@ The reference is a small category dashboard with a filter, sorted bars, exact te
 The reference asserts baseline totals, filtered totals, mark counts, reset behavior and source preservation. It intentionally does not claim to automate screen-reader usability or statistical validity. Perform the manual narrow-screen, keyboard and interpretation checks before calling your own project complete.""",
     (
         "Write independent acceptance conditions",
-        "These checks describe behavior rather than implementation details.",
-        "const expected={allCount:4,allTotal:20,groupATotal:8};\n// Verify records, labels, totals, filter behavior and reset separately.",
-        "Each assertion can fail for a meaningful user-visible error.",
+        "These checks describe behavior rather than implementation details, and each is computed from the fixture.",
+        """const rows = [
+  { group: "A", hours: 3 },
+  { group: "A", hours: 5 },
+  { group: "B", hours: 4 },
+  { group: "B", hours: 8 },
+];
+const expected = { allCount: 4, allTotal: 20, groupATotal: 8 };
+const actual = {
+  allCount: rows.length,
+  allTotal: d3.sum(rows, (d) => d.hours),
+  groupATotal: d3.sum(
+    rows.filter((d) => d.group === "A"),
+    (d) => d.hours,
+  ),
+};
+console.log(Object.keys(expected).filter((key) => actual[key] !== expected[key]));""",
+        "An empty list: every acceptance condition holds, and each one could fail on its own for a meaningful user-visible error.",
     ),
     (
         "State the analytical claim",
-        "A clear caption names scope and limitations.",
-        'const caption="Synthetic study hours by learner group; totals describe this fixture, not a population estimate.";',
-        "The chart does not turn teaching data into a real-world inference.",
+        "A clear caption names scope and limitations; it is shown as text and stored in the SVG description.",
+        """const caption = "Synthetic study hours by learner group; totals describe this fixture, not a population estimate.";
+const rows = [
+  { group: "A", hours: 3 },
+  { group: "A", hours: 5 },
+  { group: "B", hours: 4 },
+  { group: "B", hours: 8 },
+];
+const totals = [
+  ...d3.rollup(
+    rows,
+    (values) => d3.sum(values, (d) => d.hours),
+    (d) => d.group,
+  ),
+];
+svg.append("desc").text(caption);
+svg
+  .selectAll("rect")
+  .data(totals)
+  .join("rect")
+  .attr("x", 120)
+  .attr("y", (d, i) => 60 + i * 90)
+  .attr("height", 50)
+  .attr("width", ([, total]) => total * 30)
+  .attr("fill", "#2563eb");
+svg
+  .selectAll("text")
+  .data(totals)
+  .join("text")
+  .attr("x", 20)
+  .attr("y", (d, i) => 92 + i * 90)
+  .text(([group, total]) => `${group}: ${total} h`);
+d3.select(host).append("p").text(caption);
+check(svg.select("desc").text() === caption, "The SVG carries the caption for assistive technology");
+check(totals.map(([, total]) => total).join(",") === "8,12", "Totals describe only this fixture");""",
+        "Two labeled bars, A: 8 h and B: 12 h, with the caption shown below the chart and stored in the SVG description.",
     ),
     [
         (

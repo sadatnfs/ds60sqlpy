@@ -1,4 +1,4 @@
-"""polars-008: worked starting point; complete the guide's six changes."""
+"""polars-008: both worked cases; complete the guide's six changes."""
 
 import polars as pl
 
@@ -18,8 +18,25 @@ def example_one():
     return {"long_rows": long.sort("id", "period").to_dicts(), "round_trip": True}
 
 
+def example_two():
+    duplicate = pl.DataFrame({"id": [1, 1], "period": ["after", "after"], "value": [4, 6]})
+    result = duplicate.pivot(on="period", index="id", values="value", aggregate_function="sum")
+    assert result["after"].item() == 10
+    frequencies = duplicate.group_by("id", "period").len()
+    assert frequencies["len"].item() == 2
+    try:
+        duplicate.pivot(on="period", index="id", values="value")
+    except pl.exceptions.ComputeError:
+        rejected = True
+    else:
+        rejected = False
+    assert rejected
+    return {"duplicate_cell_count": 2, "explicit_aggregation_total": 10}
+
+
 if __name__ == "__main__":
     print(example_one())
+    print(example_two())
 
 # TODO 1: Add a followup column to the wide fixture and unpivot it.
 # TODO 2: Count rows by id and period before pivoting.

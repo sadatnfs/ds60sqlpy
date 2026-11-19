@@ -14,11 +14,11 @@ A classifier experiment needs more than an accuracy number. Define which rows ar
 
 ## Reading the implementation
 
-Binary logits feed sigmoid cross entropy during training. After a fixed step budget, classify with \(\mathrm{logit}\ge 0\), equivalent to probability>=.5. Compute true-positive, false-positive, true-negative and false-negative counts with boolean masks. Keep counts as integers and divide only after establishing their denominators. Save the split IDs before any training operation.
+Binary logits feed sigmoid cross entropy during training. After a fixed step budget, classify with \(\mathrm{logit}\ge 0\), equivalent to probability>=0.5. Compute true-positive, false-positive, true-negative and false-negative counts with boolean masks. Keep counts as integers and divide only after establishing their denominators. Save the split IDs before any training operation.
 
 ## Exercise 1: Freeze geometry and groups
 
-The question is: Use training points[-2,-1,1,2], labels[0,0,1,1]; hold out[-3,3].
+The question is: Use training points [-2, -1, 1, 2], labels [0, 0, 1, 1]; hold out [-3, 3].
 
 The toy target is fully specified, so a learner can reason about errors without an opaque dataset. The holdout still has only two observations and cannot support broad conclusions.
 
@@ -32,9 +32,9 @@ test_ids = {"e", "f"}
 assert not train_ids & test_ids and len(test_ids) == 2
 ```
 
-**Expected:** 4 train and2 test records with no shared IDs.
+**Expected:** 4 train and 2 test records with no shared IDs.
 
-**Verify:** Compare the computed values or written argument with 4 train and2 test records with no shared IDs.
+**Verify:** In a fresh process, the exercise checks confirm `not train_ids & test_ids` and `len(test_ids) == 2`.
 
 ## Exercise 2: Fit training preprocessing
 
@@ -51,13 +51,13 @@ np.testing.assert_allclose(scale, [np.sqrt(2.5)], atol=1e-6, rtol=0)
 assert mean[0] == 0 and vx[0, 0] == -vx[1, 0]
 ```
 
-**Expected:** mean0; scale sqrt2.5; test transformed symmetrically.
+**Expected:** mean 0; scale \(\sqrt{2.5}\); test transformed symmetrically.
 
-**Verify:** Compare the computed values or written argument with mean0; scale sqrt2.5; test transformed symmetrically.
+**Verify:** In a fresh process, the exercise checks confirm `scale` matches `[np.sqrt(2.5)]` within 1e-6; `mean[0] == 0` and `vx[0, 0] == -vx[1, 0]`.
 
 ## Exercise 3: Train within a fixed budget
 
-The question is: Initialize one weight 0 and run40 full-batch SGD steps at rate 0.1 using binary logits loss.
+The question is: Initialize one weight 0 and run 40 full-batch SGD steps at rate 0.1 using binary logits loss.
 
 The known sign relation creates a transparent diagnostic. The loop is intentionally bounded and does not tune its step count after viewing held-out predictions.
 
@@ -74,11 +74,11 @@ assert step + 1 == 40 and float(w[0, 0]) > 0 and np.isfinite(w.numpy()).all()
 
 **Expected:** 40 finite updates and positive final weight.
 
-**Verify:** Compare the computed values or written argument with 40 finite updates and positive final weight.
+**Verify:** In a fresh process, the exercise checks confirm `step + 1 == 40`; `float(w[0, 0]) > 0` and `np.isfinite(w.numpy()).all()`.
 
 ## Exercise 4: Account for every test row
 
-The question is: Threshold final test logits at0 and compute all four confusion counts.
+The question is: Threshold final test logits at 0 and compute all four confusion counts.
 
 The sum is a conservation test. Dropping difficult rows or counting a repeated record twice would invalidate the reported metric even if the remaining predictions were correct.
 
@@ -94,13 +94,13 @@ counts = {
 assert counts == {"tp": 1, "tn": 1, "fp": 0, "fn": 0} and sum(counts.values()) == 2
 ```
 
-**Expected:** TP1,TN1,FP0,FN0; total2.
+**Expected:** TP1, TN1, FP0, FN0; total 2.
 
-**Verify:** Compare the computed values or written argument with TP1,TN1,FP0,FN0; total2.
+**Verify:** In a fresh process, the exercise checks confirm `counts == {'tp': 1, 'tn': 1, 'fp': 0, 'fn': 0}` and `sum(counts.values()) == 2`.
 
 ## Exercise 5: Compare a baseline
 
-The question is: Predict class0 for every held-out row and report its error count beside the model.
+The question is: Predict class 0 for every held-out row and report its error count beside the model.
 
 The baseline uses the same held-out observations and decision unit. Its simplicity makes the gain interpretable, but the tiny count leaves substantial uncertainty.
 
@@ -109,9 +109,9 @@ baseline = np.zeros(2, dtype=bool)
 assert np.count_nonzero(baseline != truth) == 1 and np.count_nonzero(pred != truth) == 0
 ```
 
-**Expected:** baseline1 error; model0 on2 records.
+**Expected:** baseline 1 error; model 0 on 2 records.
 
-**Verify:** Compare the computed values or written argument with baseline1 error; model0 on2 records.
+**Verify:** In a fresh process, the exercise checks confirm `np.count_nonzero(baseline != truth) == 1` and `np.count_nonzero(pred != truth) == 0`.
 
 ## Exercise 6: Expose a subgroup failure
 
@@ -126,9 +126,9 @@ report = {g: (int(broken[i] != truth[i]), 1) for i, g in enumerate(["negative", 
 assert report == {"negative": (0, 1), "positive": (1, 1)}
 ```
 
-**Expected:** negative0/1; positive1/1.
+**Expected:** negative 0/1; positive 1/1.
 
-**Verify:** Compare the computed values or written argument with negative0/1; positive1/1.
+**Verify:** In a fresh process, the exercise checks confirm `report == {'negative': (0, 1), 'positive': (1, 1)}`.
 
 ## Review after comparison
 

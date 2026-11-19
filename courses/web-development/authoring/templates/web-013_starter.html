@@ -5,15 +5,37 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Color, contrast, focus and accessible states: my attempt</title>
     <style>
-      /* Implement the lesson-specific CSS. Keep keyboard focus visible. */
+      /*
+        Worked example 1: Visible keyboard focus
+        button:focus-visible {
+          outline: 3px solid #9c3200;
+          outline-offset: 3px;
+        }
+      */
+
+      /* Write the CSS for the exercises here. Keep keyboard focus visible. */
     </style>
   </head>
   <body>
-    <!-- web-013: Build status cards whose meaning does not depend on color. -->
-    <!-- Save your prediction, then implement the six exercises from the guide. -->
+    <!--
+      web-013 exercises. Hints are in the guide; answers are in the solutions folder.
+      1. Identify the missing information in a red-only error dot.
+      2. Add a focus-visible style without removing focus support.
+      3. Build status cards whose meaning does not depend on color.
+      4. Diagnose a focus ring clipped by overflow.
+      5. Inspect the page in a forced-colors or high-contrast setting.
+      6. Compute the contrast of #94a3b8 text on #ffffff and explain why one palette check does
+         not qualify every interaction state.
+    -->
     <main>
-      <h1>Color, contrast, focus and accessible states</h1>
-      <!-- Build your own document here. The reference is separate. -->
+      <h1>Clear status</h1>
+      <p class="status"><strong>Status:</strong> Ready for practice</p>
+      <p class="status warning"><strong>Status:</strong> Needs review</p>
+      <button type="button">Review lesson</button>
+      <!--
+        Worked example 2: A labeled status
+        <p class="status"><strong>Status:</strong> Needs attention</p>
+      -->
     </main>
   </body>
 </html>

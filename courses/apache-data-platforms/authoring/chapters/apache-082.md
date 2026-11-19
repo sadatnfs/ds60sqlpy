@@ -30,8 +30,8 @@ schema and starting-position policy.
 Poll under a deadline until the exact order identities and amounts are queryable
 through the Pinot broker. Compare source positions, Flink operator/checkpoint
 observations and Pinot consumption/query results. A healthy process count or zero
-lag alone is insufficient. The expected business total is20 with regional totals
-11and9 for this finite fixture.
+lag alone is insufficient. The expected business total is 20 with regional totals
+11 and 9 for this finite fixture.
 
 Record which output is append-only and which represents current state. A stream
 of changes can correctly retain several versions of a key while a current-state

@@ -4,7 +4,7 @@ import numpy as np
 
 
 def verify():
-    # Exercise 1: Classify four cases
+    # Worked example A: Classify four cases
     rows = [
         {"id": "q1", "miss": True, "unsupported": False, "abstain": False, "correct": False},
         {"id": "q2", "miss": False, "unsupported": True, "abstain": False, "correct": False},
@@ -13,7 +13,7 @@ def verify():
     ]
     assert sum(r["miss"] for r in rows) == 1 and sum(r["unsupported"] for r in rows) == 1
 
-    # Exercise 2: Compute appropriate abstention
+    # Worked example B: Compute appropriate abstention
     assert sum(r["abstain"] and r["correct"] for r in rows) == 1
     assert sum(not r["abstain"] and r["correct"] for r in rows) == 1
 
@@ -40,6 +40,25 @@ def verify():
     assert len(ids) == len(set(ids))
     bad = ids + ["q1"]
     assert len(bad) != len(set(bad))
+
+    # Exercise 1: Classify five new cases
+    rows2 = [
+        {"id": "r1", "miss": True, "unsupported": False, "abstain": False, "correct": False},
+        {"id": "r2", "miss": True, "unsupported": False, "abstain": False, "correct": False},
+        {"id": "r3", "miss": False, "unsupported": True, "abstain": False, "correct": False},
+        {"id": "r4", "miss": False, "unsupported": False, "abstain": False, "correct": True},
+        {"id": "r5", "miss": False, "unsupported": False, "abstain": True, "correct": False},
+    ]
+    assert sum(r["miss"] for r in rows2) == 2 and sum(r["unsupported"] for r in rows2) == 1
+    assert (
+        sum(r["abstain"] for r in rows2) == 1
+        and sum(r["abstain"] and r["correct"] for r in rows2) == 0
+    )
+
+    # Exercise 2: Predict coverage and answered accuracy
+    answered = [r for r in rows2 if not r["abstain"]]
+    assert len(answered) / len(rows2) == 0.8
+    assert sum(r["correct"] for r in answered) / len(answered) == 0.25
     return {"checks": 6, "status": "passed"}
 
 

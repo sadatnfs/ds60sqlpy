@@ -6,11 +6,13 @@ These are comparison material after an attempt or explicit reveal. The executabl
 
 A function value can be stored, passed and called like other values. A closure also refers to variables from its surrounding scope. That makes callbacks concise, but it makes lifetime and mutation worth tracing explicitly. Two closures can intentionally share one variable; two independent constructor calls can create separate state. A callback contract should describe when it is called, whether it may stop iteration and whether it can retain supplied values. Iterator-style APIs can avoid allocating intermediate slices, but early termination and cleanup must still be well defined. Do not confuse deferred execution with concurrent execution: a closure is not a goroutine by itself.
 
-func(int) int is a function type. An anonymous func literal creates a function value. Returning a closure from makeCounter retains access to its captured count. A visitor returning bool can stop a traversal when false. Passing a function as a parameter makes selection policy explicit without an interface type when only one operation is needed.
+func(int) int is a function type. An anonymous func literal creates a function value. Returning a closure from makeCounter retains access to its captured count. A visitor returning bool can stop a traversal when false. Passing a function as a parameter makes selection policy explicit without an interface type when only one operation is needed. The iter package names this visitor shape: iter.Seq[V] is func(yield func(V) bool), and for x := range seq runs the loop body as the yield callback, so break, continue and return keep their ordinary meaning.
 
-## 1. Capture a changing variable
+## 1. Capture a changing variable: change one input
 
-Create a closure referring to factor, change factor, then call it.
+Copy worked example 1 into a scratch pad and change `factor = 3` to `factor = 4`. Before running, predict which check fails and which value it now sees; then run it and restore the original line.
+
+The unchanged code is worked example 1:
 
 ```go
 factor := 2
@@ -19,20 +21,22 @@ factor = 3
 check(multiply(4) == 12, "capture variable")
 ```
 
-**Expected:** The closure uses the new factor 3.
+**Expected:** The changed run panics with `capture variable` because `multiply(4) == 12` no longer holds. Restoring the original line brings back the worked observation: the closure uses the new factor 3.
 
 The closure refers to the variable rather than freezing its initial value. Explicitly copying a value into a new binding produces a different contract.
 
-## 2. Create independent counters
+## 2. Create independent counters: diagnose an edited check
 
-Construct two counter closures and call the first twice.
+A careless edit changed the check in worked example 2 so that it reads `check(a() != 1 && a() == 2 && b() == 1, "independent closures")`. Run worked example 2 with that line, explain why the edited check now fails for the same program state, and restore it.
+
+The unchanged code is worked example 2:
 
 ```go
 a, b := makeCounter(), makeCounter()
 check(a() == 1 && a() == 2 && b() == 1, "independent closures")
 ```
 
-**Expected:** The first returns 1 then 2; the second starts at 1.
+**Expected:** Before the repair the program panics with `independent closures`; after it the line reads `check(a() == 1 && a() == 2 && b() == 1, "independent closures")` again and the first returns 1 then 2; the second starts at 1.
 
 Each constructor invocation creates its own captured state. Sharing a single returned closure would share that state instead.
 
@@ -77,24 +81,25 @@ check(count == 0, "empty callback")
 
 A caller should not need a fabricated sentinel callback to learn that there were no values. Empty behavior belongs in the traversal contract.
 
-## 6. Transfer explicit state
+## 6. Transfer the visitor to a range-over-func iterator
 
-Collect only even values from a bounded visitor.
+Range over an iter.Seq[int] that yields 1 through 5, append each value, and break after 2.
 
 ```go
-out := []int{}
-visit(4, func(x int) bool {
-	if x%2 == 0 {
-		out = append(out, x)
+produced := 0
+got := []int{}
+for x := range countTo(5, &produced) {
+	got = append(got, x)
+	if x == 2 {
+		break
 	}
-	return true
-})
-check(len(out) == 2 && out[0] == 2 && out[1] == 4, "collector")
+}
+check(len(got) == 2 && got[0] == 1 && got[1] == 2 && produced == 2, "range over func")
 ```
 
-**Expected:** The collected values are 2 and 4.
+**Expected:** The loop collects 1 and 2, and the iterator produces exactly two values.
 
-The closure intentionally mutates caller-owned collection state. Concurrent invocation would require a different synchronization contract; this visitor is sequential.
+Since Go 1.23 a for statement can range over a function with the iter.Seq shape func(yield func(int) bool). The loop body becomes the yield callback: break makes yield return false, and the iterator must return at once. Calling yield again after it has returned false makes the program panic. The visit helper above already had this shape, so the same early-termination contract now works with ordinary for, break and continue.
 
 ## Transfer after comparison
 

@@ -27,10 +27,17 @@ public class Main {
     }
     assert emptySum == 0 && iterations == 0;
 
-    // Exercise 4: Count a half-open interval
-    List<Integer> visited = new ArrayList<>();
-    for (int i = 0; i < 5; i++) visited.add(i);
-    assert visited.equals(List.of(0, 1, 2, 3, 4));
+    // Exercise 4: Choose a value with a switch expression
+    List<String> kinds = new ArrayList<>();
+    var days = List.of(java.time.DayOfWeek.SATURDAY, java.time.DayOfWeek.WEDNESDAY);
+    for (java.time.DayOfWeek day : days) {
+      String kind = switch (day) {
+        case SATURDAY, SUNDAY -> "weekend";
+        case MONDAY, TUESDAY, WEDNESDAY, THURSDAY, FRIDAY -> "weekday";
+      };
+      kinds.add(kind);
+    }
+    assert kinds.equals(List.of("weekend", "weekday"));
 
     // Exercise 5: Stop at the first match
     int[] items = { 3, 8, 8 };

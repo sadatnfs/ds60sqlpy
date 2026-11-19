@@ -12,7 +12,7 @@ Validate empty input, negative weights and nonfinite values before normalization
 
 ### Worked case A: hand-derived and extreme cases
 
-The first program tests weights[1,2,1], whose probabilities are exactly[0.25,0.5,0.25], and two enormous equal weights. The latter case exposes an overflow bug that ordinary small examples would miss.
+The first program tests weights `[1, 2, 1]`, whose probabilities are exactly `[0.25, 0.5, 0.25]`, and two enormous equal weights. The latter case exposes an overflow bug that ordinary small examples would miss.
 
 {{WORKED_A}}
 
@@ -34,4 +34,4 @@ Random seeds are provenance, not an independence guarantee. Two tests that reuse
 
 Record code identity, input construction, package versions, numerical tolerances and the reasoning behind each tolerance. A tolerance should reflect floating error or a declared approximation, not be enlarged until the test passes. Statistical simulations need sampling-error arguments in addition to deterministic numerical checks.
 
-Use `@test_throws` for deliberate contract violations and ordinary assertions for values, shapes and storage. Group related checks with `@testset` when a larger package needs readable failure reports. Keep end-to-end worker execution separate from source tests: a correct mathematical function is not evidence that the browser delivered the intended source, preserved its receipt or rendered its figure. The capstone ties these layers together while retaining each layer's limits.
+Use `@test_throws` for deliberate contract violations and ordinary assertions for values, shapes and storage. Group related checks with `@testset` when a larger package needs readable failure reports. Keep end-to-end worker execution separate from source tests: a correct mathematical function is not evidence that the browser delivered the intended source, saved its run output or rendered its figure. The capstone ties these layers together while retaining each layer's limits.

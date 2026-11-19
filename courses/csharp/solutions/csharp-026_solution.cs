@@ -34,6 +34,23 @@ internal static class Program {
             "domain rejection after decoding");
       Check(!Valid(new ItemDto("", 2)), "empty identity rejected");
     }
+    {
+      // Task 3: Independent construction
+      List<string> Decode(string json) {
+        var errors = new List<string>();
+        var item = JsonSerializer.Deserialize<ItemDto>(json);
+        if (item is null || string.IsNullOrWhiteSpace(item.Name)) {
+          errors.Add("name is required");
+        }
+        if (item is not null && item.Quantity < 0) {
+          errors.Add("quantity must be nonnegative");
+        }
+        return errors;
+      }
+      string valid = "{\"Name\":\"pear\",\"Quantity\":2}";
+      Check(Decode(valid).Count == 0, "valid item");
+      Check(Decode("{\"Quantity\":-1}").Count == 2, "both errors reported");
+    }
     Console.WriteLine("csharp-026: passed");
     await Task.CompletedTask;
   }

@@ -9,6 +9,7 @@
     "reward exploitation"
   ],
   "outcome": "Train a tiny categorical policy with the PPO surrogate and critic loss while testing frozen rollout state, optimization and independent task utility.",
+  "verification": "The expectation weights sum to 1, the frozen rollout state is unchanged after updates, the learned probability rows mirror each other, and the proxy-trained policy exceeds 0.9 training reward while task utility stays below 0.1.",
   "level": "advanced",
   "runtime": "llm-torch-cpu",
   "minutes": 120,

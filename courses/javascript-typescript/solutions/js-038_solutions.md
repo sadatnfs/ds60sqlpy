@@ -24,11 +24,13 @@ A version field identifies this schema generation. It does not automatically mig
 
 The Reply type connects a status union with an Envelope union, while decodeReply independently checks unknown runtime values. A record guard establishes property access, then explicit comparisons check version, ok, fields and status agreement. Narrow ok before reading data or error. The handler validates exact input keys and safe integer results before constructing a success. Its return object is a fresh value suitable for serialization.
 
-## Exercise 1: Handle and decode a successful request
+## Exercise 1: Handle and decode a successful request: change one input
 
-Task: Send 2 and 3 through the handler, JSON round-trip its reply, then decode it.
+Task: Copy Example A into a scratch `main.mts` and change `const reply = handle({ method: 'POST', path: '/sum', requestId: 'R1', body: { a: 2, b: 3 } });` to `const reply = handle({ method: 'POST', path: '/sum', requestId: 'R1', body: { a: 3, b: 3 } });`. Before running it, predict which check fails and which value it now sees; then run it and restore the original line.
 
 The JSON boundary removes any purely static guarantee. The client decoder re-establishes the runtime schema before using the success payload.
+
+The unchanged code is the exercise block of Example A:
 
 ```typescript
 const reply = handle({ method: 'POST', path: '/sum', requestId: 'R1', body: { a: 2, b: 3 } });
@@ -38,15 +40,17 @@ if (!decoded.body.ok) throw new Error(decoded.body.error.message);
 assert.equal(decoded.body.data.total, 5);
 ```
 
-**Expected:** status 200 and decoded total 5.
+**Expected:** The changed run fails with an `AssertionError` at the check `assert.equal(decoded.body.data.total, 5)`. Restoring the original line brings back the worked observation: status 200 and decoded total 5.
 
-**Verify:** Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.
+**Verify:** Compare your written prediction with the reported `AssertionError`, including its actual and expected values, and name the value that made `assert.equal(decoded.body.data.total, 5)` fail. After restoring the line, the program prints its `{"checks":1,"status":"passed"}` receipt again.
 
-## Exercise 2: Return a stable invalid-input envelope
+## Exercise 2: Return a stable invalid-input envelope: debug a regression
 
-Task: Submit a string operand instead of a number.
+Task: A regression changed one token in Example B, so one line now reads `const reply = handle({ method: 'POST', path: '/sum', requestId: 'R3', body: { a: '2', b: 3 } });`. Run Example B with that line, use the failing check to locate the defect and repair it without changing the check.
 
 The failure is represented deliberately rather than relying on JavaScript coercion. A stable category is easier for clients to branch on than free-form error prose.
+
+The unchanged code is the exercise block of Example B:
 
 ```typescript
 const reply = handle({ method: 'POST', path: '/sum', requestId: 'R2', body: { a: '2', b: 3 } });
@@ -56,9 +60,9 @@ assert.equal(reply.body.error.code, 'bad_request');
 assert.equal(reply.body.requestId, 'R2');
 ```
 
-**Expected:** status 400 with bad_request and matching request id.
+**Expected:** Before the repair the run fails with an `AssertionError` at the check `assert.equal(reply.body.requestId, 'R2')`; after it the line reads `const reply = handle({ method: 'POST', path: '/sum', requestId: 'R2', body: { a: '2', b: 3 } });` again and status 400 with bad_request and matching request id.
 
-**Verify:** Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.
+**Verify:** Keep the failing and the repaired runs. Explain why the changed token alters the value tested by `assert.equal(reply.body.requestId, 'R2')` for this input.
 
 ## Exercise 3: Distinguish route and method failures
 
@@ -73,7 +77,7 @@ assert.equal(handle({ method: 'GET', path: '/sum', requestId: 'R4', body: null }
 
 **Expected:** 404 not_found versus 405 method_not_allowed.
 
-**Verify:** Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.
+**Verify:** Keep a check equivalent to `assert.equal(handle({ method: 'GET', path: '/sum', requestId: 'R4', body: null }).status, 405)`. As a control, change `assert.equal(handle({ method: 'GET', path: '/sum', requestId: 'R4', body: null }).status, 405);` to `assert.equal(handle({ method: 'GET', path: '/sum!', requestId: 'R4', body: null }).status, 405);` inside it: the run must fail with an `AssertionError`, which shows the check can fail. Restore it.
 
 ## Exercise 4: Reject version or status/body disagreement
 
@@ -89,7 +93,7 @@ assert.throws(() => decodeReply({ ...valid, status: 400 }), TypeError);
 
 **Expected:** TypeError for both malformed replies.
 
-**Verify:** Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.
+**Verify:** Keep a check equivalent to `assert.throws(() => decodeReply({ ...valid, status: 400 }), TypeError)` and confirm that the reference still passes. Then name an input that would make it fail and explain which value changes.
 
 ## Exercise 5: Require success narrowing in checked client code
 
@@ -112,7 +116,7 @@ assert.equal(
 
 **Expected:** expected compiler error; correctly narrowed success remains usable.
 
-**Verify:** Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.
+**Verify:** Keep a check equivalent to `assert.equal(decodeReply(handle({ method: 'POST', path: '/sum', requestId: 'R6', body: { a: 0, b: 0 } })).status, 200)`. As a control, change `decodeReply(handle({ method: 'POST', path: '/sum', requestId: 'R6', body: { a: 0, b: 0 } }))` to `decodeReply(handle({ method: 'POST!', path: '/sum', requestId: 'R6', body: { a: 0, b: 0 } }))` inside it: the run must fail with an `AssertionError`, which shows the check can fail. Restore it.
 
 ## Exercise 6: Keep invalid payload details out of response errors
 
@@ -133,7 +137,7 @@ assert.equal(JSON.stringify(reply).includes('fixture-secret-value'), false);
 
 **Expected:** bad_request response does not echo the supplied value.
 
-**Verify:** Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.
+**Verify:** Keep a check equivalent to `assert.equal(reply.status, 400)`. As a control, change `method: 'POST',` to `method: 'POST!',`: the run must fail with an `AssertionError` at that check. Restore the line before continuing.
 
 ## After comparison
 

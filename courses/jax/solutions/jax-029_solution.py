@@ -90,10 +90,10 @@ def main():
     assert a.size + b.size == 32
     assert np.linalg.matrix_rank(np.asarray(a @ b)) <= 2
 
-    # Case 8: Compile the admitted operation
+    # Case 8: Compile the validated operation
     close(jax.jit(attention)(q, k, v, mask), attention(q, k, v, mask))
 
-    print("jax-029" + ": 8 asserted cases passed")
+    print("jax-029: 8 asserted cases passed")
 
 
 if __name__ == "__main__":

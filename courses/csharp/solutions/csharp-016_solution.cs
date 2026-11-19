@@ -34,6 +34,19 @@ internal static class Program {
             "only valid data contributes");
       Check(Import(Array.Empty<string>()).Counts.Count == 0, "empty input");
     }
+    {
+      // Task 3: Independent construction
+      var result = Import(new[] { "pear,2", "apple,3", "bad", "pear,1" });
+      var comparer = StringComparer.Ordinal;
+      var names = result.Counts.Keys.OrderBy(key => key, comparer);
+      var lines = new List<string>();
+      foreach (string name in names) {
+        lines.Add($"{name}: {result.Counts[name]}");
+      }
+      lines.Add($"rejected: {result.Rejected}");
+      string report = string.Join("\n", lines);
+      Check(report == "apple: 3\npear: 3\nrejected: 1", "sorted report");
+    }
     Console.WriteLine("csharp-016: passed");
     await Task.CompletedTask;
   }

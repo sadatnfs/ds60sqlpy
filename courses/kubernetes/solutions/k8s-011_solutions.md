@@ -4,9 +4,9 @@ These answers explain the stated synthetic and scoped runtime contracts. Static 
 
 ## Mechanism
 
-A Job manages finite work toward a completion condition. A Deployment manages a continuing replica set. A CronJob creates Jobs according to a schedule. These controllers have different success and lifecycle meanings:an intentionally exiting task belongs in a Job, while a server that should remain available belongs in a continuing workload controller.
+A Job manages finite work toward a completion condition. A Deployment manages a continuing replica set. A CronJob creates Jobs according to a schedule. These controllers have different success and lifecycle meanings: an intentionally exiting task belongs in a Job, while a server that should remain available belongs in a continuing workload controller.
 
-The fixed hello-task Job runs a deterministic synthetic calculation and exits. Its success output records three accepted rows, two rejected rows and total35. A separate allowed failure outcome exits2. The worker checks the Job condition, its controlled Pod identity, the task container's zero exit and the exact bounded JSON output before calling the success path complete.
+The fixed hello-task Job runs a deterministic synthetic calculation and exits. Its success output records three accepted rows, two rejected rows and total 35. A separate allowed failure outcome exits 2. The worker checks the Job condition, its controlled Pod identity, the task container's zero exit and the exact bounded JSON output before calling the success path complete.
 
 The CronJob example is suspended and remains a host-lab/reading fixture. The browser does not accept arbitrary schedules or leave recurring workloads behind. A scheduled configuration is not evidence that a run occurred, and a completed run is not evidence that future recurrence works.
 
@@ -14,13 +14,13 @@ The CronJob example is suspended and remains a host-lab/reading fixture. The bro
 
 A single completion is the desired successful work count, parallelism bounds concurrent Pods, and backoff controls retries after failures. The active deadline bounds duration independently of the outer app operation deadline.
 
-**Expected:** 1, 1, Never, 0 and20 seconds for the reference.
+**Expected:** Starter: 1, 1, Never, 1 and 30 seconds. Edited source: 1, 1, Never, 0 and 20 seconds.
 
 ## Exercise 2: Verify exact task output
 
 The fixed task is deterministic and has no external side effects. Its receipt connects controller state to the actual task container and a small independent ledger. It does not certify arbitrary learner code or every written exercise.
 
-**Expected:** Owned Complete Job, controlled successful task Pod, exit 0 and exact accepted3/rejected2/total35 output.
+**Expected:** Owned Complete Job, controlled successful task Pod, exit 0 and exact accepted 3, rejected 2 and total 35 output.
 
 ## Exercise 3: Observe intentional failure
 

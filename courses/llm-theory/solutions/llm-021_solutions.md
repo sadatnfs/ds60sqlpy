@@ -14,48 +14,48 @@ Document splitting is an identity problem before it is a random-number problem. 
 
 ## Reading the implementation
 
-Hash UTF-8 text with SHA256 under a raw-text policy. Map each family to train,validation or test, then derive document assignments. Compare sets across every pair of partitions. Serialize the manifest with sorted keys for a stable identity receipt. A hash is a content fingerprint, not a claim that two different hashes represent independent documents.
+Hash UTF-8 text with SHA256 under a raw-text policy. Map each family to train, validation or test, then derive document assignments. Compare sets across every pair of partitions. Serialize the manifest with sorted keys for a stable identity receipt. A hash is a content fingerprint, not a claim that two different hashes represent independent documents.
 
-## Exercise 1: Fingerprint exact text
+## Exercise 1: Assign a second family policy
 
-The question is: Hash two identical snippets and one paraphrase in the same family.
+The question is: Use documents p, p2, p3 in family J, q in K and r in L; map J to test, K to train and L to validation.
 
-The paraphrase remains related despite a different hash. This is why content hashing and family metadata address different contamination mechanisms.
-
-```python
-import hashlib, json
-
-hash_text = lambda t: hashlib.sha256(t.encode("utf-8")).hexdigest()
-a = hash_text("red square")
-copy = hash_text("red square")
-para = hash_text("square colored red")
-assert a == copy and a != para
-```
-
-**Expected:** identical texts share a hash; paraphrase differs.
-
-**Verify:** Compare the computed values or written argument with identical texts share a hash; paraphrase differs.
-
-## Exercise 2: Assign whole families
-
-The question is: Use documentsa,a2 inF andb inG,c inH; mapF train,G validation,H test.
-
-The assignment is made once per family. Sampling rows independently would permit related versions to cross the boundary.
+Assigning whole families keeps all three related documents on the test side. The split sizes follow the family sizes, so a large family can leave very little training data.
 
 ```python
-family = {"a": "F", "a2": "F", "b": "G", "c": "H"}
-policy = {"F": "train", "G": "validation", "H": "test"}
-manifest = {doc: policy[group] for doc, group in family.items()}
-assert manifest == {"a": "train", "a2": "train", "b": "validation", "c": "test"}
+family2 = {"p": "J", "p2": "J", "p3": "J", "q": "K", "r": "L"}
+policy2 = {"J": "test", "K": "train", "L": "validation"}
+manifest2 = {doc: policy2[group] for doc, group in family2.items()}
+assert sorted(d for d, s in manifest2.items() if s == "test") == ["p", "p2", "p3"]
+assert list(manifest2.values()).count("train") == 1 and manifest2["r"] == "validation"
 ```
 
-**Expected:** a and a2 both train.
+**Expected:** p, p2 and p3 all test; one training document q; r in validation.
 
-**Verify:** Compare the computed values or written argument with a and a2 both train.
+**Verify:** In a fresh process, the exercise checks confirm `sorted((d for d, s in manifest2.items() if s == 'test')) == ['p', 'p2', 'p3']`; `list(manifest2.values()).count('train') == 1` and `manifest2['r'] == 'validation'`.
+
+## Exercise 2: Predict the effect of key order
+
+The question is: Serialize the same two-entry manifest with keys in opposite orders, with and without sort_keys=True, and compare SHA-256 hashes.
+
+A hash identifies bytes, not meaning. A manifest hash is only a stable identity when the serialization is canonical, so the key order must be fixed before hashing.
+
+```python
+forward = json.dumps({"a": "train", "b": "test"})
+backward = json.dumps({"b": "test", "a": "train"})
+assert hash_text(forward) != hash_text(backward)
+assert hash_text(json.dumps({"a": "train", "b": "test"}, sort_keys=True)) == hash_text(
+    json.dumps({"b": "test", "a": "train"}, sort_keys=True)
+)
+```
+
+**Expected:** raw JSON hashes differ when only key order changes; sort_keys=True makes them equal.
+
+**Verify:** In a fresh process, the exercise checks confirm `hash_text(forward) != hash_text(backward)` and the combined assertion.
 
 ## Exercise 3: Audit all partition pairs
 
-The question is: Construct family sets for train,validation,test and compare pairwise intersections.
+The question is: Construct family sets for train, validation, test and compare pairwise intersections.
 
 Checking only train versus test misses validation contamination, which can affect model or prompt selection before final testing.
 
@@ -70,11 +70,11 @@ assert (
 
 **Expected:** all three intersections empty.
 
-**Verify:** Compare the computed values or written argument with all three intersections empty.
+**Verify:** In a fresh process, the exercise checks confirm `not sets['train'] & sets['validation']`, `not sets['train'] & sets['test']` and `not sets['validation'] & sets['test']`.
 
 ## Exercise 4: Inject a known leak
 
-The question is: Movea2 into validation and rerun the family intersection.
+The question is: Move a2 into validation and rerun the family intersection.
 
 A negative control proves the audit detects the intended failure. A test suite containing only clean partitions can pass even when a checker always returns success.
 
@@ -86,9 +86,9 @@ valid = {family[d] for d, p in bad.items() if p == "validation"}
 assert train & valid == {"F"}
 ```
 
-**Expected:** train/validation intersectionF.
+**Expected:** train/validation intersection F.
 
-**Verify:** Compare the computed values or written argument with train/validation intersectionF.
+**Verify:** In a fresh process, the exercise checks confirm `train & valid == {'F'}`.
 
 ## Exercise 5: Preserve the manifest identity
 
@@ -105,7 +105,7 @@ assert summary["test_documents"] == 1 and hashlib.sha256(payload()).hexdigest() 
 
 **Expected:** hash unchanged.
 
-**Verify:** Compare the computed values or written argument with hash unchanged.
+**Verify:** In a fresh process, the exercise checks confirm `summary['test_documents'] == 1` and `hashlib.sha256(payload()).hexdigest() == before`.
 
 ## Exercise 6: Distinguish normalization policy
 
@@ -120,7 +120,7 @@ assert hash_text("red square".strip()) == hash_text("red square ".strip())
 
 **Expected:** raw hashes differ; stripped hashes match.
 
-**Verify:** Compare the computed values or written argument with raw hashes differ; stripped hashes match.
+**Verify:** In a fresh process, the exercise checks confirm `hash_text('red square') != hash_text('red square ')` and `hash_text('red square'.strip()) == hash_text('red square '.strip())`.
 
 ## Review after comparison
 

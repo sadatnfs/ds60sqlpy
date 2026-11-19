@@ -36,16 +36,27 @@ def outputs() -> dict[Path, str]:
         prefix = f"courses/{BASE.name}"
         guide = f"{prefix}/guides/{key}.md"
         source = f"{prefix}/examples/{key}{unit['suffix']}"
-        setup = (
-            "The prepared Stan pad compiles and samples `main.stan` with fixed bounded settings. "
-            "Its tiny data are declared in `transformed data`; "
-            "this pad has no separate JSON editor. "
-            "The linked project explains standard data-block workflows."
-            if unit["language"] == "stan"
-            else "Run the complete program in the classroom's declared prepared profile. "
-            "Every run starts a fresh process with tiny offline synthetic data. "
-            "This is a worked tutorial, with no exam or hidden solution."
-        )
+        if unit["language"] == "stan":
+            setup = (
+                "The prepared Stan pad compiles `main.stan` and samples two chains with 100 "
+                "warmup and 100 retained draws each. Its tiny data are declared in "
+                "`transformed data`; this pad has no separate JSON editor. "
+                "The linked project explains standard data-block workflows."
+            )
+        else:
+            setup = (
+                "Run the complete program in the classroom's declared prepared profile. "
+                "Every run starts a fresh process with tiny offline synthetic data. "
+                "This is a worked tutorial, with no exam or hidden solution."
+            )
+        # Every Stan pad samples; a PyMC program samples when it calls its helper.
+        if unit["language"] == "stan" or program.count("sample_model(") > 1:
+            setup += (
+                " These teaching-sized chains can fail the convergence screen from `bayes-006` "
+                "(R-hat below 1.01, at least 100 bulk and tail effective draws per chain, no "
+                "divergences); read the printed diagnostics against it before interpreting "
+                "any estimate."
+            )
         header = (
             f"# {key}: {unit['title']}\n\nTutorial mode. Stage: {unit['level']}. "
             "Direct prerequisites: " + ", ".join(f"`{x}`" for x in unit["prerequisites"]) + ".\n\n"
@@ -78,16 +89,7 @@ def outputs() -> dict[Path, str]:
                     "outcome",
                 )
             }
-            | {
-                "lab": (
-                    "Read the two complete worked cases, reproduce their evidence "
-                    "and compare their assumptions."
-                ),
-                "verification": (
-                    f"Complete source-bound {key} investigation with explicit numerical "
-                    "or sampler diagnostics; no mastery grade."
-                ),
-            }
+            | {"lab": unit["lab"], "verification": unit["verification"]}
         )
         lessons.append(
             {

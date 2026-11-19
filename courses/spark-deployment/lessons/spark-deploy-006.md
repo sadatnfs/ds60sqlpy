@@ -14,6 +14,35 @@ The notebook profile uses its own prepared image, a writable notebook directory 
 
 Initialize the notebook state as shown in the image-preparation chapter, then:
 
+The prepared session is created by this file, which runs inside the notebook
+container:
+
+From [`projects/cluster-lab/app/notebook_session.py`](../projects/cluster-lab/app/notebook_session.py):
+
+```python
+spark = (
+    SparkSession.builder.appName("ds60-notebook-session")
+    .master("spark://master:7077")
+    .config("spark.driver.host", "notebook")
+    .config("spark.driver.bindAddress", "0.0.0.0")
+    .config("spark.driver.port", "39000")
+    .config("spark.driver.blockManager.port", "39001")
+    .config("spark.driver.maxResultSize", "1m")
+    .getOrCreate()
+)
+try:
+    result = spark.range(100_000, numPartitions=8).selectExpr("sum(id) AS sum_id").first()
+    assert result.sum_id == 4_999_950_000
+    print({"application_id": spark.sparkContext.applicationId, "sum_id": result.sum_id})
+finally:
+    spark.stop()
+```
+
+`.master("spark://master:7077")` connects to the Standalone master, which makes the
+notebook process the client-mode driver. `spark.driver.host` is the name executors
+use to call back, `bindAddress` is the local interface it listens on, and the two
+fixed ports let the Compose network route those callbacks.
+
 ```sh
 python3 lab.py --state .notebook-lab up
 python3 lab.py --state .notebook-lab notebook

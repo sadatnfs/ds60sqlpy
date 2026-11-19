@@ -33,6 +33,13 @@ internal static class Program {
       Check(total == 12, "computed total");
       Check(total != boxes + itemsPerBox, "multiplication is not addition");
     }
+    {
+      // Task 3: Independent construction
+      int rows = 4;
+      int seatsPerRow = 6;
+      int seats = rows * seatsPerRow;
+      Check(seats == 24, "four rows of six seats");
+    }
     Console.WriteLine("csharp-001: passed");
     await Task.CompletedTask;
   }

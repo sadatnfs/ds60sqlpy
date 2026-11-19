@@ -18,7 +18,7 @@ build(input_shape) reads the trailing feature width and creates one square kerne
 
 ## Exercise 1: Create an identity residual
 
-The question is: Call a width2 residual with zero kernel on[[1,2],[3,4]].
+The question is: Call a width 2 residual with zero kernel on [[1, 2], [3, 4]].
 
 The zero branch contributes nothing initially. This is a useful reference behavior but does not mean the branch has no gradient or will remain zero during training.
 
@@ -32,7 +32,7 @@ assert len(layer.trainable_variables) == 1
 
 **Expected:** output equals input; one tracked kernel.
 
-**Verify:** Compare the computed values or written argument with output equals input; one tracked kernel.
+**Verify:** In a fresh process, the exercise checks confirm `out.numpy()` equals `x.numpy()` and `len(layer.trainable_variables) == 1`.
 
 ## Exercise 2: Reuse the state
 
@@ -46,9 +46,9 @@ layer(tf.constant([[9.0, 8.0]]))
 assert layer.trainable_variables[0] is variable and len(layer.trainable_variables) == 1
 ```
 
-**Expected:** same variable object and variable count1.
+**Expected:** same variable object and variable count 1.
 
-**Verify:** Compare the computed values or written argument with same variable object and variable count1.
+**Verify:** In a fresh process, the exercise checks confirm `layer.trainable_variables[0] is variable` and `len(layer.trainable_variables) == 1`.
 
 ## Exercise 3: Assign a known transform
 
@@ -61,13 +61,13 @@ layer.kernel.assign(tf.eye(2))
 np.testing.assert_array_equal(layer(x).numpy(), 2 * x.numpy())
 ```
 
-**Expected:** output2*x.
+**Expected:** output 2*x.
 
-**Verify:** Compare the computed values or written argument with output2*x.
+**Verify:** In a fresh process, the exercise checks confirm `layer(x).numpy()` equals `2 * x.numpy()`.
 
 ## Exercise 4: Reject an incompatible width
 
-The question is: Call the built width2 layer with a width3 input.
+The question is: Call the built width 2 layer with a width 3 input.
 
 A residual addition cannot repair a mismatched matrix product. Supporting a new feature width requires a separately designed projection or layer instance.
 
@@ -82,7 +82,7 @@ else:
 
 **Expected:** ValueError naming feature width.
 
-**Verify:** Compare the computed values or written argument with ValueError naming feature width.
+**Verify:** In a fresh process, the exercise checks confirm `layer(tf.ones((1, 3)))` raises `ValueError`.
 
 ## Exercise 5: Check branch gradients
 
@@ -97,13 +97,13 @@ g = tape.gradient(total, layer.kernel)
 np.testing.assert_array_equal(g.numpy(), [[4, 4], [6, 6]])
 ```
 
-**Expected:** gradient matrix[[4,4],[6,6]].
+**Expected:** gradient matrix [[4, 4], [6, 6]].
 
-**Verify:** Compare the computed values or written argument with gradient matrix[[4,4],[6,6]].
+**Verify:** In a fresh process, the exercise checks confirm `g.numpy()` equals `[[4, 4], [6, 6]]`.
 
 ## Exercise 6: Count parameters by width
 
-The question is: Build a separate width3 layer and count its square kernel entries.
+The question is: Build a separate width 3 layer and count its square kernel entries.
 
 Parameter growth is quadratic in this dense branch width. Batch size does not contribute to the count because the same kernel is shared across observations.
 
@@ -113,9 +113,9 @@ other(tf.ones((1, 3)))
 assert other.count_params() == 9 and layer.count_params() == 4
 ```
 
-**Expected:** 9 parameters; width2 layer remains4.
+**Expected:** 9 parameters; width 2 layer remains 4.
 
-**Verify:** Compare the computed values or written argument with 9 parameters; width2 layer remains4.
+**Verify:** In a fresh process, the exercise checks confirm `other.count_params() == 9` and `layer.count_params() == 4`.
 
 ## Review after comparison
 

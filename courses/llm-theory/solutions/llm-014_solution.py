@@ -4,7 +4,7 @@ import numpy as np
 
 
 def verify():
-    # Exercise 1: Fit a tiny baseline
+    # Worked example A: Fit a tiny baseline
     docs = [[0, 1, 0, 1], [0, 2]]
     counts = np.zeros((3, 3), dtype=int)
     for doc in docs:
@@ -12,7 +12,7 @@ def verify():
             counts[a, b] += 1
     assert counts[0, 1] == 2 and counts[1, 0] == 1 and counts[0, 2] == 1 and counts.sum() == 4
 
-    # Exercise 2: Normalize smoothed rows
+    # Worked example B: Normalize smoothed rows
     prob = (counts + 1) / (counts.sum(1, keepdims=True) + 3)
     np.testing.assert_allclose(prob.sum(1), 1, atol=1e-12, rtol=0)
     np.testing.assert_allclose(prob[2], [1 / 3] * 3, atol=1e-12, rtol=0)
@@ -48,6 +48,20 @@ def verify():
         and report["targets"] == 2
         and "untested" in report["limitation"]
     )
+
+    # Exercise 1: Count transitions in new documents
+    docs2 = [[2, 0, 0, 1], [1, 2, 0]]
+    counts2 = np.zeros((3, 3), dtype=int)
+    for doc in docs2:
+        for a, b in zip(doc[:-1], doc[1:]):
+            counts2[a, b] += 1
+    assert counts2[2, 0] == 2 and counts2[0, 0] == 1 and counts2[0, 1] == 1 and counts2[1, 2] == 1
+    assert counts2.sum() == 5 and counts2[1, 1] == 0
+
+    # Exercise 2: Predict two smoothed rows
+    prob2 = (counts2 + 1) / (counts2.sum(1, keepdims=True) + 3)
+    np.testing.assert_allclose(prob2[0], [2 / 5, 2 / 5, 1 / 5], atol=1e-12, rtol=0)
+    np.testing.assert_allclose(prob2[2], [3 / 5, 1 / 5, 1 / 5], atol=1e-12, rtol=0)
     return {"checks": 6, "status": "passed"}
 
 

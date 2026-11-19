@@ -1,6 +1,7 @@
 ## Metadata and data listeners have operational responsibilities
 
-KRaft uses Kafka's own metadata quorum mechanism instead of requiring ZooKeeper.
+KRaft uses Kafka's own metadata quorum. Kafka 4.0 removed ZooKeeper mode, so every
+Kafka 4.x cluster, including this workshop, runs in KRaft mode.
 Controller roles manage cluster metadata, while broker roles serve partition data.
 A production topology needs deliberate role placement, quorum membership, failure
 domains and capacity. The teaching project combines one controller and one broker
@@ -14,6 +15,14 @@ to itself after a successful initial bootstrap. Internal service names and any
 host-facing listener must therefore be configured consistently for their intended
 network namespaces.
 
+The workshop's broker configuration makes these choices explicit:
+
+<!-- include: projects/streaming/server.properties from="process.roles" to="inter.broker.listener.name" properties -->
+
+`process.roles=broker,controller` combines both roles in one process, and
+`controller.quorum.voters` lists a single voter, so there is no quorum to lose a
+member from. The broker listens on port 9092 for clients and 9093 for controller
+traffic, and `advertised.listeners` is the address returned to clients in metadata.
 The workshop advertises kafka:9092 inside its owned private Compose network and
 publishes no host ports. Its saved cluster identity is separate from container
 identity and image identity. Kafka's retained metadata and log volume must agree
@@ -62,7 +71,20 @@ checks. Never run a global prune while expecting old state to remain.
 ## Diagnosis and interview discussion
 
 Check engine health, resource pressure, volume identity, controller/broker logs,
-listener metadata, topic state and consumer lag in a useful order. A Docker storage
+listener metadata, topic state and consumer lag in a useful order. The workshop's
+checker does not report lag; Kafka's own tool reads it for one group. Shown for
+reading, from a client container on the workshop network:
+
+```bash
+/opt/kafka/bin/kafka-consumer-groups.sh --bootstrap-server kafka:9092 \
+  --describe --group GROUP_NAME
+```
+
+For each partition the output lists the group's committed `CURRENT-OFFSET`, the
+partition's `LOG-END-OFFSET` and their difference, `LAG`. Lag that grows while the
+consumer runs means that it is slower than the producers; lag that stays constant
+with no active members means that nothing is consuming. Neither number says
+whether the records already processed were handled correctly. A Docker storage
 snapshot error before the service starts is an engine-state problem, not evidence
 that the lesson's Kafka code failed. Preserve the real diagnostic and source state
 before changing layers.

@@ -1,6 +1,6 @@
 # spark-039: Explained paired reference solutions
 
-Read the [guide](../guides/spark-039.md) and attempt one language first. The [Scala reference](spark-039_solution.scala) and [PySpark reference](spark-039_solution.py) are complete single-file programs with explicit local sessions and finally-based stop. Each compares with literal expectations;matching two implementations alone would not rule out a shared mistake.
+Read the [guide](../guides/spark-039.md) and attempt one language first. The [Scala reference](spark-039_solution.scala) and [PySpark reference](spark-039_solution.py) are complete single-file programs with explicit local sessions and finally-based stop. Each compares with literal expectations; matching two implementations alone would not rule out a shared mistake.
 
 ## Exercises and reasoning
 
@@ -26,7 +26,7 @@ def fixture_metrics(source):
     )
 ```
 
-The source formula supplies an independent expected distribution before any configuration comparison. A hot key is deliberate, so the experiment can show why adding partitions does not divide one unsalted key arbitrarily. Schema and population are fixed;no external large table is collected.
+The source formula supplies an independent expected distribution before any configuration comparison. A hot key is deliberate, so the experiment can show why adding partitions does not divide one unsalted key arbitrarily. Schema and population are fixed; no external large table is collected.
 
 **Verification evidence:** Compare aggregate counts and the independent formula 16000+4000/100.
 
@@ -34,7 +34,7 @@ The source formula supplies an independent expected distribution before any conf
 
 Execute the bounded grouped query under a unique job group, read actual executed metrics, measure partition row counts and persist/read back the product.
 
-**Expected:** 100 exact key/count pairs, total 20000;nonempty retained stage evidence;one or two data files.
+**Expected:** 100 exact key/count pairs, total 20000;nonempty retained stage evidence; one or two data files.
 
 ```scala
 def measureTwo(spark: SparkSession, source: DataFrame, root: Path): BudgetReport = {
@@ -47,7 +47,7 @@ def measure_two(spark, source, root):
     return measured(spark, source, 2, root)
 ```
 
-The report combines actual query metrics, retained scheduler stage counters and a separate physical partition-row observation. Timing covers the grouped collect only;the extra diagnostic scan and file write are outside that interval and are stated explicitly. The persisted readback ensures the measured transformation still produces the intended product.
+The report combines actual query metrics, retained scheduler stage counters and a separate physical partition-row observation. Timing covers the grouped collect only; the extra diagnostic scan and file write are outside that interval and are stated explicitly. The persisted readback ensures the measured transformation still produces the intended product.
 
 **Verification evidence:** Compare all rows with the literal formula before accepting any work/time report.
 
@@ -55,7 +55,7 @@ The report combines actual query metrics, retained scheduler stage counters and 
 
 Repeat with 4 partitions and a separate output directory.
 
-**Expected:** All 100 result tuples match the same oracle;four buckets sum 20000 and one to four files are observed.
+**Expected:** All 100 result tuples match the same oracle; four buckets sum 20000 and one to four files are observed.
 
 ```scala
 def measureFour(spark: SparkSession, source: DataFrame, root: Path): BudgetReport = {
@@ -74,7 +74,7 @@ Increasing partitions changes task granularity and output-file opportunities, no
 
 ### Exercise 4: Interpret work imbalance and spill honestly
 
-Compute maximum bucket rows divided by mean bucket rows;report available dataSize, shuffleBytesWritten and spillSize metrics without inventing missing values.
+Compute maximum bucket rows divided by mean bucket rows; report available dataSize, shuffleBytesWritten and spillSize metrics without inventing missing values.
 
 **Expected:** Both observed work ratios exceed 1;unavailable metrics remain None/None-equivalent.
 
@@ -92,13 +92,13 @@ def imbalance(counts):
     return max(counts) / (sum(counts) / len(counts))
 ```
 
-SQL metric names are retained because serialized dataSize is not automatically remote-network bytes. spillSize is the reported operator metric, not invented disk I/O when absent. A tiny run may legitimately spill zero. Partition row counts reveal the work distribution, but per-task timing would require additional actual task metrics;the ratio is labeled accordingly.
+SQL metric names are retained because serialized dataSize is not automatically remote-network bytes. spillSize is the reported operator metric, not invented disk I/O when absent. A tiny run may legitimately spill zero. Partition row counts reveal the work distribution, but per-task timing would require additional actual task metrics; the ratio is labeled accordingly.
 
 **Verification evidence:** Assert row conservation and positive ratio, then print exact available metric maps and stage receipts.
 
 ### Exercise 5: Compute a separate hypothetical cost model
 
-Use a hypothetical rate 0.05 currency units per vCPU-hour and 0.02 per GiB-month. Evaluate 2 vCPUs for 1 hour plus 2 GiB retained for 30 days under a30-day month.
+Use a hypothetical rate 0.05 currency units per vCPU-hour and 0.02 per GiB-month. Evaluate 2 vCPUs for 1 hour plus 2 GiB retained for 30 days under a 30-day month.
 
 **Expected:** Estimated 0.14 currency units, not an actual cloud bill or a price recommendation.
 
@@ -150,4 +150,4 @@ The limit is a declared teaching workload budget, not a universal safe size for 
 
 ## Execution and interpretation
 
-Run the complete reference in its prepared fixed worker. The small fixture is constructed inside the program,so opening a lesson does not fetch data. A final success line is printed only after the reference assertions complete. Plan observations,partition evidence and resource measurements apply to the actual local configuration;they do not establish cluster-scale performance. Session cleanup is explicit,and any additional owned file/query lifecycle is described in the lesson.
+Run the complete reference in its prepared fixed worker. The small fixture is constructed inside the program, so opening a lesson does not fetch data. A final success line is printed only after the reference assertions complete. Plan observations, partition evidence and resource measurements apply to the actual local configuration; they do not establish cluster-scale performance. Session cleanup is explicit, and any additional owned file/query lifecycle is described in the lesson.

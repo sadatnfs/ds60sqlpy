@@ -13,7 +13,7 @@ A caller has three distinct questions: are the bounds valid, is the value below/
 <!-- depth:start -->
 ## Function contracts and call boundaries
 
-A function call creates a local computation with a clear interface. The caller supplies x, low and high; the function returns one integer or rejects an invalid interval. Pass by value gives each parameter its own integer value. If the caller stores x=12, calling clamp_reading(x, 0, 10) can return10 while the caller variable remains12. Returning a value and modifying a caller object are different interface choices.
+A function call creates a local computation with a clear interface. The caller supplies x, low and high; the function returns one integer or rejects an invalid interval. Pass by value gives each parameter its own integer value. If the caller stores x=12, calling clamp_reading(x, 0, 10) can return 10 while the caller variable remains 12. Returning a value and modifying a caller object are different interface choices.
 
 The contract has an ordering dependency. First establish low<=high. Only then does the phrase clamp into the interval have a meaningful interpretation. The expression max(low, min(x, high)) implements the valid interval behavior, but it is not an interval validator. With reversed bounds, those library calls still produce an integer, which can hide a nonsensical request. Explicit rejection preserves the distinction between a valid answer and invalid input.
 
@@ -55,7 +55,7 @@ Evaluate -3, 5, 12 for bounds [0, 10].
 
 **Reasoning:** Below, inside and above are separate paths.
 
-**Verify:** Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.
+**Verify:** Assert `clamp_reading(-3, 0, 10) == 0`, `clamp_reading(5, 0, 10) == 5` and `clamp_reading(12, 0, 10) == 10`: one call below, inside and above the interval.
 
 ## Exercise 2: Check parameter isolation
 
@@ -65,7 +65,7 @@ Call with variable x=12 and inspect x afterward.
 
 **Reasoning:** Pass by value creates the parameter copy.
 
-**Verify:** Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.
+**Verify:** Store the result in a second variable and assert `result == 10 && x == 12`; the by-value parameter cannot change the caller's `x`.
 
 ## Exercise 3: Build a predicate
 
@@ -75,7 +75,7 @@ Write inside(x, low, high) with inclusive bounds.
 
 **Reasoning:** Return a Boolean comparison conjunction.
 
-**Verify:** Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.
+**Verify:** Assert `inside(0, 0, 10)`, `inside(10, 0, 10)` and `!inside(11, 0, 10)` so both inclusive edges and one outside value are covered.
 
 ## Exercise 4: Repair an invalid contract
 
@@ -85,7 +85,7 @@ Remove the reversed-bounds check and explain the lost guarantee.
 
 **Reasoning:** min/max alone do not validate the meaning of the bounds.
 
-**Verify:** Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.
+**Verify:** Without the check, `clamp_reading(5, 10, 0)` silently returns 10; after restoring it, Worked example 2 must catch `std::invalid_argument` again.
 
 ## Exercise 5: Check a one-point interval
 
@@ -95,7 +95,7 @@ Evaluate x=2, 3, 4 with bounds [3, 3].
 
 **Reasoning:** Equal bounds form a valid single-value interval.
 
-**Verify:** Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.
+**Verify:** Assert that `clamp_reading(2, 3, 3)`, `clamp_reading(3, 3, 3)` and `clamp_reading(4, 3, 3)` all equal 3; equal bounds form a one-value interval, not a reversed one.
 
 ## Exercise 6: Transfer to money
 
@@ -105,4 +105,4 @@ Clamp a cents amount of 1250 to [0, 1000].
 
 **Reasoning:** The contract applies to a different integer domain.
 
-**Verify:** Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.
+**Verify:** Assert `clamp_reading(1250, 0, 1000) == 1000` with `int` arguments only, and compile with `-Wconversion` to confirm no floating conversion appears.

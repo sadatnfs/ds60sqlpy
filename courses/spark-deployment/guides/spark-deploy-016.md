@@ -29,6 +29,49 @@ The intended answers are yes for the driver's required creation and no for execu
 
 The supplied NetworkPolicy template permits labeled peers and a common DNS deployment only. It intentionally does not guess a cluster's API-server or object-storage egress addresses. Applying it unchanged to a driver may block executor creation even when RBAC is correct.
 
+The template allows traffic between pods carrying the workshop label and DNS
+lookups to `kube-dns`, and nothing else:
+
+From [`projects/cluster-lab/kubernetes/network-policy.yaml`](../projects/cluster-lab/kubernetes/network-policy.yaml):
+
+```yaml
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: spark-namespace-boundary
+  namespace: NAMESPACE
+spec:
+  podSelector:
+    matchLabels:
+      ds60-workshop: spark-deployment
+  policyTypes: [Ingress, Egress]
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              ds60-workshop: spark-deployment
+  egress:
+    - to:
+        - podSelector:
+            matchLabels:
+              ds60-workshop: spark-deployment
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: kube-system
+          podSelector:
+            matchLabels:
+              k8s-app: kube-dns
+      ports:
+        - protocol: UDP
+          port: 53
+        - protocol: TCP
+          port: 53
+```
+
+Because `policyTypes` lists `Egress` and no rule names the API server, a driver
+under this policy cannot ask the API server to create executor pods.
+
 ```text
 DNS works -> API TCP times out -> inspect egress policy/routing
 API returns 403 -> inspect authenticated identity and RBAC

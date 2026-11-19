@@ -1,6 +1,6 @@
 # rust-010: explanation and comparison
 
-Attempt the six guide tasks before opening this comparison. The executable reference is [rust-010_solution.rs](rust-010_solution.rs). Its assertions are always active under the prepared classroom compile settings.
+Attempt the six guide tasks before opening this comparison. The executable reference is [rust-010_solution.rs](rust-010_solution.rs). It runs both worked examples and the reference answers below, and its assertions are always active under the prepared classroom compile settings.
 
 ## Why the two examples differ
 
@@ -8,21 +8,64 @@ Attempt the six guide tasks before opening this comparison. The executable refer
 
 **Mutate two proven-disjoint regions:** The standard library API establishes disjointness instead of relying on two potentially overlapping index borrows. The two slices mutate separate halves safely.
 
-## Reason through the six tasks
+## Task answers
 
-1. **Predict and explain.** Trace who may access text during the mutable call.
+### Task 1: Predict and explain
 
-2. **Guided modification.** Add a second mutation after the first borrow ends.
+Trace who may access text during the mutable call.
 
-3. **Independent construction.** Write a function swapping the ends of a mutable slice safely.
+No separate reference answer has been written for this task. Example A is the evidence to compare with: The function receives mutation capability for the duration of the call. The caller retains ownership and observes the deliberate mutation.
 
-4. **Diagnose a defect.** Create conflicting mutable borrows and explain the compiler diagnostic.
+### Task 2: Guided modification
 
-5. **Boundary evidence.** Test an empty slice and a split at either endpoint.
+Add a second mutation after the first borrow ends.
 
-6. **Transfer and justify.** Design an API that exposes only the smallest mutable region needed by a transformation.
+No separate reference answer has been written for this task. Start from Example B: The standard library API establishes disjointness instead of relying on two potentially overlapping index borrows. The two slices mutate separate halves safely.
 
-For tasks 1 and 2, use the checked values and mechanism trace in the two examples. For task 3, choose names that expose the input and result contract and retain the same invariants. For task 4, the diagnosed mistakes below supply a concrete wrong assumption: preserve its counterexample before repairing it. Task 5 needs an explicit expected value or documented rejection at the boundary, not just successful execution. For task 6, explain what changes in the new context and which part of the original mechanism remains applicable. Several representations may satisfy this transfer task; justify the choice rather than treating this reference as the only architecture.
+### Task 3: Independent construction
+
+Write a function swapping the ends of a mutable slice safely.
+
+**Reference answer.** The same statements run as the `Task 3` block of the reference program; here they are wrapped in `main` as a complete file.
+
+```rust
+fn main() -> Result<(), Box<dyn std::error::Error>> {
+    fn swap_ends(values: &mut [i32]) {
+        if let Some(last) = values.len().checked_sub(1) {
+            values.swap(0, last);
+        }
+    }
+    let mut values = [1, 2, 3];
+    swap_ends(&mut values);
+    assert_eq!(values, [3, 2, 1]);
+    let mut empty: [i32; 0] = [];
+    swap_ends(&mut empty);
+    assert!(empty.is_empty());
+    Ok(())
+}
+```
+
+**Observe:** [1, 2, 3] becomes [3, 2, 1], and an empty slice is left alone.
+
+checked_sub avoids underflow for an empty slice, and swap performs both writes through the one exclusive borrow.
+
+### Task 4: Diagnose a defect
+
+Create conflicting mutable borrows and explain the compiler diagnostic.
+
+No reference answer has been written for this task yet. The wrong assumptions to look for are this lesson's pitfalls: An exclusive borrow is not a thread lock. More mut annotations do not solve aliasing conflicts. Prefer safe disjointness APIs to manually asserting pointer safety.
+
+### Task 5: Boundary evidence
+
+Test an empty slice and a split at either endpoint.
+
+No reference answer has been written for this task yet. Write the expected value or documented rejection for each boundary before running it, and compare with the checks in Example A (Mutate through one explicit borrower) and Example B (Mutate two proven-disjoint regions).
+
+### Task 6: Transfer and justify
+
+Design an API that exposes only the smallest mutable region needed by a transformation.
+
+No single reference answer exists: several designs can satisfy this transfer task. Justify yours against the mechanism described below and the vocabulary entry **Exclusive borrow**, and state one limitation of your choice.
 
 ## Mechanism and diagnostic reasoning
 
@@ -36,4 +79,4 @@ An exclusive borrow is not a thread lock. More mut annotations do not solve alia
 
 ## Review before continuing
 
-The reference checks the worked scenarios, including their boundary distinctions. Your independent and transfer artifacts may have additional checks. Compare observations rather than only source text. Preserve any new regression case you discover and explain why it would reject a plausible wrong implementation. External project steps require their own build and platform evidence and are not established by a portable reference passing.
+Run the reference and confirm that it prints `rust-010: passed`, then reconstruct one boundary case from memory and explain which check would reject a plausible wrong implementation. External project steps need their own build and platform evidence; a passing portable reference does not establish them.

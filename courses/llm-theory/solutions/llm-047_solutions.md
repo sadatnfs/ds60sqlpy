@@ -24,7 +24,7 @@ Capacity bounds how many tokens an expert accepts in one batch. Overflow needs a
 
 Inputs have shape(tokens, model_width), router logits(tokens, experts), and expert matrices(experts, model_width, output_width). Stable descending argsort declares a lowest-index tie policy. The selected gates are normalized before combining expert outputs. The capacity helper tracks assigned counts, accepted counts and dropped-token flags separately. A Switch-style auxiliary term uses hard assignment fractions f and mean router probabilities P, with the hard fractions held fixed for a local gradient calculation.
 
-## Exercise 1: Calculate a top2 expert mixture
+## Exercise 1: Calculate a top-2 expert mixture
 
 The question is: Use experts I, 2I, -I and three token/router rows with selected probabilities \(\frac{3}{4}\) and \(\frac{1}{4}\).
 
@@ -39,13 +39,13 @@ np.testing.assert_allclose(output, [[1.25, 0], [0, 1.75], [-0.25, -0.25]], atol=
 np.testing.assert_allclose(gates.sum(1), 1, atol=1e-12, rtol=0)
 ```
 
-**Expected:** outputs[1.25, 0], [0, 1.75], [-.25, -.25].
+**Expected:** outputs [1.25, 0], [0, 1.75], [-0.25, -0.25].
 
-**Verify:** Compare the computed values or written argument with outputs[1.25, 0], [0, 1.75], [-.25, -.25].
+**Verify:** In a fresh process, the exercise checks confirm `output` matches `[[1.25, 0], [0, 1.75], [-0.25, -0.25]]` within 1e-12 and `gates.sum(1)` matches `1` within 1e-12.
 
 ## Exercise 2: Enforce expert capacity with residual fallback
 
-The question is: Route four tokens to experts 0, 0, 1, 0 with capacity 2 and unit top1 gates.
+The question is: Route four tokens to experts 0, 0, 1, 0 with capacity 2 and unit top-1 gates.
 
 The dropped token is not deleted from the sequence or loss denominator. Its residual path is explicit, and the drop count remains available for quality and load analysis.
 
@@ -63,11 +63,11 @@ np.testing.assert_allclose(residual, [[2, 0], [0, 2], [3, 3], [2, 1]], atol=1e-1
 
 **Expected:** assigned counts 3, 1; accepted 2, 1; last token drops its expert delta and keeps its input.
 
-**Verify:** Compare the computed values or written argument with assigned counts 3, 1; accepted 2, 1; last token drops its expert delta and keeps its input.
+**Verify:** In a fresh process, the exercise checks confirm `assigned.tolist() == [3, 1]`; `accepted.tolist() == [2, 1]`; `dropped.tolist() == [False, False, False, True]` and `residual` matches `[[2, 0], [0, 2], [3, 3], [2, 1]]` within 1e-12.
 
 ## Exercise 3: Compute a load-balancing term
 
-The question is: Use hard fractions f[.75, .25], mean router probabilities P[.7, .3], expert count 2 and coefficient .01.
+The question is: Use hard fractions f = [0.75, 0.25], mean router probabilities P = [0.7, 0.3], expert count 2 and coefficient 0.01.
 
 The term measures a routing-related objective under the declared formula. A lower auxiliary value is not itself evidence that task loss, capacity drops or distributed utilization improved.
 
@@ -84,7 +84,7 @@ np.testing.assert_allclose(
 
 **Expected:** auxiliary loss .012; balanced fixture .01.
 
-**Verify:** Compare the computed values or written argument with auxiliary loss .012; balanced fixture .01.
+**Verify:** In a fresh process, the exercise checks confirm `loss` matches `0.012` within 1e-12 and `coefficient * 2 * np.dot([0.5, 0.5], [0.5, 0.5])` matches `0.01` within 1e-12.
 
 ## Exercise 4: Trace a local router gradient
 
@@ -104,11 +104,11 @@ np.testing.assert_allclose(numeric, -3 / 16, atol=1e-8, rtol=0)
 
 **Expected:** derivative of first output coordinate is \(\frac{-3}{16}\) within 1e-8.
 
-**Verify:** Compare the computed values or written argument with derivative of first output coordinate is \(\frac{-3}{16}\) within 1e-8.
+**Verify:** In a fresh process, the exercise checks confirm `numeric` matches `-3 / 16` within 1e-8.
 
 ## Exercise 5: Separate total and active parameter counts
 
-The question is: Use 8 two-layer experts with width 64, hidden 128 and top-2 activation, excluding router and biases.
+The question is: Use 8 two-layer experts with width 64, hidden width 128 and top-2 activation, excluding router and biases.
 
 Inactive expert weights still occupy memory somewhere. Active-weight arithmetic does not measure peak memory, token dispatch cost orall-to-all communication.
 
@@ -120,11 +120,11 @@ assert active * 2 * width * hidden == 32768
 
 **Expected:** total 131072 expert weights; 32768 selected expert weights per token.
 
-**Verify:** Compare the computed values or written argument with total 131072 expert weights; 32768 selected expert weights per token.
+**Verify:** In a fresh process, the exercise checks confirm `expert_count * 2 * width * hidden == 131072` and `active * 2 * width * hidden == 32768`.
 
 ## Exercise 6: Validate routing policy and ties
 
-The question is: Reject top-k 0 and capacity 0; check equal router logits choose lower indices deterministically.
+The question is: Reject top-k 0 and capacity 0; check that equal router logits choose lower indices deterministically.
 
 Tie and overflow policies affect reproducibility and which tokens receive expert computation. They must be explicit before comparing model quality or load statistics.
 
@@ -145,7 +145,7 @@ for action in [
 
 **Expected:** invalid policies raise ValueError; top-2 tie indices 0, 1.
 
-**Verify:** Compare the computed values or written argument with invalid policies raise ValueError; top-2 tie indices 0, 1.
+**Verify:** In a fresh process, the exercise checks confirm `tied.tolist() == [[0, 1]]` and for every looped case, `action()` raises `ValueError`.
 
 ## Review after comparison
 

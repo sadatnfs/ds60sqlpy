@@ -194,9 +194,9 @@ These measures answer separate questions: how many children were observed, how m
 
 ### Exercise 6: Choose Cartesian or positional array semantics
 
-For one parent with SKUs[a, b] and channels[web, shop, api], return both independent exploded pairs and arrays_zip positional rows. Explain the relationship required for each interpretation.
+For one parent with SKUs [a, b] and channels [web, shop, api], return both independent exploded pairs and arrays_zip positional rows. Explain the relationship required for each interpretation.
 
-**Expected:** Independent generators produce 6 pairs; zip produces(a, web),(b, shop),(NULL, api), three rows.
+**Expected:** Independent generators produce 6 pairs; zip produces(a, web), (b, shop),(NULL, api), three rows.
 
 ```scala
 def arrayRelationships(spark: SparkSession): (DataFrame, DataFrame) = {
@@ -229,4 +229,4 @@ The six-row relation models every independent pairing, while the three-row relat
 
 ## Execution and interpretation
 
-Run the complete reference in its prepared fixed worker. The small fixture is constructed inside the program,so opening a lesson does not fetch data. A final success line is printed only after the reference assertions complete. Plan observations,partition evidence and resource measurements apply to the actual local configuration; they do not establish cluster-scale performance. Session cleanup is explicit,and any additional owned file/query lifecycle is described in the lesson.
+Run the complete reference in its prepared fixed worker. The small fixture is constructed inside the program, so opening a lesson does not fetch data. A final success line is printed only after the reference assertions complete. Plan observations, partition evidence and resource measurements apply to the actual local configuration; they do not establish cluster-scale performance. Session cleanup is explicit, and any additional owned file/query lifecycle is described in the lesson.

@@ -5,20 +5,20 @@ Copy to .learning before editing. Six independent attempts belong below.
 """
 
 # Exercise 1: Compare two reductions
-# Pool patch[[1,3],[2,4]] with a2x2 window.
-# Expected: max4; average2.5.
+# Pool patch [[1, 3], [2, 4]] with a2x2 window.
+# Expected: max 4; average 2.5.
 
 # Exercise 2: Inspect a flip
 # Flip the patch horizontally and inspect every pixel.
-# Expected: rows[3,1] and[4,2].
+# Expected: rows [3, 1] and [4, 2].
 
 # Exercise 3: Check an involution
 # Flip twice and compare with the original image.
 # Expected: all pixels restored exactly.
 
 # Exercise 4: Expose discarded information
-# Change the nonmaximum pixel1 to0 and recompute both pools.
-# Expected: max still4; average2.25.
+# Change the nonmaximum pixel 1 to 0 and recompute both pools.
+# Expected: max still 4; average 2.25.
 
 # Exercise 5: Keep evaluation deterministic
 # Define evaluation as an identity transform and compare repeated results with the source.

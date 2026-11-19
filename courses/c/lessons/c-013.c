@@ -1,13 +1,21 @@
 #include <stdio.h>
 
 int main(void) {
-  /* Exercise 1: Use a parenthesized macro safely
-     Square the side-effect-free expression 2+3.
-     Expected: The result is 25. */
+  /* Exercise 1: Use a parenthesized macro safely: predict an edited check
+     Copy worked example 1 into a scratch pad and change `CHECK(SQUARE(2 + 3) ==
+     25);` to `CHECK(SQUARE(3 + 3) == 25);` inside its CHECK. Before running,
+     predict whether the CHECK still holds and explain why; then restore it.
+     Expected: The changed run stops with `Check failed` at the CHECK on
+     `SQUARE(2 + 3) == 25`. Restoring the original line brings back the worked
+     observation: the result is 25. */
 
-  /* Exercise 2: Prefer a typed helper for mutation
-     Pass value++ to a normal square function.
-     Expected: The result is 9 and value increments once to 4. */
+  /* Exercise 2: Prefer a typed helper for mutation: debug a regression
+     A regression changed one token in worked example 2, so one line now reads
+     `int value = 4;`. Run worked example 2 with that line, use the failing
+     CHECK to locate the defect and repair it without changing the CHECK.
+     Expected: Before the repair the run stops with `Check failed` at the CHECK
+     on `result == 9 && value == 4`; after it the line reads `int value = 3;`
+     again and the result is 9 and value increments once to 4. */
 
   /* Exercise 3: Require a representation fact
      Check the language-required char size at translation time.

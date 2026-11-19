@@ -48,6 +48,15 @@ metadata location, schema and snapshot. If another engine participates, record
 its exact connector and selected snapshot rather than assuming common Parquet
 support is sufficient.
 
+The prepared extension's statements are in the project. Running them is a separate
+prepared step with its own acceptance receipt, not part of the default check:
+
+<!-- include: projects/hive/iceberg.hql sql -->
+
+`STORED BY ICEBERG` hands the table's metadata and snapshots to the Iceberg storage
+handler, so the `INSERT` creates a new Iceberg snapshot rather than a new Hive
+partition directory.
+
 Schema evolution, partition evolution, equality/position deletes and newer table
 features can expose compatibility limits absent from a primitive scan. Select
 one changed condition, such as a field rename or an actual supported delete,

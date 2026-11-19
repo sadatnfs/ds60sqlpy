@@ -15,6 +15,18 @@ struct LessonMain {
       precondition(Array(transformed) == [20, 30])
       precondition([Int]().reduce(0, +) == 0)
     }
+
+    do {
+      // Task 3: Independent construction
+      func sum<S: Sequence>(_ values: S) -> S.Element where S.Element: AdditiveArithmetic {
+        var total = S.Element.zero
+        for value in values { total += value }
+        return total
+      }
+      precondition(sum([1, 2, 3]) == 6)
+      precondition(sum([1.5, 2.5]) == 4.0)
+      precondition(sum([Int]()) == 0)
+    }
     print("swift-020: passed")
   }
 }

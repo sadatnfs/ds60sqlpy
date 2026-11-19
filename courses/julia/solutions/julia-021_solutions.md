@@ -6,7 +6,7 @@ The executable reference is `julia-021_reference.jl`. Its checks cover the state
 
 A correct numerical recovery validates this fixture, not a population inference.
 
-**Expected observation:** The coefficients are approximately[1,2].
+**Expected observation:** The coefficients are approximately `[1, 2]`.
 
 ## 2. Trace penalty selection
 

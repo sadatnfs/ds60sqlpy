@@ -1,6 +1,6 @@
 # swift-013: explanation and comparison
 
-Attempt the six guide tasks before opening this comparison. The executable reference is [swift-013_solution.swift](swift-013_solution.swift). Its assertions are always active under the prepared classroom compile settings.
+Attempt the six guide tasks before opening this comparison. The executable reference is [swift-013_solution.swift](swift-013_solution.swift). It runs both worked examples and the reference answers below, and its assertions are always active under the prepared classroom compile settings.
 
 ## Why the two examples differ
 
@@ -8,21 +8,65 @@ Attempt the six guide tasks before opening this comparison. The executable refer
 
 **Equal state need not mean identity:** Object identity answers a different question from comparing a property value. Two fresh counters have equal state but distinct identities.
 
-## Reason through the six tasks
+## Task answers
 
-1. **Predict and explain.** Draw references before and after assignment.
+### Task 1: Predict and explain
 
-2. **Guided modification.** Create a separate object and mutate only one.
+Draw references before and after assignment.
 
-3. **Independent construction.** Choose class or struct for a shared connection coordinator and a coordinate value.
+No separate reference answer has been written for this task. Example A is the evidence to compare with: The copied reference still identifies one object, even though both bindings are constant. Both names observe the same increment.
 
-4. **Diagnose a defect.** Diagnose expecting class assignment to create an independent snapshot.
+### Task 2: Guided modification
 
-5. **Boundary evidence.** Test equal property values on distinct objects.
+Create a separate object and mutate only one.
 
-6. **Transfer and justify.** Explain whether a shared class needs synchronization before use from concurrent tasks.
+No separate reference answer has been written for this task. Start from Example B: Object identity answers a different question from comparing a property value. Two fresh counters have equal state but distinct identities.
 
-For tasks 1 and 2, use the checked values and mechanism trace in the two examples. For task 3, choose names that expose the input and result contract and retain the same invariants. For task 4, the diagnosed mistakes below supply a concrete wrong assumption: preserve its counterexample before repairing it. Task 5 needs an explicit expected value or documented rejection at the boundary, not just successful execution. For task 6, explain what changes in the new context and which part of the original mechanism remains applicable. Several representations may satisfy this transfer task; justify the choice rather than treating this reference as the only architecture.
+### Task 3: Independent construction
+
+Choose class or struct for a shared connection coordinator and a coordinate value.
+
+**Reference answer.** It runs as the `Task 3` block of the reference program.
+
+```swift
+final class Coordinator {
+  var openConnections = 0
+}
+struct Coordinate {
+  var x: Int
+  var y: Int
+}
+let shared = Coordinator()
+let alias = shared
+alias.openConnections += 1
+let point = Coordinate(x: 1, y: 2)
+var moved = point
+moved.x = 5
+precondition(shared.openConnections == 1 && shared === alias)
+precondition(point.x == 1 && moved.x == 5)
+```
+
+**Observe:** Both coordinator references see 1 open connection, while moving the copied coordinate leaves the original at x = 1.
+
+A coordinator is shared state with one identity, so it is a class; a coordinate is a small value, so a struct copy is the right behavior.
+
+### Task 4: Diagnose a defect
+
+Diagnose expecting class assignment to create an independent snapshot.
+
+No reference answer has been written for this task yet. The wrong assumptions to look for are this lesson's pitfalls: Let does not make a referenced object deeply immutable. Reference semantics do not imply thread safety. Inheritance is not a general-purpose code reuse requirement.
+
+### Task 5: Boundary evidence
+
+Test equal property values on distinct objects.
+
+No reference answer has been written for this task yet. Write the expected value or documented rejection for each boundary before running it, and compare with the checks in Example A (Observe shared identity) and Example B (Equal state need not mean identity).
+
+### Task 6: Transfer and justify
+
+Explain whether a shared class needs synchronization before use from concurrent tasks.
+
+No single reference answer exists: several designs can satisfy this transfer task. Justify yours against the mechanism described below and the vocabulary entry **Reference identity**, and state one limitation of your choice.
 
 ## Mechanism and diagnostic reasoning
 
@@ -36,4 +80,4 @@ Let does not make a referenced object deeply immutable. Reference semantics do n
 
 ## Review before continuing
 
-The reference checks the worked scenarios, including their boundary distinctions. Your independent and transfer artifacts may have additional checks. Compare observations rather than only source text. Preserve any new regression case you discover and explain why it would reject a plausible wrong implementation. External project steps require their own build and platform evidence and are not established by a portable reference passing.
+Run the reference and confirm that it prints `swift-013: passed`, then reconstruct one boundary case from memory and explain which check would reject a plausible wrong implementation. External project steps need their own build and platform evidence; a passing portable reference does not establish them.

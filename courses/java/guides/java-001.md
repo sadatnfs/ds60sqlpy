@@ -6,11 +6,11 @@ Beginner, approximately 90 minutes. Direct prerequisites: None. This lesson star
 
 ## Learning objectives
 
-Explain source, bytecode, entry point using a concrete program. Trace the normal execution, identify its boundary assumptions and make a failure case observable. The first investigation is Create a message variable containing Hello, Java and print it once. The final exercise transfers the mechanism to observe a real compiler diagnostic.
+Compile and run Main.java with assertions enabled and tell a compiler diagnostic from a runtime failure. Along the way, explain source, bytecode, entry point using a concrete program. Trace the normal execution, identify its boundary assumptions and make a failure case observable. Exercises 1 and 2 start from the worked examples; the authored investigations begin with this task: Start count 1, increment it, then multiply it by 3. The final exercise transfers the mechanism to observe a real compiler diagnostic.
 
 ## Purpose and mental model
 
-A Java program begins as text. The compiler checks syntax and types, then writes bytecode in a class file. The Java Virtual Machine loads that bytecode and invokes a recognized entry point. Compilation and execution are different stages: a missing semicolon prevents compilation, while division by zero can fail after the program starts. This course uses a public class named Main stored in Main.java. The main method is static so the launcher can call it without first creating an object. Its String array parameter contains command-line arguments. Assertions are optional in ordinary Java launches, so the classroom deliberately enables them with-ea. A printed success message cannot replace a check that would fail on incorrect behavior.
+A Java program begins as text. The compiler checks syntax and types, then writes bytecode in a class file. The Java Virtual Machine loads that bytecode and invokes a recognized entry point. Compilation and execution are different stages: a missing semicolon prevents compilation, while division by zero can fail after the program starts. This course uses a public class named Main stored in Main.java. The main method is static so the launcher can call it without first creating an object. Its String array parameter contains command-line arguments. Assertions are optional in ordinary Java launches, so the classroom deliberately enables them with -ea. A printed success message cannot replace a check that would fail on incorrect behavior.
 
 ## Vocabulary and concepts
 
@@ -37,7 +37,7 @@ The public class name and source filename must agree. Each worked example below 
 
 ## Syntax anatomy and execution trace
 
-The class braces enclose methods, and the main-method braces enclose statements. public makes the entry point accessible, static associates it with the class, void means it returns no value, and String[] declares an array of text arguments. System.out.println writes one line. A semicolon ends most statements. javac --release21 selects the source/API target; java-ea Main loads the compiled class from the classpath. Read the first compiler diagnostic before looking for runtime output.
+The class braces enclose methods, and the main-method braces enclose statements. public makes the entry point accessible, static associates it with the class, void means it returns no value, and String[] declares an array of text arguments. System.out.println writes one line. A semicolon ends most statements. javac --release 21 selects the source/API target; java-ea Main loads the compiled class from the classpath. Read the first compiler diagnostic before looking for runtime output.
 
 ## Worked example / walkthrough
 
@@ -82,7 +82,7 @@ public class Main {
 }
 ```
 
-**Expected:** integer5 and text total=5.
+**Expected:** integer 5 and text total=5.
 
 ## Prediction before your attempt
 
@@ -90,29 +90,29 @@ Read the source from the entry point and name each value before executing it. Id
 
 ## Exercises
 
-1. **Print a first result.** Create a message variable containing Hello, Java and print it once.
-   **Expected:** one line Hello, Java.
-   **Verify:** Compare your assertion values or captured diagnostic with one line Hello, Java.
+1. **Print a first result: change one input.** Copy Example A into a scratch `Main.java` and change `String message = "Hello, Java";` to `String message = "Hello, Java!";`. Before running it with `java -ea Main`, predict which assertion fails and which value it now sees; then run it and restore the original line.
+   **Expected:** The changed run fails with an `AssertionError` from the assertion on `message.equals("Hello, Java")`. Restoring the original line brings back the worked observation: one line Hello, Java.
+   **Verify:** Compare your written prediction with the reported `AssertionError` and its stack-trace line, and name the value that made `message.equals("Hello, Java")` false. After restoring the line, the program completes without an `AssertionError` again.
 
-2. **Evaluate before printing.** Compute2+3 into an int and build the string total=5.
-   **Expected:** integer5 and text total=5.
-   **Verify:** Compare your assertion values or captured diagnostic with integer5 and text total=5.
+2. **Evaluate before printing: diagnose an edited check.** A careless edit changed the assertion that Example B adds after Example A so that it reads `assert line.equals("total=6");`. Run Example B with that line, explain why the edited assertion now fails for the same program state, and restore it.
+   **Expected:** Before the repair the run fails with an `AssertionError` from the assertion on `line.equals("total=5")`; after it the line reads `assert line.equals("total=5");` again and integer 5 and text total=5.
+   **Verify:** Keep the failing and the repaired runs. Explain why the edited assertion rejects the same program state that `line.equals("total=5")` accepts.
 
-3. **Trace sequential state.** Start count1,increment it,then multiply it by3.
-   **Expected:** final count6.
-   **Verify:** Compare your assertion values or captured diagnostic with final count6.
+3. **Trace sequential state.** Start count 1, increment it, then multiply it by 3.
+   **Expected:** final count 6.
+   **Verify:** Keep an assertion equivalent to `count == 6`. As a control, change `count = count + 1;` to `count = count - 1;`: the run must fail with an `AssertionError` from the assertion on `count == 6`. Restore the line before continuing.
 
 4. **Verify assertion mode.** Use an assertion side effect only to detect whether this teaching launch enabled assertions; fail explicitly otherwise.
    **Expected:** assertion-enabled flag true.
-   **Verify:** Compare your assertion values or captured diagnostic with assertion-enabled flag true.
+   **Verify:** Keep an assertion equivalent to `enabled = true`. As a control, change `assert enabled = true;` to `assert enabled = false;` inside it: the run must fail with an `AssertionError`, which shows the assertion can fail. Restore it.
 
-5. **Separate runtime failure.** Divide an integer by a variable containing0 and catch exactly ArithmeticException.
-   **Expected:** ArithmeticException observed;program continues after the catch.
-   **Verify:** Compare your assertion values or captured diagnostic with ArithmeticException observed;program continues after the catch.
+5. **Separate runtime failure.** Divide an integer by a variable containing 0 and catch exactly ArithmeticException.
+   **Expected:** ArithmeticException observed; program continues after the catch.
+   **Verify:** Keep an assertion equivalent to `dividedByZero`. As a control, change `int zero = 0;` to `int zero = 1;`: the run must fail with an `AssertionError` from the assertion on `dividedByZero`. Restore the line before continuing.
 
 6. **Observe a real compiler diagnostic.** Compile a small in-memory Broken class whose return statement lacks a semicolon; capture diagnostics without executing it.
    **Expected:** compiler result false and at least one ERROR diagnostic.
-   **Verify:** Compare your assertion values or captured diagnostic with compiler result false and at least one ERROR diagnostic.
+   **Verify:** Keep an assertion equivalent to `diagnostics.getDiagnostics().stream().anyMatch(d -> d.getKind() == javax.tools.Diagnostic.Kind.ERROR)`. As a control, change `.anyMatch(d -> d.getKind() == javax.tools.Diagnostic.Kind.ERROR);` to `.anyMatch(d -> d.getKind() != javax.tools.Diagnostic.Kind.ERROR);` inside it: the run must fail with an `AssertionError`, which shows the assertion can fail. Restore it.
 
 ## Common pitfalls and diagnosis
 
@@ -122,7 +122,14 @@ Do not replace a precise exception with a catch-all that returns a plausible def
 
 ## Progressive hints
 
-First reconstruct the values and identities in the worked example. Next isolate the line that changes the result when one input is altered. Finally compare the normal and failure paths with the stated contract. Use a small table of input, expected value, actual value and exception type. Ask for one hint about the first incorrect assumption before requesting the entire reference implementation.
+Read one hint at a time and attempt the exercise again before reading the next. Keep a small table of input, expected value, actual value and exception type. Ask for one hint about the first incorrect assumption before requesting the entire reference implementation.
+
+- **Exercise 1:** First restate the expected observation: one line Hello, Java. Then list the values read by `message.equals("Hello, Java")` and trace each one from its declaration. Finally, compute the asserted value with `String message = "Hello, Java!";` in place before running.
+- **Exercise 2:** First restate the expected observation: integer 5 and text total=5. Then list the values read by `line.equals("total=5")` and trace each one from its declaration. Finally, compare `assert line.equals("total=6");` with the same line in Example B and state the claim each version makes.
+- **Exercise 3:** First restate the expected observation: final count 6. Then list the values read by `count == 6` and trace each one from its declaration. Finally, predict the effect of changing `count = count + 1;` to `count = count - 1;` before running anything.
+- **Exercise 4:** First restate the expected observation: assertion-enabled flag true. Then list the values read by `enabled = true` and trace each one from its declaration. Finally, name one input that would make `enabled = true` false.
+- **Exercise 5:** First restate the expected observation: arithmeticException observed; program continues after the catch. Then list the values read by `dividedByZero` and trace each one from its declaration. Finally, predict the effect of changing `int zero = 0;` to `int zero = 1;` before running anything.
+- **Exercise 6:** First restate the expected observation: compiler result false and at least one ERROR diagnostic. Then list the values read by `diagnostics.getDiagnostics().stream().anyMatch(d -> d.getKind() == javax.tools.Diagnostic.Kind.ERROR)` and trace each one from its declaration. Finally, name one input that would make `diagnostics.getDiagnostics().stream().anyMatch(d -> d.getKind() == javax.tools.Diagnostic.Kind.ERROR)` false.
 
 ## Self-check and retrieval
 
@@ -134,7 +141,7 @@ Preserve the saved pad and the six exercise observations. Continue to the next l
 
 ## Sources and verification status
 
-[Official Java21 API or language reference](https://docs.oracle.com/en/java/javase/21/docs/api/index.html), reviewed2026-10-22. Examples and exercise fixtures are original course material. Use the [validation guide](../../../docs/validation.md) and CI artifacts for the exact revision and platform to inspect actual compile/run results. Authoring, parsing, compilation, execution and learner mastery are separate forms of evidence.
+[Official Java 21 API or language reference](https://docs.oracle.com/en/java/javase/21/docs/api/index.html), reviewed 2026-10-22. Examples and exercise fixtures are original course material. Use the [validation guide](../../../docs/validation.md) and CI artifacts for the exact revision and platform to inspect actual compile/run results. Authoring, parsing, compilation, execution and learner mastery are separate forms of evidence.
 
 ## Ask an AI tutor about this lesson
 
@@ -144,7 +151,7 @@ Read courses/java/guides/java-001.md and courses/java/lessons/java-001.java. Dir
 Explain the mechanism, ask for a prediction, review my attempt, give one hint,
 request compiler/runtime evidence, and ask a fresh retrieval question.
 Keep courses/java/solutions/ closed until I request comparison or show an attempt.
-Use Java21 and the declared offline fixture. Done when I can explain the state
+Use Java 21 and the declared offline fixture. Done when I can explain the state
 transitions, pass all six exercise contracts, diagnose one failure and solve a
 new boundary case without copying the solution.
 ```

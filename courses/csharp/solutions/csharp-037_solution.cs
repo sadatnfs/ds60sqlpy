@@ -39,6 +39,17 @@ internal static class Program {
       Check(index.Contains(8) && !index.Contains(9), "indexed membership");
       Check(index.Count == 4, "index has stored identities");
     }
+    {
+      // Task 3: Independent construction
+      string[] names = { "Pear", "apple", "Fig" };
+      string[] queries = { "PEAR", "fig", "kiwi" };
+      var policy = StringComparison.OrdinalIgnoreCase;
+      bool Scan(string q) => names.Any(n => string.Equals(n, q, policy));
+      int scanHits = queries.Count(Scan);
+      var index = new HashSet<string>(names, StringComparer.OrdinalIgnoreCase);
+      int indexHits = queries.Count(index.Contains);
+      Check(scanHits == 2 && indexHits == scanHits, "same answers");
+    }
     Console.WriteLine("csharp-037: passed");
     await Task.CompletedTask;
   }

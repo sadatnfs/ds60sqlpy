@@ -8,9 +8,11 @@ Allocated storage lets a program choose capacity at runtime. malloc returns unin
 
 malloc(count * sizeof *items) avoids repeating the element type, but multiplication needs a prior bound check. Check the returned pointer before use. calloc(count,sizeof *items) accepts element count and size separately, while still requiring an application resource budget. free(NULL) is defined and harmless. The helper here returns NULL for a zero count by its own contract and refuses multiplication overflow before allocation.
 
-## Exercise 1: Allocate and initialize
+## Exercise 1: Allocate and initialize: change one input
 
-Allocate three ints, assign 2, 4, 6 and sum them.
+Copy worked example 1 into a scratch pad and change `p[0] = 2;` to `p[1] = 2;`. Before running, predict which CHECK fails and which value it now sees; then run it and restore the original line.
+
+The unchanged code is worked example 1:
 
 ```c
 int *p = allocate_ints(3);
@@ -22,13 +24,15 @@ CHECK(p[0] + p[1] + p[2] == 12);
 free(p);
 ```
 
-**Expected:** The sum is 12 before release.
+**Expected:** The changed run stops with `Check failed` at the CHECK on `p[0] + p[1] + p[2] == 12`. Restoring the original line brings back the worked observation: the sum is 12 before release.
 
 malloc storage must be initialized before reading. The owner releases it after the final valid access.
 
-## Exercise 2: Inspect zero-initialized integers
+## Exercise 2: Inspect zero-initialized integers: diagnose an edited check
 
-Allocate three ints with calloc and read them.
+A careless edit changed the CHECK in worked example 2 so that it reads `CHECK(p[0] != 0 && p[1] == 0 && p[2] == 0);`. Run worked example 2 with that line, explain why the edited CHECK now fails for the same program state, and restore it.
+
+The unchanged code is worked example 2:
 
 ```c
 int *p = calloc(3, sizeof *p);
@@ -37,7 +41,7 @@ CHECK(p[0] == 0 && p[1] == 0 && p[2] == 0);
 free(p);
 ```
 
-**Expected:** All three values are zero.
+**Expected:** Before the repair the run stops with `Check failed` at the CHECK on `p[0] == 0 && p[1] == 0 && p[2] == 0`; after it the line reads `CHECK(p[0] == 0 && p[1] == 0 && p[2] == 0);` again and all three values are zero.
 
 For integer objects, all-bits-zero represents zero. Do not generalize that claim blindly to every possible pointer or floating representation.
 

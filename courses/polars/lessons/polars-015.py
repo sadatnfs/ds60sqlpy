@@ -1,4 +1,4 @@
-"""polars-015: worked starting point; complete the guide's six changes."""
+"""polars-015: both worked cases; complete the guide's six changes."""
 
 import tempfile
 from pathlib import Path
@@ -32,8 +32,20 @@ def example_one():
         return {"same_result": True, "rows": streaming.to_dicts()}
 
 
+def example_two():
+    frame = pl.DataFrame({"x": range(20)})
+    per_row = (
+        frame.lazy().with_columns((pl.col("x") * 2).alias("twice")).collect(engine="streaming")
+    )
+    whole = frame.lazy().select(pl.col("x").sum().alias("total")).collect(engine="streaming")
+    assert per_row.height == 20 and whole.height == 1
+    assert whole.item() == 190 and per_row["twice"].sum() == 380
+    return {"row_map_rows": 20, "reduction_rows": 1, "sum": 190}
+
+
 if __name__ == "__main__":
     print(example_one())
+    print(example_two())
 
 # TODO 1: Increase input size within a declared resource budget.
 # TODO 2: Use a nearly unique grouping key.

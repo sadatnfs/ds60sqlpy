@@ -1,6 +1,6 @@
 # swift-043: explanation and comparison
 
-Attempt the six guide tasks before opening this comparison. The executable reference is [swift-043_solution.swift](swift-043_solution.swift). Its assertions are always active under the prepared classroom compile settings.
+Attempt the six guide tasks before opening this comparison. The executable reference is [swift-043_solution.swift](swift-043_solution.swift). It runs both worked examples, and its assertions are always active under the prepared classroom compile settings.
 
 ## Why the two examples differ
 
@@ -8,21 +8,43 @@ Attempt the six guide tasks before opening this comparison. The executable refer
 
 **Ignore a superseded result:** Cancellation alone would not establish this guarantee because an operation may still complete. The stale response cannot overwrite the newer value.
 
-## Reason through the six tasks
+## Task answers
 
-1. **Predict and explain.** Trace current intent and result identity.
+### Task 1: Predict and explain
 
-2. **Guided modification.** Advance the generation and accept only the new response.
+Trace current intent and result identity.
 
-3. **Independent construction.** Implement a deterministic fake transport returning success and failure values.
+No separate reference answer has been written for this task. Example A is the evidence to compare with: Identity connects a result to the intent that authorized it. The matching generation updates current state.
 
-4. **Diagnose a defect.** Diagnose an old search response replacing a newer search result.
+### Task 2: Guided modification
 
-5. **Boundary evidence.** Test empty data, malformed data, non-success status and cancellation separately in the prepared adapter.
+Advance the generation and accept only the new response.
 
-6. **Transfer and justify.** Design a URLSession boundary with explicit FoundationNetworking import on Linux, request timeout, size bound and schema validation.
+No separate reference answer has been written for this task. Start from Example B: Cancellation alone would not establish this guarantee because an operation may still complete. The stale response cannot overwrite the newer value.
 
-For tasks 1 and 2, use the checked values and mechanism trace in the two examples. For task 3, choose names that expose the input and result contract and retain the same invariants. For task 4, the diagnosed mistakes below supply a concrete wrong assumption: preserve its counterexample before repairing it. Task 5 needs an explicit expected value or documented rejection at the boundary, not just successful execution. For task 6, explain what changes in the new context and which part of the original mechanism remains applicable. Several representations may satisfy this transfer task; justify the choice rather than treating this reference as the only architecture.
+### Task 3: Independent construction
+
+Implement a deterministic fake transport returning success and failure values.
+
+No reference answer has been written for this task yet. It needs a project or platform outside the single-file pad, so record your own build and run evidence and judge it against the vocabulary entry **Loading state** and the lesson notes.
+
+### Task 4: Diagnose a defect
+
+Diagnose an old search response replacing a newer search result.
+
+No reference answer has been written for this task yet. The wrong assumptions to look for are this lesson's pitfalls: An awaited response is not automatically a successful HTTP status. Never assume cancellation prevents all late callbacks. Avoid logging authorization headers or raw private response bodies.
+
+### Task 5: Boundary evidence
+
+Test empty data, malformed data, non-success status and cancellation separately in the prepared adapter.
+
+No reference answer has been written for this task yet. Write the expected value or documented rejection for each boundary before running it, and compare with the checks in Example A (Accept the current request result) and Example B (Ignore a superseded result).
+
+### Task 6: Transfer and justify
+
+Design a URLSession boundary with explicit FoundationNetworking import on Linux, request timeout, size bound and schema validation.
+
+No single reference answer exists: several designs can satisfy this transfer task. Justify yours against the mechanism described below and the vocabulary entry **Loading state**, and state one limitation of your choice.
 
 ## Mechanism and diagnostic reasoning
 
@@ -36,4 +58,4 @@ An awaited response is not automatically a successful HTTP status. Never assume 
 
 ## Review before continuing
 
-The reference checks the worked scenarios, including their boundary distinctions. Your independent and transfer artifacts may have additional checks. Compare observations rather than only source text. Preserve any new regression case you discover and explain why it would reject a plausible wrong implementation. External project steps require their own build and platform evidence and are not established by a portable reference passing.
+Run the reference and confirm that it prints `swift-043: passed`, then reconstruct one boundary case from memory and explain which check would reject a plausible wrong implementation. External project steps need their own build and platform evidence; a passing portable reference does not establish them.

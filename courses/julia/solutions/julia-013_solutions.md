@@ -24,13 +24,13 @@ This dependence pattern makes the specific self-update straightforward to reason
 
 The loop implements a recurrence, not a simultaneous snapshot assignment.
 
-**Expected observation:** The example becomes[1,1,1,1].
+**Expected observation:** The example becomes `[1, 1, 1, 1]`.
 
 ## 5. Preserve a snapshot
 
 The copy changes the read/write dependency and therefore the algorithm.
 
-**Expected observation:** The example becomes[1,1,2,3].
+**Expected observation:** The example becomes `[1, 1, 2, 3]`.
 
 ## 6. Choose a destination type
 

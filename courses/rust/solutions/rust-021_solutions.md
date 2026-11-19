@@ -1,6 +1,6 @@
 # rust-021: explanation and comparison
 
-Attempt the six guide tasks before opening this comparison. The executable reference is [rust-021_solution.rs](rust-021_solution.rs). Its assertions are always active under the prepared classroom compile settings.
+Attempt the six guide tasks before opening this comparison. The executable reference is [rust-021_solution.rs](rust-021_solution.rs). It runs both worked examples and the reference answers below, and its assertions are always active under the prepared classroom compile settings.
 
 ## Why the two examples differ
 
@@ -8,21 +8,61 @@ Attempt the six guide tasks before opening this comparison. The executable refer
 
 **Move owned data into a closure:** Returning the owned capture makes this closure consuming rather than indefinitely repeatable. The closure transfers its captured String to the caller once.
 
-## Reason through the six tasks
+## Task answers
 
-1. **Predict and explain.** Identify capture mode and calling capability in each example.
+### Task 1: Predict and explain
 
-2. **Guided modification.** Write a pure repeatable closure capturing an immutable factor.
+Identify capture mode and calling capability in each example.
 
-3. **Independent construction.** Implement a helper accepting FnMut for repeated transformations.
+No separate reference answer has been written for this task. Example A is the evidence to compare with: The scope makes the exclusive captured access visible. The closure updates its borrowed accumulator before the borrow ends.
 
-4. **Diagnose a defect.** Diagnose attempting to call a consuming closure twice.
+### Task 2: Guided modification
 
-5. **Boundary evidence.** Test a closure with no captures and one capturing a borrowed reference.
+Write a pure repeatable closure capturing an immutable factor.
 
-6. **Transfer and justify.** Choose capture ownership for work that will run on another thread.
+No separate reference answer has been written for this task. Start from Example B: Returning the owned capture makes this closure consuming rather than indefinitely repeatable. The closure transfers its captured String to the caller once.
 
-For tasks 1 and 2, use the checked values and mechanism trace in the two examples. For task 3, choose names that expose the input and result contract and retain the same invariants. For task 4, the diagnosed mistakes below supply a concrete wrong assumption: preserve its counterexample before repairing it. Task 5 needs an explicit expected value or documented rejection at the boundary, not just successful execution. For task 6, explain what changes in the new context and which part of the original mechanism remains applicable. Several representations may satisfy this transfer task; justify the choice rather than treating this reference as the only architecture.
+### Task 3: Independent construction
+
+Implement a helper accepting FnMut for repeated transformations.
+
+**Reference answer.** The same statements run as the `Task 3` block of the reference program; here they are wrapped in `main` as a complete file.
+
+```rust
+fn main() -> Result<(), Box<dyn std::error::Error>> {
+    fn apply_times(times: usize, mut step: impl FnMut()) {
+        for _ in 0..times {
+            step();
+        }
+    }
+    let mut value = 1;
+    apply_times(3, || value *= 2);
+    assert_eq!(value, 8);
+    Ok(())
+}
+```
+
+**Observe:** Doubling three times turns 1 into 8.
+
+FnMut allows the closure to mutate its captured value on each call, which Fn would forbid.
+
+### Task 4: Diagnose a defect
+
+Diagnose attempting to call a consuming closure twice.
+
+No reference answer has been written for this task yet. The wrong assumptions to look for are this lesson's pitfalls: Move does not imply deep copy. A moved reference still has a borrowed lifetime. Avoid adding static bounds when the real solution is scoped execution or owned data.
+
+### Task 5: Boundary evidence
+
+Test a closure with no captures and one capturing a borrowed reference.
+
+No reference answer has been written for this task yet. Write the expected value or documented rejection for each boundary before running it, and compare with the checks in Example A (Observe mutable capture) and Example B (Move owned data into a closure).
+
+### Task 6: Transfer and justify
+
+Choose capture ownership for work that will run on another thread.
+
+No single reference answer exists: several designs can satisfy this transfer task. Justify yours against the mechanism described below and the vocabulary entry **Capture**, and state one limitation of your choice.
 
 ## Mechanism and diagnostic reasoning
 
@@ -36,4 +76,4 @@ Move does not imply deep copy. A moved reference still has a borrowed lifetime. 
 
 ## Review before continuing
 
-The reference checks the worked scenarios, including their boundary distinctions. Your independent and transfer artifacts may have additional checks. Compare observations rather than only source text. Preserve any new regression case you discover and explain why it would reject a plausible wrong implementation. External project steps require their own build and platform evidence and are not established by a portable reference passing.
+Run the reference and confirm that it prints `rust-021: passed`, then reconstruct one boundary case from memory and explain which check would reject a plausible wrong implementation. External project steps need their own build and platform evidence; a passing portable reference does not establish them.

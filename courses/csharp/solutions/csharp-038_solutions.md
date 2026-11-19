@@ -1,6 +1,6 @@
 # csharp-038: explanation and comparison
 
-Attempt the six guide tasks before opening this comparison. The executable reference is [csharp-038_solution.cs](csharp-038_solution.cs). Its assertions are always active under the prepared classroom compile settings.
+Attempt the six guide tasks before opening this comparison. The executable reference is [csharp-038_solution.cs](csharp-038_solution.cs). It runs both worked examples and the reference answers below, and its assertions are always active under the prepared classroom compile settings.
 
 ## Why the two examples differ
 
@@ -8,21 +8,58 @@ Attempt the six guide tasks before opening this comparison. The executable refer
 
 **Keep literal user text literal:** Escaping preserves data meaning instead of accidentally granting regex syntax authority. The plus sign is matched literally.
 
-## Reason through the six tasks
+## Task answers
 
-1. **Predict and explain.** Explain every part of the identifier pattern.
+### Task 1: Predict and explain
 
-2. **Guided modification.** Change the maximum identifier length and test the exact boundary.
+Explain every part of the identifier pattern.
 
-3. **Independent construction.** Validate a structured identifier and then check its domain-specific reserved words.
+No separate reference answer has been written for this task. Example A is the evidence to compare with: Whole-input anchors prevent a valid substring from disguising an invalid full value. The identifier begins with a lowercase letter and uses only admitted characters.
 
-4. **Diagnose a defect.** Diagnose matching a valid substring inside an invalid full input.
+### Task 2: Guided modification
 
-5. **Boundary evidence.** Test newline, empty input and one character beyond the limit.
+Change the maximum identifier length and test the exact boundary.
 
-6. **Transfer and justify.** Choose a parser or regex for a nested format and justify complexity and error reporting.
+No separate reference answer has been written for this task. Start from Example B: Escaping preserves data meaning instead of accidentally granting regex syntax authority. The plus sign is matched literally.
 
-For tasks 1 and 2, use the checked values and mechanism trace in the two examples. For task 3, choose names that expose the input and result contract and retain the same invariants. For task 4, the diagnosed mistakes below supply a concrete wrong assumption: preserve its counterexample before repairing it. Task 5 needs an explicit expected value or documented rejection at the boundary, not just successful execution. For task 6, explain what changes in the new context and which part of the original mechanism remains applicable. Several representations may satisfy this transfer task; justify the choice rather than treating this reference as the only architecture.
+### Task 3: Independent construction
+
+Validate a structured identifier and then check its domain-specific reserved words.
+
+**Reference answer.** It runs as the `Task 3` block of the reference program.
+
+```csharp
+var options = RegexOptions.NonBacktracking;
+var limit = TimeSpan.FromSeconds(1);
+var shape = new Regex(@"\A[a-z][a-z0-9_]{0,15}\z", options, limit);
+var reserved = new HashSet<string>(StringComparer.Ordinal) { "admin" };
+bool Valid(string id) => shape.IsMatch(id) && !reserved.Contains(id);
+Check(Valid("report_2"), "accepted");
+Check(!Valid("admin"), "reserved word rejected");
+Check(!Valid("2report"), "shape rejected");
+```
+
+**Observe:** report_2 is accepted; admin and 2report are rejected for different reasons.
+
+The regular expression checks only the shape; the reserved-word rule is a separate domain check applied afterward.
+
+### Task 4: Diagnose a defect
+
+Diagnose matching a valid substring inside an invalid full input.
+
+No reference answer has been written for this task yet. The wrong assumptions to look for are this lesson's pitfalls: A timeout is a fallback, not a substitute for a simple pattern and bounded input. Regex does not make a path, SQL query or HTML context safe. Validate according to the destination meaning.
+
+### Task 5: Boundary evidence
+
+Test newline, empty input and one character beyond the limit.
+
+No reference answer has been written for this task yet. Write the expected value or documented rejection for each boundary before running it, and compare with the checks in Example A (Validate a bounded identifier) and Example B (Keep literal user text literal).
+
+### Task 6: Transfer and justify
+
+Choose a parser or regex for a nested format and justify complexity and error reporting.
+
+No single reference answer exists: several designs can satisfy this transfer task. Justify yours against the mechanism described below and the vocabulary entry **Syntax validation**, and state one limitation of your choice.
 
 ## Mechanism and diagnostic reasoning
 
@@ -36,4 +73,4 @@ A timeout is a fallback, not a substitute for a simple pattern and bounded input
 
 ## Review before continuing
 
-The reference checks the worked scenarios, including their boundary distinctions. Your independent and transfer artifacts may have additional checks. Compare observations rather than only source text. Preserve any new regression case you discover and explain why it would reject a plausible wrong implementation. External project steps require their own build and platform evidence and are not established by a portable reference passing.
+Run the reference and confirm that it prints `csharp-038: passed`, then reconstruct one boundary case from memory and explain which check would reject a plausible wrong implementation. External project steps need their own build and platform evidence; a passing portable reference does not establish them.

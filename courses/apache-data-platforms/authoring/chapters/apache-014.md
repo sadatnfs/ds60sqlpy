@@ -47,6 +47,15 @@ owned by this project. The client validates three rows, total 11 for east and a
 logical source digest. It also sends three invalid tickets, including a path-like
 value, and an unknown descriptor; each must be rejected by the actual service.
 
+The server exposes one descriptor and one ticket and rejects every other value:
+
+<!-- include: projects/arrow-flight/service.py #FixtureServer python -->
+
+`list_flights` and `get_flight_info` describe the dataset, and `do_get` streams it
+only for the ticket that `get_flight_info` returned. The client follows the same
+sequence: `list_flights`, then `get_flight_info(FlightDescriptor.for_path("events"))`,
+then `do_get` with the endpoint's ticket.
+
 A Flight ticket is an opaque server-defined selection token. It is not inherently
 a filesystem path, SQL statement or user identity. The fixture allowlists one
 exact token and does not use caller bytes to choose arbitrary files. That protects

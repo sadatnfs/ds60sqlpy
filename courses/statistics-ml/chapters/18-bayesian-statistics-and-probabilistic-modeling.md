@@ -172,7 +172,7 @@ Use simulator-generated pairs to learn likelihood, likelihood-ratio or posterior
 
 **MCMC diagnostics**
 
-Check multiple chains, effective sample sizes, Monte Carlo errors and sampler-specific failures. R-hat near one is necessary evidence in common workflows but not a proof all modes were explored.
+Check multiple chains, effective sample sizes, Monte Carlo errors and sampler-specific failures. As a minimum screen, current guidance (Vehtari and colleagues, 2021) runs at least four chains and asks, for every reported quantity, for rank-normalized split R-hat below 1.01 and bulk and tail effective sample sizes of at least about 100 per chain (400 in total for four chains); Hamiltonian runs should also report zero divergences after warmup. PyMC 5.28.5 reports convergence messages at exactly these R-hat and per-chain effective-sample-size values. Passing the screen is necessary evidence, not a proof that all modes were explored.
 
 ### stat-18-27
 

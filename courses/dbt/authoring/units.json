@@ -2,6 +2,13 @@
   "id": "dbt",
   "title": "dbt and analytics engineering",
   "summary": "A complete SQL-first route from real Core/DuckDB project files through tests, macros, snapshots, incremental correctness, contracts, documentation, targets, state/defer CI, governance and accepted data-product recovery.",
+  "run_notice": "Each case writes its dbt project and DuckDB database into its own temporary directory, runs real dbt commands through dbt's Python entry point and removes the directory when it returns. No account, warehouse, network request or package download is involved.",
+  "case_harness": {
+    "helpers": ["project", "invoke", "rows", "artifact", "relation"],
+    "introduced_in": "dbt-001",
+    "first_note": "This first lesson shows the complete program once. `project` writes the files listed above, `invoke` passes the listed arguments to dbt's programmatic `dbtRunner` and checks its success flag, `rows` queries the DuckDB file directly, and `artifact` reads a JSON file from `target/`. Later lessons show only their case functions.",
+    "note": "The program below shows only this case's own functions. They call the shared helpers {helpers}, which write the files above, run dbt through `dbtRunner` and read the results; the helpers are explained in [dbt-001](dbt-001.md) and appear in full at the top of this lesson's [starter](../lessons/{key}.py)."
+  },
   "units": [
     {
       "id": "dbt-001",
@@ -39,7 +46,8 @@
           "task": "Return 21*2 from the model and run it.",
           "check": "The database still returns 42.",
           "hint": "Inspect compiled SQL as well as output.",
-          "answer": "The source expression changes while the result remains equal. That is a concrete example of why source identity and result equality are different evidence."
+          "answer": "The source expression changes while the result remains equal. That is a concrete example of why source identity and result equality are different evidence.",
+          "answer_code": "# Uses the tempfile import and the project(), invoke() and rows() helpers in main.py.\nwith tempfile.TemporaryDirectory() as d:\n    p = project(d, models={\"answer\": \"select 21 * 2 as answer\"})\n    invoke(p, \"build\")\n    assert rows(p, \"select answer from answer\") == [(42,)]"
         },
         {
           "title": "Introduce invalid SQL",
@@ -71,17 +79,14 @@
         }
       ],
       "diagnosis": "A missing profile error usually means the project profile name and profiles.yml key disagree. A missing relation after compile is expected unless the model was run. A successful run with no tests is not a quality certificate. Inspect the command, selected resources, result status and actual database contents before deciding what was established.",
-      "transfer": "Build and inspect a local dbt project through its real adapter. Keep parsing, compilation, materialization and validation distinct. This gives you a reliable basis for the later incremental, contract and publication lessons without depending on a hosted warehouse.",
-      "lab": "Inspect the generated project files, run the actual dbt commands against the owned DuckDB database, and complete the six specified changes with artifact and row checks.",
+      "transfer": "Keep parsing, compilation, materialization and validation distinct. This gives you a reliable basis for the later incremental, contract and publication lessons without depending on a hosted warehouse.",
+      "lab": "Parse, build and query a one-model project to confirm the value 42 in DuckDB, then compile a second model and show that its relation exists only after dbt run.",
       "references": [
         [
-          "dbt documentation: A real dbt project and its execution stages",
+          "dbt reference: Programmatic invocations",
           "https://docs.getdbt.com/reference/programmatic-invocations"
         ],
-        [
-          "dbt-duckdb adapter configuration and capabilities",
-          "https://github.com/duckdb/dbt-duckdb"
-        ]
+        ["dbt-duckdb repository README", "https://github.com/duckdb/dbt-duckdb"]
       ],
       "sql_variant": {
         "explanation": "The SQL reference returns one row with answer 42. Change the expression and inspect the emitted SQL and materialized table. The prepared project supplies the setup; use the full-project route to author and inspect configuration files."
@@ -116,7 +121,8 @@
           "task": "Add id 4 with amount 3 and rebuild.",
           "check": "Accepted total becomes 24.",
           "hint": "Predict the new contribution.",
-          "answer": "The source and staged counts should both increase by one. Keep the identifier unique and verify the new row separately."
+          "answer": "The source and staged counts should both increase by one. Keep the identifier unique and verify the new row separately.",
+          "answer_code": "# Uses the tempfile import and the project(), invoke() and rows() helpers in main.py.\nwith tempfile.TemporaryDirectory() as d:\n    p = project(\n        d,\n        models={\n            \"orders\": (\n                \"select id::integer as id, amount::integer as amount from {{ ref('raw_orders') }}\"\n            )\n        },\n        seeds={\"raw_orders\": \"id,amount\\n1,5\\n2,7\\n3,9\\n4,3\\n\"},\n    )\n    invoke(p, \"build\")\n    assert rows(p, \"select count(*), sum(amount) from orders\") == [(4, 24)]"
         },
         {
           "title": "Add missing text",
@@ -149,23 +155,18 @@
         {
           "title": "Fail mandatory parsing",
           "task": "Replace the permissive conversion with a strict cast.",
-          "check": "The malformed fixture fails.",
+          "check": "Materialized as a table, the malformed fixture fails the build.",
           "hint": "This is an explicit policy choice.",
-          "answer": "Use strict failure when invalid input must block the product. Keep the failed evidence and do not mistake a stopped run for data that never arrived."
+          "answer": "Use strict failure when invalid input must block the product. A view builds without reading any rows, so the conversion error would appear only when someone queries it; materialize a table, or add a test that reads the rows, so the build itself fails. Keep the failed evidence and do not mistake a stopped run for data that never arrived.",
+          "answer_code": "# Uses the tempfile import and the project(), invoke() and rows() helpers in main.py.\nwith tempfile.TemporaryDirectory() as d:\n    p = project(\n        d,\n        models={\n            \"clean\": (\n                \"{{ config(materialized='table') }} \"\n                \"select id::integer as id, cast(amount as integer) as amount \"\n                \"from {{ ref('raw_orders') }}\"\n            )\n        },\n        seeds={\"raw_orders\": \"id,amount\\n1,5\\n2,bad\\n3,9\\n\"},\n    )\n    # A view would build without reading rows; a table must convert every row.\n    invoke(p, \"build\", succeeds=False)"
         }
       ],
       "diagnosis": "A seed can load successfully while a staging cast fails. Conversely, permissive SQL can succeed while excluding important records. Inspect the raw relation, parsed field and rejection count. Do not repair an error by silently widening every field to text or swallowing all conversion failures.",
-      "transfer": "Create a staging boundary with complete record accounting. State which invalid inputs block publication and which are quarantined, then test both paths using identified records. The same contract will later protect model features from silent data changes.",
-      "lab": "Inspect the generated project files, run the actual dbt commands against the owned DuckDB database, and complete the six specified changes with artifact and row checks.",
+      "transfer": "State which invalid inputs block publication and which are quarantined, then test both paths using identified records. The same contract will later protect model features from silent data changes.",
+      "lab": "Seed raw orders, stage them with explicit casts, and show that try_cast accepts two of three rows while the malformed record stays visible in the raw seed.",
       "references": [
-        [
-          "dbt documentation: Seeds, staging and rejected records",
-          "https://docs.getdbt.com/docs/build/seeds"
-        ],
-        [
-          "dbt-duckdb adapter configuration and capabilities",
-          "https://github.com/duckdb/dbt-duckdb"
-        ]
+        ["dbt docs: Add Seeds to your DAG", "https://docs.getdbt.com/docs/build/seeds"],
+        ["dbt-duckdb repository README", "https://github.com/duckdb/dbt-duckdb"]
       ],
       "sql_variant": {
         "explanation": "The SQL reference keeps paid orders 1, 2 and 5 with amounts 100, 50 and 120. Their total is 270. Removing the status filter returns the five-row population. Preserve the order key, inspect casts and compare the compiled predicate. The full-project parsing/quarantine exercise uses its separately declared source fixture."
@@ -239,17 +240,11 @@
         }
       ],
       "diagnosis": "A relation-not-found error can come from a missing graph edge or an unbuilt dependency. An absent ephemeral relation is expected. A fast view query on tiny data does not establish production performance. Inspect compilation and actual object types before changing orchestration order.",
-      "transfer": "Choose a materialization using observed database behavior and a stated workload. Retain ref-based dependencies and test the resulting graph, values and freshness expectations. This supports reliable selection and deployment when the project grows.",
-      "lab": "Inspect the generated project files, run the actual dbt commands against the owned DuckDB database, and complete the six specified changes with artifact and row checks.",
+      "transfer": "Retain ref-based dependencies and test the resulting graph, values and freshness expectations. This supports reliable selection and deployment when the project grows.",
+      "lab": "Build a view and a table that depends on it, read the manifest dependency and the DuckDB object types, then inline an ephemeral model and confirm that no relation is created for it.",
       "references": [
-        [
-          "dbt documentation: Dependency graphs and materialization choices",
-          "https://docs.getdbt.com/docs/build/materializations"
-        ],
-        [
-          "dbt-duckdb adapter configuration and capabilities",
-          "https://github.com/duckdb/dbt-duckdb"
-        ]
+        ["dbt docs: Materializations", "https://docs.getdbt.com/docs/build/materializations"],
+        ["dbt-duckdb repository README", "https://github.com/duckdb/dbt-duckdb"]
       ],
       "sql_variant": {
         "explanation": "The SQL reference joins the two fixed refs and groups paid amounts by customer identity. Customer 10/Ada/north has 100 from one paid order; customer 20/Ben/south has 170 from two. Compare by customer_id rather than the displayed row order. The full-project route additionally controls model dependencies and materialization files."
@@ -323,17 +318,11 @@
         }
       ],
       "diagnosis": "When a build fails, distinguish compilation, model execution and test failure. Check which relations were already materialized and whether publication was blocked. Avoid treating warning severity as an automatic acceptable outcome; it should follow a reviewed policy, not a desire for successful status.",
-      "transfer": "Use data tests as explicit evidence for a declared contract. Demonstrate a known violation, inspect the materialized state and repair the source or transformation without weakening the assertion. Carry test outcomes into the later publication decision.",
-      "lab": "Inspect the generated project files, run the actual dbt commands against the owned DuckDB database, and complete the six specified changes with artifact and row checks.",
+      "transfer": "Demonstrate a known violation, inspect the materialized state and repair the source or transformation without weakening the assertion. Carry test outcomes into the later publication decision.",
+      "lab": "Declare not_null and unique tests on an order key, build a passing and a duplicated fixture, and repair the duplicate so a full-refresh build passes.",
       "references": [
-        [
-          "dbt documentation: Data tests and the meaning of a failed build",
-          "https://docs.getdbt.com/docs/build/data-tests"
-        ],
-        [
-          "dbt-duckdb adapter configuration and capabilities",
-          "https://github.com/duckdb/dbt-duckdb"
-        ]
+        ["dbt docs: Add data tests to your DAG", "https://docs.getdbt.com/docs/build/data-tests"],
+        ["dbt-duckdb repository README", "https://github.com/duckdb/dbt-duckdb"]
       ]
     },
     {
@@ -404,17 +393,11 @@
         }
       ],
       "diagnosis": "A stale-source error can be correct behavior under the declared threshold. Check timestamp parsing, timezone, clock skew and the meaning of loaded_at before increasing the limit. If the source passes but users see missing data, investigate completeness rather than claiming freshness proved everything.",
-      "transfer": "Define and test a source freshness policy with an explicit clock and response. Pair it with batch completeness and time-coverage checks appropriate to the consumer. Keep the local fixture evidence separate from claims about an actual upstream service.",
-      "lab": "Inspect the generated project files, run the actual dbt commands against the owned DuckDB database, and complete the six specified changes with artifact and row checks.",
+      "transfer": "Pair it with batch completeness and time-coverage checks appropriate to the consumer. Keep the local fixture evidence separate from claims about an actual upstream service.",
+      "lab": "Configure a source with a one-hour error_after freshness policy and run dbt source freshness against a current and a two-day-old loaded_at timestamp.",
       "references": [
-        [
-          "dbt documentation: Source freshness and clock assumptions",
-          "https://docs.getdbt.com/docs/deploy/source-freshness"
-        ],
-        [
-          "dbt-duckdb adapter configuration and capabilities",
-          "https://github.com/duckdb/dbt-duckdb"
-        ]
+        ["dbt docs: Source freshness", "https://docs.getdbt.com/docs/deploy/source-freshness"],
+        ["dbt-duckdb repository README", "https://github.com/duckdb/dbt-duckdb"]
       ]
     },
     {
@@ -485,17 +468,11 @@
         }
       ],
       "diagnosis": "An empty selected test set is not a passing unit test. Check how many results were returned and their identifiers. Schema preparation errors should be distinguished from a wrong expected row. Do not change expected output merely because the current implementation produced something else.",
-      "transfer": "Use controlled fixtures to test transformation logic and real-data checks to test integration. Include at least one counterexample that would detect a plausible defect, and retain the source and expected rows needed to explain the result.",
-      "lab": "Inspect the generated project files, run the actual dbt commands against the owned DuckDB database, and complete the six specified changes with artifact and row checks.",
+      "transfer": "Include at least one counterexample that would detect a plausible defect, and retain the source and expected rows needed to explain the result.",
+      "lab": "Run a YAML unit test with its own two-row input, confirm that the production seed is unchanged, and make a deliberately wrong expected row fail.",
       "references": [
-        [
-          "dbt documentation: Unit fixtures and integration tests",
-          "https://docs.getdbt.com/docs/build/unit-tests"
-        ],
-        [
-          "dbt-duckdb adapter configuration and capabilities",
-          "https://github.com/duckdb/dbt-duckdb"
-        ]
+        ["dbt docs: Unit tests", "https://docs.getdbt.com/docs/build/unit-tests"],
+        ["dbt-duckdb repository README", "https://github.com/duckdb/dbt-duckdb"]
       ]
     },
     {
@@ -513,7 +490,7 @@
         {
           "title": "Inspect a complete expansion",
           "explanation": "The valid project generates rates for a normal count and a zero denominator. It checks actual values and reads compiled SQL to verify that the macro call has been expanded. Both the source abstraction and the executed expression remain inspectable.",
-          "expected": "The rates are 0.25 andnull; compiled SQL contains CASE logic rather than the macro call."
+          "expected": "The rates are 0.25 and null; compiled SQL contains CASE logic rather than the macro call."
         },
         {
           "title": "Stop on an undefined abstraction",
@@ -527,7 +504,8 @@
           "task": "Return a separate invalid-denominator flag alongside the rate.",
           "check": "Zero-trial rows remain identifiable.",
           "hint": "A null value alone can have several causes.",
-          "answer": "Publish both the rate and a named status or denominator. Consumers can then distinguish no observations from missing source counts."
+          "answer": "Publish both the rate and a named status or denominator. Consumers can then distinguish no observations from missing source counts.",
+          "answer_code": "# Uses the tempfile import and the project(), invoke() and rows() helpers in main.py.\nwith tempfile.TemporaryDirectory() as d:\n    macro = (\n        \"{% macro safe_ratio(n, d) %} case when {{ d }} = 0 then \"\n        \"null else cast({{ n }} as double) / {{ d }} end {% endmacro %}\"\n    )\n    p = project(\n        d,\n        models={\n            \"rates\": (\n                \"select id, {{ safe_ratio('successes', 'trials') }} as rate, \"\n                \"trials = 0 as invalid_denominator from {{ ref('counts') }}\"\n            )\n        },\n        seeds={\"counts\": \"id,successes,trials\\n1,1,4\\n2,0,0\\n\"},\n        macros={\"safe_ratio\": macro},\n    )\n    invoke(p, \"build\")\n    assert rows(p, \"select id, rate, invalid_denominator from rates order by id\") == [\n        (1, 0.25, False),\n        (2, None, True),\n    ]"
         },
         {
           "title": "Check integer behavior",
@@ -566,17 +544,11 @@
         }
       ],
       "diagnosis": "If compilation fails, inspect macro discovery, names and argument syntax. If results are wrong, inspect the compiled SQL and numeric domain. Do not patch a macro by suppressing undefined names or replacing every exceptional denominator with zero. That can produce clean output while changing the analytical question.",
-      "transfer": "Review a macro through its source, emitted SQL and actual result. Keep domain assumptions explicit and test contrasting numeric cases. Use abstraction to make a calculation consistent without hiding the evidence needed to validate it.",
-      "lab": "Inspect the generated project files, run the actual dbt commands against the owned DuckDB database, and complete the six specified changes with artifact and row checks.",
+      "transfer": "Keep domain assumptions explicit and test contrasting numeric cases. Use abstraction to make a calculation consistent without hiding the evidence needed to validate it.",
+      "lab": "Write a safe_ratio macro, compare its compiled CASE expression with the materialized rates 0.25 and null, and confirm that an undefined macro fails at compilation.",
       "references": [
-        [
-          "dbt documentation: Jinja macros and compiled SQL evidence",
-          "https://docs.getdbt.com/docs/build/jinja-macros"
-        ],
-        [
-          "dbt-duckdb adapter configuration and capabilities",
-          "https://github.com/duckdb/dbt-duckdb"
-        ]
+        ["dbt docs: Jinja and macros", "https://docs.getdbt.com/docs/build/jinja-macros"],
+        ["dbt-duckdb repository README", "https://github.com/duckdb/dbt-duckdb"]
       ],
       "sql_variant": {
         "explanation": "The SQL reference demonstrates Jinja variable resolution and source() in a prepared model. It produces total_orders 5, paid_orders 3 and paid_order_rate 0.6. Setting accepted_status explicitly to refunded yields one qualifying order and rate 0.2. Custom macro files and packages require the full-project route; this variant does not pretend to create them."
@@ -650,17 +622,14 @@
         }
       ],
       "diagnosis": "If an incremental run succeeds but records are missing, inspect the target watermark and arrival pattern. If duplicates appear, inspect both the source predicate and write strategy. Keep an independently recomputed small fixture to detect divergence instead of relying only on the incremental table's own counts.",
-      "transfer": "State the assumptions under which an incremental result equals a full recomputation. Test both a valid append and a late-arrival violation, then define the required repair or stronger strategy. The next lesson adds keyed updates with an explicit lookback bound.",
-      "lab": "Inspect the generated project files, run the actual dbt commands against the owned DuckDB database, and complete the six specified changes with artifact and row checks.",
+      "transfer": "Test both a valid append and a late-arrival violation, then define the required repair or stronger strategy. The next lesson adds keyed updates with an explicit lookback bound and compares it with dbt's microbatch strategy.",
+      "lab": "Run a max-watermark incremental model through an append and a repeat run, then add a late record behind the watermark and compare the incremental result with a full refresh.",
       "references": [
         [
-          "dbt documentation: Incremental watermarks and late-arriving records",
+          "dbt docs: Configure incremental models",
           "https://docs.getdbt.com/docs/build/incremental-models"
         ],
-        [
-          "dbt-duckdb adapter configuration and capabilities",
-          "https://github.com/duckdb/dbt-duckdb"
-        ]
+        ["dbt-duckdb repository README", "https://github.com/duckdb/dbt-duckdb"]
       ]
     },
     {
@@ -671,8 +640,8 @@
       "concepts": ["unique_key", "delete+insert", "lookback", "idempotency", "backfill"],
       "prerequisites": ["dbt-004", "dbt-008"],
       "outcome": "Implement a keyed incremental contract with tested boundary and repeat-run behavior.",
-      "theory": "A keyed incremental strategy can replace records whose identity is already present. A lookback window can revisit recent source records so corrections and bounded late arrivals are considered. Together, these mechanisms address some weaknesses of a pure append watermark. They still require a valid key, deterministic source selection and a bound on lateness.\n\nThe example uses DuckDB's delete+insert strategy with id as the matching key. The source predicate includes a ten-unit lookback behind the current maximum. An update to id 1 and a late insertion of id 3 are therefore included, while unchanged id 2 can be revisited without creating another copy. The result is checked again after a repeat run.\n\nThe counterexample arrives outside that lookback. It remains missing until a full refresh. A ten-unit window is a data-contract choice, not proof that older corrections cannot occur. Also, unique_key configures incremental matching; it does not by itself replace a data test proving that the selected source has one record per key.",
-      "syntax": "unique_key names the matching identity. incremental_strategy='delete+insert' is an adapter-specific implementation choice that must be supported by the prepared database. The lookback predicate uses >= so the lower boundary is included. Keep an independent uniqueness test and a reviewed policy for multiple source versions of the same key.",
+      "theory": "A keyed incremental strategy can replace records whose identity is already present. A lookback window can revisit recent source records so corrections and bounded late arrivals are considered. Together, these mechanisms address some weaknesses of a pure append watermark. They still require a valid key, deterministic source selection and a bound on lateness.\n\nThe example uses DuckDB's delete+insert strategy with id as the matching key. The source predicate includes a ten-unit lookback behind the current maximum. An update to id 1 and a late insertion of id 3 are therefore included, while unchanged id 2 can be revisited without creating another copy. The result is checked again after a repeat run.\n\nThe counterexample arrives outside that lookback. It remains missing until a full refresh. A ten-unit window is a data-contract choice, not proof that older corrections cannot occur. Also, unique_key configures incremental matching; it does not by itself replace a data test proving that the selected source has one record per key.\n\ndbt 1.9 added a built-in strategy for this kind of time-series source: `incremental_strategy='microbatch'`. The model SQL selects ordinary rows with no `is_incremental()` filter. dbt splits the work into batches of `batch_size` (hour, day, month or year) beginning at `begin`, filters every parent that declares an `event_time` to the batch window, and replaces each batch as a unit; dbt-duckdb issues a delete and an insert scoped to the window. On a normal run dbt processes the batches up to the current time plus `lookback` earlier batches (default 1), which is the built-in form of this lesson's ten-unit window. The same limits remain. A correction older than the reprocessed batches stays missing until a declared backfill, and because batches are replaced by time window rather than matched by key, a record whose `event_time` moves to a later window keeps its old version in the earlier batch unless that batch is rebuilt too.\n\ndbt 1.9 added a built-in strategy for this kind of time-series source: `incremental_strategy='microbatch'`. The model SQL selects ordinary rows with no `is_incremental()` filter. dbt splits the work into batches of `batch_size` (hour, day, month or year) beginning at `begin`, filters every parent that declares an `event_time` to the batch window, and replaces each batch as a unit; dbt-duckdb issues a delete and an insert scoped to the window. On a normal run dbt processes the batches up to the current time plus `lookback` earlier batches (default 1), which is the built-in form of this lesson's ten-unit window. The same limits remain. A correction older than the reprocessed batches stays missing until a declared backfill, and because batches are replaced by time window rather than matched by key, a record whose `event_time` moves to a later window keeps its old version in the earlier batch unless that batch is rebuilt too.",
+      "syntax": "unique_key names the matching identity. incremental_strategy='delete+insert' is an adapter-specific implementation choice that must be supported by the prepared database. The lookback predicate uses >= so the lower boundary is included. Keep an independent uniqueness test and a reviewed policy for multiple source versions of the same key.\n\nThe following microbatch version is a reading example; this lesson's program does not run it. Microbatch needs a date or timestamp `event_time` interpreted as UTC, so it assumes an `events` seed whose `updated_at` column holds timestamps rather than the integers used above. This configuration was run against the pinned dbt-core 1.11.16 and dbt-duckdb 1.11.1 on DuckDB 2.0.0 with a small timestamp seed.\n\n```sql\n{{ config(\n    materialized='incremental',\n    incremental_strategy='microbatch',\n    event_time='updated_at',\n    begin='2024-01-01',\n    batch_size='day',\n    lookback=1\n) }}\nselect id, updated_at, amount\nfrom {{ ref('events') }}\n```\n\nThe parent must declare its own `event_time`, or dbt reads all of it for every batch:\n\n```yaml\nversion: 2\nseeds:\n  - name: events\n    config:\n      event_time: updated_at\n```\n\nA declared backfill names a start and an end, both in UTC, and the end is exclusive. This command rebuilds the 2024-01-01 and 2024-01-02 batches, not 2024-01-03, each as an independent batch, and `dbt retry` reruns only batches that failed:\n\n```bash\ndbt run --select current_events --event-time-start \"2024-01-01\" --event-time-end \"2024-01-03\"\n```\n\nThe following microbatch version is a reading example; this lesson's program does not run it. Microbatch needs a date or timestamp `event_time` interpreted as UTC, so it assumes an `events` seed whose `updated_at` column holds timestamps rather than the integers used above. The pinned dbt-core 1.11 and dbt-duckdb 1.11 both support the strategy.\n\n```sql\n{{ config(\n    materialized='incremental',\n    incremental_strategy='microbatch',\n    event_time='updated_at',\n    begin='2024-01-01',\n    batch_size='day',\n    lookback=1\n) }}\nselect id, updated_at, amount\nfrom {{ ref('events') }}\n```\n\nThe parent must declare its own `event_time`, or dbt reads all of it for every batch:\n\n```yaml\nversion: 2\nseeds:\n  - name: events\n    config:\n      event_time: updated_at\n```\n\nA declared backfill names both bounds; dbt rebuilds each day between them as an independent batch, and `dbt retry` reruns only batches that failed:\n\n```bash\ndbt run --select current_events --event-time-start \"2024-01-01\" --event-time-end \"2024-01-03\"\n```",
       "math": "",
       "worked": [
         {
@@ -731,17 +700,18 @@
         }
       ],
       "diagnosis": "If a keyed update creates duplicates, inspect selected-source uniqueness rather than assuming unique_key enforced it. If old corrections are missed, inspect the lookback bound. If a rerun changes results without source changes, inspect ordering, nondeterministic expressions and external state.",
-      "transfer": "Implement a keyed incremental contract with tested boundary and repeat-run behavior. Explain which late arrivals it accepts, which require repair and how the result is reconciled with a full recomputation. Keep the policy explicit as data volume grows.",
-      "lab": "Inspect the generated project files, run the actual dbt commands against the owned DuckDB database, and complete the six specified changes with artifact and row checks.",
+      "transfer": "Explain which late arrivals it accepts, which require repair and how the result is reconciled with a full recomputation. Keep the policy explicit as data volume grows.",
+      "lab": "Apply a delete+insert model with a ten-unit lookback to a correction and a late insert, rerun it without duplicates, and show that a record outside the window needs a full refresh.",
       "references": [
         [
-          "dbt documentation: Keyed updates, lookback windows and idempotency",
+          "dbt reference: unique_key",
           "https://docs.getdbt.com/reference/resource-configs/unique_key"
         ],
         [
-          "dbt-duckdb adapter configuration and capabilities",
-          "https://github.com/duckdb/dbt-duckdb"
-        ]
+          "dbt docs: About microbatch incremental models",
+          "https://docs.getdbt.com/docs/build/incremental-microbatch"
+        ],
+        ["dbt-duckdb repository README", "https://github.com/duckdb/dbt-duckdb"]
       ]
     },
     {
@@ -812,17 +782,11 @@
         }
       ],
       "diagnosis": "Unexpected history growth may come from unstable keys or noisy tracked columns. Unexpected open records may come from the deletion policy. A historical result can also be temporally wrong even when its interval columns are well-formed. Inspect source completeness and time semantics before changing snapshot configuration.",
-      "transfer": "Explain what a snapshot actually observed and what it cannot reconstruct. Verify current and closed versions, define deletion handling, and preserve identity and clock contracts before using the history for features or analysis.",
-      "lab": "Inspect the generated project files, run the actual dbt commands against the owned DuckDB database, and complete the six specified changes with artifact and row checks.",
+      "transfer": "Verify current and closed versions, define deletion handling, and preserve identity and clock contracts before using the history for features or analysis.",
+      "lab": "Snapshot a customer seed with the check strategy and hard_deletes set to invalidate, change one region, and compare history rows with current rows after a deletion.",
       "references": [
-        [
-          "dbt documentation: Snapshots and observed historical state",
-          "https://docs.getdbt.com/docs/build/snapshots"
-        ],
-        [
-          "dbt-duckdb adapter configuration and capabilities",
-          "https://github.com/duckdb/dbt-duckdb"
-        ]
+        ["dbt docs: Add snapshots to your DAG", "https://docs.getdbt.com/docs/build/snapshots"],
+        ["dbt-duckdb repository README", "https://github.com/duckdb/dbt-duckdb"]
       ]
     },
     {
@@ -899,17 +863,11 @@
         }
       ],
       "diagnosis": "A contract error may be the correct protection against an incompatible model. Inspect declared and actual column names/types instead of disabling enforcement. After failure, inspect the database and invocation artifacts; do not assume every relation reverted to a prior state.",
-      "transfer": "Define a model schema contract and verify both accepted and rejected changes. Keep the observed failure timing separate from broader transaction claims, and combine structural compatibility with semantic and publication checks.",
-      "lab": "Inspect the generated project files, run the actual dbt commands against the owned DuckDB database, and complete the six specified changes with artifact and row checks.",
+      "transfer": "Keep the observed failure timing separate from broader transaction claims, and combine structural compatibility with semantic and publication checks.",
+      "lab": "Enforce a model contract with declared column types, build a compatible model, then change its output type and confirm that the run fails while the earlier relation keeps 42.",
       "references": [
-        [
-          "dbt documentation: Enforced model schemas and constraint boundaries",
-          "https://docs.getdbt.com/docs/mesh/govern/model-contracts"
-        ],
-        [
-          "dbt-duckdb adapter configuration and capabilities",
-          "https://github.com/duckdb/dbt-duckdb"
-        ]
+        ["dbt docs: Model contracts", "https://docs.getdbt.com/docs/mesh/govern/model-contracts"],
+        ["dbt-duckdb repository README", "https://github.com/duckdb/dbt-duckdb"]
       ]
     },
     {
@@ -947,7 +905,8 @@
           "task": "Change the latest consumer to request version 1 explicitly.",
           "check": "It returns 100.",
           "hint": "Use the version argument.",
-          "answer": "Pinning defines the chosen contract. It also creates a responsibility to review and migrate deliberately when the old version is retired."
+          "answer": "Pinning defines the chosen contract. It also creates a responsibility to review and migrate deliberately when the old version is retired.",
+          "answer_code": "# Uses the tempfile import and the project(), invoke() and rows() helpers in main.py.\nwith tempfile.TemporaryDirectory() as d:\n    schema = {\n        \"models\": [\n            {\n                \"name\": \"customer_value\",\n                \"latest_version\": 2,\n                \"versions\": [\n                    {\"v\": 1, \"defined_in\": \"customer_value_v1\"},\n                    {\"v\": 2, \"defined_in\": \"customer_value_v2\"},\n                ],\n            }\n        ]\n    }\n    p = project(\n        d,\n        models={\n            \"customer_value_v1\": \"select 100 as value\",\n            \"customer_value_v2\": \"select 80 as value\",\n            \"latest_consumer\": \"select value from {{ ref('customer_value', version=1) }}\",\n        },\n        schema=schema,\n    )\n    invoke(p, \"build\")\n    assert rows(p, \"select value from latest_consumer\") == [(100,)]"
         },
         {
           "title": "Change latest selection",
@@ -986,17 +945,11 @@
         }
       ],
       "diagnosis": "If a result changes without a schema error, inspect semantic definitions and version resolution. An unversioned ref can follow a new latest contract intentionally. If a pinned consumer fails after removal of an old version, follow the migration policy instead of silently retargeting it.",
-      "transfer": "Manage a semantic model change with explicit consumer versioning. Demonstrate the changed result, identify affected consumers and define validation and rollback requirements. Carry the same discipline into ML feature and model artifact versions.",
-      "lab": "Inspect the generated project files, run the actual dbt commands against the owned DuckDB database, and complete the six specified changes with artifact and row checks.",
+      "transfer": "Demonstrate the changed result, identify affected consumers and define validation and rollback requirements. Carry the same discipline into ML feature and model artifact versions.",
+      "lab": "Publish two versions of a model, query a consumer pinned to version 1 and one that follows the latest version, and name the gross-to-net change that separates 100 from 80.",
       "references": [
-        [
-          "dbt documentation: Model versions and semantic compatibility",
-          "https://docs.getdbt.com/docs/mesh/govern/model-versions"
-        ],
-        [
-          "dbt-duckdb adapter configuration and capabilities",
-          "https://github.com/duckdb/dbt-duckdb"
-        ]
+        ["dbt docs: Model versions", "https://docs.getdbt.com/docs/mesh/govern/model-versions"],
+        ["dbt-duckdb repository README", "https://github.com/duckdb/dbt-duckdb"]
       ]
     },
     {
@@ -1067,17 +1020,14 @@
         }
       ],
       "diagnosis": "Unexpectedly small selections can result from tags, graph direction, indirect-test rules or an overwritten baseline. Inspect ls output before executing a destructive or expensive command. A successful selector command with zero intended resources is not a completed validation.",
-      "transfer": "Construct and inspect a reproducible selection against an explicit baseline. Explain which dependencies and tests are included and which data changes are outside the comparison. The later CI lessons connect that selection to real execution and deferral.",
-      "lab": "Inspect the generated project files, run the actual dbt commands against the owned DuckDB database, and complete the six specified changes with artifact and row checks.",
+      "transfer": "Explain which dependencies and tests are included and which data changes are outside the comparison. The later CI lessons connect that selection to real execution and deferral.",
+      "lab": "List the models selected by tag:feature+, then save a manifest, change one model and select state:modified+ against that saved baseline.",
       "references": [
         [
-          "dbt documentation: Selectors, graph expansion and state comparison",
+          "dbt reference: Syntax overview",
           "https://docs.getdbt.com/reference/node-selection/syntax"
         ],
-        [
-          "dbt-duckdb adapter configuration and capabilities",
-          "https://github.com/duckdb/dbt-duckdb"
-        ]
+        ["dbt-duckdb repository README", "https://github.com/duckdb/dbt-duckdb"]
       ]
     },
     {
@@ -1148,17 +1098,11 @@
         }
       ],
       "diagnosis": "A missing catalog node may mean the model was not materialized or the wrong environment was inspected. An empty description is an authored-content gap. An exposure pointing to the wrong model is a lineage defect even if the database query succeeds. Diagnose these separately.",
-      "transfer": "Build documentation that joins observed structure with authored meaning and ownership. Review a consumer's dependency and record which claims are declarations versus runtime evidence. This creates a useful handoff for analysts, data scientists and operators.",
-      "lab": "Inspect the generated project files, run the actual dbt commands against the owned DuckDB database, and complete the six specified changes with artifact and row checks.",
+      "transfer": "Review a consumer's dependency and record which claims are declarations versus runtime evidence. This creates a useful handoff for analysts, data scientists and operators.",
+      "lab": "Generate documentation for a described mart with an exposure, read the catalog and manifest, and detect a model whose type is known but whose description is missing.",
       "references": [
-        [
-          "dbt documentation: Documentation, catalogs, exposures and ownership",
-          "https://docs.getdbt.com/docs/build/documentation"
-        ],
-        [
-          "dbt-duckdb adapter configuration and capabilities",
-          "https://github.com/duckdb/dbt-duckdb"
-        ]
+        ["dbt docs: Documentation", "https://docs.getdbt.com/docs/build/documentation"],
+        ["dbt-duckdb repository README", "https://github.com/duckdb/dbt-duckdb"]
       ]
     },
     {
@@ -1235,17 +1179,14 @@
         }
       ],
       "diagnosis": "If invalid data appears despite a failed build, inspect the consumer-facing boundary. If publication is missing after success, check the exact selected statuses and artifact path. Keep failures visible and reconcile uncertain outcomes before retrying. A gate that simply ignores failed tests is not recovery.",
-      "transfer": "Separate candidate computation from accepted publication. Demonstrate both paths and retain a source-bound decision record. Extend the mechanism to an atomic version pointer and a tested recovery plan in a durable owned environment.",
-      "lab": "Inspect the generated project files, run the actual dbt commands against the owned DuckDB database, and complete the six specified changes with artifact and row checks.",
+      "transfer": "Demonstrate both paths and retain a source-bound decision record. Extend the mechanism to an atomic version pointer and a tested recovery plan in a durable owned environment.",
+      "lab": "Build a candidate relation and record publication only when every test passes, then show that a failed uniqueness test leaves the candidate built but unpublished.",
       "references": [
         [
-          "dbt documentation: Publication gates after materialization",
+          "dbt reference: Run results JSON file",
           "https://docs.getdbt.com/reference/artifacts/run-results-json"
         ],
-        [
-          "dbt-duckdb adapter configuration and capabilities",
-          "https://github.com/duckdb/dbt-duckdb"
-        ]
+        ["dbt-duckdb repository README", "https://github.com/duckdb/dbt-duckdb"]
       ]
     },
     {
@@ -1290,7 +1231,8 @@
           "task": "Compute the all-trial rate.",
           "check": "The rate is 11/102.",
           "hint": "Use count weighting.",
-          "answer": "A mean of cohort rates would give equal cohort weight and a different target. Choose the weighting unit from the question."
+          "answer": "A mean of cohort rates would give equal cohort weight and a different target. Choose the weighting unit from the question.",
+          "answer_code": "# Uses the tempfile import and the project(), invoke() and rows() helpers in main.py.\nwith tempfile.TemporaryDirectory() as d:\n    p = project(\n        d,\n        models={\n            \"overall\": (\n                \"select sum(successes)::double / nullif(sum(trials), 0) as rate, \"\n                \"sum(trials) as denominator from {{ ref('counts') }}\"\n            )\n        },\n        seeds={\"counts\": \"cohort,successes,trials\\nA,1,1\\nA,9,99\\nB,1,2\\n\"},\n    )\n    invoke(p, \"build\")\n    assert rows(p, \"select rate, denominator from overall\") == [(11 / 102, 102)]"
         },
         {
           "title": "Test empty evidence",
@@ -1322,17 +1264,11 @@
         }
       ],
       "diagnosis": "A large rate change may come from a changed denominator rather than a changed phenomenon. Inspect grouping, source coverage and join multiplicities. A query that compiles and passes key tests can still implement the wrong estimand. Make the metric definition and independent fixture arithmetic part of review.",
-      "transfer": "Publish a metric with a complete numerator/denominator contract and an independent check. Carry it across SQL, Polars and downstream model dashboards without changing its meaning. Treat semantic-layer adoption as an additional implementation to qualify against that contract.",
-      "lab": "Inspect the generated project files, run the actual dbt commands against the owned DuckDB database, and complete the six specified changes with artifact and row checks.",
+      "transfer": "Carry it across SQL, Polars and downstream model dashboards without changing its meaning. Treat semantic-layer adoption as an additional implementation to qualify against that contract.",
+      "lab": "Compute pooled cohort rates in SQL from success and trial counts, check them against independent arithmetic, and compare an equal-row average that differs by more than 0.4.",
       "references": [
-        [
-          "dbt documentation: Metric contracts and valid denominators",
-          "https://docs.getdbt.com/docs/build/metrics-overview"
-        ],
-        [
-          "dbt-duckdb adapter configuration and capabilities",
-          "https://github.com/duckdb/dbt-duckdb"
-        ]
+        ["dbt docs: Creating metrics", "https://docs.getdbt.com/docs/build/metrics-overview"],
+        ["dbt-duckdb repository README", "https://github.com/duckdb/dbt-duckdb"]
       ]
     },
     {
@@ -1356,12 +1292,12 @@
         {
           "title": "Select only known information",
           "explanation": "At request cutoff 5, the event at 4 is not known until 7, so the correct result uses the earlier value 10. At cutoff 9, value 30 is eligible. The ordering chooses among already eligible records.",
-          "expected": "The available feature values are [10,30]."
+          "expected": "The available feature values are [10, 30]."
         },
         {
           "title": "Observe a leaking historical model",
           "explanation": "The second case omits the known_at condition. It selects 999 for the first request, even though that information was unavailable at cutoff 5. Both models execute successfully, making the semantic failure visible.",
-          "expected": "The event-only model returns [999,30]."
+          "expected": "The event-only model returns [999, 30]."
         }
       ],
       "exercises": [
@@ -1377,7 +1313,8 @@
           "task": "Make the revised event known at 4.",
           "check": "It is eligible for cutoff 5.",
           "hint": "The two-clock rule remains unchanged.",
-          "answer": "The result changes because the source history changed. Preserve that history/version when reporting a retrospective analysis."
+          "answer": "The result changes because the source history changed. Preserve that history/version when reporting a retrospective analysis.",
+          "answer_code": "# Uses the tempfile import and the project(), invoke() and rows() helpers in main.py.\nwith tempfile.TemporaryDirectory() as d:\n    sql = (\n        \"select request_id, value from (select r.request_id, f.value, \"\n        \"row_number() over (partition by r.request_id order by f.event_at desc, \"\n        \"f.known_at desc) as rank from {{ ref('requests') }} r join \"\n        \"{{ ref('features') }} f on r.customer = f.customer \"\n        \"and f.event_at <= r.cutoff and f.known_at <= r.cutoff) where rank = 1\"\n    )\n    p = project(\n        d,\n        models={\"training_features\": sql},\n        seeds={\n            \"requests\": \"request_id,customer,cutoff\\n1,10,5\\n2,10,9\\n\",\n            \"features\": \"customer,event_at,known_at,value\\n10,2,3,10\\n10,4,4,999\\n10,8,8,30\\n\",\n        },\n    )\n    invoke(p, \"build\")\n    result = rows(p, \"select request_id, value from training_features order by request_id\")\n    assert result == [(1, 999), (2, 30)]"
         },
         {
           "title": "Test equal cutoffs",
@@ -1409,17 +1346,11 @@
         }
       ],
       "diagnosis": "If a historical score is suspiciously good, inspect availability and label timing before interpreting model quality. If rows disappear, reconcile request coverage. If results vary on rerun, inspect version ties and ordering. Fix the temporal data contract before adjusting the model.",
-      "transfer": "Produce a historical feature relation with explicit entity, time and version semantics. Demonstrate a late-known counterexample and retain request coverage. This prepares the feature-store and ML engineering route to test actual retrieval against a meaningful temporal oracle.",
-      "lab": "Inspect the generated project files, run the actual dbt commands against the owned DuckDB database, and complete the six specified changes with artifact and row checks.",
+      "transfer": "Demonstrate a late-known counterexample and retain request coverage. This prepares the feature-store and ML engineering route to test actual retrieval against a meaningful temporal oracle.",
+      "lab": "Build a point-in-time feature model that requires event and known times to precede each request cutoff, and compare it with an event-time-only model that returns 999.",
       "references": [
-        [
-          "dbt documentation: Temporal data products and late-known facts",
-          "https://docs.getdbt.com/docs/build/snapshots"
-        ],
-        [
-          "dbt-duckdb adapter configuration and capabilities",
-          "https://github.com/duckdb/dbt-duckdb"
-        ]
+        ["dbt docs: Add snapshots to your DAG", "https://docs.getdbt.com/docs/build/snapshots"],
+        ["dbt-duckdb repository README", "https://github.com/duckdb/dbt-duckdb"]
       ]
     },
     {
@@ -1458,7 +1389,8 @@
           "task": "Change the local macro to add 2 and rebuild.",
           "check": "The output becomes 43.",
           "hint": "The dependency source changed.",
-          "answer": "Record the source change and affected consumers. A local path can change even when no remote version declaration changes."
+          "answer": "Record the source change and affected consumers. A local path can change even when no remote version declaration changes.",
+          "answer_code": "# Uses the tempfile import and the package_project(), invoke() and rows() helpers in main.py.\nwith tempfile.TemporaryDirectory() as d:\n    p = package_project(d)\n    (p / \"local_packages/classroom_utils/macros/add_one.sql\").write_text(\n        \"{% macro add_one(value) %} (({{ value }}) + 2) {% endmacro %}\"\n    )\n    invoke(p, \"deps\")\n    invoke(p, \"build\")\n    assert rows(p, \"select answer from answer\") == [(43,)]"
         },
         {
           "title": "Read the lock artifact",
@@ -1490,17 +1422,11 @@
         }
       ],
       "diagnosis": "An undefined package macro can result from missing preparation, a wrong package name or an unavailable resource. Check the dependency declaration, installed paths and manifest before modifying the consumer's SQL. Do not solve a local preparation problem by enabling unrelated network access inside the classroom.",
-      "transfer": "Prepare and inspect a real reusable dbt dependency with an explicit source boundary. Demonstrate its missing-dependency failure and a reviewed source change. Extend the same discipline to external packages only in a deliberately prepared project with suitable version and trust controls.",
-      "lab": "Inspect the generated project files, run the actual dbt commands against the owned DuckDB database, and complete the six specified changes with artifact and row checks.",
+      "transfer": "Demonstrate its missing-dependency failure and a reviewed source change. Extend the same discipline to external packages only in a deliberately prepared project with suitable version and trust controls.",
+      "lab": "Prepare a local package with dbt deps, use its add_one macro in a model that returns 42, and show that compiling before the package is prepared fails.",
       "references": [
-        [
-          "dbt documentation: Local packages and reusable project dependencies",
-          "https://docs.getdbt.com/docs/build/packages"
-        ],
-        [
-          "dbt-duckdb adapter configuration and capabilities",
-          "https://github.com/duckdb/dbt-duckdb"
-        ]
+        ["dbt docs: Packages", "https://docs.getdbt.com/docs/build/packages"],
+        ["dbt-duckdb repository README", "https://github.com/duckdb/dbt-duckdb"]
       ]
     },
     {
@@ -1571,17 +1497,14 @@
         }
       ],
       "diagnosis": "If a model appears in the wrong place, inspect target selection and generated schema naming before editing SQL. If credentials are missing in an external project, use the approved environment setup rather than copying secrets into the model. Stop when destination ownership is unclear.",
-      "transfer": "Run a project against an explicitly identified owned target and verify its actual destination. Preserve calculation semantics across routing changes, reject unknown environments and document the additional isolation requirements of real deployments.",
-      "lab": "Inspect the generated project files, run the actual dbt commands against the owned DuckDB database, and complete the six specified changes with artifact and row checks.",
+      "transfer": "Preserve calculation semantics across routing changes, reject unknown environments and document the additional isolation requirements of real deployments.",
+      "lab": "Add dev and prod outputs to the profile, build one model into both schemas with its target name, and confirm that an unknown target is rejected before any model runs.",
       "references": [
         [
-          "dbt documentation: Targets, environments and owned database routing",
+          "dbt reference: About target variables",
           "https://docs.getdbt.com/reference/dbt-jinja-functions/target"
         ],
-        [
-          "dbt-duckdb adapter configuration and capabilities",
-          "https://github.com/duckdb/dbt-duckdb"
-        ]
+        ["dbt-duckdb repository README", "https://github.com/duckdb/dbt-duckdb"]
       ]
     },
     {
@@ -1592,8 +1515,8 @@
       "concepts": ["defer", "state manifest", "relation resolution", "favor-state", "baseline"],
       "prerequisites": ["dbt-013", "dbt-019"],
       "outcome": "Use deferral with an explicit upstream-state contract.",
-      "theory": "Deferral lets a selected model resolve unselected dependencies using a prior manifest's relation information. It can support a small development or CI build that reuses accepted upstream relations. The manifest is therefore more than a source checksum: it identifies concrete relations that must exist and be appropriate for the intended test.\n\nThe first case builds a baseline in the synthetic prod schema, saves its manifest, and builds only a child in dev. No dev parent is created, so the child resolves the accepted prod parent. The second case gives dev its own parent with a different value. Normal deferral and favor-state then produce different observed results.\n\nThis difference matters when developers assume defer always means use production data. Existing target relations can influence resolution unless the selection policy explicitly favors the saved state. A reliable CI recipe should state which data is being read, how that baseline is qualified and whether target relations may already exist. The local schemas are owned fixtures, not access to a real production warehouse.",
-      "syntax": "--defer and --state point compilation to a saved manifest for eligible unselected dependencies. --favor-state changes the preference when an existing target relation could otherwise be used. The example saves its baseline outside target/ and checks compiled SQL as well as actual result values. Qualified names in compiled SQL identify the chosen parent.",
+      "theory": "Deferral lets a selected model resolve unselected dependencies using a prior manifest's relation information. It can support a small development or CI build that reuses accepted upstream relations. The manifest is therefore more than a source checksum: it identifies concrete relations that must exist and be appropriate for the intended test.\n\nThe first case builds a baseline in the synthetic prod schema, saves its manifest, and builds only a child in dev. No dev parent is created, so the child resolves the accepted prod parent. The second case gives dev its own parent with a different value. Normal deferral and favor-state then produce different observed results.\n\nThis difference matters when developers assume defer always means use production data. Existing target relations can influence resolution unless the selection policy explicitly favors the saved state. A reliable CI recipe should state which data is being read, how that baseline is qualified and whether target relations may already exist. The local schemas are owned fixtures, not access to a real production warehouse.\n\n`dbt clone` (dbt 1.6 and later) is the alternative when a later step needs real objects rather than compile-time references. It reads the same saved state and creates each selected node in the current target: a zero-copy clone on platforms that support one (Snowflake, Databricks and BigQuery) and otherwise a view that selects from the state's relation. It does not replace relations that already exist in the target unless `--full-refresh` is given. Deferral is usually cheaper because it creates nothing; clone is useful when a tool outside dbt, such as a dashboard, must query the development schema. Neither command checks that the baseline data is still accepted. This lesson's program uses deferral only.\n\n`dbt clone` is the alternative when a later step needs real objects rather than compile-time references. It reads the same saved state and creates each selected node in the current target: a zero-copy clone on platforms that support one (Snowflake, Databricks and BigQuery) and otherwise a view that selects from the state's relation. It does not replace relations that already exist in the target unless `--full-refresh` is given. Deferral is usually cheaper because it creates nothing; clone is useful when a tool outside dbt, such as a dashboard, must query the development schema. Neither command checks that the baseline data is still accepted. This lesson's program uses deferral only.",
+      "syntax": "--defer and --state point compilation to a saved manifest for eligible unselected dependencies. --favor-state changes the preference when an existing target relation could otherwise be used. The example saves its baseline outside target/ and checks compiled SQL as well as actual result values. Qualified names in compiled SQL identify the chosen parent.\n\nThe equivalent clone step, shown for reading and not run here, would be:\n\n```bash\ndbt clone --select child --state prod_state --target dev\n```\n\nDuckDB has no zero-copy clone, so with the pinned dbt-duckdb 1.11.1 this command creates `dev.child` as a view defined as `SELECT * FROM prod.child`. Running it again reports that the relation already exists and leaves it in place.\n\nThe equivalent clone step, shown for reading and not run here, would be:\n\n```bash\ndbt clone --select child --state prod_state --target dev\n```",
       "math": "",
       "worked": [
         {
@@ -1652,17 +1575,15 @@
         }
       ],
       "diagnosis": "Unexpected values can come from an existing target relation rather than a wrong SQL formula. Inspect selected resources, state identity, favor-state behavior and compiled relation names. If the baseline is unavailable or unqualified, stop instead of silently selecting another environment.",
-      "transfer": "Use deferral with an explicit upstream-state contract. Demonstrate how target residue changes resolution and choose a reviewed policy for a clean or deliberately state-preferring CI environment. Validate actual results after compilation.",
-      "lab": "Inspect the generated project files, run the actual dbt commands against the owned DuckDB database, and complete the six specified changes with artifact and row checks.",
+      "transfer": "Demonstrate how target residue changes resolution and choose a reviewed policy for a clean or deliberately state-preferring CI environment. Validate actual results after compilation.",
+      "lab": "Build a prod baseline, save its manifest and run a dev child with --defer and --state, then add a stale dev parent and compare the default result with --favor-state.",
       "references": [
+        ["dbt reference: Defer", "https://docs.getdbt.com/reference/node-selection/defer"],
         [
-          "dbt documentation: Deferral and the choice of upstream state",
-          "https://docs.getdbt.com/reference/node-selection/defer"
+          "dbt reference: About dbt clone command",
+          "https://docs.getdbt.com/reference/commands/clone"
         ],
-        [
-          "dbt-duckdb adapter configuration and capabilities",
-          "https://github.com/duckdb/dbt-duckdb"
-        ]
+        ["dbt-duckdb repository README", "https://github.com/duckdb/dbt-duckdb"]
       ]
     },
     {
@@ -1679,8 +1600,8 @@
       ],
       "prerequisites": ["dbt-004", "dbt-006", "dbt-013", "dbt-020"],
       "outcome": "Implement a reproducible reduced CI workflow with explicit selection, baseline and ownership.",
-      "theory": "A slim CI workflow combines a selection plan with actual execution against an isolated target and an explicit upstream baseline. Its goal is to validate the relevant change efficiently while retaining meaningful tests. Selecting changed nodes without running them is not CI acceptance, and a successful model build without the required tests is incomplete evidence.\n\nThe example first builds an accepted baseline in a synthetic prod schema. It then changes a child and runs state:modified+ in dev with deferral. One change preserves the key contract; another duplicates rows and must fail uniqueness. The accepted baseline is queried afterward to verify that the CI exercise did not alter it.\n\nA reduced CI scope is justified only under stated assumptions. Shared macros, environment changes, source contracts, schema migrations or operational behavior may require a broader gate. Keep the baseline, selected graph, executed statuses and target ownership with the result. An efficient test that reads the wrong data or omits the relevant condition is not a useful release check.",
-      "syntax": "The workflow saves a baseline manifest separately, edits the current source, and invokes build with --select state:modified+, --defer, --state and an explicit target. It inspects run_results and the preserved baseline relation. The negative fixture is expected to fail; that failure proves the selected data test actually ran.",
+      "theory": "A slim CI workflow combines a selection plan with actual execution against an isolated target and an explicit upstream baseline. Its goal is to validate the relevant change efficiently while retaining meaningful tests. Selecting changed nodes without running them is not CI acceptance, and a successful model build without the required tests is incomplete evidence.\n\nThe example first builds an accepted baseline in a synthetic prod schema. It then changes a child and runs state:modified+ in dev with deferral. One change preserves the key contract; another duplicates rows and must fail uniqueness. The accepted baseline is queried afterward to verify that the CI exercise did not alter it.\n\nA reduced CI scope is justified only under stated assumptions. Shared macros, environment changes, source contracts, schema migrations or operational behavior may require a broader gate. Keep the baseline, selected graph, executed statuses and target ownership with the result. An efficient test that reads the wrong data or omits the relevant condition is not a useful release check.\n\nTwo flags shorten the loop around such a gate. `dbt build --empty` (dbt 1.8 and later) limits every `ref` and `source` to zero rows while still executing the model SQL, so it checks dependencies, compilation and column shapes without reading input data; data tests that then pass on empty inputs say nothing about values, so it cannot replace the real build. `dbt retry` (dbt 1.6 and later) reads the previous invocation's `target/run_results.json` and re-executes that invocation from the point of failure, with the same selection. If the previous command succeeded it does nothing, and if it failed before any node ran there is nothing recorded to retry.\n\nTwo flags shorten the loop around such a gate. `dbt build --empty` (dbt 1.8 and later) limits every `ref` and `source` to zero rows while still executing the model SQL, so it checks dependencies, compilation and column shapes without reading input data; data tests that then pass on empty inputs say nothing about values, so it cannot replace the real build. `dbt retry` (dbt 1.6 and later) reads the previous invocation's `target/run_results.json` and re-executes that invocation from the point of failure, with the same selection. If the previous command succeeded it does nothing, and if it failed before any node ran there is nothing recorded to retry.",
+      "syntax": "The workflow saves a baseline manifest separately, edits the current source, and invokes build with --select state:modified+, --defer, --state and an explicit target. It inspects run_results and the preserved baseline relation. The negative fixture is expected to fail; that failure proves the selected data test actually ran.\n\nThe two flags appear in a CI script like this; the lesson's program runs only the full build:\n\n```bash\ndbt build --target dev --select state:modified+ --defer --state state --empty\ndbt build --target dev --select state:modified+ --defer --state state\ndbt retry\n```\n\n`dbt retry` reruns only the nodes that failed or were skipped. If a model failed, fix its SQL and retry: the model and its skipped tests run again. If a data test failed after its model built, retry reruns only that test against the table that is already built, so it fails again even after the model SQL is fixed; rerun the full `dbt build` instead. Both behaviours were checked with the pinned dbt-core 1.11.16 and dbt-duckdb 1.11.1.\n\nThe two flags appear in a CI script like this; the lesson's program runs only the full build:\n\n```bash\ndbt build --target dev --select state:modified+ --defer --state state --empty\ndbt build --target dev --select state:modified+ --defer --state state\ndbt retry\n```\n\nRun `dbt retry` only after fixing the cause of the failure; retrying an unchanged deterministic failure reproduces it.",
       "math": "",
       "worked": [
         {
@@ -1739,17 +1660,22 @@
         }
       ],
       "diagnosis": "A fast CI run can be empty or incomplete. Check resource counts, test selection and the baseline before interpreting its result. A failed test is useful evidence, not a reason to remove the assertion. Keep cleanup scoped to the owned CI target and preserve the accepted baseline.",
-      "transfer": "Implement a reproducible reduced CI workflow with explicit selection, baseline and ownership. Demonstrate that a meaningful defect fails and that accepted data remains intact. Explain when the change requires a broader validation scope.",
-      "lab": "Inspect the generated project files, run the actual dbt commands against the owned DuckDB database, and complete the six specified changes with artifact and row checks.",
+      "transfer": "Demonstrate that a meaningful defect fails and that accepted data remains intact. Explain when the change requires a broader validation scope.",
+      "lab": "Build a prod baseline, save its manifest, change the child model and run a state:modified+ build in dev for a compatible change and for a change that duplicates rows.",
       "references": [
         [
-          "dbt documentation: Slim CI with actual builds and data tests",
+          "dbt docs: Continuous integration jobs in dbt",
           "https://docs.getdbt.com/docs/deploy/ci-jobs"
         ],
         [
-          "dbt-duckdb adapter configuration and capabilities",
-          "https://github.com/duckdb/dbt-duckdb"
-        ]
+          "dbt reference: About dbt retry command",
+          "https://docs.getdbt.com/reference/commands/retry"
+        ],
+        [
+          "dbt reference: About dbt build command",
+          "https://docs.getdbt.com/reference/commands/build"
+        ],
+        ["dbt-duckdb repository README", "https://github.com/duckdb/dbt-duckdb"]
       ]
     },
     {
@@ -1802,7 +1728,8 @@
           "task": "Remove the incorrect factor 2 and rebuild.",
           "check": "The independent total becomes 12 and the test passes.",
           "hint": "Change the smallest relevant assumption.",
-          "answer": "Keep the same fixture and oracle while applying the correction. A new unrelated dataset would make the before/after comparison less informative."
+          "answer": "Keep the same fixture and oracle while applying the correction. A new unrelated dataset would make the before/after comparison less informative.",
+          "answer_code": "# Uses the tempfile import and the project(), invoke() and rows() helpers in main.py.\nwith tempfile.TemporaryDirectory() as d:\n    p = project(\n        d,\n        models={\"total\": \"select sum(amount) as amount from {{ ref('orders') }}\"},\n        seeds={\"orders\": \"id,amount\\n1,5\\n2,7\\n\"},\n    )\n    (p / \"tests\").mkdir()\n    (p / \"tests/reconcile.sql\").write_text(\"select * from {{ ref('total') }} where amount != 12\")\n    invoke(p, \"build\")\n    assert rows(p, \"select amount from total\") == [(12,)]"
         },
         {
           "title": "Avoid a circular oracle",
@@ -1820,17 +1747,14 @@
         }
       ],
       "diagnosis": "Start with the first relevant diagnostic rather than the last cascade of skipped resources. Inspect actual selected nodes and database state. A model success followed by a test failure calls for semantic investigation, while a missing relation may indicate preparation or routing. Do not report a skipped downstream resource as a passing result.",
-      "transfer": "Diagnose failures using the layer that actually rejected the work. Preserve bounded before/after evidence and verify a focused correction with an independent oracle. Apply the same method to feature and model pipelines where an apparently healthy process can still produce an invalid product.",
-      "lab": "Inspect the generated project files, run the actual dbt commands against the owned DuckDB database, and complete the six specified changes with artifact and row checks.",
+      "transfer": "Preserve bounded before/after evidence and verify a focused correction with an independent oracle. Apply the same method to feature and model pipelines where an apparently healthy process can still produce an invalid product.",
+      "lab": "Compile a model whose SQL the database rejects and read its error status, then build a model with a wrong factor of 2 and catch it with a singular reconciliation test.",
       "references": [
         [
-          "dbt documentation: Diagnose template, database and semantic failures",
+          "dbt reference: Run results JSON file",
           "https://docs.getdbt.com/reference/artifacts/run-results-json"
         ],
-        [
-          "dbt-duckdb adapter configuration and capabilities",
-          "https://github.com/duckdb/dbt-duckdb"
-        ]
+        ["dbt-duckdb repository README", "https://github.com/duckdb/dbt-duckdb"]
       ]
     },
     {
@@ -1901,17 +1825,14 @@
         }
       ],
       "diagnosis": "Near-zero lazy or compile timings may not include query execution. A faster result with different counts or totals is not an equivalent replacement. Check the dataset, cache regime, selected work and result contract before attributing performance to a tool or setting.",
-      "transfer": "Measure database work with a correctness oracle and a clearly defined interval. Review plans as evidence about this query and version, retain multiset/ordering semantics and include the complete refresh/read workload when choosing materializations.",
-      "lab": "Inspect the generated project files, run the actual dbt commands against the owned DuckDB database, and complete the six specified changes with artifact and row checks.",
+      "transfer": "Review plans as evidence about this query and version, retain multiset/ordering semantics and include the complete refresh/read workload when choosing materializations.",
+      "lab": "Time a grouped query whose five totals are checked against Python arithmetic, then show that a select distinct rewrite changes the total from 17 to 12.",
       "references": [
         [
-          "DuckDB documentation: Query plans, measured cost and semantic equivalence",
+          "DuckDB docs: EXPLAIN: Inspect Query Plans",
           "https://duckdb.org/docs/stable/guides/meta/explain.html"
         ],
-        [
-          "dbt-duckdb adapter configuration and capabilities",
-          "https://github.com/duckdb/dbt-duckdb"
-        ]
+        ["dbt-duckdb repository README", "https://github.com/duckdb/dbt-duckdb"]
       ]
     },
     {
@@ -1988,17 +1909,11 @@
         }
       ],
       "diagnosis": "A private-reference error can be correct governance behavior. Do not bypass it by hardcoding a relation name and claiming the policy passed. Conversely, a private model that is readable through direct SQL is not surprising: inspect database permissions as a different layer.",
-      "transfer": "Use groups and model access to define supported project interfaces, while keeping database authorization claims separate. Test both allowed and rejected dependencies and record who owns semantic compatibility and external access controls.",
-      "lab": "Inspect the generated project files, run the actual dbt commands against the owned DuckDB database, and complete the six specified changes with artifact and row checks.",
+      "transfer": "Test both allowed and rejected dependencies and record who owns semantic compatibility and external access controls.",
+      "lab": "Declare two groups and a private model, build a consumer in the same group, and confirm that dbt rejects a consumer in another group that references the private model.",
       "references": [
-        [
-          "dbt documentation: Groups, model access and governance boundaries",
-          "https://docs.getdbt.com/docs/mesh/govern/model-access"
-        ],
-        [
-          "dbt-duckdb adapter configuration and capabilities",
-          "https://github.com/duckdb/dbt-duckdb"
-        ]
+        ["dbt docs: Model access", "https://docs.getdbt.com/docs/mesh/govern/model-access"],
+        ["dbt-duckdb repository README", "https://github.com/duckdb/dbt-duckdb"]
       ]
     },
     {
@@ -2069,17 +1984,14 @@
         }
       ],
       "diagnosis": "If recovery changes more than intended, stop and identify the candidate, accepted version and actual consumer pointer. A failed test may leave materialized data. A timeout may leave an unknown commit outcome. Reconcile state before retrying or deleting evidence.",
-      "transfer": "Recover a data product through explicit accepted versions and a tested pointer mechanism. Demonstrate a failed candidate and a reversible local promotion, then describe which distributed or operational guarantees still need separate implementation and qualification.",
-      "lab": "Inspect the generated project files, run the actual dbt commands against the owned DuckDB database, and complete the six specified changes with artifact and row checks.",
+      "transfer": "Demonstrate a failed candidate and a reversible local promotion, then describe which distributed or operational guarantees still need separate implementation and qualification.",
+      "lab": "Change an accepted-version pointer inside a DuckDB transaction and roll it back, then reject a candidate that fails a value test while the accepted value stays 42.",
       "references": [
         [
-          "DuckDB documentation: Recovery, accepted versions and atomic pointers",
+          "DuckDB docs: Transaction Management",
           "https://duckdb.org/docs/stable/sql/statements/transactions.html"
         ],
-        [
-          "dbt-duckdb adapter configuration and capabilities",
-          "https://github.com/duckdb/dbt-duckdb"
-        ]
+        ["dbt-duckdb repository README", "https://github.com/duckdb/dbt-duckdb"]
       ]
     },
     {
@@ -2161,17 +2073,14 @@
         }
       ],
       "diagnosis": "If the product differs from its expected total, follow the pipeline from raw parsing through key relationships and aggregation. If the build fails, inspect which resources ran and whether publication was prevented. If a receipt is stale, do not update its hash without re-establishing the candidate's source and validation evidence.",
-      "transfer": "Deliver a complete local analytics product with a reviewable acceptance decision. Extend it with a controlled schema or timing change, run its negative cases and explain how a consumer can select a valid version. Use the ML engineering path to connect that product to features, model training and serving contracts.",
-      "lab": "Inspect the generated project files, run the actual dbt commands against the owned DuckDB database, and complete the six specified changes with artifact and row checks.",
+      "transfer": "Extend it with a controlled schema or timing change, run its negative cases and explain how a consumer can select a valid version. Use the ML engineering path to connect that product to features, model training and serving contracts.",
+      "lab": "Build staging and mart models with key tests, write a publication receipt for customer totals 12 and 9, and block publication when the customer dimension has a duplicate key.",
       "references": [
         [
-          "dbt documentation: Publish a complete validated analytics product",
+          "dbt reference: About dbt artifacts",
           "https://docs.getdbt.com/reference/artifacts/dbt-artifacts"
         ],
-        [
-          "dbt-duckdb adapter configuration and capabilities",
-          "https://github.com/duckdb/dbt-duckdb"
-        ]
+        ["dbt-duckdb repository README", "https://github.com/duckdb/dbt-duckdb"]
       ]
     }
   ],

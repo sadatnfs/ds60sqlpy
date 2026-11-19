@@ -7,7 +7,7 @@ from torch.nn import functional as F
 
 
 def verify():
-    # Exercise 1: Establish an eager oracle
+    # Worked example A: Establish an eager oracle
     def function(value):
         return value * value + 1
 
@@ -15,7 +15,7 @@ def verify():
     eager = function(x)
     assert eager.tolist() == [2.0, 5.0]
 
-    # Exercise 2: Capture with a transparent backend
+    # Worked example B: Capture with a transparent backend
     graphs = []
 
     def backend(graph, example_inputs):
@@ -27,7 +27,7 @@ def verify():
     first = len(graphs)
     assert first >= 1
 
-    # Exercise 3: Check signature reuse
+    # Worked example C: Check signature reuse
     assert compiled(torch.tensor([3.0, 4.0])).tolist() == [10.0, 17.0] and len(graphs) == first
     assert (
         compiled(torch.tensor([1.0, 2.0], dtype=torch.float64)).tolist() == [2.0, 5.0]
@@ -62,6 +62,31 @@ def verify():
         and not receipt["optimizing_native_backend"]
         and not receipt["gpu_benchmark"]
     )
+
+    # Exercise 1: Establish a new eager oracle
+    def affine(value):
+        return 2 * value - 1
+
+    points = torch.tensor([0.0, 3.0])
+    assert affine(points).tolist() == [-1.0, 5.0]
+
+    # Exercise 2: Capture the new function
+    captured = []
+
+    def counting(graph, example_inputs):
+        captured.append(graph)
+        return graph.forward
+
+    compiled_affine = torch.compile(affine, backend=counting, fullgraph=True, dynamic=False)
+    torch.testing.assert_close(compiled_affine(points), affine(points), atol=0, rtol=0)
+    assert len(captured) >= 1
+
+    # Exercise 3: Predict recompilation for a new shape
+    before_three = len(captured)
+    compiled_affine(torch.tensor([1.0, 2.0, 3.0]))
+    after_three = len(captured)
+    compiled_affine(torch.tensor([4.0, 5.0, 6.0]))
+    assert after_three > before_three and len(captured) == after_three
     return {"checks": 6, "status": "passed"}
 
 

@@ -20,9 +20,7 @@ The constructor pl.DataFrame receives a mapping from column names to equally siz
 
 ## Run the lesson
 
-Open this subject in `/classroom`, then show its code and notes. The prepared `data-engineering` worker runs `main.py` in a fresh temporary directory. The examples use installed packages and synthetic local fixtures; no account, cloud service, network request or package download is required. Save source and notes before switching lessons. Temporary databases, project files and tracking artifacts are recreated by each complete program and removed after the job. The classroom retains the submitted source and bounded output, not an indefinitely running external service. The guide distinguishes this local execution from the deployment decisions that need an owned production environment.
-
-
+Open `polars-001` in `/classroom`. Its starter `main.py` contains both worked cases, "Derive order revenue" and "An empty result still has a schema", and prints the dictionary each case returns. The prepared `data-engineering` worker runs it in a fresh temporary directory. An `AssertionError` means that an observation differs from the case's stated contract. The inputs are small literal tables. Cases that demonstrate Parquet scans write their files into a temporary directory that is removed when the case returns. No account, network request or package download is involved. Save source and notes before switching lessons.
 
 ## Worked case 1: Derive order revenue
 
@@ -47,7 +45,6 @@ def example_one():
 if __name__ == "__main__":
     print(example_one())
 ```
-
 
 ## Worked case 2: An empty result still has a schema
 
@@ -75,11 +72,9 @@ if __name__ == "__main__":
     print(example_two())
 ```
 
-
 ## Practice
 
-Make each requested change in a saved copy. Compare both the expected result and the deliberately changed assumption. The separate reference explains the answers.
-
+The starter contains both worked cases, so a task can change either one. Make each change in a saved copy, run it, and compare the printed result with the task's check before opening the separate explained answers.
 
 ### 1. Predict a new order
 
@@ -89,7 +84,6 @@ Append an order with units 3 and price 4, then predict the total before running.
 
 **Hint:** Compute the new row contribution first.
 
-
 ### 2. Choose a projection
 
 Return order_id and revenue only.
@@ -97,7 +91,6 @@ Return order_id and revenue only.
 **Check:** The output has 3 rows and 2 columns.
 
 **Hint:** Use select after defining revenue.
-
 
 ### 3. Explain an aggregate
 
@@ -107,7 +100,6 @@ Replace the final sum with a mean and describe its denominator.
 
 **Hint:** There are 3 orders, not 7 items.
 
-
 ### 4. Keep raw state
 
 Check that calling with_columns did not add revenue to frame.
@@ -115,7 +107,6 @@ Check that calling with_columns did not add revenue to frame.
 **Check:** The assertion remains true.
 
 **Hint:** Compare frame.columns and result.columns.
-
 
 ### 5. State an empty policy
 
@@ -125,7 +116,6 @@ Filter to orders above 100 and explain whether a zero-row output is an error.
 
 **Hint:** Distinguish absence of qualifying rows from failed execution.
 
-
 ### 6. Validate identifiers
 
 Add a duplicate order_id and test the proposed key.
@@ -134,20 +124,19 @@ Add a duplicate order_id and test the proposed key.
 
 **Hint:** Column type does not prove uniqueness.
 
-
 ## Diagnose errors and misleading results
 
 A ShapeError usually means constructor columns have different lengths. A missing-column error means the expression names a field unavailable in that context. Neither is fixed by converting all values to strings. If the total differs, inspect the row products and row count before modifying aggregation code. A successful sum also does not establish a valid revenue definition: negative quantities, repeated identifiers and mixed currencies are semantic cases that require explicit policy.
 
 ## Transfer to independent work
 
-Construct and verify a typed table with a stated row grain. For an independent case, use a small inventory table with units and cost, calculate stock value, and verify it with Python arithmetic. Preserve both raw and transformed frames so a reviewer can explain every changed field. This establishes a small data contract, not a guarantee that an arbitrary input file is clean.
+For an independent case, use a small inventory table with units and cost, calculate stock value, and verify it with Python arithmetic. Preserve both raw and transformed frames so a reviewer can explain every changed field. This establishes a small data contract, not a guarantee that an arbitrary input file is clean.
 
 ## Primary references
 
-- [Polars documentation: Rows, columns, schemas and expressions](https://docs.pola.rs/user-guide/concepts/data-structures/)
+- [Polars user guide: Data types and structures](https://docs.pola.rs/user-guide/concepts/data-types-and-structures/)
 - [Polars Python API reference](https://docs.pola.rs/api/python/stable/reference/index.html)
 
 ## Tutor guidance
 
-Use the repository learning-companion skill for `polars-001`. Inspect the learner's own source and observations, ask for an explanation of the relevant data or state contract, and give a focused hint. Separate an assertion on this fixture from a claim about an external dataset or deployed service.
+Use the repository's `$guide-ds60sqlpy-learning` skill (`.agents/skills/guide-ds60sqlpy-learning/SKILL.md`) for `polars-001`. Inspect the learner's own source and printed output first. Ask for an explanation of DataFrame, Series, schema, expression and row grain in their own words, then give one focused hint at a time. Keep an assertion on this synthetic fixture separate from a claim about an external dataset or deployed service.

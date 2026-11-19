@@ -6,7 +6,7 @@
   "cases": [
     {
       "exercise": 1,
-      "task": "List payload,signature,public key and expected content digest.",
+      "task": "List payload, signature, public key and expected content digest.",
       "expected": "Four distinct roles with an independently chosen trust key."
     },
     {
@@ -17,7 +17,7 @@
     {
       "exercise": 3,
       "task": "Run the qualified CLI over attestation.json with the fixed key/signature.",
-      "expected": "Exit0 plus successful verification output, with tool identity recorded."
+      "expected": "Exit 0 plus successful verification output, with tool identity recorded."
     },
     {
       "exercise": 4,

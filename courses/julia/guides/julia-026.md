@@ -8,7 +8,7 @@ Implement a preallocated matrix step, explain ownership and aliasing, and compar
 
 ## Classroom execution
 
-Choose **Julia language and scientific computing** in `/classroom`, open this unit, and select its prepared `julia` runtime. The worker starts a fresh `main.jl` process with two Julia threads, a fixed package environment, no startup file and offline package settings. Both worked examples are complete under that environment. Save your current pad before replacing it. No package, model or dataset is fetched by a lesson.
+Open `julia-026` in `/classroom` with its prepared `julia` runtime. Worked case A (reuse an output buffer) and worked case B (views expose ownership) are complete programs: save your current pad, paste one of them and press Run. The learner file contains the six investigations below; the explained reference ends by printing `julia-026: all reference checks passed`. The [course overview](../README.md) describes the shared runtime: a fresh offline `main.jl` process with two threads and a fixed package environment.
 
 ## Mutation is a storage contract
 
@@ -116,21 +116,21 @@ Using `===` alone detects only identity, not overlapping views. Ignoring dimensi
 
 Compute the two entries before running the first case.
 
-**Expected:** The final vector is[11,11].
+**Expected:** The final vector is `[11, 11]`.
 
 **Hint:** Multiply rows by the input, then add bias.
 
 ### 2. Repeat with new inputs
 
-Reuse the destination for input[1,2].
+Reuse the destination for input `[1, 2]`.
 
-**Expected:** The new vector is[5,5].
+**Expected:** The new vector is `[5, 5]`.
 
 **Hint:** Ensure old output is overwritten.
 
 ### 3. Debug a width mismatch
 
-Pass a2-by -3 matrix and a length 2 input.
+Pass a 2-by-3 matrix and a length 2 input.
 
 **Expected:** DimensionMismatch occurs before output mutation.
 
@@ -167,4 +167,4 @@ Explain why fewer measured bytes may not mean faster code.
 
 ## Study companion
 
-Use the repository learning-companion skill with this lesson ID, your prediction and your actual source/output. Ask for a diagnosis of the first incorrect type, shape, state transition or assumption. Keep observed execution distinct from a timing claim, inferred mathematical result or external deployment.
+A repository-aware assistant with the learning-companion skill can review `julia-026` with you. Give it your prediction for one investigation, your source and the actual output, and ask it to find the first incorrect assumption about preallocation, mul!, views, aliasing or storage reuse.

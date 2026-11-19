@@ -8,22 +8,26 @@ A function pointer lets a component accept behavior as data. The function type m
 
 int (*compare)(const void *,const void *) declares a function pointer rather than a function returning a pointer. qsort passes pointers to elements, which the comparator converts to the correct element type. (a>b)-(a<b) yields the required sign without subtracting the values themselves. A separate callback context can carry state when an API provides one; avoid hidden global mutable state for reusable components.
 
-## Exercise 1: Invoke through a function pointer
+## Exercise 1: Invoke through a function pointer: predict an edited check
 
-Assign a doubling function and call it with 4.
+Copy worked example 1 into a scratch pad and change `CHECK(transform(4) == 8);` to `CHECK(transform(5) == 8);` inside its CHECK. Before running, predict whether the CHECK still holds and explain why; then restore it.
+
+The unchanged code is worked example 1:
 
 ```c
 int (*transform)(int) = double_value;
 CHECK(transform(4) == 8);
 ```
 
-**Expected:** The result is 8.
+**Expected:** The changed run stops with `Check failed` at the CHECK on `transform(4) == 8`. Restoring the original line brings back the worked observation: the result is 8.
 
 The pointer type agrees with the function declaration, so the compiler can check the call.
 
-## Exercise 2: Sort integers safely
+## Exercise 2: Sort integers safely: debug a regression
 
-Sort 3, 1, 2 with a relational comparator.
+A regression changed one token in worked example 2, so one line now reads `int values[] = {4, 1, 2};`. Run worked example 2 with that line, use the failing CHECK to locate the defect and repair it without changing the CHECK.
+
+The unchanged code is worked example 2:
 
 ```c
 int values[] = {3, 1, 2};
@@ -31,7 +35,7 @@ qsort(values, 3, sizeof values[0], compare_ints);
 CHECK(values[0] == 1 && values[1] == 2 && values[2] == 3);
 ```
 
-**Expected:** The order becomes 1, 2, 3.
+**Expected:** Before the repair the run stops with `Check failed` at the CHECK on `values[0] == 1 && values[1] == 2 && values[2] == 3`; after it the line reads `int values[] = {3, 1, 2};` again and the order becomes 1, 2, 3.
 
 The comparator reports ordering rather than a numeric distance between elements.
 

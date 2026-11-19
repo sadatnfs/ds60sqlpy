@@ -32,7 +32,7 @@ The browser creates a new bounded baseline and then cleans it. Its receipt suppo
 
 The replacement is caused by the ReplicaSet restoring desired replicas. It is not a new Deployment or necessarily a new template revision. The operation must use UID-aware targeting and preserve unrelated objects.
 
-**Expected:** Pod set changes from{pod-1, pod-2} to{pod-2, pod-3} in the synthetic trace; live names/UIDs are recorded separately.
+**Expected:** Pod set changes from {pod-1, pod-2} to {pod-2, pod-3} in the synthetic trace; live names/UIDs are recorded separately.
 
 ## Exercise 5: Reject a count-only shortcut
 

@@ -9,11 +9,19 @@ The executable reference contains the two complete worked cases with assertions.
 
 Use two with_columns calls and verify the final values; changing argument order inside one call does not create this dependency.
 
-**Expected:** The staged values are[30,40,50].
+**Expected:** The staged values are [30, 40, 50].
 
 ## 2. Name the old value
 
 Compute (pl.col("x")+1).alias("incremented_x"). Retaining both fields makes a later comparison or audit straightforward.
+
+```python
+import polars as pl
+
+frame = pl.DataFrame({"x": [1, 2, 3]})
+output = frame.with_columns((pl.col("x") + 1).alias("incremented_x"))
+assert output.to_dict(as_series=False) == {"x": [1, 2, 3], "incremented_x": [2, 3, 4]}
+```
 
 **Expected:** Both x and incremented_x are visible.
 
@@ -38,6 +46,17 @@ Add another with_columns stage. Suppressing the error or creating a null field w
 ## 6. Compare two implementations
 
 Filtering paid rows then summing amount matches the conditional sum. It does not return the same row-level table, because pending rows have been removed.
+
+```python
+import polars as pl
+
+frame = pl.DataFrame({"status": ["paid", "pending", "paid"], "amount": [5, 7, 11]})
+conditional = frame.select(
+    pl.when(pl.col("status") == "paid").then(pl.col("amount")).otherwise(0).sum()
+).item()
+filtered = frame.filter(pl.col("status") == "paid").select(pl.col("amount").sum()).item()
+assert conditional == filtered == 16
+```
 
 **Expected:** The paid total is 16 in both implementations.
 
@@ -94,4 +113,4 @@ if __name__ == "__main__":
 
 ## Interpretation
 
-Build a transformation whose dependency stages are explicit. Apply the same reasoning to feature pipelines: a normalized value should reference the intended cleaned field, and training and serving must agree on that order. Use intermediate schemas and a small hand-calculated fixture to review the pipeline before optimizing it.
+Apply the same reasoning to feature pipelines: a normalized value should reference the intended cleaned field, and training and serving must agree on that order. Use intermediate schemas and a small hand-calculated fixture to review the pipeline before optimizing it.

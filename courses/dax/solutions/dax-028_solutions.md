@@ -8,7 +8,7 @@ The complete [reference source](dax-028_reference.dax) and [named model](../mode
 
 ### Case A: Intersection and one-sided difference
 
-Distinct Paper keys{1,2} and Blue keys{1,3} from the clean model.
+Distinct Paper keys {1,2} and Blue keys {1,3} from the clean model.
 
 | IntersectionRows | PaperOnlyRows |
 | --- | --- |
@@ -31,7 +31,7 @@ Concatenate the two two-row key tables; key 1 occurs in each input.
 If the downstream calculation iterates the concatenation, key 1 can contribute twice. A filter set and an iterator's row population should not be conflated.
 
 - UNION produces four rows, including key 1 twice.
-- DISTINCT removes repeated key rows, leaving 1,2,3.
+- DISTINCT removes repeated key rows, leaving 1, 2, 3.
 - The two counts represent memberships versus unique product identities.
 
 ## Explained practice answers

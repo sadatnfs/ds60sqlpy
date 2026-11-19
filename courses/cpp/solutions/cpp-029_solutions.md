@@ -25,7 +25,7 @@ std::jthread can automate joining and provide a stop token, but cooperative work
 
 ## Debugging the contract
 
-If a test occasionally reads0 instead of 42, inspect whether it observes completion before reading shared state. If shutdown hangs, locate the next cancellation check or blocking call rather than adding a longer sleep. If a function exits while a thread borrows its locals, fix the ownership scope. If thread creation can throw after another worker starts, join the already created worker during the failure path before propagating the exception.
+If a test occasionally reads 0 instead of 42, inspect whether it observes completion before reading shared state. If shutdown hangs, locate the next cancellation check or blocking call rather than adding a longer sleep. If a function exits while a thread borrows its locals, fix the ownership scope. If thread creation can throw after another worker starts, join the already created worker during the failure path before propagating the exception.
 <!-- depth:end -->
 
 ## Worked example 1
@@ -55,7 +55,7 @@ Draw result, worker creation, write, join and scope exit.
 
 **Reasoning:** The reference capture borrows local state.
 
-**Verify:** Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.
+**Verify:** Check the drawing against Worked example 1: `answer` is declared before the thread, the write of 42 happens before `t.join()`, and the read and scope exit come after it.
 
 ## Exercise 2: Read after joining
 
@@ -65,7 +65,7 @@ Compute 42 on one worker and read afterward.
 
 **Reasoning:** join establishes completion and synchronization.
 
-**Verify:** Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.
+**Verify:** Assert `answer == 42` on the line after `t.join()`, as Worked example 1 does; moving the assertion above the join creates a data race.
 
 ## Exercise 3: Request cancellation
 
@@ -75,7 +75,7 @@ Run the supplied ready handshake then set stop and join.
 
 **Reasoning:** The promise proves startup before cancellation.
 
-**Verify:** Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.
+**Verify:** Confirm Worked example 2 contains no sleep, that `started.get()` returns before `stop.store(true)`, and that `worker.join()` returns.
 
 ## Exercise 4: Repair detach
 
@@ -85,7 +85,7 @@ Review detaching a worker that captures a local by reference.
 
 **Reasoning:** Detached lifetime can outlast the referenced variable.
 
-**Verify:** Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.
+**Verify:** Trace the captured local to the end of its scope and confirm a detached thread could still use it afterward; the repaired code joins before the scope ends.
 
 ## Exercise 5: Translate to jthread
 
@@ -95,7 +95,7 @@ On a qualified C++20 library use jthread and stop_token.
 
 **Reasoning:** A stop request only works if the body checks the token.
 
-**Verify:** Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.
+**Verify:** Write a `std::jthread` loop that checks `stop_token::stop_requested()`, call `request_stop()`, let the jthread leave scope, and record the compiler and library version that built it.
 
 ## Exercise 6: Transfer failure cleanup
 
@@ -105,4 +105,4 @@ Add an owner-side early return and keep joining mandatory.
 
 **Reasoning:** RAII joining or a scope guard must cover exceptional paths.
 
-**Verify:** Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.
+**Verify:** Take the early-return path in a test and confirm the program does not call `std::terminate`, which happens when a joinable `std::thread` is destroyed.

@@ -8,21 +8,25 @@ The preprocessor transforms tokens before the compiler performs ordinary type ch
 
 #define creates a macro replacement. Parenthesize each expression argument and the full result, but understand that this does not prevent repeated evaluation. #if and #ifdef select tokens before compilation. Include guards prevent repeated header definitions. _Static_assert checks a constant expression during compilation. _Generic can select an expression by type in C11 and later without becoming a runtime type system.
 
-## Exercise 1: Use a parenthesized macro safely
+## Exercise 1: Use a parenthesized macro safely: predict an edited check
 
-Square the side-effect-free expression 2+3.
+Copy worked example 1 into a scratch pad and change `CHECK(SQUARE(2 + 3) == 25);` to `CHECK(SQUARE(3 + 3) == 25);` inside its CHECK. Before running, predict whether the CHECK still holds and explain why; then restore it.
+
+The unchanged code is worked example 1:
 
 ```c
 CHECK(SQUARE(2 + 3) == 25);
 ```
 
-**Expected:** The result is 25.
+**Expected:** The changed run stops with `Check failed` at the CHECK on `SQUARE(2 + 3) == 25`. Restoring the original line brings back the worked observation: the result is 25.
 
 Parentheses preserve grouping. This macro still evaluates its argument twice, so side effects remain inappropriate.
 
-## Exercise 2: Prefer a typed helper for mutation
+## Exercise 2: Prefer a typed helper for mutation: debug a regression
 
-Pass value++ to a normal square function.
+A regression changed one token in worked example 2, so one line now reads `int value = 4;`. Run worked example 2 with that line, use the failing CHECK to locate the defect and repair it without changing the CHECK.
+
+The unchanged code is worked example 2:
 
 ```c
 int value = 3;
@@ -30,7 +34,7 @@ int result = square_int(value++);
 CHECK(result == 9 && value == 4);
 ```
 
-**Expected:** The result is 9 and value increments once to 4.
+**Expected:** Before the repair the run stops with `Check failed` at the CHECK on `result == 9 && value == 4`; after it the line reads `int value = 3;` again and the result is 9 and value increments once to 4.
 
 A function argument expression is evaluated once for this call. SQUARE(value++) would create an unsequenced modification hazard.
 

@@ -4,7 +4,7 @@ Compare these answers only after an attempt or an explicit solution reveal. They
 
 ## Mechanism review
 
-Autograd follows the chain of tensor operations from a scalar objective back to its inputs. Forz=2w, \(a={z}^{2}\), \(\mathrm{loss}={\left(a-1\right)}^{2}\), the derivative multiplies the local sensitivities along that chain. PyTorch builds the graph dynamically during the forward pass and saves values needed for backward. An in-place mutation can invalidate those saved values, so the framework uses version checks and restricts some mutations. A failure is a signal to understand ownership and graph lifetime, not a reason to bypass checks with.data.
+Autograd follows the chain of tensor operations from a scalar objective back to its inputs. Forz=2w, \(a={z}^{2}\), \(\mathrm{loss}={\left(a-1\right)}^{2}\), the derivative multiplies the local sensitivities along that chain. PyTorch builds the graph dynamically during the forward pass and saves values needed for backward. An in-place mutation can invalidate those saved values, so the framework uses version checks and restricts some mutations. A failure is a signal to understand ownership and graph lifetime, not a reason to bypass checks with .data.
 
 Graph state is also temporary. After a normal backward pass, the saved intermediates are released; reusing the same graph for another backward usually requires an explicit retention policy or a fresh forward computation. Most training loops should recompute the forward graph per batch. Nonlinearities such as ReLU introduce points where a derivative convention matters.
 
@@ -40,63 +40,62 @@ Using no_grad around the mutation prevents recording that new operation. It does
 
 After a normal derivative computation, saved intermediates can be released. Keeping a reference to loss does not promise another backward pass can reconstruct those released values. Repeated training usually needs a new forward pass, whereas an algorithm intentionally querying multiple derivatives can request graph retention and accept its memory cost. Do not confuse retaining a graph with accumulating gradients across distinct fresh graphs.
 
-ReLU adds a separate mathematical boundary. At a negative input the derivative is zero; at a positive input it is one. At zero there is no unique classical derivative, and PyTorch chooses zero for backward. The numerical convention is not a graph-disconnection error. It should be recorded explicitly when designing derivative tests rather than judged against a symmetric probe's0.5 as if both were the same object.
+ReLU adds a separate mathematical boundary. At a negative input the derivative is zero; at a positive input it is one. At zero there is no unique classical derivative, and PyTorch chooses zero for backward. The numerical convention is not a graph-disconnection error. It should be recorded explicitly when designing derivative tests rather than judged against a symmetric probe's 0.5 as if both were the same object.
 
-## Exercise 1: Trace the chain rule
+## Exercise 1: Trace the chain at a new point
 
-The question is: Use \(w=1\), \(z=2\cdot w\), \(a=z\cdot z\) and \(\mathrm{loss}={\left(a-1\right)}^{2}\).
+The question is: Use w=2, \(z=2\cdot w\), \(a=z\cdot z\) and \(\mathrm{loss}={\left(a-1\right)}^{2}\), and predict each intermediate value and dloss/dw.
 
-The factors are dL/da=2(a-1)=6, da/dz=2z=4 and \(\frac{\partial z}{\partial w}=2\). Multiplying \(6\cdot 4\cdot 2\) gives 48 at the supplied point.
-
-```python
-w = torch.tensor(1.0, dtype=torch.float64, requires_grad=True)
-z = 2 * w
-a = z * z
-loss = (a - 1) ** 2
-gradient = torch.autograd.grad(loss, w)[0]
-assert (z.item(), a.item(), loss.item(), gradient.item()) == (2.0, 4.0, 9.0, 48.0)
-```
-
-**Expected:** z2, a4, loss 9, gradient 48.
-
-**Verify:** Compare the computed values or written argument with z2, a4, loss 9, gradient 48.
-
-## Exercise 2: Check an independent slope
-
-The question is: Compare the chain derivative with a central difference of the complete scalar expression.
-
-The finite difference treats the entire function as a black box. It can expose an incorrect manual chain factor without reading the graph internals.
+The local factors are 2(a-1)=30, 2z=8 and \(\frac{\partial z}{\partial w}=2\), so the chain gives 30*8*2=480.
 
 ```python
-h = 1e-5
-f = lambda value: ((2 * value) ** 2 - 1) ** 2
-numeric = (f(1 + h) - f(1 - h)) / (2 * h)
-np.testing.assert_allclose(numeric, 48, atol=1e-5, rtol=0)
+w2 = torch.tensor(2.0, dtype=torch.float64, requires_grad=True)
+z2 = 2 * w2
+a2 = z2 * z2
+loss2 = (a2 - 1) ** 2
+assert (z2.item(), a2.item(), loss2.item()) == (4.0, 16.0, 225.0) and torch.autograd.grad(
+    loss2, w2
+)[0].item() == 480
 ```
 
-**Expected:** approximately 48 within 1e-5.
+**Expected:** z = 4, a = 16, loss 225, gradient 480.
 
-**Verify:** Compare the computed values or written argument with approximately 48 within 1e-5.
+**Verify:** In a fresh process, the exercise checks confirm `(z2.item(), a2.item(), loss2.item()) == (4.0, 16.0, 225.0)` and `torch.autograd.grad(loss2, w2)[0].item() == 480`.
 
-## Exercise 3: Observe a leaf mutation guard
+## Exercise 2: Check the new slope numerically
 
-The question is: Try an in-place add on a leaf requiring gradients outside no_grad.
+The question is: Compare 480 with a central difference of ((2w)**2-1)**2 at w=2 using h=1e-5.
 
-The guard prevents an ambiguous modification of a value whose derivative history is being tracked. Optimizer updates use a deliberate state-update boundary instead.
+For this quartic the truncation error is about h**2 times the third derivative 768 divided by 6, far below the tolerance.
 
 ```python
-leaf = torch.tensor(1.0, requires_grad=True)
-try:
-    leaf.add_(1)
-except RuntimeError:
-    pass
-else:
-    raise AssertionError("unsafe leaf mutation accepted")
+step = 1e-5
+quartic = lambda value: ((2 * value) ** 2 - 1) ** 2
+np.testing.assert_allclose(
+    (quartic(2 + step) - quartic(2 - step)) / (2 * step), 480, atol=1e-6, rtol=0
+)
 ```
 
-**Expected:** RuntimeError.
+**Expected:** the central difference agrees with 480 within 1e-6.
 
-**Verify:** Compare the computed values or written argument with RuntimeError.
+**Verify:** In a fresh process, the exercise checks confirm `(quartic(2 + step) - quartic(2 - step)) / (2 * step)` matches `480` within 1e-06.
+
+## Exercise 3: Update a leaf under no_grad
+
+The question is: Repeat the in-place add on a leaf that requires gradients, but inside torch.no_grad().
+
+Optimizers update parameters exactly this way: the mutation is not recorded in a graph, so autograd allows it.
+
+```python
+guarded = torch.tensor(1.0, requires_grad=True)
+with torch.no_grad():
+    guarded.add_(1)
+assert guarded.item() == 2 and guarded.requires_grad and guarded.is_leaf
+```
+
+**Expected:** the update succeeds; the value is 2 and the tensor is still a leaf that requires gradients.
+
+**Verify:** In a fresh process, the exercise checks confirm `guarded.item() == 2`, `guarded.requires_grad` and `guarded.is_leaf`.
 
 ## Exercise 4: Expose saved-value invalidation
 
@@ -119,7 +118,7 @@ else:
 
 **Expected:** RuntimeError from a changed saved tensor version.
 
-**Verify:** Compare the computed values or written argument with RuntimeError from a changed saved tensor version.
+**Verify:** In a fresh process, the exercise checks confirm `objective.backward()` raises `RuntimeError`.
 
 ## Exercise 5: Inspect a ReLU convention
 
@@ -135,7 +134,7 @@ torch.testing.assert_close(points.grad, torch.tensor([0.0, 0.0, 1.0]))
 
 **Expected:** gradients 0, 0, 1.
 
-**Verify:** Compare the computed values or written argument with gradients 0, 0, 1.
+**Verify:** In a fresh process, the exercise checks confirm `points.grad` matches `torch.tensor([0.0, 0.0, 1.0])`.
 
 ## Exercise 6: Recompute after an update
 
@@ -153,7 +152,7 @@ assert torch.autograd.grad(fresh, parameter)[0].item() == -1
 
 **Expected:** at new \(w=1.5\), gradient -1 for \({\left(w-2\right)}^{2}\).
 
-**Verify:** Compare the computed values or written argument with at new \(w=1.5\), gradient -1 for \({\left(w-2\right)}^{2}\).
+**Verify:** In a fresh process, the exercise checks confirm `torch.autograd.grad(fresh, parameter)[0].item() == -1`.
 
 ## Review after comparison
 

@@ -1,6 +1,6 @@
 # swift-034: explanation and comparison
 
-Attempt the six guide tasks before opening this comparison. The executable reference is [swift-034_solution.swift](swift-034_solution.swift). Its assertions are always active under the prepared classroom compile settings.
+Attempt the six guide tasks before opening this comparison. The executable reference is [swift-034_solution.swift](swift-034_solution.swift). It runs both worked examples and the reference answers below, and its assertions are always active under the prepared classroom compile settings.
 
 ## Why the two examples differ
 
@@ -8,21 +8,59 @@ Attempt the six guide tasks before opening this comparison. The executable refer
 
 **Make drop behavior observable:** Because production finishes before consumption starts here, the buffer outcome is deterministic. The newest-one policy retains 2 and drops the older buffered value.
 
-## Reason through the six tasks
+## Task answers
 
-1. **Predict and explain.** Trace production, buffering and completion.
+### Task 1: Predict and explain
 
-2. **Guided modification.** Use bufferingOldest(1) and predict the retained value.
+Trace production, buffering and completion.
 
-3. **Independent construction.** Build a finite event stream with explicit completion ownership.
+No separate reference answer has been written for this task. Example A is the evidence to compare with: Explicit finish prevents the consumer from waiting forever after the last value. The finite stream totals 5 and terminates.
 
-4. **Diagnose a defect.** Diagnose an infinite wait caused by never finishing a finite producer.
+### Task 2: Guided modification
 
-5. **Boundary evidence.** Test zero events and a buffer overflow policy.
+Use bufferingOldest(1) and predict the retained value.
 
-6. **Transfer and justify.** Choose lossless backpressure or deliberate dropping for a real event source and explain cleanup on cancellation.
+No separate reference answer has been written for this task. Start from Example B: Because production finishes before consumption starts here, the buffer outcome is deterministic. The newest-one policy retains 2 and drops the older buffered value.
 
-For tasks 1 and 2, use the checked values and mechanism trace in the two examples. For task 3, choose names that expose the input and result contract and retain the same invariants. For task 4, the diagnosed mistakes below supply a concrete wrong assumption: preserve its counterexample before repairing it. Task 5 needs an explicit expected value or documented rejection at the boundary, not just successful execution. For task 6, explain what changes in the new context and which part of the original mechanism remains applicable. Several representations may satisfy this transfer task; justify the choice rather than treating this reference as the only architecture.
+### Task 3: Independent construction
+
+Build a finite event stream with explicit completion ownership.
+
+**Reference answer.** It runs as the `Task 3` block of the reference program.
+
+```swift
+let (events, continuation) = AsyncStream<String>.makeStream()
+let producer = Task {
+  for name in ["start", "progress", "done"] { continuation.yield(name) }
+  continuation.finish()
+}
+var received: [String] = []
+for await event in events { received.append(event) }
+await producer.value
+precondition(received == ["start", "progress", "done"])
+```
+
+**Observe:** The consumer receives start, progress and done, and its loop ends.
+
+The producer owns the continuation and calls finish(); without it the consumer's for await would wait forever.
+
+### Task 4: Diagnose a defect
+
+Diagnose an infinite wait caused by never finishing a finite producer.
+
+No reference answer has been written for this task yet. The wrong assumptions to look for are this lesson's pitfalls: AsyncStream buffering is not automatically backpressure. Ignoring dropped values can silently lose work. A continuation retained forever can keep resources alive after consumers stop.
+
+### Task 5: Boundary evidence
+
+Test zero events and a buffer overflow policy.
+
+No reference answer has been written for this task yet. Write the expected value or documented rejection for each boundary before running it, and compare with the checks in Example A (Consume a finite stream) and Example B (Make drop behavior observable).
+
+### Task 6: Transfer and justify
+
+Choose lossless backpressure or deliberate dropping for a real event source and explain cleanup on cancellation.
+
+No single reference answer exists: several designs can satisfy this transfer task. Justify yours against the mechanism described below and the vocabulary entry **AsyncSequence**, and state one limitation of your choice.
 
 ## Mechanism and diagnostic reasoning
 
@@ -36,4 +74,4 @@ AsyncStream buffering is not automatically backpressure. Ignoring dropped values
 
 ## Review before continuing
 
-The reference checks the worked scenarios, including their boundary distinctions. Your independent and transfer artifacts may have additional checks. Compare observations rather than only source text. Preserve any new regression case you discover and explain why it would reject a plausible wrong implementation. External project steps require their own build and platform evidence and are not established by a portable reference passing.
+Run the reference and confirm that it prints `swift-034: passed`, then reconstruct one boundary case from memory and explain which check would reject a plausible wrong implementation. External project steps need their own build and platform evidence; a passing portable reference does not establish them.

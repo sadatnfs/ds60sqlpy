@@ -34,7 +34,7 @@ public class Main {
     long elapsed = System.nanoTime() - start;
     assert checksum == 10_010_000L && elapsed >= 0;
 
-    // Exercise 4: Record and read an actualJFR event
+    // Exercise 4: Record and read an actual JFR event
     var root = java.nio.file.Files.createTempDirectory("ds60-jfr-");
     var file = root.resolve("fixture.jfr");
     try {
@@ -74,7 +74,7 @@ public class Main {
     Arrays.sort(samples);
     assert samples.length == 5 && samples[0] >= 0 && samples[0] <= samples[4];
 
-    // Exercise 6: Keep instrumented anduninstrumented claims separate
+    // Exercise 6: Keep instrumented and uninstrumented claims separate
     Map<String, Object> receipt = Map.of(
       "warmup_iterations",
       100,

@@ -37,6 +37,15 @@ internal static class Program {
                        .ToArray();
       Check(joined.SequenceEqual(new[] { "Lx", "Ly" }), "two right matches");
     }
+    {
+      // Task 3: Independent construction
+      var items = new[] { (Id: 1, Name: "pear"), (Id: 2, Name: "apple") };
+      var sales = new[] { (Id: 1, Qty: 2), (Id: 1, Qty: 3), (Id: 2, Qty: 4) };
+      var groups = sales.GroupBy(sale => sale.Id);
+      var totals = groups.ToDictionary(g => g.Key, g => g.Sum(s => s.Qty));
+      var report = items.Select(item => $"{item.Name}={totals[item.Id]}");
+      Check(report.SequenceEqual(new[] { "pear=5", "apple=4" }), "joined");
+    }
     Console.WriteLine("csharp-021: passed");
     await Task.CompletedTask;
   }

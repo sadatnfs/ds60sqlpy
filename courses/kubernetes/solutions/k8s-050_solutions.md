@@ -6,11 +6,11 @@ Compare after your own attempt or an explicit reveal. These explanations describ
 
 The Service API describes desired routing behavior. A data-plane implementation turns that intent into packet handling on nodes. kube-proxy is a common component that watches Service and endpoint state and programs the supported backend for the cluster version. Other networking implementations can provide Service routing through eBPF or different mechanisms.
 
-iptables, IPVS and nftables refer to Linux packet-processing facilities with different models and operational properties. Their availability, maturity and support status depend on the Kubernetes and operating-system version. Do not assume every current cluster supports every mode or that an old performance claim applies unchanged.
+On Linux, kube-proxy programs exactly one backend, chosen by its configuration. In Kubernetes 1.37 the default is iptables: a KUBE-SERVICES chain jumps to a per-Service KUBE-SVC chain, which picks a per-endpoint KUBE-SEP chain with random-probability rules, and that chain rewrites the destination (DNAT) to the Pod address. The nftables backend, GA since Kubernetes 1.33 and requiring Linux kernel 5.13 or later, keeps its rules in one `kube-proxy` table with verdict maps and processes endpoint changes more efficiently; the documentation says a future release will make it the default and recommends setting the mode explicitly. In nftables mode NodePort Services answer only on the node's primary addresses by default, not on 127.0.0.1. The IPVS backend uses kernel virtual servers plus iptables helpers; it has been deprecated since Kubernetes 1.35, and the current documentation schedules it to be disabled by default in 1.40 and removed in 1.43, so new clusters should choose nftables or iptables.
 
 An eBPF-based implementation can attach programmable logic at particular kernel hooks. That changes how traffic is handled and observed, but it does not eliminate the need for endpoint identity, policy, routing and application acceptance. The API contract and the implementation evidence remain separate layers.
 
-Begin diagnosis by identifying the installed implementation, version and active mode. A Service object can be correct while a node’s programmed state is stale or broken. Conversely, reading a packet rule does not prove the application accepts a connection.
+Begin diagnosis by identifying the installed implementation, version and active mode. On a kubeadm-style cluster, including kind, the `mode` field inside the `config.conf` key of the kube-system `kube-proxy` ConfigMap names the backend; an empty value means the release default. A Service object can be correct while a node’s programmed state is stale or broken. Conversely, reading a packet rule does not prove the application accepts a connection.
 
 The course does not modify node packet tables or switch proxy modes. Use the synthetic control/data-plane sequence and consult the prepared environment’s operator documentation. Any privileged host inspection is a separately authorized capability, not part of a browser lesson.
 
@@ -22,9 +22,9 @@ A declarative object needs an implementation to affect traffic. Both layers requ
 
 ## Exercise 2: Identify why proxy-mode advice is version-sensitive.
 
-Use the documentation matching the installed environment rather than a universal mode recommendation.
+A recommendation that was correct for an older release, such as choosing IPVS for performance, can now point at a deprecated backend. Read the documentation for the installed release, check the node kernel, and record the configured mode explicitly so an upgrade cannot change the backend silently.
 
-**Expected:** Support and behavior change with Kubernetes and kernel releases.
+**Expected:** In Kubernetes 1.37 iptables is the default, nftables has been GA since 1.33 and needs kernel 5.13 or later, and IPVS has been deprecated since 1.35 with removal scheduled, so advice depends on the release and the node kernel.
 
 ## Exercise 3: Draw the watch-to-packet sequence.
 

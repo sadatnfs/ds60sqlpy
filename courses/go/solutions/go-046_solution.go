@@ -28,6 +28,9 @@ func admit(uid string, replicas, maximum int, dryRun bool) Decision {
 		return d
 	}
 	d.Allowed = true
+	if !dryRun {
+		d.SideEffects++
+	}
 	return d
 }
 
@@ -58,7 +61,8 @@ func main() {
 	// Keep dry-run side effects absent
 	{
 		d := admit("r5", 2, 5, true)
-		check(d.Allowed && d.SideEffects == 0, "dry run")
+		live := admit("r6", 2, 5, false)
+		check(d.Allowed && d.SideEffects == 0 && live.Allowed && live.SideEffects == 1, "dry run")
 	}
 
 	// Transfer missing identity refusal

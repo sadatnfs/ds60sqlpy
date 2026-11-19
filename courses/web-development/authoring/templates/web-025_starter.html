@@ -5,15 +5,40 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Connect HTML to JavaScript: DOM, events and safe text: my attempt</title>
     <style>
-      /* Implement the lesson-specific CSS. Keep keyboard focus visible. */
+      /* Write the CSS for the exercises here. Keep keyboard focus visible. */
     </style>
   </head>
   <body>
-    <!-- web-025: Build a native-button counter with a reset action and output. -->
-    <!-- Save your prediction, then implement the six exercises from the guide. -->
+    <!--
+      web-025 exercises. Hints are in the guide; answers are in the solutions folder.
+      1. Predict when the registered callback executes.
+      2. Change the display label without changing numeric state.
+      3. Build a native-button counter with a reset action and output.
+      4. Diagnose a null selection caused by a missing id.
+      5. Insert text containing angle brackets without creating markup.
+      6. Explain why reading state back from formatted text is fragile.
+    -->
     <main>
-      <h1>Connect HTML to JavaScript: DOM, events and safe text</h1>
-      <!-- Build your own document here. The reference is separate. -->
+      <h1>Practice counter</h1>
+      <button id="add" type="button">Add one practice step</button>
+      <p>Steps: <output id="count" aria-live="polite">0</output></p>
+      <p id="label"></p>
     </main>
+    <script>
+      "use strict";
+
+      // Worked example 1: Update text safely
+      // const label = document.querySelector('#label');
+      // label.textContent = '<new learner>';
+
+      // Worked example 2: A small state transition
+      // let count = 0;
+      // button.addEventListener('click', () => {
+      //   count += 1;
+      //   output.textContent = String(count);
+      // });
+
+      // Write the JavaScript for the exercises here.
+    </script>
   </body>
 </html>

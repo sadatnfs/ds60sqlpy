@@ -8,9 +8,11 @@ A flexible array member lets a struct end with a variable-sized trailing region.
 
 struct Packet { size_t length; unsigned char data[]; } declares a flexible member. Allocate sizeof(struct Packet)+length bytes after proving length<=SIZE_MAX-sizeof(struct Packet). The member may have alignment-related placement details, so access it through the declared member rather than guessing an offset. One free releases the entire owned record. This fixture stores bytes, avoiding additional element-alignment arithmetic.
 
-## Exercise 1: Create a trailing payload
+## Exercise 1: Create a trailing payload: change one input
 
-Create a packet containing bytes 1, 2, 3.
+Copy worked example 1 into a scratch pad and change `unsigned char data[] = {1, 2, 3};` to `unsigned char data[] = {2, 2, 3};`. Before running, predict which CHECK fails and which value it now sees; then run it and restore the original line.
+
+The unchanged code is worked example 1:
 
 ```c
 unsigned char data[] = {1, 2, 3};
@@ -19,13 +21,15 @@ CHECK(p != NULL && p->length == 3 && p->data[0] == 1 && p->data[2] == 3);
 free(p);
 ```
 
-**Expected:** Length and all three bytes are retained.
+**Expected:** The changed run stops with `Check failed` at the CHECK on `p != NULL && p->length == 3 && p->data[0] == 1 && p->data[2] == 3`. Restoring the original line brings back the worked observation: length and all three bytes are retained.
 
 One owner releases header and payload together.
 
-## Exercise 2: Create an empty packet
+## Exercise 2: Create an empty packet: debug a regression
 
-Create a packet with length zero.
+A regression changed one token in worked example 2, so one line now reads `struct Packet *p = packet_create(NULL, 1);`. Run worked example 2 with that line, use the failing CHECK to locate the defect and repair it without changing the CHECK.
+
+The unchanged code is worked example 2:
 
 ```c
 struct Packet *p = packet_create(NULL, 0);
@@ -33,7 +37,7 @@ CHECK(p != NULL && p->length == 0);
 free(p);
 ```
 
-**Expected:** The header exists and records zero length.
+**Expected:** Before the repair the run stops with `Check failed` at the CHECK on `p != NULL && p->length == 0`; after it the line reads `struct Packet *p = packet_create(NULL, 0);` again and the header exists and records zero length.
 
 The helper avoids calling memcpy on absent payload pointers when no bytes are requested.
 

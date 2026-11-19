@@ -194,4 +194,4 @@ if __name__ == "__main__":
 
 ## Interpretation
 
-Explain what a snapshot actually observed and what it cannot reconstruct. Verify current and closed versions, define deletion handling, and preserve identity and clock contracts before using the history for features or analysis.
+Verify current and closed versions, define deletion handling, and preserve identity and clock contracts before using the history for features or analysis.

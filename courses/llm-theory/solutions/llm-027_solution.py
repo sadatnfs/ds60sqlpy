@@ -4,12 +4,12 @@ import numpy as np
 
 
 def verify():
-    # Exercise 1: Weight token losses
+    # Worked example A: Weight token losses
     means = np.array([1.0, 3.0])
     counts = np.array([1, 3])
     assert np.average(means, weights=counts) == 2.5 and means.mean() == 2
 
-    # Exercise 2: Build a calibration bin
+    # Worked example B: Build a calibration bin
     confidence = np.array([0.6, 0.8, 0.8, 1.0])
     correct = np.array([1, 1, 0, 1])
     assert len(confidence) == 4
@@ -41,6 +41,20 @@ def verify():
     left = {"tokenizer": "v1", "unit": "token"}
     right = {"tokenizer": "v2", "unit": "token"}
     assert left != right
+
+    # Exercise 1: Weight three documents
+    means3 = np.array([2.0, 4.0, 1.0])
+    counts3 = np.array([2, 1, 5])
+    np.testing.assert_allclose(np.average(means3, weights=counts3), 13 / 8, atol=1e-12, rtol=0)
+    np.testing.assert_allclose(means3.mean(), 7 / 3, atol=1e-12, rtol=0)
+
+    # Exercise 2: Summarize a second calibration bin
+    conf2 = np.array([0.9, 0.9, 0.7, 0.9, 0.6])
+    correct2 = np.array([1, 0, 1, 1, 0])
+    assert len(conf2) == 5
+    np.testing.assert_allclose(conf2.mean(), 0.8, atol=1e-12, rtol=0)
+    assert correct2.mean() == 0.6
+    np.testing.assert_allclose(conf2.mean() - correct2.mean(), 0.2, atol=1e-12, rtol=0)
     return {"checks": 6, "status": "passed"}
 
 

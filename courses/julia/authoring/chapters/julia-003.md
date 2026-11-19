@@ -1,12 +1,12 @@
 ## Text has several useful lengths
 
-Julia strings use UTF -8. A byte is a storage unit, a Unicode scalar value is represented by a `Char`, and a visible grapheme may contain several scalar values. These notions coincide for simple ASCII text but diverge for accented characters and many other writing systems.
+Julia strings use UTF-8. A byte is a storage unit, a Unicode scalar value is represented by a `Char`, and a visible grapheme may contain several scalar values. These notions coincide for simple ASCII text but diverge for accented characters and many other writing systems.
 
 String indices identify valid character-start positions in the underlying code-unit sequence. They are not necessarily consecutive character counts. A generic loop should use `eachindex`, `nextind` or character iteration rather than incrementing a byte index and assuming that every position begins a valid character. `length` counts characters, while `ncodeunits` exposes the underlying code-unit count.
 
 A `Char` uses single quotes and a `String` uses double quotes. Interpolation inserts a value into a string, while concatenation combines string contents. Converting bytes or normalizing text requires an explicit policy. A program should not replace invalid or meaningful distinctions simply to make two strings compare equal.
 
-## Worked case A: UTF -8 character starts
+## Worked case A: UTF-8 character starts
 
 The two-character string containing an accented Latin character and a Greek character occupies four bytes. Its valid start indices are 1 and 3. Index 2 is inside the first character and raises `StringIndexError`. Iterating over valid indices or characters produces the expected two characters without assuming a one-byte representation.
 

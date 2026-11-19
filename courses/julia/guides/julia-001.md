@@ -8,7 +8,7 @@ Run a complete Julia script, trace bindings and distinguish a computed value fro
 
 ## Classroom execution
 
-Choose **Julia language and scientific computing** in `/classroom`, open this unit, and select its prepared `julia` runtime. The worker starts a fresh `main.jl` process with two Julia threads, a fixed package environment, no startup file and offline package settings. Both worked examples are complete under that environment. Save your current pad before replacing it. No package, model or dataset is fetched by a lesson.
+Open `julia-001` in `/classroom` with its prepared `julia` runtime. Worked case A (trace a calculation) and worked case B (rebinding a scalar) are complete programs: save your current pad, paste one of them and press Run. The learner file contains the six investigations below; the explained reference ends by printing `julia-001: all reference checks passed`. The [course overview](../README.md) describes the shared runtime: a fresh offline `main.jl` process with two threads and a fixed package environment.
 
 ## The execution model
 
@@ -81,7 +81,7 @@ Use accepted 20 and rejected 3.
 
 ### 2. Keep a scalar snapshot
 
-Bind y to x=4, then rebind x to 10.
+Bind `y` to `x = 4`, then rebind `x` to 10.
 
 **Expected:** y remains 4.
 
@@ -97,7 +97,7 @@ Compare a bare arithmetic expression with println in a script.
 
 ### 4. Inspect a type
 
-Compare typeof(2) and typeof(2.5).
+Compare `typeof(2)` and `typeof(2.5)`.
 
 **Expected:** They are the environment integer type and Float64.
 
@@ -126,4 +126,4 @@ Time a first and repeated call in one process.
 
 ## Study companion
 
-Use the repository learning-companion skill with this lesson ID, your prediction and your actual source/output. Ask for a diagnosis of the first incorrect type, shape, state transition or assumption. Keep observed execution distinct from a timing claim, inferred mathematical result or external deployment.
+A repository-aware assistant with the learning-companion skill can review `julia-001` with you. Give it your prediction for one investigation, your source and the actual output, and ask it to find the first incorrect assumption about script, expression, binding, type or compilation.

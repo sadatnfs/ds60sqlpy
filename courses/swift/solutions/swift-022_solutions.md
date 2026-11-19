@@ -1,6 +1,6 @@
 # swift-022: explanation and comparison
 
-Attempt the six guide tasks before opening this comparison. The executable reference is [swift-022_solution.swift](swift-022_solution.swift). Its assertions are always active under the prepared classroom compile settings.
+Attempt the six guide tasks before opening this comparison. The executable reference is [swift-022_solution.swift](swift-022_solution.swift). It runs both worked examples and the reference answers below, and its assertions are always active under the prepared classroom compile settings.
 
 ## Why the two examples differ
 
@@ -8,21 +8,65 @@ Attempt the six guide tasks before opening this comparison. The executable refer
 
 **Break a parent-child cycle:** The weak back-reference breaks the ownership cycle while preserving navigation when the parent exists. The child survives independently without retaining its parent.
 
-## Reason through the six tasks
+## Task answers
 
-1. **Predict and explain.** Draw strong and weak arrows in both examples.
+### Task 1: Predict and explain
 
-2. **Guided modification.** Add a temporary second strong owner and predict when the weak observer clears.
+Draw strong and weak arrows in both examples.
 
-3. **Independent construction.** Design a weak delegate relationship.
+No separate reference answer has been written for this task. Example A is the evidence to compare with: The example observes a controlled ownership boundary without retaining the target accidentally. The weak observer becomes nil after the last strong reference is removed.
 
-4. **Diagnose a defect.** Diagnose an object retaining a closure that strongly captures the same object.
+### Task 2: Guided modification
 
-5. **Boundary evidence.** Test a callback after its weak owner has disappeared.
+Add a temporary second strong owner and predict when the weak observer clears.
 
-6. **Transfer and justify.** Choose weak or unowned for a relationship and justify the lifetime guarantee required.
+No separate reference answer has been written for this task. Start from Example B: The weak back-reference breaks the ownership cycle while preserving navigation when the parent exists. The child survives independently without retaining its parent.
 
-For tasks 1 and 2, use the checked values and mechanism trace in the two examples. For task 3, choose names that expose the input and result contract and retain the same invariants. For task 4, the diagnosed mistakes below supply a concrete wrong assumption: preserve its counterexample before repairing it. Task 5 needs an explicit expected value or documented rejection at the boundary, not just successful execution. For task 6, explain what changes in the new context and which part of the original mechanism remains applicable. Several representations may satisfy this transfer task; justify the choice rather than treating this reference as the only architecture.
+### Task 3: Independent construction
+
+Design a weak delegate relationship.
+
+**Reference answer.** It runs as the `Task 3` block of the reference program.
+
+```swift
+final class Listener {
+  var events: [String] = []
+}
+final class Downloader {
+  weak var delegate: Listener?
+  func finish() { delegate?.events.append("finished") }
+}
+let downloader = Downloader()
+var listener: Listener? = Listener()
+downloader.delegate = listener
+downloader.finish()
+precondition(listener?.events == ["finished"])
+listener = nil
+precondition(downloader.delegate == nil)
+downloader.finish()
+```
+
+**Observe:** The listener receives finished; after it is released the weak delegate becomes nil and finish() does nothing.
+
+The downloader does not own its delegate, so it cannot keep the listener alive or form a retain cycle with it.
+
+### Task 4: Diagnose a defect
+
+Diagnose an object retaining a closure that strongly captures the same object.
+
+No reference answer has been written for this task yet. The wrong assumptions to look for are this lesson's pitfalls: Weak is not a general replacement for ownership. A local strong binding can extend lifetime during observation. ARC does not cancel asynchronous work or close external resources automatically.
+
+### Task 5: Boundary evidence
+
+Test a callback after its weak owner has disappeared.
+
+No reference answer has been written for this task yet. Write the expected value or documented rejection for each boundary before running it, and compare with the checks in Example A (Observe weak lifetime) and Example B (Break a parent-child cycle).
+
+### Task 6: Transfer and justify
+
+Choose weak or unowned for a relationship and justify the lifetime guarantee required.
+
+No single reference answer exists: several designs can satisfy this transfer task. Justify yours against the mechanism described below and the vocabulary entry **ARC**, and state one limitation of your choice.
 
 ## Mechanism and diagnostic reasoning
 
@@ -36,4 +80,4 @@ Weak is not a general replacement for ownership. A local strong binding can exte
 
 ## Review before continuing
 
-The reference checks the worked scenarios, including their boundary distinctions. Your independent and transfer artifacts may have additional checks. Compare observations rather than only source text. Preserve any new regression case you discover and explain why it would reject a plausible wrong implementation. External project steps require their own build and platform evidence and are not established by a portable reference passing.
+Run the reference and confirm that it prints `swift-022: passed`, then reconstruct one boundary case from memory and explain which check would reject a plausible wrong implementation. External project steps need their own build and platform evidence; a passing portable reference does not establish them.

@@ -138,4 +138,4 @@ if __name__ == "__main__":
 
 ## Interpretation
 
-Use real tracking APIs to bind parameters, metrics, artifacts and terminal outcomes to an owned run. Verify readback and maintain explicit local routing. The artifact and registry lesson adds the consumer contract needed for serving.
+Verify readback and maintain explicit local routing. The artifact and registry lesson adds the consumer contract needed for serving.

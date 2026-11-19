@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import math
 import numpy as np
 import jax
 import jax.numpy as jnp
@@ -78,7 +77,7 @@ def main():
     assert jax.tree.structure(zero) == jax.tree.structure(state)
     assert all(bool(jnp.all(x == 0)) for x in jax.tree.leaves(zero))
 
-    print("jax-006" + ": 8 asserted cases passed")
+    print("jax-006: 8 asserted cases passed")
 
 
 if __name__ == "__main__":

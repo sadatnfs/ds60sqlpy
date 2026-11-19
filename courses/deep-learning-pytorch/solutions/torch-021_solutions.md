@@ -18,17 +18,17 @@ pack_padded_sequence lets an RNN or GRU process the valid prefixes and return a 
 
 ## Reading the implementation
 
-Use Embedding.from_pretrained with padding_idx0 and freeze=False for the known 4 x 2 table. Set batch_first=True on GRU so inputs are(batch, time, features). pack_padded_sequence receives CPU lengths and enforce_sorted=False for this tiny fixture. Compare the packed final state with an unpadded valid-prefix run. For loss, use an explicit boolean valid mask and reject an all-padding denominator.
+Use Embedding.from_pretrained with `padding_idx`=0 and freeze=False for the known 4-by-2 table. Set batch_first=True on GRU so inputs are (batch, time, features). pack_padded_sequence receives CPU lengths and enforce_sorted=False for this tiny fixture. Compare the packed final state with an unpadded valid-prefix run. For loss, use an explicit boolean valid mask and reject an all-padding denominator.
 
 ## Follow lookup, recurrent state and loss participation separately
 
-The embedding table has shape(V, D)=(4, 2). IDs shaped(B, T)=(1, 3) select rows and produce values shaped(B, T, D)=(1, 3, 2). The mask has shape(1, 3), and the length vector has one entry per sequence, shape(1). IDs[2, 3, 0] select[2, 2], [3, -1], [0, 0], while the vocabulary rule marks only the first two positions valid. A genuine token could have a zero vector, so vector magnitude cannot replace that rule.
+The embedding table has shape (V, D)=(4, 2). IDs shaped (B, T)=(1, 3) select rows and produce values shaped (B, T, D)=(1, 3, 2). The mask has shape (1, 3), and the length vector has one entry per sequence, shape (1). IDs [2, 3, 0] select [2, 2], [3, -1], [0, 0], while the vocabulary rule marks only the first two positions valid. A genuine token could have a zero vector, so vector magnitude cannot replace that rule.
 
-Example B differentiates the sum of all lookup outputs. Each used nonpadding row receives the sum of upstream vectors for its occurrences. Here rows 2 and 3 each receive[1, 1], unused row 1 receives zero, and padding row 0 receives zero from the lookup backward rule. If ID 2 appeared twice, its dense gradient contribution would be[2, 2]. Token indices themselves are discrete selectors, not floating parameters to differentiate through. [PyTorch 2.9 Embedding](https://docs.pytorch.org/docs/2.9/generated/torch.nn.Embedding.html).
+Example B differentiates the sum of all lookup outputs. Each used nonpadding row receives the sum of upstream vectors for its occurrences. Here rows 2 and 3 each receive [1, 1], unused row 1 receives zero, and padding row 0 receives zero from the lookup backward rule. If ID 2 appeared twice, its dense gradient contribution would be [2, 2]. Token indices themselves are discrete selectors, not floating parameters to differentiate through. [PyTorch 2.9 Embedding](https://docs.pytorch.org/docs/2.9/generated/torch.nn.Embedding.html).
 
 `padding_idx` controls the embedding operation's gradient contribution. It does not automatically propagate a mask through a GRU, initialize every supplied pretrained padding row to zero, or protect a row from explicit mutation. Optimizer-wide operations such as decay on a nonzero row are a separate state/update question. The worked table deliberately supplies a zero padding row and performs no optimizer step, so its actual evidence is the stated gradient pattern. Keras `mask_zero=True` instead creates mask metadata for compatible consumers; that is not a mechanical synonym for PyTorch's padding-gradient rule.
 
-With batch_first=True, the un-packed GRU input uses(B, T, D). Its final hidden state still uses(num_layers×directions, B, H), so the one-layer unidirectional fixture returns(1, 1, 2). batch_first does not reorder the hidden-state axes. A bidirectional final-state tensor has two directional entries per layer and cannot be replaced casually by the last padded output row. PackedSequence also carries ordering/length bookkeeping; enforce_sorted=False avoids requiring the caller to sort this tiny batch manually. Lengths describe positive valid prefixes and are supplied on CPU for this interface.
+With batch_first=True, the un-packed GRU input uses (B, T, D). Its final hidden state still uses (num_layers×directions, B, H), so the one-layer unidirectional fixture returns (1, 1, 2). batch_first does not reorder the hidden-state axes. A bidirectional final-state tensor has two directional entries per layer and cannot be replaced casually by the last padded output row. PackedSequence also carries ordering/length bookkeeping; enforce_sorted=False avoids requiring the caller to sort this tiny batch manually. Lengths describe positive valid prefixes and are supplied on CPU for this interface.
 
 Why does a zero padding vector still change a recurrent state? A recurrent step includes the previous hidden state and biases. For a GRU, write r and z for reset/update gates, n for the candidate, and \(h_{\mathrm{new}}=(1-z)n+zh_{\mathrm{old}}\). Even when \(x=0\), the recurrent affine terms and biases can make r, z, n nontrivial. The padded third step is therefore another computation, not an identity operation.
 
@@ -36,71 +36,74 @@ The fixed parameters make a compact analytic trace possible because both hidden 
 
 Example C uses values.detach(). That explicitly disconnects the GRU comparison from the embedding graph whose backward was already exercised in Example B. It still permits gradients with respect to GRU parameters in an ordinary differentiable forward, but this fixture does not call a GRU backward or update them. Do not interpret matching packed/prefix forward states as evidence that an entire embedding-plus-GRU training graph was tested. In a fresh end-to-end training step, use a fresh lookup graph and preserve the intended gradient path instead of detaching it accidentally.
 
-The masked token objective is L=(sum over b, t of m_bt×loss_bt)/(sum over b, t of m_bt). The two valid log 2 terms give numerator 2 log2 and denominator 2, so the mean is log 2. Dividing by padded width 3 gives 2 log2/3 and changes the scale whenever padding is appended. For this mean, the derivative with respect to each valid loss is \(\frac{1}{2}\) and the padding loss derivative is zero. An all-padding batch has no valid denominator and needs an explicit refusal or skip policy.
+The masked token objective is L=(sum over b, t of m_bt×loss_bt)/(sum over b, t of m_bt). The two valid log 2 terms give numerator 2 log 2 and denominator 2, so the mean is log 2. Dividing by padded width 3 gives 2 log2/3 and changes the scale whenever padding is appended. For this mean, the derivative with respect to each valid loss is \(\frac{1}{2}\) and the padding loss derivative is zero. An all-padding batch has no valid denominator and needs an explicit refusal or skip policy.
 
 A per-sequence mean followed by averaging sequences is a different objective when lengths differ. A sequence with one token and one with nine tokens each receive half the weight under that policy, whereas a global token mean assigns one-tenth versus nine-tenths. Decide the statistical unit before implementing accumulation or batching. Keras mask propagation can help layers ignore padding, but it does not remove the need to inspect the objective's actual numerator and denominator.
 
-## Exercise 1: Lookup and mark padding
+## Exercise 1: Look up a short sequence
 
-The question is: Use IDs 2, 3, 0 and a fixed 4 x 2 table with zero padding row.
+The question is: With the same 4-by-2 table and `padding_idx`=0, look up IDs [[1, 0, 0]] and build the validity mask.
 
-The mask comes from the vocabulary policy. A real token could have a zero vector, so vector magnitude is not a reliable padding detector.
+The two padding positions read the zero row; only the mask says they are not real tokens.
 
 ```python
-table = torch.tensor([[0.0, 0.0], [1.0, 0.0], [2.0, 2.0], [3.0, -1.0]])
-embedding = nn.Embedding.from_pretrained(table, freeze=False, padding_idx=0)
-ids = torch.tensor([[2, 3, 0]])
-values = embedding(ids)
-mask = ids != 0
-assert tuple(values.shape) == (1, 3, 2) and mask.tolist() == [[True, True, False]]
+lookup_table = torch.tensor([[0.0, 0.0], [1.0, 0.0], [2.0, 2.0], [3.0, -1.0]])
+lookup = nn.Embedding.from_pretrained(lookup_table, freeze=False, padding_idx=0)
+short_ids = torch.tensor([[1, 0, 0]])
+short_values = lookup(short_ids)
+assert short_values.tolist() == [[[1.0, 0.0], [0.0, 0.0], [0.0, 0.0]]] and (
+    short_ids != 0
+).tolist() == [[True, False, False]]
 ```
 
-**Expected:** embedding shape 1, 3, 2; mask True, True, False.
+**Expected:** values [[1, 0], [0, 0], [0, 0]]; mask [[True, False, False]].
 
-**Verify:** Compare the computed values or written argument with embedding shape 1, 3, 2; mask True, True, False.
+**Verify:** In a fresh process, the exercise checks confirm `short_values.tolist() == [[[1.0, 0.0], [0.0, 0.0], [0.0, 0.0]]]` and `(short_ids != 0).tolist() == [[True, False, False]]`.
 
-## Exercise 2: Verify padding-row gradient behavior
+## Exercise 2: Count gradients for repeated IDs
 
-The question is: Sum embedding outputs and backpropagate.
+The question is: Look up IDs [[2, 2, 3]] in that embedding, sum the outputs and backpropagate.
 
-`padding_idx` controls that embedding row's gradient, but does not automatically mask every later operation in the model.
+Each occurrence adds a gradient of ones to its row, so a repeated ID accumulates twice.
 
 ```python
-values.sum().backward()
-assert torch.count_nonzero(embedding.weight.grad[0]).item() == 0
-assert torch.count_nonzero(embedding.weight.grad[2:4]).item() > 0
+lookup(torch.tensor([[2, 2, 3]])).sum().backward()
+assert lookup.weight.grad.tolist() == [[0.0, 0.0], [0.0, 0.0], [2.0, 2.0], [1.0, 1.0]]
 ```
 
-**Expected:** padding row gradient zero; rows 2 and 3nonzero.
+**Expected:** row 2 gradient [2, 2]; row 3 [1, 1]; rows 0 and 1 zero.
 
-**Verify:** Compare the computed values or written argument with padding row gradient zero; rows 2 and 3nonzero.
+**Verify:** In a fresh process, the exercise checks confirm `lookup.weight.grad.tolist() == [[0.0, 0.0], [0.0, 0.0], [2.0, 2.0], [1.0, 1.0]]`.
 
-## Exercise 3: Compare packed and valid-prefix GRU state
+## Exercise 3: Pack a batch with two lengths
 
-The question is: Use fixed GRU parameters.1 and length 2; compare packed run with the unpadded first two embeddings.
+The question is: Run a GRU(2, 2) whose parameters are all 0.1 on two padded sequences of lengths 2 and 1, packed, and compare each final state with its unpadded run.
 
-The packed sequence ends after two observations. This direct comparison establishes what the final state means without relying on a padded output index.
+Packing stops the second sequence after its one real step, so its final state ignores the padding row.
 
 ```python
-gru = nn.GRU(2, 2, batch_first=True)
+rnn = nn.GRU(2, 2, batch_first=True)
 with torch.no_grad():
-    for parameter in gru.parameters():
-        parameter.fill_(0.1)
-packed = nn.utils.rnn.pack_padded_sequence(
-    values.detach(), torch.tensor([2]), batch_first=True, enforce_sorted=False
+    for weight in rnn.parameters():
+        weight.fill_(0.1)
+batch = torch.tensor([[[1.0, 0.0], [2.0, 2.0]], [[3.0, -1.0], [0.0, 0.0]]])
+packed_batch = nn.utils.rnn.pack_padded_sequence(
+    batch, torch.tensor([2, 1]), batch_first=True, enforce_sorted=False
 )
-_, packed_state = gru(packed)
-_, prefix_state = gru(values.detach()[:, :2])
-torch.testing.assert_close(packed_state, prefix_state, atol=1e-6, rtol=0)
+_, states = rnn(packed_batch)
+_, first = rnn(batch[:1, :2])
+_, second = rnn(batch[1:, :1])
+torch.testing.assert_close(states[:, 0], first[:, 0], atol=1e-6, rtol=0)
+torch.testing.assert_close(states[:, 1], second[:, 0], atol=1e-6, rtol=0)
 ```
 
-**Expected:** final states match within 1e-6.
+**Expected:** both final states match their unpadded runs within 1e-6.
 
-**Verify:** Compare the computed values or written argument with final states match within 1e-6.
+**Verify:** In a fresh process, the exercise checks confirm `states[:, 0]` matches `first[:, 0]` within 1e-06 and `states[:, 1]` matches `second[:, 0]` within 1e-06.
 
 ## Exercise 4: Expose an unmasked recurrent tail
 
-The question is: Run GRU overall three positions including zero embedding padding.
+The question is: Run the GRU over all three positions, including the zero padding embedding.
 
 Zero input does not freeze are current state. Biases and hidden-to-hidden operations can continue changing it.
 
@@ -111,11 +114,11 @@ assert not torch.allclose(padded_state, prefix_state, atol=1e-6, rtol=0)
 
 **Expected:** final state differs from the valid-prefix state.
 
-**Verify:** Compare the computed values or written argument with final state differs from the valid-prefix state.
+**Verify:** In a fresh process, the exercise checks confirm `not torch.allclose(padded_state, prefix_state, atol=1e-06, rtol=0)`.
 
 ## Exercise 5: Average only valid token losses
 
-The question is: Use losses log 2, log 2, 100with the valid mask.
+The question is: Use losses log 2, log 2, 100 with the valid mask.
 
 The valid count is two. Zeroing the third numerator but dividing by three would make padding artificially improve the metric.
 
@@ -127,7 +130,7 @@ np.testing.assert_allclose(mean.item(), np.log(2), atol=1e-12, rtol=0)
 
 **Expected:** mean log 2, unchanged by the padding loss.
 
-**Verify:** Compare the computed values or written argument with mean log 2, unchanged by the padding loss.
+**Verify:** In a fresh process, the exercise checks confirm `mean.item()` matches `np.log(2)` within 1e-12.
 
 ## Exercise 6: Reject zero-length recurrent input
 
@@ -148,7 +151,7 @@ else:
 
 **Expected:** RuntimeError for invalid length.
 
-**Verify:** Compare the computed values or written argument with RuntimeError for invalid length.
+**Verify:** In a fresh process, the exercise checks confirm the invalid call raises `RuntimeError`.
 
 ## Review after comparison
 

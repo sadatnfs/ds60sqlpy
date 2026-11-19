@@ -120,4 +120,4 @@ if __name__ == "__main__":
 
 ## Interpretation
 
-Design evaluation around the target population and information boundary. Demonstrate the difference between repeat-entity, cold-start and future-time questions, and retain the complete selection/evaluation procedure with the resulting metrics.
+Demonstrate the difference between repeat-entity, cold-start and future-time questions, and retain the complete selection/evaluation procedure with the resulting metrics.

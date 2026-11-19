@@ -1,22 +1,22 @@
 # spark-037: Deterministic streaming tests without sleep-based guesses
 
-Authored paired Scala/PySpark teaching content. The default fixtures are tiny,local and deterministic. Runtime acceptance,logical correctness and learner understanding remain separate evidence.
+Authored paired Scala/PySpark teaching content. The default fixtures are tiny, local and deterministic. Runtime acceptance, logical correctness and learner understanding remain separate evidence.
 
 ## Level and prerequisites
 
-Advanced; approximately 120 minutes. Direct design prerequisites: `spark-036`. The prepared baseline is Spark4.0.1,Scala binary2.13,JDK17 and Python3.12. Read the [execution baseline](../execution-baseline.md);a proposed future tuple is not a runtime receipt.
+Advanced; approximately 120 minutes. Direct prerequisites: `spark-036`. The prepared baseline is Spark 4.0.1, Scala binary 2.13, JDK 17 and Python 3.12. Read the [execution baseline](../execution-baseline.md).
 
 ## How to run this lesson
 
-Open `spark-037` in the classroom and choose the Scala or PySpark implementation you understand. Prepare only its fixed `spark-local-scala` or `spark-local-python` profile,save your pad and run the complete source. Scala stages as `Main.scala` with `object Main`;Python stages as `main.py` with a main guard. Each program creates its own local[2] session,disables the UI,binds the driver to loopback and stops the session in finally. No external dataset,package download,JDBC connection or cloud service is requested.
+Open `spark-037` in the classroom and choose the Scala or PySpark implementation you understand. Prepare only its fixed `spark-local-scala` or `spark-local-python` profile, save your pad and run the complete source. Scala stages as `Main.scala` with `object Main`;Python stages as `main.py` with a main guard. Each program creates its own local[2] session, disables the UI, binds the driver to loopback and stops the session in finally. No external dataset, package download, JDBC connection or cloud service is requested.
 
-The [Scala learner](../lessons/spark-037.scala) and [PySpark learner](../lessons/spark-037.py) run two complete demonstrations and retain six explicit task stubs. Use the [explained solutions](../solutions/spark-037_solutions.md) only after an attempt or an explicit worked comparison;the [Scala reference](../solutions/spark-037_solution.scala) and [PySpark reference](../solutions/spark-037_solution.py) contain complete assertions. A bounded collect is used only for the declared tiny fixture;do not copy it onto an unbounded or large production table.
+The [Scala learner](../lessons/spark-037.scala) and [PySpark learner](../lessons/spark-037.py) run two complete demonstrations and retain six explicit task stubs. Use the [explained solutions](../solutions/spark-037_solutions.md) only after an attempt or an explicit worked comparison; the [Scala reference](../solutions/spark-037_solution.scala) and [PySpark reference](../solutions/spark-037_solution.py) contain complete assertions. A bounded collect is used only for the declared tiny fixture; do not copy it onto an unbounded or large production table.
 
 ## Learning objectives
 
 - Test finite streaming scenarios with explicit batch progression and bounded cleanup.
-- State the input and output grain,schema,NULL policy and ordering before executing a transformation.
-- Compare each language implementation with independent literal expectations,not only with the other implementation.
+- State the input and output grain, schema, NULL policy and ordering before executing a transformation.
+- Compare each language implementation with independent literal expectations, not only with the other implementation.
 
 ## Vocabulary and concepts
 
@@ -40,7 +40,7 @@ The case matrix has four independent scenarios:compatible checkpoint restart, du
 
 Every source row has nullable bigint fields id, event_second, cents. Nullable schema is not permission to accept NULL in the business product:the invalid case explicitly checks the boundary. Event seconds are small integers on a declared synthetic timeline. The fixed cutoff 90 is a business admission rule, not a claim that an engine watermark has reached 90. Naming that distinction keeps the test deterministic and avoids pretending an ordinary filter verified state-store eviction.
 
-The restart case has two valid rows. The first finite query writes them;the second uses the same checkpoint and no new files. Its new input sum must be zero, and the old sink bag must remain unchanged. The persistent query ID and changed run ID distinguish logical recovery from a new query history. An empty progress array is a valid no-work shape and should not cause a test to invent a batch.
+The restart case has two valid rows. The first finite query writes them; the second uses the same checkpoint and no new files. Its new input sum must be zero, and the old sink bag must remain unchanged. The persistent query ID and changed run ID distinguish logical recovery from a new query history. An empty progress array is a valid no-work shape and should not cause a test to invent a batch.
 
 The duplicate case uses two exactly equal occurrences of one ID. It invokes native streaming dropDuplicates, so the output contains one row. There is no watermark eviction in this isolated case. The fixture has at most two input rows, so the demonstration is bounded, but an unbounded production stream would need a state-retention policy. Different payloads under the same ID would also require an explicit conflict rule rather than accepting an arbitrary retained row.
 
@@ -58,7 +58,7 @@ The final negative control submits the unsafe two-copy bag to the one-row duplic
 
 ## Keep recovery evidence portable and bounded
 
-Retain input fixture identity, query/run IDs, batch/input observations, canonical rows and the named failure reason. Avoid copying whole event logs or arbitrary user records when a small field extract explains the case. A test-owned checkpoint exists only during the scenario;cleanup happens after all evidence assertions and query termination. Existing checkpoints are neither reset nor migrated.
+Retain input fixture identity, query/run IDs, batch/input observations, canonical rows and the named failure reason. Avoid copying whole event logs or arbitrary user records when a small field extract explains the case. A test-owned checkpoint exists only during the scenario; cleanup happens after all evidence assertions and query termination. Existing checkpoints are neither reset nor migrated.
 
 These are local classic Spark 4.0.1 tests. They qualify the finite semantics and lifecycle observed in that prepared profile. They do not simulate executor loss, remote storage races or every distributed scheduling interleaving. The next observability chapter uses the same discipline to distinguish actual progress from a diagnosis hypothesis.
 
@@ -219,7 +219,7 @@ Restart the compatible baseline with its existing checkpoint and no new file.
 
 **Expected result/shape:** Same query ID, new run ID, zero new rows and unchanged sink.
 
-**Verify:** Compare identities, input sum and exact bag;allow empty progress entries.
+**Verify:** Compare identities, input sum and exact bag; allow empty progress entries.
 
 **Progressive hint:** An empty AvailableNow run can terminate without a data batch.
 
@@ -231,13 +231,13 @@ Use native streaming dropDuplicates on the id key for two identical occurrences 
 
 **Verify:** Compare input count 2 and the one-row bag.
 
-**Progressive hint:** This finite state is bounded by the fixture;no watermark eviction claim is made.
+**Progressive hint:** This finite state is bounded by the fixture; no watermark eviction claim is made.
 
 ### Exercise 4: Test the exact event-time boundary
 
 Apply the explicitly declared admission cutoff event_second>=90 to rows at 80,90 and 110.
 
-**Expected result/shape:** 3 source rows;accepted IDs 2,3 with cents 200,300.
+**Expected result/shape:** 3 source rows; accepted IDs 2,3 with cents 200,300.
 
 **Verify:** Compare exact two-row bag and explain why 90 is retained.
 
@@ -257,7 +257,7 @@ Reject a NULL identity and a negative amount while retaining valid 3:300.
 
 Compare the correct duplicate-case bag with an unsafe two-copy append result and reject the mismatch. Confirm every owned query is inactive before cleanup.
 
-**Expected result/shape:** Correct bag passes;duplicated bag raises an assertion-contract error;all owned queries are inactive.
+**Expected result/shape:** Correct bag passes; duplicated bag raises an assertion-contract error; all owned queries are inactive.
 
 **Verify:** Catch the specific mismatch and compare the exact offending rows.
 
@@ -269,11 +269,11 @@ Do not substitute sleeps for batch completion, compare unordered collections as 
 
 ## Self-check
 
-Explain the contract of `baseline` / `baseline` without reading its solution. Trace the specified boundary case,then explain the final exercise's evidence and limitation. Identify where a transformation builds a plan and where an action requests execution. Retain exact values or operator evidence rather than treating a successful process exit as proof of the whole learning objective.
+Explain the contract of `baseline` / `baseline` without reading its solution. Trace the specified boundary case, then explain the final exercise's evidence and limitation. Identify where a transformation builds a plan and where an action requests execution. Retain exact values or operator evidence rather than treating a successful process exit as proof of the whole learning objective.
 
 ## Next step
 
-Use the [course route](../README.md) to continue. Paired-language agreement is useful only when both outputs also satisfy the independent fixture contract. Keep runtime/profile receipts separate from any cluster-performance or production-recovery claim.
+Use the [course route](../README.md) to continue. Paired-language agreement is useful only when both outputs also satisfy the independent fixture contract. A successful local run is not evidence of cluster performance or production recovery.
 
 ## Primary sources and official APIs
 
@@ -285,8 +285,8 @@ Use the [course route](../README.md) to continue. Paired-language agreement is u
 
 ```text
 Use $guide-ds60sqlpy-learning to coach me through spark-037: Deterministic streaming tests without sleep-based guesses.
-Read courses/scala-spark/guides/spark-037.md and courses/scala-spark/lessons/spark-037.scala;the paired sources are courses/scala-spark/lessons/spark-037.scala and courses/scala-spark/lessons/spark-037.py.
-Direct prerequisites: spark-036. Explain the schema,row grain and new Scala/Python/Spark syntax,ask me to predict a concrete result,then inspect my attempt. Give one hint at a time,review exact result and boundary evidence,and ask retrieval questions in my own words. Do not read solutions/ until I ask or have made an honest attempt.
-Use only the prepared local[2] worker profile and owned job scratch. Do not download dependencies,start a remote service,reset existing checkpoints or alter unrelated learner work.
+Read courses/scala-spark/guides/spark-037.md and courses/scala-spark/lessons/spark-037.scala; the paired sources are courses/scala-spark/lessons/spark-037.scala and courses/scala-spark/lessons/spark-037.py.
+Direct prerequisites: spark-036. Explain the schema, row grain and new Scala/Python/Spark syntax, ask me to predict a concrete result, then inspect my attempt. Give one hint at a time, review exact result and boundary evidence, and ask retrieval questions in my own words. Do not read solutions/ until I ask or have made an honest attempt.
+Use only the prepared local[2] worker profile and owned job scratch. Do not download dependencies, start a remote service, reset existing checkpoints or alter unrelated learner work.
 Done when all six contracts have inspected evidence and I can explain the stated assumptions and a meaningful failure case.
 ```

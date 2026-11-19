@@ -193,6 +193,16 @@ Use a common family/stratum ledger to compare A and B.
 - [Horvitz and Thompson: unequal-probability sampling](https://www.tandfonline.com/doi/abs/10.1080/01621459.1952.10483446)
 - [Probability and sampling foundations](../../../courses/statistics-ml/chapters/03-probability-fundamentals-and-stochastic-processes.md)
 
-## Study companion
+## Ask an AI tutor about this lesson
 
-Use the repository learning-companion skill with this lesson ID and your own source/output. Ask for clarification of the estimand, probability distribution, data split or gradient before a hint. Keep claims about the authored fixture separate from claims requiring real population or model evidence.
+```text
+Use the checked-in $guide-ds60sqlpy-learning skill for eval-005, Stratified sampling and population weighting.
+Read courses/llm-evaluation/guides/eval-005.md and courses/llm-evaluation/lessons/eval-005.py. Direct prerequisites: eval-001, eval-002.
+Ask me to state the estimand, probability distribution, data split or gradient
+before giving a hint. Review my attempt at the six investigations one at a time,
+give one hint, and ask for the printed evidence.
+Keep courses/llm-evaluation/solutions/ closed until I attempt or explicitly request comparison.
+Keep claims about the authored fixture separate from claims that need real
+population or model evidence. Done when I can reproduce both worked programs,
+pass the six investigations and explain one failure case.
+```

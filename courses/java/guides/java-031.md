@@ -6,13 +6,13 @@ Advanced, approximately 120 minutes. Direct prerequisites: `java-030`
 
 ## Learning objectives
 
-Explain reflection, runtime annotation, service provider, binary class name using a concrete program. Trace the normal execution, identify its boundary assumptions and make a failure case observable. The first investigation is Read Version on the known Friendly provider. The final exercise transfers the mechanism to treat provider metadata as a policy input.
+Inspect annotations, invoke methods reflectively and load services with ServiceLoader while preserving failure causes. Along the way, explain reflection, runtime annotation, service provider, binary class name using a concrete program. Trace the normal execution, identify its boundary assumptions and make a failure case observable. Exercises 1 and 2 start from the worked examples; the authored investigations begin with this task: Create the temporaryMETA-INF/services entry and discover Greeting providers. The final exercise transfers the mechanism to treat provider metadata as a policy input.
 
 ## Purpose and mental model
 
-Reflection inspects or invokes program elements through metadata rather than ordinary compile-time calls. It can support frameworks and tooling,but it moves some errors from compilation to runtime and can obscure dependencies. An annotation is metadata;it does not enforce behavior until code reads it and applies a policy. Runtime retention is required when reflection should see an annotation after compilation.
+Reflection inspects or invokes program elements through metadata rather than ordinary compile-time calls. It can support frameworks and tooling, but it moves some errors from compilation to runtime and can obscure dependencies. An annotation is metadata; it does not enforce behavior until code reads it and applies a policy. Runtime retention is required when reflection should see an annotation after compilation.
 
-ServiceLoader provides a structured provider-discovery mechanism. A service interface defines the contract,and provider metadata names implementations. The provider still needs a compatible constructor,module/classpath visibility and behavior. This lesson creates an owned temporary service descriptor for a known local nested provider,loads it through a scoped URLClassLoader,and validates its annotation and method behavior. It does not load remote code or accept arbitrary class names from untrusted input.
+ServiceLoader provides a structured provider-discovery mechanism. A service interface defines the contract, and provider metadata names implementations. The provider still needs a compatible constructor, module/classpath visibility and behavior. This lesson creates an owned temporary service descriptor for a known local nested provider, loads it through a scoped URLClassLoader, and validates its annotation and method behavior. It does not load remote code or accept arbitrary class names from untrusted input.
 
 ## Vocabulary and concepts
 
@@ -22,7 +22,7 @@ ServiceLoader provides a structured provider-discovery mechanism. A service inte
 
 **Service provider:** An implementation discovered through a declared service contract.
 
-**Binary class name:** The runtime name used by class loading,including nested-class dollar separators.
+**Binary class name:** The runtime name used by class loading, including nested-class dollar separators.
 
 ## How to run this lesson
 
@@ -41,13 +41,13 @@ The public class name and source filename must agree. Each worked example below 
 
 ## Syntax anatomy and execution trace
 
-Use getAnnotation for a runtime-retained annotation andgetMethod for a public method signature. Method.invoke wraps an exception thrown by the target in InvocationTargetException. Class.forName reports missing classes explicitly. Aclasspath service descriptor is namedMETA-INF/services/<service-interface-binary-name> and contains provider binary names. Close the owned URLClassLoader and temporary directory after discovery.
+Use getAnnotation for a runtime-retained annotation and getMethod for a public method signature. Method.invoke wraps an exception thrown by the target in InvocationTargetException. Class.forName reports missing classes explicitly. A classpath service descriptor is named META-INF/services/<service-interface-binary-name> and contains provider binary names. Close the owned URLClassLoader and temporary directory after discovery.
 
 ## Worked example / walkthrough
 
 ### Example A: Inspect a retained annotation
 
-The annotation's retention policy makes it visible at runtime. Its value is information for a compatibility check,not automatic enforcement.
+The annotation's retention policy makes it visible at runtime. Its value is information for a compatibility check, not automatic enforcement.
 
 ```java
 import java.util.*;
@@ -192,29 +192,29 @@ Read the source from the entry point and name each value before executing it. Id
 
 ## Exercises
 
-1. **Inspect a retained annotation.** Read Version on the known Friendly provider.
-   **Expected:** version 2.
-   **Verify:** Compare your assertion values or captured diagnostic with version 2.
+1. **Inspect a retained annotation: predict an edited check.** Copy Example A into a scratch `Main.java` and change `assert version != null && version.value() == 2;` to `assert version != null && version.value() == 3;` inside its assertion. Before running it with `java -ea Main`, predict whether the assertion still holds and explain why; then restore it.
+   **Expected:** The changed run fails with an `AssertionError` from the assertion on `version != null && version.value() == 2`. Restoring the original line brings back the worked observation: version 2.
+   **Verify:** Compare your written prediction with the reported `AssertionError` and its stack-trace line, and explain why the edited condition is false for the values that satisfy `version != null && version.value() == 2`. After restoring the line, the program completes without an `AssertionError` again.
 
-2. **Invoke a known public method reflectively.** Findgreet(String) and invoke it with Ada.
-   **Expected:** Hello, Ada.
-   **Verify:** Compare your assertion values or captured diagnostic with Hello, Ada.
+2. **Invoke a known public method reflectively: diagnose an edited check.** A careless edit changed the assertion that Example B adds after Example A so that it reads `assert method.invoke(new Friendly(), "Ada!").equals("Hello, Ada");`. Run Example B with that line, explain why the edited assertion now fails for the same program state, and restore it.
+   **Expected:** Before the repair the run fails with an `AssertionError` from the assertion on `method.invoke(new Friendly(), "Ada").equals("Hello, Ada")`; after it the line reads `assert method.invoke(new Friendly(), "Ada").equals("Hello, Ada");` again and hello, Ada.
+   **Verify:** Keep the failing and the repaired runs. Explain why the edited assertion rejects the same program state that `method.invoke(new Friendly(), "Ada").equals("Hello, Ada")` accepts.
 
 3. **Load a real local service descriptor.** Create the temporaryMETA-INF/services entry and discover Greeting providers.
-   **Expected:** oneFriendly provider with version 2 andworkinggreet.
-   **Verify:** Compare your assertion values or captured diagnostic with oneFriendly provider with version 2 andworkinggreet.
+   **Expected:** one Friendly provider with version 2 and working greet.
+   **Verify:** Keep an assertion equivalent to `providers.get(0).greet("Lin").equals("Hello, Lin")`. As a control, change `assert providers.get(0).greet("Lin").equals("Hello, Lin");` to `assert providers.get(0).greet("Lin!").equals("Hello, Lin");` inside it: the run must fail with an `AssertionError`, which shows the assertion can fail. Restore it.
 
-4. **Preserve a reflected target failure.** Invokegreet with blank text and inspect InvocationTargetException cause.
-   **Expected:** causeIllegalArgumentException.
-   **Verify:** Compare your assertion values or captured diagnostic with causeIllegalArgumentException.
+4. **Preserve a reflected target failure.** Invoke greet with blank text and inspect InvocationTargetException cause.
+   **Expected:** cause IllegalArgumentException.
+   **Verify:** Keep an assertion equivalent to `targetFailure`. As a control, change `method.invoke(new Friendly(), " ");` to `method.invoke(new Friendly(), " !");`: the run must fail with an `AssertionError` from the assertion on `targetFailure`. Restore the line before continuing.
 
-5. **Reject missing class and method contracts.** Look up an absent class and an unsupportedgreet(int)signature.
+5. **Reject missing class and method contracts.** Look up an absent class and an unsupported greet(int) signature.
    **Expected:** ClassNotFoundException and NoSuchMethodException.
-   **Verify:** Compare your assertion values or captured diagnostic with ClassNotFoundException and NoSuchMethodException.
+   **Verify:** Keep an assertion equivalent to `missingClass && missingMethod`. As a control, change `missingClass = true;` to `missingClass = false;`: the run must fail with an `AssertionError` from the assertion on `missingClass && missingMethod`. Restore the line before continuing.
 
-6. **Treat provider metadata as a policy input.** Accept provider versions1..2 and reject a hypotheticalversion3 under the current consumer contract.
-   **Expected:** version 2 accepted;version 3 rejected.
-   **Verify:** Compare your assertion values or captured diagnostic with version 2 accepted;version 3 rejected.
+6. **Treat provider metadata as a policy input.** Accept provider versions 1..2 and reject a hypothetical version 3 under the current consumer contract.
+   **Expected:** version 2 accepted; version 3 rejected.
+   **Verify:** Keep an assertion equivalent to `3 > supportedMaximum`. As a control, change `int supportedMaximum = 2;` to `int supportedMaximum = 3;`: the run must fail with an `AssertionError` from the assertion on `3 > supportedMaximum`. Restore the line before continuing.
 
 ## Common pitfalls and diagnosis
 
@@ -224,7 +224,14 @@ Do not replace a precise exception with a catch-all that returns a plausible def
 
 ## Progressive hints
 
-First reconstruct the values and identities in the worked example. Next isolate the line that changes the result when one input is altered. Finally compare the normal and failure paths with the stated contract. Use a small table of input, expected value, actual value and exception type. Ask for one hint about the first incorrect assumption before requesting the entire reference implementation.
+Read one hint at a time and attempt the exercise again before reading the next. Keep a small table of input, expected value, actual value and exception type. Ask for one hint about the first incorrect assumption before requesting the entire reference implementation.
+
+- **Exercise 1:** First restate the expected observation: version 2. Then list the values read by `version != null && version.value() == 2` and trace each one from its declaration. Finally, compute the asserted value with `assert version != null && version.value() == 3;` in place before running.
+- **Exercise 2:** First restate the expected observation: hello, Ada. Then list the values read by `method.invoke(new Friendly(), "Ada").equals("Hello, Ada")` and trace each one from its declaration. Finally, compare `assert method.invoke(new Friendly(), "Ada!").equals("Hello, Ada");` with the same line in Example B and state the claim each version makes.
+- **Exercise 3:** First restate the expected observation: one Friendly provider with version 2 and working greet. Then list the values read by `providers.get(0).greet("Lin").equals("Hello, Lin")` and trace each one from its declaration. Finally, name one input that would make `providers.get(0).greet("Lin").equals("Hello, Lin")` false.
+- **Exercise 4:** First restate the expected observation: cause IllegalArgumentException. Then list the values read by `targetFailure` and trace each one from its declaration. Finally, predict the effect of changing `method.invoke(new Friendly(), " ");` to `method.invoke(new Friendly(), " !");` before running anything.
+- **Exercise 5:** First restate the expected observation: classNotFoundException and NoSuchMethodException. Then list the values read by `missingClass && missingMethod` and trace each one from its declaration. Finally, predict the effect of changing `missingClass = true;` to `missingClass = false;` before running anything.
+- **Exercise 6:** First restate the expected observation: version 2 accepted; version 3 rejected. Then list the values read by `3 > supportedMaximum` and trace each one from its declaration. Finally, predict the effect of changing `int supportedMaximum = 2;` to `int supportedMaximum = 3;` before running anything.
 
 ## Self-check and retrieval
 
@@ -236,7 +243,7 @@ Preserve the saved pad and the six exercise observations. Continue to the next l
 
 ## Sources and verification status
 
-[Official Java21 API or language reference](https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/ServiceLoader.html), reviewed2026-10-22. Examples and exercise fixtures are original course material. Use the [validation guide](../../../docs/validation.md) and CI artifacts for the exact revision and platform to inspect actual compile/run results. Authoring, parsing, compilation, execution and learner mastery are separate forms of evidence.
+[Official Java 21 API or language reference](https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/ServiceLoader.html), reviewed 2026-10-22. Examples and exercise fixtures are original course material. Use the [validation guide](../../../docs/validation.md) and CI artifacts for the exact revision and platform to inspect actual compile/run results. Authoring, parsing, compilation, execution and learner mastery are separate forms of evidence.
 
 ## Ask an AI tutor about this lesson
 
@@ -246,7 +253,7 @@ Read courses/java/guides/java-031.md and courses/java/lessons/java-031.java. Dir
 Explain the mechanism, ask for a prediction, review my attempt, give one hint,
 request compiler/runtime evidence, and ask a fresh retrieval question.
 Keep courses/java/solutions/ closed until I request comparison or show an attempt.
-Use Java21 and the declared offline fixture. Done when I can explain the state
+Use Java 21 and the declared offline fixture. Done when I can explain the state
 transitions, pass all six exercise contracts, diagnose one failure and solve a
 new boundary case without copying the solution.
 ```

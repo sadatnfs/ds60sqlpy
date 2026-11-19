@@ -27,8 +27,8 @@ def sample_model(model, seed):
 def diagnostics(trace, names):
     import arviz as az
 
-    rhat = np.asarray(az.rhat(trace, var_names=names).to_array(), float)
-    ess = np.asarray(az.ess(trace, var_names=names, method="bulk").to_array(), float)
+    rhat = np.asarray(az.rhat(trace, var_names=names).to_dataarray(), float)
+    ess = np.asarray(az.ess(trace, var_names=names, method="bulk").to_dataarray(), float)
 
     def finite_extreme(values, maximum):
         values = values[np.isfinite(values)]

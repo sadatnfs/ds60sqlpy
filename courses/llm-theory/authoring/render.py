@@ -7,6 +7,8 @@ SOURCE_ROOT = ROOT
 if str(SOURCE_ROOT) not in sys.path:
     sys.path.insert(0, str(SOURCE_ROOT))
 from scripts.format_inline_code import canonical_markdown  # noqa: E402
+from objectives import OBJECTIVES  # noqa: E402
+from verify_text import describe_checks  # noqa: E402
 
 SPECS = {}
 
@@ -41,6 +43,17 @@ def add(
     )
 
 
+def verify_line(lesson_id, exercise):
+    """Name the exercise's own assertions instead of repeating its expected text."""
+    described = describe_checks(exercise["code"])
+    if described is None:
+        raise ValueError(f"{lesson_id}: exercise {exercise['title']!r} needs checkable code")
+    return f"In a fresh process, the exercise checks confirm {described}."
+
+
+PRACTICE_NOTE = "Exercises 1-3 repeat the worked examples as guided reconstructions: rebuild each one without looking, then compare. Exercises 4-6 change the fixture or expose a failure."
+
+
 def polish(value):
     value = re.sub(r",(?=\S)", ", ", value)
     value = re.sub(r";(?=\S)", "; ", value)
@@ -57,7 +70,7 @@ def polish(value):
     return value
 
 
-def write_all(only=None, markdown_only=False):
+def write_all(only=None, markdown_only=False, write_plan=True):
     for track in ["llm-theory"]:
         base = ROOT / "courses" / track
         plan = json.loads((ROOT / "docs/expansion/plans/llm-theory.json").read_text())
@@ -73,9 +86,7 @@ def write_all(only=None, markdown_only=False):
             for exercise in s["exercises"]:
                 for field in ["prompt", "expected", "why"]:
                     exercise[field] = polish(exercise[field])
-            p["outcome"] = s["mental"].split(".")[0] + "."
-            p["lab"] = s["exercises"][0]["prompt"]
-            p["verification"] = s["exercises"][0]["expected"] + " " + s["exercises"][-1]["expected"]
+            p["outcome"], p["lab"], p["verification"] = OBJECTIVES[id]
             p["concepts"] = [k for k, v in s["terms"]]
             reading = p["runtime"] == "reading"
             ext = "md" if reading else "py"
@@ -87,7 +98,7 @@ def write_all(only=None, markdown_only=False):
             prereq = ", ".join(f"`{q}`" for q in p["prerequisites"])
             terms = "\n\n".join(f"**{k}:** {v}" for k, v in s["terms"])
             exercise_text = "\n\n".join(
-                f"{n}. **{e['title']}.** {e['prompt']}\n   **Expected:** {e['expected']}\n   **Verify:** Save the {('reasoning table' if reading else 'assertion results')} for exercise {n}, including {e['expected']}"
+                f"{n}. **{e['title']}.** {e['prompt']}\n   **Expected:** {e['expected']}\n   **Verify:** {verify_line(id, e)}"
                 for n, e in enumerate(s["exercises"], 1)
             )
             examples = "\n\n".join(
@@ -137,7 +148,7 @@ and evidence about generalization. Done when I can derive the worked values, pas
 
 {runtime}
 
-Run the three worked blocks in order in one scratch file; later blocks reuse the earlier helper and fixture state. To reproduce a later block in a fresh process, include its preceding blocks. Start by reading Example A without running it. Write the intermediate quantities and their units on paper. Run the entire example in a fresh process, not only the final line in a notebook with hidden variables. Examples B and C change assumptions that matter to this mechanism. Distinguish an exact algebraic mechanism from empirical model quality or hardware performance. The reference uses tiny CPU fixtures only. Compare both observations before starting independent work. An assertion failure is a request to inspect an assumption, not a reason to widen every tolerance. For float64 arithmetic use an absolute tolerance of 1e-12 unless an exercise gives another bound. TensorFlow and PyTorch float32 comparisons use 1e-6. Integer counts, identities and boolean decisions should be exact.
+Run the three worked blocks in order in one scratch file; later blocks reuse the earlier helper and fixture state. To reproduce a later block in a fresh process, include its preceding blocks. Start by reading Example A without running it. Write the intermediate quantities and their units on paper. Run the entire example in a fresh process, not only the final line in a notebook with hidden variables. Examples B and C change assumptions that matter to this mechanism. Distinguish an exact algebraic mechanism from empirical model quality or hardware performance. The reference uses tiny CPU fixtures only. Compare all three observations before starting independent work. An assertion failure is a request to inspect an assumption, not a reason to widen every tolerance. For float64 arithmetic use an absolute tolerance of 1e-12 unless an exercise gives another bound. TensorFlow and PyTorch float32 comparisons use 1e-6. Integer counts, identities and boolean decisions should be exact.
 
 ## Syntax anatomy and reasoning sequence
 
@@ -152,6 +163,8 @@ Run the three worked blocks in order in one scratch file; later blocks reuse the
 For the supplied fixture, name the input unit, the intermediate state and the final quantity that changes. Predict one normal result and one failure result before touching the code. In particular, explain this lesson's acceptance condition in your own words: {p["verification"]} Preserve the prediction beside your later observations so a correction is visible. A copied expected value is not a derivation.
 
 ## Exercises
+
+{PRACTICE_NOTE}
 
 {exercise_text}
 
@@ -169,7 +182,7 @@ First draw the state described in the vocabulary section. Next use the smallest 
 
 ## Self-check and retrieval
 
-Close both worked examples. Explain {", ".join(k for k, v in s["terms"][:3])} using the lesson fixture. Reconstruct one computation from its inputs. Then change one input while retaining the mechanism and predict whether the conclusion survives. Write which part is guaranteed by the code and which part would need new observations. This last distinction prevents a tiny deterministic teaching example from being presented as evidence about an unseen population or a production model.
+Close all three worked examples. Explain {", ".join(k for k, v in s["terms"][:3])} using the lesson fixture. Reconstruct one computation from its inputs. Then change one input while retaining the mechanism and predict whether the conclusion survives. Write which part is guaranteed by the code and which part would need new observations. This last distinction prevents a tiny deterministic teaching example from being presented as evidence about an unseen population or a production model.
 
 ## Next step
 
@@ -216,7 +229,7 @@ The question is: {e["prompt"]}
 
 **Expected:** {e["expected"]}
 
-**Verify:** Compare the computed values or written argument with {e["expected"]}
+**Verify:** {verify_line(id, e)}
 
 """
                 blocks.append(
@@ -281,7 +294,8 @@ The question is: {e["prompt"]}
             continue
         inventory["lessons"].sort(key=lambda x: x["id"])
         (base / "lessons.json").write_text(json.dumps(inventory, indent=2) + "\n")
-        (ROOT / "docs/expansion/plans/llm-theory.json").write_text(
-            json.dumps(plan, indent=2) + "\n"
-        )
+        if write_plan:
+            (ROOT / "docs/expansion/plans/llm-theory.json").write_text(
+                json.dumps(plan, indent=2) + "\n"
+            )
     print("Authored", len(SPECS), "lesson bundles")

@@ -1,4 +1,4 @@
-"""mle-015: worked starting point; complete the guide's six changes."""
+"""mle-015: both worked cases; complete the guide's six changes."""
 
 import numpy as np
 import pandas as pd
@@ -22,8 +22,24 @@ def example_one():
     return {"mature_prediction_ids": [1, 3], "brier": brier, "label_coverage": 0.5}
 
 
+def example_two():
+    from scipy.stats import ks_2samp
+
+    baseline = np.array([1.0, 2.0, 3.0, 4.0, 5.0])
+    shifted = baseline + 10
+    statistic = float(ks_2samp(baseline, shifted).statistic)
+    latencies = np.array([2.0, 3.0, 4.0, 8.0, 15.0])
+    assert statistic == 1.0 and float(np.quantile(latencies, 0.95, method="higher")) == 15.0
+    return {
+        "covariate_shift_statistic": statistic,
+        "observed_p95_ms": 15.0,
+        "quality_requires_labels": True,
+    }
+
+
 if __name__ == "__main__":
     print(example_one())
+    print(example_two())
 
 # TODO 1: Advance the cutoff and recompute maturity and coverage.
 # TODO 2: Describe a process where positive outcomes arrive later.

@@ -15,6 +15,29 @@ Left-join selected results back to the request population and report missing-fea
 
 The result changes because the source history changed. Preserve that history/version when reporting a retrospective analysis.
 
+```python
+# Uses the tempfile import and the project(), invoke() and rows() helpers in main.py.
+with tempfile.TemporaryDirectory() as d:
+    sql = (
+        "select request_id, value from (select r.request_id, f.value, "
+        "row_number() over (partition by r.request_id order by f.event_at desc, "
+        "f.known_at desc) as rank from {{ ref('requests') }} r join "
+        "{{ ref('features') }} f on r.customer = f.customer "
+        "and f.event_at <= r.cutoff and f.known_at <= r.cutoff) where rank = 1"
+    )
+    p = project(
+        d,
+        models={"training_features": sql},
+        seeds={
+            "requests": "request_id,customer,cutoff\n1,10,5\n2,10,9\n",
+            "features": "customer,event_at,known_at,value\n10,2,3,10\n10,4,4,999\n10,8,8,30\n",
+        },
+    )
+    invoke(p, "build")
+    result = rows(p, "select request_id, value from training_features order by request_id")
+    assert result == [(1, 999), (2, 30)]
+```
+
 **Expected:** It is eligible for cutoff 5.
 
 ## 3. Test equal cutoffs
@@ -128,17 +151,46 @@ def rows(root, sql):
 
 def temporal_case(available):
     with tempfile.TemporaryDirectory() as d:
-        clause = "and f.known_at <= r.cutoff" if available else ""
+        # Only the point-in-time version also requires f.known_at <= r.cutoff.
         sql = (
             (
-                "select request_id, value from (select "
-                "r.request_id,f.value,row_number() over(partition by "
-                "r.request_id order by f.event_at desc,f.known_at desc) as "
-                "rank from {{ ref('requests') }} r join {{ ref('features') "
-                "}} f on r.customer=f.customer and f.event_at<=r.cutoff "
+                "select request_id, value\n"
+                "from\n"
+                "    (\n"
+                "        select\n"
+                "            r.request_id,\n"
+                "            f.value,\n"
+                "            row_number() over (\n"
+                "                partition by r.request_id order by f.event_at desc, f.known_at "
+                "desc\n"
+                "            ) as rank\n"
+                "        from {{ ref('requests') }} r\n"
+                "        join\n"
+                "            {{ ref('features') }} f\n"
+                "            on r.customer = f.customer\n"
+                "            and f.event_at <= r.cutoff\n"
+                "            and f.known_at <= r.cutoff\n"
+                "    )\n"
+                "where rank = 1"
             )
-            + clause
-            + ") where rank=1"
+            if available
+            else (
+                "select request_id, value\n"
+                "from\n"
+                "    (\n"
+                "        select\n"
+                "            r.request_id,\n"
+                "            f.value,\n"
+                "            row_number() over (\n"
+                "                partition by r.request_id order by f.event_at desc, f.known_at "
+                "desc\n"
+                "            ) as rank\n"
+                "        from {{ ref('requests') }} r\n"
+                "        join {{ ref('features') }} f on r.customer = f.customer and f.event_at <= "
+                "r.cutoff\n"
+                "    )\n"
+                "where rank = 1"
+            )
         )
         p = project(
             d,
@@ -174,4 +226,4 @@ if __name__ == "__main__":
 
 ## Interpretation
 
-Produce a historical feature relation with explicit entity, time and version semantics. Demonstrate a late-known counterexample and retain request coverage. This prepares the feature-store and ML engineering route to test actual retrieval against a meaningful temporal oracle.
+Demonstrate a late-known counterexample and retain request coverage. This prepares the feature-store and ML engineering route to test actual retrieval against a meaningful temporal oracle.

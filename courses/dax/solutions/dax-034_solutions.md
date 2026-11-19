@@ -8,7 +8,7 @@ The complete [reference source](dax-034_reference.dax) and [named model](../mode
 
 ### Case A: A three-calendar-day denominator
 
-AnchorFebruary 3,2025; included calendar days February 1,2,3; all observed.
+Anchor February 3, 2025; included calendar days February 1, 2 and 3; all observed.
 
 | Days | Revenue | RevenuePerCalendarDay |
 | --- | --- | --- |
@@ -30,9 +30,9 @@ Same three observed calendar dates; contrast exclusion of BLANK with an explicit
 
 Neither name should be shortened to average daily revenue without identifying the denominator. A small blank-handling change can alter the business meaning.
 
-- The unfilled values are BLANK,20,36.
-- The blank-excluding average is 56/2 =28.
-- The zero-filled observed-calendar values 0,20,36 average 56/3.
+- The unfilled values are BLANK, 20, 36.
+- The blank-excluding average is 56/2 = 28.
+- The zero-filled observed-calendar values 0, 20, 36 average 56/3.
 
 ## Explained practice answers
 
@@ -44,7 +44,7 @@ Revenue is 56 and both dates have sales, so both daily-average definitions give 
 
 ### Exercise 2
 
-Move the three-day anchor to January 4,2025.
+Move the three-day anchor to January 4, 2025.
 
 Revenue is 47; the calendar-day average is 47/3, while the sale-day average is 47/2.
 

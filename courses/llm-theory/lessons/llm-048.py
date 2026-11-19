@@ -5,30 +5,32 @@ Copy to .learning before editing. Six independent attempts belong below.
 """
 
 # Exercise 1: Prove one-step distribution preservation
-# Usep[.5, .3, .2] andq[.2, .5, .3]; calculate acceptedmass, rejectionmass andresidual.
-# Expected: acceptedmass[.2, .3, .2]; rejection.3; residual[1, 0, 0]; combinedmassp.
+# Use target p = [0.5, 0.3, 0.2] and draft q = [0.2, 0.5, 0.3]; calculate the accepted
+# mass, rejection mass and residual.
+# Expected: accepted mass[.2, .3, .2]; rejection .3; residual[1, 0, 0]; combined mass p.
 
-# Exercise 2: Exercise acceptance andcorrection paths
-# Propose token1 withacceptancedraw.8, then token2 withdraw.5.
-# Expected: token1 rejected andcorrected to0; token2 accepted.
+# Exercise 2: Exercise acceptance and correction paths
+# Propose token 1 with acceptance draw .8, then token 2 with draw .5.
+# Expected: token 1 rejected and corrected to 0; token 2 accepted.
 
-# Exercise 3: Check an all-accepted round andbonus token
-# Setdraft andtarget equal top; propose tokens0, 1 withdraws.1, .6, andusebonusdraw.7.
+# Exercise 3: Check an all-accepted round and bonus token
+# Set draft and target both equal to p; propose tokens 0, 1 with draws 0.1, 0.6, and use
+# bonus draw 0.7.
 # Expected: emitted[0, 1, 1]; accepted_count2; no rejection.
 
 # Exercise 4: Stop at the first rejection
-# Useconstanttargetp, draftq, proposal draws.1, .3 andacceptance draws.2, .9.
-# Expected: draft[0, 1]; acceptedprefix[0]; correction0; emitted[0, 0].
+# Use constant target p, draft q, proposal draws 0.1, 0.3 and acceptance draws 0.2, 0.9.
+# Expected: draft[0, 1]; accepted prefix[0]; correction 0; emitted[0, 0].
 
 # Exercise 5: Rollback actual K/V arrays
-# Startcacheprefix[2], appendthetwo proposals, thenrollbackandappend thecorrection;
-# comparewithafreshcache[2, 0, 0].
+# Start with cache prefix [2], append the two proposals, then roll back and append the
+# correction; compare with a fresh cache [2, 0, 0].
 # Expected: tokens, keys, values and attention output match a fresh cache; retaining a rejected token breaks parity.
 
-# Exercise 6: Handle equality,EOS,budgets andinvalid support
-# Checkp=q hasnoresidual, stoponanacceptedEOS2, capoutputat2 tokens, andreject a zero-
-# probability draftproposal.
-# Expected: rejection mass is0 and residual isNone; accepted EOS stops generation; the token cap is respected; unsupported proposals raiseValueError.
+# Exercise 6: Handle equality, EOS, budgets and invalid support
+# Check that p=q has no residual, stop on an accepted EOS 2, cap output at 2 tokens, and
+# reject a zero-probability draft proposal.
+# Expected: rejection mass is 0 and residual is None; accepted EOS stops generation; the token cap is respected; unsupported proposals raise ValueError.
 
 if __name__ == "__main__":
     print("Read the guide and implement the six exercises in your saved copy.")

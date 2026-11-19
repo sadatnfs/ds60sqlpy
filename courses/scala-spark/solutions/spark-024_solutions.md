@@ -50,7 +50,7 @@ The complete relation establishes identity and measure conservation before physi
 
 ### Exercise 3: Observe an adaptive plan before and after execution
 
-Build a freshAQE-enabled join with skew handling enabled, coalescing disabled, skew factor 2, threshold 1024 bytes and advisory size 16384 bytes. Capture the initial plan, materialize the same DataFrame and capture the final plan.
+Build a fresh AQE-enabled join with skew handling enabled, coalescing disabled, skew factor 2, threshold 1024 bytes and advisory size 16384 bytes. Capture the initial plan, materialize the same DataFrame and capture the final plan.
 
 **Expected:** Initial/final text identifies AdaptiveSparkPlan; after materialization isFinalPlan=true. Every result tuple matches the baseline. Actual skew splitting is reported only if visible.
 
@@ -88,7 +88,7 @@ Materializing the same DataFrame lets the reader inspect the final adaptive deci
 
 ### Exercise 4: Split the hot logical key with a deterministic helper
 
-Add salt=fact_id modulo 4 only for key 0 and salt 0 otherwise. WithAQE disabled, compare eight-partition row-load ledgers by key and by(key, salt).
+Add salt=fact_id modulo 4 only for key 0 and salt 0 otherwise. With AQE disabled, compare eight-partition row-load ledgers by key and by(key, salt).
 
 **Expected:** Hot salt buckets 0..3 each have 2250 rows; cold facts all have salt 0. Both physical ledgers reconcile to 10000, and the unsalted maximum is at least 9000.
 
@@ -174,4 +174,4 @@ Projecting away salt restores the declared business schema while the full bag co
 
 ## Execution and interpretation
 
-Run the complete reference in its prepared fixed worker. The small fixture is constructed inside the program,so opening a lesson does not fetch data. A final success line is printed only after the reference assertions complete. Plan observations,partition evidence and resource measurements apply to the actual local configuration; they do not establish cluster-scale performance. Session cleanup is explicit,and any additional owned file/query lifecycle is described in the lesson.
+Run the complete reference in its prepared fixed worker. The small fixture is constructed inside the program, so opening a lesson does not fetch data. A final success line is printed only after the reference assertions complete. Plan observations, partition evidence and resource measurements apply to the actual local configuration; they do not establish cluster-scale performance. Session cleanup is explicit, and any additional owned file/query lifecycle is described in the lesson.

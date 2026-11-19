@@ -16,41 +16,42 @@ A split defines what is unseen. If two rows belong to one account, putting one i
 
 Use a mapping from account to split before selecting values. Set intersection tests group isolation. NumPy mean reduces only the selected training values, and subtraction then broadcasts the scalar to both partitions. A validation perturbation should change transformed validation values while leaving the saved fit statistic unchanged. Hash canonical record IDs only after freezing the selection, and never refit merely because a held-out point looks extreme.
 
-## Exercise 1: Partition accounts
+## Exercise 1: Partition a second account fixture
 
-The question is: Use account IDs A,A,B,B,C,C,D,D with values1,3,5,7,20,22,30,32; train on A,B.
+The question is: Use groups E, E, F, F, G, G, H, H with values 2, 4, 6, 8, 10, 12, 40, 44; train on E, F and G, then center the held-out rows with the training mean.
 
-The boolean mask has one position per record. Its values come from group identity, not a target-dependent ranking. Training has four values and validation has four, but equal counts are incidental to the group-isolation contract.
-
-```python
-groups = np.array(list("AABBCCDD"))
-x = np.array([1.0, 3.0, 5.0, 7.0, 20.0, 22.0, 30.0, 32.0])
-train = np.isin(groups, ["A", "B"])
-valid = ~train
-mean = x[train].mean()
-assert mean == 4 and set(groups[valid]) == {"C", "D"}
-```
-
-**Expected:** train mean4 and validation IDs C,D.
-
-**Verify:** Compare the computed values or written argument with train mean4 and validation IDs C,D.
-
-## Exercise 2: Expose global fitting
-
-The question is: Change the last validation value to3200 and compare train-only and global means.
-
-A perturbation restricted to validation cannot influence a training-only mean. This controlled counterexample detects leakage more directly than inspecting the name of a preprocessing object.
+Three training accounts now contribute six rows, and the held-out account is centered with a statistic it did not influence. Its centered values are far from zero, which is information about the new account rather than an error.
 
 ```python
-changed = x.copy()
-changed[-1] = 3200
-assert changed[train].mean() == mean
-assert changed.mean() != x.mean()
+groups2 = np.array(list("EEFFGGHH"))
+x2 = np.array([2.0, 4.0, 6.0, 8.0, 10.0, 12.0, 40.0, 44.0])
+train2 = np.isin(groups2, ["E", "F", "G"])
+mean2 = x2[train2].mean()
+assert mean2 == 7 and set(groups2[~train2]) == {"H"}
+np.testing.assert_array_equal(x2[~train2] - mean2, [33.0, 37.0])
 ```
 
-**Expected:** training mean stays4; global mean changes.
+**Expected:** train mean 7; validation group H; centered values 33 and 37.
 
-**Verify:** Compare the computed values or written argument with training mean stays4; global mean changes.
+**Verify:** In a fresh process, the exercise checks confirm `mean2 == 7`; `set(groups2[~train2]) == {'H'}` and `x2[~train2] - mean2` equals `[33.0, 37.0]`.
+
+## Exercise 2: Predict the effect of a training outlier
+
+The question is: Change the first training value from 2 to 200. Predict the new training mean and the centered validation values before running the check.
+
+Changing a validation value left the training mean alone in Example B; changing a training value moves the frozen statistic and every transformed validation row with it. A single training outlier can therefore alter all downstream evaluation inputs.
+
+```python
+outlier = x2.copy()
+outlier[0] = 200
+shifted = outlier[train2].mean()
+assert shifted == 40
+np.testing.assert_array_equal(outlier[~train2] - shifted, [0.0, 4.0])
+```
+
+**Expected:** training mean 40; centered H values 0 and 4.
+
+**Verify:** In a fresh process, the exercise checks confirm `shifted == 40` and `outlier[~train2] - shifted` equals `[0.0, 4.0]`.
 
 ## Exercise 3: Find crossing groups
 
@@ -63,13 +64,13 @@ wrong = np.arange(8) % 2 == 0
 assert set(groups[wrong]) & set(groups[~wrong]) == set("ABCD")
 ```
 
-**Expected:** A,B,C,D all cross the split.
+**Expected:** A, B, C, D all cross the split.
 
-**Verify:** Compare the computed values or written argument with A,B,C,D all cross the split.
+**Verify:** In a fresh process, the exercise checks confirm `set(groups[wrong]) & set(groups[~wrong]) == set('ABCD')`.
 
 ## Exercise 4: Apply frozen centering
 
-The question is: Center both partitions with training mean4 and compare validation centered values.
+The question is: Center both partitions with training mean 4 and compare validation centered values.
 
 Only the training values are guaranteed to have centered mean zero. Forcing validation to mean zero would estimate a new statistic and erase a potentially meaningful distribution shift.
 
@@ -78,9 +79,9 @@ np.testing.assert_array_equal(x[valid] - mean, [16, 18, 26, 28])
 assert (x[train] - mean).mean() == 0
 ```
 
-**Expected:** validation values16,18,26,28.
+**Expected:** validation values 16, 18, 26, 28.
 
-**Verify:** Compare the computed values or written argument with validation values16,18,26,28.
+**Verify:** In a fresh process, the exercise checks confirm `x[valid] - mean` equals `[16, 18, 26, 28]` and `(x[train] - mean).mean() == 0`.
 
 ## Exercise 5: Freeze selection identity
 
@@ -100,11 +101,11 @@ assert validation_error > 0 and hashlib.sha256(json.dumps(ids).encode()).hexdige
 
 **Expected:** The selection hash is unchanged.
 
-**Verify:** Compare the computed values or written argument with The selection hash is unchanged.
+**Verify:** In a fresh process, the exercise checks confirm `validation_error > 0` and `hashlib.sha256(json.dumps(ids).encode()).hexdigest() == digest`.
 
 ## Exercise 6: Transfer to unseen accounts
 
-The question is: Add account E with value1000 only to evaluation; specify whether its normalization can update the training mean.
+The question is: Add account E with value 1000 only to evaluation; specify whether its normalization can update the training mean.
 
 A deployment input is transformed using the fitted state. Updating the mean online is a separate algorithm requiring an explicit policy and new evaluation; it is not a harmless formatting adjustment.
 
@@ -113,9 +114,9 @@ new_value = 1000 - mean
 assert new_value == 996 and mean == 4
 ```
 
-**Expected:** transformed value996; fitted mean remains4.
+**Expected:** transformed value 996; fitted mean remains 4.
 
-**Verify:** Compare the computed values or written argument with transformed value996; fitted mean remains4.
+**Verify:** In a fresh process, the exercise checks confirm `new_value == 996` and `mean == 4`.
 
 ## Review after comparison
 

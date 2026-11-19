@@ -29,9 +29,21 @@ internal static class Program {
             "outcome retained");
     }
     {
-      int accepted = 3, rejected = 2, submitted = 5;
-      Check(accepted + rejected == submitted, "accounted input");
-      Check((double)rejected / submitted == 0.4, "defined rejection rate");
+      var accepted = new Event("op-7", "save", "accepted", 3);
+      var rejected = new Event("op-7", "save", "rejected", 2);
+      Event[] events = { accepted, rejected };
+      int submitted = 5;
+      Check(events.Sum(evt => evt.Count) == submitted, "accounted input");
+      Check((double)rejected.Count / submitted == 0.4, "rejection rate");
+    }
+    {
+      // Task 3: Independent construction
+      int[] quantities = { 3, -1, 4, -2, 5 };
+      int submitted = quantities.Length;
+      int accepted = quantities.Count(quantity => quantity >= 0);
+      int rejected = quantities.Count(quantity => quantity < 0);
+      Check(submitted == 5 && accepted == 3 && rejected == 2, "counts");
+      Check(accepted + rejected == submitted, "every record accounted for");
     }
     Console.WriteLine("csharp-044: passed");
     await Task.CompletedTask;

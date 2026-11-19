@@ -176,6 +176,16 @@ Use final-set errors to revise a prompt.
 - [Selection bias in cross-validation](https://jmlr.org/papers/v11/cawley10a.html)
 - [Existing complete-procedure validation](../../../courses/statistics-ml/tutorials/learning/07-validation-as-a-procedure.md)
 
-## Study companion
+## Ask an AI tutor about this lesson
 
-Use the repository learning-companion skill with this lesson ID and your own source/output. Ask for clarification of the estimand, probability distribution, data split or gradient before a hint. Keep claims about the authored fixture separate from claims requiring real population or model evidence.
+```text
+Use the checked-in $guide-ds60sqlpy-learning skill for eval-013, Selection procedures and protected holdouts.
+Read courses/llm-evaluation/guides/eval-013.md and courses/llm-evaluation/lessons/eval-013.py. Direct prerequisites: eval-012, eval-007.
+Ask me to state the estimand, probability distribution, data split or gradient
+before giving a hint. Review my attempt at the six investigations one at a time,
+give one hint, and ask for the printed evidence.
+Keep courses/llm-evaluation/solutions/ closed until I attempt or explicitly request comparison.
+Keep claims about the authored fixture separate from claims that need real
+population or model evidence. Done when I can reproduce both worked programs,
+pass the six investigations and explain one failure case.
+```

@@ -4,11 +4,11 @@ The first probabilistic-programming investigation fits a small regression using 
 
 The synthetic data contain 16 covariate values from minus one to one. Their outcomes follow an intercept .5 and slope 1.3 with a small deterministic perturbation. These known values provide a numerical check, but the fitted model is still an illustrative assumed likelihood. The data construction does not validate normal errors for an external dataset.
 
-The prepared profile uses PyMC 5 and ArviZ 0.23 with the InferenceData object contract. This matters because newer ecosystem interfaces can use different result objects and method names. The course does not download or upgrade packages when a lesson opens.
+The prepared profile uses PyMC 5.28.5 and ArviZ 0.23.4 with the InferenceData object contract. This matters because newer ecosystem interfaces use different result objects and defaults: PyMC 6 with ArviZ 1 returns an `xarray.DataTree` instead of `InferenceData`, summarizes with 89% equal-tailed intervals instead of 94% highest-density intervals and changes which variables `sample_posterior_predictive` resamples. The course does not download or upgrade packages when a lesson opens.
 
 ## Worked case 1: fit real chains and retain diagnostics
 
-The program creates a `pm.Model`, declares the three unknowns and attaches a normal likelihood to observed y. It then runs two serial chains, each with 120 warmup and 120 retained draws, a fixed seed and target acceptance .9. These bounded settings fit within the classroom budget. They are not a recommended production convergence budget.
+The program creates a `pm.Model`, declares the three unknowns and attaches a normal likelihood to observed y. It then runs two serial chains, each with 120 warmup and 120 retained draws, a fixed seed and target acceptance .9. These bounded settings fit within the classroom budget. They are not a recommended production convergence budget: the screen in the Markov chain unit asks for at least four chains and roughly 100 effective draws per chain for every reported quantity, which 240 retained draws in total rarely provide.
 
 The resulting posterior is an xarray-backed object with named chain and draw dimensions. The program calculates intercept and slope means and checks broad agreement with the known fixture. It also reports maximum R-hat, minimum bulk effective sample size and divergences for the sampled parameters. The reported values are observations from the actual run, not constants inserted into the tutorial.
 
@@ -26,7 +26,7 @@ Prediction at the observed covariate values is also different from forecasting a
 
 R-hat compares within- and between-chain behavior through a modern transformed diagnostic, while effective sample size describes the information in correlated draws for particular summaries. A parameter's mean can have a different Monte Carlo precision from its extreme quantile. Review the quantities relevant to the decision rather than collapsing every diagnostic into one pass/fail badge.
 
-The short demonstration can report warnings about chain count or effective sample size. Preserve them. A scientific continuation would use an appropriate longer run, inspect target-specific Monte Carlo error and investigate problematic geometry. Suppressing warnings or choosing a new seed until the output looks better is not a diagnostic strategy.
+Compare the printed record with the screen: `rhat_max` should be below 1.01, `bulk_ess_min` at least 100 times `chains` (200 for this run, 400 with the recommended four chains) and `divergences` zero. The program prints bulk effective sample size only; `az.summary` also reports the tail value `ess_tail`, which needs the same check for interval and tail-probability summaries. A printed R-hat of 1.02 or a minimum bulk effective sample size of 133 therefore fails the screen. The short demonstration can also report PyMC messages recommending at least four chains or a larger effective sample size. Preserve them. A scientific continuation would use an appropriate longer run, inspect target-specific Monte Carlo error and investigate problematic geometry. Suppressing warnings or choosing a new seed until the output looks better is not a diagnostic strategy.
 
 The code stores pointwise log-likelihood contributions for later evaluation. Their dimensions and observation unit matter. A log-likelihood entry for a repeated row is not automatically an independent predictive unit. The model-comparison tutorial revisits that contract before using information criteria or leave-one-out approximations.
 
@@ -34,4 +34,4 @@ The code stores pointwise log-likelihood contributions for later evaluation. The
 
 **Does the coefficient check establish a successful real-world regression?** It shows that the prepared inference path can recover a simple synthetic relationship within a broad tolerance. It does not establish correct modeling assumptions, calibrated uncertainty or transport to another population.
 
-**What should be saved from a Bayesian run?** Save the model and data definitions, package versions, seeds, sampling configuration, actual diagnostics and the quantities used for interpretation. The classroom preserves submitted source and output receipts; a larger project should additionally retain the full posterior artifact in an explicitly managed storage workflow.
+**What should be saved from a Bayesian run?** Save the model and data definitions, package versions, seeds, sampling configuration, actual diagnostics and the quantities used for interpretation. The classroom saves the submitted source and its run output; a larger project should additionally retain the full posterior artifact in an explicitly managed storage workflow.

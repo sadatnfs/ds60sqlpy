@@ -12,12 +12,15 @@
       "prerequisites": [],
       "runtime": "reading",
       "concepts": [
-        "Containers",
-        "images and the process model"
+        "process",
+        "image",
+        "container",
+        "writable layer",
+        "shared kernel"
       ],
-      "outcome": "Explain what evidence proves a web application is serving.",
+      "outcome": "Classify source code, image tag, container and volume. Explain what evidence proves a web application is serving.",
       "lab": "Classify source code, image tag, container and volume.",
-      "verification": "A running process plus a bounded HTTP request and expected response."
+      "verification": "Four objects with separate creation and deletion events."
     },
     {
       "id": "docker-002",
@@ -29,12 +32,15 @@
       ],
       "runtime": "reading",
       "concepts": [
-        "The Linux engine",
-        "WSL 2 and your first inspection"
+        "Docker client",
+        "Docker engine",
+        "Docker context",
+        "WSL 2",
+        "docker info"
       ],
-      "outcome": "Explain a safe response to discovering a remote context.",
+      "outcome": "Produce a minimal setup checklist. Explain a safe response to discovering a remote context.",
       "lab": "Produce a minimal setup checklist.",
-      "verification": "Stop before mutations and deliberately configure the owned local engine."
+      "verification": "Bash, local Linux engine, Compose and sufficient allocated resources."
     },
     {
       "id": "docker-003",
@@ -46,12 +52,14 @@
       ],
       "runtime": "reading",
       "concepts": [
-        "The filesystem",
-        "writable layers and container lifetime"
+        "image layers",
+        "writable layer",
+        "container lifetime",
+        "read-only root filesystem"
       ],
-      "outcome": "Choose storage for user progress and transient scratch data.",
+      "outcome": "Make a restart-versus-recreate persistence table. Choose storage for user progress and transient scratch data.",
       "lab": "Make a restart-versus-recreate persistence table.",
-      "verification": "A named volume for progress and bounded temporary storage for scratch."
+      "verification": "Writable layer survives restart but not removal; volumes follow their own lifetime."
     },
     {
       "id": "docker-004",
@@ -63,13 +71,15 @@
       ],
       "runtime": "reading",
       "concepts": [
-        "Processes",
         "PID 1",
-        "signals and graceful shutdown"
+        "signals",
+        "graceful shutdown",
+        "exec form",
+        "init process"
       ],
-      "outcome": "Design a shutdown acceptance check for a writer.",
+      "outcome": "Write a four-step graceful shutdown sequence. Design a shutdown acceptance check for a writer.",
       "lab": "Write a four-step graceful shutdown sequence.",
-      "verification": "Bounded stop, consistent persisted record and restart recovery."
+      "verification": "Stop new work, bound draining, close owned resources, exit."
     },
     {
       "id": "docker-005",
@@ -81,11 +91,16 @@
       ],
       "runtime": "reading",
       "concepts": [
-        "Dockerfile instructions and the first reproducible image"
+        "Dockerfile",
+        "FROM",
+        "COPY",
+        "RUN",
+        "CMD",
+        "image tag"
       ],
-      "outcome": "Define build and runtime acceptance separately.",
+      "outcome": "Write a minimal Dockerfile for a single file app. Define build and runtime acceptance separately.",
       "lab": "Write a minimal Dockerfile for a single file app.",
-      "verification": "Build succeeds, then endpoint and writable data behavior pass."
+      "verification": "Base, workdir, explicit source copy and foreground command."
     },
     {
       "id": "docker-006",
@@ -97,12 +112,15 @@
       ],
       "runtime": "reading",
       "concepts": [
-        "Build context",
-        ".dockerignore and accidental data exposure"
+        "build context",
+        ".dockerignore",
+        "ignore patterns",
+        "layer history",
+        "explicit COPY"
       ],
-      "outcome": "Describe source and image privacy acceptance.",
+      "outcome": "Design a context inventory for the fixture. Describe source and image privacy acceptance.",
       "lab": "Design a context inventory for the fixture.",
-      "verification": "Review inputs, build recipe and safe final file inventory."
+      "verification": "A short list of necessary public build inputs."
     },
     {
       "id": "docker-007",
@@ -114,12 +132,14 @@
       ],
       "runtime": "reading",
       "concepts": [
-        "Layers",
-        "cache invalidation and efficient rebuilds"
+        "build cache",
+        "cache invalidation",
+        "instruction order",
+        "dependency layer"
       ],
-      "outcome": "Design a build-performance experiment.",
+      "outcome": "Reorder dependency metadata and app source conceptually. Design a build-performance experiment.",
       "lab": "Reorder dependency metadata and app source conceptually.",
-      "verification": "Same engine and context, one controlled edit, named cache observations."
+      "verification": "Stable dependency inputs precede rapidly changing source."
     },
     {
       "id": "docker-008",
@@ -131,12 +151,15 @@
       ],
       "runtime": "reading",
       "concepts": [
-        "Environment variables",
-        "command arguments and configuration"
+        "environment variables",
+        "ENTRYPOINT",
+        "CMD",
+        "Compose interpolation",
+        "configuration validation"
       ],
-      "outcome": "Write a public configuration evidence record.",
+      "outcome": "Design defaults and validation for a timeout variable. Write a public configuration evidence record.",
       "lab": "Design defaults and validation for a timeout variable.",
-      "verification": "Name, safe synthetic value, source of override and observed response."
+      "verification": "A documented default plus finite positive bounded numeric parsing."
     },
     {
       "id": "docker-009",
@@ -148,12 +171,15 @@
       ],
       "runtime": "reading",
       "concepts": [
-        "Ports",
-        "loopback and the first browser request"
+        "port publishing",
+        "loopback address",
+        "bind address",
+        "host port",
+        "container port"
       ],
-      "outcome": "Choose public and internal endpoints for a two-service app.",
+      "outcome": "Draw a host browser request path. Choose public and internal endpoints for a two-service app.",
       "lab": "Draw a host browser request path.",
-      "verification": "Only the user-facing service gets a deliberate published port."
+      "verification": "Browser, host socket mapping, container interface and app listener."
     },
     {
       "id": "docker-010",
@@ -165,12 +191,15 @@
       ],
       "runtime": "reading",
       "concepts": [
-        "Logs",
-        "exit status and observation before repair"
+        "standard streams",
+        "container logs",
+        "exit status",
+        "container state",
+        "events"
       ],
-      "outcome": "Design log content for a public teaching server.",
+      "outcome": "Write an incident observation packet. Design log content for a public teaching server.",
       "lab": "Write an incident observation packet.",
-      "verification": "Useful request metadata without tokens, raw secrets or private payloads."
+      "verification": "Image identity, lifecycle state, recent logs and one failing request."
     },
     {
       "id": "docker-011",
@@ -182,12 +211,14 @@
       ],
       "runtime": "reading",
       "concepts": [
-        "Compose services",
-        "projects and a complete application"
+        "Compose service",
+        "Compose project",
+        "compose.yaml",
+        "project name"
       ],
-      "outcome": "Design a two-copy experiment without interference.",
+      "outcome": "Write the project lifecycle command sequence. Design a two-copy experiment without interference.",
       "lab": "Write the project lifecycle command sequence.",
-      "verification": "Distinct project names and distinct published host ports."
+      "verification": "Validate, build, up with readiness, inspect, then down."
     },
     {
       "id": "docker-012",
@@ -199,12 +230,15 @@
       ],
       "runtime": "reading",
       "concepts": [
-        "Health checks",
-        "startup order and real readiness"
+        "health check",
+        "readiness",
+        "depends_on",
+        "service_healthy",
+        "startup order"
       ],
-      "outcome": "Write separate health and acceptance assertions.",
+      "outcome": "Design a readiness endpoint for a file-backed teaching app. Write separate health and acceptance assertions.",
       "lab": "Design a readiness endpoint for a file-backed teaching app.",
-      "verification": "Health endpoint succeeds; user-facing response and persistence also satisfy their contracts."
+      "verification": "A bounded non-destructive test of required local capability."
     },
     {
       "id": "docker-013",
@@ -216,12 +250,14 @@
       ],
       "runtime": "reading",
       "concepts": [
-        "Named volumes",
-        "bind mounts and persistence experiments"
+        "named volume",
+        "bind mount",
+        "persistence",
+        "container recreation"
       ],
-      "outcome": "Choose a safe cleanup policy for progress.",
+      "outcome": "Build a persistence evidence table. Choose a safe cleanup policy for progress.",
       "lab": "Build a persistence evidence table.",
-      "verification": "Stop containers routinely; delete data only after an explicit reset decision."
+      "verification": "Before value, old/new container IDs, volume identity and after value."
     },
     {
       "id": "docker-014",
@@ -233,11 +269,14 @@
       ],
       "runtime": "reading",
       "concepts": [
-        "First capstone"
+        "image rebuild",
+        "container replacement",
+        "persistent data",
+        "evidence record"
       ],
-      "outcome": "Teach the project to a beginner without using hidden host state.",
+      "outcome": "Produce the complete build-and-request evidence packet. Teach the project to a beginner without using hidden host state.",
       "lab": "Produce the complete build-and-request evidence packet.",
-      "verification": "A fresh-copy procedure with prerequisites, expected outputs and scoped cleanup."
+      "verification": "Build logs, model validation, health state and exact JSON response."
     },
     {
       "id": "docker-015",
@@ -250,11 +289,14 @@
       "runtime": "reading",
       "concepts": [
         "BuildKit",
-        "cache mounts and build secrets"
+        "cache mount",
+        "secret mount",
+        "--secret",
+        "cold build"
       ],
-      "outcome": "Describe a dependency acquisition policy.",
+      "outcome": "Design a cold-build check. Describe a dependency acquisition policy.",
       "lab": "Design a cold-build check.",
-      "verification": "Locked inputs, deliberate network access and no default private credentials."
+      "verification": "Remove reliance on cache while preserving declared public inputs."
     },
     {
       "id": "docker-016",
@@ -266,11 +308,15 @@
       ],
       "runtime": "reading",
       "concepts": [
-        "Multi-stage builds and runtime dependency boundaries"
+        "multi-stage build",
+        "build stage",
+        "COPY --from",
+        "runtime image",
+        "--target"
       ],
-      "outcome": "Specify final-image acceptance.",
+      "outcome": "Design a builder-to-runtime artifact list. Specify final-image acceptance.",
       "lab": "Design a builder-to-runtime artifact list.",
-      "verification": "Run the exact final image under intended user, mounts and network."
+      "verification": "Executable or package plus explicit required runtime assets."
     },
     {
       "id": "docker-017",
@@ -282,12 +328,15 @@
       ],
       "runtime": "reading",
       "concepts": [
-        "CPU architectures",
-        "image indexes and cross-platform builds"
+        "CPU architecture",
+        "image index",
+        "--platform",
+        "emulation",
+        "cross-compilation"
       ],
-      "outcome": "Write an honest portability claim.",
+      "outcome": "Design a two-platform evidence matrix. Write an honest portability claim.",
       "lab": "Design a two-platform evidence matrix.",
-      "verification": "Name the tested platform and label other platforms unqualified."
+      "verification": "Separate build and execution columns for amd64 and arm64."
     },
     {
       "id": "docker-018",
@@ -299,12 +348,14 @@
       ],
       "runtime": "reading",
       "concepts": [
-        "Bridge networks",
-        "service DNS and container-to-container traffic"
+        "bridge network",
+        "service DNS",
+        "container port",
+        "network vantage point"
       ],
-      "outcome": "Design an internal-only database connection.",
+      "outcome": "Draw the DNS-to-request sequence. Design an internal-only database connection.",
       "lab": "Draw the DNS-to-request sequence.",
-      "verification": "Use service DNS and container port without host publication."
+      "verification": "Resolve app, connect to container port, send HTTP request, inspect body."
     },
     {
       "id": "docker-019",
@@ -316,12 +367,14 @@
       ],
       "runtime": "reading",
       "concepts": [
-        "Network isolation",
-        "gateways and outbound connectivity"
+        "network isolation",
+        "internal network",
+        "gateway",
+        "outbound connectivity"
       ],
-      "outcome": "Define outbound acceptance for an offline worker.",
+      "outcome": "Design a frontend/backend attachment table. Define outbound acceptance for an offline worker.",
       "lab": "Design a frontend/backend attachment table.",
-      "verification": "Prepared local computation succeeds and no external fetch is required."
+      "verification": "Each service joins only the networks needed by its role."
     },
     {
       "id": "docker-020",
@@ -333,12 +386,14 @@
       ],
       "runtime": "reading",
       "concepts": [
-        "Users",
-        "UID ownership and writable data paths"
+        "UID",
+        "USER",
+        "file ownership",
+        "writable data path"
       ],
-      "outcome": "Write a permission acceptance check.",
+      "outcome": "Design a non-root image setup sequence. Write a permission acceptance check.",
       "lab": "Design a non-root image setup sequence.",
-      "verification": "Non-root process can write data and cannot mutate packaged code."
+      "verification": "Create required paths, set ownership, then select the runtime user."
     },
     {
       "id": "docker-021",
@@ -350,12 +405,14 @@
       ],
       "runtime": "reading",
       "concepts": [
-        "Backups",
-        "restores and proving data recovery"
+        "backup",
+        "restore",
+        "recovery test",
+        "volume archive"
       ],
-      "outcome": "Produce a recovery evidence packet.",
+      "outcome": "Design a separate restore target. Produce a recovery evidence packet.",
       "lab": "Design a separate restore target.",
-      "verification": "Source identity, export hash, restore target, parsed value and cleanup record."
+      "verification": "A new owned volume with no overwrite of the source."
     },
     {
       "id": "docker-022",
@@ -367,12 +424,15 @@
       ],
       "runtime": "reading",
       "concepts": [
-        "Resource limits",
-        "contention and honest performance experiments"
+        "memory limit",
+        "CPU limit",
+        "PID limit",
+        "contention",
+        "measurement"
       ],
-      "outcome": "Define a safe resource stress boundary.",
+      "outcome": "Design a controlled CPU comparison. Define a safe resource stress boundary.",
       "lab": "Design a controlled CPU comparison.",
-      "verification": "Small fixed workload, timeout and owned disposable target."
+      "verification": "Same input and image, one changed limit, several bounded measurements."
     },
     {
       "id": "docker-023",
@@ -384,12 +444,15 @@
       ],
       "runtime": "reading",
       "concepts": [
-        "Read-only filesystems",
-        "capabilities and least privilege"
+        "Linux capabilities",
+        "cap_drop",
+        "read-only filesystem",
+        "no-new-privileges",
+        "least privilege"
       ],
-      "outcome": "Review a hardening change without overstating security.",
+      "outcome": "Write a least-privilege acceptance pair. Review a hardening change without overstating security.",
       "lab": "Write a least-privilege acceptance pair.",
-      "verification": "State controls tested and the trusted-local-code boundary."
+      "verification": "One required action succeeds and one forbidden action fails."
     },
     {
       "id": "docker-024",
@@ -401,12 +464,14 @@
       ],
       "runtime": "reading",
       "concepts": [
-        "Rootless engines",
-        "user namespaces and host trust"
+        "rootless mode",
+        "user namespace",
+        "engine socket",
+        "host trust"
       ],
-      "outcome": "State a support claim for a new rootless setup.",
+      "outcome": "Draw the daemon-socket authority path. State a support claim for a new rootless setup.",
       "lab": "Draw the daemon-socket authority path.",
-      "verification": "Actual app build, network, storage and cleanup observations."
+      "verification": "Socket access can permit host-impacting container requests."
     },
     {
       "id": "docker-025",
@@ -418,12 +483,15 @@
       ],
       "runtime": "reading",
       "concepts": [
-        "Image names",
-        "digests and an offline transfer"
+        "image reference",
+        "tag",
+        "digest",
+        "docker image save",
+        "docker image load"
       ],
-      "outcome": "Define offline acceptance for the study app.",
+      "outcome": "Design an offline handoff record. Define offline acceptance for the study app.",
       "lab": "Design an offline handoff record.",
-      "verification": "Imported image starts with local data and no required external services."
+      "verification": "Archive checksum, image identity, platform and expected command."
     },
     {
       "id": "docker-026",
@@ -435,12 +503,14 @@
       ],
       "runtime": "reading",
       "concepts": [
-        "Compose overrides",
-        "profiles and configuration review"
+        "override file",
+        "merge rules",
+        "profiles",
+        "docker compose config"
       ],
-      "outcome": "Write a reviewable configuration launch record.",
+      "outcome": "Create an override for a public message. Write a reviewable configuration launch record.",
       "lab": "Create an override for a public message.",
-      "verification": "Ordered files, profiles, project name and safe resolved settings."
+      "verification": "Only the intended environment value changes in the effective model."
     },
     {
       "id": "docker-027",
@@ -452,11 +522,14 @@
       ],
       "runtime": "reading",
       "concepts": [
-        "Intermediate capstone"
+        "service discovery",
+        "resource limits",
+        "recovery test",
+        "release review"
       ],
-      "outcome": "Write a beginner operator handoff.",
+      "outcome": "Build an independent restore demonstration. Write a beginner operator handoff.",
       "lab": "Build an independent restore demonstration.",
-      "verification": "Setup, evidence, failure diagnosis, backup/restore and scoped cleanup."
+      "verification": "New target state equals the exported counter while source remains intact."
     },
     {
       "id": "docker-028",
@@ -468,13 +541,15 @@
       ],
       "runtime": "reading",
       "concepts": [
-        "Registries",
-        "tags",
-        "digests and deliberate publication"
+        "registry",
+        "repository",
+        "tag",
+        "digest",
+        "publication review"
       ],
-      "outcome": "Describe a safe publication review without performing it.",
+      "outcome": "Design a release identity record. Describe a safe publication review without performing it.",
       "lab": "Design a release identity record.",
-      "verification": "Explicit destination, visibility, immutable artifact and rollback plan."
+      "verification": "Source revision, immutable image identity, platform and tested behavior."
     },
     {
       "id": "docker-029",
@@ -486,11 +561,15 @@
       ],
       "runtime": "reading",
       "concepts": [
-        "Software bills of materials and image provenance"
+        "SBOM",
+        "provenance",
+        "attestation",
+        "SPDX",
+        "image digest"
       ],
-      "outcome": "Write a supply-chain review for the fixture.",
+      "outcome": "Design an evidence linkage table. Write a supply-chain review for the fixture.",
       "lab": "Design an evidence linkage table.",
-      "verification": "Known source, resolved base, component record and actual acceptance limits."
+      "verification": "Every record names the same image digest and platform scope."
     },
     {
       "id": "docker-030",
@@ -502,12 +581,14 @@
       ],
       "runtime": "reading",
       "concepts": [
-        "Vulnerability findings",
-        "patching and dependency updates"
+        "vulnerability finding",
+        "affected version",
+        "base image update",
+        "rebuild and retest"
       ],
-      "outcome": "Write a patch decision record.",
+      "outcome": "Design a minimal base-image update. Write a patch decision record.",
       "lab": "Design a minimal base-image update.",
-      "verification": "Finding, affected artifact, chosen action, tests and residual risk."
+      "verification": "Change the resolved base deliberately and rerun relevant acceptance."
     },
     {
       "id": "docker-031",
@@ -519,12 +600,14 @@
       ],
       "runtime": "reading",
       "concepts": [
-        "CI builds",
-        "test layers and artifact promotion"
+        "continuous integration",
+        "test stage",
+        "artifact promotion",
+        "immutable digest"
       ],
-      "outcome": "Write a release gate with honest limitations.",
+      "outcome": "Design a parallel test partition. Write a release gate with honest limitations.",
       "lab": "Design a parallel test partition.",
-      "verification": "Named actual checks on exact artifacts, plus visible skipped surfaces."
+      "verification": "Independent groups with explicit ownership for shared fixtures."
     },
     {
       "id": "docker-032",
@@ -536,11 +619,14 @@
       ],
       "runtime": "reading",
       "concepts": [
-        "Debugging minimal images without changing the contract"
+        "minimal image",
+        "debug container",
+        "shared namespaces",
+        "diagnostic vantage point"
       ],
-      "outcome": "Write a repeatable minimal-image incident procedure.",
+      "outcome": "Create a vantage-point diagnosis table. Write a repeatable minimal-image incident procedure.",
       "lab": "Create a vantage-point diagnosis table.",
-      "verification": "Preserve artifact, inspect state, run bounded prepared probes and test a source repair."
+      "verification": "Host, peer and app observations with distinct address scopes."
     },
     {
       "id": "docker-033",
@@ -552,12 +638,14 @@
       ],
       "runtime": "reading",
       "concepts": [
-        "Restart policies",
-        "failure loops and idempotent startup"
+        "restart policy",
+        "crash loop",
+        "idempotent startup",
+        "backoff"
       ],
-      "outcome": "Define restart acceptance for a stateful app.",
+      "outcome": "Design idempotent counter initialization. Define restart acceptance for a stateful app.",
       "lab": "Design idempotent counter initialization.",
-      "verification": "Repeated starts preserve valid data and expose unrecoverable failures clearly."
+      "verification": "Create absent state once and validate existing state."
     },
     {
       "id": "docker-034",
@@ -569,11 +657,14 @@
       ],
       "runtime": "reading",
       "concepts": [
-        "Application migrations and durable state versioning"
+        "migration",
+        "schema version",
+        "rollback",
+        "durable state"
       ],
-      "outcome": "Write a migration release plan.",
+      "outcome": "Design a v1-to-v2 synthetic record conversion. Write a migration release plan.",
       "lab": "Design a v1-to-v2 synthetic record conversion.",
-      "verification": "Preconditions, backup, transition, validation, compatible rollback and cleanup."
+      "verification": "Preserve counter value and set a validated new schema version."
     },
     {
       "id": "docker-035",
@@ -585,12 +676,14 @@
       ],
       "runtime": "reading",
       "concepts": [
-        "Image size",
-        "startup latency and measurement"
+        "image size",
+        "startup latency",
+        "layer reuse",
+        "measurement method"
       ],
-      "outcome": "Write an optimization recommendation with evidence.",
+      "outcome": "Design a readiness latency measurement. Write an optimization recommendation with evidence.",
       "lab": "Design a readiness latency measurement.",
-      "verification": "Measured bottleneck, bounded change, correctness recheck and actual improvement."
+      "verification": "Fixed image, known cache condition and repeated bounded readiness timing."
     },
     {
       "id": "docker-036",
@@ -602,11 +695,14 @@
       ],
       "runtime": "reading",
       "concepts": [
-        "Compose on one host and the limits of orchestration"
+        "single-host Compose",
+        "orchestration",
+        "scheduling",
+        "failure domain"
       ],
-      "outcome": "Choose an orchestration approach for a stated workload.",
+      "outcome": "Build a failure-domain matrix. Choose an orchestration approach for a stated workload.",
       "lab": "Build a failure-domain matrix.",
-      "verification": "A reasoned choice based on availability, scaling, operations and learning cost."
+      "verification": "Process, container, engine, host and external dependency rows."
     },
     {
       "id": "docker-037",
@@ -619,11 +715,13 @@
       "runtime": "reading",
       "concepts": [
         "TLS",
-        "reverse proxies and publishing responsibly"
+        "reverse proxy",
+        "certificate",
+        "public exposure"
       ],
-      "outcome": "State what would be required before public exposure.",
+      "outcome": "Draw proxy and upstream trust boundaries. State what would be required before public exposure.",
       "lab": "Draw proxy and upstream trust boundaries.",
-      "verification": "A separate deployment design covering access, TLS, limits, operations and data."
+      "verification": "Explicit client-facing and internal hops with identities and timeouts."
     },
     {
       "id": "docker-038",
@@ -635,12 +733,14 @@
       ],
       "runtime": "reading",
       "concepts": [
-        "Incident response",
-        "disk pressure and scoped cleanup"
+        "incident response",
+        "disk pressure",
+        "docker system df",
+        "scoped cleanup"
       ],
-      "outcome": "Write a scoped recovery and cleanup plan.",
+      "outcome": "Design an incident evidence packet. Write a scoped recovery and cleanup plan.",
       "lab": "Design an incident evidence packet.",
-      "verification": "Explicit targets, retained data, repair check and final ownership readback."
+      "verification": "Failure symptom, time, resource inventory and bounded relevant logs."
     },
     {
       "id": "docker-039",
@@ -652,13 +752,14 @@
       ],
       "runtime": "reading",
       "concepts": [
-        "Namespaces",
+        "namespaces",
         "cgroups",
-        "OCI and the runtime beneath Docker"
+        "OCI runtime",
+        "container runtime"
       ],
-      "outcome": "Describe the shared-kernel security implication.",
+      "outcome": "Draw the client-to-process runtime chain. Describe the shared-kernel security implication.",
       "lab": "Draw the client-to-process runtime chain.",
-      "verification": "Least privilege and patching remain necessary parts of the trust model."
+      "verification": "Client, engine, runtime setup, mounts and application process."
     },
     {
       "id": "docker-040",
@@ -670,12 +771,14 @@
       ],
       "runtime": "reading",
       "concepts": [
-        "Runtime secrets",
-        "configuration files and controlled disclosure"
+        "runtime secret",
+        "secret file",
+        "/run/secrets",
+        "controlled disclosure"
       ],
-      "outcome": "Write a secret data-flow review.",
+      "outcome": "Design a no-disclosure validation message. Write a secret data-flow review.",
       "lab": "Design a no-disclosure validation message.",
-      "verification": "Source, host protection, service grant, read path, logs, rotation and deletion."
+      "verification": "Report presence or a bounded error without the sensitive value."
     },
     {
       "id": "docker-041",
@@ -687,12 +790,14 @@
       ],
       "runtime": "reading",
       "concepts": [
-        "Scaling replicas",
-        "shared state and concurrency traps"
+        "replica",
+        "shared state",
+        "race condition",
+        "scaling"
       ],
-      "outcome": "Propose a correct scaled counter architecture.",
+      "outcome": "Design a replica-readiness checklist. Propose a correct scaled counter architecture.",
       "lab": "Design a replica-readiness checklist.",
-      "verification": "A transaction-capable shared store or explicit single-writer ownership."
+      "verification": "Routing, state concurrency, sessions, resource budget and recovery."
     },
     {
       "id": "docker-042",
@@ -704,11 +809,14 @@
       ],
       "runtime": "reading",
       "concepts": [
-        "Advanced capstone"
+        "release record",
+        "recovery rehearsal",
+        "handoff",
+        "acceptance evidence"
       ],
-      "outcome": "Teach the full system and defend its limits.",
+      "outcome": "Assemble a source-bound release packet. Teach the full system and defend its limits.",
       "lab": "Assemble a source-bound release packet.",
-      "verification": "A beginner can follow the handoff and identify what it does not guarantee."
+      "verification": "Exact source, image, platform, commands and observations."
     }
   ]
 }

@@ -49,6 +49,32 @@ internal static class Program {
       }
       Check(observed?.InnerException is IOException, "cause retained");
     }
+    {
+      // Task 3: Independent construction
+      int Import(string text, bool storageAvailable) {
+        if (!int.TryParse(text, out int quantity) || quantity < 0) {
+          throw new ArgumentException("invalid quantity", nameof(text));
+        }
+        if (!storageAvailable) {
+          throw new IOException("storage unavailable");
+        }
+        return quantity;
+      }
+      Check(Import("3", true) == 3, "success");
+      string outcome = "none";
+      try {
+        Import("x", true);
+      } catch (ArgumentException) {
+        outcome = "invalid input";
+      }
+      Check(outcome == "invalid input", "input failure");
+      try {
+        Import("3", false);
+      } catch (IOException) {
+        outcome = "storage";
+      }
+      Check(outcome == "storage", "storage failure");
+    }
     Console.WriteLine("csharp-023: passed");
     await Task.CompletedTask;
   }

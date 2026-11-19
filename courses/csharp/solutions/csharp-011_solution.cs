@@ -37,6 +37,18 @@ internal static class Program {
                       Describe(missing) == "unknown",
                   "preserved meaning");
     }
+    {
+      // Task 3: Independent construction
+      string Format(int? value) {
+        if (value is null) {
+          return "missing";
+        }
+        return value.Value == 0 ? "zero" : $"{value.Value} units";
+      }
+      Check(Format(null) == "missing", "missing stays missing");
+      Check(Format(0) == "zero", "zero is a measurement");
+      Check(Format(5) == "5 units", "positive measurement");
+    }
     Console.WriteLine("csharp-011: passed");
     await Task.CompletedTask;
   }

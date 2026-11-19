@@ -48,9 +48,9 @@ The projected grain remains one fact because the dimension is unique and covers 
 
 ### Exercise 3: Disable automatic broadcasting for a fresh comparison
 
-Set automatic broadcast threshold to-1, build a fresh ordinary join and record its plan with AQE disabled. Keep the logical result contract.
+Set automatic broadcast threshold to -1, build a fresh ordinary join and record its plan with AQE disabled. Keep the logical result contract.
 
-**Expected:** Same metrics as automatic. No BroadcastHashJoin in this fresh query underAQEfalse and threshold-1.
+**Expected:** Same metrics as automatic. No BroadcastHashJoin in this fresh query under AQE false and threshold -1.
 
 ```scala
 def withoutAutomaticBroadcast(facts: DataFrame, dimension: DataFrame): DataFrame = {
@@ -163,4 +163,4 @@ The gate turns a casual hint into a declared finite input contract. Limit-plus-o
 
 ## Execution and interpretation
 
-Run the complete reference in its prepared fixed worker. The small fixture is constructed inside the program,so opening a lesson does not fetch data. A final success line is printed only after the reference assertions complete. Plan observations,partition evidence and resource measurements apply to the actual local configuration; they do not establish cluster-scale performance. Session cleanup is explicit,and any additional owned file/query lifecycle is described in the lesson.
+Run the complete reference in its prepared fixed worker. The small fixture is constructed inside the program, so opening a lesson does not fetch data. A final success line is printed only after the reference assertions complete. Plan observations, partition evidence and resource measurements apply to the actual local configuration; they do not establish cluster-scale performance. Session cleanup is explicit, and any additional owned file/query lifecycle is described in the lesson.

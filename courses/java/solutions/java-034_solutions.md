@@ -4,9 +4,9 @@ Open after an attempt or an explicit solution reveal. The executable reference r
 
 ## Mechanism review
 
-Application design separates domain decisions from the mechanisms that supply data,time or side effects. A pure pricing calculation can be tested without a database,network or system clock. A service composes that calculation with repository and clock ports. Adapters implement those ports for a particular environment. Dependency inversion means the domain-facing code depends on the behavior it needs rather than on a concrete infrastructure class.
+Application design separates domain decisions from the mechanisms that supply data, time or side effects. A pure pricing calculation can be tested without a database, network or system clock. A service composes that calculation with repository and clock ports. Adapters implement those ports for a particular environment. Dependency inversion means the domain-facing code depends on the behavior it needs rather than on a concrete infrastructure class.
 
-This lesson builds a small quote service. A catalog port supplies integer-cent prices,a fixed clock supplies the timestamp,and an audit sink records successful operations in memory. The service validates quantity andcatalog lookup before producing a result or recording an event. A failing repository propagates its failure rather than returning a fabricated zero price. Thefake-backed tests establish service logic and call boundaries,not live database or network acceptance.
+This lesson builds a small quote service. A catalog port supplies integer-cent prices, a fixed clock supplies the timestamp, and an audit sink records successful operations in memory. The service validates quantity and catalog lookup before producing a result or recording an event. A failing repository propagates its failure rather than returning a fabricated zero price. Thefake-backed tests establish service logic and call boundaries, not live database or network acceptance.
 
 **Port:** A behavior interface required by application logic.
 
@@ -18,13 +18,15 @@ This lesson builds a small quote service. A catalog port supplies integer-cent p
 
 ## Reading the reference
 
-Define a Catalog interface returning OptionalLong and declaring IOException for an operational read failure. Inject a Supplier<Instant> and Consumer<String> through the constructor. Keep the pure total calculation separate anduseMath.multiplyExact for overflow. TheQuote record carries item,quantity,total and time. Audit only after all required validation and calculation succeed.
+Define a Catalog interface returning OptionalLong and declaring IOException for an operational read failure. Inject a Supplier<Instant> and Consumer<String> through the constructor. Keep the pure total calculation separate and use Math.multiplyExact for overflow. The Quote record carries item, quantity, total and time. Audit only after all required validation and calculation succeed.
 
-## Exercise 1: Test the pure calculation
+## Exercise 1: Test the pure calculation: change one input
 
-Task: Compute 3 items at 125 cents and check the zero/negative quantity policy.
+Task: Copy Example A into a scratch `Main.java` and change `total(0, 125);` to `total(1, 125);`. Before running it with `java -ea Main`, predict which assertion fails and which value it now sees; then run it and restore the original line.
 
-The core arithmetic needsno repository or clock. Isolating it makes domain boundaries and overflow behavior easy to check.
+The core arithmetic needs no repository or clock. Isolating it makes domain boundaries and overflow behavior easy to check.
+
+The unchanged code is the part that Example A adds:
 
 ```java
 assert total(3, 125) == 375;
@@ -37,15 +39,17 @@ try {
 assert invalid;
 ```
 
-**Expected:** 375 cents; nonpositive quantity rejected.
+**Expected:** The changed run fails with an `AssertionError` from the assertion on `invalid`. Restoring the original line brings back the worked observation: 375 cents; nonpositive quantity rejected.
 
-**Verify:** Compare the program values or named exception with 375 cents; nonpositive quantity rejected. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.
+**Verify:** Compare your written prediction with the reported `AssertionError` and its stack-trace line, and name the value that made `invalid` false. After restoring the line, the program completes without an `AssertionError` again.
 
-## Exercise 2: Compose a deterministic service
+## Exercise 2: Compose a deterministic service: debug a regression
 
-Task: Inject a fixedcatalog,clock and audit list,and request twoitems.
+Task: A regression changed one token in the code that Example B adds after Example A, so one line now reads `id.equals("item-a") ? java.util.OptionalLong.of(126) : java.util.OptionalLong.empty();`. Run Example B with that line, use the failing assertion to locate the defect and repair it without changing the assertion.
 
-A fixed clock removes timing nondeterminism. The audit event is a local test double,not a message sent to another person or service.
+A fixed clock removes timing nondeterminism. The audit event is a local test double, not a message sent to another person or service.
+
+The unchanged code is the part that Example B adds:
 
 ```java
 List<String> audit = new ArrayList<>();
@@ -59,13 +63,13 @@ quote.created().equals(instant) &&
 audit.equals(List.of("quoted:item-a"));
 ```
 
-**Expected:** total250,time2026-01-01T00:00:00Z,oneauditevent.
+**Expected:** Before the repair the run fails with an `AssertionError` from the assertion on `quote.totalCents() == 250 && quote.created().equals(instant) && audit.equals(List.of("quoted:item-a"))`; after it the line reads `id.equals("item-a") ? java.util.OptionalLong.of(125) : java.util.OptionalLong.empty();` again and total 250, time 2026-01-01T00:00:00Z, one audit event.
 
-**Verify:** Compare the program values or named exception with total250,time2026-01-01T00:00:00Z,oneauditevent. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.
+**Verify:** Keep the failing and the repaired runs. Explain why the changed token alters the value tested by `quote.totalCents() == 250 && quote.created().equals(instant) && audit.equals(List.of("quoted:item-a"))` for this input.
 
 ## Exercise 3: Reject an unknown catalog item
 
-Task: Requestmissing andinspecttheauditlist.
+Task: Request missing and inspect the audit list.
 
 A missing item is a domain outcome. It should not silently become a zero-priced quote or produce a misleading success event.
 
@@ -79,9 +83,9 @@ try {
 assert missing && audit.size() == 1;
 ```
 
-**Expected:** NoSuchElementException;no additional audit.
+**Expected:** NoSuchElementException; no additional audit.
 
-**Verify:** Compare the program values or named exception with NoSuchElementException;no additional audit. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.
+**Verify:** Keep an assertion equivalent to `missing && audit.size() == 1`. As a control, change `missing = true;` to `missing = false;`: the run must fail with an `AssertionError` from the assertion on `missing && audit.size() == 1`. Restore the line before continuing.
 
 ## Exercise 4: Propagate an infrastructure failure
 
@@ -107,13 +111,13 @@ try {
 assert propagated && failures.isEmpty();
 ```
 
-**Expected:** same failure type;no success audit.
+**Expected:** same failure type; no success audit.
 
-**Verify:** Compare the program values or named exception with same failure type;no success audit. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.
+**Verify:** Keep an assertion equivalent to `propagated && failures.isEmpty()`. As a control, change `throw new java.io.IOException("catalog unavailable");` to `throw new java.io.IOException("catalog unavailable!");`: the run must fail with an `AssertionError` from the assertion on `propagated && failures.isEmpty()`. Restore the line before continuing.
 
 ## Exercise 5: Prove invalid quantity fails before a repository call
 
-Task: Use a countingcatalog and request negative quantity.
+Task: Use a counting catalog and request negative quantity.
 
 Validation ordering is part of the boundary contract. It avoids unnecessary external work and prevents a malformed request from being mistaken for an infrastructure failure.
 
@@ -136,13 +140,13 @@ try {
 assert rejected && calls.get() == 0;
 ```
 
-**Expected:** repositorycallcount0.
+**Expected:** repository call count 0.
 
-**Verify:** Compare the program values or named exception with repositorycallcount0. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.
+**Verify:** Keep an assertion equivalent to `rejected && calls.get() == 0`. As a control, change `rejected = true;` to `rejected = false;`: the run must fail with an `AssertionError` from the assertion on `rejected && calls.get() == 0`. Restore the line before continuing.
 
 ## Exercise 6: Detect arithmetic overflow without an event
 
-Task: UseLong.MAX_VALUEunitprice andquantity2.
+Task: Use a Long.MAX_VALUE unit price and quantity 2.
 
 A validly typed integer can still exceed the domain representation. Calculating before emitting a success event keeps side effects aligned with the actual outcome.
 
@@ -162,9 +166,9 @@ try {
 assert overflow && overflowAudit.isEmpty();
 ```
 
-**Expected:** ArithmeticException;audit sink unused.
+**Expected:** ArithmeticException; audit sink unused.
 
-**Verify:** Compare the program values or named exception with ArithmeticException;audit sink unused. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.
+**Verify:** Keep an assertion equivalent to `overflow && overflowAudit.isEmpty()`. As a control, change `overflow = true;` to `overflow = false;`: the run must fail with an `AssertionError` from the assertion on `overflow && overflowAudit.isEmpty()`. Restore the line before continuing.
 
 ## After comparing the answer
 

@@ -149,7 +149,7 @@ def governance_case(cross_group):
             d,
             models={
                 "internal": "{{ config(materialized='table') }} select 41 as value",
-                "consumer": "select value+1 as value from {{ ref('internal') }}",
+                "consumer": "select value + 1 as value from {{ ref('internal') }}",
             },
             schema=schema,
         )
@@ -184,4 +184,4 @@ if __name__ == "__main__":
 
 ## Interpretation
 
-Use groups and model access to define supported project interfaces, while keeping database authorization claims separate. Test both allowed and rejected dependencies and record who owns semantic compatibility and external access controls.
+Test both allowed and rejected dependencies and record who owns semantic compatibility and external access controls.

@@ -1,4 +1,4 @@
-from author import author, hello
+from author import author, hello, variant
 import yaml
 
 role = {
@@ -60,17 +60,19 @@ The offline checker models only the explicit permission matrix and receipt equal
     [
         (
             "Identify the request tuple",
-            "Write the caller,namespace,API group,resource,name and verb for an owned hello Deployment read.",
-            "A six-field request includes apps/deployments,hello,get and the explicit leased namespace.",
+            "Write the caller, namespace, API group, resource, name and verb for an owned hello Deployment read.",
+            "A six-field request includes apps/deployments, hello, get and the explicit leased namespace.",
             "Separate the resource kind from its API plural and caller identity.",
             "The API authorizes a specific action against a resource scope. An object name without namespace and caller information is incomplete. The learner record should identify the private context by its nonsecret name while keeping credential contents private.",
+            "Rewrite the tuple as one `kubectl auth can-i get deployments.apps/hello` question with explicit `--kubeconfig`, `--context` and `--namespace` flags; each of your six fields must map to one part of that command.",
         ),
         (
             "Read the Role grant",
             "Compare get hello with list deployments and create namespaces under the example Role.",
             "Only get hello is granted by this Role; list and namespace creation are absent.",
-            "Look at verbs,resourceNames and scope independently.",
+            "Look at verbs, resourceNames and scope independently.",
             "The Role contains one named read permission. It does not imply list or create rights, and namespace creation is cluster-scoped. Other bindings could add permissions, so this static inspection is a prediction to confirm with the actual owned identity.",
+            "For each of the three requests, find a single Role rule whose verbs, resources and resourceNames all match it; a request with no fully matching rule is not granted by this Role.",
         ),
         (
             "Check namespace identity",
@@ -78,6 +80,7 @@ The offline checker models only the explicit permission matrix and receipt equal
             "Refuse despite the matching namespace name and owner label.",
             "A name can be reused; the UID identifies this object instance.",
             "Deleting and recreating a namespace creates a new identity. Continuing with an old receipt could act on an unrelated replacement. The UID mismatch is therefore a decisive boundary, not a warning to ignore because the visible name looks familiar.",
+            "Decide using `metadata.uid` alone, then confirm that the matching name and owner label cannot change that decision.",
         ),
         (
             "Observe least privilege",
@@ -85,13 +88,15 @@ The offline checker models only the explicit permission matrix and receipt equal
             "Actual allow/deny results are recorded separately from source policy; no credentials enter the worksheet.",
             "Use the host guide targeting flags and a self-authorization check.",
             "The live observation establishes effective policy for that identity and time. It should include the requested verb/resource and nonsecret target. A denied action is a successful negative check when the curriculum intends the identity to lack that permission.",
+            "Each row of your record must name the verb, resource and namespace and the yes/no answer the server returned under the owned receipt; it must contain no token or kubeconfig text.",
         ),
         (
-            "Inspect expiry and cleanup reserve",
-            "Evaluate a synthetic lease expiring in30seconds for60seconds of work plus15seconds cleanup and5seconds margin.",
-            "Refuse because30<80.",
-            "Add the full work,cleanup and margin budget before comparing expiry.",
-            "The worker must retain enough credential lifetime to clean up after interruption. A lease that covers only nominal work can fail at the recovery boundary. The calculation is synthetic; a real run uses observed current time and the private receipt expiry.",
+            "Bind a ClusterRole inside one namespace",
+            "A RoleBinding in namespace lesson-a references the built-in ClusterRole view. Predict whether the bound identity can list Pods in lesson-a, list Pods in lesson-b and list Secrets in lesson-a.",
+            "Pods in lesson-a: allowed. Pods in lesson-b: denied, because a RoleBinding grants only inside its own namespace. Secrets in lesson-a: denied, because the default view role excludes Secrets.",
+            "A RoleBinding may reference a ClusterRole, but the grant stays inside the binding's namespace.",
+            "Binding a ClusterRole with a RoleBinding reuses the role's rules without widening their scope: the grant applies only in the RoleBinding's namespace. Only a ClusterRoleBinding grants the rules across all namespaces. The default view ClusterRole allows reading most namespaced objects but deliberately omits Secrets, because Secret contents can include ServiceAccount credentials that would let a reader escalate. Confirm the effective answer with `kubectl auth can-i` under the owned receipt instead of reasoning only from the YAML.",
+            "Check the binding's `metadata.namespace` and the resources listed by the `view` ClusterRole; a request outside that namespace or for a resource the role omits is denied.",
         ),
         (
             "Explain additive authorization",
@@ -99,6 +104,7 @@ The offline checker models only the explicit permission matrix and receipt equal
             "A written answer includes other RoleBindings/ClusterRoleBindings and actual effective authorization evidence.",
             "RBAC grants combine; absence from one file is not a global denial proof.",
             "A complete access claim must account for the identity's other bindings and admission/runtime controls where relevant. The course avoids relying on a visual policy snippet alone and keeps the private session scoped and short-lived.",
+            "Your answer must name at least one binding outside this Role file that could add a permission, and cite `kubectl auth can-i --list` under the owned receipt as the effective result.",
         ),
     ],
     [role],
@@ -111,8 +117,14 @@ def main():
     receipt={'namespace':'lesson-a','uid':'ns-1','owner':'owner-a'}
     observed={'namespace':'lesson-a','uid':'ns-2','owner':'owner-a'}
     assert receipt['namespace']==observed['namespace'] and receipt['uid']!=observed['uid']
-    assert 30<60+15+5
-    print('k8s-004 synthetic permission and identity calculations passed; no API calls made')
+    view_rules={'pods':{'get','list','watch'},'configmaps':{'get','list','watch'}}
+    binding_namespace='lesson-a'
+    def bound(namespace,resource,verb):
+        return namespace==binding_namespace and verb in view_rules.get(resource,set())
+    assert bound('lesson-a','pods','list')
+    assert not bound('lesson-b','pods','list')
+    assert not bound('lesson-a','secrets','list')
+    print('k8s-004 synthetic permission, identity and binding-scope checks passed; no API calls made')
 
 if __name__ == "__main__":
     main()
@@ -135,7 +147,7 @@ The browser source creates the fixed hello Deployment so the controller produces
             "Trace image selection to process observation",
             """The manifest selects ds60sqlpy-k8s-fixture:0.2.0 and Never. The host qualification receipt must record the actual image identity and preload on each eligible node. If the image is absent under Never, the kubelet reports an image-availability failure instead of automatically pulling it. A locally present tag alone is weaker evidence than a recorded content identity.
 
-The fixed command starts the fixture server on container port8080. Declaring containerPort documents the port; it does not publish a host port or create a Service. The Pod has no service-account token mount, runs as a fixed nonroot UID and has a read-only root filesystem with dropped capabilities. Those settings are part of the admitted workload contract.
+The fixed command starts the fixture server on container port 8080. Declaring containerPort documents the port; it does not publish a host port or create a Service. The Pod has no service-account token mount, runs as a fixed nonroot UID and has a read-only root filesystem with dropped capabilities. Those settings are part of the admitted workload contract.
 
 The browser waits for controller and Ready Pod identities and then cleans up. A Deployment-only Run does not include the separate in-cluster Service client. Record that distinction when interpreting success.""",
         ),
@@ -149,7 +161,7 @@ The synthetic example Running plus Ready=False has no eligible ready Service bac
         ),
         (
             "Common misleading shortcuts",
-            """Do not infer readiness from phase Running, infer a successful image pull from a tag name, or infer current process identity from a reused Pod name. An old saved image0.1 source receives an explicit broker version refusal; that is a source-admission result, not an observed node pull failure.
+            """Do not infer readiness from phase Running, infer a successful image pull from a tag name, or infer current process identity from a reused Pod name. An old saved image 0.1 source receives an explicit broker version refusal; that is a source-admission result, not an observed node pull failure.
 
 Use the narrowest discriminating field: Waiting.reason for image availability, container termination state for exit behavior, Ready condition for routing eligibility and a client response for the application. A source review or synthetic trace is labeled as such until an actual owned observation exists.""",
         ),
@@ -157,7 +169,7 @@ Use the narrowest discriminating field: Waiting.reason for image availability, c
     [
         (
             "Separate phase from readiness",
-            """Synthetic Pod status: phase Running; container state Running; Ready condition False; restartCount0. The process exists but the readiness check has not passed.""",
+            """Synthetic Pod status: phase Running; container state Running; Ready condition False; restartCount 0. The process exists but the readiness check has not passed.""",
             "Running process evidence does not establish a ready backend or successful application request.",
         ),
         (
@@ -169,17 +181,19 @@ Use the narrowest discriminating field: Waiting.reason for image availability, c
     [
         (
             "Identify image and process contract",
-            "Read the source image,pull policy,command and named port.",
-            "Image0.2.0,Never,fixed fixture server,port8080 named http.",
+            "Read the source image, pull policy, command and named port.",
+            "Image 0.2.0, Never, fixed fixture server, port 8080 named http.",
             "Read each field rather than inferring it from the filename.",
             "The source describes the requested image and process. Actual preload and runtime behavior require a host/image receipt and observed Pod. The port declaration alone does not create routing or host exposure.",
+            "Point to the exact YAML path for each item (`spec.template.spec.containers[0].image`, `imagePullPolicy`, `command` and `ports[0]`) instead of quoting the file name or lesson title.",
         ),
         (
             "Trace broad and precise state",
-            "Classify the synthetic Running/Ready=False record.",
-            "Process running,readiness unproved,no ready-routing claim.",
+            "Run the starter unchanged: its readinessProbe requests /missing. Classify the resulting state, then restore /ready and Run again.",
+            "The first Run fails its bounded readiness check without an application crash: the process can be Running while Ready stays False. After /ready is restored, a fresh Run can establish Ready.",
             "Read the condition separately from phase.",
             "Pod phase is intentionally broad. Readiness controls whether the application is considered eligible for normal Service traffic, while process liveness and client correctness are separate questions.",
+            "Cite the readiness evidence separately from the phase: the failed readiness check in the Run result, or the `Ready` entry in `status.conditions` of a host readback.",
         ),
         (
             "Diagnose the image boundary",
@@ -187,20 +201,23 @@ Use the narrowest discriminating field: Waiting.reason for image availability, c
             "Two different failure phases are named; neither is described as an application crash.",
             "Ask whether an API object and container process were ever created.",
             "The broker may reject source before the cluster sees it. A kubelet image-absence reason implies an accepted Pod reached node image handling. Preserving the phase prevents ineffective repairs such as changing application code for an image that never started.",
+            "For each failure, state whether an API object was created and whether a container process started; the two cases must differ on at least one of those answers.",
         ),
         (
             "Read logs with identity",
-            "Record a bounded synthetic log excerpt with Pod UID,container name and restart count.",
+            "Record a bounded synthetic log excerpt with Pod UID, container name and restart count.",
             "An evidence record ties the line to the exact observed process instance.",
             "Use explicit targeting and bounded log options from the host procedure.",
             "A reused name or previous container log can mislead diagnosis. UID and restart context explain which execution produced the line. No real secret or unrelated workload output belongs in the learner evidence packet.",
+            "A second reader must be able to find the same Pod UID, container name and restartCount in a readback; a log line without those three fields fails this check.",
         ),
         (
             "Distinguish restart from replacement",
-            "Compare same Pod UID with restartCount1 against a new Pod UID with restartCount0.",
+            "Compare same Pod UID with restartCount 1 against a new Pod UID with restartCount 0.",
             "First is a container restart; second is a different Pod instance.",
             "Names and counts alone do not establish identity.",
             "A Deployment can replace a Pod, while the kubelet can restart a container inside an existing Pod. These events have different lifetime implications for ephemeral storage and owner relationships, developed in later chapters.",
+            "Compare `metadata.uid` before `status.containerStatuses[0].restartCount`; if the UIDs differ, the restart count does not describe one process history.",
         ),
         (
             "Prove the bounded baseline",
@@ -208,6 +225,7 @@ Use the narrowest discriminating field: Waiting.reason for image availability, c
             "Controller/Ready Pod identities and owned cleanup are observed; Deployment-only run has no Service-client proof.",
             "Compare the result check names with the actual source resource set.",
             "The evidence should match the operation that ran. Do not copy a Service success claim from another lesson when this source contains no Service. Keep runtime qualification and the six-task explanation separate from a successful process status.",
+            "Match every claim in your statement to a named check in the Run result; remove any Service or client claim that has no matching check.",
         ),
     ],
     hello(),
@@ -226,6 +244,12 @@ if __name__ == "__main__":
     main()
 """,
     browser=True,
+    starter=variant(
+        hello(),
+        [0, "spec", "template", "spec", "containers", 0, "readinessProbe", "httpGet", "path"],
+        "/missing",
+    ),
+    starter_note="The learner starter deliberately requests readiness from /missing; Exercise 2 asks you to observe that failure and restore /ready. ",
     capability="fixed Deployment baseline plus scoped host image/log observations",
     refs=[
         "[Kubernetes Pod lifecycle](https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle/)"
@@ -244,13 +268,13 @@ The browser source can establish a fresh two-replica baseline and clean it up. T
             "Follow the controller chain",
             """The Deployment selector app=hello must match its Pod-template labels. The Deployment creates or adopts the appropriate ReplicaSet according to its controller rules; Pods reference the ReplicaSet as controller owner. A verifier should connect those UIDs back to the intended Deployment rather than only count labels.
 
-spec.replicas=2 is intent. status.observedGeneration indicates which generation the controller has processed, while updatedReplicas,readyReplicas and availableReplicas describe different observed states. The desired count can be accepted before the controller creates Pods, before scheduling succeeds or before readiness passes. Bounded waiting should report which step has not converged.
+spec.replicas=2 is intent. status.observedGeneration indicates which generation the controller has processed, while updatedReplicas, readyReplicas and availableReplicas describe different observed states. The desired count can be accepted before the controller creates Pods, before scheduling succeeds or before readiness passes. Bounded waiting should report which step has not converged.
 
 Changing Pod-template content generally creates a new revision/ReplicaSet. Deleting a Pod does not by itself change the Deployment spec or its generation. This distinction prevents a replacement event from being mislabeled as a rollout.""",
         ),
         (
             "Trace a replacement without inventing a receipt",
-            """The synthetic baseline has Deployment UID dep-a,ReplicaSet UID rs-a and Pod UIDs pod-1,pod-2. After a controlled deletion of pod-1, the observed Pod set becomes pod-2,pod-3. Deployment UID and desired replicas remain unchanged. The new Pod is linked through rs-a to dep-a.
+            """The synthetic baseline has Deployment UID dep-a, ReplicaSet UID rs-a and Pod UIDs pod-1, pod-2. After a controlled deletion of pod-1, the observed Pod set becomes pod-2, pod-3. Deployment UID and desired replicas remain unchanged. The new Pod is linked through rs-a to dep-a.
 
 A live deletion must target the exact owned Pod UID with an API precondition and the authorized stateful capability. A name-only delete after reading a stale list can remove a replacement. The course host procedure requires identity checks and a bounded recovery wait. Do not use a broad label-selector delete as a shortcut.
 
@@ -266,50 +290,55 @@ A one-shot Run\'s final cleanup is separate from the deliberate replacement exer
     [
         (
             "Read desired and observed counts",
-            """Synthetic desired replicas2,metadata.generation4,status.observedGeneration3,readyReplicas2. The count looks healthy, but the controller has not yet observed the latest desired generation.""",
+            """Synthetic desired replicas 2, metadata.generation 4, status.observedGeneration 3, readyReplicas 2. The count looks healthy, but the controller has not yet observed the latest desired generation.""",
             "The latest change is not proved converged despite two ready replicas.",
         ),
         (
             "Track a replacement graph",
-            """Before: dep-a -> rs-a -> {pod-1,pod-2}. After an owned delete: dep-a -> rs-a -> {pod-2,pod-3}. Desired replicas remain2 and the Deployment generation is unchanged.""",
-            "One new Pod UID appears,one old UID disappears,and the controller identity remains dep-a.",
+            """Before: dep-a -> rs-a -> {pod-1, pod-2}. After an owned delete: dep-a -> rs-a -> {pod-2, pod-3}. Desired replicas remain 2 and the Deployment generation is unchanged.""",
+            "One new Pod UID appears, one old UID disappears, and the controller identity remains dep-a.",
         ),
     ],
     [
         (
             "Draw ownership",
-            "Trace Deployment,ReplicaSet and Pod controller references for the baseline.",
+            "Trace Deployment, ReplicaSet and Pod controller references for the baseline.",
             "A UID-linked graph connects exactly two owned Pods to the intended Deployment.",
             "Follow controller=true owner references rather than labels alone.",
             "Labels select sets but do not prove controller ownership. The graph distinguishes the application replicas from unrelated Pods that happen to share a label. Each link should come from actual readback in a live exercise or be labeled synthetic here.",
+            "Follow each `metadata.ownerReferences` entry with `controller: true` from Pod to ReplicaSet to Deployment; every arrow in your graph must cite a UID.",
         ),
         (
             "Compare generation evidence",
-            "Interpret generation4 with observedGeneration3 and readyReplicas2.",
+            "Interpret generation 4 with observedGeneration 3 and readyReplicas 2.",
             "Latest desired state not yet confirmed observed.",
             "Ready count and generation answer different questions.",
             "The controller can report a healthy prior state while a new spec is waiting to reconcile. A verifier should require the relevant generation relationship and updated counts before claiming the current change succeeded.",
+            "Compare `metadata.generation` with `status.observedGeneration` before reading any replica count, and state which comparison your conclusion depends on.",
         ),
         (
             "Establish a fresh baseline",
-            "Use the allowed two-replica source in a qualified browser operation.",
-            "Two Ready owned Pod UIDs and cleanup evidence,with a new Run identity.",
+            "The starter declares replicas: 1. Change it to 2, then Run the source in a qualified browser operation.",
+            "Two Ready owned Pod UIDs and cleanup evidence, with a new Run identity.",
             "Record the actual result rather than reusing the synthetic UID names.",
             "The browser creates a new bounded baseline and then cleans it. Its receipt supports the checks it performed. The human explanation must not replace actual server-assigned UIDs with the fixture's illustrative identifiers.",
+            "Confirm that the Run result lists two distinct Pod UIDs, both Ready, and a cleanup result carrying this Run's identity rather than an earlier one.",
         ),
         (
             "Rehearse scoped Pod replacement",
-            "With a stateful owned host capability,delete only the recorded Pod UID and wait for replacement.",
-            "Pod set changes from{pod-1,pod-2} to{pod-2,pod-3} in the synthetic trace; live names/UIDs are recorded separately.",
+            "With a stateful owned host capability, delete only the recorded Pod UID and wait for replacement.",
+            "Pod set changes from {pod-1, pod-2} to {pod-2, pod-3} in the synthetic trace; live names/UIDs are recorded separately.",
             "Keep Deployment UID and generation in the before/after packet.",
             "The replacement is caused by the ReplicaSet restoring desired replicas. It is not a new Deployment or necessarily a new template revision. The operation must use UID-aware targeting and preserve unrelated objects.",
+            "Your before/after packet must show the Deployment UID and generation unchanged, exactly one Pod UID removed and exactly one new Pod UID added.",
         ),
         (
             "Reject a count-only shortcut",
             "Add a foreign-controller Pod to a synthetic list while removing one owned Pod.",
-            "Raw count2 but owned Ready count1,so acceptance fails.",
+            "Raw count 2 but owned Ready count 1, so acceptance fails.",
             "Filter by the verified ownership chain before counting.",
             "An unrelated Pod cannot satisfy this Deployment's desired replica contract. This negative case demonstrates why counting labels or phase values without ownership can produce a false success.",
+            "Recount using only Pods whose controller ownerReference resolves to the intended ReplicaSet UID, then compare that count with the raw list length.",
         ),
         (
             "Separate recovery from availability",
@@ -317,6 +346,7 @@ A one-shot Run\'s final cleanup is separate from the deliberate replacement exer
             "A bounded client timeline and error counts are required beyond final Ready replicas.",
             "Final state does not describe every intermediate request.",
             "The control loop may restore the final desired count after a period of reduced capacity. A client trace can establish observed continuity for its sampled requests, while a final Pod snapshot cannot. Finite samples still do not prove a universal SLA.",
+            "Name a client-side measurement taken during replacement (request times, results and error counts) that no final Deployment status field can provide.",
         ),
     ],
     hello(),
@@ -326,7 +356,8 @@ def main():
     after={**before,'pods':{'pod-2','pod-3'}}
     assert before['deployment']==after['deployment'] and before['generation']==after['generation']
     assert after['pods']-before['pods']=={'pod-3'} and before['pods']-after['pods']=={'pod-1'}
-    assert not (3>=4)
+    status={'generation':4,'observedGeneration':3,'readyReplicas':2}
+    assert status['observedGeneration']<status['generation']
     pods=[{'uid':'owned','controller':'rs-a','ready':True},{'uid':'foreign','controller':'rs-other','ready':True}]
     assert len(pods)==2 and sum(p['controller']=='rs-a' and p['ready'] for p in pods)==1
     print('k8s-006 synthetic reconciliation and ownership checks passed')
@@ -335,6 +366,8 @@ if __name__ == "__main__":
     main()
 """,
     browser=True,
+    starter=variant(hello(), [0, "spec", "replicas"], 1),
+    starter_note="The learner starter declares one replica; Exercise 3 asks you to change it to two. ",
     capability="fixed Deployment baseline; separate UID-scoped stateful Pod replacement",
     refs=[
         "[Kubernetes Deployments](https://kubernetes.io/docs/concepts/workloads/controllers/deployment/)"
@@ -347,57 +380,59 @@ author(
 
 A ClusterIP Service does not publish an external address or prove that an application is healthy. Its port is the port clients use on the Service, while targetPort identifies the destination port on backing Pods. A named targetPort such as http resolves through the container port declaration. A mismatch can break traffic even when the Service object exists.
 
-The current browser operation supports the fixed hello Deployment and hello Service. It checks Ready Pod UIDs,unique eligible EndpointSlice Pod UIDs and a new in-cluster version client,then cleans only owned resources. It deliberately permits a wrong selector value as a bounded negative case,which should fail to establish backends rather than silently succeed.""",
+The current browser operation supports the fixed hello Deployment and hello Service. It checks Ready Pod UIDs, unique eligible EndpointSlice Pod UIDs and a new in-cluster version client, then cleans only owned resources. It deliberately permits a wrong selector value as a bounded negative case, which should fail to establish backends rather than silently succeed.""",
     [
         (
             "Follow selection and port mapping",
-            """The Deployment template labels Pods app=hello. The Service selector app=hello selects those labels; changing it to app=wrong selects a different set,usually empty in this owned fixture. The selector is not an owner reference and does not create Pods. The Deployment and Service can therefore be accepted independently while routing is still wrong.
+            """The Deployment template labels Pods app=hello. The Service selector app=hello selects those labels; changing it to app=wrong selects a different set, usually empty in this owned fixture. The selector is not an owner reference and does not create Pods. The Deployment and Service can therefore be accepted independently while routing is still wrong.
 
-The admitted Service exposes port8080 and targetPort http. The container declares name http at containerPort8080. All three pieces must agree with the actual server listener. A port name is a lookup key,not a second network port. The fixed adapter refuses arbitrary host exposure,NodePort,external endpoints and unbounded port choices.
+The admitted Service exposes port 8080 and targetPort http. The container declares name http at containerPort 8080. All three pieces must agree with the actual server listener. A port name is a lookup key, not a second network port. The fixed adapter refuses arbitrary host exposure, NodePort, external endpoints and unbounded port choices.
 
-DNS resolves the Service name inside the appropriate cluster/namespace context. That resolution does not prove the selected application responds correctly. A complete test separates name resolution,routing,backend eligibility and the HTTP payload.""",
+DNS resolves the Service name inside the appropriate cluster/namespace context. That resolution does not prove the selected application responds correctly. A complete test separates name resolution, routing, backend eligibility and the HTTP payload.""",
         ),
         (
             "Compare identities rather than raw endpoint counts",
             """EndpointSlices can represent multiple addresses or IP families for the same Pod. Counting raw endpoint entries can double-count one backend. The verifier collects eligible ready targetRef Pod UIDs and compares their set with the owned Ready Pod set. An endpoint for an unrelated Pod cannot satisfy the contract even if its IP responds.
 
-The synthetic example has owned Ready UIDs {pod-a,pod-b} and two slices each listing both UIDs. There are four entries but only two unique backends. A second example replaces pod-b with foreign-c;the raw count is still two but the identity set is wrong.
+The synthetic example has owned Ready UIDs {pod-a, pod-b} and two slices each listing both UIDs. There are four entries but only two unique backends. A second example replaces pod-b with foreign-c; the raw count is still two but the identity set is wrong.
 
-The client Job is independent of readiness:it requests /version and checks the exact expected payload. A probe path can be healthy while the application route or Service selection is incorrect. The course uses a fresh owned client rather than inferring HTTP success from a status field.""",
+The client Job is independent of readiness: it requests /version and checks the exact expected payload. A probe path can be healthy while the application route or Service selection is incorrect. The course uses a fresh owned client rather than inferring HTTP success from a status field.""",
         ),
         (
             "Diagnose routing failures at the correct layer",
             """A Service with no endpoints is different from a Service with ready endpoints but a wrong application response. A wrong selector is not repaired by changing the container image without evidence. A named-port mismatch is not a DNS failure. Record the discriminating field or client result before choosing a repair.
 
-The browser source uses only its fixed port contract. Experiments with a second Service or arbitrary ports require a separate scoped host capability. Do not claim that the one-shot operation executed those transfer cases,or that finite client success proves long-term traffic availability.""",
+The browser source uses only its fixed port contract. Experiments with a second Service or arbitrary ports require a separate scoped host capability. Do not claim that the one-shot operation executed those transfer cases, or that finite client success proves long-term traffic availability.""",
         ),
     ],
     [
         (
             "Trace a named port",
             "```yaml\n" + yaml.safe_dump(hello(True)[1], sort_keys=False) + "```",
-            "Service port8080 routes to the Pod container port named http,which the fixture declares as8080.",
+            "Service port 8080 routes to the Pod container port named http, which the fixture declares as 8080.",
         ),
         (
             "Deduplicate a dual-family observation",
-            """Synthetic slices contain [pod-a,pod-b] and [pod-a,pod-b]. The owned Ready Pod set is {pod-a,pod-b}. Four endpoint entries represent two unique eligible Pod identities.""",
-            "Deduplicated UID sets match;raw entry count4 is not replica count4.",
+            """Synthetic slices contain [pod-a, pod-b] and [pod-a, pod-b]. The owned Ready Pod set is {pod-a, pod-b}. Four endpoint entries represent two unique eligible Pod identities.""",
+            "Deduplicated UID sets match; raw entry count 4 is not replica count 4.",
         ),
     ],
     [
         (
             "Trace selector equality",
             "Compare Deployment template app=hello with Service selector app=hello and app=wrong.",
-            "Matching selector finds the intended set;wrong selector has no intended backends.",
+            "Matching selector finds the intended set; wrong selector has no intended backends.",
             "Compare both label key and value.",
             "A selector is a set query over labels. It does not establish ownership by itself and it does not create missing Pods. The owned-controller UID check remains necessary after selection.",
+            "Compare the Service `spec.selector` with the Pod template labels key by key; a match needs the same key and the same value.",
         ),
         (
             "Resolve the port chain",
-            "Read Service port,targetPort and container port name/number.",
-            "Client8080 -> targetPort http -> container8080.",
+            "Read Service port, targetPort and container port name/number.",
+            "Client 8080 -> targetPort http -> container 8080.",
             "A named target is resolved against the Pod's declared port name.",
-            "The chain connects client-facing and backend ports. A Service object can exist even if this mapping is wrong,so object creation alone is insufficient routing evidence.",
+            "The chain connects client-facing and backend ports. A Service object can exist even if this mapping is wrong, so object creation alone is insufficient routing evidence.",
+            "Trace port, targetPort and containerPort through the YAML and confirm that the named port `http` is declared exactly once on the container.",
         ),
         (
             "Count unique backends",
@@ -405,27 +440,31 @@ The browser source uses only its fixed port contract. Experiments with a second 
             "Exactly two unique Pod UIDs matching the owned Ready set.",
             "Use targetRef identity rather than entry count or address alone.",
             "Multiple slices or IP families can repeat a Pod identity. Set comparison avoids inflated backend counts and also detects an unrelated endpoint with the wrong UID.",
+            "Deduplicate by `targetRef.uid`; the resulting set must equal the owned Ready Pod UIDs you recorded independently.",
         ),
         (
             "Run a selector negative case",
-            "Change only the allowed Service selector to app=wrong in an owned Run,then restore it.",
-            "No matching ready backends;bounded failure and cleanup;restored source can pass separately.",
+            "The starter's Service selects app=wrong. Run it unchanged and record the failure, then restore app=hello and Run again.",
+            "The unchanged starter has no matching ready backends and fails within its bound, with cleanup; the restored source can pass in a separate Run.",
             "Preserve source change and failure phase in the record.",
-            "The negative case tests the connection between selection and routing. A later successful Run is a fresh operation with its own UIDs,not evidence that the earlier Service persisted and was patched.",
+            "The negative case tests the connection between selection and routing. A later successful Run is a fresh operation with its own UIDs, not evidence that the earlier Service persisted and was patched.",
+            "Your record must contain the exact selector you ran, the failed check name and its cleanup result, followed by a separate passing Run after the restore.",
         ),
         (
             "Verify an independent client",
             "Inspect the fresh client Job and exact /version result after backend checks.",
-            "Job/Pod ownership and exit0 accompany the expected ds60-fixture-v1 payload contract.",
+            "Job/Pod ownership and exit 0 accompany the expected ds60-fixture-v1 payload contract.",
             "Do not substitute /ready for the application version route.",
-            "The independent request establishes that the Service path reaches the expected fixture response. Job completion alone is tied to owned Pod identity and the fixed checker behavior;the result remains bounded to the observed request.",
+            "The independent request establishes that the Service path reaches the expected fixture response. Job completion alone is tied to owned Pod identity and the fixed checker behavior; the result remains bounded to the observed request.",
+            "Confirm that the client Job belongs to this Run and that its output is the `/version` payload rather than a `/ready` response.",
         ),
         (
             "Design a second-Service transfer",
             "Explain a scoped host experiment using another Service without touching unrelated objects.",
-            "A separate capability,unique owned resource receipt,selector/port/backend/client checks and UID-aware cleanup are specified.",
+            "A separate capability, unique owned resource receipt, selector/port/backend/client checks and UID-aware cleanup are specified.",
             "The browser owns only the fixed hello name.",
-            "Generalizing the mechanism requires a deliberate new resource scope,not changing the browser validator to accept arbitrary names. The same evidence chain applies,but actual execution remains unavailable until the host capability is provided.",
+            "Generalizing the mechanism requires a deliberate new resource scope, not changing the browser validator to accept arbitrary names. The same evidence chain applies, but actual execution remains unavailable until the host capability is provided.",
+            "Check that the design names its own Service, its own owned receipt and a UID-aware cleanup step, and never edits the `hello` Service.",
         ),
     ],
     hello(True),
@@ -439,12 +478,14 @@ def main():
     assert sum(map(len,slices))==4 and len(endpoints)==2 and endpoints==ready
     assert {'pod-a','foreign-c'}!=ready
     ports={'http':8080};assert ports['http']==8080
-    print('k8s-007 synthetic selector,port and endpoint-identity checks passed')
+    print('k8s-007 synthetic selector, port and endpoint-identity checks passed')
 
 if __name__ == "__main__":
     main()
 """,
     browser=True,
+    starter=variant(hello(True), [1, "spec", "selector", "app"], "wrong"),
+    starter_note="The learner starter's Service selects app=wrong; Exercise 4 asks you to run that negative case and then restore app=hello. ",
     capability="fixed Deployment/Service baseline and selector negative case",
     refs=[
         "[Kubernetes Services](https://kubernetes.io/docs/concepts/services-networking/service/)"

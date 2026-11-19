@@ -1,6 +1,6 @@
 # swift-014: explanation and comparison
 
-Attempt the six guide tasks before opening this comparison. The executable reference is [swift-014_solution.swift](swift-014_solution.swift). Its assertions are always active under the prepared classroom compile settings.
+Attempt the six guide tasks before opening this comparison. The executable reference is [swift-014_solution.swift](swift-014_solution.swift). It runs both worked examples and the reference answers below, and its assertions are always active under the prepared classroom compile settings.
 
 ## Why the two examples differ
 
@@ -8,21 +8,57 @@ Attempt the six guide tasks before opening this comparison. The executable refer
 
 **Expose a conversion property:** A computed property can expose a convenient representation while retaining one stored unit. The getter and setter translate between temperature scales.
 
-## Reason through the six tasks
+## Task answers
 
-1. **Predict and explain.** Trace which properties are stored and which are derived.
+### Task 1: Predict and explain
 
-2. **Guided modification.** Add a computed rectangle perimeter.
+Trace which properties are stored and which are derived.
 
-3. **Independent construction.** Build a value model with one stored unit and a documented converted view.
+No separate reference answer has been written for this task. Example A is the evidence to compare with: One source of truth prevents stale duplicated state. Area changes with width without a separately updated area field.
 
-4. **Diagnose a defect.** Diagnose a separately stored area that is not updated after width changes.
+### Task 2: Guided modification
 
-5. **Boundary evidence.** Test zero and a non-integer conversion case.
+Add a computed rectangle perimeter.
 
-6. **Transfer and justify.** Choose an explicit method instead of a setter for a state change with validation and failure.
+No separate reference answer has been written for this task. Start from Example B: A computed property can expose a convenient representation while retaining one stored unit. The getter and setter translate between temperature scales.
 
-For tasks 1 and 2, use the checked values and mechanism trace in the two examples. For task 3, choose names that expose the input and result contract and retain the same invariants. For task 4, the diagnosed mistakes below supply a concrete wrong assumption: preserve its counterexample before repairing it. Task 5 needs an explicit expected value or documented rejection at the boundary, not just successful execution. For task 6, explain what changes in the new context and which part of the original mechanism remains applicable. Several representations may satisfy this transfer task; justify the choice rather than treating this reference as the only architecture.
+### Task 3: Independent construction
+
+Build a value model with one stored unit and a documented converted view.
+
+**Reference answer.** It runs as the `Task 3` block of the reference program.
+
+```swift
+/// Stores meters only; feet is a derived view and is never stored.
+struct Length {
+  var meters: Double
+  var feet: Double { meters / 0.3048 }
+}
+let length = Length(meters: 3.048)
+precondition(abs(length.feet - 10) < 1e-9)
+```
+
+**Observe:** 3.048 meters reads as 10 feet.
+
+With a single stored unit there is nothing to keep in sync; the converted value is computed from meters every time it is read.
+
+### Task 4: Diagnose a defect
+
+Diagnose a separately stored area that is not updated after width changes.
+
+No reference answer has been written for this task yet. The wrong assumptions to look for are this lesson's pitfalls: Expensive computed properties can surprise callers who expect cheap access. Observers can hide cascading side effects. Avoid duplicating state unless there is a measured caching need and invalidation policy.
+
+### Task 5: Boundary evidence
+
+Test zero and a non-integer conversion case.
+
+No reference answer has been written for this task yet. Write the expected value or documented rejection for each boundary before running it, and compare with the checks in Example A (Derive instead of duplicating) and Example B (Expose a conversion property).
+
+### Task 6: Transfer and justify
+
+Choose an explicit method instead of a setter for a state change with validation and failure.
+
+No single reference answer exists: several designs can satisfy this transfer task. Justify yours against the mechanism described below and the vocabulary entry **Stored property**, and state one limitation of your choice.
 
 ## Mechanism and diagnostic reasoning
 
@@ -36,4 +72,4 @@ Expensive computed properties can surprise callers who expect cheap access. Obse
 
 ## Review before continuing
 
-The reference checks the worked scenarios, including their boundary distinctions. Your independent and transfer artifacts may have additional checks. Compare observations rather than only source text. Preserve any new regression case you discover and explain why it would reject a plausible wrong implementation. External project steps require their own build and platform evidence and are not established by a portable reference passing.
+Run the reference and confirm that it prints `swift-014: passed`, then reconstruct one boundary case from memory and explain which check would reject a plausible wrong implementation. External project steps need their own build and platform evidence; a passing portable reference does not establish them.

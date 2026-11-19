@@ -31,8 +31,8 @@ FY 2025 under the July-start convention, observed only through 2025-02-28; activ
 
 There happen to be no second-half 2024 sales in this fixture. That does not make Gregorian and fiscal-year measures generally equivalent.
 
-- The fiscal interval starts July 1,2024.
-- The as-of boundary stops at February 28,2025, not June 30.
+- The fiscal interval starts July 1, 2024.
+- The as-of boundary stops at February 28, 2025, not June 30.
 - The available matching sales are S4..S8, totaling 123.
 
 ## Explained practice answers
@@ -47,13 +47,13 @@ The fiscal label is 2025.
 
 Change the naming convention to the starting year.
 
-July 1,2024 would be labeled FY 2024. Update labels and documentation without pretending the population changed.
+July 1, 2024 would be labeled FY 2024. Update labels and documentation without pretending the population changed.
 
 ### Exercise 3
 
 Write a fiscal-to-date metric caption.
 
-For example: FY 2025 order revenue through February 28,2025, fiscal year ending June 30.
+For example: FY 2025 order revenue through February 28, 2025, fiscal year ending June 30.
 
 ### Exercise 4
 

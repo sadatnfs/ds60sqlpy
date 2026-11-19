@@ -1,55 +1,43 @@
 # docker-038: explanatory solutions
 
-Compare after your own attempt or an explicit reveal. These are explanations of the supplied teaching fixtures, not fabricated engine results.
-
-## Mechanism review
-
-An incident is an observed deviation from expected behavior that requires diagnosis or recovery. Disk pressure can arise from images, build cache, container writable layers, logs or volumes. These categories have different retention and ownership, so one global delete command is a poor first response.
-
-Pruning means removing resources considered unused by a tool’s rules. Unused does not always mean unimportant to a learner. A stopped container may retain an investigation, and a detached volume may hold progress awaiting the next container. Identify the resource and intended retention before deletion.
-
-A useful incident sequence preserves evidence, assesses current state, identifies the failing layer, applies a scoped repair and verifies recovery. If an engine VM needs restart, that can interrupt unrelated workloads. A course lesson does not authorize such a host-wide action.
-
-Use read-only inventory first. `docker system df` summarizes storage categories; project-scoped ps, image and volume inspection add ownership. Capture small results privately. Remove only resources you created and have decided to discard, using explicit names or labels checked against the project.
-
-Routine course cleanup uses Compose down without volume deletion. A full disposable-lab reset is separately documented and should name the exact study project and volume. Build cache deletion changes performance and can affect other projects, so it is not hidden in the learner shutdown command.
+Compare after your own attempt or an explicit reveal. These explain the supplied teaching fixtures; they are not engine results. The mechanism is explained in `courses/docker/guides/docker-038.md`.
 
 ## Exercise 1: Classify disk usage by resource type.
 
-Each category has a different owner and retention policy. A single aggregate number does not identify safe deletions.
+**Expected answer:** Images, cache, writable layers, logs and volumes.
 
-**Expected:** Images, cache, writable layers, logs and volumes.
+**Why:** Each category has a different owner and retention policy. A single aggregate number does not identify safe deletions.
 
 ## Exercise 2: Predict the effect of ordinary Compose down.
 
-The stop path should not erase learner state. Verify the exact command and project identity before execution.
+**Expected answer:** It preserves named volumes unless explicit volume deletion is requested.
 
-**Expected:** It preserves named volumes unless explicit volume deletion is requested.
+**Why:** The stop path should not erase learner state. Verify the exact command and project identity before execution.
 
 ## Exercise 3: Design an incident evidence packet.
 
-Preserve the original condition before changing the engine. This makes the repair explainable and helps distinguish recovery from coincidental disappearance.
+**Expected evidence:** Failure symptom, time, resource inventory and bounded relevant logs.
 
-**Expected:** Failure symptom, time, resource inventory and bounded relevant logs.
+**Why:** Preserve the original condition before changing the engine. This makes the repair explainable and helps distinguish recovery from coincidental disappearance.
 
 ## Exercise 4: Diagnose a detached volume labeled unused.
 
-A volume can be temporarily unattached between container runs. Tool reachability is not the same as user intent to discard data.
+**Expected answer:** Determine its owner and retained data purpose before deletion.
 
-**Expected:** Determine its owner and retained data purpose before deletion.
+**Why:** A volume can be temporarily unattached between container runs. Tool reachability is not the same as user intent to discard data.
 
 ## Exercise 5: Explain why broad engine pruning is out of scope.
 
-The study project owns only its own resources. Cleanup authorization should remain as narrow as the task that created them.
+**Expected answer:** It can affect unrelated workloads and recoverable state.
 
-**Expected:** It can affect unrelated workloads and recoverable state.
+**Why:** The study project owns only its own resources. Cleanup authorization should remain as narrow as the task that created them.
 
 ## Exercise 6: Write a scoped recovery and cleanup plan.
 
-A good plan makes every destructive action reviewable and verifies the intended outcome without claiming unrelated resources were safe to remove.
+**Expected evidence:** Explicit targets, retained data, repair check and final ownership readback.
 
-**Expected:** Explicit targets, retained data, repair check and final ownership readback.
+**Why:** A good plan makes every destructive action reviewable and verifies the intended outcome without claiming unrelated resources were safe to remove.
 
 ## Check your transfer
 
-A useful solution identifies the exact object, the phase when a setting takes effect, the expected normal result and an observation that disproves it. Repeating a command until it succeeds hides the mechanism. Change one variable, keep a failure record, and test the intended behavior again. Source examples here are small enough to inspect; a production system additionally needs ownership, lifecycle, data recovery and operational review. The host exercises are optional and must stay within the learner-created project.
+A useful answer names the exact object, the phase when a setting takes effect, the expected normal result and an observation that would disprove it. A production system additionally needs ownership, lifecycle, data recovery and operational review.

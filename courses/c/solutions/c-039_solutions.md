@@ -8,9 +8,11 @@ Memory access patterns can dominate arithmetic cost. An array of structs keeps e
 
 sizeof reports actual object size including padding. offsetof gives a field offset without dereferencing a null pointer. Iterate only over initialized logical elements. restrict can promise nonaliasing to the compiler, but violating that promise is a correctness defect; it is not a harmless performance hint. The fixture compares layouts semantically and intentionally makes no wall-clock threshold assertion.
 
-## Exercise 1: Sum one field in records
+## Exercise 1: Sum one field in records: change one input
 
-Sum x fields from three Point records.
+Copy worked example 1 into a scratch pad and change `struct Point records[] = {{1, 10}, {2, 20}, {3, 30}};` to `struct Point records[] = {{2, 10}, {2, 20}, {3, 30}};`. Before running, predict which CHECK fails and which value it now sees; then run it and restore the original line.
+
+The unchanged code is worked example 1:
 
 ```c
 struct Point records[] = {{1, 10}, {2, 20}, {3, 30}};
@@ -20,13 +22,15 @@ for (size_t i = 0; i < 3; i++)
 CHECK(sum == 6);
 ```
 
-**Expected:** The result is 6.
+**Expected:** The changed run stops with `Check failed` at the CHECK on `sum == 6`. Restoring the original line brings back the worked observation: the result is 6.
 
 This traversal touches a selected field in each record. Whether unused fields waste bandwidth depends on the real layout and workload.
 
-## Exercise 2: Compute the same result by columns
+## Exercise 2: Compute the same result by columns: debug a regression
 
-Sum an x column containing 1, 2, 3.
+A regression changed one token in worked example 2, so one line now reads `sum -= x[i];`. Run worked example 2 with that line, use the failing CHECK to locate the defect and repair it without changing the CHECK.
+
+The unchanged code is worked example 2:
 
 ```c
 int x[] = {1, 2, 3};
@@ -37,7 +41,7 @@ for (size_t i = 0; i < 3; i++)
 CHECK(sum == 6 && y[2] == 30);
 ```
 
-**Expected:** The result is also 6.
+**Expected:** Before the repair the run stops with `Check failed` at the CHECK on `sum == 6 && y[2] == 30`; after it the line reads `sum += x[i];` again and the result is also 6.
 
 Equivalent semantics must be established before comparing timings. The y column remains independent storage.
 

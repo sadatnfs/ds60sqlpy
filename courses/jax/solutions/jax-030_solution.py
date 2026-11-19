@@ -90,7 +90,7 @@ def main():
     # Case 8: Transfer the target rule
     close(solve(design, jnp.array([2.0, 5.0, 8.0]), mask, 0.0), [2.0, 3.0])
 
-    print("jax-030" + ": 8 asserted cases passed")
+    print("jax-030: 8 asserted cases passed")
 
 
 if __name__ == "__main__":

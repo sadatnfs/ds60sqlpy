@@ -9,6 +9,7 @@
     "confusion matrix"
   ],
   "outcome": "Calculate agreement with the correct marginals, explain prevalence effects, and distinguish reliable labels from valid labels.",
+  "verification": "The confusion table is [[2, 0], [1, 1]]; perfect agreement gives kappa 1 and complete disagreement -1; the single-category case is rejected as undefined; and the sample still has two families when the dependence unit changes.",
   "level": "beginner",
   "runtime": "python-core",
   "minutes": 120,

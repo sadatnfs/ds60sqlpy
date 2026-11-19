@@ -18,7 +18,7 @@ Showing components makes double subtraction and population mixing visible. The f
 
 - Core line discounts are already included in NetAmount, whose total is 187.
 - Refunds 4 and 9 total 13; adjusted core revenue is 174.
-- Foreign amounts convert to 100 +110 +60 =270 USD under their separate policy.
+- Foreign amounts convert to 100 + 110 + 60 = 270 USD under their separate policy.
 
 ### Case B: Compare an aligned two-month core population
 
@@ -31,8 +31,8 @@ FullJanuary/February 2025, Paper/Home core sales, refunds attributed to original
 A return-date report could differ, but this fixture does not contain ReturnDate. The correct conclusion is to state the limitation, not invent another temporal attribution.
 
 - Core 2025 sales in these months total 123.
-- Only the refund linked to S 4 belongs to that sale-date population, subtracting 9.
-- The four compatible budget rows total 165;114 -165 =-51.
+- Only the refund linked to S4 belongs to that sale-date population, subtracting 9.
+- The four compatible budget rows total 165; 114 - 165 = -51.
 
 ## Explained practice answers
 
@@ -40,7 +40,7 @@ A return-date report could differ, but this fixture does not contain ReturnDate.
 
 Reconcile adjusted core revenue by year.
 
-2024 contributes 64 -4 =60;2025 contributes 123 -9 =114; together they total 174.
+2024 contributes 64 - 4 = 60; 2025 contributes 123 - 9 = 114; together they total 174.
 
 ### Exercise 2
 

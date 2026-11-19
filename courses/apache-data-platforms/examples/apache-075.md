@@ -15,7 +15,7 @@ profile, the bounded native Docker protocol client runs with:
 bash run.sh check
 ```
 
-The actual check lists the exact owned share/schema/table and requires invalid-recipient401/403 before accepting its bounded row read.
+The actual check lists the exact owned share/schema/table and requires an invalid-recipient 401 or 403 before accepting its bounded row read.
 
 The classroom Markdown pad does not start a service. Source configuration and
 unit policy fixtures are not actual reference-server receipts. Keep credentials

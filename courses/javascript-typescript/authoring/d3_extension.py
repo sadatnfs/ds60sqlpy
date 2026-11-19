@@ -2,6 +2,7 @@
 
 from pathlib import Path
 import json
+import re
 import runpy
 import sys
 
@@ -12,7 +13,52 @@ if str(ROOT) not in sys.path:
 
 from scripts.format_inline_code import canonical_markdown  # noqa: E402
 
+HERE = Path(__file__).resolve().parent
+if str(HERE) not in sys.path:
+    sys.path.insert(0, str(HERE))
+
+from outcomes import MINUTES, OUTCOMES  # noqa: E402
+
 SPECS = runpy.run_path(str(Path(__file__).with_name("d3_specs.py")))["LESSONS"]
+LABELS = (
+    ("https://d3js.org/", "D3 documentation"),
+    ("https://developer.mozilla.org/en-US/docs/", "MDN"),
+    ("https://datatracker.ietf.org/doc/html/", "IETF"),
+    ("https://www.w3.org/WAI/", "W3C WAI"),
+)
+
+
+def reference_label(url):
+    """Descriptive link text naming the documentation set and page."""
+    for prefix, name in LABELS:
+        if url.startswith(prefix):
+            return f"{name}: {url[len(prefix) :].strip('/')}"
+    return url
+
+
+def first_sentence(text):
+    return re.split(r"(?<=[.!?])\s+(?=[A-Z])", text.strip(), maxsplit=1)[0]
+
+
+def worked_program(key, title, number, body):
+    """A complete preview program: the reference setup, the example body and a completion line."""
+    return f"""// {key} worked example {number}: a complete program for the classroom preview.
+const host = document.querySelector("#chart");
+const output = document.querySelector("#output");
+host.replaceChildren();
+const check = (condition, message) => {{
+  if (!condition) throw new Error(message);
+}};
+const svg = d3
+  .select(host)
+  .append("svg")
+  .attr("viewBox", "0 0 640 360")
+  .attr("role", "img")
+  .attr("aria-label", {json.dumps(title)})
+  .style("width", "100%")
+  .style("max-width", "640px");
+{body.strip()}
+output.textContent = {json.dumps(f"{key} worked example {number} complete")};"""
 
 
 def write(path, text):
@@ -38,15 +84,19 @@ def build():
         solution = f"courses/javascript-typescript/solutions/{key}_solution.js"
         explanation = f"courses/javascript-typescript/solutions/{key}_solutions.md"
         prerequisites = ", ".join(f"`{p}`" for p in prereq)
+        outcome = OUTCOMES[key]
+        if outcome in {tasks[-1][0], mental.split(".")[0] + "."}:
+            raise ValueError(key + " needs a specific outcome")
+        minutes = MINUTES.get(key, 110)
         text = f"""# {key}: {title}
 
 ## Level and prerequisites
 
-{level.capitalize()}; about 110 minutes plus independent practice. Direct prerequisites: {prerequisites}. This is the D3.js specialization within the JavaScript path. Use the original language and browser lessons whenever syntax or DOM behavior is unfamiliar.
+{level.capitalize()}; about {minutes} minutes plus independent practice. Direct prerequisites: {prerequisites}. This is the D3.js specialization within the JavaScript path. Use the original language and browser lessons whenever syntax or DOM behavior is unfamiliar.
 
 ## Learning objectives
 
-{tasks[2][0]} {tasks[-1][0]} Produce a chart whose data transformation, visual encoding and interaction can be explained and checked independently.
+{outcome} The central exercise is: {tasks[2][0]} Produce a chart whose data transformation, visual encoding and interaction can be explained and checked independently.
 
 ## Purpose, vocabulary and mental model
 
@@ -58,7 +108,7 @@ def build():
 
 ## Browser execution and offline inputs
 
-Use the classroom's JavaScript browser preview. The prepared preview supplies D3 7.9.0 as the global `d3`, an empty `#chart` container and a `#output` text region. It supports top-level `await` through an asynchronous wrapper. These examples do not import modules, fetch datasets, use a CDN or contact an external service. All data is small, synthetic and present in the source. Node has no DOM and is not the execution host for these lessons.
+Use the classroom's JavaScript browser preview. The prepared preview supplies D3 7.9.0 as the global `d3`, an empty `#chart` container and a `#output` text region. It supports top-level `await` through an asynchronous wrapper. Worked example 2 is a complete program: paste the whole block into the preview and its marks appear in `#chart`. Worked example 1 is a short self-contained snippet whose result appears in the console. These examples do not import modules, fetch datasets, use a CDN or contact an external service. All data is small, synthetic and present in the source. Node has no DOM and is not the execution host for these lessons.
 
 Save your own pad before editing. Run the learner source after implementing its tasks. A completed reference prints `{key} D3 complete` only after its executable checks finish. A thrown Error signals a failed check; `console.assert` alone is not a reliable completion contract. A browser observation proves this source ran in this preview. It is not a trusted backend verifier or a guarantee of statistical correctness, accessibility or mastery.
 
@@ -67,12 +117,14 @@ The visual output belongs inside `#chart`. Use `.text()` or `textContent` for un
 ## Worked example / walkthrough
 """
         for i, (heading, body, code, expected) in enumerate(examples, 1):
+            if i == 2:
+                code = worked_program(key, title, i, code)
             text += f"\n### Worked example {i}: {heading}\n\n{body}\n\n```javascript\n{code}\n```\n\n**Expected observation:** {expected}\n"
         text += "\n## Six progressive exercises\n"
         starter = f"// {key}: {title}\n// D3 7.9.0 is supplied as global d3. Render only inside #chart.\n// Answer-free learner artifact. Save your own copy before editing.\n\n"
         answer = f"# {key}: explanatory solutions\n\nCompare after your own attempt or an explicit reveal. The separate .js reference is a complete offline browser program. These explanations discuss the six practice tasks; a visual resemblance alone is not a data or behavior check.\n\n## Mechanism review\n\n{mental}\n\n{anatomy}\n"
         for i, (prompt, expected, reason) in enumerate(tasks, 1):
-            text += f"\n### Exercise {i}: {prompt}\n\n**Expected evidence:** {expected}\n\n**Progressive hint:** Inspect the input records, then the derived values, then the DOM or Canvas marks. Compare the first disagreement with the worked example before changing another layer.\n"
+            text += f"\n### Exercise {i}: {prompt}\n\n**Expected evidence:** {expected}\n\n**Progressive hint:** {first_sentence(reason)}\n"
             starter += f"// Exercise {i}: {prompt}\n// Expected: {expected}\n\n"
             answer += f"\n## Exercise {i}: {prompt}\n\n{reason}\n\n**Expected:** {expected}\n"
         starter += 'throw new Error("Implement the six D3 practice tasks in your saved pad before claiming completion.");\n'
@@ -97,7 +149,7 @@ Close the solution and explain {", ".join(concepts[:3])} using a new small datas
 ## Primary references
 
 """
-            + "\n".join(f"- [D3 reference {i}]({url})" for i, url in enumerate(refs, 1))
+            + "\n".join(f"- [{reference_label(url)}]({url})" for url in refs)
             + f"""
 
 ## Ask an AI tutor about this lesson
@@ -141,13 +193,13 @@ console.log({json.dumps(key + " D3 complete")});
                 id=key,
                 title=title,
                 level=level,
-                minutes=110,
+                minutes=minutes,
                 prerequisites=prereq,
                 runtime="javascript-browser",
                 concepts=concepts,
-                outcome=tasks[-1][0],
+                outcome=outcome,
                 lab=tasks[2][0],
-                verification=tasks[-1][1],
+                verification=tasks[2][1],
             )
         )
         manifest["lessons"].append(

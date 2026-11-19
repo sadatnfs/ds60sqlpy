@@ -16,11 +16,16 @@ with operation and commit metadata. Repeatedly reading the current table and
 subtracting results is not automatically equivalent to a real change feed,
 especially when updates, deletes, retention and schema changes occur.
 
-Current official Python 1.4.2uses a native sharing wrapper without an inspected
-LinuxARM64wheel. The course's portable protocol client therefore supports only
-basic Parquet/minReaderVersion1 and explicitly excludes Delta-format, deletion
+Current official Python 1.4.2 uses a native sharing wrapper without an inspected
+Linux ARM64 wheel. The course's portable protocol client therefore supports only
+basic Parquet with `minReaderVersion` 1 and explicitly excludes Delta-format, deletion
 vectors and CDF. This is an intentional supported subset, not an emulated
 advanced reader or a claim that protocol evolution is unnecessary.
+
+**Execution boundary.** Case A needs a native reference server, a table writer and
+an advanced client, none of which the repository provides. Case B's guard is part
+of the portable client's source, the same protocol check shown in apache-076, but
+it is exercised only when a server returns an unsupported protocol.
 
 ## Worked case A: inspect a supported history or change range
 

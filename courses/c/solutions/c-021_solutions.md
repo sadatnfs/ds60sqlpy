@@ -8,9 +8,11 @@ A linked list stores each element in a node that points to the next node. It can
 
 struct Node contains a value and next pointer. push_front allocates first and changes the head only after success. A Node **head lets the helper update the caller head. Iterative destruction retains next before free and resets the head afterward. Reverse uses previous, current and next pointers, maintaining a processed-prefix invariant without new allocations.
 
-## Exercise 1: Insert at the head
+## Exercise 1: Insert at the head: predict an edited check
 
-Push 1 and then 2.
+Copy worked example 1 into a scratch pad and change `CHECK(push_front(&head, 1) && push_front(&head, 2));` to `CHECK(push_front(&head, 2) && push_front(&head, 2));` inside its CHECK. Before running, predict whether the CHECK still holds and explain why; then restore it.
+
+The unchanged code is worked example 1:
 
 ```c
 struct Node *head = NULL;
@@ -19,13 +21,15 @@ CHECK(head->value == 2 && head->next->value == 1);
 destroy_list(&head);
 ```
 
-**Expected:** The list order is 2 then 1.
+**Expected:** The changed run stops with `Check failed` at the CHECK on `head->value == 2 && head->next->value == 1`. Restoring the original line brings back the worked observation: the list order is 2 then 1.
 
 Head insertion reverses arrival order. If FIFO order is required, a tail pointer or different structure is needed.
 
-## Exercise 2: Count a constructed list
+## Exercise 2: Count a constructed list: debug a regression
 
-Push three values and count nodes.
+A regression changed one token in worked example 2, so one line now reads `for (int i = 0; i <= 3; i++)`. Run worked example 2 with that line, use the failing CHECK to locate the defect and repair it without changing the CHECK.
+
+The unchanged code is worked example 2:
 
 ```c
 struct Node *head = NULL;
@@ -35,7 +39,7 @@ CHECK(list_length(head) == 3);
 destroy_list(&head);
 ```
 
-**Expected:** The length is 3.
+**Expected:** Before the repair the run stops with `Check failed` at the CHECK on `list_length(head) == 3`; after it the line reads `for (int i = 0; i < 3; i++)` again and the length is 3.
 
 The traversal stops at NULL and does not assume nodes occupy adjacent addresses.
 

@@ -16,7 +16,7 @@
       "title": "Derive the reduction oracle",
       "task": "Compute the sum of squares through 100 from the closed-form formula.",
       "expected": "The result is 338350.",
-      "hint": "Use n(n+1)(2n+1)/6.",
+      "hint": "Use \\(n(n+1)(2n+1)/6\\).",
       "answer": "The independent formula checks the reduction without copying its loop."
     },
     {

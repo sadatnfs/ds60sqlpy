@@ -22,11 +22,13 @@ infer introduces a type variable extracted from a matched shape, such as the ele
 
 A mapped type uses [K in keyof T] to visit each property key. A modifier such as readonly or an optional question mark affects the generated property declaration. A conditional T extends U ? X : Y chooses a static result; infer names a matched component. The satisfies operator checks compatibility while retaining the expression's more specific inferred shape. It can catch missing or extra literal keys without replacing the runtime object or adding validation code.
 
-## Exercise 1: Map a record into field flags
+## Exercise 1: Map a record into field flags: change one input
 
-Task: Create a boolean flag type from id and count fields.
+Task: Copy Example A into a scratch `main.mts` and change `const flags: Flags<Row> = { id: true, count: false };` to `const flags: Flags<Row> = { id: false, count: false };`. Before running it, predict which check fails and which value it now sees; then run it and restore the original line.
 
 The mapped type follows the source keys, so adding a field to Row creates a new required flag. The actual object still needs to be constructed by ordinary code.
+
+The unchanged code is the exercise block of Example A:
 
 ```typescript
 type Row = { id: string; count: number };
@@ -41,15 +43,17 @@ function negativeTypeCheck(): void {
 void negativeTypeCheck;
 ```
 
-**Expected:** id true and count false; a missing flag is a compile error.
+**Expected:** The changed run fails with an `AssertionError` at the check `assert.deepEqual(flags, { id: true, count: false })`. Restoring the original line brings back the worked observation: id true and count false; a missing flag is a compile error.
 
-**Verify:** Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.
+**Verify:** Compare your written prediction with the reported `AssertionError`, including its actual and expected values, and name the value that made `assert.deepEqual(flags, { id: true, count: false })` fail. After restoring the line, the program prints its `{"checks":1,"status":"passed"}` receipt again.
 
-## Exercise 2: Prove Omit does not remove runtime secrets
+## Exercise 2: Prove Omit does not remove runtime secrets: debug a regression
 
-Task: Assign a wider record to an Omit type, then compare with an explicit public projection.
+Task: A regression changed one token in Example B, so one line now reads `const full: RecordWithSecret = { id: 'A!', secret: 'fixture-only' };`. Run Example B with that line, use the failing check to locate the defect and repair it without changing the check.
 
 Type erasure makes this a concrete data-exposure risk. The public object must be constructed with an explicit field allowlist before serialization.
+
+The unchanged code is the exercise block of Example B:
 
 ```typescript
 type RecordWithSecret = { id: string; secret: string };
@@ -61,9 +65,9 @@ assert.equal(Object.hasOwn(publicRecord, 'secret'), false);
 assert.equal(JSON.stringify(publicRecord), '{"id":"A"}');
 ```
 
-**Expected:** typed view still has secret at runtime; explicit projection does not.
+**Expected:** Before the repair the run fails with an `AssertionError` at the check `assert.equal(JSON.stringify(publicRecord), '{"id":"A"}')`; after it the line reads `const full: RecordWithSecret = { id: 'A', secret: 'fixture-only' };` again and typed view still has secret at runtime; explicit projection does not.
 
-**Verify:** Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.
+**Verify:** Keep the failing and the repaired runs. Explain why the changed token alters the value tested by `assert.equal(JSON.stringify(publicRecord), '{"id":"A"}')` for this input.
 
 ## Exercise 3: Compare distributed and whole-union array types
 
@@ -86,7 +90,7 @@ void negativeTypeCheck;
 
 **Expected:** whole-union array accepts mixed values; distributed array rejects them.
 
-**Verify:** Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.
+**Verify:** Keep a check equivalent to `assert.deepEqual(mixed, ['A', 2])`. As a control, change `const mixed: Whole<string | number> = ['A', 2];` to `const mixed: Whole<string | number> = ['A', 3];`: the run must fail with an `AssertionError` at that check. Restore the line before continuing.
 
 ## Exercise 4: Infer an array element type
 
@@ -108,7 +112,7 @@ void negativeTypeCheck;
 
 **Expected:** element type permits number 7 and rejects text.
 
-**Verify:** Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.
+**Verify:** Keep a check equivalent to `assert.equal(value, 7)`. As a control, change `const value: ElementOf<readonly number[]> = 7;` to `const value: ElementOf<readonly number[]> = 8;`: the run must fail with an `AssertionError` at that check. Restore the line before continuing.
 
 ## Exercise 5: Derive an asynchronous result type without executing it
 
@@ -127,7 +131,7 @@ assert.deepEqual(await load(), expected);
 
 **Expected:** declared resolved shape and actual result both have count 3.
 
-**Verify:** Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.
+**Verify:** Keep a check equivalent to `assert.deepEqual(await load(), expected)`. As a control, change `return { count: 3 };` to `return { count: 4 };`: the run must fail with an `AssertionError` at that check. Restore the line before continuing.
 
 ## Exercise 6: Check a configuration with satisfies
 
@@ -154,7 +158,7 @@ void negativeTypeCheck;
 
 **Expected:** valid table remains usable; misspelled literal key is a compiler error.
 
-**Verify:** Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.
+**Verify:** Keep a check equivalent to `assert.equal(labels.success, 'Ready')`. As a control, change `const labels = { success: 'Ready', failure: 'Retry' } satisfies Record<` to `const labels = { success: 'Ready!', failure: 'Retry' } satisfies Record<`: the run must fail with an `AssertionError` at that check. Restore the line before continuing.
 
 ## After comparison
 

@@ -71,9 +71,9 @@ else:
     raise AssertionError("active sentinel accepted")
 ```
 
-## Exercise 6: Compile the admitted calculation
+## Exercise 6: Compile the validated calculation
 
-The host admission check and pure numerical loss have distinct execution roles.
+The host-side validation check and pure numerical loss have distinct execution roles.
 
 **Expected:** Same log(3) value.
 
@@ -84,6 +84,6 @@ close(jax.jit(token_mean)(logits, targets, active), math.log(3.0))
 
 ## Scope of this evidence
 
-A suspiciously small loss can come from a wrong denominator, wrong class axis or masking after an invalid operation. Inspect active target identities and direct gradients. The host admission function is intentionally not a transformed numerical kernel.
+A suspiciously small loss can come from a wrong denominator, wrong class axis or masking after an invalid operation. Inspect active target identities and direct gradients. The host-side validation function is intentionally not a transformed numerical kernel.
 
 Map this objective to shifted next-token labels in llm-017 and llm-031. Explain why excluding prompt targets does not imply zero gradient through all prompt representations in a full causal model.

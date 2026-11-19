@@ -8,22 +8,26 @@ A Go program is source text organized into packages. A runnable executable needs
 
 package declares the compilation unit's package. import makes another package available under a name such as fmt. func main() declares the entrypoint; braces delimit its body. A short declaration with := creates a variable and infers its type. fmt.Sprintf constructs text while fmt.Println writes it. Go inserts many semicolons automatically, so keep an opening brace on the declaration line. The helper check(condition, message) panics on false; its message should identify the broken claim.
 
-## 1. Predict a first value
+## 1. Predict a first value: change one input
 
-Bind greeting to Hello, Go and check its exact text.
+Copy worked example 1 into a scratch pad and change `greeting := "Hello, Go"` to `greeting := "Hello, Go!"`. Before running, predict which check fails and which value it now sees; then run it and restore the original line.
+
+The unchanged code is worked example 1:
 
 ```go
 greeting := "Hello, Go"
 check(greeting == "Hello, Go", "greeting")
 ```
 
-**Expected:** greeting equals Hello, Go.
+**Expected:** The changed run panics with `greeting` because `greeting == "Hello, Go"` no longer holds. Restoring the original line brings back the worked observation: greeting equals Hello, Go.
 
 The quotes delimit a string literal; they are not part of the stored value. Matching the exact text catches a changed greeting even if printing would still look reasonable.
 
-## 2. Compute before formatting
+## 2. Compute before formatting: debug a regression
 
-Add 2 and 3, then format total=5.
+A regression changed one token in worked example 2, so one line now reads `total := 2 - 3`. Run worked example 2 with that line, use the failure to locate the defect and repair it without changing the check.
+
+The unchanged code is worked example 2:
 
 ```go
 total := 2 + 3
@@ -31,7 +35,7 @@ line := fmt.Sprintf("total=%d", total)
 check(total == 5 && line == "total=5", "format")
 ```
 
-**Expected:** The integer is 5 and the text is total=5.
+**Expected:** Before the repair the program panics with `format`; after it the line reads `total := 2 + 3` again and the integer is 5 and the text is total=5.
 
 The arithmetic result and its presentation are separate values. %d formats a decimal integer, and a wrong formatting verb can produce diagnostic text rather than the intended representation.
 

@@ -10,9 +10,10 @@ own capability checks and are not prerequisites for opening this chapter.
 
 ## Learning objectives
 
-Explain stencils and boundary conditions using the concrete cases below. Produce correct interior and boundary values plus a conserved or monotonic quantity appropriate to the chosen model.
-Distinguish an algorithmic calculation, a compiled artifact and an actual device
-observation when explaining what your work establishes.
+Work through *Stencils and boundary conditions* with the concrete cases below. Finish with this evidence:
+correct interior and boundary values plus a conserved or monotonic quantity appropriate to the chosen model. Distinguish an algorithmic
+calculation, a compiled artifact and an actual device observation when explaining
+what your work establishes.
 
 ## Purpose, vocabulary and mental model
 
@@ -28,28 +29,34 @@ The formula requires a separately stated boundary policy for indices outside the
 
 ## How to run and study this lesson
 
-Open this chapter in `/classroom` and use its saved reading worksheet. The primary
-reading pad does not execute CUDA. The two examples, six tasks and separate
-explanations are usable offline on macOS, Linux and Windows through WSL 2 with
-the ordinary classroom. An AMD, Intel or Apple GPU does not make this CUDA C++
-source executable through Docker.
-
-For the bounded CPU calculation, select **CPU model (Python)** in this lesson.
-That variant keeps its own source and result history under the same chapter. Its
-answer-free starter supplies literal fixtures and the task contract; implement
-the model and assertions before replacing its deliberate incomplete-work error.
-The separate [CPU reference](../references/cuda-023_cpu.py) uses only Python's
-standard library. For an optional terminal workflow, run this from the repository
-root in a prepared Python environment:
+Use the saved reading worksheet in `/classroom`; the reading pad does not execute
+CUDA. For the bounded calculation, select **CPU model (Python)**, whose
+answer-free starter supplies the literal fixtures and task contract. The
+[CUDA C++ study workflow](../README.md) covers platforms, optional GPU
+compilation and evidence labels. In a prepared Python environment you can also
+run the separate [CPU reference](../references/cuda-023_cpu.py) from the
+repository root:
 
 ```sh
 python courses/cuda/cpp/references/cuda-023_cpu.py
 ```
 
-The assertions check the stated numerical result or model invariant. Console text
-is evidence of this CPU reference only. The [CUDA C++ study workflow](../README.md)
-explains optional GPU compilation, paths, hardware requirements and evidence labels.
-No lesson opening downloads a model, installs a driver or starts a GPU job.
+Its assertions check the stated numerical result or model invariant; console
+text is evidence of this CPU model only, not of CUDA execution.
+
+## CUDA C++ kernel listing
+
+The kernel below is an excerpt from the chapter's complete [GPU reference](../references/cuda-023_gpu.cu). The full program adds device discovery, checked allocation and launch, completion checks and host validation. Read it as CUDA C++ source; the classroom reading pad does not compile or run it.
+
+```cpp
+__global__ void neighbor_sum(const int *input, int *output, std::size_t n) {
+  const std::size_t i =
+      static_cast<std::size_t>(blockIdx.x) * blockDim.x + threadIdx.x;
+  if (i < n)
+    output[i] =
+        (i > 0 ? input[i - 1] : 0) + input[i] + (i + 1 < n ? input[i + 1] : 0);
+}
+```
 
 ## Worked example 1: trace the mechanism
 
@@ -79,10 +86,9 @@ print({"fixed_zero_mean": out, "original_preserved": values})
 {'fixed_zero_mean': [2.0, 4.666666666666667, 4.0], 'original_preserved': [2.0, 4.0, 8.0]}
 ```
 
-Tiny floating-point display differences across platforms are acceptable only
-where the explicit assertions use a tolerance; integers, shapes and ordering
-must still satisfy their exact contracts. A printed hypothetical duration is a
-model output, not a measured GPU benchmark.
+Integers, shapes and ordering must match exactly; only assertions with an explicit
+tolerance accept small floating-point differences. A printed duration is a model
+output, not a measured GPU benchmark.
 
 ## Worked example 2: change a meaningful condition
 
@@ -111,75 +117,55 @@ do not deliberately launch a hanging kernel or reset a shared GPU to reproduce i
 
 ## Six progressive exercises
 
+Exercises 1 and 2 are guided reconstructions of the worked examples; exercises
+3-6 change an input, diagnose a defect, test a boundary and transfer the idea.
+For each one, keep the calculation, output, diagram or failure policy you
+produce so another reader can compare it with the worked cases. If the hint is
+not enough, reread the mechanism paragraph and the bounded CPU assertion.
+
 ### Exercise 1
 
 Predict and trace the first worked example before running its CPU reference. Write every intermediate quantity that leads to the stated result, including units or ownership where applicable.
 
-**Self-check:** Retain the requested calculation, output, diagram or explicit failure policy so another reader can compare it with the worked cases.
-
-**Hint 1:** Start with the literal input and intermediate quantities in worked example 1.
-
-**Hint 2:** Review the mechanism paragraph and the relevant bounded CPU assertion; separate mathematical reasoning from optional device evidence.
+**Hint:** Start with the literal input and intermediate quantities in worked example 1.
 
 ### Exercise 2
 
 Reconstruct the second worked example without copying its conclusion. Identify the changed input or condition, show the resulting calculation or dependency, and explain why it differs from the first example.
 
-**Self-check:** Retain the requested calculation, output, diagram or explicit failure policy so another reader can compare it with the worked cases.
-
-**Hint 1:** Identify exactly which condition changes in worked example 2.
-
-**Hint 2:** Review the mechanism paragraph and the relevant bounded CPU assertion; separate mathematical reasoning from optional device evidence.
+**Hint:** Identify exactly which condition changes in worked example 2.
 
 ### Exercise 3
 
 Compute the periodic neighbor mean for \([2,4,8]\).
 
-**Self-check:** Retain the requested calculation, output, diagram or explicit failure policy so another reader can compare it with the worked cases.
-
-**Hint 1:** Use the first worked example to establish the relevant quantities, then change only the requested input.
-
-**Hint 2:** Review the mechanism paragraph and the relevant bounded CPU assertion; separate mathematical reasoning from optional device evidence.
+**Hint:** Use the first worked example to establish the relevant quantities, then change only the requested input.
 
 ### Exercise 4
 
 An image looks smooth but differs near the edge. Investigate what first?
 
-**Self-check:** Retain the requested calculation, output, diagram or explicit failure policy so another reader can compare it with the worked cases.
-
-**Hint 1:** Locate the failed phase or violated dependency before proposing a repair.
-
-**Hint 2:** Review the mechanism paragraph and the relevant bounded CPU assertion; separate mathematical reasoning from optional device evidence.
+**Hint:** Locate the failed phase or violated dependency before proposing a repair.
 
 ### Exercise 5
 
 What is a radius-one fixed-zero stencil of singleton \([6]\)?
 
-**Self-check:** Retain the requested calculation, output, diagram or explicit failure policy so another reader can compare it with the worked cases.
-
-**Hint 1:** Check what the algorithm is allowed to read, write or assume at this boundary.
-
-**Hint 2:** Review the mechanism paragraph and the relevant bounded CPU assertion; separate mathematical reasoning from optional device evidence.
+**Hint:** Check what the algorithm is allowed to read, write or assume at this boundary.
 
 ### Exercise 6
 
 Transfer the method to diffusion time stepping.
 
-**Self-check:** Retain the requested calculation, output, diagram or explicit failure policy so another reader can compare it with the worked cases.
-
-**Hint 1:** State the output contract and which observations are needed in the new application.
-
-**Hint 2:** Review the mechanism paragraph and the relevant bounded CPU assertion; separate mathematical reasoning from optional device evidence.
+**Hint:** State the output contract and which observations are needed in the new application.
 
 ## Common mistakes and diagnosis
 
 A tempting but incorrect claim in this chapter is: **a visually plausible image proves the indexing and update ordering are correct.**
 
 For the concrete failure exercise, an image looks smooth but differs near the edge. Investigate what first?
-Preserve the original input and the stage where behavior diverged. Compare with
-the CPU model or dependency diagram before changing hardware configuration.
-A compiler result, synthetic timing model, profiler counter and returned numeric
-answer support different claims. Record unavailable hardware honestly.
+Preserve the original input and the stage where behavior diverged, and compare
+with the CPU model before changing hardware configuration.
 
 ## Self-check, retrieval and transfer
 
@@ -192,9 +178,8 @@ choice; it does not certify hardware qualification or expert mastery.
 
 ## Primary references
 
-These are further technical references. The chapter and local CPU model remain
-readable offline. Check the documentation matching your deliberately prepared
-toolkit before optional hardware execution.
+Check the documentation that matches your prepared toolkit before optional
+hardware execution.
 
 - [CUDA Programming Guide](https://docs.nvidia.com/cuda/cuda-programming-guide/)
 

@@ -243,10 +243,21 @@ Optimize the authored proxy from case B.
 - [Preference-based reinforcement learning](https://arxiv.org/abs/1706.03741)
 - [DPO derivation of the regularized policy](https://arxiv.org/abs/2305.18290)
 
-## Study companion
-
-Use the repository learning-companion skill with this lesson ID and your own source/output. Ask for clarification of the estimand, probability distribution, data split or gradient before a hint. Keep claims about the authored fixture separate from claims requiring real population or model evidence.
 
 ## Interactive figure variant
 
 Select **Interactive Plotly** in the lesson variant control. Its complete program uses the same authored inputs to draw the corresponding risk, calibration or policy curve. The captured figure retains a description and exact data table, and its JSON can be downloaded. Hovering a point does not create new statistical evidence. The default numerical reference remains separately saved.
+
+## Ask an AI tutor about this lesson
+
+```text
+Use the checked-in $guide-ds60sqlpy-learning skill for eval-019, KL-regularized policies and reward exploitation.
+Read courses/llm-evaluation/guides/eval-019.md and courses/llm-evaluation/lessons/eval-019.py. Direct prerequisites: eval-017, eval-016.
+Ask me to state the estimand, probability distribution, data split or gradient
+before giving a hint. Review my attempt at the six investigations one at a time,
+give one hint, and ask for the printed evidence.
+Keep courses/llm-evaluation/solutions/ closed until I attempt or explicitly request comparison.
+Keep claims about the authored fixture separate from claims that need real
+population or model evidence. Done when I can reproduce both worked programs,
+pass the six investigations and explain one failure case.
+```

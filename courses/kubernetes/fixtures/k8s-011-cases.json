@@ -6,33 +6,33 @@
   "cases": [
     {
       "exercise": 1,
-      "task": "Read completions,parallelism,restartPolicy,backoffLimit and activeDeadlineSeconds.",
-      "expected": "1,1,Never,0 and20seconds for the reference."
+      "task": "The starter Job allows one retry and a 30-second deadline. Read completions, parallelism, restartPolicy, backoffLimit and activeDeadlineSeconds, then set no retry and a 20-second deadline.",
+      "expected": "Starter: 1, 1, Never, 1 and 30 seconds. Edited source: 1, 1, Never, 0 and 20 seconds."
     },
     {
       "exercise": 2,
       "task": "Run the successful fixed task under a qualified lease.",
-      "expected": "Owned Complete Job,controlled successful task Pod,exit0 and exact accepted3/rejected2/total35 output."
+      "expected": "Owned Complete Job, controlled successful task Pod, exit 0 and exact accepted 3, rejected 2 and total 35 output."
     },
     {
       "exercise": 3,
       "task": "Change only the allowed outcome from success to failure.",
-      "expected": "Job reaches Failed;operation reports failure and cleans its owned UID."
+      "expected": "Job reaches Failed; operation reports failure and cleans its owned UID."
     },
     {
       "exercise": 4,
-      "task": "Compare backoffLimit0 and1 with restartPolicy Never.",
-      "expected": "At most the declared retry budget is requested;Never does not forbid a replacement Pod attempt."
+      "task": "Compare backoffLimit 0 and 1 with restartPolicy Never.",
+      "expected": "At most the declared retry budget is requested; Never does not forbid a replacement Pod attempt."
     },
     {
       "exercise": 5,
-      "task": "Interpret schedule,timeZone,suspend,concurrency and starting deadline fields.",
-      "expected": "A five-minute UTC schedule is configured but suspended;existing active Jobs require separate handling."
+      "task": "Interpret schedule, timeZone, suspend, concurrency and starting deadline fields.",
+      "expected": "A five-minute UTC schedule is configured but suspended; existing active Jobs require separate handling."
     },
     {
       "exercise": 6,
       "task": "Describe how a real finite task would avoid publishing duplicate effects after retry.",
-      "expected": "A stable logical-work key,commit boundary,replay policy and acceptance ledger are named."
+      "expected": "A stable logical-work key, commit boundary, replay policy and acceptance ledger are named."
     }
   ]
 }

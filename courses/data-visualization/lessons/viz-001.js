@@ -7,5 +7,15 @@ const fixture = [
 ];
 console.table(fixture);
 // Derive your traces, caption and native source table from fixture.
-// Complete the six guide tasks in your own saved source.
+// TODO 1: Trace identity.
+// TODO 2: Build the figure.
+// TODO 3: Change the measurement.
+// TODO 4: Diagnose a mismatch.
+// TODO 5: Handle empty input.
+// TODO 6: Transfer the encoding.
+const traces = [];
+const layout = { title: { text: "Describe the measured quantity and its units" } };
+if (typeof Plotly !== "undefined" && traces.length > 0) {
+  Plotly.newPlot(document.getElementById("chart"), traces, layout);
+}
 console.log("Fixture loaded; derive the figure and its checks from the guide tasks.");

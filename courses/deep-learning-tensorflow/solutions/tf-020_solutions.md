@@ -18,7 +18,7 @@ max_pool2d and avg_pool2d reduce spatial patches in a four-dimensional image ten
 
 ## Exercise 1: Compare two reductions
 
-The question is: Pool patch[[1,3],[2,4]] with a2x2 window.
+The question is: Pool patch [[1, 3], [2, 4]] with a2x2 window.
 
 The max ignores the three smaller values, while the average uses every value equally. Equal output shapes do not mean equal retained information.
 
@@ -28,9 +28,9 @@ assert float(tf.nn.max_pool2d(x, 2, 2, "VALID")[0, 0, 0, 0]) == 4
 assert float(tf.nn.avg_pool2d(x, 2, 2, "VALID")[0, 0, 0, 0]) == 2.5
 ```
 
-**Expected:** max4; average2.5.
+**Expected:** max 4; average 2.5.
 
-**Verify:** Compare the computed values or written argument with max4; average2.5.
+**Verify:** In a fresh process, the exercise checks confirm `float(tf.nn.max_pool2d(x, 2, 2, 'VALID')[0, 0, 0, 0]) == 4` and `float(tf.nn.avg_pool2d(x, 2, 2, 'VALID')[0, 0, 0, 0]) == 2.5`.
 
 ## Exercise 2: Inspect a flip
 
@@ -43,9 +43,9 @@ flipped = tf.image.flip_left_right(x)
 np.testing.assert_array_equal(flipped.numpy().reshape(2, 2), [[3, 1], [4, 2]])
 ```
 
-**Expected:** rows[3,1] and[4,2].
+**Expected:** rows [3, 1] and [4, 2].
 
-**Verify:** Compare the computed values or written argument with rows[3,1] and[4,2].
+**Verify:** In a fresh process, the exercise checks confirm `flipped.numpy().reshape(2, 2)` equals `[[3, 1], [4, 2]]`.
 
 ## Exercise 3: Check an involution
 
@@ -59,11 +59,11 @@ np.testing.assert_array_equal(tf.image.flip_left_right(flipped).numpy(), x.numpy
 
 **Expected:** all pixels restored exactly.
 
-**Verify:** Compare the computed values or written argument with all pixels restored exactly.
+**Verify:** In a fresh process, the exercise checks confirm `tf.image.flip_left_right(flipped).numpy()` equals `x.numpy()`.
 
 ## Exercise 4: Expose discarded information
 
-The question is: Change the nonmaximum pixel1 to0 and recompute both pools.
+The question is: Change the nonmaximum pixel 1 to 0 and recompute both pools.
 
 The perturbation is invisible to max pooling. This helps explain why pooling creates robustness to some changes while also losing potentially useful detail.
 
@@ -73,9 +73,9 @@ assert float(tf.nn.max_pool2d(altered, 2, 2, "VALID")[0, 0, 0, 0]) == 4
 assert float(tf.nn.avg_pool2d(altered, 2, 2, "VALID")[0, 0, 0, 0]) == 2.25
 ```
 
-**Expected:** max still4; average2.25.
+**Expected:** max still 4; average 2.25.
 
-**Verify:** Compare the computed values or written argument with max still4; average2.25.
+**Verify:** In a fresh process, the exercise checks confirm `float(tf.nn.max_pool2d(altered, 2, 2, 'VALID')[0, 0, 0, 0]) == 4` and `float(tf.nn.avg_pool2d(altered, 2, 2, 'VALID')[0, 0, 0, 0]) == 2.25`.
 
 ## Exercise 5: Keep evaluation deterministic
 
@@ -94,7 +94,7 @@ np.testing.assert_array_equal(evaluate_image(x).numpy(), evaluate_image(x).numpy
 
 **Expected:** both evaluations equal the original patch.
 
-**Verify:** Compare the computed values or written argument with both evaluations equal the original patch.
+**Verify:** In a fresh process, the exercise checks confirm `evaluate_image(x).numpy()` equals `x.numpy()` and `evaluate_image(x).numpy()` equals `evaluate_image(x).numpy()`.
 
 ## Exercise 6: Reject a semantic flip
 
@@ -109,7 +109,7 @@ assert mirror["left"] == "right" and mirror[mirror["left"]] == "left"
 
 **Expected:** left maps to right; retaining left is invalid.
 
-**Verify:** Compare the computed values or written argument with left maps to right; retaining left is invalid.
+**Verify:** In a fresh process, the exercise checks confirm `mirror['left'] == 'right'` and `mirror[mirror['left']] == 'left'`.
 
 ## Review after comparison
 

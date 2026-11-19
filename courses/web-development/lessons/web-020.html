@@ -5,15 +5,48 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Transitions, motion and reduced-motion preferences: my attempt</title>
     <style>
-      /* Implement the lesson-specific CSS. Keep keyboard focus visible. */
+      /*
+        Worked example 1: A restrained state transition
+        .card {
+          transition: transform 120ms ease;
+        }
+        .card:hover {
+          transform: translateY(-2px);
+        }
+      */
+
+      /*
+        Worked example 2: Respect the preference
+        @media (prefers-reduced-motion: reduce) {
+          .card {
+            transition: none;
+          }
+          .card:hover {
+            transform: none;
+          }
+        }
+      */
+
+      /* Write the CSS for the exercises here. Keep keyboard focus visible. */
     </style>
   </head>
   <body>
-    <!-- web-020: Build a card interaction with a static reduced-motion alternative. -->
-    <!-- Save your prediction, then implement the six exercises from the guide. -->
+    <!--
+      web-020 exercises. Hints are in the guide; answers are in the solutions folder.
+      1. Identify the difference between a transition and keyframe animation.
+      2. Limit a transition to one intentional property.
+      3. Build a card interaction with a static reduced-motion alternative.
+      4. Diagnose an animation that hides information until it finishes.
+      5. Test with reduced motion enabled and with keyboard focus.
+      6. Explain why transform does not guarantee a fast page.
+    -->
     <main>
-      <h1>Transitions, motion and reduced-motion preferences</h1>
-      <!-- Build your own document here. The reference is separate. -->
+      <h1>Motion as an optional cue</h1>
+      <a class="card" href="#notes">Read the notes</a>
+      <section id="notes">
+        <h2>Notes</h2>
+        <p>The destination remains available without animation.</p>
+      </section>
     </main>
   </body>
 </html>

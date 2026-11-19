@@ -20,6 +20,18 @@ struct LessonMain {
       let swapped = pair.swapped()
       precondition(swapped.first == "right" && swapped.second == "left")
     }
+
+    do {
+      // Task 3: Independent construction
+      struct Triple<T> {
+        let first: T
+        let second: T
+        let third: T
+        func rotated() -> Triple<T> { Triple(first: second, second: third, third: first) }
+      }
+      let rotated = Triple(first: 1, second: 2, third: 3).rotated()
+      precondition(rotated.first == 2 && rotated.second == 3 && rotated.third == 1)
+    }
     print("swift-018: passed")
   }
 }

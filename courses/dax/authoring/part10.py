@@ -264,7 +264,7 @@ LESSONS = [
                 ),
                 [
                     "The security policy permits Customer 10 and 30 only.",
-                    "The expected fact population totals 51 +56 =107.",
+                    "The expected fact population totals 51 + 56 = 107.",
                     "Removing ordinary Customer filters must not remove the security restriction.",
                 ],
                 (
@@ -458,7 +458,7 @@ LESSONS = [
             t(
                 "Predict the permitted population for the synthetic south principal.",
                 "Read the exact region mapping.",
-                "One customer,Bo, is permitted; expected revenue is 80.",
+                "One customer, Bo, is permitted; expected revenue is 80.",
             ),
             t(
                 "AddWest to a principal's allowed-region set conceptually.",
@@ -541,7 +541,7 @@ LESSONS = [
             "2025. Core actuals in that scope are 123 before refunds "
             "and 114 after the nine-dollar refund attributed to S4. "
             "The compatible budget is 165, giving an adjusted-revenue "
-            "variance of-51. This does not establish accounting "
+            "variance of -51. This does not establish accounting "
             "profit, inventory restatement or tax treatment, which "
             "require additional data and policy."
         ),
@@ -579,7 +579,7 @@ LESSONS = [
                     "Core line discounts are already included in NetAmount, whose total is 187.",
                     "Refunds 4 and 9 total 13; adjusted core revenue is 174.",
                     (
-                        "Foreign amounts convert to 100 +110 +60 =270 USD under "
+                        "Foreign amounts convert to 100 + 110 + 60 = 270 USD under "
                         "their separate policy."
                     ),
                 ],
@@ -618,10 +618,10 @@ LESSONS = [
                 [
                     "Core 2025 sales in these months total 123.",
                     (
-                        "Only the refund linked to S 4 belongs to that sale-date "
+                        "Only the refund linked to S4 belongs to that sale-date "
                         "population, subtracting 9."
                     ),
-                    "The four compatible budget rows total 165;114 -165 =-51.",
+                    "The four compatible budget rows total 165; 114 - 165 = -51.",
                 ],
                 (
                     "A return-date report could differ, but this fixture does "
@@ -643,7 +643,7 @@ LESSONS = [
                 "Reconcile adjusted core revenue by year.",
                 "Attribute each refund through its original SaleID.",
                 (
-                    "2024 contributes 64 -4 =60;2025 contributes 123 -9 =114; "
+                    "2024 contributes 64 - 4 = 60; 2025 contributes 123 - 9 = 114; "
                     "together they total 174."
                 ),
             ),
@@ -982,10 +982,10 @@ LESSONS = [
                     "model; all available dates; constant UnitCost per product."
                 ),
                 [
-                    "North permits Ada and Cy, giving revenue 51 +56 =107.",
+                    "North permits Ada and Cy, giving revenue 51 + 56 = 107.",
                     (
                         "Their product quantities are 5 Notebook,5 Pen and 2 Mug, "
-                        "costing 10 +5 +10 =25."
+                        "costing 10 + 5 + 10 = 25."
                     ),
                     (
                         "Both cost forms agree; a real security restriction must "
@@ -1078,7 +1078,7 @@ LESSONS = [
             t(
                 "Reconcile the two role-specific cost rows.",
                 "The allowed populations partition this clean fixture.",
-                "25 +19 =44, matching the unrestricted constant-product-cost calculation.",
+                "25 + 19 = 44, matching the unrestricted constant-product-cost calculation.",
             ),
             t(
                 "Add an unmatched principal to the acceptance matrix.",

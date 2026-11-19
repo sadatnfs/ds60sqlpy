@@ -12,7 +12,7 @@ Run_checks with include_deployment_checks enables checks aimed at deployment set
 
 The first configuration deliberately enables DEBUG and leaves ALLOWED_HOSTS empty. The program expects the corresponding warning IDs. The second context changes a reviewed set of settings and confirms that several specific warnings disappear.
 
-These settings are not a universal deployment recipe. Enabling a secure redirect behind a proxy that reports the wrong scheme can cause loops. HSTS has consequences for future browser access and subdomains. A local HTTP workshop may deliberately use different settings from a public HTTPS service and should explain that boundary rather than copying production-looking flags blindly.
+These settings are not a universal deployment recipe. Enabling a secure redirect behind a proxy that reports the wrong scheme can cause loops. HSTS has consequences for future browser access and subdomains. Preload-list submission additionally requires a max-age of at least 31536000 seconds (one year) with includeSubDomains, and removal from browser preload lists is slow, so this fixture tests a one-hour max-age without SECURE_HSTS_PRELOAD and records the resulting security.W021 warning as a deliberate decision. Raise max-age in steps only after HTTPS works for every subdomain. A local HTTP workshop may deliberately use different settings from a public HTTPS service and should explain that boundary rather than copying production-looking flags blindly.
 
 ## Worked case: detect known unsafe declarations
 
@@ -24,7 +24,9 @@ The fixture uses a synthetic secret string. Real deployments need secret generat
 
 ## Worked case: revise settings and inspect the changed findings
 
-An override_settings context disables DEBUG, supplies an allowed host, enables secure cookies and redirect/HSTS declarations, adds clickjacking middleware and changes the fixture secret. The targeted warning IDs are absent in the second result.
+An override_settings context disables DEBUG, supplies an allowed host, enables secure cookies and redirect/HSTS declarations, adds clickjacking middleware and changes the fixture secret. The targeted warning IDs are absent in the second result, while security.W021 remains because preload is deliberately not declared.
+
+The same context also enables Django's built-in Content Security Policy support, added in Django 6.0: `django.middleware.csp.ContentSecurityPolicyMiddleware` with `SECURE_CSP = {"default-src": [CSP.SELF]}`, where `CSP` comes from `django.utils.csp`. A test-client request marked secure, with an allowed Host header, then shows the actual response headers: `Strict-Transport-Security: max-age=3600; includeSubDomains` and `Content-Security-Policy: default-src 'self'`. A policy this strict blocks inline scripts and third-party assets, so real pages usually need explicit sources or the `CSP.NONCE` placeholder together with the `csp` template context processor; `SECURE_CSP_REPORT_ONLY` lets you observe violations before enforcing a policy.
 
 This proves that the real framework checks recognized those declarations. It does not establish a TLS handshake, trusted proxy isolation or correct certificate management. Those require actual network tests and infrastructure configuration. The chapter intentionally reports the result as configuration diagnostics.
 
@@ -71,8 +73,9 @@ def run_cases():
     django.setup()
     from django.core.checks import run_checks
     from django.http import JsonResponse
-    from django.test import override_settings
+    from django.test import Client, override_settings
     from django.urls import path
+    from django.utils.csp import CSP
 
     def view(request):
         return JsonResponse({"ok": True})
@@ -87,14 +90,17 @@ def run_cases():
         SESSION_COOKIE_SECURE=True,
         CSRF_COOKIE_SECURE=True,
         SECURE_SSL_REDIRECT=True,
+        # A one-hour max-age is a first rollout step. Preload is deliberately
+        # absent: the preload list requires at least one year and is slow to undo.
         SECURE_HSTS_SECONDS=3600,
         SECURE_HSTS_INCLUDE_SUBDOMAINS=True,
-        SECURE_HSTS_PRELOAD=True,
+        SECURE_CSP={"default-src": [CSP.SELF]},
         MIDDLEWARE=[
             "django.middleware.security.SecurityMiddleware",
             "django.contrib.sessions.middleware.SessionMiddleware",
             "django.middleware.csrf.CsrfViewMiddleware",
             "django.middleware.clickjacking.XFrameOptionsMiddleware",
+            "django.middleware.csp.ContentSecurityPolicyMiddleware",
         ],
         SECRET_KEY="fixture-only-72-char-mixed-string-0123456789-ABCDEFGHIJKLMNOPQRSTUVWXYZ-abcdef",
     ):
@@ -106,9 +112,22 @@ def run_cases():
             "security.W012",
             "security.W016",
         }.intersection(revised)
+        # The missing preload declaration is a recorded decision, not an oversight.
+        assert "security.W021" in revised
+        response = Client().get("/", secure=True, HTTP_HOST="web.example")
+        assert response.status_code == 200
+        headers = {
+            name: response[name]
+            for name in ("Strict-Transport-Security", "Content-Security-Policy")
+        }
+        assert headers == {
+            "Strict-Transport-Security": "max-age=3600; includeSubDomains",
+            "Content-Security-Policy": "default-src 'self'",
+        }
     return {
         "initial_check_ids": sorted(ids),
         "revised_check_ids": sorted(revised),
+        "revised_headers": headers,
         "scope": "configuration diagnostics, not actual TLS or proxy acceptance",
     }
 

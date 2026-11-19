@@ -28,8 +28,10 @@ public class Main {
 
     // Exercise 3: Compare eager and lazy fallback
     var calls = new java.util.concurrent.atomic.AtomicInteger();
-    assert known.orElse(calls.incrementAndGet()) == 7 && calls.get() == 1;
-    assert known.orElseGet(calls::incrementAndGet) == 7 && calls.get() == 1;
+    int eager = known.orElse(calls.incrementAndGet());
+    assert eager == 7 && calls.get() == 1;
+    int lazy = known.orElseGet(calls::incrementAndGet);
+    assert lazy == 7 && calls.get() == 1;
 
     // Exercise 4: Reject malformed lookup input
     boolean invalid = false;
@@ -44,7 +46,7 @@ public class Main {
     assert Optional.of("12").flatMap(Main::tryParse).orElseThrow() == 12;
     assert Optional.of("bad").flatMap(Main::tryParse).isEmpty();
 
-    // Exercise 6: Expose unsafeget
+    // Exercise 6: Expose unsafe get
     boolean absent = false;
     try {
       Optional.empty().get();

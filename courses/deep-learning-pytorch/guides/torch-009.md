@@ -6,7 +6,13 @@ Beginner; approximately 120 minutes. Direct prerequisites: `torch-008`. The prer
 
 ## Learning objectives
 
-An epoch is a traversal of selected records; a batch is the set reduced before an update; an optimizer step changes parameters once. The central investigation is concrete: Partition IDs 1..6 into batches of 2. The finish condition is three batches[[1, 2], [3, 4], [5, 6]]. epoch mean 4, not 5. A useful explanation connects the calculation to the reason it is needed, rather than treating a function name as a definition.
+Relate epochs, batches and optimizer steps, and combine unequal batch means with record-count weights.
+
+Central investigation: Partition record IDs into batches, train three cleared updates on x = 1..6 and repeat the loop without zero_grad.
+
+Finish condition: Six IDs give three batches, five give sizes 2, 2, 1, the cleared run produces three distinct finite weights, omitting zero_grad changes the endpoint, and batch means 2 and 8 over 2 and 1 records combine to 4, not 5.
+
+The worked examples demonstrate the mechanism; exercises 1-3 transfer it to new inputs and exercises 4-6 extend it to failures and boundary cases. A useful explanation connects the calculation to the reason it is needed, rather than treating a function name as a definition.
 
 ## Purpose and mental model
 
@@ -46,7 +52,7 @@ Slice the leading observation axis into batches. For each independent update, ca
 
 ## Trace every update at the state where its gradient was computed
 
-Six records with batch size two produce three batches per epoch: IDs[1, 2], [3, 4], [5, 6]. With one optimizer step per batch, one epoch means three updates. At batch size one, the same epoch means six updates. Neither count identifies the resulting parameter trajectory without the data order, loss reduction and learning rate.
+Six records with batch size two produce three batches per epoch: IDs [1, 2], [3, 4], [5, 6]. With one optimizer step per batch, one epoch means three updates. At batch size one, the same epoch means six updates. Neither count identifies the resulting parameter trajectory without the data order, loss reduction and learning rate.
 
 For this scalar fixture, \(y=2x\) and each batch mean loss has derivative \(2\operatorname{mean}(x^2)(w-2)\). With learning rate \(\eta=0.01\), the exact correct trajectory is:
 
@@ -64,7 +70,7 @@ Interestingly, the incorrect endpoint happens to lie closer to the known optimum
 
 Intentional accumulation is different. Hold w fixed, compute each microbatch's contribution to one declared objective, accumulate the scaled gradients, and call step once. For the full six-record mean at \(w=0\), the gradient is 2 \(\operatorname{mean}({x}^{2})\)(-2)=-182/3. One rate 0.01 step gives \(\frac{91}{150}\), about 0.606667. This differs from the three-step minibatch result because it is one update from one fixed state. When microbatch sizes differ, weight each microbatch mean by its participating count divided by the total count.
 
-Metric reporting needs the same denominator discipline. A mean loss two from two records contributes numerator four; mean loss eight from one record contributes numerator eight. The record-weighted mean is(4+8)/3=4, not the unweighted batch-mean average five. But there is another interpretation boundary: losses measured before successive updates belong to different model states. Their weighted average is an online training statistic, not necessarily the loss of the final model. A final-model metric requires a separate fixed-state evaluation pass.
+Metric reporting needs the same denominator discipline. A mean loss two from two records contributes numerator four; mean loss eight from one record contributes numerator eight. The record-weighted mean is (4+8)/3=4, not the unweighted batch-mean average five. But there is another interpretation boundary: losses measured before successive updates belong to different model states. Their weighted average is an online training statistic, not necessarily the loss of the final model. A final-model metric requires a separate fixed-state evaluation pass.
 
 Record identities protect the training population. A shared permutation of x and y preserves y=2x after shuffling. Independently permuting either side changes the prediction task while leaving each marginal array plausible. For five records at batch size two, the tail has one record; dropping it changes which observations participated in the epoch. The loop should retain that decision in its budget and denominator report.
 
@@ -85,7 +91,7 @@ batches = [ids[i : i + 2] for i in range(0, len(ids), 2)]
 assert batches == [[1, 2], [3, 4], [5, 6]]
 ```
 
-**Expected:** three batches[[1, 2], [3, 4], [5, 6]].
+**Expected:** three batches [[1, 2], [3, 4], [5, 6]].
 
 ### Example B: Retain a short tail
 
@@ -121,33 +127,33 @@ assert len(history) == 3 and np.isfinite(history).all() and len(set(history)) ==
 
 ## Prediction before your attempt
 
-For the supplied fixture, name the input unit, the intermediate state and the final quantity that changes. Predict one normal result and one failure result before touching the code. In particular, explain this lesson's acceptance condition in your own words: three batches[[1, 2], [3, 4], [5, 6]]. epoch mean 4, not 5. Preserve the prediction beside your later observations so a correction is visible. A copied expected value is not a derivation.
+For the supplied fixture, name the input unit, the intermediate state and the final quantity that changes. Predict one normal result and one failure result before touching the code. In particular, explain this lesson's acceptance condition in your own words: Six IDs give three batches, five give sizes 2, 2, 1, the cleared run produces three distinct finite weights, omitting zero_grad changes the endpoint, and batch means 2 and 8 over 2 and 1 records combine to 4, not 5. Preserve the prediction beside your later observations so a correction is visible. A copied expected value is not a derivation.
 
 ## Exercises
 
-1. **Count batches and updates.** Partition IDs 1..6 into batches of 2.
-   **Expected:** three batches[[1, 2], [3, 4], [5, 6]].
-   **Verify:** Save the assertion results for exercise 1, including three batches[[1, 2], [3, 4], [5, 6]].
+1. **Partition with batch size 4.** Partition IDs 1..10 into batches of 4 without dropping the tail.
+   **Expected:** batch sizes 4, 4, 2; the last batch is [9, 10].
+   **Verify:** In a fresh process, the exercise checks confirm `[len(batch) for batch in quads] == [4, 4, 2]` and `quads[-1] == [9, 10]`.
 
-2. **Retain a short tail.** Partition five IDs with batch size 2.
-   **Expected:** batch sizes 2, 2, 1.
-   **Verify:** Save the assertion results for exercise 2, including batch sizes 2, 2, 1.
+2. **Count updates with a dropped tail.** With 10 records, batch size 4 and the short tail dropped, count optimizer steps per epoch and over 3 epochs.
+   **Expected:** 2 steps per epoch and 6 in total; records 9 and 10 never contribute in unshuffled order.
+   **Verify:** In a fresh process, the exercise checks confirm `steps_per_epoch == 2`; `3 * steps_per_epoch == 6` and `[i for batch in quads[:steps_per_epoch] for i in batch] == list(range(1, 9))`.
 
-3. **Run three independent updates.** Train x = 1..6, y = 2x, w = 0 with batch size 2, rate 0.01, clearing gradients each batch.
-   **Expected:** three finite distinct weights.
-   **Verify:** Save the assertion results for exercise 3, including three finite distinct weights.
+3. **Trace two single-record updates.** Train w from 0 on x = 1, 2 with y = 2x, batch size 1 and learning rate 0.1, clearing gradients before each step.
+   **Expected:** weights 0.4 then 1.68.
+   **Verify:** In a fresh process, the exercise checks confirm `trace` matches `[0.4, 1.68]` within 1e-12.
 
 4. **Expose accidental accumulation.** Repeat the loop without zero_grad and compare its final weight with the correct run.
    **Expected:** different endpoint.
-   **Verify:** Save the assertion results for exercise 4, including different endpoint.
+   **Verify:** In a fresh process, the exercise checks confirm `abs(bad.item() - history[-1]) > 1e-06`.
 
 5. **Shuffle paired records together.** Use permutation 5, 0, 4, 1, 3, 2 for both x and y.
    **Expected:** every shuffled target equals twice its input.
-   **Verify:** Save the assertion results for exercise 5, including every shuffled target equals twice its input.
+   **Verify:** In a fresh process, the exercise checks confirm `sy` matches `2 * sx` exactly.
 
 6. **Aggregate unequal batch means.** Combine mean loss 2 over 2 examples and mean loss 8 over 1 example.
    **Expected:** epoch mean 4, not 5.
-   **Verify:** Save the assertion results for exercise 6, including epoch mean 4, not 5.
+   **Verify:** In a fresh process, the exercise checks confirm `(2 * 2 + 8 * 1) / 3 == 4` and `(2 + 8) / 2 == 5`.
 
 ## Common pitfalls and diagnosis
 
@@ -161,7 +167,7 @@ First draw the state described in the vocabulary section. Next use the smallest 
 
 ## Self-check and retrieval
 
-Close both worked examples. Explain Epoch, Batch, Gradient reset using the lesson fixture. Reconstruct one computation from its inputs. Then change one input while retaining the mechanism and predict whether the conclusion survives. Write which part is guaranteed by the code and which part would need new observations. This last distinction prevents a tiny deterministic teaching example from being presented as evidence about an unseen population or a production model.
+Close all three worked examples. Explain Epoch, Batch, Gradient reset using the lesson fixture. Reconstruct one computation from its inputs. Then change one input while retaining the mechanism and predict whether the conclusion survives. Write which part is guaranteed by the code and which part would need new observations. This last distinction prevents a tiny deterministic teaching example from being presented as evidence about an unseen population or a production model.
 
 ## Next step
 
@@ -169,7 +175,7 @@ Revisit the direct prerequisite `torch-008` if the calculation cannot be reconst
 
 ## Sources and verification status
 
-API and mechanism reference: [PyTorch2.9 reference](https://docs.pytorch.org/docs/2.9/index.html), reviewed 2026-10-22. The fixture, examples, counterexamples and exercise design are original course material. See [validation](../../../docs/validation.md) for execution gates. Check CI artifacts for the exact revision and platform to determine which runtime checks actually ran; authored content alone does not establish runtime execution.
+API and mechanism reference: [PyTorch 2.9 reference](https://docs.pytorch.org/docs/2.9/index.html), reviewed 2026-10-22. The fixture, examples, counterexamples and exercise design are original course material. See [validation](../../../docs/validation.md) for execution gates. Check CI artifacts for the exact revision and platform to determine which runtime checks actually ran; authored content alone does not establish runtime execution.
 
 ## Interview reasoning with worked answers
 

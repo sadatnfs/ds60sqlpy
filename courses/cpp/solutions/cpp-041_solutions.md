@@ -15,7 +15,7 @@ A release packet should let another reviewer connect source, build configuration
 
 A release is an identifiable artifact with an explicit contract and evidence for supported environments. A version string alone does not connect the binary to the source, compiler options or tested fixture. Record source revision or hash, toolchain, architecture, build configuration, dependency identities and the output schema that consumers rely on.
 
-The example report uses schema 1, rows3, total6. Its always-active condition checks the checksum before printing the report. This matters in Release builds where ordinary assert expressions may be removed. A successful build followed by an unchecked output string could otherwise look like acceptance even if the actual computation changed.
+The example report uses schema 1, rows 3, total 6. Its always-active condition checks the checksum before printing the report. This matters in Release builds where ordinary assert expressions may be removed. A successful build followed by an unchecked output string could otherwise look like acceptance even if the actual computation changed.
 
 Debug and optimized builds answer related but different questions. Debug information helps diagnosis; optimization changes performance and can expose latent undefined behavior. Both should preserve the declared result. Keep timing observations separate from correctness assertions, and record the exact flags used. A configuration name by itself is not enough to reproduce a binary.
 
@@ -53,7 +53,7 @@ Record source revision or content hashes plus compiler/architecture.
 
 **Reasoning:** The packet must identify what was actually built.
 
-**Verify:** Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.
+**Verify:** Check that the record contains a git commit or `sha256sum` values, `g++ --version` and `uname -m` output, and no absolute path from your own machine.
 
 ## Exercise 2: Compare build modes
 
@@ -63,7 +63,7 @@ Run always-active checks in Debug and Release host builds.
 
 **Reasoning:** NDEBUG must not remove the only checks.
 
-**Verify:** Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.
+**Verify:** Build once with `-O0` and once with `-O2 -DNDEBUG`, confirm both print `schema=1 rows=3 total=6`, and record how many tests ctest ran in each.
 
 ## Exercise 3: Bound a benchmark
 
@@ -73,7 +73,7 @@ Declare row count, repeats and output checksum before timing.
 
 **Reasoning:** Performance evidence needs correctness and workload identity.
 
-**Verify:** Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.
+**Verify:** Write the row count, repetitions and expected checksum before running, then compare every run's checksum with that value and keep each duration with its unit.
 
 ## Exercise 4: Repair platform claims
 
@@ -83,7 +83,7 @@ Review a packet tested only on arm64 Linux but claiming Windows.
 
 **Reasoning:** A build configuration is not a platform receipt.
 
-**Verify:** Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.
+**Verify:** Check that the corrected packet lists arm64 Linux as tested and Windows as unqualified, with no Windows test output claimed.
 
 ## Exercise 5: Check offline replay
 
@@ -93,7 +93,7 @@ Rebuild in a fresh owned directory using prepared dependencies.
 
 **Reasoning:** Missing dependencies are a reproducibility failure to report.
 
-**Verify:** Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.
+**Verify:** Rebuild from a clean directory with networking disabled and confirm the tests print the same `rows=3 total=6` result as the original build.
 
 ## Exercise 6: Transfer rollback
 
@@ -103,4 +103,4 @@ Keep a previous known-good binary and compatible input contract.
 
 **Reasoning:** Rollback requires a usable artifact, not just a written promise.
 
-**Verify:** Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.
+**Verify:** Have a reviewer locate the previous binary from your notes alone, run the acceptance test with it and get the documented result.

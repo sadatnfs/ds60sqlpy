@@ -4,9 +4,9 @@ Open after an attempt or an explicit solution reveal. The executable reference r
 
 ## Mechanism review
 
-HTTP is a request/response protocol with method,path,status,headers and body. A successful network exchange can still return an application error such as404 or400. Aclient must inspect status before interpreting the body. Timeouts bound waiting but do not prove that a remote operation didnot happen. Response bodies and server exchanges own resources that need closure.
+HTTP is a request/response protocol with method, path, status, headers and body. A successful network exchange can still return an application error such as 404 or 400. A client must inspect status before interpreting the body. Timeouts bound waiting but do not prove that a remote operation did not happen. Response bodies and server exchanges own resources that need closure.
 
-This lesson starts one short-lived server bound only to127.0.0.1 on an operating-system-selected port,then uses the JDK HttpClient to call it. It does not contact an external service or start a persistent deployment. Thehandler accepts an exact path and GET method,returns explicitUTF-8content,and closes every exchange. try-with-resources owns both client and server wrapper in Java 21. Thefixture exposes prefix-routing andmethod-validation mistakes without requiring a web framework.
+This lesson starts one short-lived server bound only to 127.0.0.1 on an operating-system-selected port, then uses the JDK HttpClient to call it. It does not contact an external service or start a persistent deployment. The handler accepts an exact path and GET method, returns explicit UTF-8 content, and closes every exchange. try-with-resources owns both client and server wrapper in Java 21. The fixture exposes prefix-routing and method-validation mistakes without requiring a web framework.
 
 **HTTP status:** The response code describing protocol/application outcome.
 
@@ -18,13 +18,15 @@ This lesson starts one short-lived server bound only to127.0.0.1 on an operating
 
 ## Reading the reference
 
-HttpServer.create binds an InetSocketAddress withport0,thengetAddress reveals the actual port. createContext uses prefix matching,so the handler should validate an exact path when that is the contract. HttpRequest specifies a timeout and method. HttpResponse exposes statusCode,headers and body separately. stop(0) releases the owned listener when the fixture closes.
+HttpServer.create binds an InetSocketAddress with port 0, then getAddress reveals the actual port. createContext uses prefix matching, so the handler should validate an exact path when that is the contract. HttpRequest specifies a timeout and method. HttpResponse exposes statusCode, headers and body separately. stop(0) releases the owned listener when the fixture closes.
 
-## Exercise 1: Call an owned loopback endpoint
+## Exercise 1: Call an owned loopback endpoint: change one input
 
-Task: Start the fixture and request `GET /health`.
+Task: Copy Example A into a scratch `Main.java` and change `java.net.http.HttpRequest.newBuilder(server.uri("/health"))` to `java.net.http.HttpRequest.newBuilder(server.uri("/health!"))`. Before running it with `java -ea Main`, predict which assertion fails and which value it now sees; then run it and restore the original line.
 
-The request reaches a real localHTTPserver. A a returned String alone would not verify routing,status or resource closure.
+The request reaches a real localHTTPserver. A a returned String alone would not verify routing, status or resource closure.
+
+The unchanged code is the part that Example A adds:
 
 ```java
 try (
@@ -44,15 +46,17 @@ try (
 }
 ```
 
-**Expected:** status 200 and body ok.
+**Expected:** The changed run fails with an `AssertionError` from the assertion on `response.statusCode() == 200 && response.body().equals("ok")`. Restoring the original line brings back the worked observation: status 200 and body ok.
 
-**Verify:** Compare the program values or named exception with status 200 and body ok. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.
+**Verify:** Compare your written prediction with the reported `AssertionError` and its stack-trace line, and name the value that made `response.statusCode() == 200 && response.body().equals("ok")` false. After restoring the line, the program completes without an `AssertionError` again.
 
-## Exercise 2: Inspect content metadata
+## Exercise 2: Inspect content metadata: diagnose an edited check
 
-Task: ReadContent-Type on the successful response.
+Task: A careless edit changed the assertion that Example B adds after Example A so that it reads `.equals("text/plain; charset=utf-9");`. Run Example B with that line, explain why the edited assertion now fails for the same program state, and restore it.
 
-Theencoding contract belongs in the response metadata as well as thebyte-writing code. Clients should not guess a platform default.
+The encoding contract belongs in the response metadata as well as the byte-writing code. Clients should not guess a platform default.
+
+The unchanged code is the part that Example B adds:
 
 ```java
 try (
@@ -74,15 +78,15 @@ try (
 }
 ```
 
-**Expected:** text/plain with UTF-8 charset.
+**Expected:** Before the repair the run fails with an `AssertionError` from the assertion on `response.headers().firstValue("Content-Type").orElseThrow().equals("text/plain; charset=utf-8")`; after it the line reads `.equals("text/plain; charset=utf-8");` again and text/plain with UTF-8 charset.
 
-**Verify:** Compare the program values or named exception with text/plain with UTF-8 charset. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.
+**Verify:** Keep the failing and the repaired runs. Explain why the edited assertion rejects the same program state that `response.headers().firstValue("Content-Type").orElseThrow().equals("text/plain; charset=utf-8")` accepts.
 
 ## Exercise 3: Reject an unsupported method
 
-Task: POSTto/health underaGET-onlycontract.
+Task: POST to /health under a GET-only contract.
 
-A routeexistingdoesnotmakeeverymethodvalid. Validation occursbeforeperformingdomainwork.
+A route existing does not make every method valid. Validation occurs before performing domain work.
 
 ```java
 try (
@@ -98,15 +102,15 @@ try (
 }
 ```
 
-**Expected:** status405 and method not allowed body.
+**Expected:** status 405 and method not allowed body.
 
-**Verify:** Compare the program values or named exception with status405 and method not allowed body. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.
+**Verify:** Keep an assertion equivalent to `response.statusCode() == 405 && response.body().equals("method not allowed")`. As a control, change `var request = java.net.http.HttpRequest.newBuilder(server.uri("/health"))` to `var request = java.net.http.HttpRequest.newBuilder(server.uri("/health!"))`: the run must fail with an `AssertionError` from the assertion on `response.statusCode() == 405 && response.body().equals("method not allowed")`. Restore the line before continuing.
 
 ## Exercise 4: Reject a prefix lookalike
 
-Task: GET/health-extra,which matches the context prefix but not the declared exact path.
+Task: GET/health-extra, which matches the context prefix but not the declared exact path.
 
-HttpServercontextmatchingisprefix-based. An exact application route needs its own path check toavoidaccidentallyacceptinglookalikes.
+HttpServer context matching is prefix-based. An exact application route needs its own path check to avoid accidentally accepting lookalikes.
 
 ```java
 try (
@@ -124,15 +128,15 @@ try (
 }
 ```
 
-**Expected:** status404.
+**Expected:** status 404.
 
-**Verify:** Compare the program values or named exception with status404. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.
+**Verify:** Keep an assertion equivalent to `response.statusCode() == 404`. As a control, change `assert response.statusCode() == 404;` to `assert response.statusCode() != 404;` inside it: the run must fail with an `AssertionError`, which shows the assertion can fail. Restore it.
 
 ## Exercise 5: Keep error status separate from transport success
 
-Task: GETanunknownpathandinspectthecompletedresponse.
+Task: GET an unknown path and inspect the completed response.
 
-Atransport-levelsuccessdoesnotmean the domain operation succeeded. Clientlogicshouldbranchonstatusbeforeparsingasuccessschema.
+A transport-level success does not mean the domain operation succeeded. Client logic should branch on status before parsing a success schema.
 
 ```java
 try (
@@ -150,15 +154,15 @@ try (
 }
 ```
 
-**Expected:** HTTP exchange completes with404 rather than a fabricated200.
+**Expected:** HTTP exchange completes with 404 rather than a fabricated 200.
 
-**Verify:** Compare the program values or named exception with HTTP exchange completes with404 rather than a fabricated200. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.
+**Verify:** Keep an assertion equivalent to `response.statusCode() == 404`. As a control, change `assert response.statusCode() == 404;` to `assert response.statusCode() != 404;` inside it: the run must fail with an `AssertionError`, which shows the assertion can fail. Restore it.
 
 ## Exercise 6: Verify local-only target and closure
 
-Task: Inspect the bound host and positive ephemeral port,then close the wrapper.
+Task: Inspect the bound host and positive ephemeral port, then close the wrapper.
 
-Thefixtureownsandstopsitslistener. It does not change a shared server orleaveadeploymentrunningafterthelesson.
+The fixture owns and stops its listener. It does not change a shared server or leave a deployment running after the lesson.
 
 ```java
 LocalServer owned = new LocalServer();
@@ -167,9 +171,9 @@ owned.close();
 assert owned.closed;
 ```
 
-**Expected:** host 127.0.0.1;port positive; closed flag true.
+**Expected:** host 127.0.0.1; port positive; closed flag true.
 
-**Verify:** Compare the program values or named exception with host 127.0.0.1;port positive; closed flag true. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.
+**Verify:** Keep an assertion equivalent to `owned.closed` and confirm that `java -ea Main` completes. Then name an input that would make it fail and explain which value changes.
 
 ## After comparing the answer
 

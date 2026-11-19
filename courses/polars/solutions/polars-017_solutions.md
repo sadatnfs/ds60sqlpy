@@ -15,11 +15,40 @@ Do not count fixture generation as query execution unless that is the workflow u
 
 A scaling observation requires comparable work and resource settings. Two points do not establish a universal complexity curve or an operational capacity limit.
 
+```python
+import polars as pl
+
+for size in (20_000, 200_000):
+    frame = pl.DataFrame({"x": [i % 101 for i in range(size)]})
+    answer = frame.lazy().filter(pl.col("x") > 50).select(pl.col("x").sum()).collect().item()
+    assert answer == sum(i % 101 for i in range(size) if i % 101 > 50)
+```
+
 **Expected:** Answers remain correct at both sizes.
 
 ## 3. Report variability
 
 Report the distribution and context. Large variability may come from scheduling, I/O caches, compilation or background activity.
+
+```python
+from statistics import median
+from time import perf_counter
+
+import polars as pl
+
+query = (
+    pl.LazyFrame({"x": [i % 101 for i in range(20_000)]})
+    .filter(pl.col("x") > 50)
+    .select(pl.col("x").sum())
+)
+timings = []
+for _ in range(5):
+    start = perf_counter()
+    query.collect(engine="in-memory")
+    timings.append(perf_counter() - start)
+report = {"raw_seconds": timings, "median_seconds": median(timings)}
+assert len(report["raw_seconds"]) == 5
+```
 
 **Expected:** The raw repetitions and a summary are available.
 
@@ -93,4 +122,4 @@ if __name__ == "__main__":
 
 ## Interpretation
 
-Produce a reviewable performance comparison with a correctness oracle. State the measured operation, data size, ordering requirement, cache regime and resource environment, and retain all repetitions. Use the result to choose the next experiment rather than treating a microbenchmark as a production guarantee.
+State the measured operation, data size, ordering requirement, cache regime and resource environment, and retain all repetitions. Use the result to choose the next experiment rather than treating a microbenchmark as a production guarantee.

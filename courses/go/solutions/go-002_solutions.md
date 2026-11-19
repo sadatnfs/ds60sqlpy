@@ -8,9 +8,11 @@ A type determines which values and operations are valid. int has an implementati
 
 var n int64 fixes the variable's type. float64(n) converts the value; converting after integer division cannot restore a lost fraction. uint8 wraps values during nonconstant conversion modulo its range. A constant that cannot fit its target type is rejected by the compiler. math.Abs gives an absolute difference, and strconv.ParseInt returns both a value and an error when decoding external text.
 
-## 1. Compare two divisions
+## 1. Compare two divisions: change one input
 
-Compute 7/2 and float64(7)/2.
+Copy worked example 1 into a scratch pad and change `a := 7 / 2` to `a := 8 / 2`. Before running, predict which check fails and which value it now sees; then run it and restore the original line.
+
+The unchanged code is worked example 1:
 
 ```go
 a := 7 / 2
@@ -18,13 +20,15 @@ b := float64(7) / 2
 check(a == 3 && b == 3.5, "division")
 ```
 
-**Expected:** The results are 3 and 3.5.
+**Expected:** The changed run panics with `division` because `a == 3 && b == 3.5` no longer holds. Restoring the original line brings back the worked observation: the results are 3 and 3.5.
 
 Converting before division selects floating arithmetic. float64(7/2) would instead be 3.0 because integer division has already occurred.
 
-## 2. Expose narrowing
+## 2. Expose narrowing: debug a regression
 
-Convert a variable holding 260 to uint8.
+A regression changed one token in worked example 2, so one line now reads `n := 261`. Run worked example 2 with that line, use the failure to locate the defect and repair it without changing the check.
+
+The unchanged code is worked example 2:
 
 ```go
 n := 260
@@ -32,7 +36,7 @@ small := uint8(n)
 check(small == 4, "narrowing")
 ```
 
-**Expected:** The narrowed value is 4.
+**Expected:** Before the repair the program panics with `narrowing`; after it the line reads `n := 260` again and the narrowed value is 4.
 
 The eight-bit unsigned result retains the value modulo 256. A direct constant assignment of 260 to uint8 would be rejected instead of silently accepted.
 

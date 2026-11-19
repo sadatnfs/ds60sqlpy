@@ -1,6 +1,6 @@
 # csharp-019: explanation and comparison
 
-Attempt the six guide tasks before opening this comparison. The executable reference is [csharp-019_solution.cs](csharp-019_solution.cs). Its assertions are always active under the prepared classroom compile settings.
+Attempt the six guide tasks before opening this comparison. The executable reference is [csharp-019_solution.cs](csharp-019_solution.cs). It runs both worked examples and the reference answers below, and its assertions are always active under the prepared classroom compile settings.
 
 ## Why the two examples differ
 
@@ -8,21 +8,61 @@ Attempt the six guide tasks before opening this comparison. The executable refer
 
 **Manage an event subscription:** Keeping the handler reference makes unsubscription precise and prevents a lingering callback. Only the first emission reaches the removed handler.
 
-## Reason through the six tasks
+## Task answers
 
-1. **Predict and explain.** Predict both scale results before running.
+### Task 1: Predict and explain
 
-2. **Guided modification.** Capture a separate local snapshot and compare its behavior after factor changes.
+Predict both scale results before running.
 
-3. **Independent construction.** Write a transformation method accepting Func<int,int>.
+No separate reference answer has been written for this task. Example A is the evidence to compare with: The closure refers to the variable, not a permanently copied value from creation time. Changing factor changes later calls through the closure.
 
-4. **Diagnose a defect.** Diagnose unsubscribing with a newly created lambda instead of the subscribed delegate.
+### Task 2: Guided modification
 
-5. **Boundary evidence.** Test no subscribers and two subscribers.
+Capture a separate local snapshot and compare its behavior after factor changes.
 
-6. **Transfer and justify.** Design ownership for subscriptions in a screen or service that can be disposed.
+No separate reference answer has been written for this task. Start from Example B: Keeping the handler reference makes unsubscription precise and prevents a lingering callback. Only the first emission reaches the removed handler.
 
-For tasks 1 and 2, use the checked values and mechanism trace in the two examples. For task 3, choose names that expose the input and result contract and retain the same invariants. For task 4, the diagnosed mistakes below supply a concrete wrong assumption: preserve its counterexample before repairing it. Task 5 needs an explicit expected value or documented rejection at the boundary, not just successful execution. For task 6, explain what changes in the new context and which part of the original mechanism remains applicable. Several representations may satisfy this transfer task; justify the choice rather than treating this reference as the only architecture.
+### Task 3: Independent construction
+
+Write a transformation method accepting Func<int,int>.
+
+**Reference answer.** It runs as the `Task 3` block of the reference program.
+
+```csharp
+int[] Transform(int[] values, Func<int, int> change) {
+  var result = new int[values.Length];
+  for (int i = 0; i < values.Length; i++) {
+    result[i] = change(values[i]);
+  }
+  return result;
+}
+int[] input = { 1, 2, 3 };
+int[] scaled = Transform(input, value => value * 10);
+Check(scaled.SequenceEqual(new[] { 10, 20, 30 }), "delegate applied");
+Check(input[0] == 1, "input unchanged");
+```
+
+**Observe:** Applying value * 10 gives 10, 20 and 30 and leaves the input unchanged.
+
+The caller supplies the behavior as a Func<int, int>, while the method owns iteration and the new result array.
+
+### Task 4: Diagnose a defect
+
+Diagnose unsubscribing with a newly created lambda instead of the subscribed delegate.
+
+No reference answer has been written for this task yet. The wrong assumptions to look for are this lesson's pitfalls: Closure capture can retain large objects or unexpected mutable state. Event handlers should avoid hiding failures. A new lambda with similar source is not necessarily the same delegate needed for unsubscription.
+
+### Task 5: Boundary evidence
+
+Test no subscribers and two subscribers.
+
+No reference answer has been written for this task yet. Write the expected value or documented rejection for each boundary before running it, and compare with the checks in Example A (A closure observes its captured variable) and Example B (Manage an event subscription).
+
+### Task 6: Transfer and justify
+
+Design ownership for subscriptions in a screen or service that can be disposed.
+
+No single reference answer exists: several designs can satisfy this transfer task. Justify yours against the mechanism described below and the vocabulary entry **Delegate**, and state one limitation of your choice.
 
 ## Mechanism and diagnostic reasoning
 
@@ -36,4 +76,4 @@ Closure capture can retain large objects or unexpected mutable state. Event hand
 
 ## Review before continuing
 
-The reference checks the worked scenarios, including their boundary distinctions. Your independent and transfer artifacts may have additional checks. Compare observations rather than only source text. Preserve any new regression case you discover and explain why it would reject a plausible wrong implementation. External project steps require their own build and platform evidence and are not established by a portable reference passing.
+Run the reference and confirm that it prints `csharp-019: passed`, then reconstruct one boundary case from memory and explain which check would reject a plausible wrong implementation. External project steps need their own build and platform evidence; a passing portable reference does not establish them.

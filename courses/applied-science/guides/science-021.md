@@ -21,7 +21,7 @@ This tutorial uses a simple chain graph with symmetric adjacency and no diagonal
 
 The map 0,0,0,1,1,1 groups similar values together. The alternating map 0,1,0,1,0,1 places unlike values next to each other. The first has positive Moran's statistic and the second has negative statistic under the specified graph. The code checks the signs and calculates the exact values.
 
-A permutation reference repeatedly rearranges the values across the same locations. The Monte Carlo upper-tail value includes the observed arrangement through a plus-one correction, so it cannot report a zero probability from a finite number of permutations. The interpretation depends on exchangeability under the permutation null. Arbitrary rearrangement may be inappropriate when the design, covariates or observation process impose additional structure.
+A permutation reference rearranges the values across the same locations. With six locations and three ones there are only \(\binom{6}{3}=20\) distinct arrangements, so the program enumerates all of them instead of sampling. Two arrangements, the observed map and its mirror image, reach the observed statistic of 0.6, so the exact one-sided p-value is \(2/20=0.10\). For larger maps the reference set is too large to enumerate, and a Monte Carlo estimate with \(B\) random permutations uses \((1+\#\{I_b\ge I_{\text{obs}}\})/(B+1)\), which counts the observed arrangement and therefore cannot report a zero probability. The interpretation depends on exchangeability under the permutation null. Arbitrary rearrangement may be inappropriate when the design, covariates or observation process impose additional structure.
 
 A global statistic can conceal local patterns, and a positive spatial association does not identify a causal mechanism. It may reflect an omitted spatial covariate, a sampling artifact or a shared measurement process. Local analyses introduce additional multiplicity and interpretation issues. The goal is to diagnose structure and choose suitable models and validation, not to convert every spatial pattern into a causal story.
 
@@ -57,6 +57,7 @@ Run the complete program in the classroom's declared prepared profile. Every run
 from __future__ import annotations
 
 import json
+from itertools import combinations
 
 import numpy as np
 
@@ -77,10 +78,14 @@ def run_cases():
     clustered = moran([0, 0, 0, 1, 1, 1], w)
     alternating = moran([0, 1, 0, 1, 0, 1], w)
     assert clustered > 0 and alternating < 0
-    rng = np.random.default_rng(21)
-    permuted = [moran(rng.permutation([0, 0, 0, 1, 1, 1]), w) for _ in range(199)]
-    p = (1 + sum(v >= clustered for v in permuted)) / 200
-    assert 0 < p <= 1
+    # Six locations and three ones allow only C(6, 3) = 20 arrangements: enumerate them all.
+    reference = []
+    for ones in combinations(range(6), 3):
+        values = np.zeros(6)
+        values[list(ones)] = 1
+        reference.append(moran(values, w))
+    p = float(np.mean(np.array(reference) >= clustered - 1e-12))
+    assert len(reference) == 20 and np.isclose(p, 0.1)  # 2 of 20 arrangements
     # Random row folds put neighboring locations in both sets; block folds do not.
     random_train = {0, 2, 4}
     block_train = {0, 1, 2}
@@ -92,6 +97,7 @@ def run_cases():
         clustered_I=clustered,
         alternating_I=alternating,
         permutation_p=p,
+        reference_arrangements=len(reference),
         random_boundary_edges=crossings(random_train),
         blocked_boundary_edges=crossings(block_train),
     )

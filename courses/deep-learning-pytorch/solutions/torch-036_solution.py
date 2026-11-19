@@ -9,14 +9,14 @@ from pathlib import Path
 
 
 def verify():
-    # Exercise 1: Freeze the scalar experiment
+    # Worked example A: Freeze the scalar experiment
     x = torch.tensor([[1.0], [2.0], [3.0]], dtype=torch.float64)
     y = 2 * x
     held = torch.tensor([[4.0], [5.0]], dtype=torch.float64)
     split = {"train": ["a", "b", "c"], "test": ["d", "e"]}
     assert not set(split["train"]) & set(split["test"]) and len(split["test"]) == 2
 
-    # Exercise 2: Train within a declared budget
+    # Worked example B: Train within a declared budget
     model = nn.Linear(1, 1, bias=False, dtype=torch.float64)
     with torch.no_grad():
         model.weight.zero_()
@@ -31,7 +31,7 @@ def verify():
         error = (expected - 2 * held).square().mean().item()
     assert torch.isfinite(model.weight).all() and error < 26
 
-    # Exercise 3: Build the owned release bundle
+    # Worked example C: Build the owned release bundle
     temporary = tempfile.TemporaryDirectory()
     folder = Path(temporary.name)
     weights = folder / "weights.pt"
@@ -95,6 +95,33 @@ def verify():
     }
     temporary.cleanup()
     assert receipt["local_contracts_pass"] and not receipt["production_go"] and not folder.exists()
+
+    # Exercise 1: Freeze a new split
+    release_split = {"train": ["a", "b", "c", "d"], "test": ["e", "f"]}
+    assert not set(release_split["train"]) & set(release_split["test"]) and (
+        len(release_split["train"]),
+        len(release_split["test"]),
+    ) == (4, 2)
+
+    # Exercise 2: Predict a ten-step weight
+    ten_model = nn.Linear(1, 1, bias=False, dtype=torch.float64)
+    with torch.no_grad():
+        ten_model.weight.zero_()
+    ten_opt = torch.optim.SGD(ten_model.parameters(), lr=0.01)
+    ten_x = torch.tensor([[1.0], [2.0], [3.0]], dtype=torch.float64)
+    for _ in range(10):
+        ten_opt.zero_grad(set_to_none=True)
+        (ten_model(ten_x) - 2 * ten_x).square().mean().backward()
+        ten_opt.step()
+    np.testing.assert_allclose(ten_model.weight.item(), 2 - 2 * (68 / 75) ** 10, atol=1e-12, rtol=0)
+
+    # Exercise 3: Hash bytes deterministically
+    first_hash = hashlib.sha256(b"weights-v2").hexdigest()
+    assert (
+        first_hash == hashlib.sha256(b"weights-v2").hexdigest()
+        and first_hash != hashlib.sha256(b"weights-v3").hexdigest()
+        and len(first_hash) == 64
+    )
     return {"checks": 6, "status": "passed"}
 
 

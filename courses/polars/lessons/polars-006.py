@@ -1,4 +1,4 @@
-"""polars-006: worked starting point; complete the guide's six changes."""
+"""polars-006: both worked cases; complete the guide's six changes."""
 
 import polars as pl
 
@@ -21,8 +21,21 @@ def example_one():
     return {"correct_total": 21, "fanout_total": 33, "validation_rejected_duplicate": rejected}
 
 
+def example_two():
+    left = pl.DataFrame({"id": [1, 2, 3], "key": [10, 20, None]})
+    right = pl.DataFrame({"key": [10, None]})
+    assert left.join(right, on="key", how="semi")["id"].to_list() == [1]
+    assert left.join(right, on="key", how="anti").sort("id")["id"].to_list() == [2, 3]
+    assert left.join(right, on="key", how="semi", nulls_equal=True).sort("id")["id"].to_list() == [
+        1,
+        3,
+    ]
+    return {"known": [1], "unmatched_or_missing": [2, 3], "explicit_null_matching": [1, 3]}
+
+
 if __name__ == "__main__":
     print(example_one())
+    print(example_two())
 
 # TODO 1: Check the dimension key before enrichment.
 # TODO 2: Verify that additive order revenue is unchanged by valid enrichment.

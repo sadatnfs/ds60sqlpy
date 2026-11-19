@@ -1,22 +1,22 @@
 # spark-028: Capstone: a skewed join with correctness and cost evidence
 
-Authored paired Scala/PySpark teaching content. The default fixtures are tiny,local and deterministic. Runtime acceptance,logical correctness and learner understanding remain separate evidence.
+Authored paired Scala/PySpark teaching content. The default fixtures are tiny, local and deterministic. Runtime acceptance, logical correctness and learner understanding remain separate evidence.
 
 ## Level and prerequisites
 
-Intermediate; approximately 150 minutes. Direct design prerequisites: `spark-027`. The prepared baseline is Spark 4.0.1,Scala binary2.13,JDK 17 and Python 3.12. Read the [execution baseline](../execution-baseline.md); a proposed future tuple is not a runtime receipt.
+Intermediate; approximately 150 minutes. Direct prerequisites: `spark-027`. The prepared baseline is Spark 4.0.1, Scala binary 2.13, JDK 17 and Python 3.12. Read the [execution baseline](../execution-baseline.md).
 
 ## How to run this lesson
 
-Open `spark-028` in the classroom and choose the Scala or PySpark implementation you understand. Prepare only its fixed `spark-local-scala` or `spark-local-python` profile,save your pad and run the complete source. Scala stages as `Main.scala` with `object Main`; Python stages as `main.py` with a main guard. Each program creates its own local[2] session,disables the UI,binds the driver to loopback and stops the session in finally. No external dataset,package download,JDBC connection or cloud service is requested.
+Open `spark-028` in the classroom and choose the Scala or PySpark implementation you understand. Prepare only its fixed `spark-local-scala` or `spark-local-python` profile, save your pad and run the complete source. Scala stages as `Main.scala` with `object Main`; Python stages as `main.py` with a main guard. Each program creates its own local[2] session, disables the UI, binds the driver to loopback and stops the session in finally. No external dataset, package download, JDBC connection or cloud service is requested.
 
 The [Scala learner](../lessons/spark-028.scala) and [PySpark learner](../lessons/spark-028.py) run two complete demonstrations and retain six explicit task stubs. Use the [explained solutions](../solutions/spark-028_solutions.md) only after an attempt or an explicit worked comparison; the [Scala reference](../solutions/spark-028_solution.scala) and [PySpark reference](../solutions/spark-028_solution.py) contain complete assertions. A bounded collect is used only for the declared tiny fixture; do not copy it onto an unbounded or large production table.
 
 ## Learning objectives
 
 - Deliver a defensible batch-optimization change backed by a reference result and bounded measurements.
-- State the input and output grain,schema,NULL policy and ordering before executing a transformation.
-- Compare each language implementation with independent literal expectations,not only with the other implementation.
+- State the input and output grain, schema, NULL policy and ordering before executing a transformation.
+- Compare each language implementation with independent literal expectations, not only with the other implementation.
 
 ## Vocabulary and concepts
 
@@ -46,7 +46,7 @@ A duplicate-sensitive distributed comparison then checks both directions of the 
 
 The resource observation helper executes a summary query and then reads the actual executed exchange metric maps from that same query tree. This intentionally uses classic Spark 4.0.1 internals, as in the earlier shuffle lesson. Its records include operator names because a broadcast exchange's data-size metric and a shuffle exchange's data-size metric must not be casually added together and called remote network bytes. Missing metrics remain absent rather than becoming fabricated zeros.
 
-The evidence packet recordsSpark version, local master, AQE state, automatic threshold, key-frequency ledger, the two observed join plans and their separate exchange maps. It does not claim measured peak memory, spill or cluster throughput when those were not collected. A lower exchange count or smaller serialized data amount can motivate a representative benchmark, but it is not by itself a complete production cost result.
+The evidence packet records Spark version, local master, AQE state, automatic threshold, key-frequency ledger, the two observed join plans and their separate exchange maps. It does not claim measured peak memory, spill or cluster throughput when those were not collected. A lower exchange count or smaller serialized data amount can motivate a representative benchmark, but it is not by itself a complete production cost result.
 
 Finally, the strategy switch is set back to the baseline. The rolled-back product must still satisfy the same exact oracle and bag comparison. Rollback changes execution policy, not the approved dimension or acceptance rules. If the candidate path fails at scale, the team should be able to return to a known correct implementation without undoing the data-quality contract that made either implementation trustworthy.
 
@@ -197,7 +197,7 @@ The oracle follows the input-generation and approved-factor rules without callin
 
 ### Exercise 1: Classify facts and reconcile the whole source population
 
-Add reason using missing fact identity, negative known amount, then accepted precedence. Retain all source records; acceptedNULL amounts remain unknown.
+Add reason using missing fact identity, negative known amount, then accepted precedence. Retain all source records; accepted NULL amounts remain unknown.
 
 **Expected result/shape:** Accepted 2000, rejected 2 with source 2001 missing_identity and 2002 negative_amount. Accepted unique fact IDs 2000 and known amounts 1800.
 
@@ -229,7 +229,7 @@ Build the ordinary equality join over accepted facts and reviewed dimension, pro
 
 Broadcast the reviewed dimension for the same equality join and projection. Preserve all output occurrences using exceptAll in both directions against baseline.
 
-**Expected result/shape:** Identical metrics and empty directional bag differences. The candidate plan containsBroadcastHashJoin.
+**Expected result/shape:** Identical metrics and empty directional bag differences. The candidate plan contains BroadcastHashJoin.
 
 **Verify:** Assert the full metric map, both distributed bag differences and the observed strategy marker.
 
@@ -239,7 +239,7 @@ Broadcast the reviewed dimension for the same equality join and projection. Pres
 
 Return version, master, AQE and automatic broadcast threshold as named fields. Attach key frequencies, the baseline/candidate plans and each observed summary-query exchange metric map.
 
-**Expected result/shape:** Spark 4.0.1, local[2], AQEfalse, threshold-1; key 0 frequency 1600 and others 100. Both runs expose actual nonempty exchange observations. No peak-memory or throughput value is invented.
+**Expected result/shape:** Spark 4.0.1, local[2], AQE false, threshold -1; key 0 frequency 1600 and others 100. Both runs expose actual nonempty exchange observations. No peak-memory or throughput value is invented.
 
 **Verify:** Assert controlled settings and frequency ledger, then print plans and separately labeled actual metric maps.
 
@@ -257,15 +257,15 @@ Choose baseline or broadcast using an explicit Boolean switch over the same acce
 
 ## Common pitfalls
 
-Do not optimize a fanout error or replaceNULL amounts with zero to simplify a checksum. Do not select dimension winners arbitrarily. Keep fact identity, known-value counts and measure totals in the acceptance contract. Do not collect an unbounded result to compare strategies. Internal metric names and plan access are pinned to classicSpark 4.0.1; keep their units and limitations visible. Rollback must preserve the repaired data contract even when it changes the physical implementation.
+Do not optimize a fanout error or replace NULL amounts with zero to simplify a checksum. Do not select dimension winners arbitrarily. Keep fact identity, known-value counts and measure totals in the acceptance contract. Do not collect an unbounded result to compare strategies. Internal metric names and plan access are pinned to classic Spark 4.0.1; keep their units and limitations visible. Rollback must preserve the repaired data contract even when it changes the physical implementation.
 
 ## Self-check
 
-Explain the contract of `classifyFacts` / `classify_facts` without reading its solution. Trace the specified boundary case,then explain the final exercise's evidence and limitation. Identify where a transformation builds a plan and where an action requests execution. Retain exact values or operator evidence rather than treating a successful process exit as proof of the whole learning objective.
+Explain the contract of `classifyFacts` / `classify_facts` without reading its solution. Trace the specified boundary case, then explain the final exercise's evidence and limitation. Identify where a transformation builds a plan and where an action requests execution. Retain exact values or operator evidence rather than treating a successful process exit as proof of the whole learning objective.
 
 ## Next step
 
-Use the [course route](../README.md) to continue. Paired-language agreement is useful only when both outputs also satisfy the independent fixture contract. Keep runtime/profile receipts separate from any cluster-performance or production-recovery claim.
+Use the [course route](../README.md) to continue. Paired-language agreement is useful only when both outputs also satisfy the independent fixture contract. A successful local run is not evidence of cluster performance or production recovery.
 
 ## Primary sources and official APIs
 
@@ -279,8 +279,8 @@ Use the [course route](../README.md) to continue. Paired-language agreement is u
 
 ```text
 Use $guide-ds60sqlpy-learning to coach me through spark-028: Capstone: a skewed join with correctness and cost evidence.
-Read courses/scala-spark/guides/spark-028.md and courses/scala-spark/lessons/spark-028.scala;the paired sources are courses/scala-spark/lessons/spark-028.scala and courses/scala-spark/lessons/spark-028.py.
-Direct prerequisites: spark-027. Explain the schema,row grain and new Scala/Python/Spark syntax,ask me to predict a concrete result,then inspect my attempt. Give one hint at a time,review exact result and boundary evidence,and ask retrieval questions in my own words. Do not read solutions/ until I ask or have made an honest attempt.
-Use only the prepared local[2] worker profile and owned job scratch. Do not download dependencies,start a remote service,reset existing checkpoints or alter unrelated learner work.
+Read courses/scala-spark/guides/spark-028.md and courses/scala-spark/lessons/spark-028.scala; the paired sources are courses/scala-spark/lessons/spark-028.scala and courses/scala-spark/lessons/spark-028.py.
+Direct prerequisites: spark-027. Explain the schema, row grain and new Scala/Python/Spark syntax, ask me to predict a concrete result, then inspect my attempt. Give one hint at a time, review exact result and boundary evidence, and ask retrieval questions in my own words. Do not read solutions/ until I ask or have made an honest attempt.
+Use only the prepared local[2] worker profile and owned job scratch. Do not download dependencies, start a remote service, reset existing checkpoints or alter unrelated learner work.
 Done when all six contracts have inspected evidence and I can explain the stated assumptions and a meaningful failure case.
 ```

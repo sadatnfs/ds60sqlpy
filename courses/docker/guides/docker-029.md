@@ -6,7 +6,7 @@ Advanced; about 120 minutes, with additional time for the optional host experime
 
 ## Learning objectives
 
-Design an evidence linkage table. Write a supply-chain review for the fixture. Explain the difference between a configuration, an observed process and evidence of the application's behavior.
+Design an evidence linkage table. Write a supply-chain review for the fixture. Use SBOM, provenance and attestation accurately when you explain what you observed.
 
 ## Purpose, vocabulary and mental model
 
@@ -18,32 +18,30 @@ The teaching image has a deliberately small application surface but still inheri
 
 ## Anatomy and a trace you can follow
 
-BuildKit can produce attestations in supported workflows and exporters. Storage and publication behavior depend on the builder and image store, so do not promise that every local load preserves every attestation identically. Keep metadata generation, artifact delivery and verification as separate steps.
+BuildKit creates attestations at build time and attaches them to the image index as in-toto JSON. Minimal provenance (`mode=min`) is added by default; `--sbom=true` adds an SPDX SBOM produced by a scanner plugin, and `--provenance=mode=max` records a detailed build statement. Attestations need a builder that can store an image index: the default docker driver requires the containerd image store, a docker-container builder works with either store, and `--push` keeps them in the registry. The `local` and `tar` exporters write them as JSON files, such as `sbom.spdx.json`, in the root of the export. For a pushed image, `docker buildx imagetools inspect IMAGE --format "{{ json .SBOM.SPDX }}"` prints the SBOM without pulling the image.
 
-For an offline exercise, create a small component inventory from the Dockerfile and compare it with an actual image inspection or a prepared SBOM. Note what the source recipe cannot reveal without resolving the base image. Do not fabricate a signed result or claim a scanner passed when it was not run.
+The scanner itself runs as an image that is downloaded on first use, so treat SBOM generation as a deliberate online step. Compare the exported SBOM with a component inventory derived from the Dockerfile, and note what the source recipe cannot reveal without resolving the base image. Keep metadata generation, artifact delivery and verification as separate steps, and do not fabricate a signed result or claim a scanner passed when it was not run.
 
 ## How to use this lesson
 
-The classroom displays this guide and saves your worksheet. Its Run button does not control your Docker engine. Docker engine access is powerful host access, so the classroom deliberately receives no engine socket. Work through the supplied examples without starting anything, then use the optional host lab only in your own disposable project. Reading a command, parsing YAML and actually running the project are different forms of evidence.
+The classroom displays this guide and saves your worksheet, `courses/docker/lessons/docker-029.md`. Its Run button does not control your Docker engine. Docker engine access is powerful host access, so the classroom deliberately receives no engine socket. Work through the supplied examples without starting anything, then use the optional host lab only in your own disposable project. Reading a command, parsing YAML and actually running the project are different forms of evidence.
 
 Use Bash in Linux, macOS Terminal, or Ubuntu under WSL 2 on Windows. The supported engine runs Linux containers. The maintained fixture is `courses/docker/fixtures/compose-lab/`; its README explains copying it into a new ignored learner directory, checking the engine, building locally with visible logs, and using the fixed project name `ds60-docker-study`. The fixture uses port 18080 on host loopback. Stop if that project name or port belongs to unrelated work; choose a new project name consistently in your own copy. Never paste a command against a remote Docker context simply because it is currently selected.
 
-For Dockerfile examples, create a file named `Dockerfile` in a scratch project. YAML snippets describe a fragment unless explicitly called a complete file. Text transcripts are synthetic illustrations, not claims about your machine. Do not substitute a real password, token or private registry into a checked-in example.
+For Dockerfile examples, create a file named `Dockerfile` in a scratch project. YAML snippets describe a fragment unless explicitly called a complete file. Text transcripts are synthetic illustrations, not claims about your machine. Do not substitute a real password, token or private registry into a checked-in example. **How to use the lessons** in the [subject README](../README.md) collects these rules in one place.
 
 ## Worked example / walkthrough
 
-### Worked example 1: Inventory visible dependencies
+### Worked example 1: Export an SBOM next to the build result
 
-This is a source-derived teaching inventory.
+Run this deliberately from your fixture copy; the scanner and base images may be downloaded on first use.
 
-```text
-application: server.py, original course source
-runtime: Python from selected base image
-operating-system packages: inherited from resolved base
-identity: record exact image and platform
+```sh
+docker buildx build --sbom=true --output type=local,dest=../ds60-sbom-out .
+ls ../ds60-sbom-out/sbom.spdx.json
 ```
 
-**Expected observation:** The source inventory has explicit unknowns until the base artifact is resolved and inspected.
+**Expected observation:** The export directory holds the image filesystem with sbom.spdx.json at its root; its package list includes the inherited Python runtime and operating-system packages, not only server.py.
 
 ### Worked example 2: Separate evidence objects
 
@@ -59,58 +57,52 @@ image digest -> provenance statement -> issuer verification policy
 
 ## Six progressive exercises
 
+For each exercise, name the object involved and the phase of its lifetime before changing anything, then vary only the condition the task names. Exercises that ask you to predict, explain, compare or diagnose keep their answers in the solutions file; the others show the evidence to look for.
+
 ### Exercise 1: Distinguish SBOM and provenance.
 
-**Expected evidence:** Component inventory versus build-origin evidence.
-
-**Hint:** Identify the object and the phase of its lifetime before changing it. Use the relevant worked example, then vary only the condition named in this task.
+**Hint:** Ask which document lists contents and which describes the build.
 
 ### Exercise 2: Predict what a source-only inventory misses.
 
-**Expected evidence:** Resolved base packages and exact inherited versions.
-
-**Hint:** Identify the object and the phase of its lifetime before changing it. Use the relevant worked example, then vary only the condition named in this task.
+**Hint:** Compare the Dockerfile's FROM line with what the base image actually contains.
 
 ### Exercise 3: Design an evidence linkage table.
 
 **Expected evidence:** Every record names the same image digest and platform scope.
 
-**Hint:** Identify the object and the phase of its lifetime before changing it. Use the relevant worked example, then vary only the condition named in this task.
+**Hint:** Make every row refer to the same digest and platform.
 
 ### Exercise 4: Diagnose an unsigned provenance statement from an unknown source.
 
-**Expected evidence:** It is an untrusted claim until verified under a policy.
-
-**Hint:** Identify the object and the phase of its lifetime before changing it. Use the relevant worked example, then vary only the condition named in this task.
+**Hint:** Ask who signed the statement and how you would verify it.
 
 ### Exercise 5: Explain exporter limitations honestly.
 
-**Expected evidence:** Attestation generation and preservation depend on the selected workflow.
-
-**Hint:** Identify the object and the phase of its lifetime before changing it. Use the relevant worked example, then vary only the condition named in this task.
+**Hint:** Check whether your builder driver and image store keep attestations.
 
 ### Exercise 6: Write a supply-chain review for the fixture.
 
 **Expected evidence:** Known source, resolved base, component record and actual acceptance limits.
 
-**Hint:** Identify the object and the phase of its lifetime before changing it. Use the relevant worked example, then vary only the condition named in this task.
+**Hint:** Separate what you know, what you resolved and what remains untested.
 
 ## Common mistakes and diagnosis
 
-Start with the smallest observation that separates two plausible causes. An image inspection answers questions about the packaged filesystem and configuration; container inspection adds runtime mounts, network attachment and exit status. An application request adds another layer of evidence. A healthy container can still serve the wrong application result. Preserve the original failure and the exact changed field before retrying.
+Generating an SBOM for a tag instead of the exact digest you ship. Trusting provenance JSON without verifying its issuer. Expecting attestations to survive a `--load` into the classic image store.
 
-The boundary case in this chapter is: Diagnose an unsigned provenance statement from an unknown source. Use its expected observation, It is an untrusted claim until verified under a policy., to avoid treating a successful command as proof of the wrong claim. Keep source edits in your own copy. Do not make a container privileged, mount the engine socket, disable all checks or delete every volume to make an example succeed.
+Exercise 4 is this chapter's boundary case: Diagnose an unsigned provenance statement from an unknown source. Start with the smallest observation that separates two plausible causes. An image inspection answers questions about the packaged filesystem and configuration; container inspection adds runtime mounts, network attachment and exit status; an application request adds another layer, and a healthy container can still serve the wrong result. Preserve the original failure and the exact changed field before retrying. Keep source edits in your own copy. Do not make a container privileged, mount the engine socket, disable all checks or delete every volume to make an example succeed.
 
 ## Retrieval, transfer and next steps
 
-Close the explanations and draw the path from source files to image to container to the observation relevant here. Reconstruct the second worked example with one different value and predict what changes. Explain which state survives process restart, container recreation and image rebuild. If none of those operations applies to this mechanism, explain why.
+Close the explanations and draw the path from source files to image to container to the observation relevant here, using SBOM, provenance, attestation, SPDX and image digest. Reconstruct worked example 2 (Separate evidence objects) with one different value and predict what changes. Explain which state survives process restart, container recreation and image rebuild, or why none of those operations applies to this mechanism.
 
-Before proceeding, retain six evidence records. For the optional host project, use `docker compose -p ds60-docker-study down` from the fixture copy to stop its containers and remove its ordinary network. This command preserves named volumes. Volume deletion is a separate deliberate reset of that disposable lab after a backup or export, never a general cleanup step. The fixture README describes its exact scoped reset.
+When a host session ends, run `docker compose -p ds60-docker-study down` from your fixture copy. It removes the project's containers and network but keeps named volumes; deleting a volume is a separate, deliberate reset described in the fixture README.
 
 ## Primary references
 
-- [Official reference 1](https://docs.docker.com/build/metadata/attestations/)
-- [Official reference 2](https://docs.docker.com/build/metadata/attestations/sbom/)
+- [Build attestations](https://docs.docker.com/build/metadata/attestations/)
+- [SBOM attestations](https://docs.docker.com/build/metadata/attestations/sbom/)
 
 ## Ask an AI tutor about this lesson
 

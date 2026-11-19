@@ -196,7 +196,7 @@ LESSONS = [
                 [[1, 67], [2, 24], [3, 96], [4, None]],
                 ("All four clean-model Product keys; retain every input row while adding revenue."),
                 [
-                    "VALUES supplies keys 1,2,3,4.",
+                    "VALUES supplies keys 1, 2, 3, 4.",
                     "ADDCOLUMNS computes one revenue result per input key.",
                     "Bag's blank measure does not remove key 4 from this projected table.",
                 ],
@@ -218,7 +218,7 @@ LESSONS = [
                 [
                     "The four candidate keys form groups.",
                     "Key 4 has BLANK for every supplied expression.",
-                    "That all-blank group is omitted; keys 1,2,3 remain.",
+                    "That all-blank group is omitted; keys 1, 2, 3 remain.",
                 ],
                 (
                     "Adding a nonblank expression or deliberately coalescing "
@@ -461,8 +461,8 @@ LESSONS = [
             "attention.\n\nPaper products have keys 1 and 2; Blue "
             "products have keys 1 and 3. Their intersection is key 1, "
             "Paper minus Blue is key 2, and their concatenation "
-            "contains 1,2,1,3. Taking DISTINCT after UNION gives the "
-            "three unique keys 1,2,3. That extra DISTINCT is a "
+            "contains 1, 2, 1, 3. Taking DISTINCT after UNION gives the "
+            "three unique keys 1, 2, 3. That extra DISTINCT is a "
             "semantic operation, not merely presentation "
             "cleanup.\n\nBefore using a table result to filter another "
             "expression, state its grain and originating columns. Set "
@@ -494,7 +494,7 @@ LESSONS = [
                 ),
                 [("IntersectionRows", "integer"), ("PaperOnlyRows", "integer")],
                 [[1, 1]],
-                "Distinct Paper keys{1,2} and Blue keys{1,3} from the clean model.",
+                "Distinct Paper keys {1,2} and Blue keys {1,3} from the clean model.",
                 [
                     "The shared key is 1, so the intersection has one row.",
                     "Key 2 belongs to Paper but not Blue.",
@@ -522,7 +522,7 @@ LESSONS = [
                 "Concatenate the two two-row key tables; key 1 occurs in each input.",
                 [
                     "UNION produces four rows, including key 1 twice.",
-                    "DISTINCT removes repeated key rows, leaving 1,2,3.",
+                    "DISTINCT removes repeated key rows, leaving 1, 2, 3.",
                     "The two counts represent memberships versus unique product identities.",
                 ],
                 (
@@ -633,8 +633,8 @@ LESSONS = [
                     "explicitly selected ShipDate relationship."
                 ),
                 [
-                    "Orders S4,S5,S6 belong to January and total 67.",
-                    "Shipments S4 and S 5 occur in January and total 47.",
+                    "Orders S4, S5, S6 belong to January and total 67.",
+                    "Shipments S4 and S5 occur in January and total 47.",
                     ("S6's 20 moves to shipment month February."),
                 ],
                 (
@@ -654,8 +654,8 @@ LESSONS = [
                 [[56, 76]],
                 "Date year 2025/month 2 with the same role comparison.",
                 [
-                    "Orders S7,S8 total 56 in February.",
-                    "Shipments include S6,S7,S8, totaling 76.",
+                    "Orders S7, S8 total 56 in February.",
+                    "Shipments include S6, S7, S8, totaling 76.",
                     "Across January and February, both date-role totals reconcile to 123.",
                 ],
                 (
@@ -828,7 +828,7 @@ LESSONS = [
             t(
                 "Predict the revenue for both audiences selected together.",
                 "VALUES over the bridge deduplicates customer keys.",
-                "The keys are 10,20,30, and the unique population totals 187 rather than 267.",
+                "The keys are 10, 20, 30, and the unique population totals 187 rather than 267.",
             ),
             t(
                 "Add Di to Newsletter without adding a sale.",
@@ -841,7 +841,7 @@ LESSONS = [
             t(
                 "Write a reconciliation for the two audience totals.",
                 "Subtract the overlapping population once.",
-                "131 +136 -80 =187 for the union of these two audiences.",
+                "131 + 136 - 80 = 187 for the union of these two audiences.",
             ),
             t(
                 "Diagnose a membership table with duplicate group/customer pairs.",

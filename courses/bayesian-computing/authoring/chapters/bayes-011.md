@@ -24,7 +24,7 @@ The degrees of freedom control tail thickness. Estimating them introduces anothe
 
 Compare replicated and observed features such as the maximum residual, spread of the central group, asymmetry or subgroup behavior. A normal model might match the overall variance by inflating its scale while failing to represent the dense center. A heavy-tailed model might describe that contrast better but still miss skewness or dependence.
 
-The actual short-chain diagnostics remain part of the output. A robust likelihood can improve some geometry while making other parts of the posterior harder. Do not assume that changing the likelihood solves every computational issue. Effective sample sizes, R-hat, divergences and Monte Carlo errors should be reviewed for the target quantities.
+The actual short-chain diagnostics remain part of the output. A robust likelihood can improve some geometry while making other parts of the posterior harder. Do not assume that changing the likelihood solves every computational issue. Effective sample sizes, R-hat, divergences and Monte Carlo errors should be reviewed for the target quantities, using the screen from the Markov chain unit: R-hat below 1.01, bulk and tail effective sample sizes of at least 100 per chain and zero divergences.
 
 Robust estimation is also distinct from robust decision-making. A decision maker may care precisely about rare extreme costs. A model that reduces outlier influence on a location estimate is not automatically conservative about tail risk. Define the relevant predictive or utility target before selecting the modeling strategy.
 

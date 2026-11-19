@@ -91,13 +91,29 @@ def outputs() -> dict[Path, str]:
                 )
             }
             | {
-                "lab": (
-                    "Read the two complete worked cases, reproduce their evidence "
-                    "and compare their assumptions."
+                "lab": unit.get(
+                    "lab",
+                    (
+                        "Follow the linked project's documented entrypoint and compare its "
+                        "recorded evidence with the two worked cases."
+                    )
+                    if reading
+                    else (
+                        "Run the complete program, then change one input in each worked "
+                        "case and predict the new result before rerunning."
+                    ),
                 ),
-                "verification": (
-                    f"Complete source-bound {key} investigation with explicit numerical "
-                    "or execution diagnostics; no mastery grade."
+                "verification": unit.get(
+                    "verification",
+                    (
+                        f"The project checks named in {key} pass under their documented "
+                        "lifecycle; reading the unit records no pad run or mastery grade."
+                    )
+                    if reading
+                    else (
+                        f"Every assertion in the {key} program passes and its printed JSON "
+                        "matches the worked cases; a passing run is not a mastery grade."
+                    ),
                 ),
             }
         )

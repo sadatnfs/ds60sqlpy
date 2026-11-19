@@ -1,6 +1,6 @@
 # swift-018: explanation and comparison
 
-Attempt the six guide tasks before opening this comparison. The executable reference is [swift-018_solution.swift](swift-018_solution.swift). Its assertions are always active under the prepared classroom compile settings.
+Attempt the six guide tasks before opening this comparison. The executable reference is [swift-018_solution.swift](swift-018_solution.swift). It runs both worked examples and the reference answers below, and its assertions are always active under the prepared classroom compile settings.
 
 ## Why the two examples differ
 
@@ -8,21 +8,58 @@ Attempt the six guide tasks before opening this comparison. The executable refer
 
 **Preserve container element type:** The relationship is encoded in the type rather than a runtime convention. Swapping retains the same concrete element type.
 
-## Reason through the six tasks
+## Task answers
 
-1. **Predict and explain.** Identify inferred generic types at every call.
+### Task 1: Predict and explain
 
-2. **Guided modification.** Use larger with Double values and a tie.
+Identify inferred generic types at every call.
 
-3. **Independent construction.** Create a generic immutable triple with a rotation operation.
+No separate reference answer has been written for this task. Example A is the evidence to compare with: The Comparable requirement makes ordering available without dynamic casts. One implementation preserves Int and String results.
 
-4. **Diagnose a defect.** Diagnose calling an unavailable method on an unconstrained T.
+### Task 2: Guided modification
 
-5. **Boundary evidence.** State tie behavior and test equal inputs.
+Use larger with Double values and a tie.
 
-6. **Transfer and justify.** Choose generic or existential abstraction for an API that must preserve concrete result type.
+No separate reference answer has been written for this task. Start from Example B: The relationship is encoded in the type rather than a runtime convention. Swapping retains the same concrete element type.
 
-For tasks 1 and 2, use the checked values and mechanism trace in the two examples. For task 3, choose names that expose the input and result contract and retain the same invariants. For task 4, the diagnosed mistakes below supply a concrete wrong assumption: preserve its counterexample before repairing it. Task 5 needs an explicit expected value or documented rejection at the boundary, not just successful execution. For task 6, explain what changes in the new context and which part of the original mechanism remains applicable. Several representations may satisfy this transfer task; justify the choice rather than treating this reference as the only architecture.
+### Task 3: Independent construction
+
+Create a generic immutable triple with a rotation operation.
+
+**Reference answer.** It runs as the `Task 3` block of the reference program.
+
+```swift
+struct Triple<T> {
+  let first: T
+  let second: T
+  let third: T
+  func rotated() -> Triple<T> { Triple(first: second, second: third, third: first) }
+}
+let rotated = Triple(first: 1, second: 2, third: 3).rotated()
+precondition(rotated.first == 2 && rotated.second == 3 && rotated.third == 1)
+```
+
+**Observe:** Rotating (1, 2, 3) gives (2, 3, 1).
+
+The properties are let constants, so rotation returns a new triple instead of changing the original.
+
+### Task 4: Diagnose a defect
+
+Diagnose calling an unavailable method on an unconstrained T.
+
+No reference answer has been written for this task yet. The wrong assumptions to look for are this lesson's pitfalls: Any discards useful type information. Excessively broad constraints make reuse harder. A generic algorithm still needs domain-specific failure and ordering policies.
+
+### Task 5: Boundary evidence
+
+State tie behavior and test equal inputs.
+
+No reference answer has been written for this task yet. Write the expected value or documented rejection for each boundary before running it, and compare with the checks in Example A (Reuse an ordering mechanism) and Example B (Preserve container element type).
+
+### Task 6: Transfer and justify
+
+Choose generic or existential abstraction for an API that must preserve concrete result type.
+
+No single reference answer exists: several designs can satisfy this transfer task. Justify yours against the mechanism described below and the vocabulary entry **Generic parameter**, and state one limitation of your choice.
 
 ## Mechanism and diagnostic reasoning
 
@@ -36,4 +73,4 @@ Any discards useful type information. Excessively broad constraints make reuse h
 
 ## Review before continuing
 
-The reference checks the worked scenarios, including their boundary distinctions. Your independent and transfer artifacts may have additional checks. Compare observations rather than only source text. Preserve any new regression case you discover and explain why it would reject a plausible wrong implementation. External project steps require their own build and platform evidence and are not established by a portable reference passing.
+Run the reference and confirm that it prints `swift-018: passed`, then reconstruct one boundary case from memory and explain which check would reject a plausible wrong implementation. External project steps need their own build and platform evidence; a passing portable reference does not establish them.

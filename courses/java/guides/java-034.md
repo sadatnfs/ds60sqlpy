@@ -6,13 +6,13 @@ Advanced, approximately 120 minutes. Direct prerequisites: `java-033`
 
 ## Learning objectives
 
-Explain port, adapter, pure core, dependency inversion using a concrete program. Trace the normal execution, identify its boundary assumptions and make a failure case observable. The first investigation is Compute 3 items at 125 cents and check the zero/negative quantity policy. The final exercise transfers the mechanism to detect arithmetic overflow without an event.
+Separate pure domain logic from infrastructure so validation and failures are testable before any repository call. Along the way, explain port, adapter, pure core, dependency inversion using a concrete program. Trace the normal execution, identify its boundary assumptions and make a failure case observable. Exercises 1 and 2 start from the worked examples; the authored investigations begin with this task: Request missing and inspect the audit list. The final exercise transfers the mechanism to detect arithmetic overflow without an event.
 
 ## Purpose and mental model
 
-Application design separates domain decisions from the mechanisms that supply data,time or side effects. A pure pricing calculation can be tested without a database,network or system clock. A service composes that calculation with repository and clock ports. Adapters implement those ports for a particular environment. Dependency inversion means the domain-facing code depends on the behavior it needs rather than on a concrete infrastructure class.
+Application design separates domain decisions from the mechanisms that supply data, time or side effects. A pure pricing calculation can be tested without a database, network or system clock. A service composes that calculation with repository and clock ports. Adapters implement those ports for a particular environment. Dependency inversion means the domain-facing code depends on the behavior it needs rather than on a concrete infrastructure class.
 
-This lesson builds a small quote service. A catalog port supplies integer-cent prices,a fixed clock supplies the timestamp,and an audit sink records successful operations in memory. The service validates quantity andcatalog lookup before producing a result or recording an event. A failing repository propagates its failure rather than returning a fabricated zero price. Thefake-backed tests establish service logic and call boundaries,not live database or network acceptance.
+This lesson builds a small quote service. A catalog port supplies integer-cent prices, a fixed clock supplies the timestamp, and an audit sink records successful operations in memory. The service validates quantity and catalog lookup before producing a result or recording an event. A failing repository propagates its failure rather than returning a fabricated zero price. Thefake-backed tests establish service logic and call boundaries, not live database or network acceptance.
 
 ## Vocabulary and concepts
 
@@ -41,13 +41,13 @@ The public class name and source filename must agree. Each worked example below 
 
 ## Syntax anatomy and execution trace
 
-Define a Catalog interface returning OptionalLong and declaring IOException for an operational read failure. Inject a Supplier<Instant> and Consumer<String> through the constructor. Keep the pure total calculation separate anduseMath.multiplyExact for overflow. TheQuote record carries item,quantity,total and time. Audit only after all required validation and calculation succeed.
+Define a Catalog interface returning OptionalLong and declaring IOException for an operational read failure. Inject a Supplier<Instant> and Consumer<String> through the constructor. Keep the pure total calculation separate and use Math.multiplyExact for overflow. The Quote record carries item, quantity, total and time. Audit only after all required validation and calculation succeed.
 
 ## Worked example / walkthrough
 
 ### Example A: Test the pure calculation
 
-The core arithmetic needsno repository or clock. Isolating it makes domain boundaries and overflow behavior easy to check.
+The core arithmetic needs no repository or clock. Isolating it makes domain boundaries and overflow behavior easy to check.
 
 ```java
 import java.util.*;
@@ -109,7 +109,7 @@ public class Main {
 
 ### Example B: Compose a deterministic service
 
-A fixed clock removes timing nondeterminism. The audit event is a local test double,not a message sent to another person or service.
+A fixed clock removes timing nondeterminism. The audit event is a local test double, not a message sent to another person or service.
 
 ```java
 import java.util.*;
@@ -177,7 +177,7 @@ public class Main {
 }
 ```
 
-**Expected:** total250,time2026-01-01T00:00:00Z,oneauditevent.
+**Expected:** total 250, time 2026-01-01T00:00:00Z, one audit event.
 
 ## Prediction before your attempt
 
@@ -185,29 +185,29 @@ Read the source from the entry point and name each value before executing it. Id
 
 ## Exercises
 
-1. **Test the pure calculation.** Compute 3 items at 125 cents and check the zero/negative quantity policy.
-   **Expected:** 375 cents; nonpositive quantity rejected.
-   **Verify:** Compare your assertion values or captured diagnostic with 375 cents; nonpositive quantity rejected.
+1. **Test the pure calculation: change one input.** Copy Example A into a scratch `Main.java` and change `total(0, 125);` to `total(1, 125);`. Before running it with `java -ea Main`, predict which assertion fails and which value it now sees; then run it and restore the original line.
+   **Expected:** The changed run fails with an `AssertionError` from the assertion on `invalid`. Restoring the original line brings back the worked observation: 375 cents; nonpositive quantity rejected.
+   **Verify:** Compare your written prediction with the reported `AssertionError` and its stack-trace line, and name the value that made `invalid` false. After restoring the line, the program completes without an `AssertionError` again.
 
-2. **Compose a deterministic service.** Inject a fixedcatalog,clock and audit list,and request twoitems.
-   **Expected:** total250,time2026-01-01T00:00:00Z,oneauditevent.
-   **Verify:** Compare your assertion values or captured diagnostic with total250,time2026-01-01T00:00:00Z,oneauditevent.
+2. **Compose a deterministic service: debug a regression.** A regression changed one token in the code that Example B adds after Example A, so one line now reads `id.equals("item-a") ? java.util.OptionalLong.of(126) : java.util.OptionalLong.empty();`. Run Example B with that line, use the failing assertion to locate the defect and repair it without changing the assertion.
+   **Expected:** Before the repair the run fails with an `AssertionError` from the assertion on `quote.totalCents() == 250 && quote.created().equals(instant) && audit.equals(List.of("quoted:item-a"))`; after it the line reads `id.equals("item-a") ? java.util.OptionalLong.of(125) : java.util.OptionalLong.empty();` again and total 250, time 2026-01-01T00:00:00Z, one audit event.
+   **Verify:** Keep the failing and the repaired runs. Explain why the changed token alters the value tested by `quote.totalCents() == 250 && quote.created().equals(instant) && audit.equals(List.of("quoted:item-a"))` for this input.
 
-3. **Reject an unknown catalog item.** Requestmissing andinspecttheauditlist.
-   **Expected:** NoSuchElementException;no additional audit.
-   **Verify:** Compare your assertion values or captured diagnostic with NoSuchElementException;no additional audit.
+3. **Reject an unknown catalog item.** Request missing and inspect the audit list.
+   **Expected:** NoSuchElementException; no additional audit.
+   **Verify:** Keep an assertion equivalent to `missing && audit.size() == 1`. As a control, change `missing = true;` to `missing = false;`: the run must fail with an `AssertionError` from the assertion on `missing && audit.size() == 1`. Restore the line before continuing.
 
 4. **Propagate an infrastructure failure.** Inject a Catalog thatthrowsIOException.
-   **Expected:** same failure type;no success audit.
-   **Verify:** Compare your assertion values or captured diagnostic with same failure type;no success audit.
+   **Expected:** same failure type; no success audit.
+   **Verify:** Keep an assertion equivalent to `propagated && failures.isEmpty()`. As a control, change `throw new java.io.IOException("catalog unavailable");` to `throw new java.io.IOException("catalog unavailable!");`: the run must fail with an `AssertionError` from the assertion on `propagated && failures.isEmpty()`. Restore the line before continuing.
 
-5. **Prove invalid quantity fails before a repository call.** Use a countingcatalog and request negative quantity.
-   **Expected:** repositorycallcount0.
-   **Verify:** Compare your assertion values or captured diagnostic with repositorycallcount0.
+5. **Prove invalid quantity fails before a repository call.** Use a counting catalog and request negative quantity.
+   **Expected:** repository call count 0.
+   **Verify:** Keep an assertion equivalent to `rejected && calls.get() == 0`. As a control, change `rejected = true;` to `rejected = false;`: the run must fail with an `AssertionError` from the assertion on `rejected && calls.get() == 0`. Restore the line before continuing.
 
-6. **Detect arithmetic overflow without an event.** UseLong.MAX_VALUEunitprice andquantity2.
-   **Expected:** ArithmeticException;audit sink unused.
-   **Verify:** Compare your assertion values or captured diagnostic with ArithmeticException;audit sink unused.
+6. **Detect arithmetic overflow without an event.** Use a Long.MAX_VALUE unit price and quantity 2.
+   **Expected:** ArithmeticException; audit sink unused.
+   **Verify:** Keep an assertion equivalent to `overflow && overflowAudit.isEmpty()`. As a control, change `overflow = true;` to `overflow = false;`: the run must fail with an `AssertionError` from the assertion on `overflow && overflowAudit.isEmpty()`. Restore the line before continuing.
 
 ## Common pitfalls and diagnosis
 
@@ -217,7 +217,14 @@ Do not replace a precise exception with a catch-all that returns a plausible def
 
 ## Progressive hints
 
-First reconstruct the values and identities in the worked example. Next isolate the line that changes the result when one input is altered. Finally compare the normal and failure paths with the stated contract. Use a small table of input, expected value, actual value and exception type. Ask for one hint about the first incorrect assumption before requesting the entire reference implementation.
+Read one hint at a time and attempt the exercise again before reading the next. Keep a small table of input, expected value, actual value and exception type. Ask for one hint about the first incorrect assumption before requesting the entire reference implementation.
+
+- **Exercise 1:** First restate the expected observation: 375 cents; nonpositive quantity rejected. Then list the values read by `invalid` and trace each one from its declaration. Finally, compute the asserted value with `total(1, 125);` in place before running.
+- **Exercise 2:** First restate the expected observation: total 250, time 2026-01-01T00:00:00Z, one audit event. Then list the values read by `quote.totalCents() == 250 && quote.created().equals(instant) && audit.equals(List.of("quoted:item-a"))` and trace each one from its declaration. Finally, compare `id.equals("item-a") ? java.util.OptionalLong.of(126) : java.util.OptionalLong.empty();` with the same line in Example B and state the claim each version makes.
+- **Exercise 3:** First restate the expected observation: noSuchElementException; no additional audit. Then list the values read by `missing && audit.size() == 1` and trace each one from its declaration. Finally, predict the effect of changing `missing = true;` to `missing = false;` before running anything.
+- **Exercise 4:** First restate the expected observation: same failure type; no success audit. Then list the values read by `propagated && failures.isEmpty()` and trace each one from its declaration. Finally, predict the effect of changing `throw new java.io.IOException("catalog unavailable");` to `throw new java.io.IOException("catalog unavailable!");` before running anything.
+- **Exercise 5:** First restate the expected observation: repository call count 0. Then list the values read by `rejected && calls.get() == 0` and trace each one from its declaration. Finally, predict the effect of changing `rejected = true;` to `rejected = false;` before running anything.
+- **Exercise 6:** First restate the expected observation: arithmeticException; audit sink unused. Then list the values read by `overflow && overflowAudit.isEmpty()` and trace each one from its declaration. Finally, predict the effect of changing `overflow = true;` to `overflow = false;` before running anything.
 
 ## Self-check and retrieval
 
@@ -229,7 +236,7 @@ Preserve the saved pad and the six exercise observations. Continue to the next l
 
 ## Sources and verification status
 
-[Official Java21 API or language reference](https://docs.oracle.com/en/java/javase/21/docs/api/index.html), reviewed2026-10-22. Examples and exercise fixtures are original course material. Use the [validation guide](../../../docs/validation.md) and CI artifacts for the exact revision and platform to inspect actual compile/run results. Authoring, parsing, compilation, execution and learner mastery are separate forms of evidence.
+[Official Java 21 API or language reference](https://docs.oracle.com/en/java/javase/21/docs/api/index.html), reviewed 2026-10-22. Examples and exercise fixtures are original course material. Use the [validation guide](../../../docs/validation.md) and CI artifacts for the exact revision and platform to inspect actual compile/run results. Authoring, parsing, compilation, execution and learner mastery are separate forms of evidence.
 
 ## Ask an AI tutor about this lesson
 
@@ -239,7 +246,7 @@ Read courses/java/guides/java-034.md and courses/java/lessons/java-034.java. Dir
 Explain the mechanism, ask for a prediction, review my attempt, give one hint,
 request compiler/runtime evidence, and ask a fresh retrieval question.
 Keep courses/java/solutions/ closed until I request comparison or show an attempt.
-Use Java21 and the declared offline fixture. Done when I can explain the state
+Use Java 21 and the declared offline fixture. Done when I can explain the state
 transitions, pass all six exercise contracts, diagnose one failure and solve a
 new boundary case without copying the solution.
 ```

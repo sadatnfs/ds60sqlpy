@@ -1,13 +1,23 @@
 #include <stdio.h>
 
 int main(void) {
-  /* Exercise 1: Exercise successful allocation
-     Copy a tiny string using the working allocator.
-     Expected: The output owns an equal string. */
+  /* Exercise 1: Exercise successful allocation: predict an edited check
+     Copy worked example 1 into a scratch pad and change
+     `CHECK(copy_with_allocator("abc", &out, controlled_alloc));` to
+     `CHECK(copy_with_allocator("abc!", &out, controlled_alloc));` inside its
+     CHECK. Before running, predict whether the CHECK still holds and explain
+     why; then restore it. Expected: The changed run stops with `Check failed`
+     at the CHECK on `strcmp(out, "abc") == 0`. Restoring the original line
+     brings back the worked observation: the output owns an equal string. */
 
-  /* Exercise 2: Inject allocation failure
-     Configure the allocator to return NULL.
-     Expected: The copy fails and output remains NULL. */
+  /* Exercise 2: Inject allocation failure: debug a regression
+     A regression changed `fail_allocation = true;` to `fail_allocation =
+     false;` in worked example 2. Run worked example 2 with that change, use the
+     failing CHECK to explain the defect and repair it without changing the
+     CHECK. Expected: Before the repair the run stops with `Check failed` at the
+     CHECK on `!copy_with_allocator("abc", &out, controlled_alloc)`; after it
+     the line reads `fail_allocation = true;` again and the copy fails and
+     output remains NULL. */
 
   /* Exercise 3: Preserve an existing output pointer
      Fail allocation while output points to a separate valid buffer.

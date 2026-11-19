@@ -4,7 +4,7 @@ import numpy as np
 
 
 def verify():
-    # Exercise 1: Fingerprint exact text
+    # Worked example A: Fingerprint exact text
     import hashlib, json
 
     hash_text = lambda t: hashlib.sha256(t.encode("utf-8")).hexdigest()
@@ -13,7 +13,7 @@ def verify():
     para = hash_text("square colored red")
     assert a == copy and a != para
 
-    # Exercise 2: Assign whole families
+    # Worked example B: Assign whole families
     family = {"a": "F", "a2": "F", "b": "G", "c": "H"}
     policy = {"F": "train", "G": "validation", "H": "test"}
     manifest = {doc: policy[group] for doc, group in family.items()}
@@ -43,6 +43,21 @@ def verify():
     # Exercise 6: Distinguish normalization policy
     assert hash_text("red square") != hash_text("red square ")
     assert hash_text("red square".strip()) == hash_text("red square ".strip())
+
+    # Exercise 1: Assign a second family policy
+    family2 = {"p": "J", "p2": "J", "p3": "J", "q": "K", "r": "L"}
+    policy2 = {"J": "test", "K": "train", "L": "validation"}
+    manifest2 = {doc: policy2[group] for doc, group in family2.items()}
+    assert sorted(d for d, s in manifest2.items() if s == "test") == ["p", "p2", "p3"]
+    assert list(manifest2.values()).count("train") == 1 and manifest2["r"] == "validation"
+
+    # Exercise 2: Predict the effect of key order
+    forward = json.dumps({"a": "train", "b": "test"})
+    backward = json.dumps({"b": "test", "a": "train"})
+    assert hash_text(forward) != hash_text(backward)
+    assert hash_text(json.dumps({"a": "train", "b": "test"}, sort_keys=True)) == hash_text(
+        json.dumps({"b": "test", "a": "train"}, sort_keys=True)
+    )
     return {"checks": 6, "status": "passed"}
 
 

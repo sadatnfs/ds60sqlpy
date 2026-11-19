@@ -8,7 +8,7 @@ Validate scientific inputs, test expected failures and preserve unexpected error
 
 ## Classroom execution
 
-Choose **Julia language and scientific computing** in `/classroom`, open this unit, and select its prepared `julia` runtime. The worker starts a fresh `main.jl` process with two Julia threads, a fixed package environment, no startup file and offline package settings. Both worked examples are complete under that environment. Save your current pad before replacing it. No package, model or dataset is fetched by a lesson.
+Open `julia-009` in `/classroom` with its prepared `julia` runtime. Worked case A (a finite nonempty mean) and worked case B (a bounded outcome record) are complete programs: save your current pad, paste one of them and press Run. The learner file contains the six investigations below; the explained reference ends by printing `julia-009: all reference checks passed`. The [course overview](../README.md) describes the shared runtime: a fresh offline `main.jl` process with two threads and a fixed package environment.
 
 ## An error policy is part of an API
 
@@ -164,4 +164,4 @@ Aggregate valid outcomes from a mixed input stream.
 
 ## Study companion
 
-Use the repository learning-companion skill with this lesson ID, your prediction and your actual source/output. Ask for a diagnosis of the first incorrect type, shape, state transition or assumption. Keep observed execution distinct from a timing claim, inferred mathematical result or external deployment.
+A repository-aware assistant with the learning-companion skill can review `julia-009` with you. Give it your prediction for one investigation, your source and the actual output, and ask it to find the first incorrect assumption about ArgumentError, DomainError, test set, boundary case or rethrow.

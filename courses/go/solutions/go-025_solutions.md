@@ -8,9 +8,11 @@ A channel connects producers and consumers with typed communication. An unbuffer
 
 make(chan int, 2) creates a two-element buffer. value, ok := <-ch distinguishes a delivered value from the zero value after closure. range ch receives until closed and drained. chan<- int restricts a parameter to sending; <-chan int restricts it to receiving. len(ch) is a transient observation rather than a synchronization protocol.
 
-## 1. Drain before iteration ends
+## 1. Drain before iteration ends: change one input
 
-Buffer 2 and 3, close and sum the channel.
+Copy worked example 1 into a scratch pad and change `ch <- 2` to `ch <- 3`. Before running, predict which check fails and which value it now sees; then run it and restore the original line.
+
+The unchanged code is worked example 1:
 
 ```go
 ch := make(chan int, 2)
@@ -24,13 +26,15 @@ for v := range ch {
 check(sum == 5, "drain")
 ```
 
-**Expected:** Both values arrive and the sum is 5.
+**Expected:** The changed run panics with `drain` because `sum == 5` no longer holds. Restoring the original line brings back the worked observation: both values arrive and the sum is 5.
 
 Close does not erase buffered values. Iteration ends after those values have been received.
 
-## 2. Distinguish zero from closed
+## 2. Distinguish zero from closed: debug a regression
 
-Send zero, close, then receive twice with comma-ok.
+A regression changed one token in worked example 2, so one line now reads `ch <- 1`. Run worked example 2 with that line, use the failure to locate the defect and repair it without changing the check.
+
+The unchanged code is worked example 2:
 
 ```go
 ch := make(chan int, 1)
@@ -41,7 +45,7 @@ b, okB := <-ch
 check(a == 0 && b == 0 && okA && !okB, "closed presence")
 ```
 
-**Expected:** The first zero has ok true; the second has ok false.
+**Expected:** Before the repair the program panics with `closed presence`; after it the line reads `ch <- 0` again and the first zero has ok true; the second has ok false.
 
 Value equality cannot distinguish a delivered zero from the post-closure zero. The boolean carries completion information.
 

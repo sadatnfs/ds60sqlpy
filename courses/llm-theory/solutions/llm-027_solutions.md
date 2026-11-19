@@ -14,45 +14,47 @@ Evaluation needs compatible units. Token-weighted loss averages over token event
 
 ## Reading the implementation
 
-Store per-event confidence and a boolean correctness outcome. Use explicit half-open bin boundaries, with the final bin including1. Compute each bin count, mean confidence and observed accuracy separately. For loss, retain sums and counts until the final division. Join model comparisons by stable event IDs rather than relying on array order.
+Store per-event confidence and a boolean correctness outcome. Use explicit half-open bin boundaries, with the final bin including 1. Compute each bin count, mean confidence and observed accuracy separately. For loss, retain sums and counts until the final division. Join model comparisons by stable event IDs rather than relying on array order.
 
-## Exercise 1: Weight token losses
+## Exercise 1: Weight three documents
 
-The question is: Combine document mean losses1 and3 with token counts1 and3.
+The question is: Combine document mean losses 2, 4 and 1 with token counts 2, 1 and 5.
 
-The two statistics answer different questions. Neither should be labelled average loss without naming its weighting unit.
-
-```python
-means = np.array([1.0, 3.0])
-counts = np.array([1, 3])
-assert np.average(means, weights=counts) == 2.5 and means.mean() == 2
-```
-
-**Expected:** token mean 2.5; document mean 2.
-
-**Verify:** Compare the computed values or written argument with token mean 2.5; document mean 2.
-
-## Exercise 2: Build a calibration bin
-
-The question is: Use confidences.6,.8,.8,1 with correctness1,1,0,1 in a single bin.
-
-The gap between confidence and frequency is observable for this small sample. Its sampling uncertainty remains large, so the bin is not a population guarantee.
+The long, low-loss document dominates the token-weighted mean, while each document counts once in the document mean. The two summaries answer different questions and must be labelled.
 
 ```python
-confidence = np.array([0.6, 0.8, 0.8, 1.0])
-correct = np.array([1, 1, 0, 1])
-assert len(confidence) == 4
-np.testing.assert_allclose(confidence.mean(), 0.8, atol=1e-12, rtol=0)
-assert correct.mean() == 0.75
+means3 = np.array([2.0, 4.0, 1.0])
+counts3 = np.array([2, 1, 5])
+np.testing.assert_allclose(np.average(means3, weights=counts3), 13 / 8, atol=1e-12, rtol=0)
+np.testing.assert_allclose(means3.mean(), 7 / 3, atol=1e-12, rtol=0)
 ```
 
-**Expected:** count4,mean confidence.8,accuracy.75.
+**Expected:** token-weighted mean 13/8 = 1.625; document mean 7/3, about 2.333.
 
-**Verify:** Compare the computed values or written argument with count4,mean confidence.8,accuracy.75.
+**Verify:** In a fresh process, the exercise checks confirm `np.average(means3, weights=counts3)` matches `13 / 8` within 1e-12 and `means3.mean()` matches `7 / 3` within 1e-12.
+
+## Exercise 2: Summarize a second calibration bin
+
+The question is: Use confidences 0.9, 0.9, 0.7, 0.9, 0.6 with correctness 1, 0, 1, 1, 0 in a single bin.
+
+The bin has the same mean confidence as Example B but lower accuracy, so its calibration gap is larger. Five predictions remain a small sample for estimating that gap.
+
+```python
+conf2 = np.array([0.9, 0.9, 0.7, 0.9, 0.6])
+correct2 = np.array([1, 0, 1, 1, 0])
+assert len(conf2) == 5
+np.testing.assert_allclose(conf2.mean(), 0.8, atol=1e-12, rtol=0)
+assert correct2.mean() == 0.6
+np.testing.assert_allclose(conf2.mean() - correct2.mean(), 0.2, atol=1e-12, rtol=0)
+```
+
+**Expected:** count 5, mean confidence 0.8, accuracy 0.6: overconfident by 0.2.
+
+**Verify:** In a fresh process, the exercise checks confirm `len(conf2) == 5`, `conf2.mean()` matches `0.8` within 1e-12, `correct2.mean() == 0.6` and `conf2.mean() - correct2.mean()` matches `0.2` within 1e-12.
 
 ## Exercise 3: Represent an empty bin
 
-The question is: Select confidence values below.5 and summarize without fabricating a rate.
+The question is: Select confidence values below 0.5 and summarize without fabricating a rate.
 
 Zero accuracy would imply observed failures, while perfect accuracy would imply observed successes. An empty bin supports neither statement.
 
@@ -65,13 +67,13 @@ summary = {
 assert summary == {"count": 0, "accuracy": None}
 ```
 
-**Expected:** count0 and accuracyNone.
+**Expected:** count 0 and accuracy None.
 
-**Verify:** Compare the computed values or written argument with count0 and accuracyNone.
+**Verify:** In a fresh process, the exercise checks confirm `summary == {'count': 0, 'accuracy': None}`.
 
 ## Exercise 4: Check boundary membership
 
-The question is: Use bins[.5,.8) and[.8,1] on the fixture.
+The question is: Use bins [0.5, 0.8) and [0.8, 1] on the fixture.
 
 A value exactly on a boundary must enter only one bin. Double inclusion or omission changes denominators and can distort calibration plots.
 
@@ -81,13 +83,13 @@ high = (confidence >= 0.8) & (confidence <= 1)
 assert (int(low.sum()), int(high.sum())) == (1, 3) and int((low | high).sum()) == 4
 ```
 
-**Expected:** counts1 and3, total4.
+**Expected:** counts 1 and 3, total 4.
 
-**Verify:** Compare the computed values or written argument with counts1 and3, total4.
+**Verify:** In a fresh process, the exercise checks confirm `(int(low.sum()), int(high.sum())) == (1, 3)` and `int((low | high).sum()) == 4`.
 
 ## Exercise 5: Align paired errors
 
-The question is: Compare dictionariesA q1=0,q2=1 and B q2=0,q1=1 by IDs.
+The question is: Compare dictionaries A q1=0, q2=1 and B q2=0, q1=1 by IDs.
 
 A zero mean can hide opposite per-question outcomes. Pairing preserves which system fails on which case.
 
@@ -100,13 +102,13 @@ np.testing.assert_array_equal(diff, [-1, 1])
 assert diff.mean() == 0
 ```
 
-**Expected:** differences[-1,1], mean0.
+**Expected:** differences [-1, 1], mean 0.
 
-**Verify:** Compare the computed values or written argument with differences[-1,1], mean0.
+**Verify:** In a fresh process, the exercise checks confirm `diff` equals `[-1, 1]` and `diff.mean() == 0`.
 
 ## Exercise 6: Reject incompatible tokenizer scores
 
-The question is: Compare evaluation metadata with tokenizer hashv1 versusv2.
+The question is: Compare evaluation metadata with tokenizer hash v1 versus v2.
 
 The same text can be divided into different numbers and identities of tokens. A new common evaluation unit is needed before treating the scores as directly comparable.
 
@@ -118,7 +120,7 @@ assert left != right
 
 **Expected:** direct token-loss comparison marked incompatible.
 
-**Verify:** Compare the computed values or written argument with direct token-loss comparison marked incompatible.
+**Verify:** In a fresh process, the exercise checks confirm `left != right`.
 
 ## Review after comparison
 

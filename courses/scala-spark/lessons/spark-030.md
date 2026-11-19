@@ -54,7 +54,7 @@ Review the proposed/driver-local/input.parquet path. State the visibility proble
 
 ### Exercise 3: Map dependencies to driver and executor environments
 
-Produce a dependency matrix for the Scala jar, purePythonrules.zip, a hypothetical native-extension wheel and JDK/Spark runtime. State which proposed substitution is unsupported.
+Produce a dependency matrix for the Scala jar, pure Python rules.zip, a hypothetical native-extension wheel and JDK/Spark runtime. State which proposed substitution is unsupported.
 
 **Inputs/evidence:** For spark-030 Exercise 3, Spark 4.0.1, Scala binary 2.13, JDK 17, course_2.13.jar, rules.zip and an unqualified native-extension wheel.
 
@@ -70,7 +70,7 @@ Reject a task closure that captures an open driver database connection and write
 
 **Inputs/evidence:** For spark-030 Exercise 4, An open driver connection captured by a task function and evidence that a failed task can be retried.
 
-**Expected result/shape:** For spark-030 Exercise 4, No connection object serialized from the driver; a defined task-side resource lifecycle if externalIO is later authorized, and a stable operation identity preventing duplicate external effects.
+**Expected result/shape:** For spark-030 Exercise 4, No connection object serialized from the driver; a defined task-side resource lifecycle if external IO is later authorized, and a stable operation identity preventing duplicate external effects.
 
 **Verify:** Explain why serializability alone would not guarantee exactly-once writes and name the cleanup and deduplication evidence needed.
 
@@ -78,7 +78,7 @@ Reject a task closure that captures an open driver database connection and write
 
 ### Exercise 5: Define the Connect adapter boundary honestly
 
-Classify which existing classic capabilities can be assumed in a proposedConnect profile, and list the compatibility and lifecycle tests required before exposing it as ready.
+Classify which existing classic capabilities can be assumed in a proposed Connect profile, and list the compatibility and lifecycle tests required before exposing it as ready.
 
 **Inputs/evidence:** For spark-030 Exercise 5, The existing _jdf/queryExecution and RDD-based diagnostic helpers, plus the proposed remote logical-plan client.
 

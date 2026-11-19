@@ -7,7 +7,7 @@ from torch.nn import functional as F
 
 
 def verify():
-    # Exercise 1: Freeze a known base
+    # Worked example A: Freeze a known base
     base = nn.Linear(2, 2, bias=False)
     with torch.no_grad():
         base.weight.copy_(torch.eye(2))
@@ -17,7 +17,7 @@ def verify():
     x = torch.tensor([[1.0, 0.0], [0.0, 1.0], [1.0, 1.0]])
     assert torch.equal(base(x), x) and not any(p.requires_grad for p in base.parameters())
 
-    # Exercise 2: Train a new head
+    # Worked example B: Train a new head
     head = nn.Linear(2, 1, bias=False)
     with torch.no_grad():
         head.weight.zero_()
@@ -31,7 +31,7 @@ def verify():
     optimizer.step()
     assert not torch.equal(head.weight, head_before) and torch.equal(base.weight, base_before)
 
-    # Exercise 3: Inspect absent base gradients
+    # Worked example C: Inspect absent base gradients
     assert base.weight.grad is None and head.weight.grad is not None
 
     # Exercise 4: Expose buffer updates despite freezing
@@ -57,6 +57,31 @@ def verify():
     (head(base(x)) - target).square().mean().backward()
     combined.step()
     assert not torch.equal(base.weight, base_before)
+
+    # Exercise 1: Freeze a scaling base
+    doubling = nn.Linear(2, 2, bias=False)
+    with torch.no_grad():
+        doubling.weight.copy_(2 * torch.eye(2))
+    doubling.requires_grad_(False)
+    probe_x = torch.tensor([[1.0, 2.0]])
+    assert doubling(probe_x).tolist() == [[2.0, 4.0]] and not doubling.weight.requires_grad
+
+    # Exercise 2: Predict the head update
+    new_head = nn.Linear(2, 1, bias=False)
+    with torch.no_grad():
+        new_head.weight.zero_()
+    head_opt = torch.optim.SGD(new_head.parameters(), lr=0.1)
+    head_opt.zero_grad(set_to_none=True)
+    (new_head(doubling(probe_x)) - torch.tensor([[1.0]])).square().mean().backward()
+    head_opt.step()
+    torch.testing.assert_close(new_head.weight, torch.tensor([[0.4, 0.8]]), atol=1e-6, rtol=0)
+    assert doubling.weight.grad is None
+
+    # Exercise 3: Count trainable parameters
+    trainable = sum(
+        p.numel() for p in [*doubling.parameters(), *new_head.parameters()] if p.requires_grad
+    )
+    assert trainable == 2
     return {"checks": 6, "status": "passed"}
 
 

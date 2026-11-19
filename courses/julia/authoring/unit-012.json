@@ -21,9 +21,9 @@
     },
     {
       "title": "Handle an empty concrete vector",
-      "task": "Sum Int[].",
+      "task": "Sum `Int[]`.",
       "expected": "The explicit additive identity is 0.",
-      "hint": "The element type supplies zero(T).",
+      "hint": "The element type supplies `zero(T)`.",
       "answer": "This empty-input policy is valid for this additive operation, not every statistic."
     },
     {

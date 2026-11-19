@@ -7,8 +7,8 @@ using .DS60Plots
 # === EXAMPLE A ===
 function worked_a()
     distribution = Normal(2, 3)
-    first = rand(MersenneTwister(42), distribution, 4000)
-    second = rand(MersenneTwister(42), distribution, 4000)
+    first = rand(Xoshiro(42), distribution, 4000)
+    second = rand(Xoshiro(42), distribution, 4000)
     standard_error = 3 / sqrt(length(first))
     @test first == second
     @test mean(distribution) == 2
@@ -23,7 +23,7 @@ function worked_b()
     @test mean(distribution) == 2
     @test var(distribution) ≈ 1.6
     @test pdf(distribution, 0) ≈ 0.8^10
-    sample = rand(MersenneTwister(7), distribution, 2000)
+    sample = rand(Xoshiro(7), distribution, 2000)
     values = collect(0:10)
     exact = pdf.(distribution, values)
     empirical = [count(==(value), sample) / length(sample) for value in values]
@@ -68,11 +68,11 @@ function exercise_checks()
     @test quantile(Normal(), 0.5) == 0
     @test logpdf(Normal(), 0) ≈ -log(2pi)/2
     @test_throws DomainError Normal(0, -1)
-    generator = MersenneTwister(3)
+    generator = Xoshiro(3)
     before = rand(generator, 3)
     after = rand(generator, 3)
     @test before != after
-    @test rand(MersenneTwister(3), 3) == before
+    @test rand(Xoshiro(3), 3) == before
 end
 
 # === MAIN ===

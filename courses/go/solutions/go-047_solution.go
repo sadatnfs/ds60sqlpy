@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"crypto/sha256"
 	"errors"
 	"fmt"
 )
@@ -77,8 +78,10 @@ func main() {
 
 	// Transfer source-bound evidence
 	{
-		receipt := map[string]string{"lesson": "go-047", "source": "reviewed-fixture"}
-		check(receipt["lesson"] == "go-047" && receipt["source"] == "reviewed-fixture", "receipt identity")
+		source := "package main\n"
+		digest := func(text string) string { return fmt.Sprintf("%x", sha256.Sum256([]byte(text))) }
+		receipt := map[string]string{"lesson": "go-047", "source": digest(source)}
+		check(receipt["lesson"] == "go-047" && receipt["source"] == digest(source) && receipt["source"] != digest(source+" "), "receipt identity")
 	}
 	fmt.Println("All lesson checks passed.")
 }

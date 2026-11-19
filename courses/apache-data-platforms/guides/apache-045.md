@@ -31,6 +31,49 @@ that the independent checker reconciles to the original IDs and final region
 totals, east 11 and west 9. The job must actually reach a terminal successful state;
 client submission alone is not accepted as execution evidence.
 
+The bounded mode of the Java job builds this pipeline:
+
+From [`projects/flink/src/WorkshopJobs.java`](../projects/flink/src/WorkshopJobs.java):
+
+```java
+var source = FileSource.forRecordStreamFormat(
+  new TextLineInputFormat(),
+  new Path("/state/input/orders.csv")
+).build();
+result = environment
+  .fromSource(source, WatermarkStrategy.noWatermarks(), "fixed-order-file")
+  .uid("orders-source")
+  .setParallelism(1)
+  .map(new ParseOrder())
+  .keyBy(event -> event.key)
+  .process(new RunningTotal())
+  .uid("region-total");
+```
+
+`keyBy` sends every order for one region to the same parallel instance, and the
+keyed function below keeps one running total per region:
+
+From [`projects/flink/src/WorkshopJobs.java`](../projects/flink/src/WorkshopJobs.java):
+
+```java
+public static final class RunningTotal extends KeyedProcessFunction<String, Event, String> {
+
+  private transient ValueState<Long> total;
+
+  public void open(OpenContext context) throws Exception {
+    total = getRuntimeContext().getState(new ValueStateDescriptor<>("total", Types.LONG));
+  }
+
+  public void processElement(Event event, Context context, Collector<String> output)
+    throws Exception {
+    Long old = total.value();
+    long next = (old == null ? 0 : old) + event.amount;
+    total.update(next);
+    output.collect("update," + event.key + "," + event.id + "," + next);
+  }
+}
+```
+
 A running aggregate can emit several updates for one key. The first east record
 produces one partial total and the later east record advances it. Those updates
 are not duplicate final table rows. They are an observable stream of state changes.

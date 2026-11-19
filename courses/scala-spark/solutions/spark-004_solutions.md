@@ -6,9 +6,9 @@ Read the [guide](../guides/spark-004.md) and attempt the [learner source](../les
 
 ### Exercise 1: Retain observed zero and repeated values
 
-Implement a nonnegative filter for Seq(100L,-5L,0L,100L,25L). Preserve input order and duplicate values. An empty input should remain empty.
+Implement a nonnegative filter for Seq(100L, -5L, 0L, 100L, 25L). Preserve input order and duplicate values. An empty input should remain empty.
 
-**Expected:** The result is Seq(100L,0L,100L,25L), with four occurrences. Both 100-cent entries and the zero remain.
+**Expected:** The result is Seq(100L, 0L, 100L, 25L), with four occurrences. Both 100-cent entries and the zero remain.
 
 ```scala
 def accepted(values: Seq[Long]): Seq[Long] = {
@@ -50,7 +50,7 @@ assert(partitionAmounts(Seq(-2L, -1L)) == (Seq.empty[Long], Seq(-2L, -1L)))
 
 For nonnegative Long amounts, return integer-cent five-percent fees rounded down. Reject a negative amount with IllegalArgumentException. Avoid multiplying by five before division, which could overflow on a very large Long.
 
-**Expected:** Seq(100L,0L,100L,25L) maps to Seq(5L,0L,5L,1L). Long.MaxValue maps safely to Long.MaxValue/20L.
+**Expected:** Seq(100L, 0L, 100L, 25L) maps to Seq(5L, 0L, 5L, 1L). Long.MaxValue maps safely to Long.MaxValue/20L.
 
 ```scala
 def fivePercent(values: Seq[Long]): Seq[Long] = {
@@ -69,9 +69,9 @@ expectIllegalArgument(fivePercent(Seq(-1L)))
 
 ### Exercise 4: Fold count and total together
 
-Return occurrence count and checked Long total for a supplied sequence. Use an explicit tuple accumulator and Math.addExact for the total. Empty input returns (0L,0L); an overflowing total raises ArithmeticException.
+Return occurrence count and checked Long total for a supplied sequence. Use an explicit tuple accumulator and Math.addExact for the total. Empty input returns (0L, 0L); an overflowing total raises ArithmeticException.
 
-**Expected:** The accepted fixture returns (4L,225L), while Seq(Long.MaxValue,1L) is rejected by checked addition.
+**Expected:** The accepted fixture returns (4L, 225L), while Seq(Long.MaxValue,1L) is rejected by checked addition.
 
 ```scala
 def summary(values: Seq[Long]): (Long, Long) = {
@@ -93,7 +93,7 @@ expectArithmetic(summary(Seq(Long.MaxValue, 1L)))
 
 Return a map from amount to occurrence count without discarding repeated values. Compare maps by keys and counts rather than assuming iteration order. Empty input returns an empty map.
 
-**Expected:** The accepted fixture yields Map(100L->2L,0L->1L,25L->1L); the sum of counts is four.
+**Expected:** The accepted fixture yields Map(100L->2L, 0L->1L, 25L->1L); the sum of counts is four.
 
 ```scala
 def frequencies(values: Seq[Long]): Map[Long, Long] = {

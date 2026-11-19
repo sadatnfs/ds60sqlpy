@@ -24,9 +24,9 @@ Use X shaped (4, 1), floating binary targets and nn.Linear(1, 1, bias=False). Ca
 
 The training values `[-2, -1, 1, 2]` have mean zero and squared deviations summing to ten. Population variance divides by four, giving 2.5 and scale \(\sqrt{2.5}\). PyTorch's `correction=0` matches NumPy's default used in the paired TensorFlow guide. Using the default sample correction would divide by three and produce \(\sqrt{\frac{10}{3}}\). Both scales are mathematically meaningful statistics, but they define different model inputs and update trajectories. Equal final class labels would not prove framework parity.
 
-The stored model weight has shape(1, 1), inputs and targets have shape(4, 1), and logits have shape(4, 1). The bias is deliberately absent. Binary cross-entropy with logits is applied directly to those logits. Applying sigmoid first and then passing its output to the logits loss would change the objective. A target shaped(4, ) is also a different interface from(4, 1), even when it contains the same four numbers; preserve the declared axes rather than relying on broadcasting or reshaping after a failure.
+The stored model weight has shape (1, 1), inputs and targets have shape (4, 1), and logits have shape (4, 1). The bias is deliberately absent. Binary cross-entropy with logits is applied directly to those logits. Applying sigmoid first and then passing its output to the logits loss would change the objective. A target shaped (4, ) is also a different interface from (4, 1), even when it contains the same four numbers; preserve the declared axes rather than relying on broadcasting or reshaping after a failure.
 
-For one normalized feature t and label y, the logit is \(z=\mathrm{wt}\) and the loss derivative with respect to w is \((\operatorname{sigmoid}(z)-y)t\). At \(w=0\), all probabilities are one-half. Writing \(s=\sqrt{2.5}\), the four derivative contributions are \(\frac{-1}{s}\), -1/(2s), -1/(2s), \(\frac{-1}{s}\). Their mean is -3/(4s), approximately-0.474342. The first SGD step at 0.1 therefore makes w approximately 0.0474342. This analytic sign and scale explain why the later fixed 40-step run should have a positive finite weight.
+For one normalized feature t and label y, the logit is \(z=\mathrm{wt}\) and the loss derivative with respect to w is \((\operatorname{sigmoid}(z)-y)t\). At \(w=0\), all probabilities are one-half. Writing \(s=\sqrt{2.5}\), the four derivative contributions are \(\frac{-1}{s}\), -1/(2s), -1/(2s), \(\frac{-1}{s}\). Their mean is -3/(4s), approximately -0.474342. The first SGD step at 0.1 therefore makes w approximately 0.0474342. This analytic sign and scale explain why the later fixed 40-step run should have a positive finite weight.
 
 The data are separable under this one-feature rule. In an unregularized logistic model, continued loss reduction can push the weight larger without a finite optimum that must be reached. Forty steps are a declared computational budget, not evidence of convergence or a reason to repeat training until a preferred test score appears. If early stopping or hyperparameters are to be selected, they need a separate selection procedure and data boundary.
 
@@ -45,67 +45,63 @@ Distinct train/test IDs are necessary but not sufficient for independence. Real 
 
 Finally, normalization parameters belong to the fitted artifact. The test coordinates must reuse the training mean and scale. Recomputing statistics on each inference batch changes predictions according to which other rows arrived together. A release should save feature order, units, mean, scale, dtype and threshold with the model state, and compare a known input through the complete preprocessing-and-model path. Model weights alone are not the whole predictor.
 
-## Exercise 1: Freeze the geometric task
+## Exercise 1: Fit normalization on new training values
 
-The question is: Use training x-2, -1, 1, 2 with labels 0, 0, 1, 1 and test x-3, 3.
+The question is: Use training inputs 0, 2, 4, 6, compute the mean and population standard deviation, and transform the test input 8.
 
-The labels are defined from the fixture geometry before training. The holdout is not used to design a different target after seeing predictions.
-
-```python
-x = torch.tensor([[-2.0], [-1.0], [1.0], [2.0]])
-y = torch.tensor([[0.0], [0.0], [1.0], [1.0]])
-test_x = torch.tensor([[-3.0], [3.0]])
-truth = torch.tensor([False, True])
-train_ids = {"a", "b", "c", "d"}
-test_ids = {"e", "f"}
-assert not train_ids & test_ids and len(test_ids) == 2
-```
-
-**Expected:** 4training records, 2test records.
-
-**Verify:** Compare the computed values or written argument with 4training records, 2test records.
-
-## Exercise 2: Fit explicit normalization
-
-The question is: Calculate training mean and population standard deviation.
-
-PyTorch's default sample correction would produce a different scale. Specifying correction 0 aligns this fixture with the paired TensorFlow/NumPy calculation.
+The squared deviations 9, 1, 1, 9 average to 5; the test value uses the frozen training statistics.
 
 ```python
-mean = x.mean(0)
-scale = x.std(0, correction=0)
-tx = (x - mean) / scale
-vx = (test_x - mean) / scale
-assert mean.item() == 0
-np.testing.assert_allclose(scale.item(), np.sqrt(2.5), atol=1e-6, rtol=0)
+fresh_x = torch.tensor([[0.0], [2.0], [4.0], [6.0]])
+centre = fresh_x.mean(0)
+spread = fresh_x.std(0, correction=0)
+assert centre.item() == 3
+np.testing.assert_allclose(spread.item(), np.sqrt(5), atol=1e-6, rtol=0)
+np.testing.assert_allclose(
+    ((torch.tensor([[8.0]]) - centre) / spread).item(), np.sqrt(5), atol=1e-6, rtol=0
+)
 ```
 
-**Expected:** mean 0; scale sqrt 2.5.
+**Expected:** mean 3; scale \(\sqrt{5}\); transformed test value \(\sqrt{5}\), about 2.2361.
 
-**Verify:** Compare the computed values or written argument with mean 0; scale sqrt 2.5.
+**Verify:** In a fresh process, the exercise checks confirm `centre.item() == 3`, `spread.item()` matches `np.sqrt(5)` within 1e-06 and `((torch.tensor([[8.0]]) - centre) / spread).item()` matches `np.sqrt(5)` within 1e-06.
 
-## Exercise 3: Train a fixed classifier
+## Exercise 2: Count a new confusion table
 
-The question is: Zero-initialize the weight and run 40 SGD with rate 0.1 steps with binary logits loss.
+The question is: Compare predictions True, False, True, True with truth True, False, False, True.
 
-The fixed budget is part of the experiment. It is not repeated until the test happens to look favorable.
+Every prediction lands in exactly one cell, so the four counts sum to the record count 4.
 
 ```python
-model = nn.Linear(1, 1, bias=False)
-with torch.no_grad():
-    model.weight.zero_()
-optimizer = torch.optim.SGD(model.parameters(), lr=0.1)
-for _ in range(40):
-    optimizer.zero_grad(set_to_none=True)
-    loss = F.binary_cross_entropy_with_logits(model(tx), y)
-    loss.backward()
-    optimizer.step()
-assert model.weight.item() > 0 and torch.isfinite(model.weight).all()
+predicted = torch.tensor([True, False, True, True])
+actual = torch.tensor([True, False, False, True])
+counts = {
+    "TP": int((predicted & actual).sum()),
+    "TN": int((~predicted & ~actual).sum()),
+    "FP": int((predicted & ~actual).sum()),
+    "FN": int((~predicted & actual).sum()),
+}
+assert counts == {"TP": 2, "TN": 1, "FP": 1, "FN": 0}
 ```
 
-**Expected:** positive finite weight after 40 updates.
+**Expected:** TP 2, TN 1, FP 1, FN 0.
 
-**Verify:** Compare the computed values or written argument with positive finite weight after 40 updates.
+**Verify:** In a fresh process, the exercise checks confirm `counts == {'TP': 2, 'TN': 1, 'FP': 1, 'FN': 0}`.
+
+## Exercise 3: Classify with a fixed weight
+
+The question is: With weight 2 and no bias, classify the normalized inputs -1.5, -0.2, 0 and 0.4 at logit 0, counting 0 as positive.
+
+The decision depends on the sign of the logit; the tie rule assigns the zero logit to the positive class.
+
+```python
+logits_t = 2 * torch.tensor([-1.5, -0.2, 0.0, 0.4])
+assert (logits_t >= 0).tolist() == [False, False, True, True]
+```
+
+**Expected:** False, False, True, True.
+
+**Verify:** In a fresh process, the exercise checks confirm `(logits_t >= 0).tolist() == [False, False, True, True]`.
 
 ## Exercise 4: Account for every test prediction
 
@@ -128,7 +124,7 @@ assert counts == {"tp": 1, "tn": 1, "fp": 0, "fn": 0} and sum(counts.values()) =
 
 **Expected:** TP 1, TN 1, FP 0, FN 0, total 2.
 
-**Verify:** Compare the computed values or written argument with TP 1, TN 1, FP 0, FN 0, total 2.
+**Verify:** In a fresh process, the exercise checks confirm `counts == {'tp': 1, 'tn': 1, 'fp': 0, 'fn': 0}` and `sum(counts.values()) == 2`.
 
 ## Exercise 5: Compare a constant baseline
 
@@ -143,7 +139,7 @@ assert int((baseline != truth).sum()) == 1 and int((prediction != truth).sum()) 
 
 **Expected:** baseline 1 error; model 0 on this fixture.
 
-**Verify:** Compare the computed values or written argument with baseline 1 error; model 0 on this fixture.
+**Verify:** In a fresh process, the exercise checks confirm `int((baseline != truth).sum()) == 1` and `int((prediction != truth).sum()) == 0`.
 
 ## Exercise 6: Reveal a group-specific failure
 
@@ -160,9 +156,9 @@ report = {
 assert report == {"negative": (0, 1), "positive": (1, 1)}
 ```
 
-**Expected:** negative 0/1errors; positive \(\frac{1}{1}\).
+**Expected:** negative class: 0 of 1 wrong; positive class: 1 of 1 wrong.
 
-**Verify:** Compare the computed values or written argument with negative 0/1errors; positive \(\frac{1}{1}\).
+**Verify:** In a fresh process, the exercise checks confirm `report == {'negative': (0, 1), 'positive': (1, 1)}`.
 
 ## Review after comparison
 

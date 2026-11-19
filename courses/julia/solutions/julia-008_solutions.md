@@ -6,7 +6,7 @@ The executable reference is `julia-008_reference.jl`. Its checks cover the state
 
 The tuple syntax distinguishes a one-field collection from the scalar value.
 
-**Expected observation:** Use(7,), including its comma.
+**Expected observation:** Use `(7,)`, including its comma.
 
 ## 2. Name a returned record
 

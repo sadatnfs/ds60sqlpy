@@ -6,7 +6,13 @@ Advanced; approximately 120 minutes. Direct prerequisites: `torch-026`. The prer
 
 ## Learning objectives
 
-Transfer learning reuses a representation while adapting a task-specific head. The central investigation is concrete: Create a bias-free 2-to-2 identity Linear base and disable its parameter gradients. The finish condition is base output equals input; all base parameters frozen. base weight now changes. A useful explanation connects the calculation to the reason it is needed, rather than treating a function name as a definition.
+Freeze a pretrained base, train a new head and manage optimizer membership and normalization buffers during later unfreezing.
+
+Central investigation: Freeze an identity Linear base, train a zero-initialized head one step, then test BatchNorm buffers and an explicit unfreeze phase.
+
+Finish condition: The frozen base stays the identity with no gradients while the head changes, BatchNorm running means still change in train mode until eval is set, and the unfreeze optimizer changes the base weight.
+
+The worked examples demonstrate the mechanism; exercises 1-3 transfer it to new inputs and exercises 4-6 extend it to failures and boundary cases. A useful explanation connects the calculation to the reason it is needed, rather than treating a function name as a definition.
 
 ## Purpose and mental model
 
@@ -48,9 +54,9 @@ Call requires_grad_(False) on base parameters, clear their grad fields, and cons
 
 ## Trace what freezing preserves and what it does not
 
-The base is a bias-free 2-to-2 Linear layer initialized to identity. Its stored weight has shape(2, 2), and base(x)=x for the three fixture rows. The head has shape(1, 2) and begins at zero. Disabling base parameter gradients and supplying only head.parameters() to SGD establishes two distinct boundaries: the base does not receive new parameter derivatives, and the optimizer is not asked to update it.
+The base is a bias-free 2-to-2 Linear layer initialized to identity. Its stored weight has shape (2, 2), and base(x)=x for the three fixture rows. The head has shape (1, 2) and begins at zero. Disabling base parameter gradients and supplying only head.parameters() to SGD establishes two distinct boundaries: the base does not receive new parameter derivatives, and the optimizer is not asked to update it.
 
-The head update has an independent analytic value. With targets[1, 2, 3], zero predictions and mean squared error, the residuals are[-1, -2, -3]. The head gradient is(2/3) times the feature-weighted residual sum, namely[-8/3, -10/3]. SGD at 0.1 produces head weights[4/15, \(\frac{1}{3}\)] and predictions[4/15, \(\frac{1}{3}\), 3/5]. This explains both the observed nonzero head update and why the base need not change for the head to learn.
+The head update has an independent analytic value. With targets [1, 2, 3], zero predictions and mean squared error, the residuals are [-1, -2, -3]. The head gradient is (2/3) times the feature-weighted residual sum, namely [-8/3, -10/3]. SGD at 0.1 produces head weights [4/15, \(\frac{1}{3}\)] and predictions [4/15, \(\frac{1}{3}\), 3/5]. This explains both the observed nonzero head update and why the base need not change for the head to learn.
 
 When the base is later unfrozen, the derivative path through it becomes relevant. If its stored weight is B and the head row is h, features are \(XB^{\mathsf T}\) and logits are \(XB^{\mathsf T}h^{\mathsf T}\). The base gradient combines the output residuals with h and X. After the head has nonzero weights, that gradient can be nonzero. Enabling `requires_grad` does not add B to an optimizer that was constructed from head parameters only. The update set must be changed deliberately.
 
@@ -123,33 +129,33 @@ assert base.weight.grad is None and head.weight.grad is not None
 
 ## Prediction before your attempt
 
-For the supplied fixture, name the input unit, the intermediate state and the final quantity that changes. Predict one normal result and one failure result before touching the code. In particular, explain this lesson's acceptance condition in your own words: base output equals input; all base parameters frozen. base weight now changes. Preserve the prediction beside your later observations so a correction is visible. A copied expected value is not a derivation.
+For the supplied fixture, name the input unit, the intermediate state and the final quantity that changes. Predict one normal result and one failure result before touching the code. In particular, explain this lesson's acceptance condition in your own words: The frozen base stays the identity with no gradients while the head changes, BatchNorm running means still change in train mode until eval is set, and the unfreeze optimizer changes the base weight. Preserve the prediction beside your later observations so a correction is visible. A copied expected value is not a derivation.
 
 ## Exercises
 
-1. **Freeze a known base.** Create a bias-free 2-to-2 identity Linear base and disable its parameter gradients.
-   **Expected:** base output equals input; all base parameters frozen.
-   **Verify:** Save the assertion results for exercise 1, including base output equals input; all base parameters frozen.
+1. **Freeze a scaling base.** Create a bias-free 2-to-2 base whose weight is 2 times the identity, freeze it and evaluate the row [1, 2].
+   **Expected:** output [[2, 4]]; the base weight does not require gradients.
+   **Verify:** In a fresh process, the exercise checks confirm `doubling(probe_x).tolist() == [[2.0, 4.0]]` and `not doubling.weight.requires_grad`.
 
-2. **Train a new head.** Attach a zero-initialized 2-to-1head and take one SGD.1step toward targets 1, 2, 3.
-   **Expected:** head changes; base remains exact identity.
-   **Verify:** Save the assertion results for exercise 2, including head changes; base remains exact identity.
+2. **Predict the head update.** Attach a zero-initialized bias-free 2-to-1 head, take one SGD step with learning rate 0.1 toward target 1 using mean squared error.
+   **Expected:** head weight [0.4, 0.8]; the base receives no gradient.
+   **Verify:** In a fresh process, the exercise checks confirm `new_head.weight` matches `torch.tensor([[0.4, 0.8]])` within 1e-06 and `doubling.weight.grad is None`.
 
-3. **Inspect absent base gradients.** Check the frozen base after head backward.
-   **Expected:** base gradient None; head gradient present.
-   **Verify:** Save the assertion results for exercise 3, including base gradient None; head gradient present.
+3. **Count trainable parameters.** Count the scalars that still require gradients across the frozen base and the new head.
+   **Expected:** 2 trainable scalars, all in the head.
+   **Verify:** In a fresh process, the exercise checks confirm `trainable == 2`.
 
 4. **Expose buffer updates despite freezing.** Freeze BatchNorm affine parameters but call it in train mode on a nonzero batch.
    **Expected:** running mean changes.
-   **Verify:** Save the assertion results for exercise 4, including running mean changes.
+   **Verify:** In a fresh process, the exercise checks confirm `not torch.equal(before, normalizer.running_mean)`.
 
 5. **Freeze normalization behavior with eval.** Switch that BatchNorm to eval and call a different batch.
    **Expected:** running mean remains unchanged.
-   **Verify:** Save the assertion results for exercise 5, including running mean remains unchanged.
+   **Verify:** In a fresh process, the exercise checks confirm `torch.equal(fixed, normalizer.running_mean)`.
 
 6. **Begin an explicit unfreeze phase.** Enable base gradients, create a new optimizer over base+head, and take one smaller-rate step.
    **Expected:** base weight now changes.
-   **Verify:** Save the assertion results for exercise 6, including base weight now changes.
+   **Verify:** In a fresh process, the exercise checks confirm `not torch.equal(base.weight, base_before)`.
 
 ## Common pitfalls and diagnosis
 
@@ -163,7 +169,7 @@ First draw the state described in the vocabulary section. Next use the smallest 
 
 ## Self-check and retrieval
 
-Close both worked examples. Explain Frozen base, Optimizer membership, Mode-dependent buffer using the lesson fixture. Reconstruct one computation from its inputs. Then change one input while retaining the mechanism and predict whether the conclusion survives. Write which part is guaranteed by the code and which part would need new observations. This last distinction prevents a tiny deterministic teaching example from being presented as evidence about an unseen population or a production model.
+Close all three worked examples. Explain Frozen base, Optimizer membership, Mode-dependent buffer using the lesson fixture. Reconstruct one computation from its inputs. Then change one input while retaining the mechanism and predict whether the conclusion survives. Write which part is guaranteed by the code and which part would need new observations. This last distinction prevents a tiny deterministic teaching example from being presented as evidence about an unseen population or a production model.
 
 ## Next step
 
@@ -171,7 +177,7 @@ Revisit the direct prerequisite `torch-026` if the calculation cannot be reconst
 
 ## Sources and verification status
 
-API and mechanism reference: [PyTorch2.9 reference](https://docs.pytorch.org/docs/2.9/index.html), reviewed 2026-10-22. The fixture, examples, counterexamples and exercise design are original course material. See [validation](../../../docs/validation.md) for execution gates. Check CI artifacts for the exact revision and platform to determine which runtime checks actually ran; authored content alone does not establish runtime execution.
+API and mechanism reference: [PyTorch 2.9 reference](https://docs.pytorch.org/docs/2.9/index.html), reviewed 2026-10-22. The fixture, examples, counterexamples and exercise design are original course material. See [validation](../../../docs/validation.md) for execution gates. Check CI artifacts for the exact revision and platform to determine which runtime checks actually ran; authored content alone does not establish runtime execution.
 
 ## Interview reasoning with worked answers
 

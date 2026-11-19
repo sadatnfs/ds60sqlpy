@@ -17,9 +17,9 @@
         "Holdout",
         "Baseline"
       ],
-      "outcome": "A deep-learning investigation asks a model to predict a defined target from available inputs, then tests what evidence supports using that prediction.",
-      "lab": "Use three training points(1, 2), (2, 4), (3, 6) and four untouched points(4, 8)..(7, 14); name one row as the prediction unit.",
-      "verification": "3 training rows, 4 holdout rows, one prediction per row. report says arithmetic/software checked; population reliability unestablished.",
+      "outcome": "Write an experiment card that names the prediction unit, the training and holdout rows, a training-only baseline and the claims a tiny CPU fixture cannot support.",
+      "lab": "Split seven points of y = 2x into three training and four untouched rows, score a constant training-mean baseline and audit a holdout that was reused for selection.",
+      "verification": "The card records 3 training and 4 holdout rows, a baseline mean of 4 with holdout MSE 54, the hand rule labeled as an analytic oracle rather than a trained model, and the reused holdout reclassified as validation.",
       "paired_lesson_id": "tf-001"
     },
     {
@@ -37,9 +37,9 @@
         "Device",
         "Broadcasting"
       ],
-      "outcome": "A PyTorch tensor has values plus metadata: shape, dtype, device, strides and gradient-tracking state.",
-      "lab": "Create a 2-by-3 float64 CPU tensor from values 0..5.",
-      "verification": "shape(2, 3), stride(3, 1), CPU, float64. RuntimeError for incompatible trailing dimensions.",
+      "outcome": "Predict a tensor's shape, stride, dtype, device and storage sharing before running code, and tell a view, a clone and a broadcast pairing apart.",
+      "lab": "Create a 2-by-3 float64 CPU tensor, mutate a row view and a clone, transpose it, and subtract a vector from its column form.",
+      "verification": "The tensor reports shape (2, 3) and stride (3, 1); the view write changes x[0, 0] to 99 while the clone stays independent; the transpose has stride (1, 3); the column subtraction broadcasts to (3, 3); and adding shapes (2, 3) and (4,) raises RuntimeError.",
       "paired_lesson_id": "tf-002"
     },
     {
@@ -56,9 +56,9 @@
         "Parameter registration",
         "Weight layout"
       ],
-      "outcome": "A linear layer computes an affine transformation from input features to output features.",
-      "lab": "UseX[[1, 2, 3], [0, 1, 0]], weight[[1, 0, -1]], bias 2.",
-      "verification": "outputs[[0], [2]], shape(2, 1). RuntimeError from incompatible matrix dimensions.",
+      "outcome": "Compute an nn.Linear output by hand from its stored (out, in) weight, count its registered parameters and diagnose a feature-width mismatch.",
+      "lab": "Load known weights into a 3-to-1 Linear layer, compare the module with X @ W.T + b, remove the bias and register state correctly.",
+      "verification": "The layer returns [[0], [2]] with shape (2, 1) and 4 registered scalars, the manual product matches it within 1e-12, the bias-free layer gives -2 and 0, and a 2-feature row raises RuntimeError.",
       "paired_lesson_id": "tf-003"
     },
     {
@@ -75,9 +75,9 @@
         "Loss unit",
         "Gradient scale"
       ],
-      "outcome": "A loss is a numerical objective with a declared unit and denominator.",
-      "lab": "Use residuals[1, -1, 2] against zero targets.",
-      "verification": "squared entries 1, 1, 4; sum 6; mean 2. MAE 4/3; MSE 2.",
+      "outcome": "Choose a loss reduction deliberately and predict how sum, mean and masked means change the loss value and the gradient scale.",
+      "lab": "Reduce the residuals [1, -1, 2] with sum and mean, duplicate the batch, differentiate both objectives and mask a padded loss.",
+      "verification": "Sum is 6 and mean is 2, duplication doubles only the sum, the sum gradient is 3 times the mean gradient, and the masked mean of [1, 4, 100] with the last entry invalid is 2.5 rather than 5/3.",
       "paired_lesson_id": "tf-004"
     },
     {
@@ -94,9 +94,9 @@
         "Finite difference",
         "Learning rate"
       ],
-      "outcome": "A derivative measures local sensitivity: how much a function changes for a small input change.",
-      "lab": "Differentiate (w-2)**2 at w=0 using autograd.grad.",
-      "verification": "derivative -4; loss 4. all raise ValueError.",
+      "outcome": "Obtain a derivative with autograd.grad, confirm it with central finite differences and keep the gradient separate from the optimizer update it informs.",
+      "lab": "Differentiate (w-2)**2 at w = 0 with autograd, compare three central-difference steps and apply one learning-rate 0.1 update by hand.",
+      "verification": "Autograd returns -4 at loss 4, every finite-difference slope agrees within 1e-10, the update gives w = 0.4, the stationary point w = 2 has gradient 0, and invalid probes raise ValueError.",
       "paired_lesson_id": "tf-005"
     },
     {
@@ -113,9 +113,9 @@
         "Saved tensor",
         "In-place hazard"
       ],
-      "outcome": "Autograd follows the chain of tensor operations from a scalar objective back to its inputs.",
-      "lab": "Use w=1, z=2*w, a=z*z and loss=(a-1)**2.",
-      "verification": "z2, a4, loss 9, gradient 48. at new w=1.5, gradient -1 for (w-2)**2.",
+      "outcome": "Trace a chain-rule derivative through an autograd graph and recognize the two in-place mutations that autograd refuses.",
+      "lab": "Backpropagate loss = (a-1)**2 with a = z*z and z = 2w at w = 1, check it numerically and mutate a leaf and a saved tensor.",
+      "verification": "The trace gives z = 2, a = 4, loss 9 and gradient 48, a central difference agrees within 1e-5, and both the leaf mutation and the saved-tensor mutation raise RuntimeError.",
       "paired_lesson_id": "tf-006"
     },
     {
@@ -133,9 +133,9 @@
         "Gradient accumulation",
         "Gradient mode"
       ],
-      "outcome": "PyTorch distinguishes graph tracking from gradient storage.",
-      "lab": "Create a leaf tensor \\(w=0\\) and intermediate tensor \\(u=2w\\), retain the intermediate gradient and backpropagate its sum.",
-      "verification": "`w.is_leaf` is `True`; `u.is_leaf` is `False`; the gradients with respect to \\(w\\) and \\(u\\) are 2 and 1. the output still has `requires_grad=True`.",
+      "outcome": "Explain when PyTorch stores, accumulates, detaches or skips gradients, and clear accumulated gradients before an independent step.",
+      "lab": "Backpropagate twice into the same leaf at w = 0, detach a shared view, and compare no_grad with eval mode.",
+      "verification": "The leaf gradient becomes -4 then -8 without clearing and returns to -4 after reset, the detached view shares storage while a detached clone does not, no_grad output has requires_grad False, and eval output still requires grad.",
       "paired_lesson_id": "tf-007"
     },
     {
@@ -152,9 +152,9 @@
         "SGD step",
         "Independent oracle"
       ],
-      "outcome": "One optimizer step is the smallest complete training experiment.",
-      "lab": "Use float64 x = [1, 2, 3], y = 2x and scalar w = 0.",
-      "verification": "mean squared loss 56/3. w.grad None; updated weight unchanged.",
+      "outcome": "Audit one optimizer step by checking the loss, the gradient and the updated weight as three separate states.",
+      "lab": "Fit w in y = 2x on x = 1, 2, 3 from w = 0 with one SGD step at learning rate 0.1, then repeat with mismatched target shapes.",
+      "verification": "The initial loss is 56/3, the gradient is -56/3 before the step, the step gives w = 28/15 and loss 56/675, and the (3, 1) target broadcast keeps loss 56/3 but changes the gradient to -16.",
       "paired_lesson_id": "tf-008"
     },
     {
@@ -171,9 +171,9 @@
         "Batch",
         "Gradient reset"
       ],
-      "outcome": "An epoch is a traversal of selected records; a batch is the set reduced before an update; an optimizer step changes parameters once.",
-      "lab": "Partition IDs 1..6 into batches of 2.",
-      "verification": "three batches[[1, 2], [3, 4], [5, 6]]. epoch mean 4, not 5.",
+      "outcome": "Relate epochs, batches and optimizer steps, and combine unequal batch means with record-count weights.",
+      "lab": "Partition record IDs into batches, train three cleared updates on x = 1..6 and repeat the loop without zero_grad.",
+      "verification": "Six IDs give three batches, five give sizes 2, 2, 1, the cleared run produces three distinct finite weights, omitting zero_grad changes the endpoint, and batch means 2 and 8 over 2 and 1 records combine to 4, not 5.",
       "paired_lesson_id": "tf-009"
     },
     {
@@ -191,9 +191,9 @@
         "Split unit",
         "Training-only fit"
       ],
-      "outcome": "A Dataset is an interface for retrieving observations, not a guarantee that the experiment is leakage-free.",
-      "lab": "Create eight records with groups A, A, B, B, C, C, D, D and values 1, 3, 5, 7, 20, 22, 30, 32.",
-      "verification": "length 8; item 0 has ID 0, group A, value 1. 16, 18, 26, 28.",
+      "outcome": "Build a Dataset and group-aware Subsets so that preprocessing statistics are fitted only on training groups.",
+      "lab": "Load eight account records, hold out whole groups C and D, fit a centering mean on A and B, then contrast a row-level split.",
+      "verification": "Group sets are disjoint, the training mean stays 4 even after a held-out value changes to 3200, the frozen transform maps held-out values to 16, 18, 26 and 28, and the alternating row split lets all four groups cross.",
       "paired_lesson_id": "tf-010"
     },
     {
@@ -210,9 +210,9 @@
         "Buffer",
         "Optimizer membership"
       ],
-      "outcome": "Annn.",
-      "lab": "Build Scalar Model with weight 0 and buffer offset 0.",
-      "verification": "one parameter weight; one buffer offset; both in state_dict. same weight object and one parameter.",
+      "outcome": "Register parameters and buffers in an nn.Module, run an explicit training step and detect an optimizer that still holds a replaced Parameter.",
+      "lab": "Build a scalar module with weight 0 and buffer offset 0, take one SGD step, convert its dtype and replace its Parameter after creating an optimizer.",
+      "verification": "The module exposes one parameter and one buffer in state_dict, one SGD step moves the weight to 28/15 while the buffer stays 0, both tensors convert to float32, and the stale optimizer still references the old Parameter.",
       "paired_lesson_id": "tf-011"
     },
     {
@@ -229,9 +229,9 @@
         "Training baseline",
         "Frozen assessment"
       ],
-      "outcome": "An auditable regressor combines data identity, a baseline, an explicit training loop and separate assessment.",
-      "lab": "Use rows zero, e1, e2, e3, [1, 1, 1], [2, 1, 1] and target 2 a-b+c.",
-      "verification": "targets 0, 2, -1, 1, 2, 4. disjoint IDs; holdout count 2; explicit limited scope.",
+      "outcome": "Deliver an auditable regression run: fixed data identities, a training-only baseline, a bounded training loop and a separately opened holdout.",
+      "lab": "Fit a bias-free 3-to-1 Linear model on four training rows of target 2a-b+c for 100 SGD steps and score two holdout rows afterward.",
+      "verification": "The baseline mean is 0.5 with holdout MSE 7.25, the weight equals (1-0.95^100) times [2, -1, 1], the trained holdout error is below 7.25, and the report keeps the two-row limitation explicit.",
       "paired_lesson_id": "tf-012"
     },
     {
@@ -248,9 +248,9 @@
         "BCEWithLogitsLoss",
         "Decision threshold"
       ],
-      "outcome": "A binary logit is an unrestricted score.",
-      "lab": "Apply sigmoid to-2, 0, 2.",
-      "verification": "middle probability.5 and strictly increasing values. 0 errors at.5 and 1 at.8.",
+      "outcome": "Train binary classifiers on logits with BCEWithLogitsLoss and choose a decision threshold as a separate, explicit policy.",
+      "lab": "Convert the logits -2, 0 and 2 to probabilities, evaluate the zero-logit loss, compare thresholds 0.5 and 0.8 and feed a probability into a logits loss by mistake.",
+      "verification": "The middle probability is 0.5, the zero-logit loss is log 2, threshold 0.5 gives 0 errors and 0.8 gives 1 on truth 0, 1, 1, the double-sigmoid loss differs by more than 0.1, and logits of magnitude 1000 stay finite.",
       "paired_lesson_id": "tf-013"
     },
     {
@@ -267,9 +267,9 @@
         "Multilabel target",
         "Class axis"
       ],
-      "outcome": "Multiclass classification chooses exactly one outcome among mutually exclusive classes.",
-      "lab": "Use one row of three zero logits and target class 1.",
-      "verification": "cross entropy log 3. IndexError or RuntimeError identifying an invalid target.",
+      "outcome": "Select CrossEntropyLoss or BCEWithLogitsLoss from the label structure and give each its correct target shape, dtype and denominator.",
+      "lab": "Score three zero logits as a multiclass row and as three independent labels, build both target forms and use an invalid class index.",
+      "verification": "The multiclass loss is log 3, the independent probabilities 0.5 sum to 1.5, class indices have shape (2,) with dtype long while multilabel targets are floating (2, 3), and class index 3 is rejected.",
       "paired_lesson_id": "tf-014"
     },
     {
@@ -287,9 +287,9 @@
         "Sampler generator",
         "Worker count"
       ],
-      "outcome": "Dataset defines how to retrieve an observation, while DataLoader defines batching, sampling and collation.",
-      "lab": "Load five paired ID/value records with batch size 2 and no shuffle.",
-      "verification": "sizes 2, 2, 1 and IDs 0..4 exactly once. ValueError before padding; token IDs must be nonnegative int64 integers.",
+      "outcome": "Configure a DataLoader whose batching, dropping, shuffling and collation are reproducible and keep each input paired with its target.",
+      "lab": "Load five ID/value records with batch size 2, then drop the tail, shuffle with seeded generators and pad two token sequences.",
+      "verification": "Batches have sizes 2, 2, 1 with IDs 0..4 once, drop_last omits ID 4, two generators seeded 7 give the same permutation, padding yields [[2, 3], [4, 0]] with lengths 2 and 1, and invalid sequences raise ValueError.",
       "paired_lesson_id": "tf-015"
     },
     {
@@ -307,9 +307,9 @@
         "Capacity",
         "Symmetry"
       ],
-      "outcome": "Nonlinearity changes which functions a network can represent.",
-      "lab": "Use inputs 00, 01, 10, 11 and two rectified differences.",
-      "verification": "outputs 0, 1, 1, 0. both.6; the function is absolute difference.",
+      "outcome": "Explain why a nonlinearity is required for XOR and test weight layout and initialization symmetry with deliberately chosen fixtures.",
+      "lab": "Build XOR from two rectified differences, remove the ReLU, map the weights into nn.Linear and probe the layout with an asymmetric matrix.",
+      "verification": "The ReLU construction outputs 0, 1, 1, 0, the linear version outputs four zeros, the asymmetric probe separates W from W.T, identical rows stay identical, and the continuous inputs (0.2, 0.8) and (0.8, 0.2) both give 0.6.",
       "paired_lesson_id": "tf-016"
     },
     {
@@ -326,9 +326,9 @@
         "Dropout mode",
         "Weight decay"
       ],
-      "outcome": "Regularization and training mode affect different parts of the experiment.",
-      "lab": "Use weights 1, -2 and compute L1 and squared L2 sums.",
-      "verification": "L1=3; squared L2=5. output still requires grad; backward gives ones.",
+      "outcome": "Separate explicit regularization penalties from Dropout's train and eval behavior and check each with exact values.",
+      "lab": "Compute L1 and squared L2 penalties for weights [1, -2], run Dropout(0.5) in eval and train mode and differentiate the penalty.",
+      "verification": "L1 is 3 and squared L2 is 5, eval-mode Dropout returns its input exactly, train mode outputs only 0 or 2, a 0.1 coefficient adds a penalty of 0.5 for a total of 2.5, and the penalty gradient is [0.2, -0.4].",
       "paired_lesson_id": "tf-017"
     },
     {
@@ -346,9 +346,9 @@
         "Batch coupling",
         "LayerNorm axis"
       ],
-      "outcome": "Normalization can introduce both state and cross-observation dependencies.",
-      "lab": "Apply BatchNorm momentum.5 to rows 1, 3 and 3, 5.",
-      "verification": "running mean 1, 2; batch counter 1. finite zeros with default affine initialization.",
+      "outcome": "Predict how BatchNorm running statistics and LayerNorm row statistics respond to train mode, eval mode and momentum conventions.",
+      "lab": "Update a BatchNorm layer with momentum 0.5 on rows [1, 3] and [3, 5], evaluate it on an outlier row and compare LayerNorm rows alone and together.",
+      "verification": "The running mean becomes [1, 2] and the running variance 1.5 after one step, eval leaves the running mean and batch counter unchanged, the LayerNorm row matches within 1e-6 alone or beside [100, 200], and PyTorch momentum 0.1 gives 1 where Keras momentum 0.1 gives 9.",
       "paired_lesson_id": "tf-018"
     },
     {
@@ -366,9 +366,9 @@
         "Receptive field",
         "Cross-correlation"
       ],
-      "outcome": "Convolution applies a shared local kernel across spatial positions.",
-      "lab": "Apply kernel 1, 0; 0, -1 to image 1..9 in 3 x 3 NCHW layout.",
-      "verification": "output shape 1, 1, 2, 2; all values-4. 8trainable scalars.",
+      "outcome": "Compute a Conv2d output by hand in NCHW layout, predict its output shape and count its shared parameters.",
+      "lab": "Apply the 2-by-2 kernel [[1, 0], [0, -1]] to a 3-by-3 ramp image, flip the kernel, change the stride and perturb one pixel.",
+      "verification": "The output has shape (1, 1, 2, 2) with every value -4, the flipped kernel gives +4, stride 2 gives shape (1, 1, 1, 1), a +10 top-left pixel changes only the top-left output, and the 1-to-2-channel 2-by-2 bias-free layer has 8 parameters.",
       "paired_lesson_id": "tf-019"
     },
     {
@@ -385,9 +385,9 @@
         "Augmentation",
         "Label invariance"
       ],
-      "outcome": "Pooling reduces local spatial information.",
-      "lab": "Pool patch 1, 3; 2, 4 with a 2-by-2 window.",
-      "verification": "max 4; average 2.5. left->right->left.",
+      "outcome": "Compare max and average pooling and apply augmentations whose labels transform consistently with the image.",
+      "lab": "Pool the patch [[1, 3], [2, 4]], flip it horizontally, change its non-maximum pixel and map a directional label under reflection.",
+      "verification": "Max pooling gives 4 and average 2.5, the flip gives rows [3, 1] and [4, 2] and round-trips exactly, lowering pixel 1 to 0 keeps max 4 but average becomes 2.25, and the label maps left to right and back.",
       "paired_lesson_id": "tf-020"
     },
     {
@@ -405,9 +405,9 @@
         "Final valid state",
         "Valid-target denominator"
       ],
-      "outcome": "A padded sequence contains real positions and artificial storage positions.",
-      "lab": "Use IDs 2, 3, 0 and a fixed 4 x 2 table with zero padding row.",
-      "verification": "embedding shape 1, 3, 2; mask True, True, False. RuntimeError for invalid length.",
+      "outcome": "Represent padded token sequences with embeddings, masks and packing so that padding never changes a gradient, a recurrent state or a loss.",
+      "lab": "Embed IDs 2, 3, 0 with a padding row, run a packed GRU of length 2 and average token losses with a validity mask.",
+      "verification": "The embedding has shape (1, 3, 2) with mask True, True, False, the padding row receives zero gradient, the packed final state matches the two-step state within 1e-6, the unmasked run differs, and the masked mean loss stays log 2.",
       "paired_lesson_id": "tf-021"
     },
     {
@@ -425,9 +425,9 @@
         "Prefix invariance",
         "Dropout argument"
       ],
-      "outcome": "Attention forms weighted combinations of value vectors using query-key comparisons.",
-      "lab": "Use zero 3-by-2 queries/keys and values 2, 0; 0, 2; 6, 6.",
-      "verification": "outputs 2, 0; 1, 1; 8/3, 8/3. repeated evaluation matches.",
+      "outcome": "Compute scaled dot-product attention with an explicit allowed mask and prove that future positions cannot change earlier outputs.",
+      "lab": "Run causal attention on a three-token fixture, change only the third value vector and compare every prefix cut.",
+      "verification": "Uniform causal outputs are [2, 0], [1, 1] and [8/3, 8/3], changing the third value to [100, 200] alters only the last row to [34, 202/3], all prefixes match within 1e-12, and an all-masked row raises ValueError.",
       "paired_lesson_id": "tf-022"
     },
     {
@@ -444,9 +444,9 @@
         "Gradient clipping",
         "Update trace"
       ],
-      "outcome": "A custom training loop can fail by disconnecting the graph, forgetting an update, reusing old gradients or applying an incorrect reduction.",
-      "lab": "Detach (w-2)**2 before backward and inspect tracking.",
-      "verification": "detached loss requires_grad False; backward raises RuntimeError. nonnegative and below 56/675.",
+      "outcome": "Debug a custom training loop by checking graph connectivity, gradient clearing and norm clipping one state transition at a time.",
+      "lab": "Detach a loss by mistake, repair two exact SGD updates and clip the gradient [3, 4] to norm 1 before stepping.",
+      "verification": "The detached loss cannot backpropagate, the repaired weights are 28/15 then 448/225, clipping returns the original norm 5 and the gradient [0.6, 0.8], the clipped step gives approximately [-0.06, -0.08], and an infinite gradient raises RuntimeError.",
       "paired_lesson_id": "tf-023"
     },
     {
@@ -464,9 +464,9 @@
         "Population standard deviation",
         "Subgroup evidence"
       ],
-      "outcome": "A classifier capstone must connect the task definition to training and evaluation evidence.",
-      "lab": "Use training x-2, -1, 1, 2 with labels 0, 0, 1, 1 and test x-3, 3.",
-      "verification": "4training records, 2test records. negative 0/1errors; positive 1/1.",
+      "outcome": "Train and evaluate a small logistic classifier with training-only normalization, a confusion table, a baseline and group-level error counts.",
+      "lab": "Normalize four training points, train 40 SGD steps on binary logits and threshold two test points at logit 0.",
+      "verification": "Normalization uses mean 0 and scale sqrt(2.5), the trained weight is positive and finite, the test confusion counts are TP 1, TN 1, FP 0 and FN 0, the constant baseline makes 1 error, and the group report shows 0 of 1 and 1 of 1 wrong after the flip.",
       "paired_lesson_id": "tf-024"
     },
     {
@@ -483,9 +483,9 @@
         "Cosine similarity",
         "False negative"
       ],
-      "outcome": "Embedding objectives teach a representation to preserve selected relationships.",
-      "lab": "Use anchor[1, 0], positive[1, 1], negative[0, 1].",
-      "verification": "dots 1, 0; cosines 1/sqrt 2, 0. positive probability increases; argmax remains 0.",
+      "outcome": "Train and audit an embedding objective by separating dot products, cosine similarity, temperature and candidate identities.",
+      "lab": "Score an anchor against one positive and one negative vector, rescale the positive, compute the two-candidate loss and vary the temperature.",
+      "verification": "Dot scores are 1 and 0 with cosines 1/sqrt(2) and 0, scaling the positive by 10 changes only the dot score, the loss is log(1+exp(-1)), temperature 0.5 raises the positive probability without changing the argmax, and a shared document ID is detected.",
       "paired_lesson_id": "tf-025"
     },
     {
@@ -503,9 +503,9 @@
         "Grad check",
         "Incoming gradient"
       ],
-      "outcome": "Custom modules should make state ownership and differentiation explicit.",
-      "lab": "Create a width 2 residual with zero kernel and scale buffer 1.",
-      "verification": "output equals input; one parameter and one buffer. gradient 24.",
+      "outcome": "Write a custom module and a custom autograd Function whose state, shape checks and backward rule are verified explicitly.",
+      "lab": "Build a width-2 residual module with a scale buffer, apply known kernels and validate a custom cube derivative with gradcheck.",
+      "verification": "The zero-kernel residual returns its input with one parameter and one buffer, the identity kernel with scale 0.5 returns 1.5x, a width-3 input raises ValueError, gradcheck passes for Cube, and the incoming factor 2 gives gradient 24 at x = 2.",
       "paired_lesson_id": "tf-026"
     },
     {
@@ -523,9 +523,9 @@
         "Mode-dependent buffer",
         "Unfreeze phase"
       ],
-      "outcome": "Transfer learning reuses a representation while adapting a task-specific head.",
-      "lab": "Create a bias-free 2-to-2 identity Linear base and disable its parameter gradients.",
-      "verification": "base output equals input; all base parameters frozen. base weight now changes.",
+      "outcome": "Freeze a pretrained base, train a new head and manage optimizer membership and normalization buffers during later unfreezing.",
+      "lab": "Freeze an identity Linear base, train a zero-initialized head one step, then test BatchNorm buffers and an explicit unfreeze phase.",
+      "verification": "The frozen base stays the identity with no gradients while the head changes, BatchNorm running means still change in train mode until eval is set, and the unfreeze optimizer changes the base weight.",
       "paired_lesson_id": "tf-027"
     },
     {
@@ -543,9 +543,9 @@
         "Data position",
         "Next-step parity"
       ],
-      "outcome": "Restartable training requires the state that determines the next update, not merely weights that reproduce the current prediction.",
-      "lab": "Take two Adam updates of a zero-weight linear model onx 1, 2 and y 2 x.",
-      "verification": "optimizer step 2 and positive weight. directory absent; no distributed-loader claim.",
+      "outcome": "Save and restore every state that determines the next training update, and show that weights alone do not resume training.",
+      "lab": "Take two Adam updates, checkpoint model, optimizer, RNG and data position, then continue in place and in a fresh interpreter.",
+      "verification": "The checkpoint holds Adam step 2 and data position 2, the fresh-process continuation reproduces the random probe and the next weight within 1e-6, a weights-only restart diverges, and the owned directory is removed.",
       "paired_lesson_id": "tf-028"
     },
     {
@@ -563,9 +563,9 @@
         "Mixed precision",
         "Gradient scaling"
       ],
-      "outcome": "Numerical stability concerns how an equivalent mathematical expression behaves in a finite representation.",
-      "lab": "Exponentiate float32 logits 1000, 999 directly.",
-      "verification": "both exponentials infinite. ValueError before loss evaluation.",
+      "outcome": "Compute softmax losses stably and compare floating-point formats by their range and precision before choosing mixed precision.",
+      "lab": "Exponentiate float32 logits 1000 and 999 directly, then compute the same loss, probabilities and gradients with stable operations.",
+      "verification": "Direct exponentials overflow to infinity, the stable loss equals log(1+exp(-1)) within 1e-6, shifted logits give probabilities that match within 1e-6, gradients are finite and sum to about 0, bfloat16 has a larger range than float16, and a NaN logit raises ValueError.",
       "paired_lesson_id": "tf-029"
     },
     {
@@ -583,9 +583,9 @@
         "Sha rd weighting",
         "Distributed acceptance"
       ],
-      "outcome": "Distributed and accumulated gradients should represent a declared global objective.",
-      "lab": "Combine means 2, 6 with counts 1, 3.",
-      "verification": "global mean 5; unweighted shard mean 4. empty shard contributes 0; global mean 5.",
+      "outcome": "Combine gradients across shards and microbatches so that they represent the declared global mean objective.",
+      "lab": "Weight shard means by their counts, accumulate summed squared-loss gradients over shards of sizes 1 and 3, and contrast separate microbatch steps.",
+      "verification": "Shard means 2 and 6 with counts 1 and 3 give 5 rather than 4, the accumulated gradient is -30 like the full batch, one SGD step gives w = 0.3, separate steps end elsewhere, and an empty shard contributes 0.",
       "paired_lesson_id": "tf-030"
     },
     {
@@ -603,9 +603,9 @@
         "Warmup",
         "Profiler overhead"
       ],
-      "outcome": "Compilation and profiling answer different questions.",
-      "lab": "Evaluatef(x)=x*x+1 at float32[1, 2].",
-      "verification": "output[2, 5]. receipt does not claim universal speedup.",
+      "outcome": "Measure performance honestly by separating an eager oracle, graph capture, warmed timing and profiler evidence.",
+      "lab": "Compile f(x)=x*x+1 with a counting backend, reuse and change its input signature, time warmed calls and profile one eager call.",
+      "verification": "The eager oracle returns [2, 5], the captured graph matches it, a float64 call adds a second graph, 20 warmed calls are correct with nonnegative elapsed time, aten::mul and aten::add appear, and the receipt makes no speedup claim.",
       "paired_lesson_id": "tf-031"
     },
     {
@@ -623,9 +623,9 @@
         "Dynamic dimension",
         "Inference parity"
       ],
-      "outcome": "A state dictionary stores named parameters and buffers, not the complete Python architecture.",
-      "lab": "Set a 2-to-1 bias-free Linear weight to[2, -1] and predict rows 1, 2 and 3, 4.",
-      "verification": "outputs 0, 2. three-row parity passes; temporary directory absent.",
+      "outcome": "Release a model as a state_dict and as an exported program, and verify inference parity and batch constraints in a fresh process.",
+      "lab": "Save a 2-to-1 Linear model with weight [2, -1] both ways, reload each in a new interpreter and test a three-row batch.",
+      "verification": "Both artifacts predict 0 and 2 for the two fixture rows, the static export rejects three rows while the module accepts them, the dynamic export with batch range 1..4 matches the module, and the temporary directory is removed.",
       "paired_lesson_id": "tf-032"
     },
     {
@@ -643,9 +643,9 @@
         "Batch independence",
         "Owned output"
       ],
-      "outcome": "Inference is a bounded function with an input and output contract.",
-      "lab": "Use float32 CPU rows 1, 2 and 3, 4.",
-      "verification": "outputs 0, 2 with shape(2, ). input unchanged.",
+      "outcome": "Implement an inference function with an explicit input contract that rejects ambiguous inputs and never mutates caller data.",
+      "lab": "Predict float32 rows [1, 2] and [3, 4], compare per-record and batched calls, then pass empty, oversized, wrongly typed and nonfinite inputs.",
+      "verification": "The batch predicts 0 and 2 with shape (2,), single-row calls agree, invalid shapes raise ValueError, an int64 matrix raises TypeError, a NaN raises ValueError, and the caller's input is unchanged.",
       "paired_lesson_id": "tf-033"
     },
     {
@@ -663,9 +663,9 @@
         "Finite safety evidence",
         "Model card"
       ],
-      "outcome": "A reliability report should preserve the conditions and denominators behind a score.",
-      "lab": "Use groups A, A, B with truth 1, 1, 0 and prediction 1, 0, 0.",
-      "verification": "A1/2errors; B0/1. card explicitly has no privacy guarantee.",
+      "outcome": "Report model reliability with group denominators, repeated identities, controlled perturbations and severe failures kept visible.",
+      "lab": "Count group errors on three records, repeat one record, shift a threshold input and summarize nine minor passes with one severe failure.",
+      "verification": "Group A has 1 error of 2 and group B 0 of 1, 8 rows contain only 3 unique IDs, the shifts give labels 1, 1, 0, the 0.9 pass rate still reports 1 severe failure, and an untested group is None rather than 0.",
       "paired_lesson_id": "tf-034"
     },
     {
@@ -683,9 +683,9 @@
         "Selection bias",
         "Local generator"
       ],
-      "outcome": "Model comparisons should preserve the pairing between predictions on the same held-out identities.",
-      "lab": "Use truth a0, b1, c2 with A0, 2, 2 and B 1, 2, 3 in different dictionary order.",
-      "verification": "paired squared-loss differences-1, 0, -1. test selection violates the declared boundary.",
+      "outcome": "Compare two models on the same held-out identities with paired differences and a reproducible bootstrap.",
+      "lab": "Align three predictions by ID, average the paired squared-loss differences and draw 1000 seeded bootstrap means.",
+      "verification": "The paired differences are -1, 0, -1 with mean -2/3 favoring model A, all 1000 bootstrap means lie in [-1, 0], reseeding with 7 replays the same indices, and a missing ID is rejected before comparison.",
       "paired_lesson_id": "tf-035"
     },
     {
@@ -703,9 +703,9 @@
         "Fresh-process inference",
         "Rollback identity"
       ],
-      "outcome": "A reproducible model release is a bundle of state, schema, data identity, execution evidence and limitations.",
-      "lab": "Use train x = [1, 2, 3] and holdout 4, 5 with target 2 x and disjoint IDs.",
-      "verification": "3 training and 2 holdout records. local checks True; production no-go; directory absent.",
+      "outcome": "Release a small model with hashed artifacts, a schema, a split manifest, fresh-process parity checks and a bounded decision record.",
+      "lab": "Train a float64 Linear model for 30 steps, save weights, schema and manifest, reload them in a child process and corrupt the hash.",
+      "verification": "Holdout error beats the training-mean baseline error of 26, the child reproduces holdout predictions within 1e-12, a zeroed hash makes the child exit nonzero with a mismatch diagnostic, and the record states a production no-go.",
       "paired_lesson_id": "tf-036"
     }
   ],

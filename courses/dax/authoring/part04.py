@@ -211,9 +211,9 @@ LESSONS = [
                 [
                     "North Notebook sales are S1 and S4: 47.",
                     (
-                        "Removing Product restrictions admits North Pen 24? In "
-                        "North Pen contributes S2 4 plus S5 20, totaling 24, and "
-                        "Mug contributes 36."
+                        "Removing Product restrictions admits the other North products: "
+                        "Pen contributes S2 4 plus S5 20, totaling 24, and "
+                        "Mug contributes S8 36."
                     ),
                     "The retained North population totals 47 + 24 + 36 = 107; share is 47/107.",
                 ],
@@ -373,7 +373,7 @@ LESSONS = [
                 "Write a customer-level average revenue for customers with sales.",
                 "AVERAGEX can iterate Customer while the measure supplies transition.",
                 (
-                    "AVERAGEX(Customer,[NetRevenue]) averages 51,80,56 and "
+                    "AVERAGEX(Customer,[NetRevenue]) averages 51, 80, 56 and "
                     "excludes Di's BLANK, yielding 187/3."
                 ),
             ),
@@ -424,7 +424,7 @@ LESSONS = [
             "to [NetRevenue] is 187. Summing that value once per "
             "Product row yields 748 because Product has four rows. "
             "Defining the variable inside SUMX(Product,...) instead "
-            "invokes the measure for each row, giving 67,24,96 and "
+            "invokes the measure for each row, giving 67, 24, 96 and "
             "BLANK, which sum to 187.\n\nOuter filters still matter "
             "before either binding. In Paper there are two Product "
             "rows and the incoming total is 91. A shared scalar is "

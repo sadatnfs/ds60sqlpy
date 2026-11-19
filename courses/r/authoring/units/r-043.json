@@ -3,7 +3,7 @@
   "title": "Linear models, design matrices and diagnostic limits",
   "level": "intermediate",
   "minutes": 140,
-  "prerequisites": ["r-042"],
+  "prerequisites": ["r-039", "r-042"],
   "concepts": ["formula", "design matrix", "residual", "rank", "prediction interval"],
   "outcome": "Connect an R model formula to its numerical design matrix, fitted coefficients and diagnostic assumptions.",
   "mechanism": "An R formula specifies a model representation, not a causal identification strategy. lm turns that formula and data into a model frame and a numerical design matrix, then fits coefficients. Inspecting model.matrix makes intercepts, factor coding and interactions visible rather than treating formula notation as a black box.\n\nA fitted coefficient describes a conditional relationship under that representation. With an interaction, a slope can depend on another predictor or group. Reporting one main-effect coefficient as a universal effect discards that structure. Factor reference levels also determine which contrasts individual coefficients represent, even when fitted predictions remain equivalent under a recoding.\n\nResiduals compare observed outcomes with fitted means. In ordinary least squares with an intercept, the fitted residuals are orthogonal to the design columns and sum to zero up to numerical error. Those algebraic properties do not prove independent errors, constant variance, normality or a correct scientific model. Diagnostic plots and substantive knowledge investigate additional assumptions.\n\nA rank-deficient design cannot identify every coefficient uniquely. Including a column that is exactly twice another creates redundant information. A numerical fit may retain fitted values while marking an aliased coefficient unavailable. Increasing sample count by duplicating the same redundant pattern does not create the missing distinction.\n\nMean confidence intervals and future-observation prediction intervals answer different questions. Under the model assumptions, a prediction interval includes residual variation in a new observation as well as uncertainty in the fitted mean, making it wider at the same point. Neither justifies extrapolation into unsupported predictor regions automatically.",
@@ -31,7 +31,7 @@
       "title": "Reconstruct a simple fit",
       "code": "d <- data.frame(x = 0:4, y = c(1, 3, 4, 7, 8))\nfit <- lm(y ~ x, data = d)\nX <- model.matrix(fit)\nstopifnot(isTRUE(all.equal(unname(coef(fit)), c(1, 1.8), tolerance = 1e-10)))\nstopifnot(max(abs(as.numeric(X %*% coef(fit)) - fitted(fit))) < 1e-10)\nstopifnot(abs(sum(residuals(fit))) < 1e-10)\nstopifnot(isTRUE(all.equal(sum(residuals(fit)^2), 0.8, tolerance = 1e-10)))\nprint(coef(fit))\n",
       "explanation": "The coefficient and residual-sum oracles come from the small literal data. Orthogonality verifies the fitted least-squares calculation, not all distributional assumptions.",
-      "expected": "Intercept 1, slope 1.8, residual sum near0, RSS 0.8."
+      "expected": "Intercept 1, slope 1.8, residual sum near 0, RSS 0.8."
     },
     {
       "title": "Two interval targets",

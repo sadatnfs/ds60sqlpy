@@ -5,15 +5,43 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Browser quality: tests, performance and independent review: my attempt</title>
     <style>
-      /* Implement the lesson-specific CSS. Keep keyboard focus visible. */
+      /* Write the CSS for the exercises here. Keep keyboard focus visible. */
     </style>
   </head>
   <body>
-    <!-- web-030: Create a quality report for the portal from web-024. -->
-    <!-- Save your prediction, then implement the six exercises from the guide. -->
+    <!--
+      web-030 exercises. Hints are in the guide; answers are in the solutions folder.
+      1. Map a label, interaction and layout claim to different evidence.
+      2. Turn one silent assumption into a throwing assertion.
+      3. Create a quality report for the portal from web-024.
+      4. Diagnose a test that passes before an interaction later throws.
+      5. Repeat the review after narrow resizing and a saved-page reload.
+      6. Explain what evidence would justify a production readiness claim.
+    -->
     <main>
-      <h1>Browser quality: tests, performance and independent review</h1>
-      <!-- Build your own document here. The reference is separate. -->
+      <h1>Quality evidence</h1>
+      <button id="run-check" type="button">Check local structure</button>
+      <output id="quality" aria-live="polite">Not checked yet.</output>
+      <ul>
+        <li>Keyboard interaction: record an observation.</li>
+        <li>Narrow width: record an observation.</li>
+        <li>Zoom and contrast: record an observation.</li>
+      </ul>
     </main>
+    <script>
+      "use strict";
+
+      // Worked example 1: An actionable assertion
+      // if (document.querySelectorAll('main').length !== 1) {
+      //   throw new Error('Expected one main region');
+      // }
+
+      // Worked example 2: A bounded measurement
+      // const start = performance.now();
+      // const values = [3, 1, 2].toSorted((a, b) => a - b);
+      // console.log('Local sorting task ms:', performance.now() - start);
+
+      // Write the JavaScript for the exercises here.
+    </script>
   </body>
 </html>

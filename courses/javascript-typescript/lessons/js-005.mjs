@@ -1,11 +1,20 @@
 // Answer-free learner source. Save your own copy before editing.
-// Exercise 1: Map and filter without changing input
-// Double 1, 2, 3, 4 and keep results above 4.
-// Expected: 6, 8; original array unchanged.
+// Exercise 1: Map and filter without changing input: change one input
+// Copy Example A into a scratch `main.mjs` and change `const original = [1, 2, 3, 4];` to
+// `const original = [2, 2, 3, 4];`. Before running it, predict which check fails and which
+// value it now sees; then run it and restore the original line.
+// Expected: The changed run fails with an `AssertionError` at the check
+// `assert.deepEqual(original, [1, 2, 3, 4])`. Restoring the original line brings back the
+// worked observation: 6, 8; original array unchanged.
 
-// Exercise 2: Supply a reduction identity
-// Sum an empty array and 1, 2, 3 using initial 0.
-// Expected: 0 and 6.
+// Exercise 2: Supply a reduction identity: diagnose an edited check
+// A careless edit changed a check in Example B so that it reads `assert.equal([1, 2,
+// 3].reduce((sum, value) => sum - value, 0), 6);`. Run Example B with that line, explain why
+// the edited check now fails for the same program state, and restore it.
+// Expected: Before the repair the run fails with an `AssertionError` at the check
+// `assert.equal([1, 2, 3].reduce((sum, value) => sum + value, 0), 6)`; after it the line
+// reads `assert.equal([1, 2, 3].reduce((sum, value) => sum + value, 0), 6);` again and 0 and
+// 6.
 
 // Exercise 3: Expose default sort coercion
 // Sort 10, 2, 1 with default and numeric comparators.

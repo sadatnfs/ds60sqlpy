@@ -6,13 +6,13 @@ Advanced, approximately 120 minutes. Direct prerequisites: `java-032`
 
 ## Learning objectives
 
-Explain allowlist, path containment, resource bound, safe diagnostic using a concrete program. Trace the normal execution, identify its boundary assumptions and make a failure case observable. The first investigation is Create `input.txt` inside an owned root and read at most 10 bytes. The final exercise transfers the mechanism to build a restricted diagnostic record.
+Enforce secure file and operation boundaries that reject traversal, symbolic links, oversized input and unknown commands. Along the way, explain allowlist, path containment, resource bound, safe diagnostic using a concrete program. Trace the normal execution, identify its boundary assumptions and make a failure case observable. Exercises 1 and 2 start from the worked examples; the authored investigations begin with this task: Write five bytes and request a four-byte maximum. The final exercise transfers the mechanism to build a restricted diagnostic record.
 
 ## Purpose and mental model
 
-An application boundary converts untrusted input into a limited set of permitted operations. Type and syntax checks are necessary but not sufficient:an identifier can be avalidString while naming an unauthorized file,and an accepted operation can still consume unbounded resources. Prefer explicit operation and identifier allowlists when the task is small. Keep validation close to the resource use and report a named failure instead of silently choosing a broader fallback.
+An application boundary converts untrusted input into a limited set of permitted operations. Type and syntax checks are necessary but not sufficient:an identifier can be a valid String while naming an unauthorized file, and an accepted operation can still consume unbounded resources. Prefer explicit operation and identifier allowlists when the task is small. Keep validation close to the resource use and report a named failure instead of silently choosing a broader fallback.
 
-Filesystem containment has both lexical andreal-path concerns. Normalizing awaydot segments can detect a simple parent traversal,but a symbolic link can redirect a seemingly contained path. This lesson uses an owned temporary directory and known fixtures,checks both forms of containment,and bounds reads with limit+1 bytes. It does not claim to be a race-proof sandbox against a concurrent adversary changing the filesystem. Logs retain selected metadata rather than copying secrets orrawsource bodies.
+Filesystem containment has both lexical and real-path concerns. Normalizing away dot segments can detect a simple parent traversal, but a symbolic link can redirect a seemingly contained path. This lesson uses an owned temporary directory and known fixtures, checks both forms of containment, and bounds reads with limit+1 bytes. It does not claim to be a race-proof sandbox against a concurrent adversary changing the filesystem. Logs retain selected metadata rather than copying secrets or raw source bodies.
 
 ## Vocabulary and concepts
 
@@ -41,7 +41,7 @@ The public class name and source filename must agree. Each worked example below 
 
 ## Syntax anatomy and execution trace
 
-Resolve a relative path under a real root,normalize it,and reject absolute orescaping paths. Reject symbolic-linkcomponents under this simple policy,then check the existing realpath remains inside the root. Read atmostlimit+1bytes and reject an oversized payload. A fixed dispatcher maps admitted operation names to known functions;it never passes input to a shell or reflection loader. Build logs from allowlisted metadata schema.
+Resolve a relative path under a real root, normalize it, and reject absolute or escaping paths. Reject symbolic-link components under this simple policy, then check the existing real path remains inside the root. Read at most limit+1 bytes and reject an oversized payload. A fixed dispatcher maps admitted operation names to known functions; it never passes input to a shell or reflection loader. Build logs from allowlisted metadata schema.
 
 ## Worked example / walkthrough
 
@@ -110,7 +110,7 @@ public class Main {
 
 ### Example B: Reject lexical traversal and absolute paths
 
-A path's string appearance is not a permission decision. Normalization andrelative-path validation make the simple boundary explicit.
+A path's string appearance is not a permission decision. Normalization and relative-path validation make the simple boundary explicit.
 
 ```java
 import java.util.*;
@@ -189,29 +189,29 @@ Read the source from the entry point and name each value before executing it. Id
 
 ## Exercises
 
-1. **Read an admitted owned file.** Create `input.txt` inside an owned root and read at most 10 bytes.
-   **Expected:** content hello.
-   **Verify:** Compare your assertion values or captured diagnostic with content hello.
+1. **Read an admitted owned file: change one input.** Copy Example A into a scratch `Main.java` and change `java.nio.file.Files.writeString(root.resolve("input.txt"), "hello");` to `java.nio.file.Files.writeString(root.resolve("input.txt"), "hello!");`. Before running it with `java -ea Main`, predict which assertion fails and which value it now sees; then run it and restore the original line.
+   **Expected:** The changed run fails with an `AssertionError` from the assertion on `new String(readBounded(root, "input.txt", 10), java.nio.charset.StandardCharsets.UTF_8).equals("hello")`. Restoring the original line brings back the worked observation: content hello.
+   **Verify:** Compare your written prediction with the reported `AssertionError` and its stack-trace line, and name the value that made `new String(readBounded(root, "input.txt", 10), java.nio.charset.StandardCharsets.UTF_8).equals("hello")` false. After restoring the line, the program completes without an `AssertionError` again.
 
-2. **Reject lexical traversal and absolute paths.** Attempt../outside.txt andanabsolutechildpath.
-   **Expected:** SecurityException for both.
-   **Verify:** Compare your assertion values or captured diagnostic with SecurityException for both.
+2. **Reject lexical traversal and absolute paths: debug a regression.** A regression changed `rejected = true;` to `rejected = false;` in the code that Example B adds after Example A. Run Example B with that change, use the failing assertion to explain the defect and repair it without changing the assertion.
+   **Expected:** Before the repair the run fails with an `AssertionError` from the assertion on `rejected`; after it the line reads `rejected = true;` again and securityException for both.
+   **Verify:** Keep the failing and the repaired runs. Explain why the changed token alters the value tested by `rejected` for this input.
 
-3. **Enforce the byte limit after reading a bounded amount.** Writefivebytes and request a four-byte maximum.
+3. **Enforce the byte limit after reading a bounded amount.** Write five bytes and request a four-byte maximum.
    **Expected:** IOException for oversized content.
-   **Verify:** Compare your assertion values or captured diagnostic with IOException for oversized content.
+   **Verify:** Keep an assertion equivalent to `rejected`. As a control, change `readBounded(root, "large.txt", 4);` to `readBounded(root, "large.txt", 5);`: the run must fail with an `AssertionError` from the assertion on `rejected`. Restore the line before continuing.
 
-4. **Reject symbolic-link access under the declared policy.** Create a link inside the owned root to another owned file and attempt to read throughit.
-   **Expected:** link rejected when platform supports creation;unsupported capability recorded explicitly.
-   **Verify:** Compare your assertion values or captured diagnostic with link rejected when platform supports creation;unsupported capability recorded explicitly.
+4. **Reject symbolic-link access under the declared policy.** Create a link inside the owned root to another owned file and attempt to read through it.
+   **Expected:** link rejected when platform supports creation; unsupported capability recorded explicitly.
+   **Verify:** Keep an assertion equivalent to `rejected`. As a control, change `rejected = true;` to `rejected = false;`: the run must fail with an `AssertionError` from the assertion on `rejected`. Restore the line before continuing.
 
-5. **Keep operation names out of code execution.** Admitonlyread_fixture andrejectrun_shell.
-   **Expected:** unknownoperationIllegalArgumentException.
-   **Verify:** Compare your assertion values or captured diagnostic with unknownoperationIllegalArgumentException.
+5. **Keep operation names out of code execution.** Admit only read_fixture and reject run_shell.
+   **Expected:** unknown operation IllegalArgumentException.
+   **Verify:** Keep an assertion equivalent to `rejected`. As a control, change `if (!operations.containsKey("run_shell")) throw new IllegalArgumentException(` to `if (operations.containsKey("run_shell")) throw new IllegalArgumentException(`: the run must fail with an `AssertionError` from the assertion on `rejected`. Restore the line before continuing.
 
-6. **Build a restricted diagnostic record.** Copy onlyrequest_id,operation and status from a map containing token andsource_text.
+6. **Build a restricted diagnostic record.** Copy only request_id, operation and status from a map containing token and source_text.
    **Expected:** diagnostic excludes both sensitive fields.
-   **Verify:** Compare your assertion values or captured diagnostic with diagnostic excludes both sensitive fields.
+   **Verify:** Keep an assertion equivalent to `!safe.containsKey("token") && !safe.containsKey("source_text") && safe.size() == 3` and confirm that `java -ea Main` completes. Then name an input that would make it fail and explain which value changes.
 
 ## Common pitfalls and diagnosis
 
@@ -221,7 +221,14 @@ Do not replace a precise exception with a catch-all that returns a plausible def
 
 ## Progressive hints
 
-First reconstruct the values and identities in the worked example. Next isolate the line that changes the result when one input is altered. Finally compare the normal and failure paths with the stated contract. Use a small table of input, expected value, actual value and exception type. Ask for one hint about the first incorrect assumption before requesting the entire reference implementation.
+Read one hint at a time and attempt the exercise again before reading the next. Keep a small table of input, expected value, actual value and exception type. Ask for one hint about the first incorrect assumption before requesting the entire reference implementation.
+
+- **Exercise 1:** First restate the expected observation: content hello. Then list the values read by `new String(readBounded(root, "input.txt", 10), java.nio.charset.StandardCharsets.UTF_8).equals("hello")` and trace each one from its declaration. Finally, compute the asserted value with `java.nio.file.Files.writeString(root.resolve("input.txt"), "hello!");` in place before running.
+- **Exercise 2:** First restate the expected observation: securityException for both. Then list the values read by `rejected` and trace each one from its declaration. Finally, compare `rejected = false;` with the same line in Example B and state the claim each version makes.
+- **Exercise 3:** First restate the expected observation: IOException for oversized content. Then list the values read by `rejected` and trace each one from its declaration. Finally, predict the effect of changing `readBounded(root, "large.txt", 4);` to `readBounded(root, "large.txt", 5);` before running anything.
+- **Exercise 4:** First restate the expected observation: link rejected when platform supports creation; unsupported capability recorded explicitly. Then list the values read by `rejected` and trace each one from its declaration. Finally, predict the effect of changing `rejected = true;` to `rejected = false;` before running anything.
+- **Exercise 5:** First restate the expected observation: unknown operation IllegalArgumentException. Then list the values read by `rejected` and trace each one from its declaration. Finally, predict the effect of changing `if (!operations.containsKey("run_shell")) throw new IllegalArgumentException(` to `if (operations.containsKey("run_shell")) throw new IllegalArgumentException(` before running anything.
+- **Exercise 6:** First restate the expected observation: diagnostic excludes both sensitive fields. Then list the values read by `!safe.containsKey("token") && !safe.containsKey("source_text") && safe.size() == 3` and trace each one from its declaration. Finally, name one input that would make `!safe.containsKey("token") && !safe.containsKey("source_text") && safe.size() == 3` false.
 
 ## Self-check and retrieval
 
@@ -233,7 +240,7 @@ Preserve the saved pad and the six exercise observations. Continue to the next l
 
 ## Sources and verification status
 
-[Official Java21 API or language reference](https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/nio/file/Path.html), reviewed2026-10-22. Examples and exercise fixtures are original course material. Use the [validation guide](../../../docs/validation.md) and CI artifacts for the exact revision and platform to inspect actual compile/run results. Authoring, parsing, compilation, execution and learner mastery are separate forms of evidence.
+[Official Java 21 API or language reference](https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/nio/file/Path.html), reviewed 2026-10-22. Examples and exercise fixtures are original course material. Use the [validation guide](../../../docs/validation.md) and CI artifacts for the exact revision and platform to inspect actual compile/run results. Authoring, parsing, compilation, execution and learner mastery are separate forms of evidence.
 
 ## Ask an AI tutor about this lesson
 
@@ -243,7 +250,7 @@ Read courses/java/guides/java-033.md and courses/java/lessons/java-033.java. Dir
 Explain the mechanism, ask for a prediction, review my attempt, give one hint,
 request compiler/runtime evidence, and ask a fresh retrieval question.
 Keep courses/java/solutions/ closed until I request comparison or show an attempt.
-Use Java21 and the declared offline fixture. Done when I can explain the state
+Use Java 21 and the declared offline fixture. Done when I can explain the state
 transitions, pass all six exercise contracts, diagnose one failure and solve a
 new boundary case without copying the solution.
 ```

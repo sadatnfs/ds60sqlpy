@@ -4,15 +4,15 @@ The executable reference is `julia-026_reference.jl`. Its checks cover the state
 
 ## 1. Trace a matrix step
 
-The products[10,12] plus[1,-1] give[11,11].
+The products `[10, 12]` plus `[1, -1]` give `[11, 11]`.
 
-**Expected observation:** The final vector is[11,11].
+**Expected observation:** The final vector is `[11, 11]`.
 
 ## 2. Repeat with new inputs
 
 Multiplication overwrites both entries before adding the bias.
 
-**Expected observation:** The new vector is[5,5].
+**Expected observation:** The new vector is `[5, 5]`.
 
 ## 3. Debug a width mismatch
 

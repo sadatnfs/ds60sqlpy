@@ -8,9 +8,11 @@ An array owns a fixed number of elements of one type. Its valid indices run from
 
 int values[3] allocates three integers. A partial initializer fills remaining elements with zero. sizeof values / sizeof values[0] derives an element count only where values is still an array. A parameter written int values[] is adjusted to a pointer parameter. Pass the logical length explicitly and document whether a null pointer is permitted for length zero. Never dereference the one-past position.
 
-## Exercise 1: Derive a local element count
+## Exercise 1: Derive a local element count: predict an edited check
 
-Create a three-element array and calculate its count with sizeof.
+Copy worked example 1 into a scratch pad and change `CHECK(n == 3);` to `CHECK(n == 4);` inside its CHECK. Before running, predict whether the CHECK still holds and explain why; then restore it.
+
+The unchanged code is worked example 1:
 
 ```c
 int values[] = {2, 4, 6};
@@ -18,20 +20,22 @@ size_t n = sizeof values / sizeof values[0];
 CHECK(n == 3);
 ```
 
-**Expected:** The count is 3.
+**Expected:** The changed run stops with `Check failed` at the CHECK on `n == 3`. Restoring the original line brings back the worked observation: the count is 3.
 
 The expression works because values is an array in this scope. Moving it unchanged into a pointer-taking helper would change its meaning.
 
-## Exercise 2: Pass an explicit length
+## Exercise 2: Pass an explicit length: debug a regression
 
-Sum three elements through a pointer-and-length API.
+A regression changed one token in worked example 2, so one line now reads `int values[] = {3, 4, 6};`. Run worked example 2 with that line, use the failing CHECK to locate the defect and repair it without changing the CHECK.
+
+The unchanged code is worked example 2:
 
 ```c
 int values[] = {2, 4, 6};
 CHECK(sum_items(values, 3) == 12);
 ```
 
-**Expected:** The result is 12.
+**Expected:** Before the repair the run stops with `Check failed` at the CHECK on `sum_items(values, 3) == 12`; after it the line reads `int values[] = {2, 4, 6};` again and the result is 12.
 
 The API relies on the caller providing at least three live elements. The pointer alone cannot prove that extent.
 

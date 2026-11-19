@@ -13,7 +13,7 @@ Start from the [main Docker instructions](../../README.md). Select this subject 
 | [mle-003: Build features without losing the request population](guides/mle-003.md) | beginner | Build features at the decision grain while preserving all requests and missingness categories. |
 | [mle-004: Validate structural and semantic feature contracts](guides/mle-004.md) | beginner | Validate a feature interface structurally and semantically. |
 | [mle-005: Validation that matches deployment and time](guides/mle-005.md) | beginner | Design evaluation around the target population and information boundary. |
-| [mle-006: Register and retrieve actual Feast historical features](guides/mle-006.md) | beginner | Qualify a real feature-store retrieval against independent temporal and coverage checks. |
+| [mle-006: Register and retrieve actual Feast historical features](guides/mle-006.md) | intermediate | Qualify a real feature-store retrieval against independent temporal and coverage checks. |
 | [mle-007: Materialization, online retrieval and freshness decisions](guides/mle-007.md) | intermediate | Populate a real online feature store and enforce a consumer freshness contract. |
 | [mle-008: One fitted transformation for training and serving](guides/mle-008.md) | intermediate | Package and use a single fitted preprocessing/model interface. |
 | [mle-009: Model evaluation, calibration and decision utility](guides/mle-009.md) | intermediate | Evaluate probabilities, ranking and actions with separately interpreted evidence. |

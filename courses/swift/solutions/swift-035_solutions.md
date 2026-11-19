@@ -1,6 +1,6 @@
 # swift-035: explanation and comparison
 
-Attempt the six guide tasks before opening this comparison. The executable reference is [swift-035_solution.swift](swift-035_solution.swift). Its assertions are always active under the prepared classroom compile settings.
+Attempt the six guide tasks before opening this comparison. The executable reference is [swift-035_solution.swift](swift-035_solution.swift). It runs both worked examples and the reference answers below, and its assertions are always active under the prepared classroom compile settings.
 
 ## Why the two examples differ
 
@@ -8,21 +8,59 @@ Attempt the six guide tasks before opening this comparison. The executable refer
 
 **Handle empty storage without dereferencing:** No base-address dereference is needed, avoiding assumptions about a pointer for empty storage. An empty buffer is valid to inspect by count.
 
-## Reason through the six tasks
+## Task answers
 
-1. **Predict and explain.** Identify the pointer lifetime and the returned owned result.
+### Task 1: Predict and explain
 
-2. **Guided modification.** Compute a maximum with an explicit empty-input policy.
+Identify the pointer lifetime and the returned owned result.
 
-3. **Independent construction.** Wrap a scoped read-only buffer operation behind a safe function contract.
+No separate reference answer has been written for this task. Example A is the evidence to compare with: Scoped access limits the lifetime reasoning to one visible closure. The result escapes as an integer while the borrowed pointer does not.
 
-4. **Diagnose a defect.** Diagnose returning the buffer baseAddress for later use.
+### Task 2: Guided modification
 
-5. **Boundary evidence.** Test empty, singleton and multi-element buffers.
+Compute a maximum with an explicit empty-input policy.
 
-6. **Transfer and justify.** Write an interoperability checklist covering ownership, alignment, initialization and error reporting.
+No separate reference answer has been written for this task. Start from Example B: No base-address dereference is needed, avoiding assumptions about a pointer for empty storage. An empty buffer is valid to inspect by count.
 
-For tasks 1 and 2, use the checked values and mechanism trace in the two examples. For task 3, choose names that expose the input and result contract and retain the same invariants. For task 4, the diagnosed mistakes below supply a concrete wrong assumption: preserve its counterexample before repairing it. Task 5 needs an explicit expected value or documented rejection at the boundary, not just successful execution. For task 6, explain what changes in the new context and which part of the original mechanism remains applicable. Several representations may satisfy this transfer task; justify the choice rather than treating this reference as the only architecture.
+### Task 3: Independent construction
+
+Wrap a scoped read-only buffer operation behind a safe function contract.
+
+**Reference answer.** It runs as the `Task 3` block of the reference program.
+
+```swift
+/// Returns the sum of the values; the buffer pointer never escapes this call.
+func total(of values: [Int]) -> Int {
+  values.withUnsafeBufferPointer { buffer in
+    var sum = 0
+    for value in buffer { sum += value }
+    return sum
+  }
+}
+precondition(total(of: [2, 3, 4]) == 9 && total(of: []) == 0)
+```
+
+**Observe:** The safe wrapper returns 9 for [2, 3, 4] and 0 for an empty array.
+
+Callers see an ordinary function; the unsafe pointer exists only inside the closure and is read-only, so it cannot outlive the array.
+
+### Task 4: Diagnose a defect
+
+Diagnose returning the buffer baseAddress for later use.
+
+No reference answer has been written for this task yet. The wrong assumptions to look for are this lesson's pitfalls: Unsafe does not disable all runtime checks or make an operation faster. Never infer lifetime from a pointer value remaining numerically unchanged. Keep native API ownership documented and avoid unsafe code when safe collections suffice.
+
+### Task 5: Boundary evidence
+
+Test empty, singleton and multi-element buffers.
+
+No reference answer has been written for this task yet. Write the expected value or documented rejection for each boundary before running it, and compare with the checks in Example A (Borrow only within the closure) and Example B (Handle empty storage without dereferencing).
+
+### Task 6: Transfer and justify
+
+Write an interoperability checklist covering ownership, alignment, initialization and error reporting.
+
+No single reference answer exists: several designs can satisfy this transfer task. Justify yours against the mechanism described below and the vocabulary entry **Pointer**, and state one limitation of your choice.
 
 ## Mechanism and diagnostic reasoning
 
@@ -36,4 +74,4 @@ Unsafe does not disable all runtime checks or make an operation faster. Never in
 
 ## Review before continuing
 
-The reference checks the worked scenarios, including their boundary distinctions. Your independent and transfer artifacts may have additional checks. Compare observations rather than only source text. Preserve any new regression case you discover and explain why it would reject a plausible wrong implementation. External project steps require their own build and platform evidence and are not established by a portable reference passing.
+Run the reference and confirm that it prints `swift-035: passed`, then reconstruct one boundary case from memory and explain which check would reject a plausible wrong implementation. External project steps need their own build and platform evidence; a passing portable reference does not establish them.

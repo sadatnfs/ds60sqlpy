@@ -1,6 +1,6 @@
 # csharp-003: explanation and comparison
 
-Attempt the six guide tasks before opening this comparison. The executable reference is [csharp-003_solution.cs](csharp-003_solution.cs). Its assertions are always active under the prepared classroom compile settings.
+Attempt the six guide tasks before opening this comparison. The executable reference is [csharp-003_solution.cs](csharp-003_solution.cs). It runs both worked examples and the reference answers below, and its assertions are always active under the prepared classroom compile settings.
 
 ## Why the two examples differ
 
@@ -8,21 +8,57 @@ Attempt the six guide tasks before opening this comparison. The executable refer
 
 **Preserve decimal intent:** A rounding difference can be a policy disagreement rather than a compiler defect. Write the expected rule before the implementation. Two valid midpoint policies produce 2.34 and 2.35.
 
-## Reason through the six tasks
+## Task answers
 
-1. **Predict and explain.** Predict which arithmetic operation throws and explain the representation boundary.
+### Task 1: Predict and explain
 
-2. **Guided modification.** Replace maximum plus one with minimum minus one and check the failure.
+Predict which arithmetic operation throws and explain the representation boundary.
 
-3. **Independent construction.** Calculate a decimal subtotal and tax, rounding only the final payable amount.
+No separate reference answer has been written for this task. Example A is the evidence to compare with: The normal and failure paths separate an exceptional boundary from ordinary arithmetic. The maximum int plus one is rejected; 100 plus 20 is accepted.
 
-4. **Diagnose a defect.** Diagnose a price parsed as double and later converted to decimal. Explain where approximation entered.
+### Task 2: Guided modification
 
-5. **Boundary evidence.** Compare midpoint values immediately below, at and above the rounding boundary.
+Replace maximum plus one with minimum minus one and check the failure.
 
-6. **Transfer and justify.** Design a quantity and currency contract that states overflow, rounding and invalid-input behavior.
+No separate reference answer has been written for this task. Start from Example B: A rounding difference can be a policy disagreement rather than a compiler defect. Write the expected rule before the implementation. Two valid midpoint policies produce 2.34 and 2.35.
 
-For tasks 1 and 2, use the checked values and mechanism trace in the two examples. For task 3, choose names that expose the input and result contract and retain the same invariants. For task 4, the diagnosed mistakes below supply a concrete wrong assumption: preserve its counterexample before repairing it. Task 5 needs an explicit expected value or documented rejection at the boundary, not just successful execution. For task 6, explain what changes in the new context and which part of the original mechanism remains applicable. Several representations may satisfy this transfer task; justify the choice rather than treating this reference as the only architecture.
+### Task 3: Independent construction
+
+Calculate a decimal subtotal and tax, rounding only the final payable amount.
+
+**Reference answer.** It runs as the `Task 3` block of the reference program.
+
+```csharp
+decimal[] prices = { 19.99m, 5.01m, 0.35m };
+decimal subtotal = prices.Sum();
+decimal tax = subtotal * 0.0825m;
+decimal payable = Math.Round(subtotal + tax, 2, MidpointRounding.ToEven);
+Check(subtotal == 25.35m, "exact decimal subtotal");
+Check(tax == 2.091375m, "unrounded tax");
+Check(payable == 27.44m, "rounded only at the end");
+```
+
+**Observe:** Subtotal 25.35, unrounded tax 2.091375 and payable 27.44.
+
+decimal keeps the cents exact, the tax keeps its full precision, and only the final payable amount is rounded once with a named midpoint rule.
+
+### Task 4: Diagnose a defect
+
+Diagnose a price parsed as double and later converted to decimal. Explain where approximation entered.
+
+No reference answer has been written for this task yet. The wrong assumptions to look for are this lesson's pitfalls: `checked` does not turn floating-point arithmetic into exact decimal arithmetic. Rounding before aggregation can produce a different total than rounding afterward. Never use an unexplained tolerance to hide a unit mismatch.
+
+### Task 5: Boundary evidence
+
+Compare midpoint values immediately below, at and above the rounding boundary.
+
+No reference answer has been written for this task yet. Write the expected value or documented rejection for each boundary before running it, and compare with the checks in Example A (Reject overflowing counts) and Example B (Preserve decimal intent).
+
+### Task 6: Transfer and justify
+
+Design a quantity and currency contract that states overflow, rounding and invalid-input behavior.
+
+No single reference answer exists: several designs can satisfy this transfer task. Justify yours against the mechanism described below and the vocabulary entry **Overflow**, and state one limitation of your choice.
 
 ## Mechanism and diagnostic reasoning
 
@@ -36,4 +72,4 @@ Use `decimal` when a decimal representation matches the domain, such as many mon
 
 ## Review before continuing
 
-The reference checks the worked scenarios, including their boundary distinctions. Your independent and transfer artifacts may have additional checks. Compare observations rather than only source text. Preserve any new regression case you discover and explain why it would reject a plausible wrong implementation. External project steps require their own build and platform evidence and are not established by a portable reference passing.
+Run the reference and confirm that it prints `csharp-003: passed`, then reconstruct one boundary case from memory and explain which check would reject a plausible wrong implementation. External project steps need their own build and platform evidence; a passing portable reference does not establish them.

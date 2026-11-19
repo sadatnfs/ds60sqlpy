@@ -19,7 +19,7 @@ def case_09():
         theta = pm.Deterministic("theta", mu + tau * z, dims="group")
         sigma = pm.HalfNormal("sigma", sigma=2)
         pm.Normal("outcome", mu=theta[group], sigma=sigma, observed=y, dims="observation")
-        prior = pm.sample_prior_predictive(samples=200, random_seed=1809)
+        prior = pm.sample_prior_predictive(draws=200, random_seed=1809)
         fitted = pm.sample(
             draws=600,
             tune=600,

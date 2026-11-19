@@ -308,4 +308,4 @@ if __name__ == "__main__":
 
 ## Interpretation
 
-Deliver a connected local ML product with actual tool execution and a reviewable acceptance decision. Use the owned service project to test persistent HTTP operation and recovery, then specify the additional evidence needed before adapting the design to a real organization and population.
+Use the owned service project to test persistent HTTP operation and recovery, then specify the additional evidence needed before adapting the design to a real organization and population.

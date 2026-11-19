@@ -21,8 +21,8 @@
         "row grain"
       ],
       "outcome": "Construct and verify a typed table with a stated row grain.",
-      "lab": "Run the two complete local cases, then make and explain the six specified changes while preserving the stated row and type contracts.",
-      "verification": "Run the assertions and inspect polars-001 reference checks passed. Interpret the counterexample in the guide."
+      "lab": "Add a revenue expression to a three-row orders table and confirm that it keeps one row per order and a total of 30, then filter to an empty frame and check that its Int64 and String schema survives.",
+      "verification": "Run the starter and compare both printed results with the guide. Worked case 1: Revenue is [10, 8, 12], total 30; input shape remains 3 by 3 and output shape is 3 by 4. Worked case 2: The empty frame has 0 rows and the original Int64/String schema; selecting label,id produces that order."
     },
     {
       "id": "polars-002",
@@ -41,8 +41,8 @@
         "dependency ordering"
       ],
       "outcome": "Build a transformation whose dependency stages are explicit.",
-      "lab": "Run the two complete local cases, then make and explain the six specified changes while preserving the stated row and type contracts.",
-      "verification": "Run the assertions and inspect polars-002 reference checks passed. Interpret the counterexample in the guide."
+      "lab": "Compare one with_columns call that reads the original x with two staged calls that read the updated x, then build a when/then recognized amount and observe the ColumnNotFoundError for a missing column.",
+      "verification": "Run the starter and compare both printed results with the guide. Worked case 1: The same-call multiplication is [10, 20, 30]; the staged multiplication is [20, 30, 40]. Worked case 2: Recognized amounts are [5, 0, 11]; selecting a missing column is rejected."
     },
     {
       "id": "polars-003",
@@ -62,8 +62,8 @@
         "missingness"
       ],
       "outcome": "Implement a parsing policy that preserves rejected evidence.",
-      "lab": "Run the two complete local cases, then make and explain the six specified changes while preserving the stated row and type contracts.",
-      "verification": "Run the assertions and inspect polars-003 reference checks passed. Interpret the counterexample in the guide."
+      "lab": "Parse text quantities with a non-strict cast, separate malformed tokens from missing ones, watch a strict cast reject the bad token, and check Decimal totals and Int8 narrowing.",
+      "verification": "Run the starter and compare both printed results with the guide. Worked case 1: Record 2 is malformed, record 3 is missing, and parsed units are [2, null, null, 4]. Worked case 2: Decimal total is 0.30; the Int8 conversion gives [127, null]."
     },
     {
       "id": "polars-004",
@@ -83,8 +83,8 @@
         "imputation"
       ],
       "outcome": "Explain how missingness changes a specific calculation.",
-      "lab": "Run the two complete local cases, then make and explain the six specified changes while preserving the stated row and type contracts.",
-      "verification": "Run the assertions and inspect polars-004 reference checks passed. Interpret the counterexample in the guide."
+      "lab": "Count null and NaN separately in a float column, apply an explicit fill policy for each, and trace which rows a filter keeps when the Boolean predicate is null.",
+      "verification": "Run the starter and compare both printed results with the guide. Worked case 1: One null and one NaN are identified; the chosen final values are [1, 0, 0, 4]. Worked case 2: The default filter retains id 1; an explicit unknown-is-true policy retains ids 1 and 3."
     },
     {
       "id": "polars-005",
@@ -104,8 +104,8 @@
         "observed count"
       ],
       "outcome": "Build an aggregate whose numerator, denominator and weighting unit are explicit.",
-      "lab": "Run the two complete local cases, then make and explain the six specified changes while preserving the stated row and type contracts.",
-      "verification": "Run the assertions and inspect polars-005 reference checks passed. Interpret the counterexample in the guide."
+      "lab": "Pool successes and trials per group instead of averaging row rates, and summarize groups whose values are partly or wholly missing without losing their row and observation counts.",
+      "verification": "Run the starter and compare both printed results with the guide. Worked case 1: The pooled rates are \\(A=0.1\\) and \\(B=0.5\\); the equal-row average for \\(A\\) is approximately \\(0.545\\). Worked case 2: Group A has 2 rows, 1 observed value and mean 2; group B has 1 row, 0 observed values and null mean."
     },
     {
       "id": "polars-006",
@@ -126,8 +126,8 @@
         "anti join"
       ],
       "outcome": "Enrich a fact table while proving its grain and totals remain valid.",
-      "lab": "Run the two complete local cases, then make and explain the six specified changes while preserving the stated row and type contracts.",
-      "verification": "Run the assertions and inspect polars-006 reference checks passed. Interpret the counterexample in the guide."
+      "lab": "Enrich orders with a validated many-to-one join, reproduce the fanout a duplicated dimension key causes, and audit membership with semi and anti joins under an explicit null-key policy.",
+      "verification": "Run the starter and compare both printed results with the guide. Worked case 1: Correct rows 3/total 21; duplicate dimension gives 5 rows/total 33; m:1 validation rejects it. Worked case 2: Default matching retains id 1; anti retains ids 2 and 3; explicit null matching also retains id 3."
     },
     {
       "id": "polars-007",
@@ -147,8 +147,8 @@
         "event time"
       ],
       "outcome": "Define time semantics before aggregating a dataset.",
-      "lab": "Run the two complete local cases, then make and explain the six specified changes while preserving the stated row and type contracts.",
-      "verification": "Run the assertions and inspect polars-007 reference checks passed. Interpret the counterexample in the guide."
+      "lab": "Convert UTC timestamps across a daylight-saving change and compare displayed hours with elapsed seconds, then split events into half-open periods so a boundary event is counted once.",
+      "verification": "Run the starter and compare both printed results with the guide. Worked case 1: Displayed hours are [1, 3], while elapsed time is 3,600 seconds. Worked case 2: The first period totals 5, the next totals 5, and all three rows occur exactly once."
     },
     {
       "id": "polars-008",
@@ -169,8 +169,8 @@
         "reconciliation"
       ],
       "outcome": "Reshape a repeated-measurement dataset with a checked compound key.",
-      "lab": "Run the two complete local cases, then make and explain the six specified changes while preserving the stated row and type contracts.",
-      "verification": "Run the assertions and inspect polars-008 reference checks passed. Interpret the counterexample in the guide."
+      "lab": "Unpivot a paired before/after table and pivot it back to the identical frame, then show that duplicate id-period cells are rejected until an aggregation policy is chosen.",
+      "verification": "Run the starter and compare both printed results with the guide. Worked case 1: The long table has four rows and the reconstructed wide table equals its source. Worked case 2: Duplicate cell frequency is 2; an explicit sum is 10; an unspecified aggregation fails."
     },
     {
       "id": "polars-009",
@@ -191,8 +191,8 @@
         "ordering"
       ],
       "outcome": "Create row-preserving historical features with explicit ordering.",
-      "lab": "Run the two complete local cases, then make and explain the six specified changes while preserving the stated row and type contracts.",
-      "verification": "Run the assertions and inspect polars-009 reference checks passed. Interpret the counterexample in the guide."
+      "lab": "Sort events by customer and time before computing running and previous values with over, then center values on a group mean while keeping every input row.",
+      "verification": "Run the starter and compare both printed results with the guide. Worked case 1: Customer A running totals are [2, 7, 11], customer B has 7, and first predecessors are null. Worked case 2: Window output has three rows; grouped means have two rows."
     },
     {
       "id": "polars-010",
@@ -213,8 +213,8 @@
         "equivalence"
       ],
       "outcome": "Explain a lazy query in terms of its requested result and observable execution plan.",
-      "lab": "Run the two complete local cases, then make and explain the six specified changes while preserving the stated row and type contracts.",
-      "verification": "Run the assertions and inspect polars-010 reference checks passed. Interpret the counterexample in the guide."
+      "lab": "Write a small Parquet file, build a lazy scan with a filter and projection, read its optimized plan, and show that filtering before or after a group mean changes the result.",
+      "verification": "Run the starter and compare both printed results with the guide. Worked case 1: Ids [2, 3] have doubled values [24, 40], and the result schema contains exactly two fields. Worked case 2: Filtering group means retains only B; filtering values first retains A and B."
     },
     {
       "id": "polars-011",
@@ -235,8 +235,8 @@
         "quarantine"
       ],
       "outcome": "Publish a small typed artifact with independently checked readback.",
-      "lab": "Run the two complete local cases, then make and explain the six specified changes while preserving the stated row and type contracts.",
-      "verification": "Run the assertions and inspect polars-011 reference checks passed. Interpret the counterexample in the guide."
+      "lab": "Combine two Parquet parts through scan_parquet and sink_parquet, verify the readback values and schema, and quarantine a malformed CSV amount instead of coercing it.",
+      "verification": "Run the starter and compare both printed results with the guide. Worked case 1: The combined artifact contains ids [1, 2, 3] with total value 10.5. Worked case 2: Id 2 is rejected and accepted numeric values total 6."
     },
     {
       "id": "polars-012",
@@ -256,8 +256,8 @@
         "round trip"
       ],
       "outcome": "Move a typed table across an Arrow boundary while preserving its logical contract.",
-      "lab": "Run the two complete local cases, then make and explain the six specified changes while preserving the stated row and type contracts.",
-      "verification": "Run the assertions and inspect polars-012 reference checks passed. Interpret the counterexample in the guide."
+      "lab": "Round-trip a table with a null through Arrow and confirm values and validity, then cast statuses to an ordered Enum and observe the rejection of an unknown category.",
+      "verification": "Run the starter and compare both printed results with the guide. Worked case 1: Values and schema round-trip; the Arrow value column has one null. Worked case 2: Business order is new, paid, shipped; unknown is rejected."
     },
     {
       "id": "polars-013",
@@ -277,8 +277,8 @@
         "grain"
       ],
       "outcome": "Normalize nested events with an explicit population and identity contract.",
-      "lab": "Run the two complete local cases, then make and explain the six specified changes while preserving the stated row and type contracts.",
-      "verification": "Run the assertions and inspect polars-013 reference checks passed. Interpret the counterexample in the guide."
+      "lab": "Count list lengths before exploding so empty and unknown item lists are excluded deliberately, then pack and unpack a struct and transform list elements with list.eval.",
+      "verification": "Run the starter and compare both printed results with the guide. Worked case 1: The item table contains two rows for order 1; orders 2 and 3 remain outside that item population. Worked case 2: The struct round trip equals its source; doubled lists are [[2, 4],[6]]."
     },
     {
       "id": "polars-014",
@@ -299,8 +299,8 @@
         "leakage"
       ],
       "outcome": "Reconstruct features using only information eligible at each prediction time.",
-      "lab": "Run the two complete local cases, then make and explain the six specified changes while preserving the stated row and type contracts.",
-      "verification": "Run the assertions and inspect polars-014 reference checks passed. Interpret the counterexample in the guide."
+      "lab": "Match requests to features with backward and forward join_asof, then rebuild point-in-time features that require both event time and known time to precede each cutoff.",
+      "verification": "Run the starter and compare both printed results with the guide. Worked case 1: Backward values are [10, 20, 30]; forward values are [20, 30, null]. Worked case 2: Available values are [10, 30]; the leaking event-only result is [999, 30]."
     },
     {
       "id": "polars-015",
@@ -320,8 +320,8 @@
         "resource budget"
       ],
       "outcome": "Evaluate a query under an explicit engine and resource contract.",
-      "lab": "Run the two complete local cases, then make and explain the six specified changes while preserving the stated row and type contracts.",
-      "verification": "Run the assertions and inspect polars-015 reference checks passed. Interpret the counterexample in the guide."
+      "lab": "Collect the same Parquet-backed aggregate with the in-memory and streaming engines, sink it to Parquet and compare, and contrast a row-wise map with a whole-input reduction.",
+      "verification": "Run the starter and compare both printed results with the guide. Worked case 1: Both engines and the artifact readback return the same five group totals. Worked case 2: The map has 20 rows, the reduction 1 row; sum is 190 and doubled sum is 380."
     },
     {
       "id": "polars-016",
@@ -342,8 +342,8 @@
         "optimizer contract"
       ],
       "outcome": "Use a Python UDF only with an explicit value, type and batching contract.",
-      "lab": "Run the two complete local cases, then make and explain the six specified changes while preserving the stated row and type contracts.",
-      "verification": "Run the assertions and inspect polars-016 reference checks passed. Interpret the counterexample in the guide."
+      "lab": "Show that a native square expression and a map_elements UDF agree on the fixture, then demonstrate how centering separate batches gives different values from centering the whole input.",
+      "verification": "Run the starter and compare both printed results with the guide. Worked case 1: Both implementations return [1, 4, 9]. Worked case 2: Global values are [-3, -2, -1, 6]; batch-centered values are [-0.5, 0.5, -3.5, 3.5]."
     },
     {
       "id": "polars-017",
@@ -364,8 +364,8 @@
         "memory estimate"
       ],
       "outcome": "Produce a reviewable performance comparison with a correctness oracle.",
-      "lab": "Run the two complete local cases, then make and explain the six specified changes while preserving the stated row and type contracts.",
-      "verification": "Run the assertions and inspect polars-017 reference checks passed. Interpret the counterexample in the guide."
+      "lab": "Time five collects of a lazy query while asserting each answer against an independent Python calculation, and separate sequence equality from content equality after a shuffle.",
+      "verification": "Run the starter and compare both printed results with the guide. Worked case 1: All five results match the exact sum; timings are nonnegative and the median is reported without a speed claim. Worked case 2: The sorted values are [1, 2, 3]; bag equality holds after sorting."
     },
     {
       "id": "polars-018",
@@ -387,8 +387,8 @@
         "readback"
       ],
       "outcome": "Publish a feature artifact with explicit derivation and consumption contracts.",
-      "lab": "Run the two complete local cases, then make and explain the six specified changes while preserving the stated row and type contracts.",
-      "verification": "Run the assertions and inspect polars-018 reference checks passed. Interpret the counterexample in the guide."
+      "lab": "Account for every raw event through quarantine and deduplication before aggregating per customer, then publish a Parquet feature file with a SHA-256 receipt and verify its readback.",
+      "verification": "Run the starter and compare both printed results with the guide. Worked case 1: Customer 10 has total 12 from 2 events; customer 20 has total 9 from 1 event; one malformed and one duplicate row are recorded. Worked case 2: Readback preserves two unique customers, the schema and exact artifact hash."
     }
   ]
 }

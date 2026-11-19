@@ -18,12 +18,12 @@ def validate(value):
 
 
 def verify():
-    # Exercise 1: Accept one bounded proposal
+    # Worked example A: Accept one bounded proposal
     proposal = {"tool": "read_fixture", "document_id": "d1"}
     accepted = validate(proposal)
     assert accepted == proposal
 
-    # Exercise 2: Reject an unknown operation
+    # Worked example B: Reject an unknown operation
     try:
         validate({"tool": "run_shell", "document_id": "d1"})
     except ValueError:
@@ -63,6 +63,19 @@ def verify():
     calls.append(checked["tool"])
     result = fixture[checked["document_id"]]
     assert isinstance(result, str) and calls == ["read_fixture"]
+
+    # Exercise 1: Accept the second allowed document
+    second = {"tool": "read_fixture", "document_id": "d2"}
+    copy2 = validate(second)
+    assert copy2 == second and copy2 is not second
+
+    # Exercise 2: Predict a case-changed tool name
+    try:
+        validate({"tool": "READ_FIXTURE", "document_id": "d1"})
+    except ValueError as error:
+        assert str(error) == "unknown tool"
+    else:
+        raise AssertionError("case-changed tool accepted")
     return {"checks": 6, "status": "passed"}
 
 

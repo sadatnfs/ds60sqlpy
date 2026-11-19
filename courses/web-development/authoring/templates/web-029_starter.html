@@ -5,15 +5,37 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Browser trust boundaries: text, origins and policy: my attempt</title>
     <style>
-      /* Implement the lesson-specific CSS. Keep keyboard focus visible. */
+      /* Write the CSS for the exercises here. Keep keyboard focus visible. */
     </style>
   </head>
   <body>
-    <!-- web-029: Build a small rendering demo that separates text handling from URL policy. -->
-    <!-- Save your prediction, then implement the six exercises from the guide. -->
+    <!--
+      web-029 exercises. Hints are in the guide; answers are in the solutions folder.
+      1. Compare origins for the same host on two different ports.
+      2. Render an angle-bracket string safely as visible text.
+      3. Build a small rendering demo that separates text handling from URL policy.
+      4. Explain why CORS is not authorization.
+      5. Inspect the preview without relying on cookies or parent-window access.
+      6. Explain the separate roles of escaping, validation, CSP and sandboxing.
+    -->
     <main>
-      <h1>Browser trust boundaries: text, origins and policy</h1>
-      <!-- Build your own document here. The reference is separate. -->
+      <h1>Keep data as data</h1>
+      <p>The following value is displayed literally:</p>
+      <pre id="untrusted"></pre>
+      <p id="url-policy"></p>
     </main>
+    <script>
+      "use strict";
+
+      // Worked example 1: Data stays text
+      // const value = '<img src=x onerror=alert(1)>';
+      // output.textContent = value;
+
+      // Worked example 2: A URL decision
+      // const url = new URL('https://example.invalid/notes');
+      // const allowed = url.protocol === 'https:';
+
+      // Write the JavaScript for the exercises here.
+    </script>
   </body>
 </html>

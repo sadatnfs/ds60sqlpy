@@ -8,29 +8,33 @@ A worker pool limits active execution but does not create infinite capacity. Que
 
 A jobs channel carries indexed tasks. Start a bounded number of workers, feed jobs and close input. A WaitGroup tracks workers; close results only after Wait completes. Assign each result to its input index. Reject zero workers before starting the pipeline, otherwise a producer may block forever with no consumer.
 
-## 1. Preserve input order
+## 1. Preserve input order: change one input
 
-Square 3, 1 and 2 with two workers.
+Copy worked example 1 into a scratch pad and change `v, err := parallelSquares([]int{3, 1, 2}, 2)` to `v, err := parallelSquares([]int{4, 1, 2}, 2)`. Before running, predict which check fails and which value it now sees; then run it and restore the original line.
+
+The unchanged code is worked example 1:
 
 ```go
 v, err := parallelSquares([]int{3, 1, 2}, 2)
 check(err == nil && len(v) == 3 && v[0] == 9 && v[1] == 1 && v[2] == 4, "order")
 ```
 
-**Expected:** The result is 9, 1, 4.
+**Expected:** The changed run panics with `order` because `err == nil && len(v) == 3 && v[0] == 9 && v[1] == 1 && v[2] == 4` no longer holds. Restoring the original line brings back the worked observation: the result is 9, 1, 4.
 
 Indices restore presentation order. Channel arrival order is not the input-order contract.
 
-## 2. Handle empty input
+## 2. Handle empty input: diagnose an edited check
 
-Run the pool on an empty slice.
+A careless edit changed the check in worked example 2 so that it reads `check(err != nil && len(v) == 0, "empty")`. Run worked example 2 with that line, explain why the edited check now fails for the same program state, and restore it.
+
+The unchanged code is worked example 2:
 
 ```go
 v, err := parallelSquares(nil, 2)
 check(err == nil && len(v) == 0, "empty")
 ```
 
-**Expected:** It returns an empty result and terminates.
+**Expected:** Before the repair the program panics with `empty`; after it the line reads `check(err == nil && len(v) == 0, "empty")` again and it returns an empty result and terminates.
 
 Every channel reaches its owned closure point even when no jobs exist.
 

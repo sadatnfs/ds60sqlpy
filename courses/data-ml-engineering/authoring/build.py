@@ -319,6 +319,12 @@ and architecture/hardware qualification remain separate evidence.
     )
 
 
+def chapter_lab(markdown: str) -> str:
+    cases = re.findall(r"^## Worked case (\d+): (.+)$", markdown, flags=re.M)
+    named = " and ".join(f'worked case {number} ("{title.strip()}")' for number, title in cases)
+    return f"Run the complete program, work through {named}, and explain the changed assumption."
+
+
 def render(root: Path = ROOT) -> dict[Path, str]:
     chapters = load_chapters(root)
     base = root / "courses/data-ml-engineering"
@@ -372,13 +378,12 @@ def render(root: Path = ROOT) -> dict[Path, str]:
                 "runtime": chapter["runtime_profile"],
                 "concepts": chapter["concepts"],
                 "outcome": chapter["outcome"],
-                "lab": (
-                    "Run both complete cases, inspect their checks "
-                    "and explain the changed assumption."
-                ),
+                "lab": chapter_lab(source.read_text("utf-8")),
                 "verification": (
-                    "Compare the actual source-bound observations with the "
-                    "chapter's independent oracles and stated limitations."
+                    f"Run `{Path(chapter['source_path']).name}` on the "
+                    f"`{chapter['runtime_profile']}` profile and confirm that its printed results "
+                    "match the values the chapter states for both worked cases; a completed run "
+                    "is not evidence for the limitations the chapter lists."
                 ),
             }
         )

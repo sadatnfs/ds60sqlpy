@@ -20,11 +20,13 @@ This lesson parses a bounded order record with an identifier, positive quantity 
 
 Use try/catch around the operation whose failure you intend to handle. Check object shape, own keys, primitive types and value bounds explicitly. Number.isInteger and Number.isSafeInteger express different numeric contracts. Throw TypeError for a schema/type violation and RangeError for an out-of-range numeric value under this fixture. Error options can retain cause when translating an operational failure.
 
-## Exercise 1: Accept a valid order
+## Exercise 1: Accept a valid order: change one input
 
-Task: Validate id A, quantity 2, price 125 and calculate integer cents.
+Task: Copy Example A into a scratch `main.mjs` and change `const raw = { id: 'A', quantity: 2, priceCents: 125 };` to `const raw = { id: 'A', quantity: 3, priceCents: 125 };`. Before running it, predict which check fails and which value it now sees; then run it and restore the original line.
 
 The accepted record is a copy with a known schema. It does not expose a reference that an external caller can later edit to invalidate the already checked value.
+
+The unchanged code is the exercise block of Example A:
 
 ```javascript
 const raw = { id: 'A', quantity: 2, priceCents: 125 };
@@ -33,15 +35,17 @@ assert.equal(total(order), 250);
 assert.notEqual(order, raw);
 ```
 
-**Expected:** total 250; fresh accepted object.
+**Expected:** The changed run fails with an `AssertionError` at the check `assert.equal(total(order), 250)`. Restoring the original line brings back the worked observation: total 250; fresh accepted object.
 
-**Verify:** Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.
+**Verify:** Compare your written prediction with the reported `AssertionError`, including its actual and expected values, and name the value that made `assert.equal(total(order), 250)` fail. After restoring the line, the program prints its `{"checks":1,"status":"passed"}` receipt again.
 
-## Exercise 2: Reject syntactically valid but wrong-shaped JSON
+## Exercise 2: Reject syntactically valid but wrong-shaped JSON: debug a regression
 
-Task: Parse null, an array and an object with an extra field, then validate.
+Task: A regression changed one token in Example B, so one line now reads `for (const text of ['null!', '[]', '{"id":"A","quantity":1,"priceCents":2,"extra":true}']) {`. Run Example B with that line, use the failing check to locate the defect and repair it without changing the check.
 
 JSON.parse proves only syntax. It does not know the domain fields or reject a valid JSON value of the wrong kind.
+
+The unchanged code is the exercise block of Example B:
 
 ```javascript
 for (const text of ['null', '[]', '{"id":"A","quantity":1,"priceCents":2,"extra":true}']) {
@@ -49,9 +53,9 @@ for (const text of ['null', '[]', '{"id":"A","quantity":1,"priceCents":2,"extra"
 }
 ```
 
-**Expected:** TypeError for each shape violation.
+**Expected:** Before the repair the run fails with an `AssertionError` at the check `assert.throws(() => validateOrder(JSON.parse(text)), TypeError)`; after it the line reads `for (const text of ['null', '[]', '{"id":"A","quantity":1,"priceCents":2,"extra":true}']) {` again and typeError for each shape violation.
 
-**Verify:** Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.
+**Verify:** Keep the failing and the repaired runs. Explain why the changed token alters the value tested by `assert.throws(() => validateOrder(JSON.parse(text)), TypeError)` for this input.
 
 ## Exercise 3: Reject invalid numeric domain values
 
@@ -71,7 +75,7 @@ for (const raw of [
 
 **Expected:** RangeError for each.
 
-**Verify:** Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.
+**Verify:** Keep a check equivalent to `assert.throws(() => validateOrder(raw), RangeError)`. As a control, change `{ id: 'A', quantity: 0, priceCents: 2 },` to `{ id: 'A', quantity: 1, priceCents: 2 },`: the run must fail with an `AssertionError` at that check. Restore the line before continuing.
 
 ## Exercise 4: Prevent unsafe integer multiplication
 
@@ -86,7 +90,7 @@ assert.throws(() => total(order), RangeError);
 
 **Expected:** RangeError from total.
 
-**Verify:** Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.
+**Verify:** Keep a check equivalent to `assert.throws(() => total(order), RangeError)` and confirm that the reference still passes. Then name an input that would make it fail and explain which value changes.
 
 ## Exercise 5: Preserve a translated cause
 
@@ -103,7 +107,7 @@ assert.match(contextual.message, /order fixture/u);
 
 **Expected:** cause identity retained.
 
-**Verify:** Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.
+**Verify:** Keep a check equivalent to `assert.match(contextual.message, /order fixture/u)` and confirm that the reference still passes. Then name an input that would make it fail and explain which value changes.
 
 ## Exercise 6: Prove rejected input caused no mutation
 
@@ -120,7 +124,7 @@ assert.deepEqual(raw, before);
 
 **Expected:** input unchanged.
 
-**Verify:** Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.
+**Verify:** Keep a check equivalent to `assert.deepEqual(raw, before)` and confirm that the reference still passes. Then name an input that would make it fail and explain which value changes.
 
 ## After comparison
 

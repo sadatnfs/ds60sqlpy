@@ -20,7 +20,19 @@ different paths depending on decoder and ingestion configuration. Decide whether
 to reject, skip, transform or quarantine each condition. Do not assume that an
 increasing Kafka offset proves every source record became a valid document.
 
-## Worked case A: reconcile a known Kafka event set
+## Worked case A: reconcile a known Kafka event set (design exercise)
+
+The workshop qualifies only Pinot's offline segment path. It has no Kafka route,
+so neither case in this chapter is executed; each one states the configuration it
+would use and the answer it should produce. The released real-time table
+configuration is part of the project:
+
+<!-- include: projects/pinot/realtime-table.json json -->
+
+`stream.kafka.consumer.prop.auto.offset.reset` set to `smallest` makes a new
+consuming segment start at the earliest retained offset, so records produced before
+the table existed are still read. The two flush thresholds commit a consuming segment
+after 10,000 rows or one hour, whichever comes first.
 
 Use the shared order contract with IDs 1, 2 and 3 and amounts 4, 9 and 7. Produce
 it once to a fresh owned topic and capture each partition's end position. Configure
@@ -30,6 +42,9 @@ correctly skip earlier records while appearing healthy.
 
 Poll the broker under a deadline until the exact IDs and values are visible.
 Compare total 20, regional totals 11 and 9, and source identities independently.
+The written answer for this fixture is three documents, east 11 from IDs 1 and 3,
+west 9 from ID 2, and a lag of zero on every partition once all three records are
+consumed.
 Also inspect consumer positions and ingestion errors. Query equality establishes
 that this finite event set is visible; it does not prove that arbitrary future
 traffic, retries or failures meet an end-to-end exactly-once claim.
@@ -40,13 +55,15 @@ Specify whether each number is the next offset or last processed offset before
 subtracting. Summing lag across partitions can conceal one stuck or unusually
 hot partition, so retain the per-partition observations.
 
-## Worked case B: a malformed event changes reconciliation
+## Worked case B: a malformed event changes reconciliation (design exercise)
 
 Append one intentionally malformed fixture after the three valid orders. Record
 its source position and expected handling. If the configured decoder skips it,
 source consumption can advance while the table remains at three valid documents.
 That difference is explainable only when a decoder error or explicit skip counter
-supports it. An unexplained count mismatch remains a failed acceptance check.
+supports it. The written answer is partition end positions that add up to four
+records, consumer positions equal to those end positions, one decoder rejection
+and three queryable documents with total 20. An unexplained count mismatch remains a failed acceptance check.
 
 A dead-letter route is a separate output with its own identity and delivery
 contract. Naming a topic does not prove that Pinot or the surrounding pipeline

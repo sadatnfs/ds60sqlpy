@@ -1,6 +1,6 @@
 # swift-008: explanation and comparison
 
-Attempt the six guide tasks before opening this comparison. The executable reference is [swift-008_solution.swift](swift-008_solution.swift). Its assertions are always active under the prepared classroom compile settings.
+Attempt the six guide tasks before opening this comparison. The executable reference is [swift-008_solution.swift](swift-008_solution.swift). It runs both worked examples and the reference answers below, and its assertions are always active under the prepared classroom compile settings.
 
 ## Why the two examples differ
 
@@ -8,21 +8,56 @@ Attempt the six guide tasks before opening this comparison. The executable refer
 
 **Make mutation explicit:** The ampersand makes the mutation boundary visible instead of hiding it behind a normal-looking value call. The caller explicitly grants mutation and observes 5.
 
-## Reason through the six tasks
+## Task answers
 
-1. **Predict and explain.** Explain each argument label and local parameter name.
+### Task 1: Predict and explain
 
-2. **Guided modification.** Add a depth label for a volume function.
+Explain each argument label and local parameter name.
 
-3. **Independent construction.** Write a pure function normalizing a quantity without mutating its caller.
+No separate reference answer has been written for this task. Example A is the evidence to compare with: Readable call sites reduce accidental parameter swaps and reveal the function purpose. Labels show which dimension each argument supplies.
 
-4. **Diagnose a defect.** Diagnose an inout call missing the ampersand and explain the compiler rule.
+### Task 2: Guided modification
 
-5. **Boundary evidence.** Test zero and negative dimensions under a documented validation policy.
+Add a depth label for a volume function.
 
-6. **Transfer and justify.** Choose return values or inout for an API and justify who owns state changes.
+No separate reference answer has been written for this task. Start from Example B: The ampersand makes the mutation boundary visible instead of hiding it behind a normal-looking value call. The caller explicitly grants mutation and observes 5.
 
-For tasks 1 and 2, use the checked values and mechanism trace in the two examples. For task 3, choose names that expose the input and result contract and retain the same invariants. For task 4, the diagnosed mistakes below supply a concrete wrong assumption: preserve its counterexample before repairing it. Task 5 needs an explicit expected value or documented rejection at the boundary, not just successful execution. For task 6, explain what changes in the new context and which part of the original mechanism remains applicable. Several representations may satisfy this transfer task; justify the choice rather than treating this reference as the only architecture.
+### Task 3: Independent construction
+
+Write a pure function normalizing a quantity without mutating its caller.
+
+**Reference answer.** It runs as the `Task 3` block of the reference program.
+
+```swift
+func normalized(_ quantity: Int, limit: Int) -> Int {
+  min(max(quantity, 0), limit)
+}
+let requested = 15
+precondition(normalized(requested, limit: 10) == 10)
+precondition(normalized(-4, limit: 10) == 0 && requested == 15)
+```
+
+**Observe:** 15 is normalized to 10 and -4 to 0, while the caller's value stays 15.
+
+The function takes its argument by value and returns a new result, so it cannot change the caller's variable.
+
+### Task 4: Diagnose a defect
+
+Diagnose an inout call missing the ampersand and explain the compiler rule.
+
+No reference answer has been written for this task yet. The wrong assumptions to look for are this lesson's pitfalls: Labels are part of API usability. Inout access cannot overlap conflicting access to the same storage. Do not use mutation merely to avoid returning a small value.
+
+### Task 5: Boundary evidence
+
+Test zero and negative dimensions under a documented validation policy.
+
+No reference answer has been written for this task yet. Write the expected value or documented rejection for each boundary before running it, and compare with the checks in Example A (Name the dimensions) and Example B (Make mutation explicit).
+
+### Task 6: Transfer and justify
+
+Choose return values or inout for an API and justify who owns state changes.
+
+No single reference answer exists: several designs can satisfy this transfer task. Justify yours against the mechanism described below and the vocabulary entry **Argument label**, and state one limitation of your choice.
 
 ## Mechanism and diagnostic reasoning
 
@@ -36,4 +71,4 @@ Labels are part of API usability. Inout access cannot overlap conflicting access
 
 ## Review before continuing
 
-The reference checks the worked scenarios, including their boundary distinctions. Your independent and transfer artifacts may have additional checks. Compare observations rather than only source text. Preserve any new regression case you discover and explain why it would reject a plausible wrong implementation. External project steps require their own build and platform evidence and are not established by a portable reference passing.
+Run the reference and confirm that it prints `swift-008: passed`, then reconstruct one boundary case from memory and explain which check would reject a plausible wrong implementation. External project steps need their own build and platform evidence; a passing portable reference does not establish them.

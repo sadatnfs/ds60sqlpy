@@ -40,7 +40,7 @@ Overlap is legitimate membership information. The error is treating overlapping 
 
 Predict the revenue for both audiences selected together.
 
-The keys are 10,20,30, and the unique population totals 187 rather than 267.
+The keys are 10, 20, 30, and the unique population totals 187 rather than 267.
 
 ### Exercise 2
 
@@ -52,7 +52,7 @@ The selected customer population increases, but Newsletter revenue remains 131 b
 
 Write a reconciliation for the two audience totals.
 
-131 +136 -80 =187 for the union of these two audiences.
+131 + 136 - 80 = 187 for the union of these two audiences.
 
 ### Exercise 4
 

@@ -20,9 +20,7 @@ str.to_datetime parses the source timestamp, time_zone="UTC" fixes its timezone 
 
 ## Run the lesson
 
-Open this subject in `/classroom`, then show its code and notes. The prepared `data-engineering` worker runs `main.py` in a fresh temporary directory. The examples use installed packages and synthetic local fixtures; no account, cloud service, network request or package download is required. Save source and notes before switching lessons. Temporary databases, project files and tracking artifacts are recreated by each complete program and removed after the job. The classroom retains the submitted source and bounded output, not an indefinitely running external service. The guide distinguishes this local execution from the deployment decisions that need an owned production environment.
-
-
+Open `polars-007` in `/classroom`. Its starter `main.py` contains both worked cases, "A clock change is not a two-hour duration" and "Partition events without duplicating the boundary", and prints the dictionary each case returns. The prepared `data-engineering` worker runs it in a fresh temporary directory. An `AssertionError` means that an observation differs from the case's stated contract. The inputs are small literal tables. Cases that demonstrate Parquet scans write their files into a temporary directory that is removed when the case returns. No account, network request or package download is involved. Save source and notes before switching lessons.
 
 ## Worked case 1: A clock change is not a two-hour duration
 
@@ -48,7 +46,6 @@ def example_one():
 if __name__ == "__main__":
     print(example_one())
 ```
-
 
 ## Worked case 2: Partition events without duplicating the boundary
 
@@ -81,11 +78,9 @@ if __name__ == "__main__":
     print(example_two())
 ```
 
-
 ## Practice
 
-Make each requested change in a saved copy. Compare both the expected result and the deliberately changed assumption. The separate reference explains the answers.
-
+The starter contains both worked cases, so a task can change either one. Make each change in a saved copy, run it, and compare the printed result with the task's check before opening the separate explained answers.
 
 ### 1. Display another zone
 
@@ -95,7 +90,6 @@ Convert the same UTC observations to a second named timezone.
 
 **Hint:** Change display, not source meaning.
 
-
 ### 2. Explain a naive value
 
 Describe what information is missing from 01:30 without a zone or date.
@@ -103,7 +97,6 @@ Describe what information is missing from 01:30 without a zone or date.
 **Check:** The answer identifies unresolved instant interpretation.
 
 **Hint:** A clock label alone is insufficient.
-
 
 ### 3. Test the end boundary
 
@@ -113,7 +106,6 @@ Add an observation exactly equal to end.
 
 **Hint:** Keep the end comparison strict.
 
-
 ### 4. Test a zero-length window
 
 Set start equal to end.
@@ -121,7 +113,6 @@ Set start equal to end.
 **Check:** The half-open window is empty.
 
 **Hint:** Both inequalities must hold.
-
 
 ### 5. Compare duration definitions
 
@@ -131,7 +122,6 @@ Explain the difference between one calendar day and 24 elapsed hours around a cl
 
 **Hint:** Civil calendars and durations answer different questions.
 
-
 ### 6. Add a late arrival
 
 Give an event an old event time but a later ingestion time.
@@ -140,20 +130,19 @@ Give an event an old event time but a later ingestion time.
 
 **Hint:** Display conversion does not solve data availability.
 
-
 ## Diagnose errors and misleading results
 
 If a duration differs by an hour, inspect timezone interpretation before adding a correction constant. If rows appear in two adjacent reports, check both endpoint operators. If an incremental job misses late records, its event-time window alone is not an ingestion policy. Print UTC instants, local displays and the exact window boundaries while diagnosing the issue.
 
 ## Transfer to independent work
 
-Define time semantics before aggregating a dataset. Use an explicit zone and interval convention, test the boundary observations and retain separate event and availability timestamps. Apply those rules consistently across training, dashboards and incremental data products.
+Use an explicit zone and interval convention, test the boundary observations and retain separate event and availability timestamps. Apply those rules consistently across training, dashboards and incremental data products.
 
 ## Primary references
 
-- [Polars documentation: Time zones, elapsed time and interval boundaries](https://docs.pola.rs/user-guide/transformations/time-series/timezones/)
+- [Polars user guide: Time zones](https://docs.pola.rs/user-guide/transformations/time-series/timezones/)
 - [Polars Python API reference](https://docs.pola.rs/api/python/stable/reference/index.html)
 
 ## Tutor guidance
 
-Use the repository learning-companion skill for `polars-007`. Inspect the learner's own source and observations, ask for an explanation of the relevant data or state contract, and give a focused hint. Separate an assertion on this fixture from a claim about an external dataset or deployed service.
+Use the repository's `$guide-ds60sqlpy-learning` skill (`.agents/skills/guide-ds60sqlpy-learning/SKILL.md`) for `polars-007`. Inspect the learner's own source and printed output first. Ask for an explanation of timezone, UTC, wall clock, half-open intervals and event time in their own words, then give one focused hint at a time. Keep an assertion on this synthetic fixture separate from a claim about an external dataset or deployed service.

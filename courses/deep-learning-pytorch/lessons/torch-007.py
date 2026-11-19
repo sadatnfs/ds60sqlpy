@@ -4,18 +4,18 @@ Answer-free learner worksheet. See the companion guide for worked examples.
 Copy to .learning before editing. Six independent attempts belong below.
 """
 
-# Exercise 1: Inspect leaf and nonleaf state
-# Create a leaf tensor \(w=0\) and intermediate tensor \(u=2w\), retain the intermediate
-# gradient and backpropagate its sum.
-# Expected: `w.is_leaf` is `True`; `u.is_leaf` is `False`; the gradients with respect to \(w\) and \(u\) are 2 and 1.
+# Exercise 1: Predict a nonleaf gradient
+# Create leaf v=1.0 and intermediate u=3v, retain u's gradient and backpropagate u*u.
+# Expected: u.grad is 6 and v.grad is 18; u is not a leaf.
 
-# Exercise 2: Observe accumulation across fresh graphs
-# Compute (w-2)**2 twice at w=0 without clearing grad.
-# Expected: after resetting first, grad -4 then -8.
+# Exercise 2: Accumulate three backward calls
+# At w=1, backpropagate (w-2)**2 three times without clearing the gradient.
+# Expected: each call contributes -2, so the stored gradient is -6.
 
-# Exercise 3: Clear before an independent step
-# Set grad None and backpropagate once more.
-# Expected: grad returns to-4.
+# Exercise 3: Clear with zero_ and with None
+# Clear the accumulated gradient with p.grad.zero_() and backpropagate once, then set it
+# to None and backpropagate once more.
+# Expected: both routes end at -2; after the None assignment the gradient is absent until the next backward.
 
 # Exercise 4: Separate detach from ownership
 # Detach a tensor, mutate the detached view, and compare with a detached clone.

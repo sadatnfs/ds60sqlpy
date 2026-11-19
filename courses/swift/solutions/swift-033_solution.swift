@@ -25,6 +25,19 @@ struct LessonMain {
       }
       precondition(result.map(\.name) == ["a", "b"])
     }
+
+    do {
+      // Task 3: Independent construction
+      struct Summary: Sendable {
+        let count: Int
+        let total: Int
+      }
+      let summary = await Task { () -> Summary in
+        let values = [2, 3, 4]
+        return Summary(count: values.count, total: values.reduce(0, +))
+      }.value
+      precondition(summary.count == 3 && summary.total == 9)
+    }
     print("swift-033: passed")
   }
 }

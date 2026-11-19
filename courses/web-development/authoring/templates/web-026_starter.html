@@ -5,15 +5,44 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Disclosures, dialogs and focus management: my attempt</title>
     <style>
-      /* Implement the lesson-specific CSS. Keep keyboard focus visible. */
+      /* Write the CSS for the exercises here. Keep keyboard focus visible. */
     </style>
   </head>
   <body>
-    <!-- web-026: Build a disclosure and a deliberately opened local dialog. -->
-    <!-- Save your prediction, then implement the six exercises from the guide. -->
+    <!--
+      web-026 exercises. Hints are in the guide; answers are in the solutions folder.
+      1. Choose a disclosure or dialog for an optional explanation.
+      2. Give a dialog a visible heading and accessible name.
+      3. Build a disclosure and a deliberately opened local dialog.
+      4. Diagnose focus returning to an unrelated control after closure.
+      5. Test Escape, close-button activation and repeated opening.
+      6. Explain why a modal is inappropriate for every small message.
+    -->
     <main>
-      <h1>Disclosures, dialogs and focus management</h1>
-      <!-- Build your own document here. The reference is separate. -->
+      <h1>Explain without interrupting</h1>
+      <details>
+        <summary>Why use native controls?</summary>
+        <p>They provide established keyboard and semantic behavior.</p>
+      </details>
+      <button id="open" type="button">Review local study settings</button>
+      <dialog>
+        <h2>Study settings</h2>
+        <p>This is a local demonstration. No preference is sent.</p>
+        <button id="close" type="button">Close settings</button>
+      </dialog>
+      <!--
+        Worked example 1: A native disclosure
+        <details><summary>Why this rule?</summary><p>The explanation remains in the document.</p></details>
+      -->
     </main>
+    <script>
+      "use strict";
+
+      // Worked example 2: An explicit dialog action
+      // openButton.addEventListener('click', () => dialog.showModal());
+      // closeButton.addEventListener('click', () => dialog.close());
+
+      // Write the JavaScript for the exercises here.
+    </script>
   </body>
 </html>

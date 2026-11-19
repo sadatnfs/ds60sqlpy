@@ -21,6 +21,11 @@ URLs, cached metadata and downloaded copies. Revoking one control credential doe
 not necessarily revoke every capability or erase data a recipient already owns.
 Define the intended revocation boundary before promising an access policy.
 
+**Execution boundary.** Issuing, rotating and revoking recipient credentials happens
+on the provider's server, which the repository does not include. The client's part,
+reading the profile and sending its bearer token only to the control endpoint, is
+in `projects/delta-sharing/client.py`.
+
 ## Worked case A: use a fixture-only short-lived profile
 
 On the separately prepared owned server, issue a synthetic recipient credential
@@ -45,7 +50,7 @@ which is why the prepared launcher uses a file.
 
 Rotate or disable the fixture credential through the actual provider mechanism.
 Require a new control request using the old credential to fail with the intended
-401/403condition. Then test a newly issued valid credential separately. Do not
+401 or 403 condition. Then test a newly issued valid credential separately. Do not
 accept an outage or missing table as proof that revocation worked.
 
 If a previously issued signed URL remains valid until its own expiration, report

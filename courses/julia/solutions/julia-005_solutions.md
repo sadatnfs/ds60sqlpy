@@ -6,7 +6,7 @@ The executable reference is `julia-005_reference.jl`. Its checks cover the state
 
 Inclusive syntax must match the intended number of observations.
 
-**Expected observation:** The range contains 1,2,3.
+**Expected observation:** The range contains 1, 2 and 3.
 
 ## 2. Use zero iterations
 

@@ -14,6 +14,59 @@ Use an explicitly owned namespace, an explicit kubeconfig and context, and a pre
 
 Prepare `Dockerfile.cluster` from a reviewed Spark 4.0.1 Python base that retains the supported Kubernetes entrypoint. Deliberately publish or load that image through your authorized environment. Then:
 
+The submission helper assembles a `spark-submit` command whose Kubernetes settings
+are explicit rather than inherited:
+
+From [`projects/cluster-lab/kubernetes/submit.py`](../projects/cluster-lab/kubernetes/submit.py):
+
+```python
+return [
+    args.spark_submit,
+    "--master",
+    args.master,
+    "--deploy-mode",
+    "cluster",
+    "--name",
+    "ds60-kubernetes-partition-proof",
+    "--conf",
+    "spark.kubernetes.context=" + args.context,
+    "--conf",
+    "spark.kubernetes.namespace=" + args.namespace,
+    "--conf",
+    "spark.kubernetes.container.image=" + args.image,
+    "--conf",
+    "spark.kubernetes.authenticate.driver.serviceAccountName=spark-driver",
+    "--conf",
+    "spark.kubernetes.authenticate.executor.serviceAccountName=spark-executor",
+    "--conf",
+    "spark.kubernetes.driver.label.ds60-workshop=spark-deployment",
+    "--conf",
+    "spark.kubernetes.executor.label.ds60-workshop=spark-deployment",
+    "--conf",
+    "spark.executor.instances=2",
+    "--conf",
+    "spark.executor.cores=1",
+    "--conf",
+    "spark.executor.memory=512m",
+    "--conf",
+    "spark.driver.memory=1g",
+    "--conf",
+    "spark.driver.maxResultSize=1m",
+    "--conf",
+    "spark.kubernetes.driver.limit.cores=1",
+    "--conf",
+    "spark.kubernetes.executor.limit.cores=1",
+    "--conf",
+    "spark.kubernetes.submission.waitAppCompletion=true",
+    "local:///opt/spark/work-dir/kubernetes_job.py",
+]
+```
+
+`--deploy-mode cluster` starts the driver as a pod; the two service-account settings
+give the driver and the executors different identities; the labels let the network
+policy in chapter 16 select these pods; and `waitAppCompletion=true` makes the
+submitting process wait for the application's final state.
+
 ```sh
 python3 kubernetes/submit.py \
   --kubeconfig "$OWNED_KUBECONFIG" \

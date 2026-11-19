@@ -9,7 +9,9 @@
     "language": "python",
     "suffix": ".py",
     "concepts": ["estimand", "transport", "effect modification"],
-    "outcome": "Explain and independently reproduce from a scientific question to a transported estimand, including a contrasting assumption or failure case.",
+    "outcome": "Standardize stratum effects to a declared target population and show how a crude comparison can reverse the sign of a positive effect.",
+    "lab": "Transport the same stratum-specific effects from the trial mix to the target population, then compare both with the crude treated-minus-control difference.",
+    "verification": "Trial ATE 1.8 and transported target ATE 1.2 come from the same stratum effects; the crude difference is -1.3, with the opposite sign.",
     "sources": [
       ["Causal Inference: What If, author resource", "https://miguelhernan.org/whatifbook"]
     ]
@@ -19,12 +21,14 @@
     "title": "Overlap, weighting and the population a result describes",
     "level": "beginner",
     "minutes": 90,
-    "prerequisites": ["science-001", "statistics-science-001"],
+    "prerequisites": ["science-001", "statistics-017"],
     "runtime": "python-core",
     "language": "python",
     "suffix": ".py",
     "concepts": ["positivity", "overlap", "effective sample size"],
-    "outcome": "Explain and independently reproduce overlap, weighting and the population a result describes, including a contrasting assumption or failure case.",
+    "outcome": "Show that inverse-probability weights balance a finite population exactly, that overlap weighting changes the target population and that concentrated weights shrink the effective sample size.",
+    "lab": "Recover the treatment effect by inverse-probability weighting in an exact population table, then compare the overlap-weighted effect with the population effect.",
+    "verification": "The weighted effect is exactly 2; overlap weighting gives 2.8 against the population effect 3.4; effective sample sizes are 3 for equal weights and 2809/2503 for weights 1, 1, 1 and 50.",
     "sources": [
       ["Causal Inference: What If, author resource", "https://miguelhernan.org/whatifbook"]
     ]
@@ -39,7 +43,9 @@
     "language": "python",
     "suffix": ".py",
     "concepts": ["sensitivity", "negative control", "measurement error"],
-    "outcome": "Explain and independently reproduce sensitivity analysis and negative-control reasoning, including a contrasting assumption or failure case.",
+    "outcome": "Locate the tipping point at which an unmeasured confounder would explain an observed effect and use a negative control to expose bias that a sensitivity grid does not reveal.",
+    "lab": "Tabulate bias-adjusted effects over confounder prevalence and strength, then compare treated and untreated means of a negative-control outcome.",
+    "verification": "The observed effect 3 falls to 0 at prevalence 0.5 with strength 6 and turns negative beyond it; the negative-control difference is 1.33 despite a known zero effect; reliability 0.5 attenuates a slope of 2 to 1.",
     "sources": [
       ["Causal Inference: What If, author resource", "https://miguelhernan.org/whatifbook"]
     ]
@@ -54,7 +60,9 @@
     "language": "python",
     "suffix": ".py",
     "concepts": ["staggered DiD", "group-time ATT", "parallel trends"],
-    "outcome": "Explain and independently reproduce staggered adoption and uncontaminated group-time contrasts, including a contrasting assumption or failure case.",
+    "outcome": "Estimate group-time effects under staggered adoption with uncontaminated comparison groups and show how an already-treated control erases a real effect.",
+    "lab": "Recover cohort-specific dynamic effects at period 4, then repeat the contrast using the already-treated early cohort as the control.",
+    "verification": "At period 4 the early cohort's effect is 6 and the late cohort's is 2, while the contrast against the already-treated cohort is 0.",
     "sources": [
       ["Callaway and Sant Anna, group-time identification", "https://arxiv.org/abs/1803.09015"],
       ["Causal Inference: What If, author resource", "https://miguelhernan.org/whatifbook"]
@@ -65,12 +73,14 @@
     "title": "Longitudinal interventions and the sequential g-formula",
     "level": "beginner",
     "minutes": 90,
-    "prerequisites": ["science-001", "statistics-science-008"],
+    "prerequisites": ["science-001", "statistics-017"],
     "runtime": "python-core",
     "language": "python",
     "suffix": ".py",
     "concepts": ["g-formula", "dynamic regime", "mediator"],
-    "outcome": "Explain and independently reproduce longitudinal interventions and the sequential g-formula, including a contrasting assumption or failure case.",
+    "outcome": "Evaluate static and dynamic treatment regimes with the sequential g-formula and show how freezing a mediator distribution removes part of the total effect.",
+    "lab": "Enumerate never-treat, always-treat and dynamic regimes over the intermediate covariate, then hold the mediator at its untreated distribution.",
+    "verification": "Never treat 2.2, the dynamic policy 4.75 and always treat 7.6 lie in that order; freezing the mediator distribution loses 0.4 of the total effect.",
     "sources": [
       ["Causal Inference: What If, author resource", "https://miguelhernan.org/whatifbook"]
     ]
@@ -85,7 +95,9 @@
     "language": "python",
     "suffix": ".py",
     "concepts": ["target trial", "IPW", "time zero"],
-    "outcome": "Explain and independently reproduce target-trial alignment and sequential treatment weights, including a contrasting assumption or failure case.",
+    "outcome": "Align a target-trial time zero, verify a sequential inverse-probability policy value by exact summation and reject covariates that were not available at baseline.",
+    "lab": "Compute the always-treat value by sequential weighting over an exact probability table, then check two records for availability after assignment.",
+    "verification": "The weighted always-treat value is 7.2 over probabilities summing to 1, and one record whose availability time follows assignment is rejected as a baseline variable.",
     "sources": [
       ["Causal Inference: What If, author resource", "https://miguelhernan.org/whatifbook"]
     ]
@@ -95,12 +107,14 @@
     "title": "Forecast vintages, revision histories and overlapping origins",
     "level": "intermediate",
     "minutes": 90,
-    "prerequisites": ["statistics-science-003"],
+    "prerequisites": ["statistics-022", "statistics-026"],
     "runtime": "python-core",
     "language": "python",
     "suffix": ".py",
     "concepts": ["vintage", "availability", "overlapping horizons"],
-    "outcome": "Explain and independently reproduce forecast vintages, revision histories and overlapping origins, including a contrasting assumption or failure case.",
+    "outcome": "Reconstruct as-of vintages from revision histories, forecast only from information available at each origin and show how a revised backtest leaks later information.",
+    "lab": "Forecast event four from the vintage available at cutoff four, then repeat the backtest with the later revision of event two.",
+    "verification": "The vintage-aware forecast is 18, the backtest that uses the revision of 14 to 50 gives 36, and four overlapping two-step forecasts cover only three unique target events.",
     "sources": [
       [
         "Forecasting: Principles and Practice, reconciliation",
@@ -119,7 +133,9 @@
     "language": "python",
     "suffix": ".py",
     "concepts": ["MinT", "coherence", "covariance"],
-    "outcome": "Explain and independently reproduce coherent hierarchical forecasts and covariance-weighted reconciliation, including a contrasting assumption or failure case.",
+    "outcome": "Reconcile hierarchical forecasts with ordinary and covariance-weighted projections and show that coherent forecasts can still be physically implausible.",
+    "lab": "Reconcile an incoherent total with its components by OLS and weighted projections, then inspect a coherent forecast with a negative component.",
+    "verification": "OLS reconciliation turns base forecasts 12, 4 and 5 into 11 = 5 + 6; trusting the total moves it back toward 12 (about 12.0 = 5.5 + 6.5); a nonnegative refit gives bottom forecasts 0 and 2.5.",
     "sources": [
       [
         "Forecasting: Principles and Practice, reconciliation",
@@ -138,7 +154,9 @@
     "language": "python",
     "suffix": ".py",
     "concepts": ["pinball loss", "calibration", "newsvendor"],
-    "outcome": "Explain and independently reproduce forecast calibration, quantiles and operational decision loss, including a contrasting assumption or failure case.",
+    "outcome": "Choose an order quantity from the newsvendor critical fractile under asymmetric loss and show how pooled interval coverage can hide a failing horizon.",
+    "lab": "Compute the critical fractile and cost-minimizing quantity, then split interval coverage by forecast horizon.",
+    "verification": "Critical fractile 0.8 selects quantity 3 with expected cost 4.67 against 5.0 for the mean policy; coverage is 1.0 at the first horizon but 0.4 at the second.",
     "sources": [
       [
         "Forecasting: Principles and Practice, reconciliation",
@@ -152,12 +170,14 @@
     "title": "Survival risk sets, delayed entry and partial likelihood",
     "level": "intermediate",
     "minutes": 90,
-    "prerequisites": ["statistics-science-004"],
+    "prerequisites": ["statistics-028"],
     "runtime": "python-core",
     "language": "python",
     "suffix": ".py",
     "concepts": ["risk set", "left truncation", "partial likelihood"],
-    "outcome": "Explain and independently reproduce survival risk sets, delayed entry and partial likelihood, including a contrasting assumption or failure case.",
+    "outcome": "Compute Cox partial likelihoods by hand from risk sets, including delayed entry, and locate the maximizing coefficient.",
+    "lab": "Evaluate the log partial likelihood at coefficient 0 with and without delayed entry, then search a grid for the maximizer.",
+    "verification": "The log partial likelihood is -log(12) = -2.485 at coefficient 0 and -log(6) = -1.792 with delayed entry; the grid maximum 0.35 matches the closed form log(2)/2 = 0.347.",
     "sources": [
       [
         "statsmodels proportional-hazards regression",
@@ -175,7 +195,9 @@
     "language": "python",
     "suffix": ".py",
     "concepts": ["censoring", "AFT", "Weibull"],
-    "outcome": "Explain and independently reproduce censoring-aware likelihoods, aft models and time scales, including a contrasting assumption or failure case.",
+    "outcome": "Write censored and left-truncated likelihood contributions, fit a Weibull model by maximum likelihood and interpret an AFT time ratio.",
+    "lab": "Compare the censored exponential rate with the naive rate, add delayed entry, then fit Weibull models without and with a binary AFT covariate.",
+    "verification": "Exponential rates 0.15 (censoring-aware), 0.25 (naive) and 0.214 (delayed entry); the AFT fit returns time ratio 2, hazard ratio about 0.41 and shape about 1.29 with gradient norms below 1e-5.",
     "sources": [
       [
         "statsmodels proportional-hazards regression",
@@ -193,7 +215,9 @@
     "language": "python",
     "suffix": ".py",
     "concepts": ["cumulative incidence", "competing risk", "PH diagnostics"],
-    "outcome": "Explain and independently reproduce competing risks and proportional-hazards diagnostics, including a contrasting assumption or failure case.",
+    "outcome": "Accumulate cumulative incidence under competing risks, contrast it with one minus Kaplan-Meier and test proportional hazards with an episode-split time interaction.",
+    "lab": "Compute cause-specific cumulative incidence for four complete records, then fit constant and episode-split Cox models to simulated data whose effect reverses after time 1.",
+    "verification": "Each cause has incidence 0.5 while one minus Kaplan-Meier gives 0.625; the constant log hazard ratio is 0.54, while the split model gives 0.86 before time 1 and a change of -1.68 (SE 0.30) after it.",
     "sources": [
       [
         "statsmodels proportional-hazards regression",
@@ -211,7 +235,9 @@
     "language": "python",
     "suffix": ".py",
     "concepts": ["retrieval", "cold start", "candidate recall"],
-    "outcome": "Explain and independently reproduce candidate generation, cold start and retrieval ceilings, including a contrasting assumption or failure case.",
+    "outcome": "Generate recommendation candidates from item co-occurrence, measure the retrieval ceiling with candidate recall and define an explicit cold-start policy.",
+    "lab": "Score unseen items by Jaccard similarity to the target user's history, check recall at 2, then rank items by popularity for a user without history.",
+    "verification": "Items i3 and i4 score 1/3 and i5 scores 0, so recall at 2 is 1 for i4 but 0 for i5, which no reranker can recover; the cold-start policy ranks i3 first.",
     "sources": [
       ["Rendle and colleagues, Bayesian Personalized Ranking", "https://arxiv.org/abs/1205.2618"],
       ["Dudik and colleagues, doubly robust policy evaluation", "https://arxiv.org/abs/1103.4601"]
@@ -227,7 +253,9 @@
     "language": "python",
     "suffix": ".py",
     "concepts": ["BPR", "negative sampling", "temporal leakage"],
-    "outcome": "Explain and independently reproduce pairwise learned ranking and defensible negative sampling, including a contrasting assumption or failure case.",
+    "outcome": "Train a pairwise BPR ranking objective with an independently checked gradient and keep future positives out of negative sampling.",
+    "lab": "Train pairwise logistic ranking weights and compare the analytic gradient with finite differences, then sample negatives that respect attribution and reporting delays.",
+    "verification": "Training lowers the pairwise loss from log 2 = 0.693 to 0.081 with all margins positive; the negative sampler returns only c at time 5 and c and d at time 9.",
     "sources": [
       ["Rendle and colleagues, Bayesian Personalized Ranking", "https://arxiv.org/abs/1205.2618"],
       ["Dudik and colleagues, doubly robust policy evaluation", "https://arxiv.org/abs/1103.4601"]
@@ -238,12 +266,14 @@
     "title": "Logged-policy evaluation, support and variance control",
     "level": "intermediate",
     "minutes": 90,
-    "prerequisites": ["science-013", "statistics-science-005"],
+    "prerequisites": ["science-013", "statistics-017"],
     "runtime": "python-core",
     "language": "python",
     "suffix": ".py",
     "concepts": ["IPS", "doubly robust", "support"],
-    "outcome": "Explain and independently reproduce logged-policy evaluation, support and variance control, including a contrasting assumption or failure case.",
+    "outcome": "Estimate a new policy's value from logged data with inverse propensity scoring and a doubly robust correction and show how clipping trades bias for variance.",
+    "lab": "Recover the new policy's value by IPS and by doubly robust estimation, then clip the importance weights.",
+    "verification": "IPS and doubly robust estimates both equal 0.5 against a logging-policy average of 0.32; clipping lowers the estimate to 0.34.",
     "sources": [
       ["Rendle and colleagues, Bayesian Personalized Ranking", "https://arxiv.org/abs/1205.2618"],
       ["Dudik and colleagues, doubly robust policy evaluation", "https://arxiv.org/abs/1103.4601"]
@@ -259,7 +289,9 @@
     "language": "python",
     "suffix": ".py",
     "concepts": ["duality", "shadow price", "KKT"],
-    "outcome": "Explain and independently reproduce optimization duality and the scope of shadow prices, including a contrasting assumption or failure case.",
+    "outcome": "Solve a small linear program, verify its dual shadow price and show that the price is valid only within its local sensitivity range.",
+    "lab": "Verify the primal allocation and the shadow price of the binding resource, then apply a resource change beyond the local range.",
+    "verification": "Allocation (3, 2) has value 13 and shadow price 1, matching a finite-difference derivative; raising the resource from 5 to 9 gives 16, not the 17 the local price predicts.",
     "sources": [
       [
         "SciPy mixed-integer optimization",
@@ -281,7 +313,9 @@
     "language": "python",
     "suffix": ".py",
     "concepts": ["MILP", "integrality", "relaxation"],
-    "outcome": "Explain and independently reproduce integer decisions, relaxation bounds and solver certificates, including a contrasting assumption or failure case.",
+    "outcome": "Solve a binary allocation exactly, compare it with its linear-programming relaxation bound and show that rounding the relaxation can violate a resource constraint.",
+    "lab": "Solve the binary allocation and check its feasibility and integrality, then round the fractional relaxation.",
+    "verification": "The integer optimum is 14 with choice (0, 1, 1), below the relaxation bound 14.8; rounding the relaxation costs 11, exceeding the budget of 9.",
     "sources": [
       [
         "SciPy mixed-integer optimization",
@@ -303,7 +337,9 @@
     "language": "python",
     "suffix": ".py",
     "concepts": ["scenario", "robust optimization", "EVPI"],
-    "outcome": "Explain and independently reproduce scenario decisions, minimax policies and information value, including a contrasting assumption or failure case.",
+    "outcome": "Compare expected-cost and minimax decisions across demand scenarios and compute the expected value of perfect information.",
+    "lab": "Choose a quantity by expected cost and by worst-case cost, then compute how much perfect scenario information would save.",
+    "verification": "Expected cost selects 4 (expected cost 4.3), minimax selects 10 (worst cost 8) and the expected value of perfect information is 4.3.",
     "sources": [
       [
         "SciPy mixed-integer optimization",
@@ -320,12 +356,14 @@
     "title": "Estimated heterogeneity and prediction in research synthesis",
     "level": "advanced",
     "minutes": 120,
-    "prerequisites": ["statistics-science-006"],
+    "prerequisites": ["statistics-039"],
     "runtime": "python-core",
     "language": "python",
     "suffix": ".py",
     "concepts": ["heterogeneity", "random effects", "prediction interval"],
-    "outcome": "Explain and independently reproduce estimated heterogeneity and prediction in research synthesis, including a contrasting assumption or failure case.",
+    "outcome": "Estimate between-study heterogeneity with the DerSimonian-Laird method and distinguish a confidence interval for the mean effect from a prediction interval for a new study.",
+    "lab": "Compute tau-squared and the random-effects mean, then compare confidence and prediction half-widths.",
+    "verification": "tau-squared = (11.1875 - 3)/75 = 0.109 and the mean is 0.475; the prediction half-width 0.750 is about twice the confidence half-width 0.379.",
     "sources": [
       [
         "Cochrane handbook, analysis and meta-analysis",
@@ -343,7 +381,9 @@
     "language": "python",
     "suffix": ".py",
     "concepts": ["dependent effects", "GLS", "missing studies"],
-    "outcome": "Explain and independently reproduce dependent effects, missing studies and synthesis sensitivity, including a contrasting assumption or failure case.",
+    "outcome": "Combine dependent effect sizes through their covariance and make a missing-study scenario explicit in a synthesis sensitivity analysis.",
+    "lab": "Compare the variance of the same mean under independent and correlated effects, then add two hypothetical unpublished negative studies.",
+    "verification": "The mean stays 0.5 while its variance rises from 0.020 (independent) to 0.035 (dependent); the stated missing-study scenario moves the visible mean 0.5 to 0.24.",
     "sources": [
       [
         "Cochrane handbook, analysis and meta-analysis",
@@ -361,7 +401,9 @@
     "language": "python",
     "suffix": ".py",
     "concepts": ["Moran I", "spatial validation", "permutation"],
-    "outcome": "Explain and independently reproduce spatial dependence, permutation reference sets and blocked validation, including a contrasting assumption or failure case.",
+    "outcome": "Compute Moran's I for clustered and alternating maps, obtain its exact permutation p-value and compare random row splits with spatial blocks.",
+    "lab": "Contrast Moran's I for clustered and alternating values on a six-node chain, enumerate all 20 arrangements, then count neighbor edges crossing train and test folds.",
+    "verification": "Moran's I is 0.6 clustered and -1 alternating, the exact one-sided p-value is 2/20 = 0.10, and random folds cut 5 neighbor edges against 1 for spatial blocks.",
     "sources": [
       ["PySAL ESDA Moran documentation", "https://pysal.org/esda/stable/generated/esda.Moran.html"]
     ]
@@ -371,12 +413,14 @@
     "title": "Survey inclusion weights, clustering and population targets",
     "level": "advanced",
     "minutes": 120,
-    "prerequisites": ["statistics-003", "statistics-008"],
+    "prerequisites": ["statistics-005", "statistics-008"],
     "runtime": "python-core",
     "language": "python",
     "suffix": ".py",
     "concepts": ["Horvitz-Thompson", "design effect", "survey"],
-    "outcome": "Explain and independently reproduce survey inclusion weights, clustering and population targets, including a contrasting assumption or failure case.",
+    "outcome": "Compute Horvitz-Thompson totals with inclusion weights, separate their expectation from one realized sample and derive a cluster design effect.",
+    "lab": "Average the Horvitz-Thompson estimator over every possible sample, compare one realized sample, then derive the design effect of cluster sampling.",
+    "verification": "The expected Horvitz-Thompson total 16 equals the population total while the realized sample gives 15; the Hajek mean is 4 and the cluster design effect is 2.2.",
     "sources": [
       [
         "Statistics Canada, survey estimation and weighting",
@@ -394,7 +438,9 @@
     "language": "python",
     "suffix": ".py",
     "concepts": ["identification", "ridge", "high dimension"],
-    "outcome": "Explain and independently reproduce high-dimensional identification, regularization and validation, including a contrasting assumption or failure case.",
+    "outcome": "Show that interpolating a design with more predictors than observations does not establish generalization and that duplicated predictors identify only their sum.",
+    "lab": "Fit a minimum-norm interpolating model and a ridge model to 20 observations of 40 predictors, compare errors, then duplicate a predictor.",
+    "verification": "The interpolating fit has training error 0 while ridge has test error 1.88 against the true signal; the duplicated design has rank 1, so coefficients (1, 2) and (2, 1) give identical fits.",
     "sources": [
       ["Statistical Learning, author-maintained resources", "https://www.statlearning.com/"]
     ]
@@ -409,7 +455,9 @@
     "language": "python",
     "suffix": ".py",
     "concepts": ["decision dossier", "rollback", "uncertainty"],
-    "outcome": "Explain and independently reproduce a scientific decision dossier with explicit rollback conditions, including a contrasting assumption or failure case.",
+    "outcome": "Assemble a decision dossier that estimates effects with uncertainty, selects actions on lower bounds under a budget and triggers a declared rollback when evidence is revised.",
+    "lab": "Estimate regional effects and standard errors, select regions whose lower bounds justify their cost, then revise the evidence and apply the rollback rule.",
+    "verification": "Effects 3, 1 and -1 with standard errors sqrt(1/3), sqrt(4/3) and sqrt(1/12); only north is selected, and after the revision no region qualifies, which triggers the declared rollback.",
     "sources": [
       [
         "SciPy mixed-integer optimization",

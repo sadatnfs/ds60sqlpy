@@ -40,7 +40,7 @@ This is an explicit deny expectation, not a fallback to all regions. Test it und
 
 Predict the permitted population for the synthetic south principal.
 
-One customer,Bo, is permitted; expected revenue is 80.
+One customer, Bo, is permitted; expected revenue is 80.
 
 ### Exercise 2
 

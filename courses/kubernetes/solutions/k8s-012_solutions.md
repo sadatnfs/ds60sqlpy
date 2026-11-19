@@ -6,7 +6,7 @@ These answers explain the stated synthetic and scoped runtime contracts. Static 
 
 Troubleshooting starts by separating observations from hypotheses. A condition, event or log can narrow a failure, but no single status word explains every unavailable application. Build a short timeline from source submission through API acceptance, scheduling, container start, readiness and client behavior. Locate the first boundary that has not been established.
 
-This worksheet compares three explicit synthetic cases:missing configuration, an incorrect readiness path and a failed finite Job. It also names which cases the browser can reproduce directly. Wrong readiness and fixed task failure have bounded current operations; the missing-config example is a host/static case because the broker rejects inconsistent ConfigMap references before apply.
+This worksheet compares three explicit synthetic cases: missing configuration, an incorrect readiness path and a failed finite Job. It also names which cases the browser can reproduce directly. Wrong readiness and fixed task failure have bounded current operations; the missing-config example is a host/static case because the broker rejects inconsistent ConfigMap references before apply.
 
 The purpose is a disciplined diagnosis and minimal repair, not a collection of broad commands against every namespace. Use only the owned target and preserve relevant object UIDs so a replacement or unrelated workload cannot silently enter the evidence.
 
@@ -32,7 +32,7 @@ The application can be running while the readiness URL is wrong. Changing unrela
 
 The fixed task can start successfully and still fail its own contract. Increasing an unrelated Deployment count would not repair it. A retry policy also cannot turn a deterministic injected failure into a correct result without changing the intended input.
 
-**Expected:** Task exit2 and terminal Failed condition identify the injected application outcome.
+**Expected:** Task exit 2 and terminal Failed condition identify the injected application outcome.
 
 ## Exercise 5: Write a minimal incident timeline
 

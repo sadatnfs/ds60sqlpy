@@ -31,12 +31,12 @@
       "title": "One typed total per group",
       "code": "groups <- list(A = c(1, 2), B = c(4, 6))\ntotals <- vapply(groups, sum, numeric(1))\nstopifnot(identical(totals, c(A = 3, B = 10)))\nprint(totals)\n",
       "explanation": "The prototype states that every group produces one numeric total. Group names remain available for interpretation.",
-      "expected": "A3, B10."
+      "expected": "Named totals A = 3 and B = 10."
     },
     {
       "title": "Structured mapping and a readable pipeline",
-      "code": "groups <- list(A = c(1, 2), B = c(4, 6))\nsummaries <- lapply(groups, function(x) list(n = length(x), total = sum(x)))\nstopifnot(summaries$B$n == 2L, summaries$B$total == 10)\nresult <- c(3, 1, 2) |>\n  sort() |>\n  head(2)\nstopifnot(identical(result, c(1, 2)))\nprint(result)\n",
-      "explanation": "A list is appropriate for structured group outputs. The pipe is ordinary sequential evaluation with an inspectable intermediate order.",
+      "code": "groups <- list(A = c(1, 2), B = c(4, 6))\nsummaries <- lapply(groups, \\(x) list(n = length(x), total = sum(x)))\nstopifnot(summaries$B$n == 2L, summaries$B$total == 10)\nresult <- c(3, 1, 2) |>\n  sort() |>\n  head(2)\nstopifnot(identical(result, c(1, 2)))\nprint(result)\n",
+      "explanation": "A list is appropriate for structured group outputs. The anonymous function uses `\\(x)`, the R 4.1 shorthand for `function(x)`. The pipe is ordinary sequential evaluation with an inspectable intermediate order.",
       "expected": "1,2."
     }
   ],

@@ -6,6 +6,8 @@ Earlier llm-002 through llm-042 source ownership remains with the established or
 
 Every expert topic contains three worked demonstrations, six exercises, an explicit derivation and shape trace, a controlled case study, design tradeoffs and separate executable/explanatory solutions. Primary papers are linked in each guide. Default code uses only prepared NumPy or PyTorch CPU dependencies and does not download models or data.
 
+The learning objectives (outcome, lab and finish condition) come from `objectives.py`; they are authored, not cut from the mental-model text or the first exercise. Each Verify line is derived from the exercise's own assertions by `verify_text.py`. The three worked demonstrations are exercises 1-3, and each guide says so: those exercises are guided reconstructions, while exercises 4-6 change the fixture or expose a failure. `python courses/llm-theory/authoring/build.py --no-plan` regenerates the six bundles without rewriting `docs/expansion/plans/llm-theory.json`; a full run copies the authored objectives into that plan. The renderer writes learner and reference programs unformatted, so run the pinned Ruff 0.16.0 formatter on `courses/llm-theory` afterwards.
+
 ## Detailed review and program preservation
 
 `depth_reviews_foundations_expert.py` contains the reviewed mechanism and

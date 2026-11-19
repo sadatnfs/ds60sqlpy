@@ -16,6 +16,20 @@ struct LessonMain {
       let exact = Decimal(string: "0.1")! + Decimal(string: "0.2")!
       precondition(exact == Decimal(string: "0.3")!)
     }
+
+    do {
+      // Task 3: Independent construction
+      enum Addition: Equatable {
+        case accepted(UInt8)
+        case rejected
+      }
+      func add(_ left: UInt8, _ right: UInt8) -> Addition {
+        let result = left.addingReportingOverflow(right)
+        return result.overflow ? .rejected : .accepted(result.partialValue)
+      }
+      precondition(add(200, 50) == .accepted(250))
+      precondition(add(200, 56) == .rejected)
+    }
     print("swift-003: passed")
   }
 }

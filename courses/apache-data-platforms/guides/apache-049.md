@@ -29,6 +29,44 @@ actual effect on the running job's counters and backpressure metrics. The checke
 must distinguish a nonzero observed metric from a prediction based only on the
 presence of sleep in source code.
 
+The pressure mode builds a deliberately slow second stage:
+
+From [`projects/flink/src/WorkshopJobs.java`](../projects/flink/src/WorkshopJobs.java):
+
+```java
+} else if (mode.equals("pressure")) {
+  result = environment
+    .fromSource(
+      new NumberSequenceSource(0, 499),
+      WatermarkStrategy.noWatermarks(),
+      "pressure-numbers"
+    )
+    .uid("pressure-source")
+    .map(new Payload())
+    .name("pressure-payload-producer")
+    .uid("pressure-payload")
+    .disableChaining()
+    .map(new SlowConsumer())
+    .name("bounded-slow-consumer")
+    .uid("pressure-consumer")
+    .disableChaining();
+```
+
+`disableChaining()` keeps the producer and the consumer in separate tasks, so records
+cross a network buffer between them, and `SlowConsumer` sleeps 10 ms per record:
+
+From [`projects/flink/src/WorkshopJobs.java`](../projects/flink/src/WorkshopJobs.java):
+
+```java
+public static final class SlowConsumer implements MapFunction<String, String> {
+
+  public String map(String value) throws Exception {
+    Thread.sleep(10);
+    return value.substring(0, value.indexOf(':'));
+  }
+}
+```
+
 A tiny input can fit entirely in buffers and never create measurable pressure.
 The route therefore declares its finite payload size, pacing and observation
 window. If the selected machine does not produce the intended metric within the

@@ -1,6 +1,6 @@
 # csharp-018: explanation and comparison
 
-Attempt the six guide tasks before opening this comparison. The executable reference is [csharp-018_solution.cs](csharp-018_solution.cs). Its assertions are always active under the prepared classroom compile settings.
+Attempt the six guide tasks before opening this comparison. The executable reference is [csharp-018_solution.cs](csharp-018_solution.cs). It runs both worked examples, and its assertions are always active under the prepared classroom compile settings.
 
 ## Why the two examples differ
 
@@ -8,21 +8,43 @@ Attempt the six guide tasks before opening this comparison. The executable refer
 
 **Preserve a generic relationship:** A generic data model encodes relationships between fields independently of the values used. Swap preserves the element type, and a tie remains a valid value.
 
-## Reason through the six tasks
+## Task answers
 
-1. **Predict and explain.** Predict the inferred type at each Max call.
+### Task 1: Predict and explain
 
-2. **Guided modification.** Use Max with decimal values.
+Predict the inferred type at each Max call.
 
-3. **Independent construction.** Create a generic immutable three-element container.
+No separate reference answer has been written for this task. Example A is the evidence to compare with: The constraint guarantees comparison while the generic return preserves the concrete type. The same method returns an int or a string without object casts.
 
-4. **Diagnose a defect.** Explain why an unconstrained T cannot safely call Length.
+### Task 2: Guided modification
 
-5. **Boundary evidence.** Test equal values and document whether the first or second object is returned on a tie.
+Use Max with decimal values.
 
-6. **Transfer and justify.** Design a generic helper with the smallest useful capability constraint.
+No separate reference answer has been written for this task. Start from Example B: A generic data model encodes relationships between fields independently of the values used. Swap preserves the element type, and a tie remains a valid value.
 
-For tasks 1 and 2, use the checked values and mechanism trace in the two examples. For task 3, choose names that expose the input and result contract and retain the same invariants. For task 4, the diagnosed mistakes below supply a concrete wrong assumption: preserve its counterexample before repairing it. Task 5 needs an explicit expected value or documented rejection at the boundary, not just successful execution. For task 6, explain what changes in the new context and which part of the original mechanism remains applicable. Several representations may satisfy this transfer task; justify the choice rather than treating this reference as the only architecture.
+### Task 3: Independent construction
+
+Create a generic immutable three-element container.
+
+No reference answer has been written for this task yet. It needs a project or platform outside the single-file pad, so record your own build and run evidence and judge it against the vocabulary entry **Type parameter** and the lesson notes.
+
+### Task 4: Diagnose a defect
+
+Explain why an unconstrained T cannot safely call Length.
+
+No reference answer has been written for this task yet. The wrong assumptions to look for are this lesson's pitfalls: Adding a class constraint does not make arbitrary methods available. Avoid converting to object merely to escape a compiler error. String ordering may require a comparer for culture-independent business behavior.
+
+### Task 5: Boundary evidence
+
+Test equal values and document whether the first or second object is returned on a tie.
+
+No reference answer has been written for this task yet. Write the expected value or documented rejection for each boundary before running it, and compare with the checks in Example A (Retain the element type) and Example B (Preserve a generic relationship).
+
+### Task 6: Transfer and justify
+
+Design a generic helper with the smallest useful capability constraint.
+
+No single reference answer exists: several designs can satisfy this transfer task. Justify yours against the mechanism described below and the vocabulary entry **Type parameter**, and state one limitation of your choice.
 
 ## Mechanism and diagnostic reasoning
 
@@ -36,4 +58,4 @@ Adding a class constraint does not make arbitrary methods available. Avoid conve
 
 ## Review before continuing
 
-The reference checks the worked scenarios, including their boundary distinctions. Your independent and transfer artifacts may have additional checks. Compare observations rather than only source text. Preserve any new regression case you discover and explain why it would reject a plausible wrong implementation. External project steps require their own build and platform evidence and are not established by a portable reference passing.
+Run the reference and confirm that it prints `csharp-018: passed`, then reconstruct one boundary case from memory and explain which check would reject a plausible wrong implementation. External project steps need their own build and platform evidence; a passing portable reference does not establish them.

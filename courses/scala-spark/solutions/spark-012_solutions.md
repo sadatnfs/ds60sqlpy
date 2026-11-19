@@ -8,7 +8,7 @@ Read the [guide](../guides/spark-012.md) and attempt one language first. The [Sc
 
 Return ordered field triples(name, simpleString, nullable) for a DataFrame. Check the fixture rather than inferring correctness from a printed schema alone.
 
-**Expected:** The triples are(event_id, bigint, false),(team, string, true),(amount_cents, bigint, true).
+**Expected:** The triples are (event_id, bigint, false), (team, string, true), (amount_cents, bigint, true).
 
 ```scala
 def schemaFields(frame: DataFrame): Seq[(String, String, Boolean)] = {
@@ -46,7 +46,7 @@ def team_a(frame):
 
 The source function describes the relation while the caller controls when results are requested. This makes evaluation boundaries visible and avoids a hidden collect inside a reusable transformation. The raw count check confirms immutable-plan behavior for the fixture. It is not a timing-based claim that every possible planning operation is free of metadata or engine work.
 
-**Verification evidence:** Assert returned count 2, ordered IDs[1,3] and raw count 4 at explicit action sites.
+**Verification evidence:** Assert returned count 2, ordered IDs [1, 3] and raw count 4 at explicit action sites.
 
 ### Exercise 3: Bound the driver result and detect overflow of the budget
 
@@ -176,4 +176,4 @@ Actual readback can detect an unexpected reused or differently configured sessio
 
 ## Execution and interpretation
 
-Run the complete reference in its prepared fixed worker. The small fixture is constructed inside the program,so opening a lesson does not fetch data. A final success line is printed only after the reference assertions complete. Plan observations,partition evidence and resource measurements apply to the actual local configuration; they do not establish cluster-scale performance. Session cleanup is explicit,and any additional owned file/query lifecycle is described in the lesson.
+Run the complete reference in its prepared fixed worker. The small fixture is constructed inside the program, so opening a lesson does not fetch data. A final success line is printed only after the reference assertions complete. Plan observations, partition evidence and resource measurements apply to the actual local configuration; they do not establish cluster-scale performance. Session cleanup is explicit, and any additional owned file/query lifecycle is described in the lesson.

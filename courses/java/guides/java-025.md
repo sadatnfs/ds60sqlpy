@@ -6,13 +6,13 @@ Advanced, approximately 120 minutes. Direct prerequisites: `java-024`
 
 ## Learning objectives
 
-Explain reachability, retention, garbage collection, allocation rate using a concrete program. Trace the normal execution, identify its boundary assumptions and make a failure case observable. The first investigation is Store a small byte array in a list and drop the local variable reference. The final exercise transfers the mechanism to record process memory cautiously.
+Explain object reachability and retention and measure allocation and memory use without misleading claims. Along the way, explain reachability, retention, garbage collection, allocation rate using a concrete program. Trace the normal execution, identify its boundary assumptions and make a failure case observable. Exercises 1 and 2 start from the worked examples; the authored investigations begin with this task: Create a WeakReference to the still-strongly-referenced array. The final exercise transfers the mechanism to record process memory cautiously.
 
 ## Purpose and mental model
 
-The JVM manages heap memory through reachability,not by immediately freeing an object when a local variable changes. References in collections,static fields,thread locals or listeners can keep objects alive after a caller no longer needs them. Stack frames hold local execution state and references,while objects and arrays generally live in managed heap storage. An unreachable object becomes eligible for collection,but collection timing is not a deterministic application contract.
+The JVM manages heap memory through reachability, not by immediately freeing an object when a local variable changes. References in collections, static fields, thread locals or listeners can keep objects alive after a caller no longer needs them. Stack frames hold local execution state and references, while objects and arrays generally live in managed heap storage. An unreachable object becomes eligible for collection, but collection timing is not a deterministic application contract.
 
-System.gc is a request rather than proof that a particular object was reclaimed. Memory counters are observations affected by allocation,collection and implementation details. This lesson uses bounded arrays and explicit ownership changes to explain retention without allocating until failure or relying on a forced collection. Weak references can observe optional reachability,but application correctness should not depend on when a weakly reachable object disappears.
+System.gc is a request rather than proof that a particular object was reclaimed. Memory counters are observations affected by allocation, collection and implementation details. This lesson uses bounded arrays and explicit ownership changes to explain retention without allocating until failure or relying on a forced collection. Weak references can observe optional reachability, but application correctness should not depend on when a weakly reachable object disappears.
 
 ## Vocabulary and concepts
 
@@ -41,7 +41,7 @@ The public class name and source filename must agree. Each worked example below 
 
 ## Syntax anatomy and execution trace
 
-A collection holding an array retains a strong reference. Clearing the collection removes that particular ownership path,but other references may remain. WeakReference.get may return the referent or null depending on reachability and collection. Runtime memory values describe the current process and should not be treated as exact per-object size measurements. Avoid finalizers as a resource-lifetime mechanism;use explicit close for files,sockets and executors.
+A collection holding an array retains a strong reference. Clearing the collection removes that particular ownership path, but other references may remain. WeakReference.get may return the referent or null depending on reachability and collection. Runtime memory values describe the current process and should not be treated as exact per-object size measurements. Avoid finalizers as a resource-lifetime mechanism; use explicit close for files, sockets and executors.
 
 ## Worked example / walkthrough
 
@@ -69,7 +69,7 @@ public class Main {
 
 ### Example B: Remove one ownership path deliberately
 
-Clearing a container removes its references,but another strong reference can keep the object reachable. Reachability is a graph property.
+Clearing a container removes its references, but another strong reference can keep the object reachable. Reachability is a graph property.
 
 ```java
 import java.util.*;
@@ -91,7 +91,7 @@ public class Main {
 }
 ```
 
-**Expected:** list empty;separate array still valid.
+**Expected:** list empty; separate array still valid.
 
 ## Prediction before your attempt
 
@@ -99,29 +99,29 @@ Read the source from the entry point and name each value before executing it. Id
 
 ## Exercises
 
-1. **Expose a strong retention path.** Store a small byte array in a list and drop the local variable reference.
-   **Expected:** list still exposes the same array contents.
-   **Verify:** Compare your assertion values or captured diagnostic with list still exposes the same array contents.
+1. **Expose a strong retention path: change one input.** Copy Example A into a scratch `Main.java` and change `byte[] payload = new byte[1024];` to `byte[] payload = new byte[1025];`. Before running it with `java -ea Main`, predict which assertion fails and which value it now sees; then run it and restore the original line.
+   **Expected:** The changed run fails with an `AssertionError` from the assertion on `retained.get(0)[0] == 7 && retained.get(0).length == 1024`. Restoring the original line brings back the worked observation: list still exposes the same array contents.
+   **Verify:** Compare your written prediction with the reported `AssertionError` and its stack-trace line, and name the value that made `retained.get(0)[0] == 7 && retained.get(0).length == 1024` false. After restoring the line, the program completes without an `AssertionError` again.
 
-2. **Remove one ownership path deliberately.** Keep a separate reference,clear the list,and inspect the separate reference.
-   **Expected:** list empty;separate array still valid.
-   **Verify:** Compare your assertion values or captured diagnostic with list empty;separate array still valid.
+2. **Remove one ownership path deliberately: diagnose an edited check.** A careless edit changed the assertion that Example B adds after Example A so that it reads `assert retained.isEmpty() && separate[1] == 7;`. Run Example B with that line, explain why the edited assertion now fails for the same program state, and restore it.
+   **Expected:** Before the repair the run fails with an `AssertionError` from the assertion on `retained.isEmpty() && separate[0] == 7`; after it the line reads `assert retained.isEmpty() && separate[0] == 7;` again and list empty; separate array still valid.
+   **Verify:** Keep the failing and the repaired runs. Explain why the edited assertion rejects the same program state that `retained.isEmpty() && separate[0] == 7` accepts.
 
 3. **Inspect a weak reference without timing assumptions.** Create a WeakReference to the still-strongly-referenced array.
-   **Expected:** weakget returns the same object while strong reference exists.
-   **Verify:** Compare your assertion values or captured diagnostic with weakget returns the same object while strong reference exists.
+   **Expected:** weak get returns the same object while strong reference exists.
+   **Verify:** Keep an assertion equivalent to `weak.get() == separate`. As a control, change `assert weak.get() == separate;` to `assert weak.get() != separate;` inside it: the run must fail with an `AssertionError`, which shows the assertion can fail. Restore it.
 
 4. **Separate value size from allocation count.** Create ten arrays of 128 bytes and count logical payload bytes.
-   **Expected:** 1280 logical bytes;no exact heap-overhead claim.
-   **Verify:** Compare your assertion values or captured diagnostic with 1280 logical bytes;no exact heap-overhead claim.
+   **Expected:** 1280 logical bytes; no exact heap-overhead claim.
+   **Verify:** Keep an assertion equivalent to `logical == 1280`. As a control, change `for (int i = 0; i < 10; i++) blocks.add(new byte[128]);` to `for (int i = 0; i <= 10; i++) blocks.add(new byte[128]);`: the run must fail with an `AssertionError` from the assertion on `logical == 1280`. Restore the line before continuing.
 
 5. **Reuse a bounded working buffer.** Fill one array repeatedly rather than retaining every intermediate array.
-   **Expected:** same buffer identity;final value9.
-   **Verify:** Compare your assertion values or captured diagnostic with same buffer identity;final value9.
+   **Expected:** same buffer identity; final value 9.
+   **Verify:** Keep an assertion equivalent to `System.identityHashCode(buffer) == identity && buffer[0] == 9`. As a control, change `for (int i = 0; i < 10; i++) Arrays.fill(buffer, (byte) i);` to `for (int i = 0; i <= 10; i++) Arrays.fill(buffer, (byte) i);`: the run must fail with an `AssertionError` from the assertion on `System.identityHashCode(buffer) == identity && buffer[0] == 9`. Restore the line before continuing.
 
-6. **Record process memory cautiously.** ReadRuntime total/free/max memory and check only valid ordering relationships.
+6. **Record process memory cautiously.** Read Runtime total/free/max memory and check only valid ordering relationships.
    **Expected:** nonnegative counters; max at least total; no claim of exact object size.
-   **Verify:** Compare your assertion values or captured diagnostic with nonnegative counters; max at least total; no claim of exact object size.
+   **Verify:** Keep an assertion equivalent to `total >= 0 && free >= 0 && maximum >= total` and confirm that `java -ea Main` completes. Then name an input that would make it fail and explain which value changes.
 
 ## Common pitfalls and diagnosis
 
@@ -131,7 +131,14 @@ Do not replace a precise exception with a catch-all that returns a plausible def
 
 ## Progressive hints
 
-First reconstruct the values and identities in the worked example. Next isolate the line that changes the result when one input is altered. Finally compare the normal and failure paths with the stated contract. Use a small table of input, expected value, actual value and exception type. Ask for one hint about the first incorrect assumption before requesting the entire reference implementation.
+Read one hint at a time and attempt the exercise again before reading the next. Keep a small table of input, expected value, actual value and exception type. Ask for one hint about the first incorrect assumption before requesting the entire reference implementation.
+
+- **Exercise 1:** First restate the expected observation: list still exposes the same array contents. Then list the values read by `retained.get(0)[0] == 7 && retained.get(0).length == 1024` and trace each one from its declaration. Finally, compute the asserted value with `byte[] payload = new byte[1025];` in place before running.
+- **Exercise 2:** First restate the expected observation: list empty; separate array still valid. Then list the values read by `retained.isEmpty() && separate[0] == 7` and trace each one from its declaration. Finally, compare `assert retained.isEmpty() && separate[1] == 7;` with the same line in Example B and state the claim each version makes.
+- **Exercise 3:** First restate the expected observation: weak get returns the same object while strong reference exists. Then list the values read by `weak.get() == separate` and trace each one from its declaration. Finally, name one input that would make `weak.get() == separate` false.
+- **Exercise 4:** First restate the expected observation: 1280 logical bytes; no exact heap-overhead claim. Then list the values read by `logical == 1280` and trace each one from its declaration. Finally, predict the effect of changing `for (int i = 0; i < 10; i++) blocks.add(new byte[128]);` to `for (int i = 0; i <= 10; i++) blocks.add(new byte[128]);` before running anything.
+- **Exercise 5:** First restate the expected observation: same buffer identity; final value 9. Then list the values read by `System.identityHashCode(buffer) == identity && buffer[0] == 9` and trace each one from its declaration. Finally, predict the effect of changing `for (int i = 0; i < 10; i++) Arrays.fill(buffer, (byte) i);` to `for (int i = 0; i <= 10; i++) Arrays.fill(buffer, (byte) i);` before running anything.
+- **Exercise 6:** First restate the expected observation: nonnegative counters; max at least total; no claim of exact object size. Then list the values read by `total >= 0 && free >= 0 && maximum >= total` and trace each one from its declaration. Finally, name one input that would make `total >= 0 && free >= 0 && maximum >= total` false.
 
 ## Self-check and retrieval
 
@@ -143,7 +150,7 @@ Preserve the saved pad and the six exercise observations. Continue to the next l
 
 ## Sources and verification status
 
-[Official Java21 API or language reference](https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/ref/Reference.html), reviewed2026-10-22. Examples and exercise fixtures are original course material. Use the [validation guide](../../../docs/validation.md) and CI artifacts for the exact revision and platform to inspect actual compile/run results. Authoring, parsing, compilation, execution and learner mastery are separate forms of evidence.
+[Official Java 21 API or language reference](https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/ref/Reference.html), reviewed 2026-10-22. Examples and exercise fixtures are original course material. Use the [validation guide](../../../docs/validation.md) and CI artifacts for the exact revision and platform to inspect actual compile/run results. Authoring, parsing, compilation, execution and learner mastery are separate forms of evidence.
 
 ## Ask an AI tutor about this lesson
 
@@ -153,7 +160,7 @@ Read courses/java/guides/java-025.md and courses/java/lessons/java-025.java. Dir
 Explain the mechanism, ask for a prediction, review my attempt, give one hint,
 request compiler/runtime evidence, and ask a fresh retrieval question.
 Keep courses/java/solutions/ closed until I request comparison or show an attempt.
-Use Java21 and the declared offline fixture. Done when I can explain the state
+Use Java 21 and the declared offline fixture. Done when I can explain the state
 transitions, pass all six exercise contracts, diagnose one failure and solve a
 new boundary case without copying the solution.
 ```

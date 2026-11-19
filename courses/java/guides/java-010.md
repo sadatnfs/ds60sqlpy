@@ -6,7 +6,7 @@ Beginner, approximately 90 minutes. Direct prerequisites: `java-009`
 
 ## Learning objectives
 
-Explain interface, dynamic dispatch, composition using a concrete program. Trace the normal execution, identify its boundary assumptions and make a failure case observable. The first investigation is Use Pricing references to identity and half-price implementations on 100 cents. The final exercise transfers the mechanism to reject an invalid wrapper.
+Program to an interface, compose behavior by delegation, and switch exhaustively over a sealed type with record patterns. Along the way, explain interface, dynamic dispatch, composition, sealed interface using a concrete program. Trace the normal execution, identify its boundary assumptions and make a failure case observable. Exercises 1 and 2 start from the worked examples; the authored investigations begin with this task: Price 200 cents with NoDiscount, Percent(25) and Fixed(250) through one pattern-matching switch over the sealed Discount interface. The final exercise transfers the mechanism to reject an invalid wrapper.
 
 ## Purpose and mental model
 
@@ -19,6 +19,8 @@ An interface describes behavior a caller can rely on without depending on one im
 **Dynamic dispatch:** Selecting an implementation from the runtime receiver object.
 
 **Composition:** Building behavior by delegating to contained collaborators.
+
+**Sealed interface:** An interface that names every permitted implementation, enabling exhaustive pattern switches.
 
 ## How to run this lesson
 
@@ -37,7 +39,7 @@ The public class name and source filename must agree. Each worked example below 
 
 ## Syntax anatomy and execution trace
 
-An interface declares a method; implementing classes or lambdas supply its body. A variable of interface type can hold different implementations. The receiver object selects the overridden method at runtime. A composed wrapper validates its own policy, delegates to the inner implementation and checks arithmetic withMath.addExact. Keep domain validation consistent across all implementations so callers do not need class-specific exceptions.
+An interface declares a method; implementing classes or lambdas supply its body. A variable of interface type can hold different implementations. The receiver object selects the overridden method at runtime. A composed wrapper validates its own policy, delegates to the inner implementation and checks arithmetic with Math.addExact. Keep domain validation consistent across all implementations so callers do not need class-specific exceptions. A sealed interface lists its permitted implementations, so a switch over it can be exhaustive without a default branch, and a record pattern such as Percent(int percent) tests the type and binds the record component in one case label (Java 21).
 
 ## Worked example / walkthrough
 
@@ -67,6 +69,22 @@ public class Main {
     public int price(int amount) {
       return Math.addExact(delegate.price(amount), cents);
     }
+  }
+
+  sealed interface Discount permits NoDiscount, Percent, Fixed {}
+
+  record NoDiscount() implements Discount {}
+
+  record Percent(int percent) implements Discount {}
+
+  record Fixed(int cents) implements Discount {}
+
+  static int discounted(int price, Discount discount) {
+    return switch (discount) {
+      case NoDiscount() -> price;
+      case Percent(int percent) -> (price * (100 - percent)) / 100;
+      case Fixed(int cents) -> Math.max(0, price - cents);
+    };
   }
 
   public static void main(String[] args) throws Exception {
@@ -113,6 +131,22 @@ public class Main {
     }
   }
 
+  sealed interface Discount permits NoDiscount, Percent, Fixed {}
+
+  record NoDiscount() implements Discount {}
+
+  record Percent(int percent) implements Discount {}
+
+  record Fixed(int cents) implements Discount {}
+
+  static int discounted(int price, Discount discount) {
+    return switch (discount) {
+      case NoDiscount() -> price;
+      case Percent(int percent) -> (price * (100 - percent)) / 100;
+      case Fixed(int cents) -> Math.max(0, price - cents);
+    };
+  }
+
   public static void main(String[] args) throws Exception {
     Pricing regular = amount -> {
       requireNonnegative(amount);
@@ -130,7 +164,7 @@ public class Main {
 }
 ```
 
-**Expected:** price100 becomes60.
+**Expected:** price 100 becomes 60.
 
 ## Prediction before your attempt
 
@@ -138,29 +172,29 @@ Read the source from the entry point and name each value before executing it. Id
 
 ## Exercises
 
-1. **Call through an interface.** Use Pricing references to identity and half-price implementations on 100 cents.
-   **Expected:** 100 and 50.
-   **Verify:** Compare your assertion values or captured diagnostic with 100 and 50.
+1. **Call through an interface: change one input.** Copy Example A into a scratch `Main.java` and change `return amount / 2;` to `return amount / 3;`. Before running it with `java -ea Main`, predict which assertion fails and which value it now sees; then run it and restore the original line.
+   **Expected:** The changed run fails with an `AssertionError` from the assertion on `regular.price(100) == 100 && half.price(100) == 50`. Restoring the original line brings back the worked observation: 100 and 50.
+   **Verify:** Compare your written prediction with the reported `AssertionError` and its stack-trace line, and name the value that made `regular.price(100) == 100 && half.price(100) == 50` false. After restoring the line, the program completes without an `AssertionError` again.
 
-2. **Compose a fee policy.** Wrap the half-price policy with a10-cent fee.
-   **Expected:** price100 becomes60.
-   **Verify:** Compare your assertion values or captured diagnostic with price100 becomes60.
+2. **Compose a fee policy: debug a regression.** A regression changed one token in the code that Example B adds after Example A, so one line now reads `Pricing withFee = new Fee(half, 11);`. Run Example B with that line, use the failing assertion to locate the defect and repair it without changing the assertion.
+   **Expected:** Before the repair the run fails with an `AssertionError` from the assertion on `withFee.price(100) == 60`; after it the line reads `Pricing withFee = new Fee(half, 10);` again and price 100 becomes 60.
+   **Verify:** Keep the failing and the repaired runs. Explain why the changed token alters the value tested by `withFee.price(100) == 60` for this input.
 
-3. **Inspect rounding semantics.** Apply integer half-price to101 cents under truncation-toward-zero.
-   **Expected:** 50 cents before fee.
-   **Verify:** Compare your assertion values or captured diagnostic with 50 cents before fee.
+3. **Switch exhaustively over a sealed type.** Price 200 cents with NoDiscount, Percent(25) and Fixed(250) through one pattern-matching switch over the sealed Discount interface.
+   **Expected:** 200, 150 and 0.
+   **Verify:** Keep an assertion equivalent to `discountedPrices.equals(List.of(200, 150, 0))`. As a control, change `for (Discount discount : List.of(new NoDiscount(), new Percent(25), new Fixed(250))) {` to `for (Discount discount : List.of(new NoDiscount(), new Percent(26), new Fixed(250))) {`: the run must fail with an `AssertionError` from the assertion on `discountedPrices.equals(List.of(200, 150, 0))`. Restore the line before continuing.
 
-4. **Validate every implementation.** Call regular,half and fee policy with-1.
-   **Expected:** all throwIllegalArgumentException.
-   **Verify:** Compare your assertion values or captured diagnostic with all throwIllegalArgumentException.
+4. **Validate every implementation.** Call regular, half and fee policy with -1.
+   **Expected:** all throw IllegalArgumentException.
+   **Verify:** Keep an assertion equivalent to `rejected`. As a control, change `rejected = true;` to `rejected = false;`: the run must fail with an `AssertionError` from the assertion on `rejected`. Restore the line before continuing.
 
-5. **Change a collaborator without changing caller code.** Iterate over the three policies and collect prices for100.
-   **Expected:** results100,50,60.
-   **Verify:** Compare your assertion values or captured diagnostic with results100,50,60.
+5. **Change a collaborator without changing caller code.** Iterate over the three policies and collect prices for 100.
+   **Expected:** results 100, 50, 60.
+   **Verify:** Keep an assertion equivalent to `prices.equals(List.of(100, 50, 60))`. As a control, change `for (Pricing policy : List.of(regular, half, withFee)) prices.add(policy.price(100));` to `for (Pricing policy : List.of(regular, half, withFee)) prices.add(policy.price(101));`: the run must fail with an `AssertionError` from the assertion on `prices.equals(List.of(100, 50, 60))`. Restore the line before continuing.
 
 6. **Reject an invalid wrapper.** Construct a fee wrapper with a negative fee or null delegate.
-   **Expected:** negative fee IllegalArgumentException;null delegate NullPointerException.
-   **Verify:** Compare your assertion values or captured diagnostic with negative fee IllegalArgumentException;null delegate NullPointerException.
+   **Expected:** negative fee IllegalArgumentException; null delegate NullPointerException.
+   **Verify:** Keep an assertion equivalent to `feeRejected && delegateRejected`. As a control, change `feeRejected = true;` to `feeRejected = false;`: the run must fail with an `AssertionError` from the assertion on `feeRejected && delegateRejected`. Restore the line before continuing.
 
 ## Common pitfalls and diagnosis
 
@@ -170,7 +204,14 @@ Do not replace a precise exception with a catch-all that returns a plausible def
 
 ## Progressive hints
 
-First reconstruct the values and identities in the worked example. Next isolate the line that changes the result when one input is altered. Finally compare the normal and failure paths with the stated contract. Use a small table of input, expected value, actual value and exception type. Ask for one hint about the first incorrect assumption before requesting the entire reference implementation.
+Read one hint at a time and attempt the exercise again before reading the next. Keep a small table of input, expected value, actual value and exception type. Ask for one hint about the first incorrect assumption before requesting the entire reference implementation.
+
+- **Exercise 1:** First restate the expected observation: 100 and 50. Then list the values read by `regular.price(100) == 100 && half.price(100) == 50` and trace each one from its declaration. Finally, compute the asserted value with `return amount / 3;` in place before running.
+- **Exercise 2:** First restate the expected observation: price 100 becomes 60. Then list the values read by `withFee.price(100) == 60` and trace each one from its declaration. Finally, compare `Pricing withFee = new Fee(half, 11);` with the same line in Example B and state the claim each version makes.
+- **Exercise 3:** First restate the expected observation: 200, 150 and 0. Then list the values read by `discountedPrices.equals(List.of(200, 150, 0))` and trace each one from its declaration. Finally, predict the effect of changing `for (Discount discount : List.of(new NoDiscount(), new Percent(25), new Fixed(250))) {` to `for (Discount discount : List.of(new NoDiscount(), new Percent(26), new Fixed(250))) {` before running anything.
+- **Exercise 4:** First restate the expected observation: all throw IllegalArgumentException. Then list the values read by `rejected` and trace each one from its declaration. Finally, predict the effect of changing `rejected = true;` to `rejected = false;` before running anything.
+- **Exercise 5:** First restate the expected observation: results 100, 50, 60. Then list the values read by `prices.equals(List.of(100, 50, 60))` and trace each one from its declaration. Finally, predict the effect of changing `for (Pricing policy : List.of(regular, half, withFee)) prices.add(policy.price(100));` to `for (Pricing policy : List.of(regular, half, withFee)) prices.add(policy.price(101));` before running anything.
+- **Exercise 6:** First restate the expected observation: negative fee IllegalArgumentException; null delegate NullPointerException. Then list the values read by `feeRejected && delegateRejected` and trace each one from its declaration. Finally, predict the effect of changing `feeRejected = true;` to `feeRejected = false;` before running anything.
 
 ## Self-check and retrieval
 
@@ -182,7 +223,7 @@ Preserve the saved pad and the six exercise observations. Continue to the next l
 
 ## Sources and verification status
 
-[Official Java21 API or language reference](https://docs.oracle.com/en/java/javase/21/docs/api/index.html), reviewed2026-10-22. Examples and exercise fixtures are original course material. Use the [validation guide](../../../docs/validation.md) and CI artifacts for the exact revision and platform to inspect actual compile/run results. Authoring, parsing, compilation, execution and learner mastery are separate forms of evidence.
+[Official Java 21 API or language reference](https://docs.oracle.com/en/java/javase/21/docs/api/index.html), reviewed 2026-10-22. Examples and exercise fixtures are original course material. Use the [validation guide](../../../docs/validation.md) and CI artifacts for the exact revision and platform to inspect actual compile/run results. Authoring, parsing, compilation, execution and learner mastery are separate forms of evidence.
 
 ## Ask an AI tutor about this lesson
 
@@ -192,7 +233,7 @@ Read courses/java/guides/java-010.md and courses/java/lessons/java-010.java. Dir
 Explain the mechanism, ask for a prediction, review my attempt, give one hint,
 request compiler/runtime evidence, and ask a fresh retrieval question.
 Keep courses/java/solutions/ closed until I request comparison or show an attempt.
-Use Java21 and the declared offline fixture. Done when I can explain the state
+Use Java 21 and the declared offline fixture. Done when I can explain the state
 transitions, pass all six exercise contracts, diagnose one failure and solve a
 new boundary case without copying the solution.
 ```

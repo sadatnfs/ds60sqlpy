@@ -1,22 +1,22 @@
 # spark-033: Stateful deduplication and event identity
 
-Authored paired Scala/PySpark teaching content. The default fixtures are tiny,local and deterministic. Runtime acceptance,logical correctness and learner understanding remain separate evidence.
+Authored paired Scala/PySpark teaching content. The default fixtures are tiny, local and deterministic. Runtime acceptance, logical correctness and learner understanding remain separate evidence.
 
 ## Level and prerequisites
 
-Advanced; approximately 120 minutes. Direct design prerequisites: `spark-032`. The prepared baseline is Spark 4.0.1,Scala binary2.13,JDK 17 and Python 3.12. Read the [execution baseline](../execution-baseline.md); a proposed future tuple is not a runtime receipt.
+Advanced; approximately 105 minutes. Direct prerequisites: `spark-032`. The prepared baseline is Spark 4.0.1, Scala binary 2.13, JDK 17 and Python 3.12. Read the [execution baseline](../execution-baseline.md).
 
 ## How to run this lesson
 
-Open `spark-033` in the classroom and choose the Scala or PySpark implementation you understand. Prepare only its fixed `spark-local-scala` or `spark-local-python` profile,save your pad and run the complete source. Scala stages as `Main.scala` with `object Main`; Python stages as `main.py` with a main guard. Each program creates its own local[2] session,disables the UI,binds the driver to loopback and stops the session in finally. No external dataset,package download,JDBC connection or cloud service is requested.
+Open `spark-033` in the classroom and choose the Scala or PySpark implementation you understand. Prepare only its fixed `spark-local-scala` or `spark-local-python` profile, save your pad and run the complete source. Scala stages as `Main.scala` with `object Main`; Python stages as `main.py` with a main guard. Each program creates its own local[2] session, disables the UI, binds the driver to loopback and stops the session in finally. No external dataset, package download, JDBC connection or cloud service is requested.
 
 The [Scala learner](../lessons/spark-033.scala) and [PySpark learner](../lessons/spark-033.py) run two complete demonstrations and retain six explicit task stubs. Use the [explained solutions](../solutions/spark-033_solutions.md) only after an attempt or an explicit worked comparison; the [Scala reference](../solutions/spark-033_solution.scala) and [PySpark reference](../solutions/spark-033_solution.py) contain complete assertions. A bounded collect is used only for the declared tiny fixture; do not copy it onto an unbounded or large production table.
 
 ## Learning objectives
 
 - Bound deduplication state while distinguishing duplicate delivery from legitimate equal-valued events.
-- State the input and output grain,schema,NULL policy and ordering before executing a transformation.
-- Compare each language implementation with independent literal expectations,not only with the other implementation.
+- State the input and output grain, schema, NULL policy and ordering before executing a transformation.
+- Compare each language implementation with independent literal expectations, not only with the other implementation.
 
 ## Vocabulary and concepts
 
@@ -40,13 +40,13 @@ The accepted branch applies a five-minute watermark to event_time and dropDuplic
 
 Deduplication by ID also does not decide which conflicting payload is authoritative. This fixture replays the same amount and timestamp. A real event ID reused with a different amount or meaning requires a conflict/version policy, not an assumption that whichever record survives is correct. Stable identity and idempotency are data contracts in addition to the stateful operator choice.
 
-Two finite file queries read the same source. The accepted query writes watermarked deduplicated records to one Parquet sink and checkpoint. The quarantine query writes missing-ID records to its own sink and checkpoint. In the preparedSpark 4.0.1 execution, their progress input metrics count records after the respective branch filters: the first phase reports 2 for accepted identities and 1 for quarantine, not 3 for each raw file scan. The accepted metric still includes an in-horizon replay before deduplication removes it. The final ledger therefore reads the source once as a bounded batch to establish six delivery identities independently of engine metric placement. Adding metrics from arbitrary queries is not a general source-population rule; this fixture has disjoint exhaustive branches and explicit reconciliation.
+Two finite file queries read the same source. The accepted query writes watermarked deduplicated records to one Parquet sink and checkpoint. The quarantine query writes missing-ID records to its own sink and checkpoint. In the prepared Spark 4.0.1 execution, their progress input metrics count records after the respective branch filters: the first phase reports 2 for accepted identities and 1 for quarantine, not 3 for each raw file scan. The accepted metric still includes an in-horizon replay before deduplication removes it. The final ledger therefore reads the source once as a bounded batch to establish six delivery identities independently of engine metric placement. Adding metrics from arbitrary queries is not a general source-population rule; this fixture has disjoint exhaustive branches and explicit reconciliation.
 
 The third phase publishes an administrative event at 00:20. It remains in the accepted sink with amount 0 so it can advance event-time progress through the stateful operator. Filtering it out before watermarking would remove the evidence needed for that advancement. After the finite run, the business view excludes the explicit administrative ID, but the source and accepted-output ledgers continue to account for it.
 
 Actual state-operator progress must show removal of the older e1, e2, e3 entries after the watermark advances. This makes the retention boundary observable. The system no longer promises to remember every historical event ID forever. Repeated keys outside the retained horizon require a separate durable identity policy if the business needs perpetual uniqueness. The lesson deliberately does not fabricate such a guarantee from the word deduplication.
 
-The final source has six deliveries: four known-ID business deliveries including one replay, oneNULL-ID quarantine delivery, and one advancer. The accepted sink has four rows: three business events plus the advancer. The quarantine sink has one row. The difference of one known-ID delivery is explained by the in-horizon replay. The business sum is 30, while the rejected 99 never contributes. These counts make the decision ledger auditable.
+The final source has six deliveries: four known-ID business deliveries including one replay, one NULL-ID quarantine delivery, and one advancer. The accepted sink has four rows: three business events plus the advancer. The quarantine sink has one row. The difference of one known-ID delivery is explained by the in-horizon replay. The business sum is 30, while the rejected 99 never contributes. These counts make the decision ledger auditable.
 
 All source files are atomically published under fresh owned scratch, each phase finishes before the next file appears, and both queries stop in finally. The query definitions and checkpoint paths remain stable across phases. No sleeps, sockets or Kafka service are used. The output and state evidence describe this bounded retention policy and fixture, not an unlimited exactly-once guarantee for every possible source or sink.
 
@@ -183,7 +183,7 @@ Filter accepted identities, drop the reason field, attach a five-minute watermar
 
 Run both first-phase branches with AvailableNow: deduplicated records to accepted-output and missing-ID records to quarantine-output. Use distinct checkpoints and bounded await/stop scopes.
 
-**Expected result/shape:** Accepted(e1, delivery 1,10),(e2, delivery 2,10); quarantine(delivery 3, NULL, missing_event_id). The raw source has 3 rows; prepared branch input metrics report 2 accepted-eligible rows and 1 quarantine row.
+**Expected result/shape:** Accepted(e1, delivery 1,10), (e2, delivery 2,10); quarantine(delivery 3, NULL, missing_event_id). The raw source has 3 rows; prepared branch input metrics report 2 accepted-eligible rows and 1 quarantine row.
 
 **Verify:** Assert both exact output populations, branch metrics 2/1 and an independent raw batch-source count 3.
 
@@ -193,7 +193,7 @@ Run both first-phase branches with AvailableNow: deduplicated records to accepte
 
 Publish the second file after the first phase terminates and run both compatible branches again. Compare the accepted business identities and their total.
 
-**Expected result/shape:** Accepted(e1, delivery 1,10),(e2, delivery 2,10),(e3, delivery 5,10); delivery 4 replay contributes no additional row. Business total 30.
+**Expected result/shape:** Accepted(e1, delivery 1,10), (e2, delivery 2,10), (e3, delivery 5,10); delivery 4 replay contributes no additional row. Business total 30.
 
 **Verify:** Assert all retained event/delivery pairs, sum 30, raw source total 5 and prepared branch metrics 2 accepted-eligible inputs versus 0 quarantined inputs for this phase.
 
@@ -225,24 +225,24 @@ Do not deduplicate by amount when identity is the contract. Do not merge all NUL
 
 ## Self-check
 
-Explain the contract of `classify` / `classify` without reading its solution. Trace the specified boundary case,then explain the final exercise's evidence and limitation. Identify where a transformation builds a plan and where an action requests execution. Retain exact values or operator evidence rather than treating a successful process exit as proof of the whole learning objective.
+Explain the contract of `classify` / `classify` without reading its solution. Trace the specified boundary case, then explain the final exercise's evidence and limitation. Identify where a transformation builds a plan and where an action requests execution. Retain exact values or operator evidence rather than treating a successful process exit as proof of the whole learning objective.
 
 ## Next step
 
-Use the [course route](../README.md) to continue. Paired-language agreement is useful only when both outputs also satisfy the independent fixture contract. Keep runtime/profile receipts separate from any cluster-performance or production-recovery claim.
+Use the [course route](../README.md) to continue. Paired-language agreement is useful only when both outputs also satisfy the independent fixture contract. A successful local run is not evidence of cluster performance or production recovery.
 
 ## Primary sources and official APIs
 
 - [Spark 4.0.1 dropDuplicatesWithinWatermark](https://spark.apache.org/docs/4.0.1/api/python/reference/pyspark.sql/api/pyspark.sql.DataFrame.dropDuplicatesWithinWatermark.html)
 
-- [Spark 4.0.1 streaming deduplication,watermarks and progress](https://spark.apache.org/docs/4.0.1/streaming/apis-on-dataframes-and-datasets.html)
+- [Spark 4.0.1 streaming deduplication, watermarks and progress](https://spark.apache.org/docs/4.0.1/streaming/apis-on-dataframes-and-datasets.html)
 
 ## Ask an AI tutor about this lesson
 
 ```text
 Use $guide-ds60sqlpy-learning to coach me through spark-033: Stateful deduplication and event identity.
-Read courses/scala-spark/guides/spark-033.md and courses/scala-spark/lessons/spark-033.py;the paired sources are courses/scala-spark/lessons/spark-033.scala and courses/scala-spark/lessons/spark-033.py.
-Direct prerequisites: spark-032. Explain the schema,row grain and new Scala/Python/Spark syntax,ask me to predict a concrete result,then inspect my attempt. Give one hint at a time,review exact result and boundary evidence,and ask retrieval questions in my own words. Do not read solutions/ until I ask or have made an honest attempt.
-Use only the prepared local[2] worker profile and owned job scratch. Do not download dependencies,start a remote service,reset existing checkpoints or alter unrelated learner work.
+Read courses/scala-spark/guides/spark-033.md and courses/scala-spark/lessons/spark-033.py; the paired sources are courses/scala-spark/lessons/spark-033.scala and courses/scala-spark/lessons/spark-033.py.
+Direct prerequisites: spark-032. Explain the schema, row grain and new Scala/Python/Spark syntax, ask me to predict a concrete result, then inspect my attempt. Give one hint at a time, review exact result and boundary evidence, and ask retrieval questions in my own words. Do not read solutions/ until I ask or have made an honest attempt.
+Use only the prepared local[2] worker profile and owned job scratch. Do not download dependencies, start a remote service, reset existing checkpoints or alter unrelated learner work.
 Done when all six contracts have inspected evidence and I can explain the stated assumptions and a meaningful failure case.
 ```

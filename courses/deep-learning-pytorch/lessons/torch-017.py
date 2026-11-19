@@ -4,25 +4,25 @@ Answer-free learner worksheet. See the companion guide for worked examples.
 Copy to .learning before editing. Six independent attempts belong below.
 """
 
-# Exercise 1: Calculate two penalties
-# Use weights 1, -2 and compute L1 and squared L2 sums.
-# Expected: L1=3; squared L2=5.
+# Exercise 1: Compute penalties for a new vector
+# Use weights 3, -4, 0 and compute the L1 and squared L2 sums.
+# Expected: L1 = 7; squared L2 = 25.
 
-# Exercise 2: Check evaluation dropout
-# Apply Dropout.5 in eval mode to ones twice.
-# Expected: both outputs exactly ones.
+# Exercise 2: Predict train-mode values for p=0.25
+# Apply Dropout(0.25) in train mode to a (3, 5) tensor of ones and inspect every value.
+# Expected: shape (3, 5); each value is 0 or 4/3.
 
-# Exercise 3: Check training invariants
-# Switch the same layer to train mode and inspect output values.
-# Expected: shape(4, 8); only 0 or2.
+# Exercise 3: Confirm eval disables the new rate
+# Switch the same Dropout(0.25) layer to eval mode and apply it to the ones tensor.
+# Expected: output exactly equals the input.
 
 # Exercise 4: Separate data and penalty terms
-# Combine data loss 2 with coefficient.1 times squared L2.
-# Expected: penalty.5; total 2.5.
+# Combine data loss 2 with coefficient 0.1 times squared L2.
+# Expected: penalty 0.5; total 2.5.
 
 # Exercise 5: Differentiate the explicit penalty
-# Differentiate .1*sum(v*v) at v=[1, -2].
-# Expected: gradient [.2, -.4].
+# Differentiate 0.1*sum(v*v) at v=[1, -2].
+# Expected: gradient [0.2, -0.4].
 
 # Exercise 6: Keep mode separate from gradients
 # Set Dropout to eval and pass a requires_grad input.

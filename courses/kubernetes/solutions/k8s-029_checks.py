@@ -14,7 +14,8 @@ def main():
         assert not valid({"message": "hello", "replicas": value})
     assert not valid({"replicas": 1})
     assert not valid({"message": "hello", "replicas": 1, "replcias": 2})
-    assert 6 != 7
+    status = {"generation": 7, "observedGeneration": 6, "ready": True}
+    assert status["ready"] and status["observedGeneration"] != status["generation"]
     print("k8s-029 strict synthetic subset passed; server pruning and admission are not simulated")
 
 

@@ -20,9 +20,7 @@ list.len returns list lengths while preserving null for an absent list. Filterin
 
 ## Run the lesson
 
-Open this subject in `/classroom`, then show its code and notes. The prepared `data-engineering` worker runs `main.py` in a fresh temporary directory. The examples use installed packages and synthetic local fixtures; no account, cloud service, network request or package download is required. Save source and notes before switching lessons. Temporary databases, project files and tracking artifacts are recreated by each complete program and removed after the job. The classroom retains the submitted source and bounded output, not an indefinitely running external service. The guide distinguishes this local execution from the deployment decisions that need an owned production environment.
-
-
+Open `polars-013` in `/classroom`. Its starter `main.py` contains both worked cases, "Declare the population before exploding" and "Preserve named structure and transform elements", and prints the dictionary each case returns. The prepared `data-engineering` worker runs it in a fresh temporary directory. An `AssertionError` means that an observation differs from the case's stated contract. The inputs are small literal tables. Cases that demonstrate Parquet scans write their files into a temporary directory that is removed when the case returns. No account, network request or package download is involved. Save source and notes before switching lessons.
 
 ## Worked case 1: Declare the population before exploding
 
@@ -50,12 +48,11 @@ if __name__ == "__main__":
     print(example_one())
 ```
 
-
 ## Worked case 2: Preserve named structure and transform elements
 
 The second case packs x and y into a point struct, reconstructs the columns and then doubles nested list values. It checks both identity preservation and the shape of the nested result.
 
-**Expected evidence:** The struct round trip equals its source; doubled lists are [[2,4],[6]].
+**Expected evidence:** The struct round trip equals its source; doubled lists are [[2, 4],[6]].
 
 ```python
 import polars as pl
@@ -77,11 +74,9 @@ if __name__ == "__main__":
     print(example_two())
 ```
 
-
 ## Practice
 
-Make each requested change in a saved copy. Compare both the expected result and the deliberately changed assumption. The separate reference explains the answers.
-
+The starter contains both worked cases, so a task can change either one. Make each change in a saved copy, run it, and compare the printed result with the task's check before opening the separate explained answers.
 
 ### 1. Separate empty from unknown
 
@@ -91,7 +86,6 @@ Create separate counts for an empty list and a null list.
 
 **Hint:** A list length of 0 is not a null length.
 
-
 ### 2. Change the grain
 
 Write the key for the exploded item table.
@@ -99,7 +93,6 @@ Write the key for the exploded item table.
 **Check:** An order_id alone is no longer sufficient.
 
 **Hint:** One order may contain repeated item labels.
-
 
 ### 3. Keep order-level metrics
 
@@ -109,7 +102,6 @@ Compute the original number of orders before exploding.
 
 **Hint:** Do not infer orders from item rows.
 
-
 ### 4. Add a struct field
 
 Add a third named coordinate and round-trip all fields.
@@ -118,15 +110,13 @@ Add a third named coordinate and round-trip all fields.
 
 **Hint:** Select fields by name.
 
-
 ### 5. Transform a nested value
 
 Square each numeric element without a Python row loop.
 
-**Check:** The lists become [[1,4],[9]].
+**Check:** The lists become [[1, 4],[9]].
 
 **Hint:** Use list.eval with element expressions.
-
 
 ### 6. Test null nested elements
 
@@ -136,20 +126,19 @@ Add a list containing a null element and define the policy.
 
 **Hint:** A missing element differs from a missing list.
 
-
 ## Diagnose errors and misleading results
 
 Unexpected row counts after explode usually indicate an unstated grain or empty-list policy. Missing struct fields indicate schema evolution or a spelling problem, not an invitation to select by position. Check nested dtypes before applying numeric expressions and retain collection-level identifiers for reconciliation.
 
 ## Transfer to independent work
 
-Normalize nested events with an explicit population and identity contract. Demonstrate empty, missing and repeated-element cases, then verify that any flattened table can still be related to its original records. This is essential for reliable event analytics and sequence-feature construction.
+Demonstrate empty, missing and repeated-element cases, then verify that any flattened table can still be related to its original records. This is essential for reliable event analytics and sequence-feature construction.
 
 ## Primary references
 
-- [Polars documentation: Nested data, lists and structs](https://docs.pola.rs/user-guide/expressions/lists-and-arrays/)
+- [Polars user guide: Lists and arrays](https://docs.pola.rs/user-guide/expressions/lists-and-arrays/)
 - [Polars Python API reference](https://docs.pola.rs/api/python/stable/reference/index.html)
 
 ## Tutor guidance
 
-Use the repository learning-companion skill for `polars-013`. Inspect the learner's own source and observations, ask for an explanation of the relevant data or state contract, and give a focused hint. Separate an assertion on this fixture from a claim about an external dataset or deployed service.
+Use the repository's `$guide-ds60sqlpy-learning` skill (`.agents/skills/guide-ds60sqlpy-learning/SKILL.md`) for `polars-013`. Inspect the learner's own source and printed output first. Ask for an explanation of list, struct, explode, nested expression and grain in their own words, then give one focused hint at a time. Keep an assertion on this synthetic fixture separate from a claim about an external dataset or deployed service.

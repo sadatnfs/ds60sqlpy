@@ -2,24 +2,33 @@
 public class Main {
 
   public static void main(String[] args) throws Exception {
-    // Exercise 1: Read from a producer
-    // Sum `List.of(1, 2, 3)` and `List.of(1.5, 2.5)` through List<?extends Number>.
-    // Expected: sums 6.0 and 4.0.
+    // Exercise 1: Read from a producer: predict an edited check
+    // Copy Example A into a scratch `Main.java` and change `assert sum(List.of(1, 2, 3)) ==
+    // 6.0;` to `assert sum(List.of(2, 2, 3)) == 6.0;` inside its assertion. Before running it
+    // with `java -ea Main`, predict whether the assertion still holds and explain why; then
+    // restore it.
+    // Expected: The changed run fails with an `AssertionError` from the assertion on
+    // `sum(List.of(1, 2, 3)) == 6.0`. Restoring the original line brings back the worked
+    // observation: sums 6.0 and 4.0.
 
-    // Exercise 2: Write to a consumer
-    // Append integers1,2 to a List<Number> through List<?superInteger>.
-    // Expected: listcontains1,2.
+    // Exercise 2: Write to a consumer: diagnose an edited check
+    // A careless edit changed the assertion that Example B adds after Example A so that it reads
+    // `assert numbers.equals(List.of(2, 2));`. Run Example B with that line, explain why the
+    // edited assertion now fails for the same program state, and restore it.
+    // Expected: Before the repair the run fails with an `AssertionError` from the assertion on
+    // `numbers.equals(List.of(1, 2))`; after it the line reads `assert numbers.equals(List.of(1,
+    // 2));` again and list contains 1, 2.
 
     // Exercise 3: Connect source and destination types
-    // CopyList<Integer> intoList<Number> with a bounded generic method.
-    // Expected: destinationcontains3,4.
+    // Copy List<Integer> into List<Number> with a bounded generic method.
+    // Expected: destination contains 3, 4.
 
     // Exercise 4: Preserve generic return type
-    // Callfirst on a String list and assign directly toString.
+    // Call first on a String list and assign it directly to a String.
     // Expected: result alpha.
 
     // Exercise 5: Handle an empty input contract
-    // Callfirst on an empty list and require a named failure.
+    // Call first on an empty list and require a named failure.
     // Expected: NoSuchElementException.
 
     // Exercise 6: Observe erasure carefully

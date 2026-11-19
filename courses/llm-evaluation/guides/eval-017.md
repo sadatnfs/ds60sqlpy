@@ -153,7 +153,7 @@ Use one win and three losses.
 
 **Expected:** The fitted preference probability is 0.25.
 
-**Hint:** The MLE difference is log(wins/losses).
+**Hint:** The MLE difference is \(\log(\mathrm{wins}/\mathrm{losses})\).
 
 ### 4. All wins and no losses
 
@@ -169,7 +169,7 @@ Use scores-1000 and 1000 for the preferred/rejected pair.
 
 **Expected:** Loss remains finite at 2000.
 
-**Hint:** Avoid log(sigmoid(delta)) computed naively.
+**Hint:** Avoid computing \(\log\sigma(\delta)\) naively.
 
 ### 6. Interpret a preference cycle
 
@@ -184,6 +184,16 @@ Observe A>B, B>C and C>A across labels.
 - [Preference-based reward learning](https://arxiv.org/abs/1706.03741)
 - [Direct Preference Optimization model assumptions](https://arxiv.org/abs/2305.18290)
 
-## Study companion
+## Ask an AI tutor about this lesson
 
-Use the repository learning-companion skill with this lesson ID and your own source/output. Ask for clarification of the estimand, probability distribution, data split or gradient before a hint. Keep claims about the authored fixture separate from claims requiring real population or model evidence.
+```text
+Use the checked-in $guide-ds60sqlpy-learning skill for eval-017, Preference data and Bradley-Terry reward models.
+Read courses/llm-evaluation/guides/eval-017.md and courses/llm-evaluation/lessons/eval-017.py. Direct prerequisites: eval-003, eval-011, llm-applied-020.
+Ask me to state the estimand, probability distribution, data split or gradient
+before giving a hint. Review my attempt at the six investigations one at a time,
+give one hint, and ask for the printed evidence.
+Keep courses/llm-evaluation/solutions/ closed until I attempt or explicitly request comparison.
+Keep claims about the authored fixture separate from claims that need real
+population or model evidence. Done when I can reproduce both worked programs,
+pass the six investigations and explain one failure case.
+```

@@ -3,6 +3,7 @@
   "title": "Retrieval evaluation and ranking denominators",
   "concepts": ["recall at k", "MRR", "nDCG", "judgment pools", "candidate generation"],
   "outcome": "Evaluate retrieval separately from answer quality with explicit relevance grades, duplicate handling and unjudged-document policy.",
+  "verification": "An ideal top two still misses one relevant document, a miss scores 0 for recall, reciprocal rank and nDCG, duplicate and unjudged documents are rejected, and an empty relevant set reports missing values instead of 0 or 1.",
   "level": "intermediate",
   "runtime": "python-core",
   "minutes": 120,

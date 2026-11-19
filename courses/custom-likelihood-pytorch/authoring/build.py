@@ -74,16 +74,7 @@ def outputs() -> dict[Path, str]:
                     "outcome",
                 )
             }
-            | {
-                "lab": (
-                    "Read the two complete worked cases, reproduce their evidence "
-                    "and compare their assumptions."
-                ),
-                "verification": (
-                    f"Complete source-bound {key} investigation with explicit numerical "
-                    "diagnostics and explicit scientific limits; no mastery grade."
-                ),
-            }
+            | {"lab": unit["lab"], "verification": unit["verification"]}
         )
         lessons.append(
             {

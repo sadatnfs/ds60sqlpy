@@ -6,7 +6,7 @@ The executable reference is `julia-015_reference.jl`. Its checks cover the state
 
 Names and shape are part of the resulting schema.
 
-**Expected observation:** The output column contains 1,2,3 under the explicit name scaled.
+**Expected observation:** The output column contains 1, 2 and 3 under the explicit name `scaled`.
 
 ## 2. Observe a shared column
 
@@ -24,7 +24,7 @@ A snapshot is useful for comparison and provenance when future mutation is possi
 
 Row accounting remains necessary after grouping.
 
-**Expected observation:** It reports 2 rows,1 observed score and mean 1.
+**Expected observation:** It reports 2 rows, 1 observed score and mean 1.
 
 ## 5. Handle an all-missing group
 

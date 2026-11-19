@@ -1,22 +1,22 @@
 # spark-019: Windows, ties and deterministic deduplication
 
-Authored paired Scala/PySpark teaching content. The default fixtures are tiny,local and deterministic. Runtime acceptance,logical correctness and learner understanding remain separate evidence.
+Authored paired Scala/PySpark teaching content. The default fixtures are tiny, local and deterministic. Runtime acceptance, logical correctness and learner understanding remain separate evidence.
 
 ## Level and prerequisites
 
-Intermediate; approximately 120 minutes. Direct design prerequisites: `spark-018`. The prepared baseline is Spark 4.0.1,Scala binary2.13,JDK 17 and Python 3.12. Read the [execution baseline](../execution-baseline.md); a proposed future tuple is not a runtime receipt.
+Intermediate; approximately 90 minutes. Direct prerequisites: `spark-018`. The prepared baseline is Spark 4.0.1, Scala binary 2.13, JDK 17 and Python 3.12. Read the [execution baseline](../execution-baseline.md).
 
 ## How to run this lesson
 
-Open `spark-019` in the classroom and choose the Scala or PySpark implementation you understand. Prepare only its fixed `spark-local-scala` or `spark-local-python` profile,save your pad and run the complete source. Scala stages as `Main.scala` with `object Main`; Python stages as `main.py` with a main guard. Each program creates its own local[2] session,disables the UI,binds the driver to loopback and stops the session in finally. No external dataset,package download,JDBC connection or cloud service is requested.
+Open `spark-019` in the classroom and choose the Scala or PySpark implementation you understand. Prepare only its fixed `spark-local-scala` or `spark-local-python` profile, save your pad and run the complete source. Scala stages as `Main.scala` with `object Main`; Python stages as `main.py` with a main guard. Each program creates its own local[2] session, disables the UI, binds the driver to loopback and stops the session in finally. No external dataset, package download, JDBC connection or cloud service is requested.
 
 The [Scala learner](../lessons/spark-019.scala) and [PySpark learner](../lessons/spark-019.py) run two complete demonstrations and retain six explicit task stubs. Use the [explained solutions](../solutions/spark-019_solutions.md) only after an attempt or an explicit worked comparison; the [Scala reference](../solutions/spark-019_solution.scala) and [PySpark reference](../solutions/spark-019_solution.py) contain complete assertions. A bounded collect is used only for the declared tiny fixture; do not copy it onto an unbounded or large production table.
 
 ## Learning objectives
 
 - Choose a stable winner per key without relying on partition arrival order.
-- State the input and output grain,schema,NULL policy and ordering before executing a transformation.
-- Compare each language implementation with independent literal expectations,not only with the other implementation.
+- State the input and output grain, schema, NULL policy and ordering before executing a transformation.
+- Compare each language implementation with independent literal expectations, not only with the other implementation.
 
 ## Vocabulary and concepts
 
@@ -40,7 +40,7 @@ A deterministic result is not demonstrated by hoping one execution changes when 
 
 The complete winner implementation is checked under several partition counts and against an equivalent SQL row_number expression. Literal winners remain the primary oracle. DataFrame/SQL agreement alone could hide the same mistaken descending/ascending policy. No performance conclusion is drawn from the tiny repartition checks; they exercise robustness of the logical selection rule.
 
-Window frames answer a different question from rank ordering. A cumulative ROWS frame with a complete chronological order adds one occurrence at a time. A RANGE frame ordered only by event_time reaches all peers with that timestamp at once. EntityA therefore has cumulative ROWS totals 10,30,60 but time-peer RANGE totals 10,60,60. Neither is wrong in isolation. One reports progress through an occurrence ordering; the other reports all events through a clock value.
+Window frames answer a different question from rank ordering. A cumulative ROWS frame with a complete chronological order adds one occurrence at a time. A RANGE frame ordered only by event_time reaches all peers with that timestamp at once. Entity A therefore has cumulative ROWS totals 10,30,60 but time-peer RANGE totals 10,60,60. Neither is wrong in isolation. One reports progress through an occurrence ordering; the other reports all events through a clock value.
 
 A final event-ID sort for display is separate from the window order. The learner sees a stable table by event_id, even though a chronological window for entity C places event 8 before the missing-time event 7. Confusing those two orderings makes lag and running totals appear inconsistent. Retain the ordering specification beside any window-derived measure.
 
@@ -182,9 +182,9 @@ Add candidate_rank using row_number per entity, descending event_time with NULL 
 
 ### Exercise 3: Select stable winners across physical layouts
 
-Validate candidates, rank them and retain rank 1. Compare winner IDs after repartitioning to 1,3 and 4 partitions, then compare an equivalentSQL row_number query.
+Validate candidates, rank them and retain rank 1. Compare winner IDs after repartitioning to 1,3 and 4 partitions, then compare an equivalent SQL row_number query.
 
-**Expected result/shape:** Every case yields event IDs[3,6,8], one per entity. SQL returns the same literal winners.
+**Expected result/shape:** Every case yields event IDs [3, 6, 8], one per entity. SQL returns the same literal winners.
 
 **Verify:** Assert exact winners in every layout and SQL, not just equal row counts.
 
@@ -194,7 +194,7 @@ Validate candidates, rank them and retain rank 1. Compare winner IDs after repar
 
 Use dense_rank ordered only by descending event_time with NULL last, returning all rank 1 candidates. Report the candidate IDs rather than choosing an arbitrary winner.
 
-**Expected result/shape:** Top-time candidates[2,3,5,6,8]. Entities A and B each have two admissible candidates under the incomplete rule.
+**Expected result/shape:** Top-time candidates [2, 3, 5, 6, 8]. Entities A and B each have two admissible candidates under the incomplete rule.
 
 **Verify:** Assert the five candidate identities and the two ambiguous entity keys. Do not require unstable executions to change output.
 
@@ -226,11 +226,11 @@ Do not assume sort before dropDuplicates defines its survivor contract. Do not o
 
 ## Self-check
 
-Explain the contract of `validateCandidates` / `validate_candidates` without reading its solution. Trace the specified boundary case,then explain the final exercise's evidence and limitation. Identify where a transformation builds a plan and where an action requests execution. Retain exact values or operator evidence rather than treating a successful process exit as proof of the whole learning objective.
+Explain the contract of `validateCandidates` / `validate_candidates` without reading its solution. Trace the specified boundary case, then explain the final exercise's evidence and limitation. Identify where a transformation builds a plan and where an action requests execution. Retain exact values or operator evidence rather than treating a successful process exit as proof of the whole learning objective.
 
 ## Next step
 
-Use the [course route](../README.md) to continue. Paired-language agreement is useful only when both outputs also satisfy the independent fixture contract. Keep runtime/profile receipts separate from any cluster-performance or production-recovery claim.
+Use the [course route](../README.md) to continue. Paired-language agreement is useful only when both outputs also satisfy the independent fixture contract. A successful local run is not evidence of cluster performance or production recovery.
 
 ## Primary sources and official APIs
 
@@ -242,8 +242,8 @@ Use the [course route](../README.md) to continue. Paired-language agreement is u
 
 ```text
 Use $guide-ds60sqlpy-learning to coach me through spark-019: Windows, ties and deterministic deduplication.
-Read courses/scala-spark/guides/spark-019.md and courses/scala-spark/lessons/spark-019.py;the paired sources are courses/scala-spark/lessons/spark-019.scala and courses/scala-spark/lessons/spark-019.py.
-Direct prerequisites: spark-018. Explain the schema,row grain and new Scala/Python/Spark syntax,ask me to predict a concrete result,then inspect my attempt. Give one hint at a time,review exact result and boundary evidence,and ask retrieval questions in my own words. Do not read solutions/ until I ask or have made an honest attempt.
-Use only the prepared local[2] worker profile and owned job scratch. Do not download dependencies,start a remote service,reset existing checkpoints or alter unrelated learner work.
+Read courses/scala-spark/guides/spark-019.md and courses/scala-spark/lessons/spark-019.py; the paired sources are courses/scala-spark/lessons/spark-019.scala and courses/scala-spark/lessons/spark-019.py.
+Direct prerequisites: spark-018. Explain the schema, row grain and new Scala/Python/Spark syntax, ask me to predict a concrete result, then inspect my attempt. Give one hint at a time, review exact result and boundary evidence, and ask retrieval questions in my own words. Do not read solutions/ until I ask or have made an honest attempt.
+Use only the prepared local[2] worker profile and owned job scratch. Do not download dependencies, start a remote service, reset existing checkpoints or alter unrelated learner work.
 Done when all six contracts have inspected evidence and I can explain the stated assumptions and a meaningful failure case.
 ```

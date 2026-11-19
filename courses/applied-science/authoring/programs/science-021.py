@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+from itertools import combinations
 
 import numpy as np
 
@@ -23,10 +24,14 @@ def run_cases():
     clustered = moran([0, 0, 0, 1, 1, 1], w)
     alternating = moran([0, 1, 0, 1, 0, 1], w)
     assert clustered > 0 and alternating < 0
-    rng = np.random.default_rng(21)
-    permuted = [moran(rng.permutation([0, 0, 0, 1, 1, 1]), w) for _ in range(199)]
-    p = (1 + sum(v >= clustered for v in permuted)) / 200
-    assert 0 < p <= 1
+    # Six locations and three ones allow only C(6, 3) = 20 arrangements: enumerate them all.
+    reference = []
+    for ones in combinations(range(6), 3):
+        values = np.zeros(6)
+        values[list(ones)] = 1
+        reference.append(moran(values, w))
+    p = float(np.mean(np.array(reference) >= clustered - 1e-12))
+    assert len(reference) == 20 and np.isclose(p, 0.1)  # 2 of 20 arrangements
     # Random row folds put neighboring locations in both sets; block folds do not.
     random_train = {0, 2, 4}
     block_train = {0, 1, 2}
@@ -38,6 +43,7 @@ def run_cases():
         clustered_I=clustered,
         alternating_I=alternating,
         permutation_p=p,
+        reference_arrangements=len(reference),
         random_boundary_edges=crossings(random_train),
         blocked_boundary_edges=crossings(block_train),
     )

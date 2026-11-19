@@ -4,7 +4,7 @@ These answers explain the stated synthetic and scoped runtime contracts. Static 
 
 ## Mechanism
 
-An API resource is a typed collection of objects, not necessarily a running process. A CustomResourceDefinition, abbreviated CRD, registers a new resource type with the API server. A custom resource is one instance of that type. Here the cluster-scoped registration is lessonreports.learning.ds60sqlpy, while hello-report is a namespaced LessonReport instance. Registering a schema does not install an operator or create a Deployment automatically.
+An API resource is a typed collection of objects, not necessarily a running process. A CustomResourceDefinition, abbreviated CRD, registers a new resource type with the API server. A custom resource is one instance of that type. Here the cluster-scoped registration is `lessonreports.learning.ds60sqlpy`, while hello-report is a namespaced LessonReport instance. Registering a schema does not install an operator or create a Deployment automatically.
 
 The synthetic API describes a report application with message and replicas. A structural schema gives the server a typed shape it can validate and use for other API machinery. Our spec.message is one of two strings and spec.replicas is an integer from 1 through 2. These are deliberate course limits, not a generic configuration format. A desired instance can be valid yet remain unimplemented when no qualified controller observes it.
 
@@ -20,7 +20,7 @@ The registration changes the API surface for the cluster. A namespaced instance 
 
 The mapping determines API discovery and object addressing. A typo in the kind or API version can fail before schema validation, while a different metadata.name creates a different instance rather than changing its type.
 
-**Expected:** learning.ds60sqlpy/v1, LessonReport, lesson reports and hello-report are distinct fields.
+**Expected:** learning.ds60sqlpy/v1, LessonReport, `lessonreports` and hello-report are distinct fields.
 
 ## Exercise 3: Predict schema negatives
 

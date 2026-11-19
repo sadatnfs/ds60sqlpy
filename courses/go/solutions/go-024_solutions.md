@@ -8,9 +8,11 @@ A goroutine is a concurrently scheduled execution of a function. Starting one do
 
 go function() starts a goroutine. A channel send and receive can transfer a result and establish an ordering relationship. sync.WaitGroup tracks a known set of tasks; Add must happen before a concurrent Wait can conclude. Defer Done inside each task. Do not write a shared ordinary variable concurrently merely because a later print appears to observe the expected value.
 
-## 1. Join a produced result
+## 1. Join a produced result: change one input
 
-Start a goroutine computing 6 times 7 and receive its result.
+Copy worked example 1 into a scratch pad and change `go func() { result <- 6 * 7 }()` to `go func() { result <- 7 * 7 }()`. Before running, predict which check fails and which value it now sees; then run it and restore the original line.
+
+The unchanged code is worked example 1:
 
 ```go
 result := make(chan int)
@@ -18,13 +20,15 @@ go func() { result <- 6 * 7 }()
 check(<-result == 42, "goroutine result")
 ```
 
-**Expected:** The received value is 42.
+**Expected:** The changed run panics with `goroutine result` because `<-result == 42` no longer holds. Restoring the original line brings back the worked observation: the received value is 42.
 
 The receive waits for the send. The program does not assume the worker has completed merely because enough wall-clock time passed.
 
-## 2. Wait for several tasks
+## 2. Wait for several tasks: debug a regression
 
-Start three tasks that signal a buffered completion channel and wait for all of them.
+A regression changed one token in worked example 2, so one line now reads `for i := 1; i < 3; i++ {`. Run worked example 2 with that line, use the failure to locate the defect and repair it without changing the check.
+
+The unchanged code is worked example 2:
 
 ```go
 done := make(chan struct{}, 3)
@@ -37,7 +41,7 @@ wg.Wait()
 check(len(done) == 3, "joined tasks")
 ```
 
-**Expected:** Exactly three completion markers are received.
+**Expected:** Before the repair the program panics with `joined tasks`; after it the line reads `for i := 0; i < 3; i++ {` again and exactly three completion markers are received.
 
 The buffer avoids blocking completion before the parent reads. WaitGroup joins the tasks; the channel stores inspectable completion evidence.
 

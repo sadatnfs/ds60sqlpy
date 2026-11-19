@@ -1,4 +1,4 @@
-"""dbt-002: worked starting point; complete the guide's six changes."""
+"""dbt-002: both worked cases; complete the guide's six changes."""
 
 import json
 import os
@@ -104,8 +104,31 @@ def example_one():
         return {"seed_rows": 3, "amount_total": 21}
 
 
+def example_two():
+    with tempfile.TemporaryDirectory() as d:
+        p = project(
+            d,
+            models={
+                "clean": (
+                    "select id::integer as id, try_cast(amount as integer) as amount\n"
+                    "from {{ ref('raw_orders') }}\n"
+                    "where try_cast(amount as integer) is not null"
+                )
+            },
+            seeds={"raw_orders": "id,amount\n1,5\n2,bad\n3,9\n"},
+        )
+        invoke(p, "build")
+        assert rows(p, "select id, amount from clean order by id") == [(1, 5), (3, 9)]
+        assert rows(p, "select count(*) from raw_orders") == [(3,)]
+        assert rows(
+            p, "select count(*) from raw_orders where try_cast(amount as integer) is null"
+        ) == [(1,)]
+        return {"accepted_rows": 2, "rejected_rows": 1, "raw_rows": 3}
+
+
 if __name__ == "__main__":
     print(example_one())
+    print(example_two())
 
 # TODO 1: Add id 4 with amount 3 and rebuild.
 # TODO 2: Add a blank amount and decide its category.

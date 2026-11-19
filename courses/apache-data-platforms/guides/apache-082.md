@@ -34,8 +34,8 @@ schema and starting-position policy.
 Poll under a deadline until the exact order identities and amounts are queryable
 through the Pinot broker. Compare source positions, Flink operator/checkpoint
 observations and Pinot consumption/query results. A healthy process count or zero
-lag alone is insufficient. The expected business total is20 with regional totals
-11and9 for this finite fixture.
+lag alone is insufficient. The expected business total is 20 with regional totals
+11 and 9 for this finite fixture.
 
 Record which output is append-only and which represents current state. A stream
 of changes can correctly retain several versions of a key while a current-state
@@ -94,8 +94,8 @@ Prepare a separately owned combined Kafka/Flink/Pinot route. Capture actual conn
 - Cleanup/evidence-storage result and any separate prepared or unavailable feature.
 
 For the common three-order fixture, require IDs 1/2/3 with amounts 4/9/7, total 20,
-east 11 and west 9. A later fourth west order of2changes current total to22 and west
-to11while an earlier pinned snapshot remains unchanged. Do not use this simple
+east 11 and west 9. A later fourth west order of 2 changes the current total to 22 and west
+to 11 while an earlier pinned snapshot remains unchanged. Do not use this simple
 oracle to claim correctness for a different pipeline without defining its
 deduplication, correction and visibility semantics.
 

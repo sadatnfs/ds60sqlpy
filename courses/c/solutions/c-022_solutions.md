@@ -8,9 +8,11 @@ A stack removes the most recently inserted value; a queue removes the earliest. 
 
 The queue stores head and count. The next insertion index is (head+count)%capacity, and removal advances head modulo capacity. count ranges from zero through capacity. Returning bool plus an output pointer preserves the distinction between an empty queue and a legitimate zero-valued item. Rejected operations leave both structure and output unchanged.
 
-## Exercise 1: Preserve FIFO order
+## Exercise 1: Preserve FIFO order: predict an edited check
 
-Enqueue 2 then 5 and dequeue twice.
+Copy worked example 1 into a scratch pad and change `CHECK(enqueue(&q, 2) && enqueue(&q, 5));` to `CHECK(enqueue(&q, 2) && enqueue(&q, 6));` inside its CHECK. Before running, predict whether the CHECK still holds and explain why; then restore it.
+
+The unchanged code is worked example 1:
 
 ```c
 struct Queue q = {0};
@@ -20,13 +22,15 @@ CHECK(dequeue(&q, &out) && out == 2);
 CHECK(dequeue(&q, &out) && out == 5);
 ```
 
-**Expected:** The values arrive as 2 then 5.
+**Expected:** The changed run stops with `Check failed` at the CHECK on `dequeue(&q, &out) && out == 5`. Restoring the original line brings back the worked observation: the values arrive as 2 then 5.
 
 The queue contract differs from a stack, which would return 5 first.
 
-## Exercise 2: Reject an empty read
+## Exercise 2: Reject an empty read: debug a regression
 
-Dequeue from a new queue with output 9.
+A regression changed one token in worked example 2, so one line now reads `int out = 10;`. Run worked example 2 with that line, use the failing CHECK to locate the defect and repair it without changing the CHECK.
+
+The unchanged code is worked example 2:
 
 ```c
 struct Queue q = {0};
@@ -34,7 +38,7 @@ int out = 9;
 CHECK(!dequeue(&q, &out) && out == 9 && q.count == 0);
 ```
 
-**Expected:** The operation fails and output stays 9.
+**Expected:** Before the repair the run stops with `Check failed` at the CHECK on `!dequeue(&q, &out) && out == 9 && q.count == 0`; after it the line reads `int out = 9;` again and the operation fails and output stays 9.
 
 No element is read before the occupancy check. Zero cannot be used as an empty sentinel because zero may be a real item.
 

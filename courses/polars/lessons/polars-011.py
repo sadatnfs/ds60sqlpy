@@ -1,4 +1,4 @@
-"""polars-011: worked starting point; complete the guide's six changes."""
+"""polars-011: both worked cases; complete the guide's six changes."""
 
 import tempfile
 from pathlib import Path
@@ -19,8 +19,21 @@ def example_one():
         return {"rows": result.to_dicts(), "schema": str(result.schema)}
 
 
+def example_two():
+    with tempfile.TemporaryDirectory() as d:
+        path = Path(d) / "raw.csv"
+        path.write_text("id,amount\n1,2\n2,broken\n3,4\n")
+        raw = pl.read_csv(path, schema_overrides={"amount": pl.String})
+        parsed = raw.with_columns(pl.col("amount").cast(pl.Int64, strict=False).alias("parsed"))
+        invalid = parsed.filter(pl.col("parsed").is_null())
+        assert invalid["id"].to_list() == [2]
+        assert parsed.filter(pl.col("parsed").is_not_null())["parsed"].sum() == 6
+        return {"quarantine": invalid.to_dicts(), "accepted_total": 6}
+
+
 if __name__ == "__main__":
     print(example_one())
+    print(example_two())
 
 # TODO 1: Rename the input parts so their lexical order changes.
 # TODO 2: Explain why combined.parquet is outside part-*.parquet.

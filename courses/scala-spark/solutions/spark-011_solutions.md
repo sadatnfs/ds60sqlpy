@@ -29,7 +29,7 @@ The function returns a plan expression that can be reused inside an engine trans
 
 Return the ordered event IDs selected by aboveTen from this tiny fixture. Preserve both equal-valued 20-cent events and leave raw unchanged.
 
-**Expected:** The result is[2,4], and raw still contains IDs[1,2,3,4]. Projecting amount and calling distinct is not an acceptable implementation.
+**Expected:** The result is [2, 4], and raw still contains IDs [1, 2, 3, 4]. Projecting amount and calling distinct is not an acceptable implementation.
 
 ```scala
 def selectedIds(frame: DataFrame): Seq[Long] = {
@@ -104,7 +104,7 @@ The condition remains one composite engine expression rather than several driver
 
 Return a DataFrame with event_id and amount_plus_one=amount_cents+1, without filling NULL or dropping identity. Keep a Long-compatible integer result.
 
-**Expected:** Ordered rows are(1,1),(2,21),(3, NULL),(4,21). The two 21 values remain separate events and unknown remains unknown.
+**Expected:** Ordered rows are (1,1),(2,21),(3, NULL),(4,21). The two 21 values remain separate events and unknown remains unknown.
 
 ```scala
 def projected(frame: DataFrame): DataFrame = {
@@ -125,7 +125,7 @@ Arithmetic with an unknown input remains unknown under SQL semantics. An alias n
 
 Register a session-local temporary view and return ordered IDs from SQL SELECT/WHERE amount_cents>10. Compare SQL and DataFrame paths to the literal expected IDs rather than only to one another.
 
-**Expected:** Both paths return [2,4]. The temporary view exists only in this owned session and no external database connection is opened.
+**Expected:** Both paths return [2, 4]. The temporary view exists only in this owned session and no external database connection is opened.
 
 ```scala
 def sqlIds(spark: SparkSession, frame: DataFrame): Seq[Long] = {
@@ -150,8 +150,8 @@ def sql_ids(spark, frame):
 
 The temporary view provides a name for the same local DataFrame plan inside this SparkSession. SQL WHERE retains only true predicate rows and ORDER BY defines deterministic output. Both implementations can share a conceptual mistake, so each is checked against independent literal identities. This exercises Spark SQL syntax without opening PostgreSQL, JDBC or another service.
 
-**Verification evidence:** Assert SQL IDs and selectedIds against [2,4] independently, then let the complete program stop its session in finally.
+**Verification evidence:** Assert SQL IDs and selectedIds against [2, 4] independently, then let the complete program stop its session in finally.
 
 ## Execution and interpretation
 
-Run the complete reference in its prepared fixed worker. The small fixture is constructed inside the program,so opening a lesson does not fetch data. A final success line is printed only after the reference assertions complete. Plan observations,partition evidence and resource measurements apply to the actual local configuration; they do not establish cluster-scale performance. Session cleanup is explicit,and any additional owned file/query lifecycle is described in the lesson.
+Run the complete reference in its prepared fixed worker. The small fixture is constructed inside the program, so opening a lesson does not fetch data. A final success line is printed only after the reference assertions complete. Plan observations, partition evidence and resource measurements apply to the actual local configuration; they do not establish cluster-scale performance. Session cleanup is explicit, and any additional owned file/query lifecycle is described in the lesson.

@@ -6,7 +6,13 @@ Advanced; approximately 120 minutes. Direct prerequisites: `torch-033`. The prer
 
 ## Learning objectives
 
-A reliability report should preserve the conditions and denominators behind a score. The central investigation is concrete: Use groups A, A, B with truth 1, 1, 0 and prediction 1, 0, 0. The finish condition is A1/2errors; B0/1. card explicitly has no privacy guarantee. A useful explanation connects the calculation to the reason it is needed, rather than treating a function name as a definition.
+Report model reliability with group denominators, repeated identities, controlled perturbations and severe failures kept visible.
+
+Central investigation: Count group errors on three records, repeat one record, shift a threshold input and summarize nine minor passes with one severe failure.
+
+Finish condition: Group A has 1 error of 2 and group B 0 of 1, 8 rows contain only 3 unique IDs, the shifts give labels 1, 1, 0, the 0.9 pass rate still reports 1 severe failure, and an untested group is None rather than 0.
+
+The worked examples demonstrate the mechanism; exercises 1-3 transfer it to new inputs and exercises 4-6 extend it to failures and boundary cases. A useful explanation connects the calculation to the reason it is needed, rather than treating a function name as a definition.
 
 ## Purpose and mental model
 
@@ -48,7 +54,7 @@ Compute boolean error vectors before aggregation. Groupby declared labels and re
 
 ## Keep population, perturbation and mechanism claims separate
 
-The original three records contain one error: groupA has \(\frac{1}{2}\) and groupB has 0/1. Overall error is \(\frac{1}{3}\). Repeating the correct record c five additional times creates eight rows but only three unique IDs. A naive row-weighted error becomes \(\frac{1}{8}\) even though no new case was tested. The apparent improvement comes entirely from changing the weight of one existing success.
+The original three records contain one error: group A has \(\frac{1}{2}\) and group B has 0/1. Overall error is \(\frac{1}{3}\). Repeating the correct record c five additional times creates eight rows but only three unique IDs. A naive row-weighted error becomes \(\frac{1}{8}\) even though no new case was tested. The apparent improvement comes entirely from changing the weight of one existing success.
 
 This counterexample does not imply that every repeated identity should be removed. A longitudinal task may legitimately contain several observations from one person or device. The question is which unit the reported quantity is intended to average over, and whether dependence is modeled. Exact duplicate detection, source-family grouping and a weighting policy are related but different controls. A set of three IDs alone also does not prove those units are statistically independent.
 
@@ -56,7 +62,7 @@ Zero errors among one observation is weak evidence about an unknown error probab
 
 An empty group has no measured rate. Returning None preserves that absence; returning zero invents a successful observation. A report or chart should not replace missing rates with zero merely to fill a display. Likewise, a confidence calculation cannot create coverage for a group or condition that never appeared in the data. Keep coverage counts and the intended target population beside every aggregate.
 
-The perturbation rule here is f(x)=1 when \(x\ge 0\). Starting at one, the shifts-0.1, -0.9, -1.1 produce 0.9, 0.1, -0.1 and therefore labels 1, 1, 0. If the target itself is defined by the observed sign, the final change is correct behavior after crossing the decision boundary. Calling it a robustness failure would assume an invariant label that the task definition does not support.
+The perturbation rule here is f(x)=1 when \(x\ge 0\). Starting at one, the shifts -0.1, -0.9, -1.1 produce 0.9, 0.1, -0.1 and therefore labels 1, 1, 0. If the target itself is defined by the observed sign, the final change is correct behavior after crossing the decision boundary. Calling it a robustness failure would assume an invariant label that the task definition does not support.
 
 A different application might model these shifts as measurement noise while the latent class remains fixed. That is a different target policy and needs its own oracle. For this simple sign rule, perturbations with magnitude strictly below one cannot cross from the starting point to the negative side. That analytic statement is local to this scalar rule and declared perturbation set; it is not evidence that an arbitrary neural classifier is robust to all small changes.
 
@@ -91,7 +97,7 @@ report = {
 assert report == {"A": (1, 2), "B": (0, 1)}
 ```
 
-**Expected:** A1/2errors; B0/1.
+**Expected:** group A: 1 of 2 wrong; group B: 0 of 1 wrong.
 
 ### Example B: Expose repeated identities
 
@@ -102,7 +108,7 @@ ids = ["a", "b", "c"] + ["c"] * 5
 assert len(ids) == 8 and len(set(ids)) == 3
 ```
 
-**Expected:** 8rows but 3 unique IDs.
+**Expected:** 8 rows but 3 unique IDs.
 
 ### Example C: Trace a controlled perturbation
 
@@ -119,33 +125,33 @@ assert changed.tolist() == [1, 1, 0]
 
 ## Prediction before your attempt
 
-For the supplied fixture, name the input unit, the intermediate state and the final quantity that changes. Predict one normal result and one failure result before touching the code. In particular, explain this lesson's acceptance condition in your own words: A1/2errors; B0/1. card explicitly has no privacy guarantee. Preserve the prediction beside your later observations so a correction is visible. A copied expected value is not a derivation.
+For the supplied fixture, name the input unit, the intermediate state and the final quantity that changes. Predict one normal result and one failure result before touching the code. In particular, explain this lesson's acceptance condition in your own words: Group A has 1 error of 2 and group B 0 of 1, 8 rows contain only 3 unique IDs, the shifts give labels 1, 1, 0, the 0.9 pass rate still reports 1 severe failure, and an untested group is None rather than 0. Preserve the prediction beside your later observations so a correction is visible. A copied expected value is not a derivation.
 
 ## Exercises
 
-1. **Count group errors.** Use groups A, A, B with truth 1, 1, 0 and prediction 1, 0, 0.
-   **Expected:** A1/2errors; B0/1.
-   **Verify:** Save the assertion results for exercise 1, including A1/2errors; B0/1.
+1. **Count errors for three groups.** Use groups A, B, B, C with truth 0, 1, 1, 0 and predictions 0, 0, 1, 1.
+   **Expected:** A: 0 of 1 wrong; B: 1 of 2; C: 1 of 1.
+   **Verify:** In a fresh process, the exercise checks confirm `summary == {'A': (0, 1), 'B': (1, 2), 'C': (1, 1)}`.
 
-2. **Expose repeated identities.** Repeat correct record c five times and compare row count with unique IDs.
-   **Expected:** 8rows but 3 unique IDs.
-   **Verify:** Save the assertion results for exercise 2, including 8rows but 3 unique IDs.
+2. **Deduplicate repeated identities.** Use row identities p, q, q, r, r, r and count rows, unique identities and the largest repeat.
+   **Expected:** 6 rows, 3 unique identities, largest repeat 3.
+   **Verify:** In a fresh process, the exercise checks confirm `len(rows_t) == 6`, `len(set(rows_t)) == 3` and `max((rows_t.count(i) for i in set(rows_t))) == 3`.
 
-3. **Trace a controlled perturbation.** Classify \(x\ge 0\) at base 1 after shifts-.1, -.9, -1.1.
-   **Expected:** labels 1, 1, 0.
-   **Verify:** Save the assertion results for exercise 3, including labels 1, 1, 0.
+3. **Trace a new perturbation.** Classify \(x\ge 0\) at base 0.5 after shifts -0.4, -0.5 and -0.6.
+   **Expected:** labels 1, 1, 0; the shift of -0.5 lands exactly on the boundary.
+   **Verify:** In a fresh process, the exercise checks confirm `(start + moves >= 0).long().tolist() == [1, 1, 0]`.
 
 4. **Keep severe failures visible.** Use 9 minor passes and 1 severe failure.
-   **Expected:** overall pass rate.9; severe failure count 1.
-   **Verify:** Save the assertion results for exercise 4, including overall pass rate.9; severe failure count 1.
+   **Expected:** overall pass rate 0.9; severe failure count 1.
+   **Verify:** In a fresh process, the exercise checks confirm `passed.float().mean().item()` matches `0.9` within 1e-06 and `int((~passed & severe).sum()) == 1`.
 
 5. **Represent an untested group.** Define a rate helper with count 0.
-   **Expected:** None for untested; 0for zero errors in one case.
-   **Verify:** Save the assertion results for exercise 5, including None for untested; 0for zero errors in one case.
+   **Expected:** None for untested; 0 for zero errors in one case.
+   **Verify:** In a fresh process, the exercise checks confirm `rate(0, 0) is None` and `rate(0, 1) == 0`.
 
 6. **Write a bounded card.** Record 3 unique units, synthetic teaching use and untested future conditions.
    **Expected:** card explicitly has no privacy guarantee.
-   **Verify:** Save the assertion results for exercise 6, including card explicitly has no privacy guarantee.
+   **Verify:** In a fresh process, the exercise checks confirm `card['unique_units'] == 3` and `not card['differential_privacy_established']`.
 
 ## Common pitfalls and diagnosis
 
@@ -159,7 +165,7 @@ First draw the state described in the vocabulary section. Next use the smallest 
 
 ## Self-check and retrieval
 
-Close both worked examples. Explain Subgroup denominator, Robustness condition, Finite safety evidence using the lesson fixture. Reconstruct one computation from its inputs. Then change one input while retaining the mechanism and predict whether the conclusion survives. Write which part is guaranteed by the code and which part would need new observations. This last distinction prevents a tiny deterministic teaching example from being presented as evidence about an unseen population or a production model.
+Close all three worked examples. Explain Subgroup denominator, Robustness condition, Finite safety evidence using the lesson fixture. Reconstruct one computation from its inputs. Then change one input while retaining the mechanism and predict whether the conclusion survives. Write which part is guaranteed by the code and which part would need new observations. This last distinction prevents a tiny deterministic teaching example from being presented as evidence about an unseen population or a production model.
 
 ## Next step
 
@@ -167,7 +173,7 @@ Revisit the direct prerequisite `torch-033` if the calculation cannot be reconst
 
 ## Sources and verification status
 
-API and mechanism reference: [PyTorch2.9 reference](https://docs.pytorch.org/docs/2.9/index.html), reviewed 2026-10-22. The fixture, examples, counterexamples and exercise design are original course material. See [validation](../../../docs/validation.md) for execution gates. Check CI artifacts for the exact revision and platform to determine which runtime checks actually ran; authored content alone does not establish runtime execution.
+API and mechanism reference: [PyTorch 2.9 reference](https://docs.pytorch.org/docs/2.9/index.html), reviewed 2026-10-22. The fixture, examples, counterexamples and exercise design are original course material. See [validation](../../../docs/validation.md) for execution gates. Check CI artifacts for the exact revision and platform to determine which runtime checks actually ran; authored content alone does not establish runtime execution.
 
 ## Interview reasoning with worked answers
 

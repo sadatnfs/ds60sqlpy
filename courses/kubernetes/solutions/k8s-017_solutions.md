@@ -6,7 +6,7 @@ These answers explain the stated synthetic and scoped runtime contracts. Static 
 
 A container security context describes requested process and filesystem restrictions. Running as a nonroot UID, dropping capabilities, disallowing privilege escalation and using a read-only root filesystem reduce different risks. Pod Security admission is a separate policy that can reject workloads not meeting a chosen standard. Neither a namespace name nor one security field creates complete isolation by itself.
 
-The allowed browser workload uses runAsUser65532, runAsNonRoot true, RuntimeDefault seccomp, allowPrivilegeEscalation false, readOnlyRootFilesystem true and capabilities.drop ALL. Service-account token mounting is disabled. The parser rejects attempts to replace these values or add host namespaces, privileged mode and unapproved mounts.
+The allowed browser workload uses runAsUser 65532, runAsNonRoot true, RuntimeDefault seccomp, allowPrivilegeEscalation false, readOnlyRootFilesystem true and capabilities.drop ALL. Service-account token mounting is disabled. The parser rejects attempts to replace these values or add host namespaces, privileged mode and unapproved mounts.
 
 This lesson distinguishes source checks, admission decisions and actual runtime identity. The configured UID is desired process identity; an observed runtime UID requires a qualified fixture or host observation. The current app's admitted baseline and ownership checks do not automatically prove every host/kernel security property.
 
@@ -26,13 +26,13 @@ The app proves its bounded workload checks. A runtime UID claim needs a dedicate
 
 The course protects the operation at source admission. This is a valid negative result even though no privileged process ran. Preserve the phase rather than inventing a server rejection event.
 
-**Expected:** Parser refusal before cluster mutation.
+**Expected:** The course parser refuses the source before any cluster request. Under Pod Security Admission, privileged: true violates the Baseline level and allowPrivilegeEscalation: true violates the Restricted level.
 
 ## Exercise 4: Reject host access
 
 A secure-looking container context does not neutralize a host namespace or mount. The parser rejects those requests rather than trusting a learner to choose a harmless path.
 
-**Expected:** All are outside the admitted browser contract.
+**Expected:** hostPath volumes, hostNetwork and hostPID violate the Baseline standard, so a namespace enforcing baseline or restricted rejects them at admission; the classroom parser rejects them even earlier.
 
 ## Exercise 5: Observe a host policy separately
 

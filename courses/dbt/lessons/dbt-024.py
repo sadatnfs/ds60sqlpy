@@ -1,4 +1,4 @@
-"""dbt-024: worked starting point; complete the guide's six changes."""
+"""dbt-024: both worked cases; complete the guide's six changes."""
 
 import os
 import tempfile
@@ -103,7 +103,7 @@ def governance_case(cross_group):
             d,
             models={
                 "internal": "{{ config(materialized='table') }} select 41 as value",
-                "consumer": "select value+1 as value from {{ ref('internal') }}",
+                "consumer": "select value + 1 as value from {{ ref('internal') }}",
             },
             schema=schema,
         )
@@ -122,8 +122,13 @@ def example_one():
     return governance_case(False)
 
 
+def example_two():
+    return governance_case(True)
+
+
 if __name__ == "__main__":
     print(example_one())
+    print(example_two())
 
 # TODO 1: Locate the group and owner metadata for a model.
 # TODO 2: Make the producer public and review the cross-group dependency.

@@ -3,7 +3,7 @@
 This is a preparation runbook, not a local acceptance receipt. Use a dedicated
 Linux host whose CPU architecture, compatible Java 8 distribution and graph/index
 components have been validated. Keep learner/shared servers outside the experiment.
-The Atlas 2.5.0 release POM pins HBase2.6.4 and Solr8.11.3 and targets Java 8.
+The Atlas 2.5.0 release POM pins HBase 2.6.4 and Solr 8.11.3 and targets Java 8.
 Read its exact installation instructions and build profiles before choosing an
 embedded development stack or external HBase/Solr. No hook compatibility with
 Hive 4.2 is inferred.

@@ -1,6 +1,6 @@
 # rust-022: explanation and comparison
 
-Attempt the six guide tasks before opening this comparison. The executable reference is [rust-022_solution.rs](rust-022_solution.rs). Its assertions are always active under the prepared classroom compile settings.
+Attempt the six guide tasks before opening this comparison. The executable reference is [rust-022_solution.rs](rust-022_solution.rs). It runs both worked examples and the reference answers below, and its assertions are always active under the prepared classroom compile settings.
 
 ## Why the two examples differ
 
@@ -8,21 +8,81 @@ Attempt the six guide tasks before opening this comparison. The executable refer
 
 **Render a safe message:** Useful diagnostics can describe the contract while avoiding unnecessary payload disclosure. The message explains the rule without repeating raw input.
 
-## Reason through the six tasks
+## Task answers
 
-1. **Predict and explain.** Match each failure to its domain variant.
+### Task 1: Predict and explain
 
-2. **Guided modification.** Add a maximum-quantity category.
+Match each failure to its domain variant.
 
-3. **Independent construction.** Define a custom error for an importer with syntax and storage boundaries.
+No separate reference answer has been written for this task. Example A is the evidence to compare with: A caller can decide from the type rather than inspect a fragile message substring. Negative and malformed inputs remain separate variants.
 
-4. **Diagnose a defect.** Diagnose branching on a translated message string.
+### Task 2: Guided modification
 
-5. **Boundary evidence.** Test zero, malformed and out-of-range text.
+Add a maximum-quantity category.
 
-6. **Transfer and justify.** Choose which layer translates an internal error into a public response and what context it may expose.
+No separate reference answer has been written for this task. Start from Example B: Useful diagnostics can describe the contract while avoiding unnecessary payload disclosure. The message explains the rule without repeating raw input.
 
-For tasks 1 and 2, use the checked values and mechanism trace in the two examples. For task 3, choose names that expose the input and result contract and retain the same invariants. For task 4, the diagnosed mistakes below supply a concrete wrong assumption: preserve its counterexample before repairing it. Task 5 needs an explicit expected value or documented rejection at the boundary, not just successful execution. For task 6, explain what changes in the new context and which part of the original mechanism remains applicable. Several representations may satisfy this transfer task; justify the choice rather than treating this reference as the only architecture.
+### Task 3: Independent construction
+
+Define a custom error for an importer with syntax and storage boundaries.
+
+**Reference answer.** The same statements run as the `Task 3` block of the reference program; here they are wrapped in `main` as a complete file.
+
+```rust
+fn main() -> Result<(), Box<dyn std::error::Error>> {
+    #[derive(Debug)]
+    enum ImportError {
+        Syntax { line: usize },
+        Storage(std::io::Error),
+    }
+    impl std::fmt::Display for ImportError {
+        fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+            match self {
+                Self::Syntax { line } => write!(f, "syntax error on line {line}"),
+                Self::Storage(_) => write!(f, "storage failed"),
+            }
+        }
+    }
+    impl std::error::Error for ImportError {
+        fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
+            match self {
+                Self::Syntax { .. } => None,
+                Self::Storage(cause) => Some(cause),
+            }
+        }
+    }
+    use std::error::Error;
+    let syntax = ImportError::Syntax { line: 3 };
+    assert_eq!(syntax.to_string(), "syntax error on line 3");
+    assert!(syntax.source().is_none());
+    let cause = std::io::Error::other("disk full");
+    let storage = ImportError::Storage(cause);
+    assert_eq!(storage.source().unwrap().to_string(), "disk full");
+    Ok(())
+}
+```
+
+**Observe:** The syntax error names line 3; the storage error keeps the disk full cause reachable through source.
+
+Separate variants let callers fix input or retry storage, and source preserves the underlying io::Error instead of flattening it into a string.
+
+### Task 4: Diagnose a defect
+
+Diagnose branching on a translated message string.
+
+No reference answer has been written for this task yet. The wrong assumptions to look for are this lesson's pitfalls: A generic string loses structured recovery information. Unwrap belongs only where a nearby fixture invariant establishes success. Do not map cancellation or unknown outcomes into an ordinary empty result.
+
+### Task 5: Boundary evidence
+
+Test zero, malformed and out-of-range text.
+
+No reference answer has been written for this task yet. Write the expected value or documented rejection for each boundary before running it, and compare with the checks in Example A (Preserve a domain category) and Example B (Render a safe message).
+
+### Task 6: Transfer and justify
+
+Choose which layer translates an internal error into a public response and what context it may expose.
+
+No single reference answer exists: several designs can satisfy this transfer task. Justify yours against the mechanism described below and the vocabulary entry **Error enum**, and state one limitation of your choice.
 
 ## Mechanism and diagnostic reasoning
 
@@ -36,4 +96,4 @@ A generic string loses structured recovery information. Unwrap belongs only wher
 
 ## Review before continuing
 
-The reference checks the worked scenarios, including their boundary distinctions. Your independent and transfer artifacts may have additional checks. Compare observations rather than only source text. Preserve any new regression case you discover and explain why it would reject a plausible wrong implementation. External project steps require their own build and platform evidence and are not established by a portable reference passing.
+Run the reference and confirm that it prints `rust-022: passed`, then reconstruct one boundary case from memory and explain which check would reject a plausible wrong implementation. External project steps need their own build and platform evidence; a passing portable reference does not establish them.

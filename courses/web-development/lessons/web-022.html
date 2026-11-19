@@ -5,15 +5,53 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>CSS architecture, layers and maintainable components: my attempt</title>
     <style>
-      /* Implement the lesson-specific CSS. Keep keyboard focus visible. */
+      /*
+        Worked example 1: Explicit ordering
+        @layer base, components, utilities;
+        @layer base {
+          p {
+            color: #172033;
+          }
+        }
+        @layer components {
+          .note {
+            color: #0753a4;
+            &:hover {
+              text-decoration: underline;
+            }
+          }
+        }
+      */
+
+      /*
+        Worked example 2: A narrow utility
+        @layer utilities {
+          .text-muted {
+            color: #475569;
+          }
+        }
+      */
+
+      /* Write the CSS for the exercises here. Keep keyboard focus visible. */
     </style>
   </head>
   <body>
-    <!-- web-022: Build a small layered stylesheet with base, component and utility rules. -->
-    <!-- Save your prediction, then implement the six exercises from the guide. -->
+    <!--
+      web-022 exercises. Hints are in the guide; answers are in the solutions folder.
+      1. Predict the layer winner for normal declarations.
+      2. Move a component's rules into one named layer.
+      3. Build a small layered stylesheet with base, component and utility rules.
+      4. Diagnose an unlayered rule unexpectedly beating layered normal rules.
+      5. Place the component under a different parent.
+      6. Explain why important declarations complicate layer reasoning.
+    -->
     <main>
-      <h1>CSS architecture, layers and maintainable components</h1>
-      <!-- Build your own document here. The reference is separate. -->
+      <h1>Readable CSS ownership</h1>
+      <article class="lesson-card">
+        <h2>One component</h2>
+        <p>A normal description.</p>
+        <p class="text-muted">An intentionally muted note.</p>
+      </article>
     </main>
   </body>
 </html>

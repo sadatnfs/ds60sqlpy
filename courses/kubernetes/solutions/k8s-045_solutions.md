@@ -14,6 +14,8 @@ The containerPort field documents a container’s intended port and can supply a
 
 An emptyDir volume is one way to share files within a Pod, but it is not implied by shared networking and does not survive Pod replacement. Keep the network and storage contracts distinct when explaining a sidecar design.
 
+Since Kubernetes 1.33, native sidecar containers are stable. Declare the helper under `initContainers` with `restartPolicy: Always`. The kubelet starts it in init-container order before the application containers and moves on once it has started, or once its startupProbe succeeds when one is defined. It keeps running for the life of the Pod, is restarted if it exits, is stopped only after the application containers during Pod termination, and does not keep a Job's Pod from completing. A helper listed under `containers` has none of these ordering guarantees, which is why older sidecar designs needed startup polling and shutdown workarounds.
+
 ## Exercise 1: Predict same-Pod localhost access.
 
 The Pod boundary determines the loopback scope. This is why a proxy sidecar can reach a loopback-only app.

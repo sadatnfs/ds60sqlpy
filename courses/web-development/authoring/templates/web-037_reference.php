@@ -11,6 +11,8 @@ function check(bool $condition, string $message): void
 
 $label = "café";
 check(strlen($label) === 5, "Expected UTF-8 byte count");
+check(mb_strlen($label) === 4, "Expected four code points");
+check(mb_strcut($label, 0, 4) === "caf", "A byte-bounded cut split a character");
 check(preg_match("//u", $label) === 1, "Expected valid UTF-8");
 $json = json_encode(
   ["label" => $label, "bytes" => strlen($label)],

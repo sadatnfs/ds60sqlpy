@@ -12,5 +12,15 @@ const fixture = [
 ];
 console.table(fixture);
 // Derive your traces, caption and native source table from fixture.
-// Complete the six guide tasks in your own saved source.
+// TODO 1: Calculate one paired loss.
+// TODO 2: Build two panels.
+// TODO 3: Change one failure.
+// TODO 4: Repair a misleading comparison.
+// TODO 5: Aggregate by meaningful groups.
+// TODO 6: Transfer to repeated visits.
+const traces = [];
+const layout = { title: { text: "Describe the measured quantity and its units" } };
+if (typeof Plotly !== "undefined" && traces.length > 0) {
+  Plotly.newPlot(document.getElementById("chart"), traces, layout);
+}
 console.log("Fixture loaded; derive the figure and its checks from the guide tasks.");

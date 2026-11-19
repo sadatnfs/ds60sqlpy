@@ -1,22 +1,22 @@
 # spark-032: Event time, watermarks and late-data policy
 
-Authored paired Scala/PySpark teaching content. The default fixtures are tiny,local and deterministic. Runtime acceptance,logical correctness and learner understanding remain separate evidence.
+Authored paired Scala/PySpark teaching content. The default fixtures are tiny, local and deterministic. Runtime acceptance, logical correctness and learner understanding remain separate evidence.
 
 ## Level and prerequisites
 
-Advanced; approximately 120 minutes. Direct design prerequisites: `spark-031`. The prepared baseline is Spark 4.0.1,Scala binary2.13,JDK 17 and Python 3.12. Read the [execution baseline](../execution-baseline.md); a proposed future tuple is not a runtime receipt.
+Advanced; approximately 120 minutes. Direct prerequisites: `spark-031`. The prepared baseline is Spark 4.0.1, Scala binary 2.13, JDK 17 and Python 3.12. Read the [execution baseline](../execution-baseline.md).
 
 ## How to run this lesson
 
-Open `spark-032` in the classroom and choose the Scala or PySpark implementation you understand. Prepare only its fixed `spark-local-scala` or `spark-local-python` profile,save your pad and run the complete source. Scala stages as `Main.scala` with `object Main`; Python stages as `main.py` with a main guard. Each program creates its own local[2] session,disables the UI,binds the driver to loopback and stops the session in finally. No external dataset,package download,JDBC connection or cloud service is requested.
+Open `spark-032` in the classroom and choose the Scala or PySpark implementation you understand. Prepare only its fixed `spark-local-scala` or `spark-local-python` profile, save your pad and run the complete source. Scala stages as `Main.scala` with `object Main`; Python stages as `main.py` with a main guard. Each program creates its own local[2] session, disables the UI, binds the driver to loopback and stops the session in finally. No external dataset, package download, JDBC connection or cloud service is requested.
 
 The [Scala learner](../lessons/spark-032.scala) and [PySpark learner](../lessons/spark-032.py) run two complete demonstrations and retain six explicit task stubs. Use the [explained solutions](../solutions/spark-032_solutions.md) only after an attempt or an explicit worked comparison; the [Scala reference](../solutions/spark-032_solution.scala) and [PySpark reference](../solutions/spark-032_solution.py) contain complete assertions. A bounded collect is used only for the declared tiny fixture; do not copy it onto an unbounded or large production table.
 
 ## Learning objectives
 
 - State what a watermark does and test a declared late-event policy with controlled event-time progression.
-- State the input and output grain,schema,NULL policy and ordering before executing a transformation.
-- Compare each language implementation with independent literal expectations,not only with the other implementation.
+- State the input and output grain, schema, NULL policy and ordering before executing a transformation.
+- Compare each language implementation with independent literal expectations, not only with the other implementation.
 
 ## Vocabulary and concepts
 
@@ -36,13 +36,13 @@ A five-minute watermark delay is not a wall-clock timer that drops every event a
 
 This fixture uses five-minute tumbling windows and a five-minute watermark on event_time. Four phases publish one complete input file each, then run the same compatible AvailableNow query against the same owned checkpoint and Parquet append sink. The phases are deliberately sequenced by query termination rather than file modification-time guesses or sleeps. Each phase therefore has a controlled prior state and watermark history.
 
-Phase 1 containsA events at 00:01 with amount 10 and 00:04 with amount 20. They belong to the 00:00-00:05 window. That window is not final merely because the source temporarily has no more files. Phase 2 adds an out-of-orderA event at 00:03 with amount 5 and anA event at 00:12 with amount 30. The 00:03 event is still within retained state and contributes, so the first window final total is 35 from three events.
+Phase 1 contains A events at 00:01 with amount 10 and 00:04 with amount 20. They belong to the 00:00-00:05 window. That window is not final merely because the source temporarily has no more files. Phase 2 adds an out-of-order A event at 00:03 with amount 5 and an A event at 00:12 with amount 30. The 00:03 event is still within retained state and contributes, so the first window final total is 35 from three events.
 
 The 00:12 event advances event-time progress. AvailableNow can execute a no-data batch after a watermark advance, allowing eligible state cleanup and append finalization before termination. After phase 2, the 00:00-00:05 result is in the append sink. The program verifies the actual progress watermark rather than assuming that the configured delay alone proves this happened.
 
-Phase 3 then sends anA event at 00:02 with amount 999, after the first window has been finalized under the observed progress. That far-late event is dropped by the tested stateful policy, and its amount must not change the already emitted 35. Another event, B at 00:13 with amount 7, belongs to the still-open 00:10-00:15 window. The reference records the actual dropped-by-watermark counter, not merely a guessed decision based on event text.
+Phase 3 then sends an A event at 00:02 with amount 999, after the first window has been finalized under the observed progress. That far-late event is dropped by the tested stateful policy, and its amount must not change the already emitted 35. Another event, B at 00:13 with amount 7, belongs to the still-open 00:10-00:15 window. The reference records the actual dropped-by-watermark counter, not merely a guessed decision based on event text.
 
-Phase 4 adds an explicit administrative advancer at 00:30 with amount 0. It is a fixture device to move the watermark far enough to finalize the 00:10 windows. The final append product hasA at 00:00 with records 3, total 35; A at 00:10 with records 1, total 30; and B at 00:10 with records 1, total 7. The advancer own 00:30 window remains unfinalized because the final watermark is around 00:25. The test does not pretend that every input row must already appear in an append result.
+Phase 4 adds an explicit administrative advancer at 00:30 with amount 0. It is a fixture device to move the watermark far enough to finalize the 00:10 windows. The final append product has A at 00:00 with records 3, total 35; A at 00:10 with records 1, total 30; and B at 00:10 with records 1, total 7. The advancer own 00:30 window remains unfinalized because the final watermark is around 00:25. The test does not pretend that every input row must already appear in an append result.
 
 The event ledger distinguishes five accepted business events, one observed far-late dropped event and one administrative advancer whose window is pending. All seven records were consumed by the source, while only five business events contribute to the three final result rows. Source input counts, late-drop counters, state retention and sink rows are therefore different metrics. None should be substituted for another.
 
@@ -233,15 +233,15 @@ Do not translate watermark delay into a wall-clock sleep deadline. Do not assume
 
 ## Self-check
 
-Explain the contract of `windowed` / `windowed` without reading its solution. Trace the specified boundary case,then explain the final exercise's evidence and limitation. Identify where a transformation builds a plan and where an action requests execution. Retain exact values or operator evidence rather than treating a successful process exit as proof of the whole learning objective.
+Explain the contract of `windowed` / `windowed` without reading its solution. Trace the specified boundary case, then explain the final exercise's evidence and limitation. Identify where a transformation builds a plan and where an action requests execution. Retain exact values or operator evidence rather than treating a successful process exit as proof of the whole learning objective.
 
 ## Next step
 
-Use the [course route](../README.md) to continue. Paired-language agreement is useful only when both outputs also satisfy the independent fixture contract. Keep runtime/profile receipts separate from any cluster-performance or production-recovery claim.
+Use the [course route](../README.md) to continue. Paired-language agreement is useful only when both outputs also satisfy the independent fixture contract. A successful local run is not evidence of cluster performance or production recovery.
 
 ## Primary sources and official APIs
 
-- [Spark 4.0.1 event-time windows,watermarks,guarantees and AvailableNow](https://spark.apache.org/docs/4.0.1/streaming/apis-on-dataframes-and-datasets.html)
+- [Spark 4.0.1 event-time windows, watermarks, guarantees and AvailableNow](https://spark.apache.org/docs/4.0.1/streaming/apis-on-dataframes-and-datasets.html)
 
 - [Spark 4.0.1 streaming checkpoint configuration boundaries](https://spark.apache.org/docs/4.0.1/streaming/additional-information.html)
 
@@ -249,8 +249,8 @@ Use the [course route](../README.md) to continue. Paired-language agreement is u
 
 ```text
 Use $guide-ds60sqlpy-learning to coach me through spark-032: Event time, watermarks and late-data policy.
-Read courses/scala-spark/guides/spark-032.md and courses/scala-spark/lessons/spark-032.scala;the paired sources are courses/scala-spark/lessons/spark-032.scala and courses/scala-spark/lessons/spark-032.py.
-Direct prerequisites: spark-031. Explain the schema,row grain and new Scala/Python/Spark syntax,ask me to predict a concrete result,then inspect my attempt. Give one hint at a time,review exact result and boundary evidence,and ask retrieval questions in my own words. Do not read solutions/ until I ask or have made an honest attempt.
-Use only the prepared local[2] worker profile and owned job scratch. Do not download dependencies,start a remote service,reset existing checkpoints or alter unrelated learner work.
+Read courses/scala-spark/guides/spark-032.md and courses/scala-spark/lessons/spark-032.scala; the paired sources are courses/scala-spark/lessons/spark-032.scala and courses/scala-spark/lessons/spark-032.py.
+Direct prerequisites: spark-031. Explain the schema, row grain and new Scala/Python/Spark syntax, ask me to predict a concrete result, then inspect my attempt. Give one hint at a time, review exact result and boundary evidence, and ask retrieval questions in my own words. Do not read solutions/ until I ask or have made an honest attempt.
+Use only the prepared local[2] worker profile and owned job scratch. Do not download dependencies, start a remote service, reset existing checkpoints or alter unrelated learner work.
 Done when all six contracts have inspected evidence and I can explain the stated assumptions and a meaningful failure case.
 ```

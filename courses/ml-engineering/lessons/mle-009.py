@@ -1,4 +1,4 @@
-"""mle-009: worked starting point; complete the guide's six changes."""
+"""mle-009: both worked cases; complete the guide's six changes."""
 
 import numpy as np
 import pandas as pd
@@ -116,8 +116,46 @@ def example_one():
     return {"rows": len(test), "metrics": metrics, "not_a_deployment_decision_alone": True}
 
 
+def example_two():
+    y = np.array([0, 0, 1, 1])
+    prob = np.array([0.1, 0.4, 0.6, 0.9])
+
+    def utility(threshold):
+        chosen = prob >= threshold
+        return int(5 * np.sum(chosen & (y == 1)) - 2 * np.sum(chosen & (y == 0)))
+
+    assert utility(0.3) == 8 and utility(0.5) == 10 and utility(0.8) == 5
+    import plotly.graph_objects as go
+
+    values = [[threshold, utility(threshold)] for threshold in (0.3, 0.5, 0.8)]
+    figure = go.Figure(
+        go.Bar(
+            x=[str(row[0]) for row in values], y=[row[1] for row in values], name="Declared utility"
+        )
+    )
+    figure.update_layout(
+        title="Threshold utility on a fixed teaching fixture",
+        xaxis_title="Decision threshold",
+        yaxis_title="Utility units",
+        meta={
+            "description": (
+                "Four labeled examples under benefit 5 and false-positive "
+                "cost 2; these are declared teaching costs, not estimated "
+                "business effects."
+            ),
+            "table": {"columns": ["Threshold", "Utility"], "rows": values},
+        },
+    )
+    figure.show()
+    return {
+        "utilities": {str(t): utility(t) for t in (0.3, 0.5, 0.8)},
+        "costs_are_declared_not_inferred": True,
+    }
+
+
 if __name__ == "__main__":
     print(example_one())
+    print(example_two())
 
 # TODO 1: Explain what a high AUC would and would not establish.
 # TODO 2: Read the sample count in each displayed bin.

@@ -38,7 +38,7 @@ For tensors requiring gradients, a leaf is not the result of a tracked different
 
 The first fixture has \(w=0\) and intermediate=2w. Backpropagating that scalar gives incoming sensitivity one at the intermediate and sensitivity two at w. The intermediate's gradient is visible only because retain_grad was requested. Its absence by default would be a storage-policy observation, not evidence that the chain rule failed.
 
-Now reset `w.grad` to None and compute(w-2)². The new contribution is -4. Building the same expression again creates a fresh graph, but backward adds another -4 into the existing gradient buffer, leaving -8. A fresh graph does not clear a previous buffer. Resetting to None before the third computation gives -4 again without changing w itself.
+Now reset `w.grad` to None and compute (w-2)². The new contribution is -4. Building the same expression again creates a fresh graph, but backward adds another -4 into the existing gradient buffer, leaving -8. A fresh graph does not clear a previous buffer. Resetting to None before the third computation gives -4 again without changing w itself.
 
 None and numeric zero have different meanings. None may indicate that no gradient has been stored, that a reset occurred, that the tensor was unused, or that an intermediate was not retained. A numeric zero can be the correct derivative of a connected path. Optimizers can also treat them differently: parameters with None gradients are commonly skipped, whereas zero gradients may still interact with momentum or weight decay. This distinction is documented for zero_grad rather than being merely a display detail. [PyTorch 2.9 zero_grad](https://docs.pytorch.org/docs/2.9/generated/torch.optim.Optimizer.zero_grad.html).
 
@@ -46,59 +46,60 @@ The detach example changes shared storage. After detached=source.detach(), writi
 
 Finally, model.eval() does not stop derivatives through a Linear layer. It changes a module's training flag and the behavior of layers that consult it. no_grad affects ordinary operation recording while leaving the original tensor's `requires_grad` flag unchanged; factory operations with an explicit `requires_grad` argument are a documented exception to treating the scope as a blanket flag rewrite. Keep mode, recording and gradient-buffer decisions separate in the surrounding training or inference function.
 
-## Exercise 1: Inspect leaf and nonleaf state
+## Exercise 1: Predict a nonleaf gradient
 
-The question is: Create a leaf tensor \(w=0\) and intermediate tensor \(u=2w\), retain the intermediate gradient and backpropagate its sum.
+The question is: Create leaf v=1.0 and intermediate u=3v, retain u's gradient and backpropagate u*u.
 
-Leaf status follows graph construction, not whether a tensor is assigned to a Python variable. retain_grad explicitly requests storage for the intermediate diagnostic.
-
-```python
-w = torch.tensor(0.0, requires_grad=True)
-intermediate = 2 * w
-intermediate.retain_grad()
-intermediate.backward()
-assert (
-    w.is_leaf and not intermediate.is_leaf and w.grad.item() == 2 and intermediate.grad.item() == 1
-)
-```
-
-**Expected:** `w.is_leaf` is `True`; `u.is_leaf` is `False`; the gradients with respect to \(w\) and \(u\) are 2 and 1.
-
-**Verify:** Compare the computed values or written argument with `w.is_leaf` is `True`; `u.is_leaf` is `False`; the gradients with respect to \(w\) and \(u\) are 2 and 1.
-
-## Exercise 2: Observe accumulation across fresh graphs
-
-The question is: Compute \({\left(w-2\right)}^{2}\) twice at \(w=0\) without clearing grad.
-
-The second forward creates a new graph, but backward still adds into the existing leaf gradient buffer. Graph freshness does not imply gradient-buffer freshness.
+d(u*u)/du=2u=6, and the extra factor du/dv=3 gives 18 at the leaf.
 
 ```python
-w.grad = None
-((w - 2) ** 2).backward()
-assert w.grad.item() == -4
-((w - 2) ** 2).backward()
-assert w.grad.item() == -8
+v = torch.tensor(1.0, requires_grad=True)
+u = 3 * v
+u.retain_grad()
+(u * u).backward()
+assert v.grad.item() == 18 and u.grad.item() == 6 and not u.is_leaf
 ```
 
-**Expected:** after resetting first, grad -4 then -8.
+**Expected:** u.grad is 6 and v.grad is 18; u is not a leaf.
 
-**Verify:** Compare the computed values or written argument with after resetting first, grad -4 then -8.
+**Verify:** In a fresh process, the exercise checks confirm `v.grad.item() == 18`, `u.grad.item() == 6` and `not u.is_leaf`.
 
-## Exercise 3: Clear before an independent step
+## Exercise 2: Accumulate three backward calls
 
-The question is: Set grad None and backpropagate once more.
+The question is: At w=1, backpropagate \({\left(w-2\right)}^{2}\) three times without clearing the gradient.
 
-This is the intended reset for independent batches. Intentional microbatch accumulation needs a separate scaling and update policy.
+Backward adds into .grad; three fresh graphs each add \(2(w-2)\)=-2.
 
 ```python
-w.grad = None
-((w - 2) ** 2).backward()
-assert w.grad.item() == -4
+p = torch.tensor(1.0, requires_grad=True)
+for _ in range(3):
+    ((p - 2) ** 2).backward()
+assert p.grad.item() == -6
 ```
 
-**Expected:** grad returns to-4.
+**Expected:** each call contributes -2, so the stored gradient is -6.
 
-**Verify:** Compare the computed values or written argument with grad returns to-4.
+**Verify:** In a fresh process, the exercise checks confirm `p.grad.item() == -6`.
+
+## Exercise 3: Clear with zero_ and with None
+
+The question is: Clear the accumulated gradient with p.grad.zero_() and backpropagate once, then set it to None and backpropagate once more.
+
+zero_ keeps an allocated zero tensor; None removes it, which lets a later check distinguish no gradient from a zero gradient.
+
+```python
+p.grad.zero_()
+((p - 2) ** 2).backward()
+assert p.grad.item() == -2
+p.grad = None
+assert p.grad is None
+((p - 2) ** 2).backward()
+assert p.grad.item() == -2
+```
+
+**Expected:** both routes end at -2; after the None assignment the gradient is absent until the next backward.
+
+**Verify:** In a fresh process, the exercise checks confirm `p.grad.item() == -2`, `p.grad is None` and `p.grad.item() == -2`.
 
 ## Exercise 4: Separate detach from ownership
 
@@ -116,7 +117,7 @@ assert source[0].item() == 9 and owned[0].item() == 1 and not detached.requires_
 
 **Expected:** shared original changes; owned clone stays unchanged.
 
-**Verify:** Compare the computed values or written argument with shared original changes; owned clone stays unchanged.
+**Verify:** In a fresh process, the exercise checks confirm `source[0].item() == 9`, `owned[0].item() == 1` and `not detached.requires_grad`.
 
 ## Exercise 5: Use no_grad for an observation
 
@@ -134,7 +135,7 @@ assert tracked.requires_grad and not observed.requires_grad
 
 **Expected:** tracked result `requires_grad` True; observed result False.
 
-**Verify:** Compare the computed values or written argument with tracked result `requires_grad` True; observed result False.
+**Verify:** In a fresh process, the exercise checks confirm `tracked.requires_grad` and `not observed.requires_grad`.
 
 ## Exercise 6: Show eval is separate
 
@@ -151,7 +152,7 @@ assert result.requires_grad and model.training is False
 
 **Expected:** the output still has `requires_grad=True`.
 
-**Verify:** Compare the computed values or written argument with the output still has `requires_grad=True`.
+**Verify:** In a fresh process, the exercise checks confirm `result.requires_grad` and `model.training is False`.
 
 ## Review after comparison
 

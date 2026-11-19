@@ -33,6 +33,18 @@ internal static class Program {
       Check(accepted && value == 42, "valid count");
       Check(!rejected, "invalid count is not zero");
     }
+    {
+      // Task 3: Independent construction
+      bool TryQuantity(string text, out int quantity) {
+        var style = NumberStyles.None;
+        var culture = CultureInfo.InvariantCulture;
+        return int.TryParse(text, style, culture, out quantity);
+      }
+      Check(TryQuantity("42", out int count) && count == 42, "accepted");
+      Check(!TryQuantity("-1", out _), "negative rejected");
+      Check(!TryQuantity("4.5", out _), "fraction rejected");
+      Check(!TryQuantity("", out _), "empty rejected");
+    }
     Console.WriteLine("csharp-002: passed");
     await Task.CompletedTask;
   }

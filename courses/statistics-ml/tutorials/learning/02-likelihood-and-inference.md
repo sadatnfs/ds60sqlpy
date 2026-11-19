@@ -1,6 +1,6 @@
 # From Bernoulli likelihood to interval coverage
 
-Tutorial ID: `statistics-learning-002`. Prerequisites: `statistics-learning-001`, `statistics-004`, `statistics-008`. Complete program: [learning_01.py](examples/learning_01.py).
+Tutorial ID: `statistics-learning-002`. Prerequisites: `statistics-learning-001`, `statistics-004`, `statistics-008`. Complete program: [learning_02.py](examples/learning_02.py).
 
 ## Separate data, parameter and estimator
 

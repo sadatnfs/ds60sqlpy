@@ -4,7 +4,7 @@ import numpy as np
 
 
 def verify():
-    # Exercise 1: Align by identity
+    # Worked example A: Align by identity
     truth = {"a": 0.0, "b": 1.0, "c": 2.0}
     a = {"a": 0.0, "b": 2.0, "c": 2.0}
     b = {"c": 3.0, "a": 1.0, "b": 2.0}
@@ -12,7 +12,7 @@ def verify():
     diff = np.array([(a[i] - truth[i]) ** 2 - (b[i] - truth[i]) ** 2 for i in ids])
     np.testing.assert_array_equal(diff, [-1, 0, -1])
 
-    # Exercise 2: Calculate the mean difference
+    # Worked example B: Calculate the mean difference
     np.testing.assert_allclose(diff.mean(), -2 / 3, atol=1e-12, rtol=0)
 
     # Exercise 3: Resample paired units
@@ -42,6 +42,21 @@ def verify():
     assert all(row["partition"] == "validation" for row in ledger if row["action"] == "choose")
     bad = {"action": "choose", "partition": "test"}
     assert bad["partition"] != "validation"
+
+    # Exercise 1: Align a fourth record
+    truth4 = {"a": 0.0, "b": 1.0, "c": 2.0, "d": 4.0}
+    a4 = {"d": 5.0, "a": 0.0, "b": 2.0, "c": 2.0}
+    b4 = {"b": 1.0, "d": 4.0, "c": 3.0, "a": 1.0}
+    diff4 = np.array([(a4[i] - truth4[i]) ** 2 - (b4[i] - truth4[i]) ** 2 for i in sorted(truth4)])
+    np.testing.assert_array_equal(diff4, [-1, 1, -1, 1])
+    assert diff4.mean() == 0
+
+    # Exercise 2: Expose positional pairing
+    positional = np.array(
+        [(pa - t) ** 2 - (pb - t) ** 2 for t, pa, pb in zip(truth.values(), a.values(), b.values())]
+    )
+    np.testing.assert_array_equal(positional, [-9, 1, 0])
+    assert not np.array_equal(positional, diff)
     return {"checks": 6, "status": "passed"}
 
 

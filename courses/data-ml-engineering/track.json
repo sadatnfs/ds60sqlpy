@@ -19,8 +19,8 @@
         "observable evidence"
       ],
       "outcome": "Trace a small record-to-metric pipeline and define its observable contract.",
-      "lab": "Run both complete cases, inspect their checks and explain the changed assumption.",
-      "verification": "Compare the actual source-bound observations with the chapter's independent oracles and stated limitations."
+      "lab": "Run the complete program, work through worked case 1 (\"A complete valid supplied collection\") and worked case 2 (\"A plausible value violates the contract\"), and explain the changed assumption.",
+      "verification": "Run `dme-001.py` on the `python-core` profile and confirm that its printed results match the values the chapter states for both worked cases; a completed run is not evidence for the limitations the chapter lists."
     },
     {
       "id": "dme-002",
@@ -39,8 +39,8 @@
         "exit status"
       ],
       "outcome": "Read and write owned UTF-8 files through explicit paths.",
-      "lab": "Run both complete cases, inspect their checks and explain the changed assumption.",
-      "verification": "Compare the actual source-bound observations with the chapter's independent oracles and stated limitations."
+      "lab": "Run the complete program, work through worked case 1 (\"A file read with explicit ownership and location\") and worked case 2 (\"A process prints output and still fails\"), and explain the changed assumption.",
+      "verification": "Run `dme-002.py` on the `python-core` profile and confirm that its printed results match the values the chapter states for both worked cases; a completed run is not evidence for the limitations the chapter lists."
     },
     {
       "id": "dme-003",
@@ -59,8 +59,8 @@
         "denominators"
       ],
       "outcome": "Normalize aware timestamps and retain the meaning of missing values.",
-      "lab": "Run both complete cases, inspect their checks and explain the changed assumption.",
-      "verification": "Compare the actual source-bound observations with the chapter's independent oracles and stated limitations."
+      "lab": "Run the complete program, work through worked case 1 (\"Equal instants and a declared observed subset\") and worked case 2 (\"Guessing a timezone or a zero changes the claim\"), and explain the changed assumption.",
+      "verification": "Run `dme-003.py` on the `python-core` profile and confirm that its printed results match the values the chapter states for both worked cases; a completed run is not evidence for the limitations the chapter lists."
     },
     {
       "id": "dme-004",
@@ -80,8 +80,8 @@
         "SQL NULL"
       ],
       "outcome": "Execute real DuckDB joins and grouped metrics with an independent row oracle.",
-      "lab": "Run both complete cases, inspect their checks and explain the changed assumption.",
-      "verification": "Compare the actual source-bound observations with the chapter's independent oracles and stated limitations."
+      "lab": "Run the complete program, work through worked case 1 (\"Aggregate an identified, valid relation\") and worked case 2 (\"Duplicate keys and missing values change the answer\"), and explain the changed assumption.",
+      "verification": "Run `dme-004.py` on the `data-engineering` profile and confirm that its printed results match the values the chapter states for both worked cases; a completed run is not evidence for the limitations the chapter lists."
     },
     {
       "id": "dme-005",
@@ -101,8 +101,8 @@
         "complexity"
       ],
       "outcome": "Build a pure transformation with explicit inputs and outputs.",
-      "lab": "Run both complete cases, inspect their checks and explain the changed assumption.",
-      "verification": "Compare the actual source-bound observations with the chapter's independent oracles and stated limitations."
+      "lab": "Run the complete program, work through worked case 1 (\"Change a parameter without changing the input\") and worked case 2 (\"Reusing a consumed iterator and sharing a mutable collection\"), and explain the changed assumption.",
+      "verification": "Run `dme-005.py` on the `python-core` profile and confirm that its printed results match the values the chapter states for both worked cases; a completed run is not evidence for the limitations the chapter lists."
     },
     {
       "id": "dme-006",
@@ -121,8 +121,8 @@
         "evidence boundaries"
       ],
       "outcome": "Check hand-derived outputs, boundaries and changed inputs.",
-      "lab": "Run both complete cases, inspect their checks and explain the changed assumption.",
-      "verification": "Compare the actual source-bound observations with the chapter's independent oracles and stated limitations."
+      "lab": "Run the complete program, work through worked case 1 (\"Execute a small suite against a stated contract\") and worked case 2 (\"A weak invariant permits a wrong answer\"), and explain the changed assumption.",
+      "verification": "Run `dme-006.py` on the `python-core` profile and confirm that its printed results match the values the chapter states for both worked cases; a completed run is not evidence for the limitations the chapter lists."
     },
     {
       "id": "dme-007",
@@ -143,8 +143,8 @@
         "consumer contract"
       ],
       "outcome": "Validate a strict typed input and a compatible additive schema change.",
-      "lab": "Run both complete cases, inspect their checks and explain the changed assumption.",
-      "verification": "Compare the actual source-bound observations with the chapter's independent oracles and stated limitations."
+      "lab": "Run the complete program, work through worked case 1 (\"A new reader accepts old data, but the reverse fails\") and worked case 2 (\"Reject a semantic mismatch instead of hiding it\"), and explain the changed assumption.",
+      "verification": "Run `dme-007.py` on the `data-engineering` profile and confirm that its printed results match the values the chapter states for both worked cases; a completed run is not evidence for the limitations the chapter lists."
     },
     {
       "id": "dme-008",
@@ -165,8 +165,8 @@
         "provenance"
       ],
       "outcome": "Build a reviewable source/data/configuration hash manifest.",
-      "lab": "Run both complete cases, inspect their checks and explain the changed assumption.",
-      "verification": "Compare the actual source-bound observations with the chapter's independent oracles and stated limitations."
+      "lab": "Run the complete program, work through worked case 1 (\"Record and execute a small computation bundle\") and worked case 2 (\"Changed values invalidate the old claim\"), and explain the changed assumption.",
+      "verification": "Run `dme-008.py` on the `python-core` profile and confirm that its printed results match the values the chapter states for both worked cases; a completed run is not evidence for the limitations the chapter lists."
     },
     {
       "id": "dme-009",
@@ -187,8 +187,8 @@
         "replay"
       ],
       "outcome": "Ingest a declared CSV/JSON delivery with checksums and row reconciliation.",
-      "lab": "Run both complete cases, inspect their checks and explain the changed assumption.",
-      "verification": "Compare the actual source-bound observations with the chapter's independent oracles and stated limitations."
+      "lab": "Run the complete program, work through worked case 1 (\"Accept once, then reconcile a replay\") and worked case 2 (\"Reject corrupted, incomplete and conflicting deliveries\"), and explain the changed assumption.",
+      "verification": "Run `dme-009.py` on the `data-engineering` profile and confirm that its printed results match the values the chapter states for both worked cases; a completed run is not evidence for the limitations the chapter lists."
     },
     {
       "id": "dme-010",
@@ -208,8 +208,8 @@
         "ASGI boundary"
       ],
       "outcome": "Exercise an actual local ASGI pagination contract without network access.",
-      "lab": "Run both complete cases, inspect their checks and explain the changed assumption.",
-      "verification": "Compare the actual source-bound observations with the chapter's independent oracles and stated limitations."
+      "lab": "Run the complete program, work through worked case 1 (\"Preserve the initial population across a mutation\") and worked case 2 (\"Reconcile a request after a deliberately ignored response\"), and explain the changed assumption.",
+      "verification": "Run `dme-010.py` on the `data-engineering` profile and confirm that its printed results match the values the chapter states for both worked cases; a completed run is not evidence for the limitations the chapter lists."
     },
     {
       "id": "dme-011",
@@ -230,8 +230,8 @@
         "capture versus application"
       ],
       "outcome": "Apply synthetic insert/update/delete events to a real local SQLite table.",
-      "lab": "Run both complete cases, inspect their checks and explain the changed assumption.",
-      "verification": "Compare the actual source-bound observations with the chapter's independent oracles and stated limitations."
+      "lab": "Run the complete program, work through worked case 1 (\"Apply an update and recognize a replay\") and worked case 2 (\"Reject stale resurrection and conflicting meaning\"), and explain the changed assumption.",
+      "verification": "Run `dme-011.py` on the `python-core` profile and confirm that its printed results match the values the chapter states for both worked cases; a completed run is not evidence for the limitations the chapter lists."
     },
     {
       "id": "dme-012",
@@ -252,8 +252,8 @@
         "historical meaning"
       ],
       "outcome": "Build and query a real dimensional product at a declared grain.",
-      "lab": "Run both complete cases, inspect their checks and explain the changed assumption.",
-      "verification": "Compare the actual source-bound observations with the chapter's independent oracles and stated limitations."
+      "lab": "Run the complete program, work through worked case 1 (\"Two legitimate questions produce different classifications\") and worked case 2 (\"Overlapping history and an unknown route block acceptance\"), and explain the changed assumption.",
+      "verification": "Run `dme-012.py` on the `data-engineering` profile and confirm that its printed results match the values the chapter states for both worked cases; a completed run is not evidence for the limitations the chapter lists."
     },
     {
       "id": "dme-013",
@@ -274,8 +274,8 @@
         "JSON representation"
       ],
       "outcome": "Round-trip typed columnar records and inspect actual Arrow/Parquet schemas.",
-      "lab": "Run both complete cases, inspect their checks and explain the changed assumption.",
-      "verification": "Compare the actual source-bound observations with the chapter's independent oracles and stated limitations."
+      "lab": "Run the complete program, work through worked case 1 (\"Inspect a real Arrow-to-Parquet round-trip\") and worked case 2 (\"Expose loss and define an explicit portable representation\"), and explain the changed assumption.",
+      "verification": "Run `dme-013.py` on the `data-engineering` profile and confirm that its printed results match the values the chapter states for both worked cases; a completed run is not evidence for the limitations the chapter lists."
     },
     {
       "id": "dme-014",
@@ -296,8 +296,8 @@
         "request coverage"
       ],
       "outcome": "Select only information known at a decision cutoff.",
-      "lab": "Run both complete cases, inspect their checks and explain the changed assumption.",
-      "verification": "Compare the actual source-bound observations with the chapter's independent oracles and stated limitations."
+      "lab": "Run the complete program, work through worked case 1 (\"Event-only and arrival-only ordering both mislead\") and worked case 2 (\"Keep unknown and measured zero distinct\"), and explain the changed assumption.",
+      "verification": "Run `dme-014.py` on the `python-core` profile and confirm that its printed results match the values the chapter states for both worked cases; a completed run is not evidence for the limitations the chapter lists."
     },
     {
       "id": "dme-015",
@@ -318,8 +318,8 @@
         "consistent reader"
       ],
       "outcome": "Publish a checked local manifest through an atomic pointer replacement.",
-      "lab": "Run both complete cases, inspect their checks and explain the changed assumption.",
-      "verification": "Compare the actual source-bound observations with the chapter's independent oracles and stated limitations."
+      "lab": "Run the complete program, work through worked case 1 (\"A real process exits before activation\") and worked case 2 (\"Corruption blocks activation and consumption\"), and explain the changed assumption.",
+      "verification": "Run `dme-015.py` on the `python-core` profile and confirm that its printed results match the values the chapter states for both worked cases; a completed run is not evidence for the limitations the chapter lists."
     },
     {
       "id": "dme-016",
@@ -341,8 +341,8 @@
         "current snapshot"
       ],
       "outcome": "Retain valid and rejected Polars records with concrete reason codes.",
-      "lab": "Run both complete cases, inspect their checks and explain the changed assumption.",
-      "verification": "Compare the actual source-bound observations with the chapter's independent oracles and stated limitations."
+      "lab": "Run the complete program, work through worked case 1 (\"Build a current snapshot without losing history accounting\") and worked case 2 (\"Quarantine invalid records and reject equal-version conflicts\"), and explain the changed assumption.",
+      "verification": "Run `dme-016.py` on the `data-engineering` profile and confirm that its printed results match the values the chapter states for both worked cases; a completed run is not evidence for the limitations the chapter lists."
     },
     {
       "id": "dme-017",
@@ -362,8 +362,8 @@
         "row grain"
       ],
       "outcome": "Compare actual SQLite, DuckDB and Polars results under one contract.",
-      "lab": "Run both complete cases, inspect their checks and explain the changed assumption.",
-      "verification": "Compare the actual source-bound observations with the chapter's independent oracles and stated limitations."
+      "lab": "Run the complete program, work through worked case 1 (\"three real engines agree on a mixed population\") and worked case 2 (\"an all-null group reveals a policy mismatch\"), and explain the changed assumption.",
+      "verification": "Run `dme-017.py` on the `data-engineering` profile and confirm that its printed results match the values the chapter states for both worked cases; a completed run is not evidence for the limitations the chapter lists."
     },
     {
       "id": "dme-018",
@@ -382,8 +382,8 @@
         "small files"
       ],
       "outcome": "Inspect real partitioned Parquet fragments selected by a predicate.",
-      "lab": "Run both complete cases, inspect their checks and explain the changed assumption.",
-      "verification": "Compare the actual source-bound observations with the chapter's independent oracles and stated limitations."
+      "lab": "Run the complete program, work through worked case 1 (\"select one real date partition\") and worked case 2 (\"more files with the same logical answer\"), and explain the changed assumption.",
+      "verification": "Run `dme-018.py` on the `data-engineering` profile and confirm that its printed results match the values the chapter states for both worked cases; a completed run is not evidence for the limitations the chapter lists."
     },
     {
       "id": "dme-019",
@@ -402,8 +402,8 @@
         "partial aggregation"
       ],
       "outcome": "Execute and inspect a real Spark aggregation and its physical shuffle boundary.",
-      "lab": "Run both complete cases, inspect their checks and explain the changed assumption.",
-      "verification": "Compare the actual source-bound observations with the chapter's independent oracles and stated limitations."
+      "lab": "Run the complete program, work through worked case 1 (\"observe a real shuffle and a hot key\") and worked case 2 (\"salted partial sums followed by reconciliation\"), and explain the changed assumption.",
+      "verification": "Run `dme-019.py` on the `spark-local-python` profile and confirm that its printed results match the values the chapter states for both worked cases; a completed run is not evidence for the limitations the chapter lists."
     },
     {
       "id": "dme-020",
@@ -423,8 +423,8 @@
         "task attempt"
       ],
       "outcome": "Execute a bounded local DAG with recorded completed artifact identities.",
-      "lab": "Run both complete cases, inspect their checks and explain the changed assumption.",
-      "verification": "Compare the actual source-bound observations with the chapter's independent oracles and stated limitations."
+      "lab": "Run the complete program, work through worked case 1 (\"resume after a completed dependency\") and worked case 2 (\"reconcile publication after an uncertain outcome\"), and explain the changed assumption.",
+      "verification": "Run `dme-020.py` on the `python-core` profile and confirm that its printed results match the values the chapter states for both worked cases; a completed run is not evidence for the limitations the chapter lists."
     },
     {
       "id": "dme-021",
@@ -444,8 +444,8 @@
         "uncertain acknowledgement"
       ],
       "outcome": "Commit a state change and an outbox event in one actual SQLite transaction.",
-      "lab": "Run both complete cases, inspect their checks and explain the changed assumption.",
-      "verification": "Compare the actual source-bound observations with the chapter's independent oracles and stated limitations."
+      "lab": "Run the complete program, work through worked case 1 (\"failure between state change and event insertion\") and worked case 2 (\"the consumer commits but acknowledgement is missing\"), and explain the changed assumption.",
+      "verification": "Run `dme-021.py` on the `python-core` profile and confirm that its printed results match the values the chapter states for both worked cases; a completed run is not evidence for the limitations the chapter lists."
     },
     {
       "id": "dme-022",
@@ -466,8 +466,8 @@
         "replacement semantics"
       ],
       "outcome": "Rebuild a declared half-open historical interval and reconcile it.",
-      "lab": "Run both complete cases, inspect their checks and explain the changed assumption.",
-      "verification": "Compare the actual source-bound observations with the chapter's independent oracles and stated limitations."
+      "lab": "Run the complete program, work through worked case 1 (\"repair one day and replay the repair\") and worked case 2 (\"preserve a newer correction during an older broad run\"), and explain the changed assumption.",
+      "verification": "Run `dme-022.py` on the `data-engineering` profile and confirm that its printed results match the values the chapter states for both worked cases; a completed run is not evidence for the limitations the chapter lists."
     },
     {
       "id": "dme-023",
@@ -487,8 +487,8 @@
         "revision-aware sink"
       ],
       "outcome": "Trace a bounded event-time window mechanism under out-of-order arrivals.",
-      "lab": "Run both complete cases, inspect their checks and explain the changed assumption.",
-      "verification": "Compare the actual source-bound observations with the chapter's independent oracles and stated limitations."
+      "lab": "Run the complete program, work through worked case 1 (\"out-of-order input with explicit progress\") and worked case 2 (\"a late correction followed by expiry\"), and explain the changed assumption.",
+      "verification": "Run `dme-023.py` on the `python-core` profile and confirm that its printed results match the values the chapter states for both worked cases; a completed run is not evidence for the limitations the chapter lists."
     },
     {
       "id": "dme-024",
@@ -509,8 +509,8 @@
         "state-schema evolution"
       ],
       "outcome": "Restore a versioned checkpoint and compare with a full replay oracle.",
-      "lab": "Run both complete cases, inspect their checks and explain the changed assumption.",
-      "verification": "Compare the actual source-bound observations with the chapter's independent oracles and stated limitations."
+      "lab": "Run the complete program, work through worked case 1 (\"close, reopen and resume\") and worked case 2 (\"reject inconsistent or incompatible continuation\"), and explain the changed assumption.",
+      "verification": "Run `dme-024.py` on the `python-core` profile and confirm that its printed results match the values the chapter states for both worked cases; a completed run is not evidence for the limitations the chapter lists."
     },
     {
       "id": "dme-025",
@@ -529,8 +529,8 @@
         "ABA conflict"
       ],
       "outcome": "Model versioned object publication and conditional pointer updates explicitly.",
-      "lab": "Run both complete cases, inspect their checks and explain the changed assumption.",
-      "verification": "Compare the actual source-bound observations with the chapter's independent oracles and stated limitations."
+      "lab": "Run the complete program, work through worked case 1 (\"prepare immutable data before moving a pointer\") and worked case 2 (\"a stale writer and a return to identical bytes\"), and explain the changed assumption.",
+      "verification": "Run `dme-025.py` on the `python-core` profile and confirm that its printed results match the values the chapter states for both worked cases; a completed run is not evidence for the limitations the chapter lists."
     },
     {
       "id": "dme-026",
@@ -550,8 +550,8 @@
         "dataset grain"
       ],
       "outcome": "Query an actual versioned Parquet manifest with DuckDB.",
-      "lab": "Run both complete cases, inspect their checks and explain the changed assumption.",
-      "verification": "Compare the actual source-bound observations with the chapter's independent oracles and stated limitations."
+      "lab": "Run the complete program, work through worked case 1 (\"read an additive field without inventing history\") and worked case 2 (\"readable changes that violate the consumer contract\"), and explain the changed assumption.",
+      "verification": "Run `dme-026.py` on the `data-engineering` profile and confirm that its printed results match the values the chapter states for both worked cases; a completed run is not evidence for the limitations the chapter lists."
     },
     {
       "id": "dme-027",
@@ -571,8 +571,8 @@
         "orphan reachability"
       ],
       "outcome": "Investigate snapshot and delete invariants using real local files and a clearly labelled table-format model.",
-      "lab": "Run both complete cases, inspect their checks and explain the changed assumption.",
-      "verification": "Compare the actual source-bound observations with the chapter's independent oracles and stated limitations."
+      "lab": "Run the complete program, work through worked case 1 (\"logical deletion while preserving an old snapshot\") and worked case 2 (\"two candidates planned from the same parent\"), and explain the changed assumption.",
+      "verification": "Run `dme-027.py` on the `data-engineering` profile and confirm that its printed results match the values the chapter states for both worked cases; a completed run is not evidence for the limitations the chapter lists."
     },
     {
       "id": "dme-028",
@@ -591,8 +591,8 @@
         "semantic compatibility"
       ],
       "outcome": "Query a real local metadata catalog and resolve a versioned dataset contract.",
-      "lab": "Run both complete cases, inspect their checks and explain the changed assumption.",
-      "verification": "Compare the actual source-bound observations with the chapter's independent oracles and stated limitations."
+      "lab": "Run the complete program, work through worked case 1 (\"a candidate does not become current by existing\") and worked case 2 (\"reject unauthorized, stale and incompatible activation\"), and explain the changed assumption.",
+      "verification": "Run `dme-028.py` on the `data-engineering` profile and confirm that its printed results match the values the chapter states for both worked cases; a completed run is not evidence for the limitations the chapter lists."
     },
     {
       "id": "dme-029",
@@ -612,8 +612,8 @@
         "tombstone retention"
       ],
       "outcome": "Derive query-shaped partition keys and quantify a hot-partition case.",
-      "lab": "Run both complete cases, inspect their checks and explain the changed assumption.",
-      "verification": "Compare the actual source-bound observations with the chapter's independent oracles and stated limitations."
+      "lab": "Run the complete program, work through worked case 1 (\"a bounded day query versus all-history fanout\") and worked case 2 (\"replica overlap and unsafe deletion cleanup\"), and explain the changed assumption.",
+      "verification": "Run `dme-029.py` on the `python-core` profile and confirm that its printed results match the values the chapter states for both worked cases; a completed run is not evidence for the limitations the chapter lists."
     },
     {
       "id": "dme-030",
@@ -634,8 +634,8 @@
         "aggregate retraction"
       ],
       "outcome": "Compute a query oracle and choose a compatible ingestion grain.",
-      "lab": "Run both complete cases, inspect their checks and explain the changed assumption.",
-      "verification": "Compare the actual source-bound observations with the chapter's independent oracles and stated limitations."
+      "lab": "Run the complete program, work through worked case 1 (\"a replayed update inflates an append aggregate\") and worked case 2 (\"a changed grouping key needs retraction\"), and explain the changed assumption.",
+      "verification": "Run `dme-030.py` on the `data-engineering` profile and confirm that its printed results match the values the chapter states for both worked cases; a completed run is not evidence for the limitations the chapter lists."
     },
     {
       "id": "dme-031",
@@ -656,8 +656,8 @@
         "provenance"
       ],
       "outcome": "Trace an actual artifact dependency graph using content identities.",
-      "lab": "Run both complete cases, inspect their checks and explain the changed assumption.",
-      "verification": "Compare the actual source-bound observations with the chapter's independent oracles and stated limitations."
+      "lab": "Run the complete program, work through worked case 1 (\"trace a changed source through actual artifacts\") and worked case 2 (\"a recipe change starts later in the graph\"), and explain the changed assumption.",
+      "verification": "Run `dme-031.py` on the `python-core` profile and confirm that its printed results match the values the chapter states for both worked cases; a completed run is not evidence for the limitations the chapter lists."
     },
     {
       "id": "dme-032",
@@ -677,8 +677,8 @@
         "retention audit"
       ],
       "outcome": "Enforce a declared synthetic access/retention policy and preserve an audit record.",
-      "lab": "Run both complete cases, inspect their checks and explain the changed assumption.",
-      "verification": "Compare the actual source-bound observations with the chapter's independent oracles and stated limitations."
+      "lab": "Run the complete program, work through worked case 1 (\"minimize the released table and reject another purpose\") and worked case 2 (\"pseudonyms remain linkable, and retention is local\"), and explain the changed assumption.",
+      "verification": "Run `dme-032.py` on the `data-engineering` profile and confirm that its printed results match the values the chapter states for both worked cases; a completed run is not evidence for the limitations the chapter lists."
     },
     {
       "id": "dme-033",
@@ -696,8 +696,8 @@
         "cohort population mix"
       ],
       "outcome": "Train and evaluate a real baseline for an explicitly defined synthetic decision.",
-      "lab": "Run both complete cases, inspect their checks and explain the changed assumption.",
-      "verification": "Compare the actual source-bound observations with the chapter's independent oracles and stated limitations."
+      "lab": "Run the complete program, work through worked case 1 (\"A high-accuracy baseline has high missed-case cost\") and worked case 2 (\"The same decisions have a different aggregate interpretation\"), and explain the changed assumption.",
+      "verification": "Run `dme-033.py` on the `data-engineering` profile and confirm that its printed results match the values the chapter states for both worked cases; a completed run is not evidence for the limitations the chapter lists."
     },
     {
       "id": "dme-034",
@@ -717,8 +717,8 @@
         "request population"
       ],
       "outcome": "Use actual local Feast retrieval against a two-clock independent oracle.",
-      "lab": "Run both complete cases, inspect their checks and explain the changed assumption.",
-      "verification": "Compare the actual source-bound observations with the chapter's independent oracles and stated limitations."
+      "lab": "Run the complete program, work through worked case 1 (\"A future correction looks historically valid\") and worked case 2 (\"Preserve missing requests and test the exact boundary\"), and explain the changed assumption.",
+      "verification": "Run `dme-034.py` on the `data-engineering` profile and confirm that its printed results match the values the chapter states for both worked cases; a completed run is not evidence for the limitations the chapter lists."
     },
     {
       "id": "dme-035",
@@ -738,8 +738,8 @@
         "data leakage"
       ],
       "outcome": "Fit a real preprocessing pipeline on training rows only.",
-      "lab": "Run both complete cases, inspect their checks and explain the changed assumption.",
-      "verification": "Compare the actual source-bound observations with the chapter's independent oracles and stated limitations."
+      "lab": "Run the complete program, work through worked case 1 (\"Apply frozen state to three different future rows\") and worked case 2 (\"Future rows change both statistics and vocabulary\"), and explain the changed assumption.",
+      "verification": "Run `dme-035.py` on the `data-engineering` profile and confirm that its printed results match the values the chapter states for both worked cases; a completed run is not evidence for the limitations the chapter lists."
     },
     {
       "id": "dme-036",
@@ -759,8 +759,8 @@
         "validation before inference"
       ],
       "outcome": "Compare fitted-pipeline predictions with a reviewed JSON inference interface.",
-      "lab": "Run both complete cases, inspect their checks and explain the changed assumption.",
-      "verification": "Compare the actual source-bound observations with the chapter's independent oracles and stated limitations."
+      "lab": "Run the complete program, work through worked case 1 (\"Reordered JSON fields produce the same score\") and worked case 2 (\"Reject eight incompatible requests before scoring\"), and explain the changed assumption.",
+      "verification": "Run `dme-036.py` on the `data-engineering` profile and confirm that its printed results match the values the chapter states for both worked cases; a completed run is not evidence for the limitations the chapter lists."
     },
     {
       "id": "dme-037",
@@ -780,8 +780,8 @@
         "checkpoint state"
       ],
       "outcome": "Repeat a seeded training run with declared data/configuration identities.",
-      "lab": "Run both complete cases, inspect their checks and explain the changed assumption.",
-      "verification": "Compare the actual source-bound observations with the chapter's independent oracles and stated limitations."
+      "lab": "Run the complete program, work through worked case 1 (\"Repeat the same local recipe\") and worked case 2 (\"Change the seed, change the order, and preserve conflicting evidence\"), and explain the changed assumption.",
+      "verification": "Run `dme-037.py` on the `data-engineering` profile and confirm that its printed results match the values the chapter states for both worked cases; a completed run is not evidence for the limitations the chapter lists."
     },
     {
       "id": "dme-038",
@@ -802,8 +802,8 @@
         "reliability uncertainty"
       ],
       "outcome": "Evaluate a realistic future or grouped cohort with calibrated metrics.",
-      "lab": "Run both complete cases, inspect their checks and explain the changed assumption.",
-      "verification": "Compare the actual source-bound observations with the chapter's independent oracles and stated limitations."
+      "lab": "Run the complete program, work through worked case 1 (\"A perfect row score does not generalize to new entities\") and worked case 2 (\"Probability scores improve while ranking stays the same\"), and explain the changed assumption.",
+      "verification": "Run `dme-038.py` on the `data-engineering` profile and confirm that its printed results match the values the chapter states for both worked cases; a completed run is not evidence for the limitations the chapter lists."
     },
     {
       "id": "dme-039",
@@ -823,8 +823,8 @@
         "evaluation identity"
       ],
       "outcome": "Create and read back real local MLflow runs and model versions.",
-      "lab": "Run both complete cases, inspect their checks and explain the changed assumption.",
-      "verification": "Compare the actual source-bound observations with the chapter's independent oracles and stated limitations."
+      "lab": "Run the complete program, work through worked case 1 (\"Accept a measured candidate and update the alias explicitly\") and worked case 2 (\"Registration succeeds while acceptance fails\"), and explain the changed assumption.",
+      "verification": "Run `dme-039.py` on the `data-engineering` profile and confirm that its printed results match the values the chapter states for both worked cases; a completed run is not evidence for the limitations the chapter lists."
     },
     {
       "id": "dme-040",
@@ -845,8 +845,8 @@
         "origin trust"
       ],
       "outcome": "Validate a bounded model manifest and its exact content hashes.",
-      "lab": "Run both complete cases, inspect their checks and explain the changed assumption.",
-      "verification": "Compare the actual source-bound observations with the chapter's independent oracles and stated limitations."
+      "lab": "Run the complete program, work through worked case 1 (\"Restore a known numerical computation\") and worked case 2 (\"Reject invalid artifacts and expose the limit of integrity checks\"), and explain the changed assumption.",
+      "verification": "Run `dme-040.py` on the `python-core` profile and confirm that its printed results match the values the chapter states for both worked cases; a completed run is not evidence for the limitations the chapter lists."
     },
     {
       "id": "dme-041",
@@ -866,8 +866,8 @@
         "accepted model version"
       ],
       "outcome": "Compare real batch predictions with a local ASGI request contract.",
-      "lab": "Run both complete cases, inspect their checks and explain the changed assumption.",
-      "verification": "Compare the actual source-bound observations with the chapter's independent oracles and stated limitations."
+      "lab": "Run the complete program, work through worked case 1 (\"real fitted-model parity across two interfaces\") and worked case 2 (\"reject stale data and unavailable versions\"), and explain the changed assumption.",
+      "verification": "Run `dme-041.py` on the `data-engineering` profile and confirm that its printed results match the values the chapter states for both worked cases; a completed run is not evidence for the limitations the chapter lists."
     },
     {
       "id": "dme-042",
@@ -886,8 +886,8 @@
         "uncertain effects"
       ],
       "outcome": "Exercise a bounded real ASGI contract and resource cleanup.",
-      "lab": "Run both complete cases, inspect their checks and explain the changed assumption.",
-      "verification": "Compare the actual source-bound observations with the chapter's independent oracles and stated limitations."
+      "lab": "Run the complete program, work through worked case 1 (\"cancel an admitted request and recover capacity\") and worked case 2 (\"cancellation after an effect does not undo the effect\"), and explain the changed assumption.",
+      "verification": "Run `dme-042.py` on the `data-engineering` profile and confirm that its printed results match the values the chapter states for both worked cases; a completed run is not evidence for the limitations the chapter lists."
     },
     {
       "id": "dme-043",
@@ -905,8 +905,8 @@
         "multi-window burn"
       ],
       "outcome": "Compute request-based service indicators with explicit eligible denominators.",
-      "lab": "Run both complete cases, inspect their checks and explain the changed assumption.",
-      "verification": "Compare the actual source-bound observations with the chapter's independent oracles and stated limitations."
+      "lab": "Run the complete program, work through worked case 1 (\"availability passes while timely success fails\") and worked case 2 (\"a recent burst is diluted by a broad window\"), and explain the changed assumption.",
+      "verification": "Run `dme-043.py` on the `python-core` profile and confirm that its printed results match the values the chapter states for both worked cases; a completed run is not evidence for the limitations the chapter lists."
     },
     {
       "id": "dme-044",
@@ -926,8 +926,8 @@
         "coverage"
       ],
       "outcome": "Measure a changed input distribution without inferring quality loss automatically.",
-      "lab": "Run both complete cases, inspect their checks and explain the changed assumption.",
-      "verification": "Compare the actual source-bound observations with the chapter's independent oracles and stated limitations."
+      "lab": "Run the complete program, work through worked case 1 (\"substantial input shift with unchanged observed accuracy\") and worked case 2 (\"separate maturity from availability\"), and explain the changed assumption.",
+      "verification": "Run `dme-044.py` on the `python-core` profile and confirm that its printed results match the values the chapter states for both worked cases; a completed run is not evidence for the limitations the chapter lists."
     },
     {
       "id": "dme-045",
@@ -948,8 +948,8 @@
         "strict payload"
       ],
       "outcome": "Enforce a synthetic resource-authorization contract and safe request validation.",
-      "lab": "Run both complete cases, inspect their checks and explain the changed assumption.",
-      "verification": "Compare the actual source-bound observations with the chapter's independent oracles and stated limitations."
+      "lab": "Run the complete program, work through worked case 1 (\"permit one tenant and deny another\") and worked case 2 (\"an authorized name can still point to an unsafe object\"), and explain the changed assumption.",
+      "verification": "Run `dme-045.py` on the `python-core` profile and confirm that its printed results match the values the chapter states for both worked cases; a completed run is not evidence for the limitations the chapter lists."
     },
     {
       "id": "dme-046",
@@ -970,8 +970,8 @@
         "cost units"
       ],
       "outcome": "Compute a bounded workload/capacity model and check its assumptions.",
-      "lab": "Run both complete cases, inspect their checks and explain the changed assumption.",
-      "verification": "Compare the actual source-bound observations with the chapter's independent oracles and stated limitations."
+      "lab": "Run the complete program, work through worked case 1 (\"identical counts and average demand, different tails\") and worked case 2 (\"account for scan amplification without inventing a benchmark\"), and explain the changed assumption.",
+      "verification": "Run `dme-046.py` on the `python-core` profile and confirm that its printed results match the values the chapter states for both worked cases; a completed run is not evidence for the limitations the chapter lists."
     },
     {
       "id": "dme-047",
@@ -992,8 +992,8 @@
         "degraded mode"
       ],
       "outcome": "Trace a declared circuit-breaker/retry mechanism with bounded probes.",
-      "lab": "Run both complete cases, inspect their checks and explain the changed assumption.",
-      "verification": "Compare the actual source-bound observations with the chapter's independent oracles and stated limitations."
+      "lab": "Run the complete program, work through worked case 1 (\"bound attempts and probe recovery\") and worked case 2 (\"nested retries multiply attempts\"), and explain the changed assumption.",
+      "verification": "Run `dme-047.py` on the `python-core` profile and confirm that its printed results match the values the chapter states for both worked cases; a completed run is not evidence for the limitations the chapter lists."
     },
     {
       "id": "dme-048",
@@ -1015,8 +1015,8 @@
         "compatible rollback"
       ],
       "outcome": "Perform a compatible local schema migration and accepted-version switch.",
-      "lab": "Run both complete cases, inspect their checks and explain the changed assumption.",
-      "verification": "Compare the actual source-bound observations with the chapter's independent oracles and stated limitations."
+      "lab": "Run the complete program, work through worked case 1 (\"expand, reject premature activation, then backfill\") and worked case 2 (\"rollback preserves the expanded schema\"), and explain the changed assumption.",
+      "verification": "Run `dme-048.py` on the `data-engineering` profile and confirm that its printed results match the values the chapter states for both worked cases; a completed run is not evidence for the limitations the chapter lists."
     },
     {
       "id": "dme-049",
@@ -1038,8 +1038,8 @@
         "quality rejection"
       ],
       "outcome": "Connect ingestion, quarantine, real analytical transformation and an accepted publication manifest.",
-      "lab": "Run both complete cases, inspect their checks and explain the changed assumption.",
-      "verification": "Compare the actual source-bound observations with the chapter's independent oracles and stated limitations."
+      "lab": "Run the complete program, work through worked case 1 (\"publish and replay a complete delivery\") and worked case 2 (\"a quality failure preserves the previous publication\"), and explain the changed assumption.",
+      "verification": "Run `dme-049.py` on the `data-engineering` profile and confirm that its printed results match the values the chapter states for both worked cases; a completed run is not evidence for the limitations the chapter lists."
     },
     {
       "id": "dme-050",
@@ -1061,8 +1061,8 @@
         "atomic correction"
       ],
       "outcome": "Reconcile identified streaming-style updates with a full batch recomputation.",
-      "lab": "Run both complete cases, inspect their checks and explain the changed assumption.",
-      "verification": "Compare the actual source-bound observations with the chapter's independent oracles and stated limitations."
+      "lab": "Run the complete program, work through worked case 1 (\"replay does not create new business state\") and worked case 2 (\"restart, move an entity and reject a partial conflicting batch\"), and explain the changed assumption.",
+      "verification": "Run `dme-050.py` on the `python-core` profile and confirm that its printed results match the values the chapter states for both worked cases; a completed run is not evidence for the limitations the chapter lists."
     },
     {
       "id": "dme-051",
@@ -1085,8 +1085,8 @@
         "ASGI inference"
       ],
       "outcome": "Connect actual Feast, fitted training, MLflow evidence and local inference.",
-      "lab": "Run both complete cases, inspect their checks and explain the changed assumption.",
-      "verification": "Compare the actual source-bound observations with the chapter's independent oracles and stated limitations."
+      "lab": "Run the complete program, work through worked case 1 (\"train, register, reload and serve\") and worked case 2 (\"reject incompatible requests without moving acceptance\"), and explain the changed assumption.",
+      "verification": "Run `dme-051.py` on the `data-engineering` profile and confirm that its printed results match the values the chapter states for both worked cases; a completed run is not evidence for the limitations the chapter lists."
     },
     {
       "id": "dme-052",
@@ -1106,8 +1106,8 @@
         "recovery time"
       ],
       "outcome": "Create and restore an actual consistent SQLite backup with checked evidence.",
-      "lab": "Run both complete cases, inspect their checks and explain the changed assumption.",
-      "verification": "Compare the actual source-bound observations with the chapter's independent oracles and stated limitations."
+      "lab": "Run the complete program, work through worked case 1 (\"restore the accepted backup and quantify the gap\") and worked case 2 (\"reject an unsupported or altered backup candidate\"), and explain the changed assumption.",
+      "verification": "Run `dme-052.py` on the `python-core` profile and confirm that its printed results match the values the chapter states for both worked cases; a completed run is not evidence for the limitations the chapter lists."
     },
     {
       "id": "dme-053",
@@ -1128,8 +1128,8 @@
         "controlled cutover"
       ],
       "outcome": "Maintain simultaneous compatible readers during a real local migration.",
-      "lab": "Run both complete cases, inspect their checks and explain the changed assumption.",
-      "verification": "Compare the actual source-bound observations with the chapter's independent oracles and stated limitations."
+      "lab": "Run the complete program, work through worked case 1 (\"compatible readers before and after cutover\") and worked case 2 (\"equal totals conceal damaged identifiers\"), and explain the changed assumption.",
+      "verification": "Run `dme-053.py` on the `data-engineering` profile and confirm that its printed results match the values the chapter states for both worked cases; a completed run is not evidence for the limitations the chapter lists."
     },
     {
       "id": "dme-054",
@@ -1152,8 +1152,8 @@
         "conditional rollback"
       ],
       "outcome": "Diagnose a bounded fault using actual recorded workflow/service evidence.",
-      "lab": "Run both complete cases, inspect their checks and explain the changed assumption.",
-      "verification": "Compare the actual source-bound observations with the chapter's independent oracles and stated limitations."
+      "lab": "Run the complete program, work through worked case 1 (\"confirm a committed result without replay\") and worked case 2 (\"execution committed, but a separate consumer gate rejects it\"), and explain the changed assumption.",
+      "verification": "Run `dme-054.py` on the `data-engineering` profile and confirm that its printed results match the values the chapter states for both worked cases; a completed run is not evidence for the limitations the chapter lists."
     },
     {
       "id": "dme-055",
@@ -1174,8 +1174,8 @@
         "qualification evidence"
       ],
       "outcome": "Compare two defensible designs using explicit workload and correctness requirements.",
-      "lab": "Run both complete cases, inspect their checks and explain the changed assumption.",
-      "verification": "Compare the actual source-bound observations with the chapter's independent oracles and stated limitations."
+      "lab": "Run the complete program, work through worked case 1 (\"daily reporting and interactive history choose differently\") and worked case 2 (\"changed assumptions and missing evidence invalidate a choice\"), and explain the changed assumption.",
+      "verification": "Run `dme-055.py` on the `python-core` profile and confirm that its printed results match the values the chapter states for both worked cases; a completed run is not evidence for the limitations the chapter lists."
     },
     {
       "id": "dme-056",
@@ -1196,13 +1196,13 @@
         "evidence tiers"
       ],
       "outcome": "Assemble a reproducible local investigation with source, input, test and runtime evidence.",
-      "lab": "Run both complete cases, inspect their checks and explain the changed assumption.",
-      "verification": "Compare the actual source-bound observations with the chapter's independent oracles and stated limitations."
+      "lab": "Run the complete program, work through worked case 1 (\"execute and validate a reproducible local bundle\") and worked case 2 (\"reject stale evidence, a wrong answer and an unsupported scope\"), and explain the changed assumption.",
+      "verification": "Run `dme-056.py` on the `python-core` profile and confirm that its printed results match the values the chapter states for both worked cases; a completed run is not evidence for the limitations the chapter lists."
     },
     {
       "id": "dme-057",
       "title": "From an HTTP request to an admitted inference job",
-      "level": "intermediate",
+      "level": "advanced",
       "minutes": 90,
       "prerequisites": [
         "dme-056"
@@ -1215,13 +1215,13 @@
         "idempotency"
       ],
       "outcome": "Trace a source-bound accepted request and reconcile unknown creation outcomes without duplicate execution.",
-      "lab": "Run both complete cases, inspect their checks and explain the changed assumption.",
-      "verification": "Compare the actual source-bound observations with the chapter's independent oracles and stated limitations."
+      "lab": "Run the complete program, work through worked case 1 (\"a lost creation response\") and worked case 2 (\"apparently equivalent inputs\"), and explain the changed assumption.",
+      "verification": "Run `dme-057.py` on the `python-core` profile and confirm that its printed results match the values the chapter states for both worked cases; a completed run is not evidence for the limitations the chapter lists."
     },
     {
       "id": "dme-058",
       "title": "Bytes, subwords and the tokenizer boundary",
-      "level": "intermediate",
+      "level": "advanced",
       "minutes": 90,
       "prerequisites": [
         "dme-057"
@@ -1234,13 +1234,13 @@
         "token budgets"
       ],
       "outcome": "Apply exact byte-BPE merges and decode UTF-8 correctly across arbitrary byte boundaries.",
-      "lab": "Run both complete cases, inspect their checks and explain the changed assumption.",
-      "verification": "Compare the actual source-bound observations with the chapter's independent oracles and stated limitations."
+      "lab": "Run the complete program, work through worked case 1 (\"exact merge ordering\") and worked case 2 (\"six byte deliveries, two characters\"), and explain the changed assumption.",
+      "verification": "Run `dme-058.py` on the `python-core` profile and confirm that its printed results match the values the chapter states for both worked cases; a completed run is not evidence for the limitations the chapter lists."
     },
     {
       "id": "dme-059",
       "title": "Token embeddings, positions and retrieval representations",
-      "level": "intermediate",
+      "level": "advanced",
       "minutes": 90,
       "prerequisites": [
         "dme-058"
@@ -1252,13 +1252,13 @@
         "retrieval embeddings"
       ],
       "outcome": "Separate token lookup and position encoding from a retrieval representation and its evaluation.",
-      "lab": "Run both complete cases, inspect their checks and explain the changed assumption.",
-      "verification": "Compare the actual source-bound observations with the chapter's independent oracles and stated limitations."
+      "lab": "Run the complete program, work through worked case 1 (\"a repeated token at different positions\") and worked case 2 (\"pooling loses order\"), and explain the changed assumption.",
+      "verification": "Run `dme-059.py` on the `python-core` profile and confirm that its printed results match the values the chapter states for both worked cases; a completed run is not evidence for the limitations the chapter lists."
     },
     {
       "id": "dme-060",
       "title": "Safe checkpoints, startup loading and readiness",
-      "level": "intermediate",
+      "level": "advanced",
       "minutes": 90,
       "prerequisites": [
         "dme-059"
@@ -1270,13 +1270,13 @@
         "startup readiness"
       ],
       "outcome": "Reject changed or incompatible checkpoint tensors before readiness and explain startup-only loading.",
-      "lab": "Run both complete cases, inspect their checks and explain the changed assumption.",
-      "verification": "Compare the actual source-bound observations with the chapter's independent oracles and stated limitations."
+      "lab": "Run the complete program, work through worked case 1 (\"verify, then multiply\") and worked case 2 (\"changed bytes and changed shape\"), and explain the changed assumption.",
+      "verification": "Run `dme-060.py` on the `python-core` profile and confirm that its printed results match the values the chapter states for both worked cases; a completed run is not evidence for the limitations the chapter lists."
     },
     {
       "id": "dme-061",
       "title": "Device placement, transfers and precision budgets",
-      "level": "intermediate",
+      "level": "advanced",
       "minutes": 90,
       "prerequisites": [
         "dme-060"
@@ -1289,13 +1289,13 @@
         "KV bytes"
       ],
       "outcome": "Verify actual CPU placement and calculate bounded weight-transfer and KV-memory estimates.",
-      "lab": "Run both complete cases, inspect their checks and explain the changed assumption.",
-      "verification": "Compare the actual source-bound observations with the chapter's independent oracles and stated limitations."
+      "lab": "Run the complete program, work through worked case 1 (\"actual CPU tensor placement\") and worked case 2 (\"a model and cache budget\"), and explain the changed assumption.",
+      "verification": "Run `dme-061.py` on the `llm-torch-cpu` profile and confirm that its printed results match the values the chapter states for both worked cases; a completed run is not evidence for the limitations the chapter lists."
     },
     {
       "id": "dme-062",
       "title": "Bounded admission, queues and capacity ownership",
-      "level": "intermediate",
+      "level": "advanced",
       "minutes": 90,
       "prerequisites": [
         "dme-061"
@@ -1308,8 +1308,8 @@
         "Little law"
       ],
       "outcome": "Enforce request and token reservations and explain FIFO waiting under changed service durations.",
-      "lab": "Run both complete cases, inspect their checks and explain the changed assumption.",
-      "verification": "Compare the actual source-bound observations with the chapter's independent oracles and stated limitations."
+      "lab": "Run the complete program, work through worked case 1 (\"count and token reservations\") and worked case 2 (\"a long request ahead of short requests\"), and explain the changed assumption.",
+      "verification": "Run `dme-062.py` on the `python-core` profile and confirm that its printed results match the values the chapter states for both worked cases; a completed run is not evidence for the limitations the chapter lists."
     },
     {
       "id": "dme-063",
@@ -1327,8 +1327,8 @@
         "numerical equivalence"
       ],
       "outcome": "Verify actual cached attention against full-prefix logits and an independent causal formula.",
-      "lab": "Run both complete cases, inspect their checks and explain the changed assumption.",
-      "verification": "Compare the actual source-bound observations with the chapter's independent oracles and stated limitations."
+      "lab": "Run the complete program, work through worked case 1 (\"compare every prefix position\") and worked case 2 (\"an independent formula and a future perturbation\"), and explain the changed assumption.",
+      "verification": "Run `dme-063.py` on the `llm-torch-cpu` profile and confirm that its printed results match the values the chapter states for both worked cases; a completed run is not evidence for the limitations the chapter lists."
     },
     {
       "id": "dme-064",
@@ -1346,8 +1346,8 @@
         "stopping"
       ],
       "outcome": "Derive sampling distributions and enforce stop strings across output boundaries.",
-      "lab": "Run both complete cases, inspect their checks and explain the changed assumption.",
-      "verification": "Compare the actual source-bound observations with the chapter's independent oracles and stated limitations."
+      "lab": "Run the complete program, work through worked case 1 (\"full, truncated and colder distributions\") and worked case 2 (\"a stop marker split across deliveries\"), and explain the changed assumption.",
+      "verification": "Run `dme-064.py` on the `python-core` profile and confirm that its printed results match the values the chapter states for both worked cases; a completed run is not evidence for the limitations the chapter lists."
     },
     {
       "id": "dme-065",
@@ -1365,8 +1365,8 @@
         "continuous scheduling"
       ],
       "outcome": "Compare latency/fairness and padding tradeoffs without confusing scheduler simulation with runtime throughput.",
-      "lab": "Run both complete cases, inspect their checks and explain the changed assumption.",
-      "verification": "Compare the actual source-bound observations with the chapter's independent oracles and stated limitations."
+      "lab": "Run the complete program, work through worked case 1 (\"one long and one short request\") and worked case 2 (\"padding and bucketing\"), and explain the changed assumption.",
+      "verification": "Run `dme-065.py` on the `python-core` profile and confirm that its printed results match the values the chapter states for both worked cases; a completed run is not evidence for the limitations the chapter lists."
     },
     {
       "id": "dme-066",
@@ -1384,8 +1384,8 @@
         "kernel evidence"
       ],
       "outcome": "Inspect physical tensor strides and derive stable tiled softmax before interpreting kernel evidence.",
-      "lab": "Run both complete cases, inspect their checks and explain the changed assumption.",
-      "verification": "Compare the actual source-bound observations with the chapter's independent oracles and stated limitations."
+      "lab": "Run the complete program, work through worked case 1 (\"equal values, different byte strides\") and worked case 2 (\"exact online softmax over large scores\"), and explain the changed assumption.",
+      "verification": "Run `dme-066.py` on the `python-core` profile and confirm that its printed results match the values the chapter states for both worked cases; a completed run is not evidence for the limitations the chapter lists."
     },
     {
       "id": "dme-067",
@@ -1403,8 +1403,8 @@
         "copy-on-write"
       ],
       "outcome": "Calculate page fragmentation and preserve shared prefix state through copy-on-write.",
-      "lab": "Run both complete cases, inspect their checks and explain the changed assumption.",
-      "verification": "Compare the actual source-bound observations with the chapter's independent oracles and stated limitations."
+      "lab": "Run the complete program, work through worked case 1 (\"page rounding and a real byte formula\") and worked case 2 (\"a branch writes a shared tail\"), and explain the changed assumption.",
+      "verification": "Run `dme-067.py` on the `python-core` profile and confirm that its printed results match the values the chapter states for both worked cases; a completed run is not evidence for the limitations the chapter lists."
     },
     {
       "id": "dme-068",
@@ -1421,8 +1421,8 @@
         "residual distribution"
       ],
       "outcome": "Bound quantization error and prove a speculative acceptance correction reconstructs its target distribution.",
-      "lab": "Run both complete cases, inspect their checks and explain the changed assumption.",
-      "verification": "Compare the actual source-bound observations with the chapter's independent oracles and stated limitations."
+      "lab": "Run the complete program, work through worked case 1 (\"quantized weights and an output-error bound\") and worked case 2 (\"reconstruct the exact target distribution\"), and explain the changed assumption.",
+      "verification": "Run `dme-068.py` on the `python-core` profile and confirm that its printed results match the values the chapter states for both worked cases; a completed run is not evidence for the limitations the chapter lists."
     },
     {
       "id": "dme-069",
@@ -1440,8 +1440,8 @@
         "cursor readback"
       ],
       "outcome": "Parse exact SSE across arbitrary network chunks and read retained event suffixes without generation.",
-      "lab": "Run both complete cases, inspect their checks and explain the changed assumption.",
-      "verification": "Compare the actual source-bound observations with the chapter's independent oracles and stated limitations."
+      "lab": "Run the complete program, work through worked case 1 (\"every possible two-chunk split\") and worked case 2 (\"cursor readback and truncated framing\"), and explain the changed assumption.",
+      "verification": "Run `dme-069.py` on the `python-core` profile and confirm that its printed results match the values the chapter states for both worked cases; a completed run is not evidence for the limitations the chapter lists."
     },
     {
       "id": "dme-070",
@@ -1458,8 +1458,8 @@
         "durable recovery"
       ],
       "outcome": "Preserve resource ownership during cancellation and mark interrupted requests without replay.",
-      "lab": "Run both complete cases, inspect their checks and explain the changed assumption.",
-      "verification": "Compare the actual source-bound observations with the chapter's independent oracles and stated limitations."
+      "lab": "Run the complete program, work through worked case 1 (\"a cancellation flag is not released memory\") and worked case 2 (\"an interrupted record after restart\"), and explain the changed assumption.",
+      "verification": "Run `dme-070.py` on the `python-core` profile and confirm that its printed results match the values the chapter states for both worked cases; a completed run is not evidence for the limitations the chapter lists."
     },
     {
       "id": "dme-071",
@@ -1477,8 +1477,8 @@
         "profiling"
       ],
       "outcome": "Define latency denominators and distinguish compute, wall time, cohort composition and actual profiling evidence.",
-      "lab": "Run both complete cases, inspect their checks and explain the changed assumption.",
-      "verification": "Compare the actual source-bound observations with the chapter's independent oracles and stated limitations."
+      "lab": "Run the complete program, work through worked case 1 (\"one fully specified timeline\") and worked case 2 (\"a hidden slow cohort\"), and explain the changed assumption.",
+      "verification": "Run `dme-071.py` on the `python-core` profile and confirm that its printed results match the values the chapter states for both worked cases; a completed run is not evidence for the limitations the chapter lists."
     },
     {
       "id": "dme-072",
@@ -1496,8 +1496,8 @@
         "capstone memo"
       ],
       "outcome": "Operate the complete local service and defend a source-bound CPU release decision with explicit limits.",
-      "lab": "Run both complete cases, inspect their checks and explain the changed assumption.",
-      "verification": "Compare the actual source-bound observations with the chapter's independent oracles and stated limitations."
+      "lab": "Run the complete program, work through worked case 1 (\"a bounded local release memo\") and worked case 2 (\"correct arithmetic but leaked cancellation capacity\"), and explain the changed assumption.",
+      "verification": "Run `dme-072.py` on the `python-core` profile and confirm that its printed results match the values the chapter states for both worked cases; a completed run is not evidence for the limitations the chapter lists."
     }
   ]
 }

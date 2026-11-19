@@ -1,4 +1,4 @@
-"""dbt-015: worked starting point; complete the guide's six changes."""
+"""dbt-015: both worked cases; complete the guide's six changes."""
 
 import json
 import os
@@ -116,8 +116,13 @@ def example_one():
     return publication_case(False)
 
 
+def example_two():
+    return publication_case(True)
+
+
 if __name__ == "__main__":
     print(example_one())
+    print(example_two())
 
 # TODO 1: Add a domain test that rejects negative amounts.
 # TODO 2: Query the bad relation after failure.

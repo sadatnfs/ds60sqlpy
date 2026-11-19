@@ -4,17 +4,19 @@ Answer-free learner worksheet. See the companion guide for worked examples.
 Copy to .learning before editing. Six independent attempts belong below.
 """
 
-# Exercise 1: Inspect module state
-# Build Scalar Model with weight 0 and buffer offset 0.
-# Expected: one parameter weight; one buffer offset; both in state_dict.
+# Exercise 1: Evaluate a module with a nonzero buffer
+# Build ScalarModel, set its offset buffer to 1 under no_grad and evaluate x = 1, 2, 3.
+# Expected: outputs [1, 1, 1]; offset is a buffer, not a parameter.
 
-# Exercise 2: Check a forward call
-# Runx 1, 2, 3 through the zero-weight module.
-# Expected: three zero outputs; weight unchanged.
+# Exercise 2: Predict one step with the offset present
+# Train the shifted module one SGD step with learning rate 0.1 toward y = 2x using mean
+# squared error.
+# Expected: initial loss 35/3; new weight 22/15; offset still 1.
 
-# Exercise 3: Run one explicit loop step
-# Use SGD with rate 0.1 and mean squared error, clearing gradients before backward.
-# Expected: weight 28/15; buffer still 0.
+# Exercise 3: Count state in a ModuleList
+# Put two ScalarModel instances in nn.ModuleList and count parameters, buffers and
+# state_dict keys.
+# Expected: 2 parameters, 2 buffers and keys 0.weight, 0.offset, 1.weight, 1.offset.
 
 # Exercise 4: Move dtype through registered state
 # Convert the module to float32 and inspect parameter and buffer dtypes.

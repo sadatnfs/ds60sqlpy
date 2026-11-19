@@ -31,6 +31,31 @@ committing, so a Java asynchronous call returning is not mistaken for durable
 application completion. Errors remain errors and do not become a success message
 merely because the producer object was created.
 
+The probe's producer configuration states the delivery contract explicitly:
+
+From [`projects/streaming/TransactionProbe.java`](../projects/streaming/TransactionProbe.java):
+
+```java
+private static Properties producerProperties() {
+  var properties = new Properties();
+  properties.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, BOOTSTRAP);
+  properties.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
+  properties.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
+  properties.put(ProducerConfig.ENABLE_IDEMPOTENCE_CONFIG, "true");
+  properties.put(ProducerConfig.ACKS_CONFIG, "all");
+  properties.put(ProducerConfig.TRANSACTIONAL_ID_CONFIG, "ds60-workshop-transaction-writer");
+  properties.put(ProducerConfig.REQUEST_TIMEOUT_MS_CONFIG, "3000");
+  properties.put(ProducerConfig.DELIVERY_TIMEOUT_MS_CONFIG, "15000");
+  properties.put(ProducerConfig.MAX_BLOCK_MS_CONFIG, "10000");
+  properties.put(ProducerConfig.TRANSACTION_TIMEOUT_CONFIG, "15000");
+  return properties;
+}
+```
+
+`acks=all` waits until every in-sync replica has the write; `enable.idempotence`
+lets the broker discard a retried duplicate of the same producer sequence number;
+and a `transactional.id` is required before the producer can use transactions.
+
 The workshop has one broker and replication factor one. Therefore the observed
 write and restart retention establish a local log boundary only. They do not
 show that another broker can serve the data when this broker is unavailable.

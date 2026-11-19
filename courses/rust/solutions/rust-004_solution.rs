@@ -13,6 +13,16 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         assert_eq!(text.get(0..1), None);
         assert_eq!(text.get(0..2), Some("é"));
     }
+
+    {
+        // Task 3: Independent construction
+        fn byte_length(text: &str) -> usize {
+            text.len()
+        }
+        assert_eq!(byte_length("pear"), 4);
+        assert_eq!(byte_length("é"), 2);
+        assert_eq!(byte_length(&String::from("café")), 5);
+    }
     println!("rust-004: passed");
     Ok(())
 }

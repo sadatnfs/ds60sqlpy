@@ -408,7 +408,7 @@ local_counts = jnp.array([1., 3.])""",
                     "Use an adversarial count imbalance.",
                 ),
             ),
-            "Check whether each quantity is a sum, mean, count, replicated global value or gathered per-participant array. The all-zero global-count case needs a declared admission policy before division. Correct mapped CPU arithmetic is not evidence of actual multi-host collective ordering or recovery.",
+            "Check whether each quantity is a sum, mean, count, replicated global value or gathered per-participant array. The all-zero global-count case needs a declared input-validation policy before division. Correct mapped CPU arithmetic is not evidence of actual multi-host collective ordering or recovery.",
             "Translate this calculation into a proposed data-parallel training step with unequal nonpadding token counts. Explain the actual collective order and ownership evidence a multi-process implementation would need, connecting to torch-030 and tf-030.",
             (
                 ("vmap named axes", "https://docs.jax.dev/en/latest/_autosummary/jax.vmap.html"),
@@ -430,7 +430,7 @@ UNITS.append(
 
 The attention fixture first uses zero scores so the causal mask determines exact averages. That isolates information access, but zero dot products cannot test whether the scale factor is correct. A second nonuniform row supplies an independent scalar softmax oracle. Future-only perturbations then test prefix invariance of the actual output.
 
-Mask admission is explicit. Every query must have at least one available key under this lesson's categorical normalization contract. An all-forbidden row has no defined distribution. The pure attention calculation assumes admitted shapes and uses negative infinity to remove forbidden mass before normalization. This is a small square CPU mechanism, not a complete cached decoder or an optimized GPU kernel.
+Mask validation is explicit. Every query must have at least one available key under this lesson's categorical normalization contract. An all-forbidden row has no defined distribution. The pure attention calculation assumes validated shapes and uses negative infinity to remove forbidden mass before normalization. This is a small square CPU mechanism, not a complete cached decoder or an optimized GPU kernel.
 
 The adapter uses row-vector inputs: \(Y=X(W+sAB)\). W is fixed, A maps input features into a small rank space and B maps back to output features. Initializing B to zero preserves the base function. It also makes A's first gradient zero while B can receive a nonzero gradient through A. That is an expected connected derivative, not a reason to detach A.
 
@@ -467,7 +467,7 @@ b = jnp.zeros((2, 8))""",
         (
             case(
                 "An exact causal average",
-                "Admit the zero-score attention fixture and calculate its outputs.",
+                "Validate the zero-score attention fixture with `admit_attention`, then calculate its outputs.",
                 "[[2,0],[1,1],[8/3,8/3]].",
                 "Each query averages only its available prefix. This fixture tests the mask and normalization, while a nonuniform case is still needed for scaling.",
                 "admit_attention(q, k, v, mask)\nclose(attention(q, k, v, mask), [[2., 0.], [1., 1.], [8 / 3, 8 / 3]])",
@@ -502,7 +502,7 @@ b = jnp.zeros((2, 8))""",
             case(
                 "Refuse an empty allowed set",
                 "Remove every key from the first query's mask.",
-                "ValueError during admission.",
+                "ValueError during input validation.",
                 "A fully masked query has no categorical distribution under this contract.",
                 "try:\n    admit_attention(q, k, v, mask.at[0].set(False))\nexcept ValueError:\n    pass\nelse:\n    raise AssertionError('all-masked query admitted')",
                 "Check each row, not only the mask's total number of true values.",
@@ -524,12 +524,12 @@ b = jnp.zeros((2, 8))""",
                 "Count input-rank and rank-output factors separately.",
             ),
             case(
-                "Compile the admitted operation",
+                "Compile the validated operation",
                 "JIT the pure attention helper and compare the exact fixture.",
                 "Matching causal-average outputs.",
-                "This checks JAX transformation parity for the admitted CPU mechanism only.",
+                "This checks JAX transformation parity for the validated CPU mechanism only.",
                 "close(jax.jit(attention)(q, k, v, mask), attention(q, k, v, mask))",
-                "Keep admission, computation and evidence claims separate.",
+                "Keep input validation, computation and evidence claims separate.",
             ),
         ),
         "For a port mismatch, inspect factor orientation, score scale, axis, mask convention and reduction first. Square matrices and uniform scores can conceal wrong operations. Do not infer full-model equivalence from these two isolated mechanisms.",
@@ -552,15 +552,20 @@ UNITS.extend(
             "Capstone: a checked differentiable numerical component",
             "advanced",
             (29,),
-            ("admission contract", "masked objective", "ridge solve", "independent validation"),
-            "Deliver a small reusable numerical component with separate admission, mathematical, transformation and interpretation evidence.",
-            r"""A component is ready for reuse only when another reader can identify its accepted inputs, output meaning and failure policy. This capstone combines a masked regression objective with a closed-form ridge solve. It deliberately separates host-side admission from the pure numerical functions, making the transformation boundary visible.
+            (
+                "input-validation contract",
+                "masked objective",
+                "ridge solve",
+                "independent validation",
+            ),
+            "Deliver a small reusable numerical component with separate input-validation, mathematical, transformation and interpretation evidence.",
+            r"""A component is ready for reuse only when another reader can identify its accepted inputs, output meaning and failure policy. This capstone combines a masked regression objective with a closed-form ridge solve. It deliberately separates host-side input validation from the pure numerical functions, making the transformation boundary visible.
 
 Each row represents an observation with a feature vector and one target. The mask selects participating observations. A ridge penalty applies to every supplied coefficient under this declared convention, including any intercept column. Other conventions can exclude an intercept; that would be a different objective and must be named rather than silently substituted.
 
 The reference solves the normal equations for a tiny well-conditioned fixture. It is not a recommendation to form normal equations for every large or ill-conditioned regression problem. Their conditioning can be worse than the original design matrix. The scientific purpose here is a compact independently checkable objective with a known optimum and a gradient that should vanish there.
 
-Acceptance has several layers. Shape and finite-value checks admit the data. An exact coefficient fixture checks the intended equation. A masked outlier and row permutation check the population and identity policy. The gradient at the solved optimum checks consistency between the objective and solution. JIT parity checks supported transformation behavior. None of those tests alone would establish a valid causal interpretation or population model.
+Acceptance has several layers. Shape and finite-value checks validate the data. An exact coefficient fixture checks the intended equation. A masked outlier and row permutation check the population and identity policy. The gradient at the solved optimum checks consistency between the objective and solution. JIT parity checks supported transformation behavior. None of those tests alone would establish a valid causal interpretation or population model.
 
 For independent practice, close the reference and implement the contract from the equations. Explain why each negative control would reject a plausible wrong implementation. Then change the feature layout or penalty convention deliberately, deriving new expected behavior before modifying the code. A successful copied reference is rehearsal, not the final evidence of independence.""",
             r"""Define \(L(w)=\sum_i m_i(x_i^{\mathsf T}w-y_i)^2/\sum_i m_i+\lambda\lVert w\rVert_2^2\). Setting its gradient to zero gives \((X^{\mathsf T}MX/N+\lambda I)w=X^{\mathsf T}My/N\), where M is diagonal with mask entries and \(N=\sum_i m_i\). For rows (1,0),(1,1),(1,2), targets 1,3,5 and lambda zero, the unique fixture solution is (1,2).""",
@@ -593,7 +598,7 @@ mask = jnp.ones(3, dtype=bool)""",
             (
                 case(
                     "An independently known solution",
-                    "Admit and solve the unpenalized fixture, then evaluate its gradient.",
+                    "Validate the unpenalized fixture with `admit`, solve it, then evaluate its gradient.",
                     "Weights [1,2], zero loss and zero gradient within tolerance.",
                     "The coefficients are known from the target rule. A vanishing gradient additionally checks consistency between the coded objective and solved equation.",
                     "admit(design, targets, mask, 0.)\nweight = solve(design, targets, mask, 0.)\nclose(weight, [1., 2.])\nclose(objective(weight, design, targets, mask, 0.), 0.)\nclose(jax.grad(objective)(weight, design, targets, mask, 0.), [0., 0.])",
@@ -627,7 +632,7 @@ mask = jnp.ones(3, dtype=bool)""",
                 ),
                 case(
                     "Reject an empty population",
-                    "Admit a completely false mask.",
+                    "Pass a completely false mask to `admit`.",
                     "ValueError.",
                     "The component refuses an undefined empirical mean before entering the numerical kernel.",
                     "try:\n    admit(design, targets, jnp.zeros(3, dtype=bool), 0.)\nexcept ValueError:\n    pass\nelse:\n    raise AssertionError('empty population admitted')",
@@ -635,7 +640,7 @@ mask = jnp.ones(3, dtype=bool)""",
                 ),
                 case(
                     "Reject an invalid penalty",
-                    "Admit a negative ridge penalty.",
+                    "Pass a negative ridge penalty to `admit`.",
                     "ValueError under the declared nonnegative-penalty contract.",
                     "A negative value would change the optimization problem and can destroy the intended convexity guarantee.",
                     "try:\n    admit(design, targets, mask, -.1)\nexcept ValueError:\n    pass\nelse:\n    raise AssertionError('negative penalty admitted')",
@@ -643,11 +648,11 @@ mask = jnp.ones(3, dtype=bool)""",
                 ),
                 case(
                     "Check transformation parity",
-                    "Compile the solve on admitted inputs and compare with the eager result.",
+                    "Compile the solve on validated inputs and compare with the eager result.",
                     "Matching coefficients.",
-                    "The compiled function receives the numerical representation after host admission.",
+                    "The compiled function receives the numerical representation after host-side validation.",
                     "close(jax.jit(solve)(design, targets, mask, .1), solve(design, targets, mask, .1))",
-                    "A pure kernel and an admission wrapper have different responsibilities.",
+                    "A pure kernel and a validation wrapper have different responsibilities.",
                 ),
                 case(
                     "Transfer the target rule",
@@ -658,7 +663,7 @@ mask = jnp.ones(3, dtype=bool)""",
                     "Derive the new intercept and slope before running.",
                 ),
             ),
-            "A zero gradient can belong to the wrong objective. A low residual can belong to an ill-conditioned problem. A JIT pass can preserve the wrong mask. Retain separate evidence for admission, mathematical correctness, transformation behavior and the intended interpretation.",
+            "A zero gradient can belong to the wrong objective. A low residual can belong to an ill-conditioned problem. A JIT pass can preserve the wrong mask. Retain separate evidence for input validation, mathematical correctness, transformation behavior and the intended interpretation.",
             "Deliver your own implementation with a short contract, shape ledger, independent oracle and a failure case absent from the worked examples. Explain when a QR/SVD-based fit or a different regularization policy would be preferable to this tiny normal-equation teaching component.",
             (
                 (
@@ -802,7 +807,7 @@ UNITS.extend(
             "Optional GPU and TPU execution qualification",
             "advanced",
             (31,),
-            ("backend admission", "device readback", "allocator", "hardware evidence"),
+            ("backend qualification", "device readback", "allocator", "hardware evidence"),
             "Design and assess a device-specific qualification record without treating CPU or compiler evidence as accelerator acceptance.",
             r"""JAX's ability to target an accelerator is not evidence that a particular program used one. Package compatibility, driver/runtime support, device availability, explicit placement, compilation, synchronized execution and readback are separate observations. This reading unit specifies how those observations should fit together before a hardware claim is made.
 
@@ -812,7 +817,7 @@ A useful first device probe is small and independently checkable. Discover the r
 
 Allocator behavior also needs careful language. A runtime can reserve a substantial pool before a model creates its visible arrays. Reserved memory, live payload, temporary intermediates and peak device use are different quantities. Current JAX GPU allocation documentation describes a default preallocation policy and alternatives with fragmentation or performance tradeoffs. Do not copy an allocator setting into every environment without recording its purpose and measuring its effect.
 
-TPU and GPU qualification are distinct. They use different backend packages, hardware and precision/performance characteristics. An NVIDIA CUDA receipt does not qualify a TPU path. Likewise, a one-device correctness probe does not establish multi-device throughput, numerical accuracy for every operation or recovery from a serious device fault.""",
+TPU and GPU qualification are distinct. They use different backend packages, hardware and precision/performance characteristics. An NVIDIA CUDA test record does not qualify a TPU path. Likewise, a one-device correctness probe does not establish multi-device throughput, numerical accuracy for every operation or recovery from a serious device fault.""",
             r"""The minimal numerical oracle can be \(f(x)=x^2\) on \(x=(1,2,3)\), giving (1,4,9). The equation is deliberately trivial so evidence can focus on execution identity and completion. A later performance ratio must compare completed equivalent work with shape, dtype, transfers and warmup fixed. Logical payload bytes are \(N\times\mathrm{bytes\ per\ element}\); they are not peak allocator usage.""",
             "",
             (
@@ -839,7 +844,7 @@ TPU and GPU qualification are distinct. They use different backend packages, har
                     "A CPU reference passes every mathematical assertion. Decide whether it qualifies the optional GPU lesson.",
                     "It supports CPU numerical behavior only.",
                     "The same mathematics can be correct while the accelerator toolchain or device operation remains untested.",
-                    "Retain the CPU receipt as a baseline and list the missing accelerator stages.",
+                    "Retain the CPU test record as a baseline and list the missing accelerator stages.",
                     "Do not discard useful CPU evidence or relabel it.",
                 ),
                 case(
@@ -870,7 +875,7 @@ TPU and GPU qualification are distinct. They use different backend packages, har
                     "Distinguish TPU qualification",
                     "A GPU probe succeeds. List what a TPU claim still requires.",
                     "A separately prepared TPU environment, actual TPU allocation/computation/readback and target-specific measurements.",
-                    "The GPU receipt does not establish another backend's package or hardware behavior.",
+                    "The GPU test record does not establish another backend's package or hardware behavior.",
                     "Use the same mathematical oracle where appropriate, while retaining separate environment and device evidence.",
                     "Keep model-independent arithmetic reusable without merging backend qualification.",
                 ),
@@ -879,7 +884,7 @@ TPU and GPU qualification are distinct. They use different backend packages, har
                     "A bounded job is interrupted during device work and its child process is reaped. Decide whether another device job may be declared safe automatically.",
                     "Process cleanup alone does not prove device recovery; retain the outcome for the resource owner to inspect.",
                     "The repository's optional-device workflow treats serious faults separately from an ordinary repairable syntax error and never resets a shared GPU automatically.",
-                    "Preserve the receipt, identify the owned device and require the explicit recovery workflow before requalification.",
+                    "Preserve the interrupted run record, identify the owned device and require the explicit recovery workflow before requalification.",
                     "Separate host-process lifecycle from device state.",
                 ),
             ),
@@ -904,13 +909,13 @@ TPU and GPU qualification are distinct. They use different backend packages, har
             "Specify a multi-process numerical and lifecycle contract with explicit ownership, data placement and failure evidence.",
             r"""Multi-host execution adds process coordination to numerical computation. Each process has local devices and local data, while the program can describe global arrays spanning participants. Initialization and topology must be established before device queries or array computations that depend on the distributed context.
 
-JAX does not launch the participating processes for the user. A separately prepared launcher or job system must provide the owned processes, configuration and lifecycle. The ordinary single-source classroom worker is not that orchestrator and does not receive ambient cluster credentials or arbitrary external endpoints to imitate one.
+JAX does not launch the participating processes for you. A separately prepared launcher or job system must provide the owned processes, configuration and lifecycle. The ordinary single-source classroom worker is not that orchestrator and does not receive ambient cluster credentials or arbitrary external endpoints to imitate one.
 
 Every participant must follow a compatible collective sequence. A branch that makes one process call a reduction while another skips it can hang even if each local calculation looks correct in isolation. Logical order, participation and failure handling are therefore part of correctness, not just performance engineering.
 
 Global shape and local addressability are different concepts. A process may own only a subset of a global array's shards. Inspecting its addressable shards is not equivalent to converting the whole global value to a local NumPy array. Global inputs should be constructed from the declared process-local data and sharding plan, with sample identity and counts retained.
 
-A successful local multi-process experiment is useful, but it does not establish behavior across actual hosts or a production network. A multi-host receipt must identify participating processes/devices, topology, source and versions, correct global results, communication observations and lifecycle outcomes. Failure injection must be bounded and confined to resources owned for the study.""",
+A successful local multi-process experiment is useful, but it does not establish behavior across actual hosts or a production network. A multi-host run record must identify participating processes/devices, topology, source and versions, correct global results, communication observations and lifecycle outcomes. Failure injection must be bounded and confined to resources owned for the study.""",
             r"""Suppose process zero owns three observations and process one owns one. Global mean loss remains \((S_0+S_1)/(N_0+N_1)\), not the mean of local means unless the weighting question is deliberately changed. A replicated global result may be visible on several participants without representing several independent observations. Collective mathematics and collective participation must both be correct.""",
             "",
             (
@@ -969,7 +974,7 @@ A successful local multi-process experiment is useful, but it does not establish
                     "A named-axis CPU model computes the correct global mean. Decide whether it demonstrates multi-host throughput.",
                     "It demonstrates the mapped mathematical reduction, not network communication or multi-host performance.",
                     "The actual execution surface determines the scope of the evidence.",
-                    "Use the CPU model as a numerical oracle for a later real deployment, retaining separate receipts.",
+                    "Use the CPU model as a numerical oracle for a later real deployment, retaining separate run records.",
                     "Do not relabel a simulation as infrastructure acceptance.",
                 ),
                 case(

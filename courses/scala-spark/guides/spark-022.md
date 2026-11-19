@@ -1,22 +1,22 @@
 # spark-022: Shuffles, stages, tasks and aggregation cost
 
-Authored paired Scala/PySpark teaching content. The default fixtures are tiny,local and deterministic. Runtime acceptance,logical correctness and learner understanding remain separate evidence.
+Authored paired Scala/PySpark teaching content. The default fixtures are tiny, local and deterministic. Runtime acceptance, logical correctness and learner understanding remain separate evidence.
 
 ## Level and prerequisites
 
-Intermediate; approximately 120 minutes. Direct design prerequisites: `spark-021`. The prepared baseline is Spark 4.0.1,Scala binary2.13,JDK 17 and Python 3.12. Read the [execution baseline](../execution-baseline.md); a proposed future tuple is not a runtime receipt.
+Intermediate; approximately 90 minutes. Direct prerequisites: `spark-021`. The prepared baseline is Spark 4.0.1, Scala binary 2.13, JDK 17 and Python 3.12. Read the [execution baseline](../execution-baseline.md).
 
 ## How to run this lesson
 
-Open `spark-022` in the classroom and choose the Scala or PySpark implementation you understand. Prepare only its fixed `spark-local-scala` or `spark-local-python` profile,save your pad and run the complete source. Scala stages as `Main.scala` with `object Main`; Python stages as `main.py` with a main guard. Each program creates its own local[2] session,disables the UI,binds the driver to loopback and stops the session in finally. No external dataset,package download,JDBC connection or cloud service is requested.
+Open `spark-022` in the classroom and choose the Scala or PySpark implementation you understand. Prepare only its fixed `spark-local-scala` or `spark-local-python` profile, save your pad and run the complete source. Scala stages as `Main.scala` with `object Main`; Python stages as `main.py` with a main guard. Each program creates its own local[2] session, disables the UI, binds the driver to loopback and stops the session in finally. No external dataset, package download, JDBC connection or cloud service is requested.
 
 The [Scala learner](../lessons/spark-022.scala) and [PySpark learner](../lessons/spark-022.py) run two complete demonstrations and retain six explicit task stubs. Use the [explained solutions](../solutions/spark-022_solutions.md) only after an attempt or an explicit worked comparison; the [Scala reference](../solutions/spark-022_solution.scala) and [PySpark reference](../solutions/spark-022_solution.py) contain complete assertions. A bounded collect is used only for the declared tiny fixture; do not copy it onto an unbounded or large production table.
 
 ## Learning objectives
 
 - Explain why a wide transformation moves data and distinguish partition count from row count.
-- State the input and output grain,schema,NULL policy and ordering before executing a transformation.
-- Compare each language implementation with independent literal expectations,not only with the other implementation.
+- State the input and output grain, schema, NULL policy and ordering before executing a transformation.
+- Compare each language implementation with independent literal expectations, not only with the other implementation.
 
 ## Vocabulary and concepts
 
@@ -133,7 +133,7 @@ Compute input row count, distinct key count and total id sum. Confirm the key fo
 
 Require 1..16 shuffle partitions, set that configuration in the owned session and return key, n from groupBy/count. Execute the two-partition case under the supplied unique job group.
 
-**Expected result/shape:** Sorted output[(0,20),...,(999,20)], with total counts 20000 and an Exchange in the executed plan.
+**Expected result/shape:** Sorted output [(0,20),...,(999,20)], with total counts 20000 and an Exchange in the executed plan.
 
 **Verify:** Assert every key/count pair and the plan Exchange marker. Reject an out-of-budget partition request.
 
@@ -175,7 +175,7 @@ For the declared 20000-row,1000-key, four-mapper fixture, return source_rows_per
 
 **Expected result/shape:** For reducers 2:5000,4000,500. For reducers 5:5000,4000,200. These values do not assert actual balanced hash buckets or network bytes.
 
-**Verify:** Assert the two model tuples and print Spark 4.0.1, AQEfalse, local[2] with the distinct p2/p5 observations.
+**Verify:** Assert the two model tuples and print Spark 4.0.1, AQE false, local[2] with the distinct p2/p5 observations.
 
 **Progressive hint:** The local-combine bound is mappers times distinct keys; the average is groups divided by reducers.
 
@@ -185,11 +185,11 @@ Do not equate 20000 input rows with 20000 tasks or 1000 output groups with 1000 
 
 ## Self-check
 
-Explain the contract of `sourceMetrics` / `source_metrics` without reading its solution. Trace the specified boundary case,then explain the final exercise's evidence and limitation. Identify where a transformation builds a plan and where an action requests execution. Retain exact values or operator evidence rather than treating a successful process exit as proof of the whole learning objective.
+Explain the contract of `sourceMetrics` / `source_metrics` without reading its solution. Trace the specified boundary case, then explain the final exercise's evidence and limitation. Identify where a transformation builds a plan and where an action requests execution. Retain exact values or operator evidence rather than treating a successful process exit as proof of the whole learning objective.
 
 ## Next step
 
-Use the [course route](../README.md) to continue. Paired-language agreement is useful only when both outputs also satisfy the independent fixture contract. Keep runtime/profile receipts separate from any cluster-performance or production-recovery claim.
+Use the [course route](../README.md) to continue. Paired-language agreement is useful only when both outputs also satisfy the independent fixture contract. A successful local run is not evidence of cluster performance or production recovery.
 
 ## Primary sources and official APIs
 
@@ -203,8 +203,8 @@ Use the [course route](../README.md) to continue. Paired-language agreement is u
 
 ```text
 Use $guide-ds60sqlpy-learning to coach me through spark-022: Shuffles, stages, tasks and aggregation cost.
-Read courses/scala-spark/guides/spark-022.md and courses/scala-spark/lessons/spark-022.py;the paired sources are courses/scala-spark/lessons/spark-022.scala and courses/scala-spark/lessons/spark-022.py.
-Direct prerequisites: spark-021. Explain the schema,row grain and new Scala/Python/Spark syntax,ask me to predict a concrete result,then inspect my attempt. Give one hint at a time,review exact result and boundary evidence,and ask retrieval questions in my own words. Do not read solutions/ until I ask or have made an honest attempt.
-Use only the prepared local[2] worker profile and owned job scratch. Do not download dependencies,start a remote service,reset existing checkpoints or alter unrelated learner work.
+Read courses/scala-spark/guides/spark-022.md and courses/scala-spark/lessons/spark-022.py; the paired sources are courses/scala-spark/lessons/spark-022.scala and courses/scala-spark/lessons/spark-022.py.
+Direct prerequisites: spark-021. Explain the schema, row grain and new Scala/Python/Spark syntax, ask me to predict a concrete result, then inspect my attempt. Give one hint at a time, review exact result and boundary evidence, and ask retrieval questions in my own words. Do not read solutions/ until I ask or have made an honest attempt.
+Use only the prepared local[2] worker profile and owned job scratch. Do not download dependencies, start a remote service, reset existing checkpoints or alter unrelated learner work.
 Done when all six contracts have inspected evidence and I can explain the stated assumptions and a meaningful failure case.
 ```

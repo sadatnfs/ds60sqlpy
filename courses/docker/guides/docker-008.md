@@ -6,7 +6,7 @@ Beginner; about 100 minutes, with additional time for the optional host experime
 
 ## Learning objectives
 
-Design defaults and validation for a timeout variable. Write a public configuration evidence record. Explain the difference between a configuration, an observed process and evidence of the application's behavior.
+Design defaults and validation for a timeout variable. Write a public configuration evidence record. Use environment variables, ENTRYPOINT and CMD accurately when you explain what you observed.
 
 ## Purpose, vocabulary and mental model
 
@@ -20,15 +20,17 @@ Treat configuration as data with validation. A missing value should produce a cl
 
 The fixture reads `APP_MESSAGE` and serves it in a JSON field. Compose explicitly sets the value. A source-only message edit changes the image; an environment edit changes runtime configuration and usually requires container recreation to take effect. An image environment value is a default which runtime options can override.
 
+An image's `ENTRYPOINT` names the executable and its `CMD` supplies default arguments, or the whole default command when there is no entrypoint. Arguments after the image name in `docker run IMAGE ARG...` replace `CMD` and are appended to the entrypoint; `--entrypoint` replaces the executable and also clears the image's default `CMD`. The fixture's Dockerfile sets only `CMD ["python", "server.py"]`, so `docker run IMAGE python -c ...` replaces the whole command, while its Compose `client` service sets `entrypoint: ["python", "-c"]` and passes the program text as `command`.
+
 The exec-form command array does not expand `$NAME` like a shell. If the application needs an environment value, have the application read it or use an intentionally reviewed shell wrapper. `docker compose config` is valuable for validation but can display interpolated private values; use synthetic data in this lesson.
 
 ## How to use this lesson
 
-The classroom displays this guide and saves your worksheet. Its Run button does not control your Docker engine. Docker engine access is powerful host access, so the classroom deliberately receives no engine socket. Work through the supplied examples without starting anything, then use the optional host lab only in your own disposable project. Reading a command, parsing YAML and actually running the project are different forms of evidence.
+The classroom displays this guide and saves your worksheet, `courses/docker/lessons/docker-008.md`. Its Run button does not control your Docker engine. Docker engine access is powerful host access, so the classroom deliberately receives no engine socket. Work through the supplied examples without starting anything, then use the optional host lab only in your own disposable project. Reading a command, parsing YAML and actually running the project are different forms of evidence.
 
 Use Bash in Linux, macOS Terminal, or Ubuntu under WSL 2 on Windows. The supported engine runs Linux containers. The maintained fixture is `courses/docker/fixtures/compose-lab/`; its README explains copying it into a new ignored learner directory, checking the engine, building locally with visible logs, and using the fixed project name `ds60-docker-study`. The fixture uses port 18080 on host loopback. Stop if that project name or port belongs to unrelated work; choose a new project name consistently in your own copy. Never paste a command against a remote Docker context simply because it is currently selected.
 
-For Dockerfile examples, create a file named `Dockerfile` in a scratch project. YAML snippets describe a fragment unless explicitly called a complete file. Text transcripts are synthetic illustrations, not claims about your machine. Do not substitute a real password, token or private registry into a checked-in example.
+For Dockerfile examples, create a file named `Dockerfile` in a scratch project. YAML snippets describe a fragment unless explicitly called a complete file. Text transcripts are synthetic illustrations, not claims about your machine. Do not substitute a real password, token or private registry into a checked-in example. **How to use the lessons** in the [subject README](../README.md) collects these rules in one place.
 
 ## Worked example / walkthrough
 
@@ -57,58 +59,53 @@ docker run --rm --pull never -e APP_MESSAGE=sample ds60-docker-study:local pytho
 
 ## Six progressive exercises
 
+For each exercise, name the object involved and the phase of its lifetime before changing anything, then vary only the condition the task names. Exercises that ask you to predict, explain, compare or diagnose keep their answers in the solutions file; the others show the evidence to look for.
+
 ### Exercise 1: Distinguish Compose interpolation from container environment.
 
-**Expected evidence:** Model rendering versus process input.
-
-**Hint:** Identify the object and the phase of its lifetime before changing it. Use the relevant worked example, then vary only the condition named in this task.
+**Hint:** Run docker compose config and compare it with the environment inside the container.
 
 ### Exercise 2: Predict the type of APP_MESSAGE.
 
-**Expected evidence:** A string, even when its contents look numeric.
-
-**Hint:** Identify the object and the phase of its lifetime before changing it. Use the relevant worked example, then vary only the condition named in this task.
+**Hint:** Ask what type every value in a process environment has.
 
 ### Exercise 3: Design defaults and validation for a timeout variable.
 
 **Expected evidence:** A documented default plus finite positive bounded numeric parsing.
 
-**Hint:** Identify the object and the phase of its lifetime before changing it. Use the relevant worked example, then vary only the condition named in this task.
+**Hint:** Decide what happens for a missing, a negative, a huge and a non-numeric value.
 
 ### Exercise 4: Diagnose an exec array containing literal $PORT.
 
-**Expected evidence:** No shell expansion occurs in an argument array.
-
-**Hint:** Identify the object and the phase of its lifetime before changing it. Use the relevant worked example, then vary only the condition named in this task.
+**Hint:** Ask which program would expand $PORT and whether one runs in exec form.
 
 ### Exercise 5: Explain why restart may not apply changed Compose environment.
 
-**Expected evidence:** Existing container configuration and recreation differ.
-
-**Hint:** Identify the object and the phase of its lifetime before changing it. Use the relevant worked example, then vary only the condition named in this task.
+**Hint:** Compare what docker compose restart and docker compose up do to the container.
 
 ### Exercise 6: Write a public configuration evidence record.
 
 **Expected evidence:** Name, safe synthetic value, source of override and observed response.
 
-**Hint:** Identify the object and the phase of its lifetime before changing it. Use the relevant worked example, then vary only the condition named in this task.
+**Hint:** Record where the value came from and the response that shows it.
 
 ## Common mistakes and diagnosis
 
-Start with the smallest observation that separates two plausible causes. An image inspection answers questions about the packaged filesystem and configuration; container inspection adds runtime mounts, network attachment and exit status. An application request adds another layer of evidence. A healthy container can still serve the wrong application result. Preserve the original failure and the exact changed field before retrying.
+Expecting every `.env` value to appear inside the container. Restarting a container after changing its environment instead of recreating it. Overriding `--entrypoint` and expecting the image's `CMD` to still apply.
 
-The boundary case in this chapter is: Diagnose an exec array containing literal $PORT. Use its expected observation, No shell expansion occurs in an argument array., to avoid treating a successful command as proof of the wrong claim. Keep source edits in your own copy. Do not make a container privileged, mount the engine socket, disable all checks or delete every volume to make an example succeed.
+Exercise 4 is this chapter's boundary case: Diagnose an exec array containing literal $PORT. Start with the smallest observation that separates two plausible causes. An image inspection answers questions about the packaged filesystem and configuration; container inspection adds runtime mounts, network attachment and exit status; an application request adds another layer, and a healthy container can still serve the wrong result. Preserve the original failure and the exact changed field before retrying. Keep source edits in your own copy. Do not make a container privileged, mount the engine socket, disable all checks or delete every volume to make an example succeed.
 
 ## Retrieval, transfer and next steps
 
-Close the explanations and draw the path from source files to image to container to the observation relevant here. Reconstruct the second worked example with one different value and predict what changes. Explain which state survives process restart, container recreation and image rebuild. If none of those operations applies to this mechanism, explain why.
+Close the explanations and draw the path from source files to image to container to the observation relevant here, using environment variables, ENTRYPOINT, CMD, Compose interpolation and configuration validation. Reconstruct worked example 2 (Read one explicit variable) with one different value and predict what changes. Explain which state survives process restart, container recreation and image rebuild, or why none of those operations applies to this mechanism.
 
-Before proceeding, retain six evidence records. For the optional host project, use `docker compose -p ds60-docker-study down` from the fixture copy to stop its containers and remove its ordinary network. This command preserves named volumes. Volume deletion is a separate deliberate reset of that disposable lab after a backup or export, never a general cleanup step. The fixture README describes its exact scoped reset.
+When a host session ends, run `docker compose -p ds60-docker-study down` from your fixture copy. It removes the project's containers and network but keeps named volumes; deleting a volume is a separate, deliberate reset described in the fixture README.
 
 ## Primary references
 
-- [Official reference 1](https://docs.docker.com/compose/how-tos/environment-variables/)
-- [Official reference 2](https://docs.docker.com/compose/how-tos/environment-variables/variable-interpolation/)
+- [Environment variables in Compose](https://docs.docker.com/compose/how-tos/environment-variables/)
+- [Compose variable interpolation](https://docs.docker.com/compose/how-tos/environment-variables/variable-interpolation/)
+- [Dockerfile reference: ENTRYPOINT](https://docs.docker.com/reference/dockerfile/#entrypoint)
 
 ## Ask an AI tutor about this lesson
 

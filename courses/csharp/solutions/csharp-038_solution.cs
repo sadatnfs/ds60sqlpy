@@ -37,6 +37,17 @@ internal static class Program {
       Check(pattern.IsMatch("a+b") && !pattern.IsMatch("aaab"),
             "escaped literal");
     }
+    {
+      // Task 3: Independent construction
+      var options = RegexOptions.NonBacktracking;
+      var limit = TimeSpan.FromSeconds(1);
+      var shape = new Regex(@"\A[a-z][a-z0-9_]{0,15}\z", options, limit);
+      var reserved = new HashSet<string>(StringComparer.Ordinal) { "admin" };
+      bool Valid(string id) => shape.IsMatch(id) && !reserved.Contains(id);
+      Check(Valid("report_2"), "accepted");
+      Check(!Valid("admin"), "reserved word rejected");
+      Check(!Valid("2report"), "shape rejected");
+    }
     Console.WriteLine("csharp-038: passed");
     await Task.CompletedTask;
   }

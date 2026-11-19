@@ -14,7 +14,7 @@ add(
     """Concurrency permits operations to overlap. A data race occurs when unsynchronized access to shared mutable state violates the required memory and ordering rules. Even an apparently simple increment includes read, calculation and write, so it is not automatically atomic. Correctness requires protecting the entire invariant, not just individual fields.
 
 A lock establishes mutual exclusion and ordering for code using the same lock object. Keep the protected region small and avoid awaiting while holding a synchronous lock. Never choose a publicly accessible object or a mutable value as the lock identity. Deadlock is a separate risk when multiple locks are acquired in conflicting orders; a single documented ordering can prevent that class of cycle.""",
-    "`lock (gate)` enters a protected region and exits even on exceptions. All accesses participating in the invariant must use the same gate. Task.WhenAll observes the completion of the scheduled work.",
+    "`lock (gate)` enters a protected region and exits even on exceptions. All accesses participating in the invariant must use the same gate. Since .NET 9 and C# 13, `System.Threading.Lock` is the dedicated lock type: `lock` on a `Lock` uses its scope API, and the compiler warns when a `Lock` is converted to `object`. Task.WhenAll observes the completion of the scheduled work.",
     [
         ("Atomicity", "An operation behaving as one indivisible state transition."),
         ("Mutual exclusion", "Only one participant enters a protected region at a time."),
@@ -41,7 +41,7 @@ A lock establishes mutual exclusion and ordering for code using the same lock ob
         "Choose immutable snapshots or a lock for a shared report cache and justify the ownership model.",
     ],
     "A passing unsynchronized stress run does not prove absence of races. Locking a different object in the reader does not protect the writer invariant. Never await inside a synchronous lock.",
-    helpers="public sealed class LockedCounter { private readonly object gate = new(); private int value; public void Add() { lock (gate) value++; } public int Value { get { lock (gate) return value; } } }",
+    helpers="public sealed class LockedCounter { private readonly Lock gate = new(); private int value; public void Add() { lock (gate) value++; } public int Value { get { lock (gate) return value; } } }",
 )
 
 add(
@@ -374,10 +374,10 @@ The classroom builds a fixed net10.0 project without arbitrary packages. Externa
         "Runtime facts are useful diagnostics but do not replace a source and project review.",
     ),
     (
-        "Keep configuration explicit",
-        'var configuration = new Dictionary<string, string> { ["target"] = "net10.0", ["nullable"] = "enable" };\nCheck(configuration["target"] == "net10.0" && configuration["nullable"] == "enable", "reviewed build contract");',
-        "The example preserves the intended target and nullable policy.",
-        "A real project fixture, rather than this metadata demonstration, is required to qualify multi-file build behavior.",
+        "Read the compiled target framework",
+        'string? target = AppContext.TargetFrameworkName;\nCheck(target == ".NETCoreApp,Version=v10.0", "compiled target framework");\nCheck(Environment.Version.Major == 10, "running runtime generation");',
+        "The compiled program reports .NETCoreApp,Version=v10.0, the framework its project targeted, and runs on a .NET 10 runtime.",
+        "Both values come from the build and the runtime rather than from a hand-written table, so the checks fail if the project targets another framework. A real multi-project fixture is still required to qualify restore and publish behavior.",
     ),
     [
         "Explain the distinct purpose of restore, build, run and publish.",
@@ -410,9 +410,9 @@ Latency, throughput and failure rate describe different aspects of a service. A 
     ),
     (
         "Keep outcome counts consistent",
-        'int accepted = 3, rejected = 2, submitted = 5;\nCheck(accepted + rejected == submitted, "accounted input");\nCheck((double)rejected / submitted == 0.4, "defined rejection rate");',
-        "Five submitted records are fully accounted for and rejection rate is 0.4.",
-        "The denominator is stated explicitly; changing it changes the metric meaning.",
+        'var accepted = new Event("op-7", "save", "accepted", 3);\nvar rejected = new Event("op-7", "save", "rejected", 2);\nEvent[] events = { accepted, rejected };\nint submitted = 5;\nCheck(events.Sum(evt => evt.Count) == submitted, "accounted input");\nCheck((double)rejected.Count / submitted == 0.4, "rejection rate");',
+        "The accepted and rejected events account for all five submitted records, and the rejection rate is 0.4.",
+        "The counts come from the emitted events, so a record that was never classified would make the first check fail. The denominator is stated explicitly; changing it changes the metric meaning.",
     ),
     [
         "Identify safe fields and the event population.",
@@ -466,8 +466,8 @@ add(
     "Modern C# features and version-aware readability",
     """Language evolution adds concise ways to express familiar contracts. Primary constructors, collection expressions and improved patterns can reduce noise, but unfamiliar syntax should be introduced by its meaning rather than used to make code look advanced. Version-aware code records the target language generation and avoids accidentally relying on a preview feature.
 
-C# 14 accompanies .NET 10. This chapter uses established modern features supported by that target and explains the broader C# 14 release boundary through official documentation. New syntax does not relax nullability, ownership or equality rules. A code review should ask whether a feature makes the domain relationship easier to see and whether contributors can diagnose its errors.""",
-    "A collection expression such as `[1, 2, 3]` is target-typed. A primary constructor supplies parameters used by members. `nameof` produces a symbol name while retaining compile-time refactoring support.",
+C# 14 accompanies .NET 10 and is the default for the classroom's net10.0 target. C# 13 (.NET 9) added params collections, the System.Threading.Lock type for lock statements and the \\e escape sequence. C# 14 adds the field keyword in property accessors, extension members, null-conditional assignment such as a?.B = c, nameof for unbound generic types such as List<> and implicit span conversions. Example B exercises three of these features. New syntax does not relax nullability, ownership or equality rules. A code review should ask whether a feature makes the domain relationship easier to see and whether contributors can diagnose its errors.""",
+    "A collection expression such as `[1, 2, 3]` is target-typed. A primary constructor supplies parameters used by members. `nameof` produces a symbol name while retaining compile-time refactoring support; since C# 14 it also accepts an unbound generic type such as `nameof(List<>)`. `missing?.Capacity = 32` assigns only when `missing` is not null, and `\\e` is the escape character U+001B.",
     [
         ("Language version", "The set of syntax and semantic features accepted by the compiler."),
         ("Target typing", "Using context to determine an expression type."),
@@ -481,9 +481,9 @@ C# 14 accompanies .NET 10. This chapter uses established modern features support
     ),
     (
         "Keep constructor policy visible",
-        'var scale = new Scale(3);\nCheck(scale.Apply(4) == 12, "primary constructor parameter");\nCheck(nameof(Scale.Apply) == "Apply", "symbol name");',
-        "The supplied factor is used by the instance operation.",
-        "Concise construction should preserve a clear relationship between input parameters and behavior.",
+        'var scale = new Scale(3);\nCheck(scale.Apply(4) == 12, "primary constructor parameter");\nCheck(nameof(List<>) == "List", "C# 14 unbound generic nameof");\nStringBuilder? missing = null;\nmissing?.Capacity = 32;\nCheck(missing is null, "C# 14 null-conditional assignment");\nCheck("\\e" == "\\u001b", "C# 13 escape sequence");',
+        "The supplied factor is used by the instance operation, nameof(List<>) is List, missing?.Capacity = 32 leaves the null builder alone, and \\e is the escape character.",
+        "Concise construction should preserve a clear relationship between input parameters and behavior. The three newer checks compile only with C# 13 or 14, which the net10.0 target selects by default; an older target would reject them at compile time.",
     ),
     [
         "Identify the target type of each collection expression.",

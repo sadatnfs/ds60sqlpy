@@ -1,6 +1,6 @@
 # apache-022: Cluster configuration and shared data paths
 
-Tutorial mode. Stage: intermediate. Direct prerequisites: `apache-021`, `apache-003`.
+Tutorial mode. Stage: advanced. Direct prerequisites: `apache-021`, `apache-003`.
 
 ## A path names bytes only within a filesystem contract
 

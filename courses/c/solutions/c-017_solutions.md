@@ -8,9 +8,11 @@ A reusable C component needs an ownership vocabulary. A borrowed pointer grants 
 
 The owner struct contains a char pointer and length. create allocates length plus one, copies bytes and writes a terminator. clone calls the same creation policy on a borrowed source. destroy releases and resets the owner. Use a const pointer for borrowed read access. Returning a struct by value can transfer ownership, but subsequent copies must obey the documented move-or-clone policy because C does not enforce it automatically.
 
-## Exercise 1: Create an owned string
+## Exercise 1: Create an owned string: predict an edited check
 
-Create an owner for alpha.
+Copy worked example 1 into a scratch pad and change `CHECK(text_create(&t, "alpha"));` to `CHECK(text_create(&t, "alpha!"));` inside its CHECK. Before running, predict whether the CHECK still holds and explain why; then restore it.
+
+The unchanged code is worked example 1:
 
 ```c
 struct Text t = {0};
@@ -19,13 +21,15 @@ CHECK(t.len == 5 && strcmp(t.data, "alpha") == 0);
 text_destroy(&t);
 ```
 
-**Expected:** Length is 5 and content is alpha.
+**Expected:** The changed run stops with `Check failed` at the CHECK on `t.len == 5 && strcmp(t.data, "alpha") == 0`. Restoring the original line brings back the worked observation: length is 5 and content is alpha.
 
 The owner contains both storage and logical length. The terminator is additional storage, not part of len.
 
-## Exercise 2: Clone independent storage
+## Exercise 2: Clone independent storage: debug a regression
 
-Clone cat and mutate the clone to bat.
+A regression changed one token in worked example 2, so one line now reads `b.data[1] = 'b';`. Run worked example 2 with that line, use the failing CHECK to locate the defect and repair it without changing the CHECK.
+
+The unchanged code is worked example 2:
 
 ```c
 struct Text a = {0}, b = {0};
@@ -36,7 +40,7 @@ text_destroy(&a);
 text_destroy(&b);
 ```
 
-**Expected:** The original remains cat.
+**Expected:** Before the repair the run stops with `Check failed` at the CHECK on `strcmp(a.data, "cat") == 0 && strcmp(b.data, "bat") == 0`; after it the line reads `b.data[0] = 'b';` again and the original remains cat.
 
 Two independently allocated owners can be destroyed separately. A plain struct assignment would share the pointer and make that unsafe.
 

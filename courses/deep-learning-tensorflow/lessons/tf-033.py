@@ -5,19 +5,19 @@ Copy to .learning before editing. Six independent attempts belong below.
 """
 
 # Exercise 1: Predict a valid batch
-# Predict for float32 rows[1,2],[3,4].
-# Expected: outputs0,2 with shape(2,).
+# Predict for float32 rows [1, 2], [3, 4].
+# Expected: outputs 0, 2 with shape (2,).
 
 # Exercise 2: Compare batch independence
 # Predict each row independently and compare concatenated outputs with the batch result.
 # Expected: exact equality for this fixed linear fixture.
 
 # Exercise 3: Reject empty and oversized batches
-# Pass shapes(0,2) and(5,2).
+# Pass shapes (0, 2) and (5, 2).
 # Expected: ValueError with batch in the message.
 
 # Exercise 4: Reject wrong feature structure
-# Pass a vector[1,2] and a matrix with three columns.
+# Pass a vector [1, 2] and a matrix with three columns.
 # Expected: ValueError with shape in the message.
 
 # Exercise 5: Reject nonfinite values and wrong dtype

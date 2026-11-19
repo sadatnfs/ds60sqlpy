@@ -5,15 +5,45 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Normal flow, display and positioning: my attempt</title>
     <style>
-      /* Implement the lesson-specific CSS. Keep keyboard focus visible. */
+      /*
+        Worked example 2: A contained badge
+        .card {
+          position: relative;
+          padding: 2rem;
+        }
+        .badge {
+          position: absolute;
+          inset-block-start: 0.5rem;
+          inset-inline-end: 0.5rem;
+        }
+      */
+
+      /* Write the CSS for the exercises here. Keep keyboard focus visible. */
     </style>
   </head>
   <body>
-    <!-- web-014: Build a card with an intentional positioned badge and flowing content. -->
-    <!-- Save your prediction, then implement the six exercises from the guide. -->
+    <!--
+      web-014 exercises. Hints are in the guide; answers are in the solutions folder.
+      1. Predict whether relative positioning frees the original space.
+      2. Turn a group of inline links into a block navigation list.
+      3. Build a card with an intentional positioned badge and flowing content.
+      4. Diagnose an absolute label overlapping enlarged text.
+      5. Add a long paragraph and narrow the preview.
+      6. Explain the containing block used by an absolute element.
+    -->
     <main>
-      <h1>Normal flow, display and positioning</h1>
-      <!-- Build your own document here. The reference is separate. -->
+      <h1>Flow before coordinates</h1>
+      <article class="card">
+        <span class="badge">New</span>
+        <h2>HTML notes</h2>
+        <p>
+          This content remains in normal flow. Adding another paragraph increases the card's height.
+        </p>
+      </article>
+      <!--
+        Worked example 1: Ordinary flow
+        <p>First paragraph.</p><p>Second paragraph.</p>
+      -->
     </main>
   </body>
 </html>

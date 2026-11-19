@@ -7,7 +7,7 @@ from torch.nn import functional as F
 
 
 def verify():
-    # Exercise 1: Count group errors
+    # Worked example A: Count group errors
     truth = torch.tensor([1, 1, 0])
     prediction = torch.tensor([1, 0, 0])
     groups = ["A", "A", "B"]
@@ -18,11 +18,11 @@ def verify():
     }
     assert report == {"A": (1, 2), "B": (0, 1)}
 
-    # Exercise 2: Expose repeated identities
+    # Worked example B: Expose repeated identities
     ids = ["a", "b", "c"] + ["c"] * 5
     assert len(ids) == 8 and len(set(ids)) == 3
 
-    # Exercise 3: Trace a controlled perturbation
+    # Worked example C: Trace a controlled perturbation
     base = torch.tensor(1.0)
     shifts = torch.tensor([-0.1, -0.9, -1.1])
     changed = (base + shifts >= 0).long()
@@ -48,6 +48,30 @@ def verify():
         "differential_privacy_established": False,
     }
     assert card["unique_units"] == 3 and not card["differential_privacy_established"]
+
+    # Exercise 1: Count errors for three groups
+    truth_t = torch.tensor([0, 1, 1, 0])
+    pred_t = torch.tensor([0, 0, 1, 1])
+    groups_t = ["A", "B", "B", "C"]
+    wrong = pred_t != truth_t
+    summary = {
+        g: (int(wrong[torch.tensor([x == g for x in groups_t])].sum()), groups_t.count(g))
+        for g in ["A", "B", "C"]
+    }
+    assert summary == {"A": (0, 1), "B": (1, 2), "C": (1, 1)}
+
+    # Exercise 2: Deduplicate repeated identities
+    rows_t = ["p", "q", "q", "r", "r", "r"]
+    assert (
+        len(rows_t) == 6
+        and len(set(rows_t)) == 3
+        and max(rows_t.count(i) for i in set(rows_t)) == 3
+    )
+
+    # Exercise 3: Trace a new perturbation
+    start = torch.tensor(0.5)
+    moves = torch.tensor([-0.4, -0.5, -0.6])
+    assert ((start + moves) >= 0).long().tolist() == [1, 1, 0]
     return {"checks": 6, "status": "passed"}
 
 

@@ -22,7 +22,7 @@ def exercise_1():
 
 
 # Exercise 2: Reject an empty objective
-# Admit a mask with no active targets.
+# Pass a mask with no active targets to `admit`.
 def exercise_2():
     raise NotImplementedError("Reject an empty objective")
 
@@ -40,15 +40,15 @@ def exercise_4():
 
 
 # Exercise 5: Reject an active sentinel
-# Mark the -100 target active and apply admission.
+# Mark the -100 target active and apply `admit`.
 def exercise_5():
     raise NotImplementedError("Reject an active sentinel")
 
 
-# Exercise 6: Compile the admitted calculation
-# JIT token_mean on the admitted fixture and compare with the eager objective.
+# Exercise 6: Compile the validated calculation
+# JIT token_mean on the validated fixture and compare with the eager objective.
 def exercise_6():
-    raise NotImplementedError("Compile the admitted calculation")
+    raise NotImplementedError("Compile the validated calculation")
 
 
 if __name__ == "__main__":

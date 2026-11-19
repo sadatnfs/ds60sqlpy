@@ -16,8 +16,8 @@ Analytics model; January and February 2025; all products; complete snapshots on 
 
 The incorrect sum can still be useful as an intermediate check, but it must not be labeled inventory on hand at period end.
 
-- January 31 has 10 +20 +5 =35 units.
-- February 28 has 8 +15 +7 =30 units.
+- January 31 has 10 + 20 + 5 = 35 units.
+- February 28 has 8 + 15 + 7 = 30 units.
 - All snapshot rows sum to 65; the closing selected-date balance is 30.
 
 ### Case B: An explicitly carried-forward subset
@@ -40,7 +40,7 @@ This is a model-based as-of estimate, not a measured February 15 snapshot. Real 
 
 Predict the closing balance for Notebook and Mug at February 28.
 
-It is 8 +7 =15, coincidentally equal to the earlier carried subset for different reasons.
+It is 8 + 7 = 15, coincidentally equal to the earlier carried subset for different reasons.
 
 ### Exercise 2
 

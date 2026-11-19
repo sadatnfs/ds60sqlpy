@@ -13,6 +13,10 @@ if str(ROOT) not in sys.path:
 
 from scripts.format_inline_code import canonical_markdown  # noqa: E402
 
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+import variants  # noqa: E402
+from outcomes import MINUTES, OUTCOMES  # noqa: E402
+
 BASE = Path(__file__).resolve().parents[1]
 SPECS = []
 
@@ -95,6 +99,136 @@ def program(s, count=6):
     )
 
 
+def _lower_first(text):
+    """Lower-case an ordinary leading word, leaving identifiers such as JSON intact."""
+    return text[:1].lower() + text[1:] if text[1:2].islower() else text
+
+
+def _message(value):
+    if value and len(value) >= 2 and value[0] == value[-1] == '"':
+        return value[1:-1].replace('\\"', '"').replace("\\\\", "\\")
+    return value
+
+
+def _occurs(excerpt, code):
+    """Whether an edited excerpt already appears verbatim, which would make it ambiguous."""
+    return " ".join(excerpt.split()) in " ".join(code.split())
+
+
+def practice(ident, s):
+    """Six exercises: two derived from the worked examples, four authored investigations.
+
+    Every Verify line and hint is built from the case's own check and the one-token
+    edit that qualify_variants.py observed making that check fail.
+    """
+    span = variants.code_span
+    records = variants.load_records()
+    rows = []
+    for index, c in enumerate(s["cases"]):
+        shown = format_snippet(c["code"])
+        v = variants.variant(records, ident, index, c["code"], shown)
+        spans = variants.checks(shown) or variants.checks(c["code"])
+        cond = span(v["condition"] if v and v.get("condition") else spans[-1][2])
+        message = _message(v["message"] if v else spans[-1][3]) or "the check"
+        panic = span(message)
+        row = dict(
+            title=c["title"],
+            task=c["task"],
+            expected=c["expected"],
+            code=c["code"],
+            explanation=c["explanation"],
+            variant=v,
+            shown=shown,
+        )
+        if v:
+            original, edited = span(v["line"]), span(v["broken"])
+        if index == 0:
+            row["title"] = c["title"] + (
+                ": predict an edited check" if v and v["in_check"] else ": change one input"
+            )
+            if v and v["in_check"]:
+                row["task"] = (
+                    f"Copy worked example 1 into a scratch pad and change {original} to {edited} inside its check. Before running, predict whether the check still passes and explain why; then restore it."
+                )
+            elif v:
+                row["task"] = (
+                    f"Copy worked example 1 into a scratch pad and change {original} to {edited}. Before running, predict which check fails and which value it now sees; then run it and restore the original line."
+                )
+            else:
+                row["task"] = (
+                    f"Close worked example 1 and rebuild it in a fresh pad, keeping its check {cond}. Then propose one input change that would make that check fail and explain why before trying it."
+                )
+            row["expected"] = (
+                f"The changed run panics with {panic} because "
+                + ("the edited check" if v["in_check"] else cond)
+                + f" no longer holds. Restoring the original line brings back the worked observation: {_lower_first(c['expected'])}"
+                if v
+                else f"Your rebuild passes with the original input ({_lower_first(c['expected'])}), and your proposed change makes the check panic with {panic}."
+            )
+            row["verify"] = (
+                f"Compare your written prediction with the panic message {panic} and name the value that made {cond} false. After restoring the input, the program must print its success line again."
+            )
+        elif index == 1:
+            row["title"] = c["title"] + (
+                ": diagnose an edited check" if v and v["in_check"] else ": debug a regression"
+            )
+            if v and v["in_check"]:
+                row["task"] = (
+                    f"A careless edit changed the check in worked example 2 so that it reads {edited}. Run worked example 2 with that line, explain why the edited check now fails for the same program state, and restore it."
+                )
+            elif v and _occurs(v["broken"], rows[0]["shown"] + "\n" + shown):
+                row["task"] = (
+                    f"A regression changed {original} to {edited} in worked example 2. Run worked example 2 with that change, use the failure to explain the defect and repair it without changing the check."
+                )
+            elif v:
+                row["task"] = (
+                    f"A regression changed one token in worked example 2, so one line now reads {edited}. Run worked example 2 with that line, use the failure to locate the defect and repair it without changing the check."
+                )
+            else:
+                row["task"] = (
+                    f"Introduce one deliberate defect into a copy of worked example 2 that makes {cond} fail, then explain how the panic message leads back to the faulty line."
+                )
+            row["expected"] = (
+                f"Before the repair the program panics with {panic}; after it the line reads {original} again and {_lower_first(c['expected'])}"
+                if v
+                else f"The defective copy panics with {panic}; the repaired copy reproduces the worked observation: {_lower_first(c['expected'])}"
+            )
+            row["verify"] = (
+                f"Keep the failing and the repaired runs. Explain why the edited check rejects the same program state that {cond} accepts."
+                if v and v["in_check"]
+                else f"Keep the failing and the repaired runs. Explain why the changed token alters the value tested by {cond} for this input."
+            )
+        elif v and not v["in_check"]:
+            row["verify"] = (
+                f"Keep a check equivalent to {cond}. As a control, change {original} to {edited}: the run must panic with {panic}. Restore the line before continuing."
+            )
+        elif v:
+            row["verify"] = (
+                f"Keep a check equivalent to {cond}. As a control, change {original} to {edited} inside that check: it must panic with {panic}, which shows the check can fail. Restore it."
+            )
+        else:
+            row["verify"] = (
+                f"Keep a check equivalent to {cond} and confirm the success line. Then name an input that would make it fail and the panic message ({panic}) you would expect."
+            )
+        third = (
+            f"Predict the effect of changing {original} to {edited} before running anything. If the prediction is hard, trace that line again with the original input."
+            if v and not v["in_check"]
+            else f"Name one input that would make {cond} false. A check that no input can falsify is not evidence."
+        )
+        if index == 0 and v:
+            third = f"Compute the checked value with {edited} in place before running, then compare it with the value {cond} expects."
+        elif index == 1 and v:
+            third = f"Compare {edited} with the same line in worked example 2 and state the claim each version makes."
+        row["hints"] = [
+            "Restate the expected observation: "
+            + (c["expected"] if index < 2 else row["expected"]),
+            f"The check {cond} decides this case. List the values it reads and trace each one back to the input before changing code.",
+            third,
+        ]
+        rows.append(row)
+    return rows
+
+
 def render():
     plan = dict(
         schema_version=1,
@@ -122,23 +256,29 @@ def render():
             f"### Worked example {i + 1}: {c['title']}\n\n{c['task']}\n\n```go\n{program(s, i + 1)}\n```\n\n**Observe:** {c['expected']}\n\n{c['explanation']}"
             for i, c in enumerate(s["cases"][:2])
         )
+        rows = practice(ident, s)
         exercises = "\n\n".join(
-            f"### Exercise {i}: {c['title']}\n\n{c['task']}\n\n**Expected:** {c['expected']}\n\n**Verify:** Retain the input and assert the stated result. Change one relevant boundary and explain why the same check should pass or fail."
-            for i, c in enumerate(s["cases"], 1)
+            f"### Exercise {i}: {r['title']}\n\n{r['task']}\n\n**Expected:** {r['expected']}\n\n**Verify:** {r['verify']}"
+            for i, r in enumerate(rows, 1)
         )
         hints = "\n\n".join(
-            f"### Hint for investigation {i}: {c['title']}\n\n1. Restate the expected observation: {c['expected']}\n2. Identify the input and the state boundary relevant to {c['title'].lower()}. Trace that boundary before changing code.\n3. Reduce the experiment to one assertion and compare it with the corresponding worked-example mechanism. Keep the smallest distinguishing input."
-            for i, c in enumerate(s["cases"], 1)
+            f"### Hint for investigation {i}: {r['title']}\n\n"
+            + "\n".join(f"{n}. {hint}" for n, hint in enumerate(r["hints"], 1))
+            for i, r in enumerate(rows, 1)
         )
+        minutes = MINUTES.get(ident, 90 if n <= 16 else 120)
+        outcome = OUTCOMES[ident]
+        if outcome.lower().startswith("explain and implement"):
+            raise ValueError(ident + " needs a specific outcome")
         guide = f"""# {ident}: {s["title"]}
 
 ## Level and prerequisites
 
-{level.capitalize()}. Allow about {90 if n <= 16 else 120} minutes, then revisit the transfer case later. Prerequisites: {", ".join(prereqs) or "No previous Go knowledge. Read source as plain text and distinguish editing from executing."}
+{level.capitalize()}. Allow about {minutes} minutes, then revisit the transfer case later. Prerequisites: {", ".join(prereqs) or "No previous Go knowledge. Read source as plain text and distinguish editing from executing."}
 
 ## Learning objectives
 
-By the end, explain {", ".join(a.lower() for a, b in s["terms"])}; implement the six investigations below; and defend the expected result of a changed input before running it. A passing reference is evidence about that program, not a certification of your independent understanding.
+{outcome} Along the way, explain {", ".join(a.lower() for a, b in s["terms"])}; implement the six investigations below; and defend the expected result of a changed input before running it.
 
 ## Why this mechanism matters
 
@@ -152,7 +292,7 @@ By the end, explain {", ".join(a.lower() for a, b in s["terms"])}; implement the
 
 {s["anatomy"]}
 
-## Classroom execution contract
+## Run this lesson
 
 Choose Go in the unified Docker classroom. Save your own pad before experimenting. The prepared worker stages it as `main.go`, compiles it, and executes the resulting program with bounded time and output. The pad is one source file. It does not supply interactive input, arbitrary command-line arguments, package installation, Kubernetes credentials or a host Docker socket. Every ordinary reference here uses the standard library, synthetic local data and explicit checks. A failed `check` panics and produces a nonzero process result; do not remove it to make the run appear successful.
 
@@ -192,7 +332,7 @@ Close the reference. Rebuild one normal case and one boundary case from a blank 
 
 ## Next step and sources
 
-[Primary language or library documentation]({s["source"]}), reviewed 2026-10-23. The teaching explanations and synthetic fixtures are original. This source supports the API contract; it does not verify the classroom worker. Runtime receipts are recorded separately by the repository validation tools. Continue with the next lesson when you can explain the six observations and diagnose a changed case without copying its answer.
+[Primary language or library documentation]({s["source"]}), reviewed 2026-10-23. The teaching explanations and synthetic fixtures are original. Continue with the next lesson when you can explain the six observations and diagnose a changed case without copying its answer.
 
 ## Ask an AI tutor about this lesson
 
@@ -207,8 +347,11 @@ and finish with a fresh boundary case about {s["terms"][-1][0].lower()}.
 ```
 """
         answers = f"# {ident}: explained solutions\n\nThese are comparison material after an attempt or explicit reveal. The executable reference implements all six cases in one `main.go`.\n\n## Mechanism\n\n{s['model']}\n\n{s['anatomy']}\n\n"
-        for i, c in enumerate(s["cases"], 1):
-            answers += f"## {i}. {c['title']}\n\n{c['task']}\n\n```go\n{format_snippet(c['code'])}\n```\n\n**Expected:** {c['expected']}\n\n{c['explanation']}\n\n"
+        for i, r in enumerate(rows, 1):
+            lead = ""
+            if i <= 2:
+                lead = f"The unchanged code is worked example {i}:\n\n"
+            answers += f"## {i}. {r['title']}\n\n{r['task']}\n\n{lead}```go\n{r['shown']}\n```\n\n**Expected:** {r['expected']}\n\n{r['explanation']}\n\n"
         answers += "## Transfer after comparison\n\nReturn to your own pad and reproduce one check with a new input. Explain why the check rejects a plausible wrong implementation. Keep the distinction between a pure model, an in-process fake, and a real external system visible in your notes.\n"
         starter = (
             'package main\n\nimport "fmt"\n\nfunc main() {\n'
@@ -216,13 +359,13 @@ and finish with a fresh boundary case about {s["terms"][-1][0].lower()}.
                 "    // Exercise "
                 + str(i)
                 + ": "
-                + c["title"]
+                + r["title"]
                 + ": "
-                + c["task"]
+                + r["task"]
                 + "\n    // Expected: "
-                + c["expected"]
+                + r["expected"]
                 + "\n\n"
-                for i, c in enumerate(s["cases"], 1)
+                for i, r in enumerate(rows, 1)
             )
             + '    fmt.Println("Implement the six investigations in your saved pad.")\n}\n'
         )
@@ -242,13 +385,13 @@ and finish with a fresh boundary case about {s["terms"][-1][0].lower()}.
                 id=ident,
                 title=s["title"],
                 level=level,
-                minutes=90 if n <= 16 else 120,
+                minutes=minutes,
                 prerequisites=prereqs,
                 runtime="go",
                 concepts=[a for a, b in s["terms"]],
-                outcome="Explain and implement " + s["title"].lower() + ".",
-                lab=s["cases"][0]["task"],
-                verification=s["cases"][0]["expected"] + " " + s["cases"][-1]["expected"],
+                outcome=outcome,
+                lab=s["cases"][2]["task"],
+                verification=s["cases"][2]["expected"],
             )
         )
         manifest["lessons"].append(
@@ -267,4 +410,7 @@ and finish with a fresh boundary case about {s["terms"][-1][0].lower()}.
         (BASE / filename).write_text(
             json.dumps(value, indent=2) + "\n", encoding="utf-8", newline="\n"
         )
+    missing = set(OUTCOMES) ^ {item["id"] for item in plan["lessons"]}
+    if missing:
+        raise ValueError("outcomes.py and the lesson list differ: " + ", ".join(sorted(missing)))
     print(f"Rendered {len(SPECS)} complete Go lesson bundles.")

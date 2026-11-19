@@ -8,7 +8,7 @@ DNS maps names to records such as IP addresses. Kubernetes cluster DNS creates s
 
 For a typical cluster domain cluster.local, a Service named api in namespace study has a name like api.study.svc.cluster.local. The cluster domain is configurable, so do not hardcode it as a universal fact in a reusable client. A DNS answer establishes name resolution, not a listening process or healthy application.
 
-Caching affects how quickly clients observe changes. Resolver libraries and applications can cache differently, and long-lived connections can continue using an existing destination without a new DNS lookup. Diagnose the actual client behavior before concluding that a DNS record update should have moved every request immediately.
+Caching affects how quickly clients observe changes, but what can go stale depends on the Service type. A ClusterIP Service name keeps resolving to the same virtual IP while its endpoints change, so DNS caching does not delay endpoint changes there; staleness comes from long-lived connections that stay on their original backend. A headless Service returns Pod addresses directly, so a cached answer can keep sending new connections to a removed Pod until the record's TTL expires and the client resolves again. Resolver libraries and applications cache differently. Diagnose the actual client behavior before concluding that a DNS record update should have moved every request immediately.
 
 A Pod’s dnsPolicy and dnsConfig influence resolver behavior. Search suffixes and ndots can cause multiple queries for one short-looking name. NetworkPolicy that blocks DNS can break service discovery even when direct IP transport works.
 
@@ -42,7 +42,7 @@ The app listener can be correct while discovery fails. Do not change its port be
 
 Inspect the client lifecycle and resolver policy. Repeatedly changing records without evidence can make the incident harder to interpret.
 
-**Expected:** Caching or existing connections can delay fresh destination use.
+**Expected:** For a ClusterIP Service, existing connections keep their old backend because the name still resolves to the same virtual IP; for a headless Service, cached Pod address records can also send new connections to a removed Pod.
 
 ## Exercise 6: Design robust service discovery for a client.
 

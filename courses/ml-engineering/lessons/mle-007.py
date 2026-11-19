@@ -1,4 +1,4 @@
-"""mle-007: worked starting point; complete the guide's six changes."""
+"""mle-007: both worked cases; complete the guide's six changes."""
 
 import os
 import tempfile
@@ -80,8 +80,27 @@ def example_one():
             store.teardown()
 
 
+def example_two():
+    with tempfile.TemporaryDirectory() as d:
+        store, data = online_case(Path(d) / "features")
+        try:
+            decision = int(datetime(2024, 1, 4, tzinfo=UTC).timestamp())
+            max_age = 2 * 86400
+            ages = [decision - int(value) for value in data["feature_epoch"]]
+            accepted = [0 <= age <= max_age for age in ages]
+            assert ages == [86400, 259200] and accepted == [True, False]
+            return {
+                "ages_seconds": ages,
+                "freshness_decisions": accepted,
+                "retrieval_does_not_replace_consumer_freshness_policy": True,
+            }
+        finally:
+            store.teardown()
+
+
 if __name__ == "__main__":
     print(example_one())
+    print(example_two())
 
 # TODO 1: Move the declared decision time forward by one day.
 # TODO 2: Give a feature timestamp after the decision time.

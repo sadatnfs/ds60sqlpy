@@ -4,12 +4,12 @@ import numpy as np
 
 
 def verify():
-    # Exercise 1: Count attention scores
+    # Worked example A: Count attention scores
     b, h = 1, 2
     counts = [b * h * t * t for t in [16, 32]]
     assert counts == [512, 2048]
 
-    # Exercise 2: Count raw cache bytes
+    # Worked example B: Count raw cache bytes
     cache = [2 * 1 * 1 * 2 * t * 16 * 4 for t in [16, 32]]
     assert cache == [4096, 8192]
 
@@ -30,6 +30,15 @@ def verify():
         "measured_peak": False,
     }
     assert len(estimate["excludes"]) == 3 and not estimate["measured_peak"]
+
+    # Exercise 1: Count scores for a larger configuration
+    scores_big = 2 * 4 * 64 * 64
+    assert scores_big == 32768 and scores_big * 4 == 131072
+
+    # Exercise 2: Predict cache growth with depth and context
+    cache3 = [2 * 3 * 1 * 2 * t * 16 * 4 for t in [48, 96]]
+    assert cache3 == [36864, 73728] and cache3[1] == 2 * cache3[0]
+    assert (1 * 2 * 96 * 96) // (1 * 2 * 48 * 48) == 4
     return {"checks": 6, "status": "passed"}
 
 

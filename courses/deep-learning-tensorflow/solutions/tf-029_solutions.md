@@ -4,7 +4,7 @@ Compare these answers only after an attempt or an explicit solution reveal. They
 
 ## Mechanism review
 
-Floating-point arithmetic has a finite representable range. The probabilities implied by logits[1000,999] are well defined, but exponentiating those scores directly overflows ordinary floating-point types. Subtracting the maximum leaves the softmax unchanged because a common multiplicative factor cancels between numerator and denominator. A stable cross entropy works with shifted logits or a log-sum-exp expression, avoiding an unnecessary probability round trip. Numeric precision is a separate concern from objective correctness: a stable implementation can still optimize the wrong labels or denominator. Mixed precision may improve performance on some hardware, but this CPU fixture makes no speed claim.
+Floating-point arithmetic has a finite representable range. The probabilities implied by logits [1000,999] are well defined, but exponentiating those scores directly overflows ordinary floating-point types. Subtracting the maximum leaves the softmax unchanged because a common multiplicative factor cancels between numerator and denominator. A stable cross entropy works with shifted logits or a log-sum-exp expression, avoiding an unnecessary probability round trip. Numeric precision is a separate concern from objective correctness: a stable implementation can still optimize the wrong labels or denominator. Mixed precision may improve performance on some hardware, but this CPU fixture makes no speed claim.
 
 **Overflow:** A finite mathematical result exceeds the numeric representation.
 
@@ -14,11 +14,11 @@ Floating-point arithmetic has a finite representable range. The probabilities im
 
 ## Reading the implementation
 
-Use tf.nn.sparse_softmax_cross_entropy_with_logits for the combined stable calculation. In NumPy, logaddexp(0,-1) gives the positive-first-class loss. finite checks should include gradients as well as forward outputs. float16 overflows at much smaller exponent arguments than float64. Compare using absolute tolerances appropriate to the dtype instead of exact equality for transcendental functions.
+Use tf.nn.sparse_softmax_cross_entropy_with_logits for the combined stable calculation. In NumPy, logaddexp(0, -1) gives the positive-first-class loss. finite checks should include gradients as well as forward outputs. float16 overflows at much smaller exponent arguments than float64. Compare using absolute tolerances appropriate to the dtype instead of exact equality for transcendental functions.
 
 ## Exercise 1: Expose naive overflow
 
-The question is: Exponentiate NumPy logits[1000,999] directly under an explicit error-state context.
+The question is: Exponentiate NumPy logits [1000,999] directly under an explicit error-state context.
 
 The warning is intentionally scoped to a counterexample. Silencing all numerical warnings in a training program would hide unrelated failures.
 
@@ -31,11 +31,11 @@ assert np.isinf(naive).all()
 
 **Expected:** both exponentials are infinite.
 
-**Verify:** Compare the computed values or written argument with both exponentials are infinite.
+**Verify:** In a fresh process, the exercise checks confirm `np.isinf(naive).all()`.
 
 ## Exercise 2: Calculate stable loss
 
-The question is: Use a logits-aware TensorFlow loss for target0.
+The question is: Use a logits-aware TensorFlow loss for target 0.
 
 The meaningful quantity is the difference between scores, not their shared offset. The stable form keeps that difference available without constructing enormous exponentials.
 
@@ -48,11 +48,11 @@ np.testing.assert_allclose(loss.numpy(), [np.logaddexp(0, -1)], atol=1e-6, rtol=
 
 **Expected:** loss \(\log(1+e^{-1})\) within 1e-6.
 
-**Verify:** Compare the computed values or written argument with loss \(\log(1+e^{-1})\) within 1e-6.
+**Verify:** In a fresh process, the exercise checks confirm `loss.numpy()` matches `[np.logaddexp(0, -1)]` within 1e-6.
 
 ## Exercise 3: Check shift invariance
 
-The question is: Compare softmax[1000,999] with softmax[0,-1].
+The question is: Compare softmax[1000,999] with softmax[0, -1].
 
 A common score shift cancels from the normalized distribution. This metamorphic property can catch an implementation that normalizes the wrong axis or clips scores inconsistently.
 
@@ -64,11 +64,11 @@ np.testing.assert_allclose(
 
 **Expected:** probabilities agree within 1e-6.
 
-**Verify:** Compare the computed values or written argument with probabilities agree within 1e-6.
+**Verify:** In a fresh process, the exercise checks confirm `tf.nn.softmax(z).numpy()` matches `tf.nn.softmax([0.0, -1.0]).numpy()` within 1e-6.
 
 ## Exercise 4: Inspect gradients
 
-The question is: Differentiate the stable target0 loss with respect to both logits.
+The question is: Differentiate the stable target 0 loss with respect to both logits.
 
 The derivative of cross entropy is probability minus one-hot target. Its components sum to zero because the probabilities and target each sum to one.
 
@@ -81,13 +81,13 @@ assert np.isfinite(g).all()
 np.testing.assert_allclose(g.sum(), 0, atol=1e-6, rtol=0)
 ```
 
-**Expected:** finite gradients summing approximately0.
+**Expected:** finite gradients summing approximately 0.
 
-**Verify:** Compare the computed values or written argument with finite gradients summing approximately0.
+**Verify:** In a fresh process, the exercise checks confirm `np.isfinite(g).all()` and `g.sum()` matches `0` within 1e-6.
 
 ## Exercise 5: Separate precision policies
 
-The question is: Compare float16 and float64 exponentiation of20.
+The question is: Compare float16 and float64 exponentiation of 20.
 
 A lower-precision type changes range as well as resolution. Hardware support and loss scaling require separate experiments; a dtype cast alone is not evidence of safe mixed-precision training.
 
@@ -100,7 +100,7 @@ assert np.isinf(low) and np.isfinite(high)
 
 **Expected:** float16 overflows; float64 remains finite.
 
-**Verify:** Compare the computed values or written argument with float16 overflows; float64 remains finite.
+**Verify:** In a fresh process, the exercise checks confirm `np.isinf(low)` and `np.isfinite(high)`.
 
 ## Exercise 6: Validate input finiteness
 
@@ -128,7 +128,7 @@ np.testing.assert_allclose(stable(z).sum(), 1, atol=1e-12, rtol=0)
 
 **Expected:** ValueError for NaN; finite input returns unit mass.
 
-**Verify:** Compare the computed values or written argument with ValueError for NaN; finite input returns unit mass.
+**Verify:** In a fresh process, the exercise checks confirm `stable([0, np.nan])` raises `ValueError` and `stable(z).sum()` matches `1` within 1e-12.
 
 ## Review after comparison
 

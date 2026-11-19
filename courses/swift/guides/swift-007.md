@@ -6,7 +6,7 @@ Beginner, approximately 90 minutes. Prerequisites: `swift-006`
 
 ## Learning objectives
 
-Implement a first-match search with an optional result. Then design a bounded retry loop and explain both its invariant and its stop condition.
+Write loops with safe traversal and report not-found with an optional result. The central exercise is task 3: Implement a first-match search with an optional result.
 
 ## Purpose and mental model
 
@@ -105,7 +105,7 @@ struct LessonMain {
 
 6. **Transfer and justify.** Design a bounded retry loop and explain both its invariant and its stop condition.
 
-For each task, keep a short evidence table: input or initial state, prediction, observed value or diagnostic, and the rule that explains it. The guided examples establish mechanisms; the independent and transfer tasks require your own representation and explanation. Use the separate solution after attempting the task, then close it and reconstruct one boundary case.
+For each task, keep a short evidence table: input or initial state, prediction, observed value or diagnostic, and the rule that explains it. The guided examples establish mechanisms; the independent and transfer tasks require your own representation and explanation. The separate explanation gives an executed reference answer where one has been written and says plainly where none exists yet. Open it only after your own attempt, then close it and reconstruct one boundary case.
 
 ## Common pitfalls and diagnosis
 
@@ -115,9 +115,9 @@ A useful regression case distinguishes the intended rule from the tempting wrong
 
 ## Progressive hints
 
-1. Name the input, output and invariant using the vocabulary above. Reproduce Example A before changing two things at once.
-2. Compare the changed condition in Example B. Identify the first line whose behavior differs and state why.
-3. Reduce your independent task to a normal case, an empty or boundary case, and an invalid case. Write expected observations before inspecting the reference.
+1. Reproduce Example A (Accumulate a total) before changing anything, and confirm its observation: The total is 12 and the empty total is zero.
+2. Compare Example B (Stop at the first match) with Example A and name the first line whose behavior differs. Its observation is: The first 8 appears at offset 1 and 9 is absent.
+3. Before opening the explanation, test your task 3 attempt against this lesson's main pitfall: An enumerated offset is not universally a collection index.
 
 ## Self-check and next step
 
@@ -125,7 +125,7 @@ Explain Invariant, Accumulator, Termination argument without reading the definit
 
 ## Sources and execution boundary
 
-[Official language or framework documentation](https://docs.swift.org/swift-book/documentation/the-swift-programming-language/). The prose, small fixtures and task designs in this chapter are original. Documentation links provide additional API detail, not a dependency fetched by the classroom. Runtime qualification is recorded separately by the repository validation workflow. Reading a guide, compiling a reference, running its assertions and completing an external project are distinct achievements.
+[Official language or framework documentation](https://docs.swift.org/swift-book/documentation/the-swift-programming-language/). The prose, small fixtures and task designs in this chapter are original. Documentation links provide additional API detail, not a dependency fetched by the classroom. Reading a guide, compiling a reference, running its assertions and completing an external project are distinct achievements.
 
 ## Ask an AI tutor about this lesson
 

@@ -1,6 +1,32 @@
-"""mle-005: worked starting point; complete the guide's six changes."""
+"""mle-005: both worked cases; complete the guide's six changes."""
 
 import numpy as np
+import pandas as pd
+
+
+def dataset():
+    rng = np.random.default_rng(17)
+    n = 120
+    usage = rng.uniform(1, 100, n)
+    tickets = rng.poisson(2, n)
+    region = np.where(np.arange(n) % 2 == 0, "north", "south")
+    logit = 0.9 * tickets - 0.035 * usage + (region == "north") * 0.3
+    probability = 1 / (1 + np.exp(-logit))
+    label = (rng.random(n) < probability).astype(int)
+    cutoff = np.arange(n) + 100
+    return pd.DataFrame(
+        {
+            "id": np.arange(n),
+            "customer_id": np.arange(n) % 12,
+            "cutoff": cutoff,
+            "available_at": cutoff - 2,
+            "label_available_at": cutoff + 4,
+            "usage": usage,
+            "tickets": tickets,
+            "region": region,
+            "label": label,
+        }
+    )
 
 
 def example_one():
@@ -21,8 +47,24 @@ def example_one():
     }
 
 
+def example_two():
+    frame = dataset()
+    cutoff = 180
+    train = frame[(frame.cutoff < cutoff) & (frame.label_available_at <= cutoff)]
+    test = frame[frame.cutoff >= cutoff]
+    assert set(train.id).isdisjoint(test.id)
+    assert train.cutoff.max() < test.cutoff.min()
+    assert train.label_available_at.max() <= cutoff
+    return {
+        "training_rows": len(train),
+        "test_rows": len(test),
+        "training_label_cutoff": int(train.label_available_at.max()),
+    }
+
+
 if __name__ == "__main__":
     print(example_one())
+    print(example_two())
 
 # TODO 1: State whether the target is known or unseen customers.
 # TODO 2: Check both row identifiers and customer identifiers.

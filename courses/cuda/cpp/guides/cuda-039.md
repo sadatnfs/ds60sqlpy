@@ -10,9 +10,10 @@ own capability checks and are not prerequisites for opening this chapter.
 
 ## Learning objectives
 
-Explain streams as dependency-ordered work queues using the concrete cases below. Produce correct results with explicit dependencies and an annotated timeline.
-Distinguish an algorithmic calculation, a compiled artifact and an actual device
-observation when explaining what your work establishes.
+Work through *Streams as dependency-ordered work queues* with the concrete cases below. Finish with this evidence:
+correct results with explicit dependencies and an annotated timeline. Distinguish an algorithmic
+calculation, a compiled artifact and an actual device observation when explaining
+what your work establishes.
 
 ## Purpose, vocabulary and mental model
 
@@ -20,28 +21,40 @@ A stream is an ordered queue of work. Operations in one stream respect that stre
 
 ## How to run and study this lesson
 
-Open this chapter in `/classroom` and use its saved reading worksheet. The primary
-reading pad does not execute CUDA. The two examples, six tasks and separate
-explanations are usable offline on macOS, Linux and Windows through WSL 2 with
-the ordinary classroom. An AMD, Intel or Apple GPU does not make this CUDA C++
-source executable through Docker.
-
-For the bounded CPU calculation, select **CPU model (Python)** in this lesson.
-That variant keeps its own source and result history under the same chapter. Its
-answer-free starter supplies literal fixtures and the task contract; implement
-the model and assertions before replacing its deliberate incomplete-work error.
-The separate [CPU reference](../references/cuda-039_cpu.py) uses only Python's
-standard library. For an optional terminal workflow, run this from the repository
-root in a prepared Python environment:
+Use the saved reading worksheet in `/classroom`; the reading pad does not execute
+CUDA. For the bounded calculation, select **CPU model (Python)**, whose
+answer-free starter supplies the literal fixtures and task contract. The
+[CUDA C++ study workflow](../README.md) covers platforms, optional GPU
+compilation and evidence labels. In a prepared Python environment you can also
+run the separate [CPU reference](../references/cuda-039_cpu.py) from the
+repository root:
 
 ```sh
 python courses/cuda/cpp/references/cuda-039_cpu.py
 ```
 
-The assertions check the stated numerical result or model invariant. Console text
-is evidence of this CPU reference only. The [CUDA C++ study workflow](../README.md)
-explains optional GPU compilation, paths, hardware requirements and evidence labels.
-No lesson opening downloads a model, installs a driver or starts a GPU job.
+Its assertions check the stated numerical result or model invariant; console
+text is evidence of this CPU model only, not of CUDA execution.
+
+## CUDA C++ kernel listing
+
+The kernel below is an excerpt from the chapter's complete [GPU reference](../references/cuda-039_gpu.cu). The full program adds device discovery, checked allocation and launch, completion checks and host validation. Read it as CUDA C++ source; the classroom reading pad does not compile or run it.
+
+```cpp
+__global__ void produce(int *values, std::size_t n) {
+  const std::size_t i =
+      static_cast<std::size_t>(blockIdx.x) * blockDim.x + threadIdx.x;
+  if (i < n)
+    values[i] = 2 * static_cast<int>(i);
+}
+
+__global__ void consume(int *values, std::size_t n) {
+  const std::size_t i =
+      static_cast<std::size_t>(blockIdx.x) * blockDim.x + threadIdx.x;
+  if (i < n)
+    values[i] += 1;
+}
+```
 
 ## Worked example 1: trace the mechanism
 
@@ -67,10 +80,9 @@ print({"reference": b, "required_order_edges": edges})
 {'reference': [3, 5, 7], 'required_order_edges': [('produce_A', 'record_event'), ('record_event', 'wait_B'), ('wait_B', 'consume_B')]}
 ```
 
-Tiny floating-point display differences across platforms are acceptable only
-where the explicit assertions use a tolerance; integers, shapes and ordering
-must still satisfy their exact contracts. A printed hypothetical duration is a
-model output, not a measured GPU benchmark.
+Integers, shapes and ordering must match exactly; only assertions with an explicit
+tolerance accept small floating-point differences. A printed duration is a model
+output, not a measured GPU benchmark.
 
 ## Worked example 2: change a meaningful condition
 
@@ -99,75 +111,55 @@ do not deliberately launch a hanging kernel or reset a shared GPU to reproduce i
 
 ## Six progressive exercises
 
+Exercises 1 and 2 are guided reconstructions of the worked examples; exercises
+3-6 change an input, diagnose a defect, test a boundary and transfer the idea.
+For each one, keep the calculation, output, diagram or failure policy you
+produce so another reader can compare it with the worked cases. If the hint is
+not enough, reread the mechanism paragraph and the bounded CPU assertion.
+
 ### Exercise 1
 
 Predict and trace the first worked example before running its CPU reference. Write every intermediate quantity that leads to the stated result, including units or ownership where applicable.
 
-**Self-check:** Retain the requested calculation, output, diagram or explicit failure policy so another reader can compare it with the worked cases.
-
-**Hint 1:** Start with the literal input and intermediate quantities in worked example 1.
-
-**Hint 2:** Review the mechanism paragraph and the relevant bounded CPU assertion; separate mathematical reasoning from optional device evidence.
+**Hint:** Start with the literal input and intermediate quantities in worked example 1.
 
 ### Exercise 2
 
 Reconstruct the second worked example without copying its conclusion. Identify the changed input or condition, show the resulting calculation or dependency, and explain why it differs from the first example.
 
-**Self-check:** Retain the requested calculation, output, diagram or explicit failure policy so another reader can compare it with the worked cases.
-
-**Hint 1:** Identify exactly which condition changes in worked example 2.
-
-**Hint 2:** Review the mechanism paragraph and the relevant bounded CPU assertion; separate mathematical reasoning from optional device evidence.
+**Hint:** Identify exactly which condition changes in worked example 2.
 
 ### Exercise 3
 
 Draw the event edge for upload in A followed by compute in B.
 
-**Self-check:** Retain the requested calculation, output, diagram or explicit failure policy so another reader can compare it with the worked cases.
-
-**Hint 1:** Use the first worked example to establish the relevant quantities, then change only the requested input.
-
-**Hint 2:** Review the mechanism paragraph and the relevant bounded CPU assertion; separate mathematical reasoning from optional device evidence.
+**Hint:** Use the first worked example to establish the relevant quantities, then change only the requested input.
 
 ### Exercise 4
 
 A stream is destroyed while another stream still borrows its buffer. What is the real ownership issue?
 
-**Self-check:** Retain the requested calculation, output, diagram or explicit failure policy so another reader can compare it with the worked cases.
-
-**Hint 1:** Locate the failed phase or violated dependency before proposing a repair.
-
-**Hint 2:** Review the mechanism paragraph and the relevant bounded CPU assertion; separate mathematical reasoning from optional device evidence.
+**Hint:** Locate the failed phase or violated dependency before proposing a repair.
 
 ### Exercise 5
 
 How should an empty chunk affect the queue?
 
-**Self-check:** Retain the requested calculation, output, diagram or explicit failure policy so another reader can compare it with the worked cases.
-
-**Hint 1:** Check what the algorithm is allowed to read, write or assume at this boundary.
-
-**Hint 2:** Review the mechanism paragraph and the relevant bounded CPU assertion; separate mathematical reasoning from optional device evidence.
+**Hint:** Check what the algorithm is allowed to read, write or assume at this boundary.
 
 ### Exercise 6
 
 Transfer the pattern to framework interoperability.
 
-**Self-check:** Retain the requested calculation, output, diagram or explicit failure policy so another reader can compare it with the worked cases.
-
-**Hint 1:** State the output contract and which observations are needed in the new application.
-
-**Hint 2:** Review the mechanism paragraph and the relevant bounded CPU assertion; separate mathematical reasoning from optional device evidence.
+**Hint:** State the output contract and which observations are needed in the new application.
 
 ## Common mistakes and diagnosis
 
 A tempting but incorrect claim in this chapter is: **using two streams guarantees simultaneous execution or guarantees isolation between their buffers.**
 
 For the concrete failure exercise, a stream is destroyed while another stream still borrows its buffer. What is the real ownership issue?
-Preserve the original input and the stage where behavior diverged. Compare with
-the CPU model or dependency diagram before changing hardware configuration.
-A compiler result, synthetic timing model, profiler counter and returned numeric
-answer support different claims. Record unavailable hardware honestly.
+Preserve the original input and the stage where behavior diverged, and compare
+with the CPU model before changing hardware configuration.
 
 ## Self-check, retrieval and transfer
 
@@ -180,9 +172,8 @@ choice; it does not certify hardware qualification or expert mastery.
 
 ## Primary references
 
-These are further technical references. The chapter and local CPU model remain
-readable offline. Check the documentation matching your deliberately prepared
-toolkit before optional hardware execution.
+Check the documentation that matches your prepared toolkit before optional
+hardware execution.
 
 - [CUDA Programming Guide](https://docs.nvidia.com/cuda/cuda-programming-guide/)
 

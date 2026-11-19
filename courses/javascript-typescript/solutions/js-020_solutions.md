@@ -22,26 +22,30 @@ Exhaustiveness means accounting for every alternative. A function accepting neve
 
 Use a union operator between alternatives, then compare a literal discriminant with switch or equality. Within each branch, the checker exposes only that variant's fields. assertNever throws in the runtime fallback while requiring a never argument statically. User-defined type predicates can guide narrowing, but TypeScript trusts their declared claim; an incorrect predicate can make unsafe code compile. Prefer simple guards whose runtime checks actually establish the claimed property.
 
-## Exercise 1: Handle a result union
+## Exercise 1: Handle a result union: predict an edited check
 
-Task: Format both successful value 7 and a failure message.
+Task: Copy Example A into a scratch `main.mts` and change `assert.equal(formatResult({ kind: 'failure', message: 'offline' }), 'error:offline');` to `assert.equal(formatResult({ kind: 'failure', message: 'offline!' }), 'error:offline');` inside its check. Before running it, predict whether the check still passes and explain why; then restore it.
 
 The kind check determines which payload exists. A failure result cannot accidentally be read as if it contained the success value.
+
+The unchanged code is the exercise block of Example A:
 
 ```typescript
 assert.equal(formatResult({ kind: 'success', value: 7 }), 'value:7');
 assert.equal(formatResult({ kind: 'failure', message: 'offline' }), 'error:offline');
 ```
 
-**Expected:** value:7 and error:offline.
+**Expected:** The changed run fails with an `AssertionError` at the check `assert.equal(formatResult({ kind: 'failure', message: 'offline' }), 'error:offline')`. Restoring the original line brings back the worked observation: value:7 and error:offline.
 
-**Verify:** Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.
+**Verify:** Compare your written prediction with the reported `AssertionError`, including its actual and expected values, and explain why the edited check rejects the values that `assert.equal(formatResult({ kind: 'failure', message: 'offline' }), 'error:offline')` accepts. After restoring the line, the program prints its `{"checks":1,"status":"passed"}` receipt again.
 
-## Exercise 2: Preserve an empty string during narrowing
+## Exercise 2: Preserve an empty string during narrowing: diagnose an edited check
 
-Task: Handle string or undefined using an explicit undefined comparison.
+Task: A careless edit changed a check in Example B so that it reads `assert.equal(describe(undefined), 'missing!');`. Run Example B with that line, explain why the edited check now fails for the same program state, and restore it.
 
 if(value) would merge the empty-string case with absence. A guard should encode the domain distinction, not merely satisfy the checker.
+
+The unchanged code is the exercise block of Example B:
 
 ```typescript
 function describe(value: string | undefined): number | 'missing' {
@@ -51,9 +55,9 @@ assert.equal(describe(''), 0);
 assert.equal(describe(undefined), 'missing');
 ```
 
-**Expected:** empty string has length 0; absent value returns missing.
+**Expected:** Before the repair the run fails with an `AssertionError` at the check `assert.equal(describe(undefined), 'missing')`; after it the line reads `assert.equal(describe(undefined), 'missing');` again and empty string has length 0; absent value returns missing.
 
-**Verify:** Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.
+**Verify:** Keep the failing and the repaired runs. Explain why the edited check rejects the same program state that `assert.equal(describe(undefined), 'missing')` accepts.
 
 ## Exercise 3: Reject access to another variant payload
 
@@ -74,7 +78,7 @@ assert.equal(formatResult({ kind: 'failure', message: 'bad' }), 'error:bad');
 
 **Expected:** expected compiler error on value; valid failure formatting remains unchanged.
 
-**Verify:** Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.
+**Verify:** Keep a check equivalent to `assert.equal(formatResult({ kind: 'failure', message: 'bad' }), 'error:bad')`. As a control, change `assert.equal(formatResult({ kind: 'failure', message: 'bad' }), 'error:bad');` to `assert.equal(formatResult({ kind: 'failure', message: 'bad!' }), 'error:bad');` inside it: the run must fail with an `AssertionError`, which shows the check can fail. Restore it.
 
 ## Exercise 4: Catch an unhandled new variant at compile time
 
@@ -101,7 +105,7 @@ assert.equal(formatResult({ kind: 'success', value: 0 }), 'value:0');
 
 **Expected:** expected compiler error at assertNever for pending.
 
-**Verify:** Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.
+**Verify:** Keep a check equivalent to `assert.equal(formatResult({ kind: 'success', value: 0 }), 'value:0')`. As a control, change `assert.equal(formatResult({ kind: 'success', value: 0 }), 'value:0');` to `assert.equal(formatResult({ kind: 'success', value: 1 }), 'value:0');` inside it: the run must fail with an `AssertionError`, which shows the check can fail. Restore it.
 
 ## Exercise 5: Use an honest unknown-value predicate
 
@@ -127,7 +131,7 @@ for (const value of [null, [], { value: '2' }, { value: NaN }])
 
 **Expected:** valid record accepted; null, arrays and string-valued records rejected.
 
-**Verify:** Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.
+**Verify:** Keep a check equivalent to `assert.equal(hasFiniteValue({ value: 2 }), true)`. As a control, change `&& 'value' in value && typeof value.value === 'number' && Number.isFinite(value.value);` to `&& 'value' in value && typeof value.value !== 'number' && Number.isFinite(value.value);`: the run must fail with an `AssertionError` at that check. Restore the line before continuing.
 
 ## Exercise 6: Expose the runtime limit of an asserted union
 
@@ -142,7 +146,7 @@ assert.throws(() => formatResult(malformed as Result), /unhandled variant/u);
 
 **Expected:** runtime fallback throws rather than fabricating success.
 
-**Verify:** Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.
+**Verify:** Keep a check equivalent to `assert.throws(() => formatResult(malformed as Result), /unhandled variant/u)` and confirm that the reference still passes. Then name an input that would make it fail and explain which value changes.
 
 ## After comparison
 

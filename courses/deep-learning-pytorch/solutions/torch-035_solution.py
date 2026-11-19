@@ -7,7 +7,7 @@ from torch.nn import functional as F
 
 
 def verify():
-    # Exercise 1: Align predictions by ID
+    # Worked example A: Align predictions by ID
     truth = {"a": 0.0, "b": 1.0, "c": 2.0}
     a = {"a": 0.0, "b": 2.0, "c": 2.0}
     b = {"c": 3.0, "a": 1.0, "b": 2.0}
@@ -17,10 +17,10 @@ def verify():
     )
     assert difference.tolist() == [-1.0, 0.0, -1.0]
 
-    # Exercise 2: Interpret the average contrast
+    # Worked example B: Interpret the average contrast
     np.testing.assert_allclose(difference.mean().item(), -2 / 3, atol=1e-12, rtol=0)
 
-    # Exercise 3: Resample pairs reproducibly
+    # Worked example C: Resample pairs reproducibly
     generator = torch.Generator().manual_seed(7)
     indices = torch.randint(0, 3, (1000, 3), generator=generator)
     estimates = difference[indices].mean(1)
@@ -43,6 +43,26 @@ def verify():
     ledger = [("choose", "validation"), ("assess", "test")]
     assert all(partition == "validation" for action, partition in ledger if action == "choose")
     assert ("choose", "test")[1] != "validation"
+
+    # Exercise 1: Align a new pair of models
+    truth2 = {"x": 1.0, "y": 2.0}
+    model_a = {"x": 1.0, "y": 4.0}
+    model_b = {"y": 2.0, "x": 0.0}
+    keys = sorted(truth2)
+    paired = torch.tensor(
+        [(model_a[k] - truth2[k]) ** 2 - (model_b[k] - truth2[k]) ** 2 for k in keys],
+        dtype=torch.float64,
+    )
+    assert paired.tolist() == [-1.0, 4.0]
+
+    # Exercise 2: Interpret the new mean contrast
+    assert paired.mean().item() == 1.5
+
+    # Exercise 3: Bound the new bootstrap means
+    gen = torch.Generator().manual_seed(11)
+    draws = torch.randint(0, 2, (500, 2), generator=gen)
+    boot = paired[draws].mean(1)
+    assert set(boot.tolist()) <= {-1.0, 1.5, 4.0} and boot.min() >= -1 and boot.max() <= 4
     return {"checks": 6, "status": "passed"}
 
 

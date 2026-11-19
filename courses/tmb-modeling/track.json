@@ -14,8 +14,8 @@
       "runtime": "r-statistics",
       "concepts": ["objective", "automatic differentiation", "R and C++ boundary"],
       "outcome": "Trace an observation through the objective, optimizer and returned estimate.",
-      "lab": "Run the complete base-R companion, then follow the explicitly prepared TMB project for native compilation evidence.",
-      "verification": "Compare mathematical invariants and named diagnostics; compiled and bridge results require separate project acceptance."
+      "lab": "Run the base-R companion, which evaluates a sum-of-squares objective and its gradient at two means for two small datasets. Compiling a C++ objective and calling it from R happens only in the separately prepared `tmb-local` project: `R/compile.R` builds its nine model templates and `R/api.R` calls them through `TMB::MakeADFun`.",
+      "verification": "The gradient n*mu - sum(y) is zero at the sample mean 3 of (1, 2, 6), and replacing 6 with 9 moves the minimizer to 4."
     },
     {
       "id": "tmb-002",
@@ -26,20 +26,20 @@
       "runtime": "r-statistics",
       "concepts": ["DATA macros", "PARAMETER macros", "AD types", "shape contracts"],
       "outcome": "Separate data shapes from optimized parameters and detect a malformed design.",
-      "lab": "Run the complete base-R companion, then follow the explicitly prepared TMB project for native compilation evidence.",
-      "verification": "Compare mathematical invariants and named diagnostics; compiled and bridge results require separate project acceptance."
+      "lab": "Run the base-R companion, which checks a design-matrix and coefficient shape contract with base-R matrices. Typed `DATA_` and `PARAMETER_` declarations are compiled only in the separately prepared `tmb-local` project, for example `DATA_MATRIX(X)` and `PARAMETER_VECTOR(beta)` in `models/regression.cpp`.",
+      "verification": "The design has one row per observation and one column per coefficient, and a one-column design is rejected for the two-coefficient vector."
     },
     {
       "id": "tmb-003",
       "title": "The full Gaussian negative log likelihood",
       "level": "beginner",
       "minutes": 90,
-      "prerequisites": ["tmb-002", "r-043"],
+      "prerequisites": ["tmb-002", "statistics-011"],
       "runtime": "r-statistics",
       "concepts": ["normalization", "maximum likelihood scale", "log density"],
       "outcome": "Derive and check the normalized Gaussian objective and its scale estimate.",
-      "lab": "Run the complete base-R companion, then follow the explicitly prepared TMB project for native compilation evidence.",
-      "verification": "Compare mathematical invariants and named diagnostics; compiled and bridge results require separate project acceptance."
+      "lab": "Run the base-R companion, which evaluates the full Gaussian negative log likelihood and checks it against `dnorm` and against duplicated data. The compiled version is `models/normal_mean.cpp` in the separately prepared `tmb-local` project, and its `tests/acceptance.R` compares `obj$fn` with the same base-R sum of `dnorm` terms.",
+      "verification": "The normalized negative log likelihood equals minus the sum of `dnorm` log densities, and tripling the data triples it without moving the mean."
     },
     {
       "id": "tmb-004",
@@ -50,8 +50,8 @@
       "runtime": "r-statistics",
       "concepts": ["log scale", "correlation transform", "Jacobians", "boundary behavior"],
       "outcome": "Use unconstrained coordinates without changing the inferential target.",
-      "lab": "Run the complete base-R companion, then follow the explicitly prepared TMB project for native compilation evidence.",
-      "verification": "Compare mathematical invariants and named diagnostics; compiled and bridge results require separate project acceptance."
+      "lab": "Run the base-R companion, which optimizes a log standard deviation and tabulates the tanh correlation transform. The compiled templates in the separately prepared `tmb-local` project use the same unconstrained coordinates, for example `log_sigma` and `phi_raw` in `models/ar1.cpp`.",
+      "verification": "`optimize` over log sigma returns a positive standard deviation, and the tanh derivative at 8 is below 1e-5, showing how flat the transform becomes."
     },
     {
       "id": "tmb-005",
@@ -62,8 +62,8 @@
       "runtime": "r-statistics",
       "concepts": ["shared library", "ABI", "process lifetime", "reproducibility"],
       "outcome": "Explain exactly which source and native library a model evaluation uses.",
-      "lab": "Run the complete base-R companion, then follow the explicitly prepared TMB project for native compilation evidence.",
-      "verification": "Compare mathematical invariants and named diagnostics; compiled and bridge results require separate project acceptance."
+      "lab": "Run the base-R companion, which fingerprints two source-description files with `tools::md5sum`; it compiles nothing. In the separately prepared `tmb-local` project, `R/compile.R` runs `TMB::compile`, and `make_objective()` in `R/api.R` loads the library with `dyn.load` and refuses a different library already loaded under the same name.",
+      "verification": "Two source descriptions that differ by one character get different MD5 fingerprints; no library is compiled or loaded."
     },
     {
       "id": "tmb-006",
@@ -73,33 +73,33 @@
       "prerequisites": ["tmb-005", "torch-005"],
       "runtime": "r-statistics",
       "concepts": ["chain rule", "finite differences", "parameter ordering"],
-      "outcome": "Compare automatic derivatives against an analytic and numerical oracle.",
-      "lab": "Run the complete base-R companion, then follow the explicitly prepared TMB project for native compilation evidence.",
-      "verification": "Compare mathematical invariants and named diagnostics; compiled and bridge results require separate project acceptance."
+      "outcome": "Check an analytic gradient against central differences, the same oracles the prepared project uses to test TMB's automatic derivatives.",
+      "lab": "Run the base-R companion, which checks the analytic Gaussian gradient against central differences at two points, so it does not call `MakeADFun`. In the separately prepared `tmb-local` project, `make_objective()` in `R/api.R` calls `TMB::MakeADFun`, and `tests/acceptance.R` compares `obj$fn` with the base-R likelihood and `obj$gr` with a central-difference gradient.",
+      "verification": "Central differences with step 1e-4 match the analytic Gaussian gradient to within 1e-5 at both test points."
     },
     {
       "id": "tmb-007",
       "title": "nlminb and optimization evidence",
       "level": "intermediate",
       "minutes": 90,
-      "prerequisites": ["tmb-006", "r-043"],
+      "prerequisites": ["tmb-006", "statistics-008"],
       "runtime": "r-statistics",
       "concepts": ["optimization", "initialization", "convergence", "scaling"],
       "outcome": "Assess a fit using objective, gradient, status and multiple starting points.",
-      "lab": "Run the complete base-R companion, then follow the explicitly prepared TMB project for native compilation evidence.",
-      "verification": "Compare mathematical invariants and named diagnostics; compiled and bridge results require separate project acceptance."
+      "lab": "Run the base-R companion, which runs `nlminb` itself, on a base-R Gaussian objective from two starting points. In the separately prepared `tmb-local` project, `fit_objective()` in `R/api.R` passes TMB's `obj$fn` and `obj$gr` to the same optimizer and records the maximum absolute gradient.",
+      "verification": "`nlminb` from the starts (-2, 0) and (8, 2) reaches the same estimate to within 1e-4, and each run prints its final gradient."
     },
     {
       "id": "tmb-008",
       "title": "Hessian, curvature and weak identification",
       "level": "intermediate",
       "minutes": 90,
-      "prerequisites": ["tmb-007", "r-042"],
+      "prerequisites": ["tmb-007", "statistics-008"],
       "runtime": "r-statistics",
       "concepts": ["observed information", "eigenvalues", "collinearity"],
       "outcome": "Explain when inverse curvature can and cannot support standard errors.",
-      "lab": "Run the complete base-R companion, then follow the explicitly prepared TMB project for native compilation evidence.",
-      "verification": "Compare mathematical invariants and named diagnostics; compiled and bridge results require separate project acceptance."
+      "lab": "Run the base-R companion, which compares eigenvalues of ordinary and nearly collinear cross-product matrices and applies the delta method. In the separately prepared `tmb-local` project, `tests/acceptance.R` calls `TMB::sdreport` and requires a positive-definite Hessian (`pdHess`), and `fit_objective()` uses `stats::optimHess` for its optional Newton correction.",
+      "verification": "The nearly collinear cross-product has a condition number above 1e8, while the transformed interval for exp(s) stays positive."
     },
     {
       "id": "tmb-009",
@@ -110,8 +110,8 @@
       "runtime": "r-statistics",
       "concepts": ["reporting", "delta method", "derived quantities"],
       "outcome": "Choose plain diagnostics or derivative-aware uncertainty for each output.",
-      "lab": "Run the complete base-R companion, then follow the explicitly prepared TMB project for native compilation evidence.",
-      "verification": "Compare mathematical invariants and named diagnostics; compiled and bridge results require separate project acceptance."
+      "lab": "Run the base-R companion, which computes delta-method variances for transformed parameters. The templates in the separately prepared `tmb-local` project declare both kinds of output, for example `REPORT(residual)` and `ADREPORT(sigma)` in `models/normal_mean.cpp`; `tests/acceptance.R` reads `obj$report()` and calls `TMB::sdreport`.",
+      "verification": "The numerical Jacobian of exp at log 2 matches exp(s) to 1e-8, and the covariance used for the ratio's standard error is positive definite."
     },
     {
       "id": "tmb-010",
@@ -122,8 +122,8 @@
       "runtime": "r-statistics",
       "concepts": ["exponential decay", "nonlinear prediction", "identifiability"],
       "outcome": "Fit and interpret a nonlinear mean without confusing interpolation and extrapolation.",
-      "lab": "Run the complete base-R companion, then follow the explicitly prepared TMB project for native compilation evidence.",
-      "verification": "Compare mathematical invariants and named diagnostics; compiled and bridge results require separate project acceptance."
+      "lab": "Run the base-R companion, which fits the decay curve with `nlminb` on a base-R likelihood. The compiled version is `models/nonlinear.cpp` in the separately prepared `tmb-local` project, which `tests/acceptance.R` fits with `fit_objective()` and checks against the generating amplitude, rate and offset.",
+      "verification": "`nlminb` converges on the decay curve and recovers the generating rate 0.6 to within 0.03."
     },
     {
       "id": "tmb-011",
@@ -134,8 +134,8 @@
       "runtime": "r-statistics",
       "concepts": ["Poisson exposure", "right censoring", "left truncation", "hazard"],
       "outcome": "Write normalized terms that reflect what was actually observed.",
-      "lab": "Run the complete base-R companion, then follow the explicitly prepared TMB project for native compilation evidence.",
-      "verification": "Compare mathematical invariants and named diagnostics; compiled and bridge results require separate project acceptance."
+      "lab": "Run the base-R companion, which evaluates Poisson-exposure and censored, delayed-entry Weibull contributions. The compiled versions are `models/poisson_exposure.cpp` and `models/censored_weibull.cpp` in the separately prepared `tmb-local` project; `tests/acceptance.R` checks their values against `dpois` and the closed form 2.5 + log 2.",
+      "verification": "The censored, delayed-entry Weibull (shape 1) negative log likelihood equals 2.5 + log 2 exactly, unlike the version that treats every time as an event."
     },
     {
       "id": "tmb-012",
@@ -146,8 +146,8 @@
       "runtime": "r-statistics",
       "concepts": ["joint density", "random intercept", "shrinkage", "integration"],
       "outcome": "Distinguish a latent joint objective from its marginal likelihood.",
-      "lab": "Run the complete base-R companion, then follow the explicitly prepared TMB project for native compilation evidence.",
-      "verification": "Compare mathematical invariants and named diagnostics; compiled and bridge results require separate project acceptance."
+      "lab": "Run the base-R companion, which evaluates the marginal Gaussian likelihood through a Cholesky factor and tabulates shrinkage. In the separately prepared `tmb-local` project, `models/random_intercept.cpp` is built with `random = \"u\"`, and `tests/acceptance.R` checks TMB's Laplace objective against the exact Gaussian marginal likelihood.",
+      "verification": "The marginal covariance is positive definite, and the shrinkage factor is larger for a group of 20 than for a group of 2."
     },
     {
       "id": "tmb-013",
@@ -158,8 +158,8 @@
       "runtime": "r-statistics",
       "concepts": ["Laplace approximation", "log determinant", "normalization"],
       "outcome": "Derive the integrated objective and test its exact Gaussian special case.",
-      "lab": "Run the complete base-R companion, then follow the explicitly prepared TMB project for native compilation evidence.",
-      "verification": "Compare mathematical invariants and named diagnostics; compiled and bridge results require separate project acceptance."
+      "lab": "Run the base-R companion, which compares the Laplace value with numerical quadrature for Gaussian and quartic integrands. TMB's own Laplace approximation runs only in the separately prepared `tmb-local` project, where `tests/acceptance.R` compares the random-intercept objective with its exact Gaussian integral.",
+      "verification": "The Laplace value is exact for the Gaussian integrand at tau 0.5 and 2, while quadrature shows its error once a quartic term is added."
     },
     {
       "id": "tmb-014",
@@ -170,20 +170,20 @@
       "runtime": "r-statistics",
       "concepts": ["nested optimization", "conditional mode", "warm starts"],
       "outcome": "Diagnose latent-mode failure separately from fixed-parameter convergence.",
-      "lab": "Run the complete base-R companion, then follow the explicitly prepared TMB project for native compilation evidence.",
-      "verification": "Compare mathematical invariants and named diagnostics; compiled and bridge results require separate project acceptance."
+      "lab": "Run the base-R companion, which takes a Newton step on a quadratic and compares limited and full `nlminb` runs. TMB's inner optimization of latent effects runs only in the separately prepared `tmb-local` project, for the models built with `random = \"u\"` (`random_intercept`, `ar1` and `panel_trend`).",
+      "verification": "One Newton step from (10, -7) solves the quadratic exactly, while a one-iteration `nlminb` run leaves a visible gradient on the double-well objective."
     },
     {
       "id": "tmb-015",
       "title": "AR(1) states and sparse precision",
       "level": "advanced",
       "minutes": 120,
-      "prerequisites": ["tmb-014", "r-049"],
+      "prerequisites": ["tmb-014", "statistics-025"],
       "runtime": "r-statistics",
       "concepts": ["stationarity", "AR1 covariance", "sparse precision", "initial state"],
       "outcome": "Connect a time-series recurrence to covariance, precision and TMB density.",
-      "lab": "Run the complete base-R companion, then follow the explicitly prepared TMB project for native compilation evidence.",
-      "verification": "Compare mathematical invariants and named diagnostics; compiled and bridge results require separate project acceptance."
+      "lab": "Run the base-R companion, which builds the tridiagonal AR(1) precision matrix and checks that it inverts the covariance. The compiled latent AR(1) model is `models/ar1.cpp` in the separately prepared `tmb-local` project, and `tests/acceptance.R` compares its Laplace objective with the exact stationary-covariance likelihood.",
+      "verification": "The tridiagonal AR(1) precision matrix inverts the stationary covariance to within 1e-12 for phi = -0.6 and 0.6."
     },
     {
       "id": "tmb-016",
@@ -194,8 +194,8 @@
       "runtime": "r-statistics",
       "concepts": ["group ownership", "pooled MLE", "unequal sizes", "parallel fitting"],
       "outcome": "Choose between separate panel fits and one shared likelihood.",
-      "lab": "Run the complete base-R companion, then follow the explicitly prepared TMB project for native compilation evidence.",
-      "verification": "Compare mathematical invariants and named diagnostics; compiled and bridge results require separate project acceptance."
+      "lab": "Run the base-R companion, which contrasts pooled and panel averages and block versus shared covariance matrices. The compiled panel model is `models/panel_trend.cpp` in the separately prepared `tmb-local` project, which `tests/acceptance.R` fits with four groups and their latent offsets.",
+      "verification": "The pooled mean equals the size-weighted average of panel means, and a shared intercept adds covariance 0.2 between otherwise independent blocks."
     },
     {
       "id": "tmb-017",
@@ -206,8 +206,8 @@
       "runtime": "r-statistics",
       "concepts": ["block Hessian", "coupled effects", "distributed marginal likelihood"],
       "outcome": "Prove when group-level Laplace contributions can be added and when they cannot.",
-      "lab": "Run the complete base-R companion, then follow the explicitly prepared TMB project for native compilation evidence.",
-      "verification": "Compare mathematical invariants and named diagnostics; compiled and bridge results require separate project acceptance."
+      "lab": "Run the base-R companion, which checks log-determinant additivity for block-diagonal covariance and shows where it fails. The separately prepared `tmb-local` project has no separate template for this comparison; `models/panel_trend.cpp` shows the shared case, with common trend parameters and one latent offset per group.",
+      "verification": "The block-diagonal log determinant equals the sum of the block log determinants, and coupled variables break that additivity."
     },
     {
       "id": "tmb-018",
@@ -218,8 +218,8 @@
       "runtime": "r-statistics",
       "concepts": ["conditional forecast", "predictive variance", "new groups", "delta method"],
       "outcome": "Report distinct intervals for a mean, a latent state and a future observation.",
-      "lab": "Run the complete base-R companion, then follow the explicitly prepared TMB project for native compilation evidence.",
-      "verification": "Compare mathematical invariants and named diagnostics; compiled and bridge results require separate project acceptance."
+      "lab": "Run the base-R companion, which tabulates AR(1) forecast means and variances and a simplified new-group uncertainty, so it does not call `sdreport`. In the separately prepared `tmb-local` project, `tests/acceptance.R` fits `models/panel_trend.cpp`, whose template ADREPORTs `prediction`, `sigma` and `tau`, and calls `TMB::sdreport(..., getReportCovariance = FALSE)`, requiring a positive-definite Hessian.",
+      "verification": "Forecast innovation variance grows with horizon, and the new-group observation SD exceeds the intercept standard error."
     },
     {
       "id": "tmb-019",
@@ -230,8 +230,8 @@
       "runtime": "r-statistics",
       "concepts": ["simulation", "coverage", "misspecification", "selection of failures"],
       "outcome": "Use reproducible simulations to evaluate an estimator and its uncertainty claims.",
-      "lab": "Run the complete base-R companion, then follow the explicitly prepared TMB project for native compilation evidence.",
-      "verification": "Compare mathematical invariants and named diagnostics; compiled and bridge results require separate project acceptance."
+      "lab": "Run the base-R companion, which runs a 200-replicate coverage simulation with `rnorm`. In the separately prepared `tmb-local` project, `tests/public_api.R` calls `obj$simulate()` on the compiled normal model, whose template has a `SIMULATE` block, and runs `TMB::checkConsistency()`.",
+      "verification": "Independent replicates print coverage near 0.95 with Monte Carlo SE about 0.015, while a shared random shift pushes the nominal interval's coverage below 0.8."
     },
     {
       "id": "tmb-020",
@@ -241,21 +241,21 @@
       "prerequisites": ["tmb-006", "r-027"],
       "runtime": "r-statistics",
       "concepts": ["OpenMP", "parallel accumulator", "thread budget", "numerical parity"],
-      "outcome": "Parallelize an independent sum while preserving the objective and its derivatives.",
-      "lab": "Run the complete base-R companion, then follow the explicitly prepared TMB project for native compilation evidence.",
-      "verification": "Compare mathematical invariants and named diagnostics; compiled and bridge results require separate project acceptance."
+      "outcome": "Partition an independent likelihood sum so that a parallel evaluation preserves the objective and its derivatives.",
+      "lab": "Run the base-R companion, which checks that a partitioned likelihood sum equals the serial sum and tabulates thread requests. In the separately prepared `tmb-local` project, `models/parallel_gaussian.cpp` is compiled with OpenMP, and `tests/acceptance.R` compares its value and gradient under `TMB::openmp(1, ...)` and `TMB::openmp(2, ...)`.",
+      "verification": "The likelihood summed over two chunks equals the serial sum, and averaging per-chunk means instead of dividing by n gives the wrong mean loss."
     },
     {
       "id": "tmb-021",
       "title": "AFModel as a historical design case",
       "level": "advanced",
       "minutes": 120,
-      "prerequisites": ["tmb-016", "r-049"],
+      "prerequisites": ["tmb-016", "statistics-026"],
       "runtime": "r-statistics",
       "concepts": ["forecasting components", "historical model review", "temporal validation"],
       "outcome": "Translate a historical modeling architecture into an original, inspectable panel example.",
-      "lab": "Run the complete base-R companion, then follow the explicitly prepared TMB project for native compilation evidence.",
-      "verification": "Compare mathematical invariants and named diagnostics; compiled and bridge results require separate project acceptance."
+      "lab": "Run the base-R companion, which tabulates a decaying trend with panel offsets and AR(1) residual forecasts. The separately prepared `tmb-local` project compiles the trend and autoregressive pieces as `models/panel_trend.cpp` and `models/ar1.cpp`; no AFModel code is compiled.",
+      "verification": "Panel A's AR(1) residual forecasts shrink toward zero at every horizon (phi = 0.6) around a decaying trend with panel offsets."
     },
     {
       "id": "tmb-022",
@@ -266,8 +266,8 @@
       "runtime": "r-statistics",
       "concepts": ["rpy2", "scoped converters", "schema", "row identity"],
       "outcome": "Define and test a typed data contract before crossing the Python/R boundary.",
-      "lab": "Run the complete base-R companion, then follow the explicitly prepared TMB project for native compilation evidence.",
-      "verification": "Compare mathematical invariants and named diagnostics; compiled and bridge results require separate project acceptance."
+      "lab": "Run the base-R companion, which checks row identity, missing values, factor levels and a UTC timestamp in an R data frame. pandas and rpy2 conversion runs only in the Python bridge of the separately prepared `tmb-local` project (`python/bridge.py`), checked by `tests/bridge_acceptance.py`.",
+      "verification": "Row IDs are unique and values finite in the valid frame, a missing response is rejected, factor levels keep their declared order and the timestamp is UTC."
     },
     {
       "id": "tmb-023",
@@ -277,9 +277,9 @@
       "prerequisites": ["tmb-022", "tmb-007"],
       "runtime": "r-statistics",
       "concepts": ["fixed protocol", "embedded R", "ABI rejection", "detached results"],
-      "outcome": "Call a prepared model while keeping execution, data and native pointers isolated.",
-      "lab": "Run the complete base-R companion, then follow the explicitly prepared TMB project for native compilation evidence.",
-      "verification": "Compare mathematical invariants and named diagnostics; compiled and bridge results require separate project acceptance."
+      "outcome": "Design a narrow request to a prepared compiled model that keeps execution, data and native pointers isolated.",
+      "lab": "Run the base-R companion, which checks a request's parameter order and row identity. In the separately prepared `tmb-local` project, `python/bridge.py` sends such requests to the compiled models through rpy2, and `tests/bridge_acceptance.py` checks the round trip.",
+      "verification": "Parameters arrive in the declared order (mu, log_sigma), theta has length two and returned row IDs keep their original unsorted order."
     },
     {
       "id": "tmb-024",
@@ -290,8 +290,8 @@
       "runtime": "r-statistics",
       "concepts": ["capstone", "forecast validation", "model dossier", "qualified uncertainty"],
       "outcome": "Assemble a reproducible fit, forecast and limitations report for a synthetic panel.",
-      "lab": "Run the complete base-R companion, then follow the explicitly prepared TMB project for native compilation evidence.",
-      "verification": "Compare mathematical invariants and named diagnostics; compiled and bridge results require separate project acceptance."
+      "lab": "Run the base-R companion, which tabulates trend forecasts with group offsets and known-group versus new-group noise. The compiled forecast model is `models/panel_trend.cpp` in the separately prepared `tmb-local` project, whose ADREPORTed `prediction` is summarized by `TMB::sdreport` in `tests/acceptance.R`.",
+      "verification": "Group offsets put sensor A's forecasts below and sensor B's above the new-group trend, and a new group's noise SD sqrt(sigma^2 + tau^2) exceeds a known group's."
     },
     {
       "id": "tmb-025",
@@ -302,8 +302,8 @@
       "runtime": "r-statistics",
       "concepts": ["template", "Rinterface", "runExample", "authoring workflow"],
       "outcome": "Separate generated scaffolding from a scientifically complete likelihood.",
-      "lab": "Run the base-R companion and inspect the pinned API signature; use the separate prepared TMB project for actual native API probes.",
-      "verification": "Check the stated numerical invariant and distinguish API explanation from a source-bound native receipt."
+      "lab": "Run the base-R companion, which checks a declared data and parameter schema. In the separately prepared `tmb-local` project, `tests/public_api.R` prints the scaffold from `TMB::template()` and the interface that `TMB::Rinterface()` derives from `models/normal_mean.cpp`.",
+      "verification": "The response length matches the design rows and beta has one entry per design column; a column list with the same shape but different meaning is flagged."
     },
     {
       "id": "tmb-026",
@@ -314,8 +314,8 @@
       "runtime": "r-statistics",
       "concepts": ["map", "profile", "random", "retaping"],
       "outcome": "Explain which construction options change parameter dimension, target or recorded operations.",
-      "lab": "Run the base-R companion and inspect the pinned API signature; use the separate prepared TMB project for actual native API probes.",
-      "verification": "Check the stated numerical invariant and distinguish API explanation from a source-bound native receipt."
+      "lab": "Run the base-R companion, which reconstructs a full parameter vector from a `map`-style factor, so it does not call `MakeADFun`. In the separately prepared `tmb-local` project, `tests/public_api.R` builds a `TMB::MakeADFun` object with `map = list(log_sigma = factor(NA))` and profiles `mu` with `TMB::tmbprofile`.",
+      "verification": "A `map`-style factor rebuilds (3, 3, 7) from one free value, tying the first two parameters and fixing the third."
     },
     {
       "id": "tmb-027",
@@ -326,8 +326,8 @@
       "runtime": "r-statistics",
       "concepts": ["CppAD", "TMBad", "intern", "higher derivatives"],
       "outcome": "Choose an AD framework for a specific tested derivative target.",
-      "lab": "Run the base-R companion and inspect the pinned API signature; use the separate prepared TMB project for actual native API probes.",
-      "verification": "Check the stated numerical invariant and distinguish API explanation from a source-bound native receipt."
+      "lab": "Run the base-R companion, which checks first and second finite-difference derivatives of a smooth function. The separately prepared `tmb-local` project compiles every model with `framework = \"CppAD\"` in `R/compile.R`; no TMBad build is part of the project.",
+      "verification": "Central differences match the first derivative of exp(x) + x^4 to within 1e-6 at -0.4 and 0.7, and the printed derivatives of x^4 end at the constant 24."
     },
     {
       "id": "tmb-028",
@@ -338,8 +338,8 @@
       "runtime": "r-statistics",
       "concepts": ["summary.sdreport", "as.list.sdreport", "bias correction", "report covariance"],
       "outcome": "Read report objects without losing shape, estimand or uncertainty assumptions.",
-      "lab": "Run the base-R companion and inspect the pinned API signature; use the separate prepared TMB project for actual native API probes.",
-      "verification": "Check the stated numerical invariant and distinguish API explanation from a source-bound native receipt."
+      "lab": "Run the base-R companion, which computes a contrast standard error and compares a transformed mean with a mean of transforms. In the separately prepared `tmb-local` project, `tests/public_api.R` calls `TMB::sdreport(..., getReportCovariance = FALSE)` and prints its `summary`, `as.list` and `print` forms.",
+      "verification": "The contrast standard error uses the full covariance, and the lognormal mean exp(m + v/2) exceeds the transformed mean exp(m)."
     },
     {
       "id": "tmb-029",
@@ -350,8 +350,8 @@
       "runtime": "r-statistics",
       "concepts": ["tmbprofile", "profile likelihood", "slice", "confint"],
       "outcome": "Explain nuisance reoptimization and derive a profile-likelihood interval.",
-      "lab": "Run the base-R companion and inspect the pinned API signature; use the separate prepared TMB project for actual native API probes.",
-      "verification": "Check the stated numerical invariant and distinguish API explanation from a source-bound native receipt."
+      "lab": "Run the base-R companion, which compares a profile with a slice for a correlated quadratic and contrasts transformed and delta-method intervals. In the separately prepared `tmb-local` project, `tests/public_api.R` profiles `mu` with `TMB::tmbprofile` and plots the profile to a temporary file.",
+      "verification": "The profile (1 - rho^2)a^2/2 never exceeds the slice a^2/2, and the transformed log-scale interval differs from the symmetric delta interval by more than 0.1."
     },
     {
       "id": "tmb-030",
@@ -362,8 +362,8 @@
       "runtime": "r-statistics",
       "concepts": ["tmbroot", "root finding", "likelihood ratio", "boundary inference"],
       "outcome": "Find confidence endpoints by a stated likelihood-rise equation.",
-      "lab": "Run the base-R companion and inspect the pinned API signature; use the separate prepared TMB project for actual native API probes.",
-      "verification": "Check the stated numerical invariant and distinguish API explanation from a source-bound native receipt."
+      "lab": "Run the base-R companion, which finds profile-interval roots with `uniroot` and checks them against the exact interval. In the separately prepared `tmb-local` project, `tests/public_api.R` compares `confint()` of a `TMB::tmbprofile` result and `TMB::tmbroot()` with the exact interval 3.5 ± 1.96.",
+      "verification": "`uniroot` finds both likelihood-rise endpoints to within 1e-4 of the exact interval, and an unconstrained interval for a positive parameter crosses zero."
     },
     {
       "id": "tmb-031",
@@ -374,8 +374,8 @@
       "runtime": "r-statistics",
       "concepts": ["SIMULATE", "checkConsistency", "summary.checkConsistency"],
       "outcome": "Distinguish generative consistency, estimation bias and approximation bias.",
-      "lab": "Run the base-R companion and inspect the pinned API signature; use the separate prepared TMB project for actual native API probes.",
-      "verification": "Check the stated numerical invariant and distinguish API explanation from a source-bound native receipt."
+      "lab": "Run the base-R companion, which simulates score statistics with `rnorm`. In the separately prepared `tmb-local` project, `tests/public_api.R` calls `obj$simulate()` and `TMB::checkConsistency(obj, n = 100)` on the compiled normal model.",
+      "verification": "The mean and scale scores average near zero over 100 simulations, while the score that drops the normalizer averages below -10."
     },
     {
       "id": "tmb-032",
@@ -386,8 +386,8 @@
       "runtime": "r-statistics",
       "concepts": ["oneStepPredict", "probability integral transform", "discrete residuals"],
       "outcome": "Construct diagnostics that respect observation ordering and conditioning.",
-      "lab": "Run the base-R companion and inspect the pinned API signature; use the separate prepared TMB project for actual native API probes.",
-      "verification": "Check the stated numerical invariant and distinguish API explanation from a source-bound native receipt."
+      "lab": "Run the base-R companion, which computes probability-integral-transform and randomized quantile residuals. No file in the separately prepared `tmb-local` project calls `oneStepPredict`, so this chapter's TMB usage is explanatory; the course API reference gives the pinned signature.",
+      "verification": "Gaussian PIT residuals equal standardized forecast errors to 1e-12, and randomized quantile residuals for counts stay strictly inside (0, 1)."
     },
     {
       "id": "tmb-033",
@@ -398,8 +398,8 @@
       "runtime": "r-statistics",
       "concepts": ["normalize", "partition function", "process density"],
       "outcome": "Explain why process normalization depends on parameters and affects estimation.",
-      "lab": "Run the base-R companion and inspect the pinned API signature; use the separate prepared TMB project for actual native API probes.",
-      "verification": "Check the stated numerical invariant and distinguish API explanation from a source-bound native receipt."
+      "lab": "Run the base-R companion, which checks a Gaussian normalizing constant by quadrature and the null space of an intrinsic precision. No file in the separately prepared `tmb-local` project calls `TMB::normalize`, so this chapter's TMB usage is explanatory; the course API reference gives the pinned signature.",
+      "verification": "The Gaussian kernel normalizes to 1 by quadrature for tau 0.5 and 2, and the intrinsic first-difference precision has the constant vector in its null space."
     },
     {
       "id": "tmb-034",
@@ -410,8 +410,8 @@
       "runtime": "r-statistics",
       "concepts": ["SR", "quadrature", "integration grids", "non-exported helpers"],
       "outcome": "Compare integration strategies without confusing a documented helper with a supported public export.",
-      "lab": "Run the base-R companion and inspect the pinned API signature; use the separate prepared TMB project for actual native API probes.",
-      "verification": "Check the stated numerical invariant and distinguish API explanation from a source-bound native receipt."
+      "lab": "Run the base-R companion, which compares quadrature with the Laplace value and evaluates a discrete mixture marginal. In the separately prepared `tmb-local` project, `tests/public_api.R` only prints the `TMB::SR()` grid descriptor; no sequential-reduction fit runs there.",
+      "verification": "Quadrature departs from the Laplace value once a quartic term is added, the two-component mixture marginal is positive and grid size grows as 20^d."
     },
     {
       "id": "tmb-035",
@@ -422,8 +422,8 @@
       "runtime": "r-statistics",
       "concepts": ["newton", "newtonOption", "smart search", "step diagnostics"],
       "outcome": "Relate inner-optimizer controls to curvature and numerical failure modes.",
-      "lab": "Run the base-R companion and inspect the pinned API signature; use the separate prepared TMB project for actual native API probes.",
-      "verification": "Check the stated numerical invariant and distinguish API explanation from a source-bound native receipt."
+      "lab": "Run the base-R companion, which takes one Newton step on a quadratic and shifts an indefinite Hessian. In the separately prepared `tmb-local` project, `tests/public_api.R` solves a sparse quadratic with `TMB::newton` and reads a model's controls with `TMB::newtonOption(obj)`.",
+      "verification": "One Newton step on the quadratic lands on the exact solution, and shifting the indefinite Hessian by 2I makes both eigenvalues positive."
     },
     {
       "id": "tmb-036",
@@ -434,8 +434,8 @@
       "runtime": "r-statistics",
       "concepts": ["runSymbolicAnalysis", "fill-in", "CHOLMOD", "incomplete factorization"],
       "outcome": "Distinguish sparse structure, ordering and numerical solve accuracy.",
-      "lab": "Run the base-R companion and inspect the pinned API signature; use the separate prepared TMB project for actual native API probes.",
-      "verification": "Check the stated numerical invariant and distinguish API explanation from a source-bound native receipt."
+      "lab": "Run the base-R companion, which solves a tridiagonal system, checks a permuted solve and measures the error of dropping coupling. No file in the separately prepared `tmb-local` project calls `runSymbolicAnalysis`; sparse factorizations occur inside TMB's Laplace approximation for its latent models.",
+      "verification": "A permuted tridiagonal solve restores the same solution to 1e-12, while dropping the off-diagonal coupling leaves a visible residual."
     },
     {
       "id": "tmb-037",
@@ -445,9 +445,9 @@
       "prerequisites": ["tmb-036", "tmb-005"],
       "runtime": "r-statistics",
       "concepts": ["TMB.Version", "compile", "precompile", "dynlib", "FreeADFun", "config"],
-      "outcome": "Build and retire native objects with explicit version and process ownership.",
-      "lab": "Run the base-R companion and inspect the pinned API signature; use the separate prepared TMB project for actual native API probes.",
-      "verification": "Check the stated numerical invariant and distinguish API explanation from a source-bound native receipt."
+      "outcome": "Explain how native objects are built, loaded and retired with explicit version and process ownership.",
+      "lab": "Run the base-R companion, which fingerprints two source-description files and prints the R version and platform; it compiles nothing. In the separately prepared `tmb-local` project, `R/compile.R` compiles the models and writes a build record (`build-receipt.txt`) of R, TMB, Matrix, RcppEigen and architecture, and `tests/public_api.R` checks `TMB::dynlib()`, `TMB::config()` and `TMB::TMB.Version()` and releases objects with `TMB::FreeADFun()`.",
+      "verification": "Two model revisions get different MD5 fingerprints and the printed build record names the R version and platform; nothing is compiled."
     },
     {
       "id": "tmb-038",
@@ -458,8 +458,8 @@
       "runtime": "r-statistics",
       "concepts": ["gdbsource", "print.backtrace", "compile errors", "bounds checks"],
       "outcome": "Separate R validation errors, compiler failures and native crashes during diagnosis.",
-      "lab": "Run the base-R companion and inspect the pinned API signature; use the separate prepared TMB project for actual native API probes.",
-      "verification": "Check the stated numerical invariant and distinguish API explanation from a source-bound native receipt."
+      "lab": "Run the base-R companion, which validates group indices before evaluation and models the build-failure decision. No file in the separately prepared `tmb-local` project calls `gdbsource`; its failure handling is input validation in `validate_inputs()` (`R/api.R`) and a stop on a nonzero `TMB::compile` status in `R/compile.R`.",
+      "verification": "Valid zero-based group indices pass, an out-of-range index stops with an error and a failed build leads to the no-load state."
     },
     {
       "id": "tmb-039",
@@ -469,9 +469,9 @@
       "prerequisites": ["tmb-038", "tmb-020"],
       "runtime": "r-statistics",
       "concepts": ["benchmark", "plot.parallelBenchmark", "openmp", "autopar"],
-      "outcome": "Measure a named operation while keeping thread policy and numerical correctness visible.",
-      "lab": "Run the base-R companion and inspect the pinned API signature; use the separate prepared TMB project for actual native API probes.",
-      "verification": "Check the stated numerical invariant and distinguish API explanation from a source-bound native receipt."
+      "outcome": "Plan a benchmark of a named operation that keeps thread policy and numerical correctness visible.",
+      "lab": "Run the base-R companion, which tabulates illustrative timings and an Amdahl bound; its timings are hypothetical, not measurements. In the separately prepared `tmb-local` project, `tests/public_api.R` runs `TMB::benchmark(profile_obj, n = 10000, cores = 1)` with a fixed evaluation budget.",
+      "verification": "With a serial fraction of 0.25 the Amdahl speedup can never exceed 4; the timing table is labeled hypothetical, not measured."
     },
     {
       "id": "tmb-040",
@@ -482,8 +482,8 @@
       "runtime": "r-statistics",
       "concepts": ["API inventory", "evidence tiers", "reproducibility", "model lifecycle"],
       "outcome": "Navigate every pinned public TMB API without overstating untested features.",
-      "lab": "Run the base-R companion and inspect the pinned API signature; use the separate prepared TMB project for actual native API probes.",
-      "verification": "Check the stated numerical invariant and distinguish API explanation from a source-bound native receipt."
+      "lab": "Run the base-R companion, which prints an evidence map and the checks still required. In the separately prepared `tmb-local` project, `tests/acceptance.R` and `tests/public_api.R` are the executable checks, and the course qualification ledger records where they actually ran.",
+      "verification": "The evidence map marks the compiled, native, rpy2 and Spark layers as separate run records, and the uncertainty and invalid-input checks remain required."
     },
     {
       "id": "tmb-041",
@@ -494,8 +494,8 @@
       "runtime": "r-statistics",
       "concepts": ["DATA macros", "PARAMETER macros", "array layout", "sparse inputs"],
       "outcome": "Design a C++ data contract that preserves dimensions, indices and scientific meaning.",
-      "lab": "Run the base-R oracle and inspect the original C++ API pattern; native capability requires an explicit source-bound project receipt.",
-      "verification": "Check shapes, normalizers, derivatives and the stated evidence boundary."
+      "lab": "Run the base-R companion, which shows R's column-major array order and the conversion to zero-based indices. The separately prepared `tmb-cpp-api` probes declare typed inputs such as `DATA_MATRIX(covariance)` and `DATA_SPARSE_MATRIX(precision)` in `models/density_forms.cpp`, and their `check.R` compiles and checks them.",
+      "verification": "R stores the 2-by-3 array column-major (a[2, 2] is 4), the group design matrix selects u[group] exactly and C++ indices are the R indices minus one."
     },
     {
       "id": "tmb-042",
@@ -506,8 +506,8 @@
       "runtime": "r-statistics",
       "concepts": ["log density", "logspace_add", "logspace_sub", "mixture likelihood"],
       "outcome": "Evaluate probability terms stably without changing their statistical meaning.",
-      "lab": "Run the base-R oracle and inspect the original C++ API pattern; native capability requires an explicit source-bound project receipt.",
-      "verification": "Check shapes, normalizers, derivatives and the stated evidence boundary."
+      "lab": "Run the base-R companion, which compares stable and direct log-sum computations. The separately prepared `tmb-cpp-api` probes compile `models/stable_mixture.cpp`, and `check.R` compares its values and gradients with an independent log-density oracle.",
+      "verification": "The log-sum-exp mixture matches the direct value, stays finite at -1000 where the direct form underflows, and the stable log difference recovers log 0.5."
     },
     {
       "id": "tmb-043",
@@ -518,8 +518,8 @@
       "runtime": "r-statistics",
       "concepts": ["MVNORM", "GMRF", "covariance", "precision", "normalization"],
       "outcome": "Choose covariance or precision interfaces and verify equivalent tiny densities.",
-      "lab": "Run the base-R oracle and inspect the original C++ API pattern; native capability requires an explicit source-bound project receipt.",
-      "verification": "Check shapes, normalizers, derivatives and the stated evidence boundary."
+      "lab": "Run the base-R companion, which compares covariance and precision forms of a bivariate normal density and inspects an intrinsic precision. The separately prepared `tmb-cpp-api` probes compile `models/density_forms.cpp`, and `check.R` compares its `MVNORM`, `GMRF`, `SCALE` and `VECSCALE` densities with dense formulas.",
+      "verification": "Covariance and precision forms of the bivariate normal density agree to 1e-12, and treating a precision as a covariance changes the value by more than 0.1."
     },
     {
       "id": "tmb-044",
@@ -530,8 +530,8 @@
       "runtime": "r-statistics",
       "concepts": ["SEPARABLE", "SCALE", "VECSCALE", "Kronecker covariance"],
       "outcome": "Compose normalized densities while preserving axis order and scale Jacobians.",
-      "lab": "Run the base-R oracle and inspect the original C++ API pattern; native capability requires an explicit source-bound project receipt.",
-      "verification": "Check shapes, normalizers, derivatives and the stated evidence boundary."
+      "lab": "Run the base-R companion, which checks the scaled-density identity and a Kronecker covariance. The separately prepared `tmb-cpp-api` probes compile `models/separable_array.cpp`, and `check.R` compares its `SEPARABLE` value and every correlation and scale gradient direction with a dense oracle.",
+      "verification": "The scaled density equals the correlation density plus the sum of log scales, and the Kronecker covariance has 0.3, 0.7 and 0.21 in its first row."
     },
     {
       "id": "tmb-045",
@@ -542,8 +542,8 @@
       "runtime": "r-statistics",
       "concepts": ["REPORT", "ADREPORT", "SIMULATE", "generative consistency"],
       "outcome": "Keep diagnostics, differentiable outputs and simulated observations aligned with the model.",
-      "lab": "Run the base-R oracle and inspect the original C++ API pattern; native capability requires an explicit source-bound project receipt.",
-      "verification": "Check shapes, normalizers, derivatives and the stated evidence boundary."
+      "lab": "Run the base-R companion, which tabulates residuals and simulates conditional and unconditional group outcomes. In the separately prepared `tmb-local` project, `models/normal_mean.cpp` contains `REPORT`, `ADREPORT` and a `SIMULATE` block, and `tests/public_api.R` calls `obj$simulate()`.",
+      "verification": "The companion prints residuals and simulates three new group effects, so unconditional outcomes vary with the simulated effects while conditional outcomes keep fixed ones."
     },
     {
       "id": "tmb-046",
@@ -554,8 +554,8 @@
       "runtime": "r-statistics",
       "concepts": ["conditional expressions", "taping", "domain safety", "smoothness"],
       "outcome": "Distinguish data-controlled logic, parameter-controlled logic and invalid arithmetic.",
-      "lab": "Run the base-R oracle and inspect the original C++ API pattern; native capability requires an explicit source-bound project receipt.",
-      "verification": "Check shapes, normalizers, derivatives and the stated evidence boundary."
+      "lab": "Run the base-R companion, which checks a piecewise gradient against finite differences and evaluates a stable softplus. The separately prepared `tmb-cpp-api` probes compile `models/conditional.cpp`, and `check.R` checks its conditional tape crossings.",
+      "verification": "The piecewise gradient of max(x, 0)^2 matches central differences to 1e-7, and the stable softplus stays finite at 1000 where the naive form overflows."
     },
     {
       "id": "tmb-047",
@@ -566,8 +566,8 @@
       "runtime": "r-statistics",
       "concepts": ["atomic functions", "reverse derivatives", "adjoints", "higher-order checks"],
       "outcome": "Design and test a custom derivative boundary without silently truncating derivatives.",
-      "lab": "Run the base-R oracle and inspect the original C++ API pattern; native capability requires an explicit source-bound project receipt.",
-      "verification": "Check shapes, normalizers, derivatives and the stated evidence boundary."
+      "lab": "Run the base-R companion, which checks a reverse-mode derivative rule for x^4 against finite differences. The separately prepared `tmb-cpp-api` probes compile `models/atomic_quartic.cpp`, and `check.R` checks its atomic value, gradient and Hessian.",
+      "verification": "The reverse-mode rule 4x^3 times the adjoint matches finite differences to 1e-7, and a wrong rule that is exact at x = 1 is caught at the other test points."
     },
     {
       "id": "tmb-048",
@@ -578,8 +578,8 @@
       "runtime": "r-statistics",
       "concepts": ["C++ API family map", "numerical acceptance", "runtime boundary"],
       "outcome": "Plan a qualified custom template using the appropriate authoring families.",
-      "lab": "Run the base-R oracle and inspect the original C++ API pattern; native capability requires an explicit source-bound project receipt.",
-      "verification": "Check shapes, normalizers, derivatives and the stated evidence boundary."
+      "lab": "Run the base-R companion, which prints an acceptance plan and a coverage table. The separately prepared `tmb-cpp-api` probes compile all five family models under CppAD in `check.R`, separately from the nine-model `tmb-local` project.",
+      "verification": "The acceptance plan maps each check to the failure it catches, and the coverage table shows a new primitive with checked mathematics but no compiled run."
     }
   ]
 }

@@ -14,15 +14,15 @@
   "exercises": [
     {
       "title": "Read a shape",
-      "task": "Compare a length 2 vector with a2-by -1 matrix.",
-      "expected": "Their sizes are(2,) and(2,1).",
+      "task": "Compare a length 2 vector with a 2-by-1 matrix.",
+      "expected": "Their sizes are `(2,)` and `(2, 1)`.",
       "hint": "Element count does not determine the number of axes.",
       "answer": "Operations can dispatch or broadcast differently for these shapes."
     },
     {
       "title": "Trace column order",
       "task": "Locate value 5 in the reshaped matrix.",
-      "expected": "It is at row 1,column 3.",
+      "expected": "It is at row 1, column 3.",
       "hint": "Follow columns through the input vector.",
       "answer": "The storage order is explicit and should not be confused with the scientific interpretation of axes."
     },

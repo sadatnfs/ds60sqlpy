@@ -11,6 +11,27 @@ runpy.run_path(str(HERE / "build_programs.py"), run_name="__main__")
 DETAILS = {}
 for path in sorted(HERE.glob("details*.py")):
     DETAILS.update(runpy.run_path(str(path))["DETAILS"])
+VERIFY = runpy.run_path(str(HERE / "verify.py"))["VERIFY"]
+
+
+def apply_checks(text, marker, checks, label):
+    """Replace each exercise's Verify line with its exercise-specific check."""
+    pieces = re.split(rf"(?m)^({marker} Exercise [1-6]:)", text)
+    replaced = 0
+    for index in range(1, len(pieces), 2):
+        number = int(pieces[index].split()[-1].rstrip(":"))
+        pieces[index + 1], count = re.subn(
+            r"(?m)^\*\*Verify:\*\* .*$",
+            lambda _: "**Verify:** " + checks[number - 1],
+            pieces[index + 1],
+            count=1,
+        )
+        replaced += count
+    if replaced != 6:
+        raise SystemExit(f"{label}: expected six Verify lines, found {replaced}")
+    return "".join(pieces)
+
+
 programs = json.loads((HERE / "program_inputs.json").read_text())
 outputs = json.loads((HERE / "expected_outputs.json").read_text())
 for record in programs:
@@ -56,10 +77,11 @@ for record in programs:
             )
         else:
             text = text.replace("## Worked example 1", answer + "## Worked example 1")
+        text = apply_checks(text, "##", VERIFY[n], solution.name)
         solution.write_text(text)
     chunks = [
         "## Worked example / walkthrough",
-        "Each example below is a complete independent program. Copy one into `main.cpp`,or compile its linked checked-in source using [the compile and run tutorial](../compile-and-run.md). Do not concatenate the two programs:each defines its own `main`. Use C++20 and the shown warning/thread flags. The printed success line follows the displayed assertions; it is a bounded example check,not a substitute for the six learner tasks.",
+        "Each example below is a complete independent program. Copy one into `main.cpp`, or compile its linked checked-in source using [the compile and run tutorial](../compile-and-run.md). Do not concatenate the two programs: each defines its own `main`. Use C++20 and the shown warning/thread flags. The printed success line follows the displayed assertions; it is a bounded example check, not a substitute for the six learner tasks.",
     ]
     for index in (1, 2):
         name = f"{key}-example-{index}.cpp"
@@ -69,7 +91,7 @@ for record in programs:
             f"### Worked example {index}",
             f"[Complete program {index}](../examples/{name})",
             "```cpp\n" + code + "\n```",
-            "**Expected:** With assertions enabled,the program exits0 and prints:\n\n```text\n"
+            "**Expected:** With assertions enabled, the program exits with status 0 and prints:\n\n```text\n"
             + expected.rstrip()
             + "\n```",
         ]
@@ -98,6 +120,7 @@ for record in programs:
         "First identify the changed input. Then trace the relevant operation in the worked examples. Finally compare the result to this clue: ",
         "",
     )
+    guide = apply_checks(guide, "###", VERIFY[n], path.name)
     path.write_text(guide)
 # Remove internal publication labels without changing the original pilots' teaching bodies.
 for n in (1, 2, 3, 9):
@@ -114,7 +137,7 @@ refs = {
     6: "[Numeric conversion contract](https://eel.is/c++draft/charconv.from.chars)",
     7: "[Vector capacity and invalidation](https://eel.is/c++draft/vector.capacity)",
     12: "[GCC compilation and linking stages](https://gcc.gnu.org/onlinedocs/gcc/Overall-Options.html)",
-    13: "[CMake3.28 tutorial](https://cmake.org/cmake/help/v3.28/guide/tutorial/index.html)",
+    13: "[CMake 3.28 tutorial](https://cmake.org/cmake/help/v3.28/guide/tutorial/index.html)",
     25: "[GCC instrumentation options](https://gcc.gnu.org/onlinedocs/gcc/Instrumentation-Options.html)",
     29: "[Thread join contract](https://eel.is/c++draft/thread.thread.member)",
     31: "[Atomic ordering contract](https://eel.is/c++draft/atomics.order)",
@@ -131,5 +154,7 @@ for n in DETAILS:
             "## Ask an AI tutor about this lesson",
             "## Primary references\n\n" + reference + "\n\n## Ask an AI tutor about this lesson",
         )
+    else:
+        text = re.sub(r"(?<=## Primary references\n\n)[^\n]*", lambda _: reference, text, count=1)
     path.write_text(text)
 runpy.run_path(str(HERE / "normalize_prose.py"), run_name="__main__")

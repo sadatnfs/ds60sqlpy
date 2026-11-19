@@ -8,9 +8,11 @@ POSIX file descriptors are small integer handles to open resources. They are not
 
 pipe fills two descriptors: index zero reads and index one writes. read and write return ssize_t, with negative values indicating errors. A robust general loop handles EINTR and partial transfers under a total byte budget. close releases one descriptor reference. dup creates another reference to the same underlying open description, so closing one reference does not necessarily end the stream. POSIX APIs are platform extensions, not ISO C17 itself.
 
-## Exercise 1: Transfer a small pipe payload
+## Exercise 1: Transfer a small pipe payload: predict an edited check
 
-Write abc, close the writer and read the bytes.
+Copy worked example 1 into a scratch pad and change `CHECK(close(fds[0]) == 0);` to `CHECK(close(fds[1]) == 0);` inside its CHECK. Before running, predict whether the CHECK still holds and explain why; then restore it.
+
+The unchanged code is worked example 1:
 
 ```c
 int fds[2];
@@ -22,13 +24,15 @@ CHECK(read(fds[0], out, 3) == 3 && strcmp(out, "abc") == 0);
 CHECK(close(fds[0]) == 0);
 ```
 
-**Expected:** Three bytes arrive unchanged.
+**Expected:** The changed run stops with `Check failed` at the CHECK on `close(fds[0]) == 0`. Restoring the original line brings back the worked observation: three bytes arrive unchanged.
 
 The tiny write is within the pipe atomic-write bound. General streams still require loops for partial operations.
 
-## Exercise 2: Observe EOF after closure
+## Exercise 2: Observe EOF after closure: diagnose an edited check
 
-Close an unused writer and read from its empty pipe.
+A careless edit changed the CHECK in worked example 2 so that it reads `CHECK(close(fds[1]) == 0);`. Run worked example 2 with that line, explain why the edited CHECK now fails for the same program state, and restore it.
+
+The unchanged code is worked example 2:
 
 ```c
 int fds[2];
@@ -39,7 +43,7 @@ CHECK(read(fds[0], &byte, 1) == 0);
 CHECK(close(fds[0]) == 0);
 ```
 
-**Expected:** read returns zero.
+**Expected:** Before the repair the run stops with `Check failed` at the CHECK on `close(fds[0]) == 0`; after it the line reads `CHECK(close(fds[0]) == 0);` again and read returns zero.
 
 Zero is EOF for this positive-sized read, not an error. All writers are closed before waiting.
 

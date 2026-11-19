@@ -8,22 +8,26 @@ A Go string is an immutable sequence of bytes, not necessarily valid Unicode tex
 
 len(text) counts bytes. []byte(text) and []rune(text) choose different element units. utf8.RuneCountInString counts decoded code points, while utf8.ValidString checks encoding validity. strings.TrimSpace removes surrounding Unicode whitespace and returns a string. A rune literal uses single quotes and has a numeric code-point value; a string literal uses double quotes.
 
-## 1. Count two units
+## 1. Count two units: change one input
 
-Inspect A followed by a smiling face.
+Copy worked example 1 into a scratch pad and change `text := "A🙂"` to `text := "A🙂!"`. Before running, predict which check fails and which value it now sees; then run it and restore the original line.
+
+The unchanged code is worked example 1:
 
 ```go
 text := "A🙂"
 check(len(text) == 5 && utf8.RuneCountInString(text) == 2, "text units")
 ```
 
-**Expected:** There are 5 bytes and 2 runes.
+**Expected:** The changed run panics with `text units` because `len(text) == 5 && utf8.RuneCountInString(text) == 2` no longer holds. Restoring the original line brings back the worked observation: there are 5 bytes and 2 runes.
 
 The ASCII letter occupies one byte and this emoji occupies four. Neither count is a general grapheme-cluster algorithm.
 
-## 2. Edit a copied byte slice
+## 2. Edit a copied byte slice: debug a regression
 
-Convert cat to bytes, replace c with b and retain the original.
+A regression changed one token in worked example 2, so one line now reads `data[1] = 'b'`. Run worked example 2 with that line, use the failure to locate the defect and repair it without changing the check.
+
+The unchanged code is worked example 2:
 
 ```go
 original := "cat"
@@ -32,7 +36,7 @@ data[0] = 'b'
 check(original == "cat" && string(data) == "bat", "copy edit")
 ```
 
-**Expected:** The original is cat and the new string is bat.
+**Expected:** Before the repair the program panics with `copy edit`; after it the line reads `data[0] = 'b'` again and the original is cat and the new string is bat.
 
 The mutable byte slice provides an explicit editing boundary. This example uses ASCII so replacing one byte does not split a multibyte encoding.
 

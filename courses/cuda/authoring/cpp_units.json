@@ -524,6 +524,10 @@
   {
     "n": 17,
     "title": "Shared memory and block synchronization",
+    "listing": {
+      "intro": "The kernel applies this chapter's reversal pattern to block-sized tiles. Each block loads its tile into shared memory, every thread reaches one barrier, and only then does any thread read a value another thread wrote. Tail threads load 0 instead of returning, so barrier participation stays uniform; with four values one block returns [12, 9, 6, 3].",
+      "code": "constexpr int BLOCK = 256;\n\n// Reverse each block-sized tile of in into out. Launch with BLOCK threads per\n// block. Tail threads load a neutral value and still reach the barrier.\n__global__ void reverse_tiles(const int *in, int *out, int n) {\n  __shared__ int tile[BLOCK];\n  const int base = blockIdx.x * BLOCK;\n  const int t = threadIdx.x;\n  const int valid = min(BLOCK, n - base); // elements owned by this block\n  tile[t] = t < valid ? in[base + t] : 0;\n  __syncthreads(); // every load is visible before any thread reads the tile\n  if (t < valid)\n    out[base + t] = tile[valid - 1 - t];\n}\n// Launch: reverse_tiles<<<(n + BLOCK - 1) / BLOCK, BLOCK>>>(in, out, n);\n"
+    },
     "prerequisites": ["cuda-014", "cuda-016"],
     "theory": "cooperative loads, visibility, barriers, race conditions and divergent barrier hazards. Explain all participating threads' responsibilities before showing a shared-memory optimization. Distinguish a block barrier from a grid barrier.",
     "evidence": "correct boundary behavior and a synchronization explanation naming producer and consumer threads.",
@@ -556,6 +560,10 @@
   {
     "n": 18,
     "title": "A simple matrix multiplication with a complete specification",
+    "listing": {
+      "intro": "This is the baseline kernel the chapter specifies: one thread per output coordinate, explicit row-major offsets and a bounds check before any read. The early return is safe only because the kernel has no barrier.",
+      "code": "// One thread computes one C[row, col]. A is M-by-K, B is K-by-N and C is\n// M-by-N, all row-major.\n__global__ void matmul_naive(const float *A, const float *B, float *C, int M,\n                             int N, int K) {\n  const int row = blockIdx.y * blockDim.y + threadIdx.y;\n  const int col = blockIdx.x * blockDim.x + threadIdx.x;\n  if (row >= M || col >= N)\n    return; // safe here: no barrier follows\n  float sum = 0.0f;\n  for (int inner = 0; inner < K; ++inner)\n    sum += A[row * K + inner] * B[inner * N + col];\n  C[row * N + col] = sum;\n}\n// Launch: dim3 block(16, 16);\n//         dim3 grid((N + 15) / 16, (M + 15) / 16);\n"
+    },
     "prerequisites": ["cuda-015", "cuda-017", "cuda-006"],
     "theory": "matrix dimensions, contraction, row-major offsets, accumulation type and numerical tolerance. Derive the scalar algorithm first and map one output element to a thread.",
     "evidence": "correctness across the shape suite and a transparent operation/byte estimate.",
@@ -588,6 +596,10 @@
   {
     "n": 19,
     "title": "Tiled matrix multiplication and reuse",
+    "listing": {
+      "intro": "The tiled kernel follows the phase structure above: cooperative loads with zero fill, a barrier before the tiles are read, and a second barrier before the next phase overwrites them. Out-of-range threads keep running so that they reach both barriers. Two 16-by-16 float tiles use 2 x 16 x 16 x 4 = 2048 bytes of shared memory per block.",
+      "code": "constexpr int TILE = 16;\n\n__global__ void tiled_matmul(const float *A, const float *B, float *C, int M,\n                             int N, int K) {\n  __shared__ float As[TILE][TILE];\n  __shared__ float Bs[TILE][TILE];\n  const int row = blockIdx.y * TILE + threadIdx.y;\n  const int col = blockIdx.x * TILE + threadIdx.x;\n  float sum = 0.0f;\n  for (int phase = 0; phase < (K + TILE - 1) / TILE; ++phase) {\n    const int a_col = phase * TILE + threadIdx.x;\n    const int b_row = phase * TILE + threadIdx.y;\n    As[threadIdx.y][threadIdx.x] =\n        (row < M && a_col < K) ? A[row * K + a_col] : 0.0f;\n    Bs[threadIdx.y][threadIdx.x] =\n        (b_row < K && col < N) ? B[b_row * N + col] : 0.0f;\n    __syncthreads(); // both tiles are complete before any thread reads them\n    for (int k = 0; k < TILE; ++k)\n      sum += As[threadIdx.y][k] * Bs[k][threadIdx.x];\n    __syncthreads(); // all reads finish before the next phase overwrites tiles\n  }\n  if (row < M && col < N)\n    C[row * N + col] = sum; // predicate the store; never return early\n}\n// Launch: dim3 block(TILE, TILE);\n//         dim3 grid((N + TILE - 1) / TILE, (M + TILE - 1) / TILE);\n"
+    },
     "prerequisites": ["cuda-018", "cuda-017"],
     "theory": "tile loading, shared-memory reuse, synchronization between phases, tail predicates and resource costs. Derive why a tile reduces repeated global reads, while explaining that more reuse may consume more shared memory and registers.",
     "evidence": "correctness plus a measured, scoped comparison with a reasoned interpretation even if the tile loses on a small input.",
@@ -846,6 +858,10 @@
   {
     "n": 27,
     "title": "Race reasoning, masks and warp cooperation",
+    "listing": {
+      "intro": "This reduction keeps the chapter's participation invariant: one full warp executes every shuffle with the full mask, and lanes without data contribute 0. With values 1 through 8 in lanes 0-7, lane 0 ends with 36.",
+      "code": "// Sum up to 32 values with exactly one full warp: warp_sum<<<1, 32>>>.\n// Every lane executes every shuffle; lanes without data contribute 0.\n__global__ void warp_sum(const int *values, int count, int *result) {\n  const int lane = threadIdx.x;\n  int v = lane < count ? values[lane] : 0;\n  const unsigned full = 0xffffffffu; // all 32 lanes participate\n  for (int offset = 16; offset > 0; offset /= 2)\n    v += __shfl_down_sync(full, v, offset);\n  if (lane == 0)\n    *result = v; // lane 0 holds the warp total\n}\n"
+    },
     "prerequisites": ["cuda-017", "cuda-020", "cuda-026"],
     "theory": "warp participation, active masks, collective operations, shuffle exchanges and explicit synchronization. Independent thread scheduling means old implicit lockstep assumptions are unsafe as a general correctness argument.",
     "evidence": "correct results across all tail sizes and a written participation invariant.",
@@ -1109,6 +1125,10 @@
   {
     "n": 35,
     "title": "Shared-memory banks and a transpose case study",
+    "listing": {
+      "intro": "The padded tile is the transpose case study's layout. Global reads and writes both stay coalesced through the tile, and the extra column changes each column's bank in the simplified 32-bank model; whether it is faster on a given GPU is a measurement question.",
+      "code": "constexpr int TILE = 32;\n\n// Transpose a rows-by-cols row-major matrix. A warp reads one tile row and\n// later writes one output row, so both global accesses stay coalesced. The\n// extra column moves each tile column to a different bank in the simplified\n// 32-bank model.\n__global__ void transpose_tiled(const float *in, float *out, int rows,\n                                int cols) {\n  __shared__ float tile[TILE][TILE + 1];\n  int x = blockIdx.x * TILE + threadIdx.x; // input column\n  int y = blockIdx.y * TILE + threadIdx.y; // input row\n  if (x < cols && y < rows)\n    tile[threadIdx.y][threadIdx.x] = in[y * cols + x];\n  __syncthreads(); // the whole tile is loaded before any column is read\n  x = blockIdx.y * TILE + threadIdx.x; // output column = input row\n  y = blockIdx.x * TILE + threadIdx.y; // output row = input column\n  if (x < rows && y < cols)\n    out[y * rows + x] = tile[threadIdx.x][threadIdx.y];\n}\n// Launch: dim3 block(TILE, TILE);\n//         dim3 grid((cols + TILE - 1) / TILE, (rows + TILE - 1) / TILE);\n"
+    },
     "prerequisites": ["cuda-015", "cuda-017", "cuda-034"],
     "theory": "shared-memory access patterns, bank conflicts, broadcasts, padding, and tiling. Treat details as architecture-dependent instead of teaching an unconditional magic padding rule.",
     "evidence": "correct output and a measured explanation of the selected layout.",
@@ -1651,7 +1671,7 @@
     "mistake": "replacing the expression with a mathematically equivalent floating-point formula always preserves stability.",
     "sources": [],
     "mechanism": "Softmax converts a row of logits into nonnegative weights that sum to one. Exponentiating large logits directly can overflow even when the final probabilities are ordinary finite values. Subtracting the row maximum preserves the exact mathematical ratios while keeping the largest exponential at one. A kernel needs a maximum reduction, exponentials, a sum reduction and division, with correct row boundaries and accumulation precision. Define behavior for masks and exceptional inputs separately; an all-masked row cannot be treated as an ordinary finite row without a policy. Test short, ragged and extreme-valued rows.",
-    "example1": "For logits \\([1000,1001]\\), subtract maximum 1001 to obtain \\([-1,0]\\). Exponentials are approximately \\([0.367879,1]\\), giving probabilities \\([0.268941,0.731059]\\). Directly computing exp(1001) can overflow in common floating types although the normalized answer is well behaved.",
+    "example1": "For logits \\([1000,1001]\\), subtract maximum 1001 to obtain \\([-1,0]\\). Exponentials are approximately \\([0.367879,1]\\), giving probabilities \\([0.268941,0.731059]\\). Directly computing \\(e^{1001}\\) can overflow in common floating types although the normalized answer is well behaved.",
     "example2": "For \\([4,4,4]\\), subtracting four produces three zeros, so each probability is one third. For a single finite logit, the output is one. These cases check normalization and row handling independently of large exponentials.",
     "code": "import math\n\n\ndef softmax(values):\n    maximum = max(values)\n    exp = [math.exp(v - maximum) for v in values]\n    return [v / sum(exp) for v in exp]\n\n\np = softmax([1000, 1001])\nassert abs(sum(p) - 1) < 1e-12 and abs(p[1] - 0.7310585786300049) < 1e-12\nassert softmax([4, 4, 4]) == [1 / 3] * 3\nprint(p)",
     "tasks": [
@@ -2086,7 +2106,8 @@
   {
     "n": 64,
     "title": "Capstone: a custom ML operator that earns its existence",
-    "prerequisites": ["cuda-051", "cuda-052", "cuda-061", "cuda-097", "cuda-098"],
+    "prerequisites": ["cuda-051", "cuda-052", "cuda-061"],
+    "prerequisite_note": "The framework-binding part of this capstone also uses `cuda-097` (a Python API over a CUDA C++ operator) and `cuda-098` (backward as part of the operator) from the Python branch. They come later in the subject order, so read them before that part rather than treating them as a gate for opening this chapter.",
     "theory": "custom kernels versus existing framework operations, forward/backward contracts, shapes, strides, dtypes, devices, stream semantics, error propagation, packaging and regression coverage. Include framework gradcheck or a justified equivalent where differentiability is relevant.",
     "evidence": "supported-contract documentation, forward and backward tests, invalid-input behavior, end-to-end measurement and an honest decision to keep or reject the custom kernel.",
     "mistake": "faster forward execution alone proves the operator improves training or is safe for arbitrary framework tensors.",

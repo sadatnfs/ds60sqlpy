@@ -10,9 +10,10 @@ own capability checks and are not prerequisites for opening this chapter.
 
 ## Learning objectives
 
-Explain tiled matrix multiplication and reuse using the concrete cases below. Produce correctness plus a measured, scoped comparison with a reasoned interpretation even if the tile loses on a small input.
-Distinguish an algorithmic calculation, a compiled artifact and an actual device
-observation when explaining what your work establishes.
+Work through *Tiled matrix multiplication and reuse* with the concrete cases below. Finish with this evidence:
+correctness plus a measured, scoped comparison with a reasoned interpretation even if the tile loses on a small input. Distinguish an algorithmic
+calculation, a compiled artifact and an actual device observation when explaining
+what your work establishes.
 
 ## Purpose, vocabulary and mental model
 
@@ -20,28 +21,53 @@ Tiling loads small regions of A and B into shared memory and reuses each value a
 
 ## How to run and study this lesson
 
-Open this chapter in `/classroom` and use its saved reading worksheet. The primary
-reading pad does not execute CUDA. The two examples, six tasks and separate
-explanations are usable offline on macOS, Linux and Windows through WSL 2 with
-the ordinary classroom. An AMD, Intel or Apple GPU does not make this CUDA C++
-source executable through Docker.
-
-For the bounded CPU calculation, select **CPU model (Python)** in this lesson.
-That variant keeps its own source and result history under the same chapter. Its
-answer-free starter supplies literal fixtures and the task contract; implement
-the model and assertions before replacing its deliberate incomplete-work error.
-The separate [CPU reference](../references/cuda-019_cpu.py) uses only Python's
-standard library. For an optional terminal workflow, run this from the repository
-root in a prepared Python environment:
+Use the saved reading worksheet in `/classroom`; the reading pad does not execute
+CUDA. For the bounded calculation, select **CPU model (Python)**, whose
+answer-free starter supplies the literal fixtures and task contract. The
+[CUDA C++ study workflow](../README.md) covers platforms, optional GPU
+compilation and evidence labels. In a prepared Python environment you can also
+run the separate [CPU reference](../references/cuda-019_cpu.py) from the
+repository root:
 
 ```sh
 python courses/cuda/cpp/references/cuda-019_cpu.py
 ```
 
-The assertions check the stated numerical result or model invariant. Console text
-is evidence of this CPU reference only. The [CUDA C++ study workflow](../README.md)
-explains optional GPU compilation, paths, hardware requirements and evidence labels.
-No lesson opening downloads a model, installs a driver or starts a GPU job.
+Its assertions check the stated numerical result or model invariant; console
+text is evidence of this CPU model only, not of CUDA execution.
+
+## CUDA C++ kernel listing
+
+The tiled kernel follows the phase structure above: cooperative loads with zero fill, a barrier before the tiles are read, and a second barrier before the next phase overwrites them. Out-of-range threads keep running so that they reach both barriers. Two 16-by-16 float tiles use 2 x 16 x 16 x 4 = 2048 bytes of shared memory per block. Read it as CUDA C++ source; the classroom reading pad does not compile or run it.
+
+```cpp
+constexpr int TILE = 16;
+
+__global__ void tiled_matmul(const float *A, const float *B, float *C, int M,
+                             int N, int K) {
+  __shared__ float As[TILE][TILE];
+  __shared__ float Bs[TILE][TILE];
+  const int row = blockIdx.y * TILE + threadIdx.y;
+  const int col = blockIdx.x * TILE + threadIdx.x;
+  float sum = 0.0f;
+  for (int phase = 0; phase < (K + TILE - 1) / TILE; ++phase) {
+    const int a_col = phase * TILE + threadIdx.x;
+    const int b_row = phase * TILE + threadIdx.y;
+    As[threadIdx.y][threadIdx.x] =
+        (row < M && a_col < K) ? A[row * K + a_col] : 0.0f;
+    Bs[threadIdx.y][threadIdx.x] =
+        (b_row < K && col < N) ? B[b_row * N + col] : 0.0f;
+    __syncthreads(); // both tiles are complete before any thread reads them
+    for (int k = 0; k < TILE; ++k)
+      sum += As[threadIdx.y][k] * Bs[k][threadIdx.x];
+    __syncthreads(); // all reads finish before the next phase overwrites tiles
+  }
+  if (row < M && col < N)
+    C[row * N + col] = sum; // predicate the store; never return early
+}
+// Launch: dim3 block(TILE, TILE);
+//         dim3 grid((N + TILE - 1) / TILE, (M + TILE - 1) / TILE);
+```
 
 ## Worked example 1: trace the mechanism
 
@@ -65,10 +91,9 @@ print({"phases": phases, "two_tiles_bytes": 2048})
 {'phases': [(0, 2), (2, 4), (4, 5)], 'two_tiles_bytes': 2048}
 ```
 
-Tiny floating-point display differences across platforms are acceptable only
-where the explicit assertions use a tolerance; integers, shapes and ordering
-must still satisfy their exact contracts. A printed hypothetical duration is a
-model output, not a measured GPU benchmark.
+Integers, shapes and ordering must match exactly; only assertions with an explicit
+tolerance accept small floating-point differences. A printed duration is a model
+output, not a measured GPU benchmark.
 
 ## Worked example 2: change a meaningful condition
 
@@ -80,75 +105,55 @@ valid. Keep the original case as a regression check when changing a boundary.
 
 ## Six progressive exercises
 
+Exercises 1 and 2 are guided reconstructions of the worked examples; exercises
+3-6 change an input, diagnose a defect, test a boundary and transfer the idea.
+For each one, keep the calculation, output, diagram or failure policy you
+produce so another reader can compare it with the worked cases. If the hint is
+not enough, reread the mechanism paragraph and the bounded CPU assertion.
+
 ### Exercise 1
 
 Predict and trace the first worked example before running its CPU reference. Write every intermediate quantity that leads to the stated result, including units or ownership where applicable.
 
-**Self-check:** Retain the requested calculation, output, diagram or explicit failure policy so another reader can compare it with the worked cases.
-
-**Hint 1:** Start with the literal input and intermediate quantities in worked example 1.
-
-**Hint 2:** Review the mechanism paragraph and the relevant bounded CPU assertion; separate mathematical reasoning from optional device evidence.
+**Hint:** Start with the literal input and intermediate quantities in worked example 1.
 
 ### Exercise 2
 
 Reconstruct the second worked example without copying its conclusion. Identify the changed input or condition, show the resulting calculation or dependency, and explain why it differs from the first example.
 
-**Self-check:** Retain the requested calculation, output, diagram or explicit failure policy so another reader can compare it with the worked cases.
-
-**Hint 1:** Identify exactly which condition changes in worked example 2.
-
-**Hint 2:** Review the mechanism paragraph and the relevant bounded CPU assertion; separate mathematical reasoning from optional device evidence.
+**Hint:** Identify exactly which condition changes in worked example 2.
 
 ### Exercise 3
 
 Count phases for \(\mathrm{k}=5\) and tile width two.
 
-**Self-check:** Retain the requested calculation, output, diagram or explicit failure policy so another reader can compare it with the worked cases.
-
-**Hint 1:** Use the first worked example to establish the relevant quantities, then change only the requested input.
-
-**Hint 2:** Review the mechanism paragraph and the relevant bounded CPU assertion; separate mathematical reasoning from optional device evidence.
+**Hint:** Use the first worked example to establish the relevant quantities, then change only the requested input.
 
 ### Exercise 4
 
 Why is returning early for an out-of-range output thread dangerous?
 
-**Self-check:** Retain the requested calculation, output, diagram or explicit failure policy so another reader can compare it with the worked cases.
-
-**Hint 1:** Locate the failed phase or violated dependency before proposing a repair.
-
-**Hint 2:** Review the mechanism paragraph and the relevant bounded CPU assertion; separate mathematical reasoning from optional device evidence.
+**Hint:** Locate the failed phase or violated dependency before proposing a repair.
 
 ### Exercise 5
 
 How much shared storage do two 16-by-16 float tiles use?
 
-**Self-check:** Retain the requested calculation, output, diagram or explicit failure policy so another reader can compare it with the worked cases.
-
-**Hint 1:** Check what the algorithm is allowed to read, write or assume at this boundary.
-
-**Hint 2:** Review the mechanism paragraph and the relevant bounded CPU assertion; separate mathematical reasoning from optional device evidence.
+**Hint:** Check what the algorithm is allowed to read, write or assume at this boundary.
 
 ### Exercise 6
 
 A tiled kernel loses on a tiny matrix. Is that a bug?
 
-**Self-check:** Retain the requested calculation, output, diagram or explicit failure policy so another reader can compare it with the worked cases.
-
-**Hint 1:** State the output contract and which observations are needed in the new application.
-
-**Hint 2:** Review the mechanism paragraph and the relevant bounded CPU assertion; separate mathematical reasoning from optional device evidence.
+**Hint:** State the output contract and which observations are needed in the new application.
 
 ## Common mistakes and diagnosis
 
 A tempting but incorrect claim in this chapter is: **shared memory automatically makes a kernel faster.**
 
 For the concrete failure exercise, why is returning early for an out-of-range output thread dangerous?
-Preserve the original input and the stage where behavior diverged. Compare with
-the CPU model or dependency diagram before changing hardware configuration.
-A compiler result, synthetic timing model, profiler counter and returned numeric
-answer support different claims. Record unavailable hardware honestly.
+Preserve the original input and the stage where behavior diverged, and compare
+with the CPU model before changing hardware configuration.
 
 ## Self-check, retrieval and transfer
 
@@ -161,9 +166,8 @@ choice; it does not certify hardware qualification or expert mastery.
 
 ## Primary references
 
-These are further technical references. The chapter and local CPU model remain
-readable offline. Check the documentation matching your deliberately prepared
-toolkit before optional hardware execution.
+Check the documentation that matches your prepared toolkit before optional
+hardware execution.
 
 - [CUDA Programming Guide](https://docs.nvidia.com/cuda/cuda-programming-guide/)
 

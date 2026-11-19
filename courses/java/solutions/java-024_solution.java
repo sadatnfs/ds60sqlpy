@@ -48,11 +48,13 @@ public class Main {
           }
         })
       );
+      boolean allEntered;
       try {
-        assert entered.await(2, java.util.concurrent.TimeUnit.SECONDS);
+        allEntered = entered.await(2, java.util.concurrent.TimeUnit.SECONDS);
       } finally {
         release.countDown();
       }
+      assert allEntered;
       int completed = 0;
       for (var future : futures) completed += future.get(3, java.util.concurrent.TimeUnit.SECONDS);
       assert completed == 6 && maximum.get() == 2;
@@ -86,9 +88,12 @@ public class Main {
           exited.countDown();
         }
       });
-      assert started.await(2, java.util.concurrent.TimeUnit.SECONDS);
-      assert future.cancel(true);
-      assert exited.await(2, java.util.concurrent.TimeUnit.SECONDS);
+      boolean began = started.await(2, java.util.concurrent.TimeUnit.SECONDS);
+      assert began;
+      boolean cancelled = future.cancel(true);
+      assert cancelled;
+      boolean finished = exited.await(2, java.util.concurrent.TimeUnit.SECONDS);
+      assert finished;
     }
 
     // Exercise 6: Keep a blocking wait outside a monitor
@@ -108,7 +113,8 @@ public class Main {
         Thread.currentThread().interrupt();
       }
     });
-    assert waiting.await(2, java.util.concurrent.TimeUnit.SECONDS);
+    boolean workerWaiting = waiting.await(2, java.util.concurrent.TimeUnit.SECONDS);
+    assert workerWaiting;
     synchronized (monitor) {
       state[0] = 8;
     }

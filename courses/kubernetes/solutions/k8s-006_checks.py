@@ -12,7 +12,8 @@ def main():
     assert after["pods"] - before["pods"] == {"pod-3"} and before["pods"] - after["pods"] == {
         "pod-1"
     }
-    assert not (3 >= 4)
+    status = {"generation": 4, "observedGeneration": 3, "readyReplicas": 2}
+    assert status["observedGeneration"] < status["generation"]
     pods = [
         {"uid": "owned", "controller": "rs-a", "ready": True},
         {"uid": "foreign", "controller": "rs-other", "ready": True},

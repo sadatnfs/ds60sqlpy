@@ -1,6 +1,6 @@
 # rust-029: explanation and comparison
 
-Attempt the six guide tasks before opening this comparison. The executable reference is [rust-029_solution.rs](rust-029_solution.rs). Its assertions are always active under the prepared classroom compile settings.
+Attempt the six guide tasks before opening this comparison. The executable reference is [rust-029_solution.rs](rust-029_solution.rs). It runs both worked examples and the reference answers below, and its assertions are always active under the prepared classroom compile settings.
 
 ## Why the two examples differ
 
@@ -8,21 +8,65 @@ Attempt the six guide tasks before opening this comparison. The executable refer
 
 **Drain before declaring completion:** Producer lifetime and channel completion are explicitly connected. The receiver drains both values and ends after the sender is dropped.
 
-## Reason through the six tasks
+## Task answers
 
-1. **Predict and explain.** Trace queue occupancy and ownership after each send.
+### Task 1: Predict and explain
 
-2. **Guided modification.** Increase capacity and predict the accepted immediate sends.
+Trace queue occupancy and ownership after each send.
 
-3. **Independent construction.** Build a bounded producer-consumer report pipeline.
+No separate reference answer has been written for this task. Example A is the evidence to compare with: The rejected value remains visible in the error instead of disappearing silently. One item is admitted and the next immediate send reports full capacity.
 
-4. **Diagnose a defect.** Diagnose a receiver waiting because an unused sender clone remains alive.
+### Task 2: Guided modification
 
-5. **Boundary evidence.** Test no messages and a disconnected receiver.
+Increase capacity and predict the accepted immediate sends.
 
-6. **Transfer and justify.** Choose blocking, rejection or intentional dropping for a workload and explain producer evidence.
+No separate reference answer has been written for this task. Start from Example B: Producer lifetime and channel completion are explicitly connected. The receiver drains both values and ends after the sender is dropped.
 
-For tasks 1 and 2, use the checked values and mechanism trace in the two examples. For task 3, choose names that expose the input and result contract and retain the same invariants. For task 4, the diagnosed mistakes below supply a concrete wrong assumption: preserve its counterexample before repairing it. Task 5 needs an explicit expected value or documented rejection at the boundary, not just successful execution. For task 6, explain what changes in the new context and which part of the original mechanism remains applicable. Several representations may satisfy this transfer task; justify the choice rather than treating this reference as the only architecture.
+### Task 3: Independent construction
+
+Build a bounded producer-consumer report pipeline.
+
+**Reference answer.** The same statements run as the `Task 3` block of the reference program; here they are wrapped in `main` as a complete file.
+
+```rust
+fn main() -> Result<(), Box<dyn std::error::Error>> {
+    let (send, receive) = std::sync::mpsc::sync_channel::<u32>(2);
+    let producer = std::thread::spawn(move || {
+        for quantity in [3, 5, 2] {
+            send.send(quantity).unwrap();
+        }
+    });
+    let mut report = Vec::new();
+    for quantity in receive {
+        report.push(format!("qty={quantity}"));
+    }
+    producer.join().unwrap();
+    assert_eq!(report, ["qty=3", "qty=5", "qty=2"]);
+    Ok(())
+}
+```
+
+**Observe:** The consumer reports qty=3, qty=5 and qty=2 in order and then stops.
+
+sync_channel(2) blocks the producer when two items are waiting, and the receiving loop ends when the producer's sender is dropped.
+
+### Task 4: Diagnose a defect
+
+Diagnose a receiver waiting because an unused sender clone remains alive.
+
+No reference answer has been written for this task yet. The wrong assumptions to look for are this lesson's pitfalls: Joining a producer before draining a full bounded channel can deadlock. Ignoring a failed send loses work. Channel capacity does not bound work already started outside the channel.
+
+### Task 5: Boundary evidence
+
+Test no messages and a disconnected receiver.
+
+No reference answer has been written for this task yet. Write the expected value or documented rejection for each boundary before running it, and compare with the checks in Example A (Make full capacity observable) and Example B (Drain before declaring completion).
+
+### Task 6: Transfer and justify
+
+Choose blocking, rejection or intentional dropping for a workload and explain producer evidence.
+
+No single reference answer exists: several designs can satisfy this transfer task. Justify yours against the mechanism described below and the vocabulary entry **Channel**, and state one limitation of your choice.
 
 ## Mechanism and diagnostic reasoning
 
@@ -36,4 +80,4 @@ Joining a producer before draining a full bounded channel can deadlock. Ignoring
 
 ## Review before continuing
 
-The reference checks the worked scenarios, including their boundary distinctions. Your independent and transfer artifacts may have additional checks. Compare observations rather than only source text. Preserve any new regression case you discover and explain why it would reject a plausible wrong implementation. External project steps require their own build and platform evidence and are not established by a portable reference passing.
+Run the reference and confirm that it prints `rust-029: passed`, then reconstruct one boundary case from memory and explain which check would reject a plausible wrong implementation. External project steps need their own build and platform evidence; a passing portable reference does not establish them.

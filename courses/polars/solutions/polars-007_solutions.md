@@ -9,6 +9,17 @@ The executable reference contains the two complete worked cases with assertions.
 
 Use convert_time_zone with a valid IANA zone. A timezone is not just a fixed UTC offset because historical and seasonal rules can differ.
 
+```python
+import polars as pl
+
+frame = pl.DataFrame({"stamp": ["2024-03-10T06:30:00+00:00", "2024-03-10T07:30:00+00:00"]})
+utc = frame.select(pl.col("stamp").str.to_datetime(time_zone="UTC").alias("utc"))
+tokyo = utc.with_columns(pl.col("utc").dt.convert_time_zone("Asia/Tokyo").alias("tokyo"))
+assert tokyo["tokyo"].dt.hour().to_list() == [15, 16]
+assert tokyo["tokyo"].dt.epoch("s").to_list() == tokyo["utc"].dt.epoch("s").to_list()
+assert (tokyo["tokyo"][1] - tokyo["tokyo"][0]).total_seconds() == 3600
+```
+
 **Expected:** The instants and elapsed seconds stay unchanged.
 
 ## 2. Explain a naive value
@@ -20,6 +31,20 @@ The date, region and repeated-time policy can matter. Do not silently assume the
 ## 3. Test the end boundary
 
 The filter time < end excludes the boundary, which avoids double counting when the next period starts there.
+
+```python
+from datetime import UTC, datetime
+
+import polars as pl
+
+times = [datetime(2024, 1, day, tzinfo=UTC) for day in (1, 2, 3, 3)]
+frame = pl.DataFrame({"time": times, "amount": [2, 3, 5, 7]})
+start, end = times[0], times[2]
+period = frame.filter((pl.col("time") >= start) & (pl.col("time") < end))
+following = frame.filter(pl.col("time") >= end)
+assert period["amount"].sum() == 5
+assert following["amount"].to_list() == [5, 7]
+```
 
 **Expected:** It belongs to the following period.
 
@@ -89,4 +114,4 @@ if __name__ == "__main__":
 
 ## Interpretation
 
-Define time semantics before aggregating a dataset. Use an explicit zone and interval convention, test the boundary observations and retain separate event and availability timestamps. Apply those rules consistently across training, dashboards and incremental data products.
+Use an explicit zone and interval convention, test the boundary observations and retain separate event and availability timestamps. Apply those rules consistently across training, dashboards and incremental data products.

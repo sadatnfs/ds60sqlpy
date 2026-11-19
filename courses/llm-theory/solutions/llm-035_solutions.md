@@ -14,11 +14,11 @@ Inference scheduling interleaves work from multiple requests while preserving ea
 
 ## Reading the implementation
 
-Maintain a dictionary from(request,model_version,tokenizer_version) to K/V state. For each scheduled token, look up only that request cache and append one position. Track generated or consumed token counts separately per request. Compare concatenated per-request logits to a full-prefix oracle; never compare only aggregate tensor norms, which could hide cross-request swaps.
+Maintain a dictionary from (request, model_version, tokenizer_version) to K/V state. For each scheduled token, look up only that request cache and append one position. Track generated or consumed token counts separately per request. Compare concatenated per-request logits to a full-prefix oracle; never compare only aggregate tensor norms, which could hide cross-request swaps.
 
 ## Exercise 1: Define unequal requests
 
-The question is: Use requestA tokens2,5,7 and B tokens1,3 with separate cache keys.
+The question is: Use request A tokens 2, 5, 7 and B tokens 1, 3 with separate cache keys.
 
 Different request lengths require different offsets. A shared cache tensor without per-request bookkeeping would confuse the next position.
 
@@ -31,13 +31,13 @@ keys = {r: (r, "model-v1", "tokens-v1") for r in requests}
 assert len(set(keys.values())) == 2 and [len(requests[r]) for r in ["A", "B"]] == [3, 2]
 ```
 
-**Expected:** lengths3 and2;distinct keys.
+**Expected:** lengths 3 and 2; distinct keys.
 
-**Verify:** Compare the computed values or written argument with lengths3 and2;distinct keys.
+**Verify:** In a fresh process, the exercise checks confirm `len(set(keys.values())) == 2` and `[len(requests[r]) for r in ['A', 'B']] == [3, 2]`.
 
 ## Exercise 2: Interleave bounded work
 
-The question is: ProcessA0,B0,A1,B1,A2 with independent caches.
+The question is: Process A0, B0, A1, B1, A2 with independent caches.
 
 Each scheduling action advances one request only. The final cache lengths are conservation checks on the work assigned to each request.
 
@@ -53,9 +53,9 @@ with torch.no_grad():
 assert caches[keys["A"]]["k"].shape[2] == 3 and caches[keys["B"]]["k"].shape[2] == 2
 ```
 
-**Expected:** cache lengthsA3,B2.
+**Expected:** cache lengths A3, B2.
 
-**Verify:** Compare the computed values or written argument with cache lengthsA3,B2.
+**Verify:** In a fresh process, the exercise checks confirm `caches[keys['A']]['k'].shape[2] == 3` and `caches[keys['B']]['k'].shape[2] == 2`.
 
 ## Exercise 3: Compare independent inference
 
@@ -73,11 +73,11 @@ with torch.no_grad():
 
 **Expected:** both requests match within 1e-6.
 
-**Verify:** Compare the computed values or written argument with both requests match within 1e-6.
+**Verify:** In a fresh process, the exercise checks confirm for every `(request, tokens)` in `requests.items()`, `incremental` matches `full` within 1e-6.
 
 ## Exercise 4: Invalidate a tokenizer change
 
-The question is: Look upA under tokenizerv2 rather thanv1.
+The question is: Look up A under tokenizer v2 rather than v1.
 
 Token IDs can change meaning when tokenization changes. Reusing old vectors merely because the vocabulary size is equal would violate the model input contract.
 
@@ -87,11 +87,11 @@ assert caches.get(("A", "model-v1", "tokens-v2")) is None
 
 **Expected:** no cached state found.
 
-**Verify:** Compare the computed values or written argument with no cached state found.
+**Verify:** In a fresh process, the exercise checks confirm `caches.get(('A', 'model-v1', 'tokens-v2')) is None`.
 
 ## Exercise 5: Invalidate a model change
 
-The question is: Look upA under modelv2 with the same tokenizer.
+The question is: Look up A under model v2 with the same tokenizer.
 
 Cached projections depend on the model weights. A new model version requires recomputing state from the request prefix.
 
@@ -101,11 +101,11 @@ assert caches.get(("A", "model-v2", "tokens-v1")) is None
 
 **Expected:** no cached state found.
 
-**Verify:** Compare the computed values or written argument with no cached state found.
+**Verify:** In a fresh process, the exercise checks confirm `caches.get(('A', 'model-v2', 'tokens-v1')) is None`.
 
 ## Exercise 6: Respect independent caps
 
-The question is: Set capsA3,B2 and verify scheduled counts; reject one extraB token.
+The question is: Set caps A3, B2 and verify scheduled counts; reject one extra B token.
 
 A single global cap could allow one request to exceed its budget while another uses less. Count and enforce limits per request before scheduling additional work.
 
@@ -115,9 +115,9 @@ consumed = {r: len(outputs[r]) for r in requests}
 assert consumed == caps and consumed["B"] >= caps["B"]
 ```
 
-**Expected:** A and B at their own caps;B cannot advance.
+**Expected:** A and B at their own caps; B cannot advance.
 
-**Verify:** Compare the computed values or written argument with A and B at their own caps;B cannot advance.
+**Verify:** In a fresh process, the exercise checks confirm `consumed == caps` and `consumed['B'] >= caps['B']`.
 
 ## Review after comparison
 

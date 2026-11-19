@@ -6,7 +6,7 @@
       "runtime_profile": "html-browser",
       "reference_path": "courses/web-development/solutions/web-001_solution.html",
       "marker": "web-001 reference checks passed",
-      "expected_observation": "The preview contains one main heading and two paragraphs in a main region.",
+      "expected_observation": "The preview contains one main heading and two paragraphs inside the body.",
       "qualification": "Requires actual runtime and manual observations; this inventory is not a receipt."
     },
     {

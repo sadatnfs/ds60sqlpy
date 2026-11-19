@@ -4,17 +4,18 @@ Answer-free learner worksheet. See the companion guide for worked examples.
 Copy to .learning before editing. Six independent attempts belong below.
 """
 
-# Exercise 1: Compute uniform causal mixtures
-# Use zero 3-by-2 queries/keys and values 2, 0; 0, 2; 6, 6.
-# Expected: outputs 2, 0; 1, 1; 8/3, 8/3.
+# Exercise 1: Mix new values causally
+# Use zero 3-by-2 queries and keys with values [4, 0], [0, 4], [1, 1] and a causal allowed
+# mask.
+# Expected: outputs [4, 0], [2, 2] and [5/3, 5/3].
 
-# Exercise 2: Perturb only the future
-# Change only the third value to 100, 200.
-# Expected: first two rows unchanged; last 34, 202/3.
+# Exercise 2: Predict a bidirectional change
+# Allow every position (an all-True mask) and change only the third value to [10, 10].
+# Expected: every row becomes [14/3, 14/3]; without a causal mask the change reaches all rows.
 
-# Exercise 3: Recompute nonuniform prefixes
-# Use Q=K rows 1, 0; 0, 1; 1, 1 and compare cuts 1..3.
-# Expected: all prefix outputs match within 1e-12.
+# Exercise 3: Compute one nonuniform weight
+# Use queries, keys and values equal to the 2-by-2 identity with a causal mask.
+# Expected: row 0 is [1, 0]; row 1 is [1-p, p] with \(p=\sigma(1/\sqrt{2})\), about 0.6698.
 
 # Exercise 4: Reject an all-masked row
 # Set the second allowed row to False.

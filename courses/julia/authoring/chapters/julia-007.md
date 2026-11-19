@@ -8,7 +8,7 @@ Indexing a slice with an ordinary range often produces a copy, while `view` or `
 
 ## Worked case A: inspect a column-major matrix
 
-Reshaping the values 1 through 6 into a2-by -3 matrix fills its first column before the second. The example checks selected coordinates, the complete shape and the sum. `reshape` can share the underlying data, so a shape transformation should not automatically be treated as a deep copy.
+Reshaping the values 1 through 6 into a 2-by-3 matrix fills its first column before the second. The example checks selected coordinates, the complete shape and the sum. `reshape` can share the underlying data, so a shape transformation should not automatically be treated as a deep copy.
 
 {{WORKED_A}}
 

@@ -24,11 +24,13 @@ Two tabs share the same localStorage area when their origins match, but the stor
 
 Listen for submit on the form and preventDefault only because this local fixture handles the request itself. FormData reads named controls; disabled controls and unnamed controls have different submission behavior. Trim text under a stated policy, parse numeric input and check safe integer bounds. Persist an object containing version and validated fields. Loading requires parse and schema checks before rendering. Use removeItem with the owned key for reset, never clear unrelated browser storage.
 
-## Exercise 1: Validate one local form submission
+## Exercise 1: Validate one local form submission: change one input
 
-Task: Save the snippet as HTML and submit name Ada and quantity 2, then try an invalid quantity.
+Task: Rebuild Example A in your copy of the lesson's browser fixture without looking at it. Then change one attribute, label or handler and write down the visible, focus or announcement change you expect before reloading.
 
 Native constraints stop many invalid user submissions before the submit handler. The explicit domain check still defines the accepted state and protects alternate invocation paths.
+
+The unchanged code is the exercise block of Example A:
 
 ```html
 <!doctype html>
@@ -56,15 +58,17 @@ form.addEventListener('submit', event => {
 >
 ```
 
-**Expected:** valid output Ada: 2; invalid input produces no accepted state.
+**Expected:** Your rebuild reproduces the worked observation (valid output Ada: 2; invalid input produces no accepted state), and the changed copy shows the difference you predicted.
 
-**Verify:** Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.
+**Verify:** Record the browser observation before and after your change, including where focus lands and any live-region text, and explain which line caused the difference.
 
-## Exercise 2: Handle storage success and failure explicitly
+## Exercise 2: Handle storage success and failure explicitly: debug a regression
 
-Task: Run this standalone snippet on a loopback HTTP origin and activate Save.
+Task: Introduce one deliberate defect into a copy of Example B, such as a wrong selector, a missing attribute or a handler on the wrong element. Predict which browser behavior will expose it, confirm that prediction, then repair it.
 
 A successful state update and a successful storage operation are separate observations. The interface reports the actual persistence outcome without hiding failure behind a local display update.
+
+The unchanged code is the exercise block of Example B:
 
 ```html
 <!doctype html>
@@ -86,9 +90,9 @@ document.querySelector('#save').addEventListener('click', () => {
 >
 ```
 
-**Expected:** either Saved or a visible Storage unavailable message, never an invented success.
+**Expected:** The defective copy no longer shows: either Saved or a visible Storage unavailable message, never an invented success. The repaired copy shows it again.
 
-**Verify:** Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.
+**Verify:** Keep notes on the failing and the repaired behavior and name the first browser observation that differed between them.
 
 ## Exercise 3: Load only a recognized stored schema
 
@@ -106,7 +110,7 @@ if (value === null || value.version !== 1 || typeof value.name !== 'string'
 
 **Expected:** invalid saved state is diagnosed and does not become accepted application state.
 
-**Verify:** Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.
+**Verify:** In the browser fixture, record the observation that shows: invalid saved state is diagnosed and does not become accepted application state. Then change one input and record what changes, keeping keyboard and pointer results separate.
 
 ## Exercise 4: Distinguish current state from persisted state
 
@@ -121,7 +125,7 @@ An editable control is a draft, not automatically committed application state. K
 
 **Expected:** the last saved value returns; the unsaved edit is not falsely described as persisted.
 
-**Verify:** Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.
+**Verify:** In the browser fixture, record the observation that shows: the last saved value returns; the unsaved edit is not falsely described as persisted. Then change one input and record what changes, keeping keyboard and pointer results separate.
 
 ## Exercise 5: Observe a change from another tab
 
@@ -137,7 +141,7 @@ window.addEventListener('storage', event => {
 
 **Expected:** the other tab reports an external change; the writing tab does not receive its own storage event.
 
-**Verify:** Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.
+**Verify:** In the browser fixture, record the observation that shows: the other tab reports an external change; the writing tab does not receive its own storage event. Then change one input and record what changes, keeping keyboard and pointer results separate.
 
 ## Exercise 6: Reset only this lesson's key
 
@@ -152,7 +156,7 @@ localStorage.removeItem(key);
 
 **Expected:** owned key absent; unrelated key unchanged.
 
-**Verify:** Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.
+**Verify:** In the browser fixture, record the observation that shows: owned key absent; unrelated key unchanged. Then change one input and record what changes, keeping keyboard and pointer results separate.
 
 ## After comparison
 

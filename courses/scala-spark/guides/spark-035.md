@@ -1,28 +1,28 @@
 # spark-035: Checkpoints, restart and delivery guarantees
 
-Authored paired Scala/PySpark teaching content. The default fixtures are tiny,local and deterministic. Runtime acceptance,logical correctness and learner understanding remain separate evidence.
+Authored paired Scala/PySpark teaching content. The default fixtures are tiny, local and deterministic. Runtime acceptance, logical correctness and learner understanding remain separate evidence.
 
 ## Level and prerequisites
 
-Advanced; approximately 120 minutes. Direct design prerequisites: `spark-034`. The prepared baseline is Spark4.0.1,Scala binary2.13,JDK17 and Python3.12. Read the [execution baseline](../execution-baseline.md);a proposed future tuple is not a runtime receipt.
+Advanced; approximately 120 minutes. Direct prerequisites: `spark-034`. The prepared baseline is Spark 4.0.1, Scala binary 2.13, JDK 17 and Python 3.12. Read the [execution baseline](../execution-baseline.md).
 
 ## How to run this lesson
 
-Open `spark-035` in the classroom and choose the Scala or PySpark implementation you understand. Prepare only its fixed `spark-local-scala` or `spark-local-python` profile,save your pad and run the complete source. Scala stages as `Main.scala` with `object Main`;Python stages as `main.py` with a main guard. Each program creates its own local[2] session,disables the UI,binds the driver to loopback and stops the session in finally. No external dataset,package download,JDBC connection or cloud service is requested.
+Open `spark-035` in the classroom and choose the Scala or PySpark implementation you understand. Prepare only its fixed `spark-local-scala` or `spark-local-python` profile, save your pad and run the complete source. Scala stages as `Main.scala` with `object Main`;Python stages as `main.py` with a main guard. Each program creates its own local[2] session, disables the UI, binds the driver to loopback and stops the session in finally. No external dataset, package download, JDBC connection or cloud service is requested.
 
-The [Scala learner](../lessons/spark-035.scala) and [PySpark learner](../lessons/spark-035.py) run two complete demonstrations and retain six explicit task stubs. Use the [explained solutions](../solutions/spark-035_solutions.md) only after an attempt or an explicit worked comparison;the [Scala reference](../solutions/spark-035_solution.scala) and [PySpark reference](../solutions/spark-035_solution.py) contain complete assertions. A bounded collect is used only for the declared tiny fixture;do not copy it onto an unbounded or large production table.
+The [Scala learner](../lessons/spark-035.scala) and [PySpark learner](../lessons/spark-035.py) run two complete demonstrations and retain six explicit task stubs. Use the [explained solutions](../solutions/spark-035_solutions.md) only after an attempt or an explicit worked comparison; the [Scala reference](../solutions/spark-035_solution.scala) and [PySpark reference](../solutions/spark-035_solution.py) contain complete assertions. A bounded collect is used only for the declared tiny fixture; do not copy it onto an unbounded or large production table.
 
 ## Learning objectives
 
 - Explain how source offsets, state, checkpoints and sink behavior jointly determine recovery semantics.
-- State the input and output grain,schema,NULL policy and ordering before executing a transformation.
-- Compare each language implementation with independent literal expectations,not only with the other implementation.
+- State the input and output grain, schema, NULL policy and ordering before executing a transformation.
+- Compare each language implementation with independent literal expectations, not only with the other implementation.
 
 ## Vocabulary and concepts
 
 - **Checkpoint:** Persistent query metadata including progress and, for stateful operators, state needed for compatible recovery.
 
-- **Source offset:** A source-specific position or processed-input identity;it is not a business event key.
+- **Source offset:** A source-specific position or processed-input identity; it is not a business event key.
 
 - **Query ID:** The logical streaming query identity preserved when restarting from its checkpoint.
 
@@ -34,7 +34,7 @@ The [Scala learner](../lessons/spark-035.scala) and [PySpark learner](../lessons
 
 A streaming query is a long-lived logical computation, even when this lesson uses a finite invocation. Its recovery story spans input identity, query state and output publication. A checkpoint records progress so a compatible restart can continue rather than treating every available input as new. The output sink must also implement a suitable commit protocol. A checkpoint file alone does not make arbitrary HTTP calls, emails or database inserts exactly once.
 
-The fixture has two immutable JSON files with an explicit id:bigint, cents:bigint schema. FileA contains 1:100 and 2:200. FileB contains 2:200 and 3:300. Each row is an input occurrence;ID 2 appears in two occurrences. This deliberately separates replay of an already processed file from repetition of a business identity in a new file. Correct source recovery retains four occurrences and total 800, not three rows and 600.
+The fixture has two immutable JSON files with an explicit id:bigint, cents:bigint schema. File A contains 1:100 and 2:200. File B contains 2:200 and 3:300. Each row is an input occurrence; ID 2 appears in two occurrences. This deliberately separates replay of an already processed file from repetition of a business identity in a new file. Correct source recovery retains four occurrences and total 800, not three rows and 600.
 
 ## Follow the three histories
 
@@ -46,9 +46,9 @@ The sink history records committed Parquet output. Reading through Spark's file 
 
 ## Bound the experiment without guessing arrival time
 
-AvailableNow processes the data available for that invocation and stops. maxFilesPerTrigger 1 bounds source admission per microbatch;it does not mean there will always be exactly one batch, or that a batch takes a fixed number of seconds. The reference awaits completion with 45 seconds per query and a five-second stop timeout. No sleep is used to infer that a file has been processed. Query progress is read only after completion and is joined with actual sink values.
+AvailableNow processes the data available for that invocation and stops. maxFilesPerTrigger 1 bounds source admission per microbatch; it does not mean there will always be exactly one batch, or that a batch takes a fixed number of seconds. The reference awaits completion with 45 seconds per query and a five-second stop timeout. No sleep is used to infer that a file has been processed. Query progress is read only after completion and is joined with actual sink values.
 
-The first run seesFileA. After it finishes, the producer publishesFileB and starts the same query against the same checkpoint and sink. The logical query ID stays the same, the run ID changes, and only the new file contributes to that run's input count. A third run adds no file and must leave the sink unchanged. An empty finite run may have no progress entries, so a sum over available input counts is more appropriate than demanding one progress record.
+The first run sees File A. After it finishes, the producer publishes File B and starts the same query against the same checkpoint and sink. The logical query ID stays the same, the run ID changes, and only the new file contributes to that run's input count. A third run adds no file and must leave the sink unchanged. An empty finite run may have no progress entries, so a sum over available input counts is more appropriate than demanding one progress record.
 
 ## New checkpoint means a new processing history
 
@@ -197,7 +197,7 @@ assert demo_second["input_rows"] == 2 and bag(spark, owned_root / "demo-output")
 ]
 ```
 
-The repeated business ID is retained because it arrived in a new source file. Offset recovery prevents rereadingFileA as fresh input;it is not an event-ID deduplication rule.
+The repeated business ID is retained because it arrived in a new source file. Offset recovery prevents rereading File A as fresh input; it is not an event-ID deduplication rule.
 
 ## Exercises
 
@@ -209,7 +209,7 @@ Read a static copy of the two-row schema fixture and require bigint id/cents, kn
 
 **Verify:** Compare the exact two-row bag and reject an explicit null-id DataFrame.
 
-**Progressive hint:** A bag preserves repeated rows;schema and NULL validation occur before bounded collection.
+**Progressive hint:** A bag preserves repeated rows; schema and NULL validation occur before bounded collection.
 
 ### Exercise 2: Run the first finite file stream
 
@@ -219,7 +219,7 @@ Execute the AvailableNow Parquet query with its owned checkpoint/output and reta
 
 **Verify:** Assert the progress input count is 2, query is terminated, and readback bag is exact.
 
-**Progressive hint:** Await the finite query instead of sleeping;the sink read happens after termination.
+**Progressive hint:** Await the finite query instead of sleeping; the sink read happens after termination.
 
 ### Exercise 3: Resume the same checkpoint after a new file
 
@@ -229,7 +229,7 @@ Publish a second file with 2:200 and 3:300, then restart the compatible query wi
 
 **Verify:** Compare both identities, progress count and all 4 output occurrences.
 
-**Progressive hint:** The duplicate business ID is in a new file;checkpoint offsets do not deduplicate event IDs.
+**Progressive hint:** The duplicate business ID is in a new file; checkpoint offsets do not deduplicate event IDs.
 
 ### Exercise 4: Resume with no new source files
 
@@ -239,7 +239,7 @@ Run the same compatible query again without adding input and compare output befo
 
 **Verify:** Assert zero progress input sum and exact unchanged sink rows.
 
-**Progressive hint:** An empty AvailableNow run may have no progress entries;sum the available entries rather than require one batch.
+**Progressive hint:** An empty AvailableNow run may have no progress entries; sum the available entries rather than require one batch.
 
 ### Exercise 5: Replay with a separate checkpoint and output
 
@@ -249,7 +249,7 @@ Start from a new checkpoint only when the output namespace is also new. Replay t
 
 **Verify:** Assert checkpoint/output paths differ and both independent bags equal the literal 4-row oracle.
 
-**Progressive hint:** A new checkpoint forgets old offsets;do not point it at the old append sink.
+**Progressive hint:** A new checkpoint forgets old offsets; do not point it at the old append sink.
 
 ### Exercise 6: Write a guarantee ledger from exact counts
 
@@ -263,15 +263,15 @@ Return output row count, distinct business IDs and total cents, then explain why
 
 ## Common pitfalls
 
-Do not reuse an old output with a new checkpoint without an idempotency plan. Do not infer readiness from a sleep or expect one progress record for an empty run. Do not mutate consumed input files. A correct total can hide a missing duplicate or zero, so compare row bags, identities and sums. The owned root is removed only after every query created by this program is inactive;no existing checkpoint or unrelated session is reset.
+Do not reuse an old output with a new checkpoint without an idempotency plan. Do not infer readiness from a sleep or expect one progress record for an empty run. Do not mutate consumed input files. A correct total can hide a missing duplicate or zero, so compare row bags, identities and sums. The owned root is removed only after every query created by this program is inactive; no existing checkpoint or unrelated session is reset.
 
 ## Self-check
 
-Explain the contract of `validatedBag` / `validated_bag` without reading its solution. Trace the specified boundary case,then explain the final exercise's evidence and limitation. Identify where a transformation builds a plan and where an action requests execution. Retain exact values or operator evidence rather than treating a successful process exit as proof of the whole learning objective.
+Explain the contract of `validatedBag` / `validated_bag` without reading its solution. Trace the specified boundary case, then explain the final exercise's evidence and limitation. Identify where a transformation builds a plan and where an action requests execution. Retain exact values or operator evidence rather than treating a successful process exit as proof of the whole learning objective.
 
 ## Next step
 
-Use the [course route](../README.md) to continue. Paired-language agreement is useful only when both outputs also satisfy the independent fixture contract. Keep runtime/profile receipts separate from any cluster-performance or production-recovery claim.
+Use the [course route](../README.md) to continue. Paired-language agreement is useful only when both outputs also satisfy the independent fixture contract. A successful local run is not evidence of cluster performance or production recovery.
 
 ## Primary sources and official APIs
 
@@ -283,8 +283,8 @@ Use the [course route](../README.md) to continue. Paired-language agreement is u
 
 ```text
 Use $guide-ds60sqlpy-learning to coach me through spark-035: Checkpoints, restart and delivery guarantees.
-Read courses/scala-spark/guides/spark-035.md and courses/scala-spark/lessons/spark-035.scala;the paired sources are courses/scala-spark/lessons/spark-035.scala and courses/scala-spark/lessons/spark-035.py.
-Direct prerequisites: spark-034. Explain the schema,row grain and new Scala/Python/Spark syntax,ask me to predict a concrete result,then inspect my attempt. Give one hint at a time,review exact result and boundary evidence,and ask retrieval questions in my own words. Do not read solutions/ until I ask or have made an honest attempt.
-Use only the prepared local[2] worker profile and owned job scratch. Do not download dependencies,start a remote service,reset existing checkpoints or alter unrelated learner work.
+Read courses/scala-spark/guides/spark-035.md and courses/scala-spark/lessons/spark-035.scala; the paired sources are courses/scala-spark/lessons/spark-035.scala and courses/scala-spark/lessons/spark-035.py.
+Direct prerequisites: spark-034. Explain the schema, row grain and new Scala/Python/Spark syntax, ask me to predict a concrete result, then inspect my attempt. Give one hint at a time, review exact result and boundary evidence, and ask retrieval questions in my own words. Do not read solutions/ until I ask or have made an honest attempt.
+Use only the prepared local[2] worker profile and owned job scratch. Do not download dependencies, start a remote service, reset existing checkpoints or alter unrelated learner work.
 Done when all six contracts have inspected evidence and I can explain the stated assumptions and a meaningful failure case.
 ```

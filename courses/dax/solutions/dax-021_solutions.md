@@ -52,7 +52,7 @@ Gross is 170 and net is 163; blue-line discounts total 7.
 
 Write a customer-level average revenue for customers with sales.
 
-AVERAGEX(Customer,[NetRevenue]) averages 51,80,56 and excludes Di's BLANK, yielding 187/3.
+AVERAGEX(Customer,[NetRevenue]) averages 51, 80, 56 and excludes Di's BLANK, yielding 187/3.
 
 ### Exercise 4
 

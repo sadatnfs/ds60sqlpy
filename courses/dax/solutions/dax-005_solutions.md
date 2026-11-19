@@ -53,7 +53,7 @@ The first two rows have quantities 2 and 1; keep Amount rather than replacing it
 
 Write a query returning three rows in descending SaleID order.
 
-TOPN(3,Sales,Sales[SaleID],DESC) chooses S8,S7,S6; an outer ORDER BY makes that display order explicit.
+TOPN(3,Sales,Sales[SaleID],DESC) chooses S8, S7, S6; an outer ORDER BY makes that display order explicit.
 
 ### Exercise 4
 

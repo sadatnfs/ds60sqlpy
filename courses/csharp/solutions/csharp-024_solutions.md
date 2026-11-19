@@ -1,6 +1,6 @@
 # csharp-024: explanation and comparison
 
-Attempt the six guide tasks before opening this comparison. The executable reference is [csharp-024_solution.cs](csharp-024_solution.cs). Its assertions are always active under the prepared classroom compile settings.
+Attempt the six guide tasks before opening this comparison. The executable reference is [csharp-024_solution.cs](csharp-024_solution.cs). It runs both worked examples and the reference answers below, and its assertions are always active under the prepared classroom compile settings.
 
 ## Why the two examples differ
 
@@ -8,21 +8,58 @@ Attempt the six guide tasks before opening this comparison. The executable refer
 
 **Dispose after failure:** The same cleanup contract applies to abnormal control flow, which is where manual release is often forgotten. The controlled exception still triggers cleanup.
 
-## Reason through the six tasks
+## Task answers
 
-1. **Predict and explain.** Trace the point at which Dispose runs in each example.
+### Task 1: Predict and explain
 
-2. **Guided modification.** Nest two resources and predict reverse disposal order.
+Trace the point at which Dispose runs in each example.
 
-3. **Independent construction.** Write a helper that reads from a caller-owned stream without closing it.
+No separate reference answer has been written for this task. Example A is the evidence to compare with: Scope exit is the ownership boundary; no garbage-collector timing is needed. The resource is open inside and closed afterward.
 
-4. **Diagnose a defect.** Diagnose returning a stream from inside a using scope.
+### Task 2: Guided modification
 
-5. **Boundary evidence.** Test cleanup after an exception before normal completion.
+Nest two resources and predict reverse disposal order.
 
-6. **Transfer and justify.** Document ownership and leave-open behavior for a parser that wraps a stream reader.
+No separate reference answer has been written for this task. Start from Example B: The same cleanup contract applies to abnormal control flow, which is where manual release is often forgotten. The controlled exception still triggers cleanup.
 
-For tasks 1 and 2, use the checked values and mechanism trace in the two examples. For task 3, choose names that expose the input and result contract and retain the same invariants. For task 4, the diagnosed mistakes below supply a concrete wrong assumption: preserve its counterexample before repairing it. Task 5 needs an explicit expected value or documented rejection at the boundary, not just successful execution. For task 6, explain what changes in the new context and which part of the original mechanism remains applicable. Several representations may satisfy this transfer task; justify the choice rather than treating this reference as the only architecture.
+### Task 3: Independent construction
+
+Write a helper that reads from a caller-owned stream without closing it.
+
+**Reference answer.** It runs as the `Task 3` block of the reference program.
+
+```csharp
+string ReadAll(Stream stream) {
+  var encoding = Encoding.UTF8;
+  using var reader = new StreamReader(stream, encoding, leaveOpen: true);
+  return reader.ReadToEnd();
+}
+using var source = new MemoryStream(Encoding.UTF8.GetBytes("data"));
+Check(ReadAll(source) == "data", "content read");
+Check(source.CanRead, "caller-owned stream stays open");
+```
+
+**Observe:** The helper returns data and the caller's stream is still readable afterward.
+
+leaveOpen: true makes the reader dispose only itself, so the stream's owner, the caller, decides when it closes.
+
+### Task 4: Diagnose a defect
+
+Diagnose returning a stream from inside a using scope.
+
+No reference answer has been written for this task yet. The wrong assumptions to look for are this lesson's pitfalls: Dispose does not automatically make an object safe for concurrent callers. Never rely on finalizer timing for a lock or file release. Releasing a borrowed resource violates its caller ownership.
+
+### Task 5: Boundary evidence
+
+Test cleanup after an exception before normal completion.
+
+No reference answer has been written for this task yet. Write the expected value or documented rejection for each boundary before running it, and compare with the checks in Example A (Dispose on ordinary scope exit) and Example B (Dispose after failure).
+
+### Task 6: Transfer and justify
+
+Document ownership and leave-open behavior for a parser that wraps a stream reader.
+
+No single reference answer exists: several designs can satisfy this transfer task. Justify yours against the mechanism described below and the vocabulary entry **Resource owner**, and state one limitation of your choice.
 
 ## Mechanism and diagnostic reasoning
 
@@ -36,4 +73,4 @@ Dispose does not automatically make an object safe for concurrent callers. Never
 
 ## Review before continuing
 
-The reference checks the worked scenarios, including their boundary distinctions. Your independent and transfer artifacts may have additional checks. Compare observations rather than only source text. Preserve any new regression case you discover and explain why it would reject a plausible wrong implementation. External project steps require their own build and platform evidence and are not established by a portable reference passing.
+Run the reference and confirm that it prints `csharp-024: passed`, then reconstruct one boundary case from memory and explain which check would reject a plausible wrong implementation. External project steps need their own build and platform evidence; a passing portable reference does not establish them.

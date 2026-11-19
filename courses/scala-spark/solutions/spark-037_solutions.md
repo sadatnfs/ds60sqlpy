@@ -1,6 +1,6 @@
 # spark-037: Explained paired reference solutions
 
-Read the [guide](../guides/spark-037.md) and attempt one language first. The [Scala reference](spark-037_solution.scala) and [PySpark reference](spark-037_solution.py) are complete single-file programs with explicit local sessions and finally-based stop. Each compares with literal expectations;matching two implementations alone would not rule out a shared mistake.
+Read the [guide](../guides/spark-037.md) and attempt one language first. The [Scala reference](spark-037_solution.scala) and [PySpark reference](spark-037_solution.py) are complete single-file programs with explicit local sessions and finally-based stop. Each compares with literal expectations; matching two implementations alone would not rule out a shared mistake.
 
 ## Exercises and reasoning
 
@@ -44,7 +44,7 @@ def restart_empty(spark, paths):
 
 The source checkpoint is retained during this case. A new checkpoint would answer a different replay question. The test accepts the documented no-work shape and still verifies that the old committed product was not duplicated.
 
-**Verification evidence:** Compare identities, input sum and exact bag;allow empty progress entries.
+**Verification evidence:** Compare identities, input sum and exact bag; allow empty progress entries.
 
 ### Exercise 3: Test real streaming duplicate suppression
 
@@ -71,7 +71,7 @@ This case runs a stateful Spark deduplication operator, not only a local Python 
 
 Apply the explicitly declared admission cutoff event_second>=90 to rows at 80,90 and 110.
 
-**Expected:** 3 source rows;accepted IDs 2,3 with cents 200,300.
+**Expected:** 3 source rows; accepted IDs 2,3 with cents 200,300.
 
 ```scala
 def lateCase(spark: SparkSession, paths: (Path, Path, Path)): RunReceipt = {
@@ -113,7 +113,7 @@ The invalid count is established against the supplied raw fixture rather than di
 
 Compare the correct duplicate-case bag with an unsafe two-copy append result and reject the mismatch. Confirm every owned query is inactive before cleanup.
 
-**Expected:** Correct bag passes;duplicated bag raises an assertion-contract error;all owned queries are inactive.
+**Expected:** Correct bag passes; duplicated bag raises an assertion-contract error; all owned queries are inactive.
 
 ```scala
 def requireBag(actual: Seq[String], expected: Seq[String]): Unit = {
@@ -127,10 +127,10 @@ def require_bag(actual, expected):
         raise ValueError("Canonical bag mismatch")
 ```
 
-The negative control demonstrates that the case oracle would reject a duplicate-preserving or repeated-append shortcut. It does not rely on a randomly occurring failure. Inactive-query checks are a precondition for deleting the fresh scratch root;cleanup must not race active stream work or target another test directory.
+The negative control demonstrates that the case oracle would reject a duplicate-preserving or repeated-append shortcut. It does not rely on a randomly occurring failure. Inactive-query checks are a precondition for deleting the fresh scratch root; cleanup must not race active stream work or target another test directory.
 
 **Verification evidence:** Catch the specific mismatch and compare the exact offending rows.
 
 ## Execution and interpretation
 
-Run the complete reference in its prepared fixed worker. The small fixture is constructed inside the program,so opening a lesson does not fetch data. A final success line is printed only after the reference assertions complete. Plan observations,partition evidence and resource measurements apply to the actual local configuration;they do not establish cluster-scale performance. Session cleanup is explicit,and any additional owned file/query lifecycle is described in the lesson.
+Run the complete reference in its prepared fixed worker. The small fixture is constructed inside the program, so opening a lesson does not fetch data. A final success line is printed only after the reference assertions complete. Plan observations, partition evidence and resource measurements apply to the actual local configuration; they do not establish cluster-scale performance. Session cleanup is explicit, and any additional owned file/query lifecycle is described in the lesson.

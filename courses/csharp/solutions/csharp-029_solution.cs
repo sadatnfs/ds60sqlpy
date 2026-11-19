@@ -38,6 +38,18 @@ internal static class Program {
       }
       Check(observed, "failure propagated through await");
     }
+    {
+      // Task 3: Independent construction
+      async Task<int> TotalAsync(IEnumerable<Task<int>> parts) {
+        int[] values = await Task.WhenAll(parts);
+        if (values.Any(value => value < 0)) {
+          throw new ArgumentException("negative part");
+        }
+        return values.Sum();
+      }
+      var parts = new[] { Task.FromResult(2), Task.FromResult(5) };
+      Check(await TotalAsync(parts) == 7, "validated total");
+    }
     Console.WriteLine("csharp-029: passed");
     await Task.CompletedTask;
   }

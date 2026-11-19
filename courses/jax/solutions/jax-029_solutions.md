@@ -34,7 +34,7 @@ close(
 
 A fully masked query has no categorical distribution under this contract.
 
-**Expected:** ValueError during admission.
+**Expected:** ValueError during input validation.
 
 ```python
 try:
@@ -67,9 +67,9 @@ assert a.size + b.size == 32
 assert np.linalg.matrix_rank(np.asarray(a @ b)) <= 2
 ```
 
-## Exercise 6: Compile the admitted operation
+## Exercise 6: Compile the validated operation
 
-This checks JAX transformation parity for the admitted CPU mechanism only.
+This checks JAX transformation parity for the validated CPU mechanism only.
 
 **Expected:** Matching causal-average outputs.
 

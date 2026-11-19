@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import math
 import numpy as np
 import jax
 import jax.numpy as jnp
@@ -61,7 +60,7 @@ def main():
     close(second(0.0), 0.0)
     close(second(2.0), 48.0)
 
-    print("jax-009" + ": 8 asserted cases passed")
+    print("jax-009: 8 asserted cases passed")
 
 
 if __name__ == "__main__":

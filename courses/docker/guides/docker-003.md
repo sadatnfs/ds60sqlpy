@@ -6,7 +6,7 @@ Beginner; about 100 minutes, with additional time for the optional host experime
 
 ## Learning objectives
 
-Make a restart-versus-recreate persistence table. Choose storage for user progress and transient scratch data. Explain the difference between a configuration, an observed process and evidence of the application's behavior.
+Make a restart-versus-recreate persistence table. Choose storage for user progress and transient scratch data. Use image layers, writable layer and container lifetime accurately when you explain what you observed.
 
 ## Purpose, vocabulary and mental model
 
@@ -24,11 +24,11 @@ For diagnosis, first identify whether a file came from the image, the writable l
 
 ## How to use this lesson
 
-The classroom displays this guide and saves your worksheet. Its Run button does not control your Docker engine. Docker engine access is powerful host access, so the classroom deliberately receives no engine socket. Work through the supplied examples without starting anything, then use the optional host lab only in your own disposable project. Reading a command, parsing YAML and actually running the project are different forms of evidence.
+The classroom displays this guide and saves your worksheet, `courses/docker/lessons/docker-003.md`. Its Run button does not control your Docker engine. Docker engine access is powerful host access, so the classroom deliberately receives no engine socket. Work through the supplied examples without starting anything, then use the optional host lab only in your own disposable project. Reading a command, parsing YAML and actually running the project are different forms of evidence.
 
 Use Bash in Linux, macOS Terminal, or Ubuntu under WSL 2 on Windows. The supported engine runs Linux containers. The maintained fixture is `courses/docker/fixtures/compose-lab/`; its README explains copying it into a new ignored learner directory, checking the engine, building locally with visible logs, and using the fixed project name `ds60-docker-study`. The fixture uses port 18080 on host loopback. Stop if that project name or port belongs to unrelated work; choose a new project name consistently in your own copy. Never paste a command against a remote Docker context simply because it is currently selected.
 
-For Dockerfile examples, create a file named `Dockerfile` in a scratch project. YAML snippets describe a fragment unless explicitly called a complete file. Text transcripts are synthetic illustrations, not claims about your machine. Do not substitute a real password, token or private registry into a checked-in example.
+For Dockerfile examples, create a file named `Dockerfile` in a scratch project. YAML snippets describe a fragment unless explicitly called a complete file. Text transcripts are synthetic illustrations, not claims about your machine. Do not substitute a real password, token or private registry into a checked-in example. **How to use the lessons** in the [subject README](../README.md) collects these rules in one place.
 
 ## Worked example / walkthrough
 
@@ -54,58 +54,50 @@ docker run --rm --pull never --read-only ds60-docker-study:local python -c "from
 
 ## Six progressive exercises
 
+For each exercise, name the object involved and the phase of its lifetime before changing anything, then vary only the condition the task names. Exercises that ask you to predict, explain, compare or diagnose keep their answers in the solutions file; the others show the evidence to look for.
+
 ### Exercise 1: Classify /app/server.py in the fixture.
 
-**Expected evidence:** An image-provided application file.
-
-**Hint:** Identify the object and the phase of its lifetime before changing it. Use the relevant worked example, then vary only the condition named in this task.
+**Hint:** Find the Dockerfile instruction that put the file there.
 
 ### Exercise 2: Predict whether a sibling container sees an unmounted new file.
 
-**Expected evidence:** It does not share the first container writable layer.
-
-**Hint:** Identify the object and the phase of its lifetime before changing it. Use the relevant worked example, then vary only the condition named in this task.
+**Hint:** Ask where the first container wrote the file and whether anything is shared.
 
 ### Exercise 3: Make a restart-versus-recreate persistence table.
 
 **Expected evidence:** Writable layer survives restart but not removal; volumes follow their own lifetime.
 
-**Hint:** Identify the object and the phase of its lifetime before changing it. Use the relevant worked example, then vary only the condition named in this task.
+**Hint:** Use three columns: the writable layer, a named volume and tmpfs.
 
 ### Exercise 4: Diagnose a missing file after compose up recreates a service.
 
-**Expected evidence:** Check whether it was written to the old disposable layer.
-
-**Hint:** Identify the object and the phase of its lifetime before changing it. Use the relevant worked example, then vary only the condition named in this task.
+**Hint:** Compare the container IDs before and after compose up.
 
 ### Exercise 5: Explain why read-only plus tmpfs permits temporary writes.
 
-**Expected evidence:** The root mount and tmpfs have different write policies.
-
-**Hint:** Identify the object and the phase of its lifetime before changing it. Use the relevant worked example, then vary only the condition named in this task.
+**Hint:** List the mounts in the container and the write policy of each.
 
 ### Exercise 6: Choose storage for user progress and transient scratch data.
 
-**Expected evidence:** A named volume for progress and bounded temporary storage for scratch.
-
-**Hint:** Identify the object and the phase of its lifetime before changing it. Use the relevant worked example, then vary only the condition named in this task.
+**Hint:** Ask how long each kind of data must survive and who may delete it.
 
 ## Common mistakes and diagnosis
 
-Start with the smallest observation that separates two plausible causes. An image inspection answers questions about the packaged filesystem and configuration; container inspection adds runtime mounts, network attachment and exit status. An application request adds another layer of evidence. A healthy container can still serve the wrong application result. Preserve the original failure and the exact changed field before retrying.
+Writing important data to the container's writable layer and losing it when Compose recreates the service. Expecting a file created in one container to appear in another without a shared mount. Removing `read_only` instead of adding a tmpfs for scratch files.
 
-The boundary case in this chapter is: Diagnose a missing file after compose up recreates a service. Use its expected observation, Check whether it was written to the old disposable layer., to avoid treating a successful command as proof of the wrong claim. Keep source edits in your own copy. Do not make a container privileged, mount the engine socket, disable all checks or delete every volume to make an example succeed.
+Exercise 4 is this chapter's boundary case: Diagnose a missing file after compose up recreates a service. Start with the smallest observation that separates two plausible causes. An image inspection answers questions about the packaged filesystem and configuration; container inspection adds runtime mounts, network attachment and exit status; an application request adds another layer, and a healthy container can still serve the wrong result. Preserve the original failure and the exact changed field before retrying. Keep source edits in your own copy. Do not make a container privileged, mount the engine socket, disable all checks or delete every volume to make an example succeed.
 
 ## Retrieval, transfer and next steps
 
-Close the explanations and draw the path from source files to image to container to the observation relevant here. Reconstruct the second worked example with one different value and predict what changes. Explain which state survives process restart, container recreation and image rebuild. If none of those operations applies to this mechanism, explain why.
+Close the explanations and draw the path from source files to image to container to the observation relevant here, using image layers, writable layer, container lifetime and read-only root filesystem. Reconstruct worked example 2 (Try a write on a read-only root) with one different value and predict what changes. Explain which state survives process restart, container recreation and image rebuild, or why none of those operations applies to this mechanism.
 
-Before proceeding, retain six evidence records. For the optional host project, use `docker compose -p ds60-docker-study down` from the fixture copy to stop its containers and remove its ordinary network. This command preserves named volumes. Volume deletion is a separate deliberate reset of that disposable lab after a backup or export, never a general cleanup step. The fixture README describes its exact scoped reset.
+When a host session ends, run `docker compose -p ds60-docker-study down` from your fixture copy. It removes the project's containers and network but keeps named volumes; deleting a volume is a separate, deliberate reset described in the fixture README.
 
 ## Primary references
 
-- [Official reference 1](https://docs.docker.com/engine/storage/)
-- [Official reference 2](https://docs.docker.com/engine/storage/drivers/)
+- [Storage overview](https://docs.docker.com/engine/storage/)
+- [Storage drivers](https://docs.docker.com/engine/storage/drivers/)
 
 ## Ask an AI tutor about this lesson
 

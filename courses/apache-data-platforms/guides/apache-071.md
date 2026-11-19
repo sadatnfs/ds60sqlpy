@@ -22,6 +22,12 @@ authorizer and enforce it at the actual data-access boundary. The prepared Atlas
 client explicitly reports that data-engine enforcement has not been demonstrated.
 No chapter treats a successful label attachment as a denied query.
 
+**Execution boundary.** Attaching, searching for and removing a classification all
+need a running Atlas server, which the repository does not provide. The
+classification type and the curated entity's `classifications` list appear in the
+`bash run.sh plan` output; the search results described below are expectations
+for a prepared server.
+
 ## Worked case A: attach and discover a review label
 
 Define the owned reviewed classification and attach it to the curated synthetic

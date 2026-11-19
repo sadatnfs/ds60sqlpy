@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import re
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
@@ -23,7 +24,7 @@ RUNTIME = (
     "script in a fresh offline R process. Define every "
     "required input in the script; earlier runs do not "
     "leave live variables behind. Save source and notes "
-    "separately from run receipts. No package installation "
+    "separately from saved run output. No package installation "
     "or data download is needed for these examples."
 )
 PLOTS = (
@@ -39,11 +40,76 @@ PLOTS = (
 )
 
 
+VERSIONS = (
+    "The prepared environment uses R 4.6.1, R6 2.6.1, S7 "
+    "0.2.2, ggplot2 4.0.3 and Plotly 4.12.1. These original "
+    "examples use the checked-in dependency contract; "
+    "external package changes require a fresh compatibility "
+    "check."
+)
+COMPARE = (
+    "Compare your implementation with the reference only "
+    "after retaining your own attempt. Different readable "
+    "implementations can satisfy the same behavioral "
+    "contract. Inspect type, shape, missingness and "
+    "boundary behavior alongside printed numbers. A successful "
+    "exit checks only the properties a program actually "
+    "asserts; it does not establish general correctness or "
+    "mastery."
+)
+# Base graphics draw immediately; ggplot2 and Plotly objects draw only when printed.
+BASE_PLOT = re.compile(r"(?<![\w.:])(plot|hist|barplot|boxplot|image|pie|matplot|curve)\(")
+FIGURE_CONSTRUCTOR = re.compile(
+    r"\b(ggplot2::ggplot|ggplot|plotly::plot_ly|plot_ly|plotly::ggplotly|ggplotly)\("
+)
+ASSIGNMENT = re.compile(r"^\s*([A-Za-z.][\w.]*)\s*<-\s*(.*)$")
+
+
 def units():
     return [json.loads(path.read_text()) for path in sorted((HERE / "units").glob("r-*.json"))]
 
 
-def guide(unit):
+def draws_figures(unit):
+    for code in [unit["reference"], *[e["code"] for e in unit["worked_examples"]]]:
+        if BASE_PLOT.search(code):
+            return True
+        figures = set()
+        for line in code.splitlines():
+            match = ASSIGNMENT.match(line)
+            if not match or "ggplot_build(" in match[2] or "plotly_build(" in match[2]:
+                continue
+            if FIGURE_CONSTRUCTOR.search(match[2]) or any(
+                re.search(rf"\b{re.escape(name)}\b", match[2]) for name in figures
+            ):
+                figures.add(match[1])
+        if any(re.search(rf"\bprint\(\s*{re.escape(name)}\s*\)", code) for name in figures):
+            return True
+    return False
+
+
+def run_section(unit):
+    key = unit["id"]
+    figures = (
+        "This chapter draws figures: base plots are captured as PNG, ggplot2 and Plotly "
+        "objects must be printed explicitly, and the classroom keeps at most two figures "
+        "per run."
+        if draws_figures(unit)
+        else "This chapter prints values only; when a chapter draws figures, the classroom "
+        "keeps at most two figures per run."
+    )
+    return (
+        f"Open `{key}` in `/classroom` and use the prepared `r-statistics` profile. Each Run "
+        "evaluates one `main.R` script in a fresh offline R process, so define every input "
+        "in the script; an earlier Run leaves no variables behind. Work in the "
+        f"[starter](../lessons/{key}.R). The [complete reference](../solutions/{key}_reference.R) "
+        f"ends by printing `{key} reference checks passed`, and the [explained "
+        f"answers](../solutions/{key}_solutions.md) are there for deliberate comparison "
+        f"after your own attempt. {figures} The [course overview](../README.md) describes "
+        "saved work, figure capture and the prepared package versions."
+    )
+
+
+def guide(unit, successors=()):
     key = unit["id"]
     prerequisites = ", ".join(f"`{x}`" for x in unit["prerequisites"]) or "None."
     text = [
@@ -53,16 +119,7 @@ def guide(unit):
         "",
         "## Run and retain your work",
         "",
-        RUNTIME,
-        "",
-        PLOTS,
-        "",
-        (
-            f"Open the [starter](../lessons/{key}.R). The [complete "
-            f"reference](../solutions/{key}_reference.R) and "
-            f"[explained answers](../solutions/{key}_solutions.md) are "
-            f"available for deliberate comparison."
-        ),
+        run_section(unit),
         "",
         "## Outcome and mechanism",
         "",
@@ -90,68 +147,55 @@ def guide(unit):
             example["explanation"],
             "",
         ]
-    text += [
-        "## Practice with evidence",
-        "",
-        (
-            "Retain the submitted source, the specific input or "
-            "changed condition, and the observed result or expected "
-            "failure. A successful exit checks only the properties "
-            "the program actually asserts; it does not establish "
-            "general correctness or mastery."
-        ),
-        "",
-    ]
+    text += ["## Practice with evidence", ""]
     labels = ["Predict", "Modify", "Construct", "Diagnose", "Check a boundary", "Transfer"]
     for number, task in enumerate(unit["exercises"], 1):
         text += [f"### Exercise {number}: {labels[number - 1]}", "", task["prompt"], ""]
     text += ["## Progressive hints", ""]
     text += [f"{i}. {task['hint']}" for i, task in enumerate(unit["exercises"], 1)]
-    text += [
-        "",
-        "## Reference review",
-        "",
-        unit["solution_explanation"],
-        "",
-        (
-            "Compare your implementation with the reference only "
-            "after retaining your own attempt. Different readable "
-            "implementations can satisfy the same behavioral "
-            "contract. Inspect type, shape, missingness and "
-            "boundary behavior alongside printed numbers."
-        ),
-        "",
-        "## Primary references",
-        "",
-    ]
+    worked = "\n\n".join(e["explanation"].strip() for e in unit["worked_examples"])
+    review = (
+        "The reference applies the reasoning explained under the worked examples above; "
+        f"the [explained answers](../solutions/{key}_solutions.md) add an answer for each "
+        "exercise."
+        if unit["solution_explanation"].strip() == worked
+        else unit["solution_explanation"]
+    )
+    text += ["", "## Reference review", "", review, "", "## Primary references", ""]
     text += [f"- [{source['title']}]({source['url']})" for source in unit["sources"]]
+    followers = [other["id"] for other in successors if key in other["prerequisites"]]
+    if followers:
+        onward = (
+            f"Chapters that list `{key}` as a direct prerequisite: "
+            + ", ".join(f"[`{other}`]({other}.md)" for other in followers)
+            + "."
+        )
+    else:
+        onward = (
+            f"No later chapter lists `{key}` as a direct prerequisite; the "
+            "[course map](../README.md) lists every chapter with its prerequisites."
+        )
+    if 41 <= int(key.split("-")[1]) <= 50:
+        onward += (
+            " For the modeling assumptions behind these examples, read the "
+            "[statistics tutorial](../../statistics-ml/README.md) alongside the R code."
+        )
     text += [
-        "",
-        (
-            "The prepared environment uses R 4.6.1, R6 2.6.1, S7 "
-            "0.2.2, ggplot2 4.0.3 and Plotly 4.12.1. These original "
-            "examples use the checked-in dependency contract; "
-            "external package changes require a fresh compatibility "
-            "check."
-        ),
         "",
         "## Continue",
         "",
-        (
-            "Use the [course map](../README.md) to choose the next "
-            "chapter by its prerequisites. For broader model "
-            "assumptions, study the statistics tutorial alongside "
-            "the executable R examples."
-        ),
+        onward,
         "",
         "## Ask an AI tutor",
         "",
         "```text",
-        f"Use $guide-ds60sqlpy-learning for {key}. Read the guide and my saved attempt.",
-        ("Explain the relevant R mechanism, type and data-shape contract. Give one"),
-        ("progressive hint before revealing the complete reference unless I request it."),
-        ("Distinguish my observed output from an expected result and from unrun code."),
-        ("Do not claim mastery from a successful process exit or a matching source string."),
+        f"Use $guide-ds60sqlpy-learning for {key} ({unit['title']}).",
+        "Read the guide and my saved attempt. Explain the relevant R mechanism,",
+        f"type and data-shape contract, focusing on: {', '.join(unit['concepts'])}.",
+        "Give one progressive hint before revealing the complete reference unless",
+        "I request it. Distinguish my observed output from an expected result and",
+        "from unrun code. Do not claim mastery from a successful process exit or a",
+        "matching source string.",
         "```",
         "",
     ]
@@ -184,15 +228,15 @@ def solution(unit):
             "",
             task["answer"],
             "",
-            f"**Expected evidence:** {task['expected']}",
-            "",
         ]
+        if task["expected"].strip() != task["answer"].strip():
+            text += [f"**Expected evidence:** {task['expected']}", ""]
     text += [
         "## What the checks establish",
         "",
         (
-            "The reference contains explicit behavioral assertions "
-            "for its small synthetic inputs. A passing run "
+            f"The reference makes {unit['reference'].count('stopifnot(')} `stopifnot()` "
+            "checks on its small synthetic inputs. A passing run "
             "establishes those assertions in the reported "
             "environment. It does not prove correctness for every "
             "input, statistical validity for an unrelated "
@@ -238,6 +282,15 @@ def readme(records):
         RUNTIME,
         "",
         PLOTS,
+        "",
+        COMPARE,
+        "",
+        VERSIONS,
+        "",
+        (
+            "Each guide ends with an optional prompt for a repository-aware AI tutor "
+            "that names the chapter and its concepts; the guides are complete without it."
+        ),
         "",
         "## Course map",
         "",
@@ -307,7 +360,7 @@ def artifacts():
             + unit["reference"].rstrip()
             + "\n"
         )
-        files[f"courses/r/guides/{key}.md"] = guide(unit)
+        files[f"courses/r/guides/{key}.md"] = guide(unit, records)
         files[f"courses/r/solutions/{key}_solutions.md"] = solution(unit)
         plan.append(
             {
@@ -320,10 +373,9 @@ def artifacts():
                 "concepts": unit["concepts"],
                 "outcome": unit["outcome"],
                 "lab": unit["exercises"][2]["prompt"],
-                "verification": (
-                    "Run explicit behavioral checks for the declared "
-                    "inputs; inspect types, shape, missingness, diagnostics "
-                    "and supported figures."
+                "verification": "Reproduce the worked observations: "
+                + " ".join(e["expected"].strip() for e in unit["worked_examples"][:2]).replace(
+                    "`", ""
                 ),
             }
         )

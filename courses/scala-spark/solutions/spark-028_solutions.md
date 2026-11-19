@@ -6,7 +6,7 @@ Read the [guide](../guides/spark-028.md) and attempt one language first. The [Sc
 
 ### Exercise 1: Classify facts and reconcile the whole source population
 
-Add reason using missing fact identity, negative known amount, then accepted precedence. Retain all source records; acceptedNULL amounts remain unknown.
+Add reason using missing fact identity, negative known amount, then accepted precedence. Retain all source records; accepted NULL amounts remain unknown.
 
 **Expected:** Accepted 2000, rejected 2 with source 2001 missing_identity and 2002 negative_amount. Accepted unique fact IDs 2000 and known amounts 1800.
 
@@ -31,7 +31,7 @@ def classify_facts(raw):
     )
 ```
 
-The row-preserving ledger makes rejected records visible instead of dropping them inside a later join or filter. Its precedence produces one interpretable reason per source occurrence. Known-amount counts remain separate from accepted row counts, so allowingNULL measurements cannot silently be presented as complete observed revenue.
+The row-preserving ledger makes rejected records visible instead of dropping them inside a later join or filter. Its precedence produces one interpretable reason per source occurrence. Known-amount counts remain separate from accepted row counts, so allowing NULL measurements cannot silently be presented as complete observed revenue.
 
 **Verification evidence:** Assert every rejection identity/reason, source reconciliation and accepted uniqueness/completeness counts.
 
@@ -62,7 +62,7 @@ def review_dimension(raw):
     return reviewed
 ```
 
-Review establishes the build-side grain before either join strategy is evaluated. The row budget keeps the candidate bounded, and countDistinct excludesNULL keys as well as detecting multiplicity. The rejected negative control prevents a later optimization from hiding an unresolved business-version conflict.
+Review establishes the build-side grain before either join strategy is evaluated. The row budget keeps the candidate bounded, and countDistinct excludes NULL keys as well as detecting multiplicity. The rejected negative control prevents a later optimization from hiding an unresolved business-version conflict.
 
 **Verification evidence:** Assert all six key/factor rows and the explicit duplicate-approved rejection.
 
@@ -95,7 +95,7 @@ The per-key oracle checks more than the grand total. It detects a wrong factor m
 
 Broadcast the reviewed dimension for the same equality join and projection. Preserve all output occurrences using exceptAll in both directions against baseline.
 
-**Expected:** Identical metrics and empty directional bag differences. The candidate plan containsBroadcastHashJoin.
+**Expected:** Identical metrics and empty directional bag differences. The candidate plan contains BroadcastHashJoin.
 
 ```scala
 def broadcastProduct(facts: DataFrame, dimension: DataFrame): DataFrame = {
@@ -120,7 +120,7 @@ The candidate changes physical execution while retaining the same selected input
 
 Return version, master, AQE and automatic broadcast threshold as named fields. Attach key frequencies, the baseline/candidate plans and each observed summary-query exchange metric map.
 
-**Expected:** Spark 4.0.1, local[2], AQEfalse, threshold-1; key 0 frequency 1600 and others 100. Both runs expose actual nonempty exchange observations. No peak-memory or throughput value is invented.
+**Expected:** Spark 4.0.1, local[2], AQE false, threshold -1; key 0 frequency 1600 and others 100. Both runs expose actual nonempty exchange observations. No peak-memory or throughput value is invented.
 
 ```scala
 def configurationReceipt(spark: SparkSession): Map[String, String] = {
@@ -174,4 +174,4 @@ The rollback boundary is deliberately narrower than the business-data contract. 
 
 ## Execution and interpretation
 
-Run the complete reference in its prepared fixed worker. The small fixture is constructed inside the program,so opening a lesson does not fetch data. A final success line is printed only after the reference assertions complete. Plan observations,partition evidence and resource measurements apply to the actual local configuration; they do not establish cluster-scale performance. Session cleanup is explicit,and any additional owned file/query lifecycle is described in the lesson.
+Run the complete reference in its prepared fixed worker. The small fixture is constructed inside the program, so opening a lesson does not fetch data. A final success line is printed only after the reference assertions complete. Plan observations, partition evidence and resource measurements apply to the actual local configuration; they do not establish cluster-scale performance. Session cleanup is explicit, and any additional owned file/query lifecycle is described in the lesson.

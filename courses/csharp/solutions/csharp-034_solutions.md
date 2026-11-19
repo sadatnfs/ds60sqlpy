@@ -1,6 +1,6 @@
 # csharp-034: explanation and comparison
 
-Attempt the six guide tasks before opening this comparison. The executable reference is [csharp-034_solution.cs](csharp-034_solution.cs). Its assertions are always active under the prepared classroom compile settings.
+Attempt the six guide tasks before opening this comparison. The executable reference is [csharp-034_solution.cs](csharp-034_solution.cs). It runs both worked examples and the reference answers below, and its assertions are always active under the prepared classroom compile settings.
 
 ## Why the two examples differ
 
@@ -8,21 +8,56 @@ Attempt the six guide tasks before opening this comparison. The executable refer
 
 **Update one key safely:** The update delegate is a pure calculation, so repeated evaluation cannot duplicate an external effect. Twenty admitted updates produce 20.
 
-## Reason through the six tasks
+## Task answers
 
-1. **Predict and explain.** Compare count++ with Interlocked.Increment.
+### Task 1: Predict and explain
 
-2. **Guided modification.** Add a second independently counted key.
+Compare count++ with Interlocked.Increment.
 
-3. **Independent construction.** Build a concurrent frequency counter using pure update functions.
+No separate reference answer has been written for this task. Example A is the evidence to compare with: Each increment is one supported atomic operation rather than a compound unsynchronized expression. The atomic count is exactly 400.
 
-4. **Diagnose a defect.** Diagnose sending a message inside an AddOrUpdate delegate.
+### Task 2: Guided modification
 
-5. **Boundary evidence.** Test absent and already-present keys.
+Add a second independently counted key.
 
-6. **Transfer and justify.** Explain why atomically updating two separate balances does not preserve a transfer invariant.
+No separate reference answer has been written for this task. Start from Example B: The update delegate is a pure calculation, so repeated evaluation cannot duplicate an external effect. Twenty admitted updates produce 20.
 
-For tasks 1 and 2, use the checked values and mechanism trace in the two examples. For task 3, choose names that expose the input and result contract and retain the same invariants. For task 4, the diagnosed mistakes below supply a concrete wrong assumption: preserve its counterexample before repairing it. Task 5 needs an explicit expected value or documented rejection at the boundary, not just successful execution. For task 6, explain what changes in the new context and which part of the original mechanism remains applicable. Several representations may satisfy this transfer task; justify the choice rather than treating this reference as the only architecture.
+### Task 3: Independent construction
+
+Build a concurrent frequency counter using pure update functions.
+
+**Reference answer.** It runs as the `Task 3` block of the reference program.
+
+```csharp
+var counts = new ConcurrentDictionary<string, int>();
+string[] words = { "a", "b", "a", "a" };
+int Next(string key, int before) => before + 1;
+Task Add(string w) => Task.Run(() => counts.AddOrUpdate(w, 1, Next));
+await Task.WhenAll(words.Select(Add));
+Check(counts["a"] == 3 && counts["b"] == 1, "concurrent frequencies");
+```
+
+**Observe:** a is counted 3 times and b once.
+
+AddOrUpdate may retry the update function under contention, so the function is pure: it computes the new count from the old one without side effects.
+
+### Task 4: Diagnose a defect
+
+Diagnose sending a message inside an AddOrUpdate delegate.
+
+No reference answer has been written for this task yet. The wrong assumptions to look for are this lesson's pitfalls: Concurrent containers protect their own structure, not arbitrary objects stored inside them. Do not infer once-only callback execution. Use a higher-level lock or transaction for multi-location invariants.
+
+### Task 5: Boundary evidence
+
+Test absent and already-present keys.
+
+No reference answer has been written for this task yet. Write the expected value or documented rejection for each boundary before running it, and compare with the checks in Example A (Count atomically) and Example B (Update one key safely).
+
+### Task 6: Transfer and justify
+
+Explain why atomically updating two separate balances does not preserve a transfer invariant.
+
+No single reference answer exists: several designs can satisfy this transfer task. Justify yours against the mechanism described below and the vocabulary entry **Interlocked**, and state one limitation of your choice.
 
 ## Mechanism and diagnostic reasoning
 
@@ -36,4 +71,4 @@ Concurrent containers protect their own structure, not arbitrary objects stored 
 
 ## Review before continuing
 
-The reference checks the worked scenarios, including their boundary distinctions. Your independent and transfer artifacts may have additional checks. Compare observations rather than only source text. Preserve any new regression case you discover and explain why it would reject a plausible wrong implementation. External project steps require their own build and platform evidence and are not established by a portable reference passing.
+Run the reference and confirm that it prints `csharp-034: passed`, then reconstruct one boundary case from memory and explain which check would reject a plausible wrong implementation. External project steps need their own build and platform evidence; a passing portable reference does not establish them.

@@ -6,7 +6,7 @@ The executable reference is `julia-024_reference.jl`. Its checks cover the state
 
 This checks the stated smooth problem and does not imply that every refinement improves every numerical task.
 
-**Expected observation:** The fine final value is closer to exp(-1).
+**Expected observation:** The fine final value is closer to `exp(-1)`.
 
 ## 2. Inspect the complete path
 

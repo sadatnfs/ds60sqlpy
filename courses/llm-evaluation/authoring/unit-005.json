@@ -9,6 +9,7 @@
     "effective sample size"
   ],
   "outcome": "Estimate a declared target mixture from an intentionally balanced evaluation and diagnose overlap and weight concentration.",
+  "verification": "The reweighted target accuracy is 0.6; missing support and zero inclusion probability are rejected; the known-size and sampled-weight denominators give 0.2 and 1/3; concentrated weights drive the effective sample size below 1.03; both systems use identical IDs and weights.",
   "level": "beginner",
   "runtime": "python-core",
   "minutes": 120,

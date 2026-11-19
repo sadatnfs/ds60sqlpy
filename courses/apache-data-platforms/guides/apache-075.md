@@ -18,10 +18,54 @@ server. Keep the scope of a local or prepared-native workshop explicit.
 
 The [sharing project](../projects/delta-sharing/README.md) provides an actual
 bounded protocol client and a separate reference-server preparation runbook.
-The selected1.4.1 release did not expose a matching prebuilt package or image tag
-at inspection. Current official Python 1.4.2also requires a native wrapper lacking
-an inspected LinuxARM64wheel. The portable basic-Parquet client avoids emulation
+The selected 1.4.1 release did not expose a matching prebuilt package or image tag
+at inspection. Current official Python 1.4.2 also requires a native wrapper lacking
+an inspected Linux ARM64 wheel. The portable basic-Parquet client avoids emulation
 and rejects features it does not implement.
+
+**Execution boundary.** No Delta Sharing reference server is included. `bash run.sh
+prepare` and `bash run.sh plan` validate the recipient client without contacting a
+server; the listings and the 401 or 403 below require a separately prepared
+reference server. Its share, schema and table come from a configuration like the
+project's example:
+
+From [`projects/delta-sharing/server-config.example.yaml`](../projects/delta-sharing/server-config.example.yaml):
+
+```yaml
+version: 1
+host: "0.0.0.0"
+port: 8080
+endpoint: "/delta-sharing"
+preSignedUrlTimeoutSeconds: 60
+stalenessAcceptable: false
+evaluatePredicateHints: false
+shares:
+  - name: ds60_fixture
+    schemas:
+      - name: tutorial
+        tables:
+          - name: orders
+            location: "s3a://owned-fixture-bucket/orders"
+            id: "81e0b600-1380-4b9a-a4db-000000000001"
+            historyShared: true
+```
+
+The client walks that hierarchy with three bounded listing requests before it asks
+for table metadata:
+
+From [`projects/delta-sharing/client.py`](../projects/delta-sharing/client.py):
+
+```python
+code, _, body = control("/shares?maxResults=100")
+if share not in {row["name"] for row in json.loads(body).get("items", [])}:
+    raise ValueError("Expected owned share absent from bounded listing")
+_, _, body = control("/shares/" + urllib.parse.quote(share, safe="") + "/schemas?maxResults=100")
+if schema not in {row["name"] for row in json.loads(body).get("items", [])}:
+    raise ValueError("Expected owned schema absent")
+_, _, body = control(path.rsplit("/", 1)[0] + "?maxResults=100")
+if table not in {row["name"] for row in json.loads(body).get("items", [])}:
+    raise ValueError("Expected owned table absent")
+```
 
 ## Worked case A: discover one explicitly owned table
 
@@ -46,7 +90,7 @@ calling one page complete. Record the limit and selected names with the result.
 ## Worked case B: reject an invalid recipient
 
 Issue a separate list request with an intentionally invalid fixture credential
-and require401 or403. A server outage, missing table or TLS failure does not
+and require 401 or 403. A server outage, missing table or TLS failure does not
 satisfy this authentication/authorization negative case. Keep the valid and
 invalid observations separate so an unavailable service cannot masquerade as a
 successful access-control test.
@@ -95,7 +139,7 @@ profile, the bounded native Docker protocol client runs with:
 bash run.sh check
 ```
 
-The actual check lists the exact owned share/schema/table and requires invalid-recipient401/403 before accepting its bounded row read.
+The actual check lists the exact owned share/schema/table and requires an invalid-recipient 401 or 403 before accepting its bounded row read.
 
 The classroom Markdown pad does not start a service. Source configuration and
 unit policy fixtures are not actual reference-server receipts. Keep credentials

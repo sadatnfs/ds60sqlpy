@@ -17,8 +17,8 @@ FullJanuary 2025 and Paper category; Budget is monthly/category-grained and disc
 The sign convention is part of the metric: here negative means below the revenue target, not necessarily a generic unfavorable variance for every account type.
 
 - January has 31 selected dates, satisfying the complete single-month guard.
-- Paper actuals are S 4 and S 5:27 +20 =47.
-- The mapped budget is 60, so actual minus budget is-13.
+- Paper actuals are S4 and S5: 27 + 20 = 47.
+- The mapped budget is 60, so actual minus budget is -13.
 
 ### Case B: A daily selection is not assigned the monthly target
 
@@ -40,13 +40,13 @@ BLANK protects an undefined comparison. If a daily target is required, add and e
 
 Predict February Home actual and budget.
 
-Actual 36, budget 50 and variance-14.
+Actual 36, budget 50 and variance -14.
 
 ### Exercise 2
 
 Combine both January categories.
 
-Actual 67, budget 90 and variance-23.
+Actual 67, budget 90 and variance -23.
 
 ### Exercise 3
 

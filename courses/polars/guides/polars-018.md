@@ -20,9 +20,7 @@ Parse into a new field, isolate invalid rows, apply the declared duplicate rule 
 
 ## Run the lesson
 
-Open this subject in `/classroom`, then show its code and notes. The prepared `data-engineering` worker runs `main.py` in a fresh temporary directory. The examples use installed packages and synthetic local fixtures; no account, cloud service, network request or package download is required. Save source and notes before switching lessons. Temporary databases, project files and tracking artifacts are recreated by each complete program and removed after the job. The classroom retains the submitted source and bounded output, not an indefinitely running external service. The guide distinguishes this local execution from the deployment decisions that need an owned production environment.
-
-
+Open `polars-018` in `/classroom`. Its starter `main.py` contains both worked cases, "Account for every event" and "Publish and inspect a typed artifact", and prints the dictionary each case returns. The prepared `data-engineering` worker runs it in a fresh temporary directory. An `AssertionError` means that an observation differs from the case's stated contract. The inputs are small literal tables. Cases that demonstrate Parquet scans write their files into a temporary directory that is removed when the case returns. No account, network request or package download is involved. Save source and notes before switching lessons.
 
 ## Worked case 1: Account for every event
 
@@ -64,7 +62,6 @@ if __name__ == "__main__":
     print(example_one())
 ```
 
-
 ## Worked case 2: Publish and inspect a typed artifact
 
 The second case writes the feature table and a receipt, then reads both back. It verifies the file hash and logical contents independently. This is a local publication mechanism, not a claim that a distributed transactional service has been deployed.
@@ -104,11 +101,9 @@ if __name__ == "__main__":
     print(example_two())
 ```
 
-
 ## Practice
 
-Make each requested change in a saved copy. Compare both the expected result and the deliberately changed assumption. The separate reference explains the answers.
-
+The starter contains both worked cases, so a task can change either one. Make each change in a saved copy, run it, and compare the printed result with the task's check before opening the separate explained answers.
 
 ### 1. Introduce conflicting duplicates
 
@@ -118,7 +113,6 @@ Change one repeated event amount while keeping its id.
 
 **Hint:** Identical retries differ from conflicting versions.
 
-
 ### 2. Reconcile the source
 
 Write the complete row-accounting equation.
@@ -126,7 +120,6 @@ Write the complete row-accounting equation.
 **Check:** 5 source rows = 3 accepted unique + 1 invalid + 1 duplicate.
 
 **Hint:** Keep categories mutually exclusive.
-
 
 ### 3. Check final grain
 
@@ -136,7 +129,6 @@ Assert one output row per customer.
 
 **Hint:** An aggregate should have a declared key.
 
-
 ### 4. Tamper with an artifact
 
 Change the output bytes after writing its receipt.
@@ -144,7 +136,6 @@ Change the output bytes after writing its receipt.
 **Check:** The hash check detects the difference.
 
 **Hint:** A stored hash describes particular bytes.
-
 
 ### 5. Distinguish two equalities
 
@@ -154,7 +145,6 @@ Explain byte identity versus logical table equality.
 
 **Hint:** Parquet metadata and encoding choices can differ.
 
-
 ### 6. Design the next boundary
 
 Specify what a model-training consumer must verify.
@@ -163,20 +153,19 @@ Specify what a model-training consumer must verify.
 
 **Hint:** A readable file is not necessarily suitable training input.
 
-
 ## Diagnose errors and misleading results
 
 If counts do not reconcile, inspect classification order and duplicate semantics. If an output hash changes, determine whether bytes changed, the receipt is stale or a different encoding was produced. If a model receives future information, correct the temporal contract before improving model hyperparameters. Preserve rejected evidence and the publication decision.
 
 ## Transfer to independent work
 
-Publish a feature artifact with explicit derivation and consumption contracts. Extend the case with a conflicting duplicate and a late-known event, then document why publication is accepted or blocked. Use this result as a foundation for the analytics-engineering and ML-engineering paths rather than assuming a clean-looking table is a complete data product.
+Extend the case with a conflicting duplicate and a late-known event, then document why publication is accepted or blocked. Use this result as a foundation for the analytics-engineering and ML-engineering paths rather than assuming a clean-looking table is a complete data product.
 
 ## Primary references
 
-- [Polars documentation: A validated event-to-feature publication](https://docs.pola.rs/user-guide/lazy/schemas/)
+- [Polars user guide: Schema](https://docs.pola.rs/user-guide/lazy/schemas/)
 - [Polars Python API reference](https://docs.pola.rs/api/python/stable/reference/index.html)
 
 ## Tutor guidance
 
-Use the repository learning-companion skill for `polars-018`. Inspect the learner's own source and observations, ask for an explanation of the relevant data or state contract, and give a focused hint. Separate an assertion on this fixture from a claim about an external dataset or deployed service.
+Use the repository's `$guide-ds60sqlpy-learning` skill (`.agents/skills/guide-ds60sqlpy-learning/SKILL.md`) for `polars-018`. Inspect the learner's own source and printed output first. Ask for an explanation of data contract, deduplication, quarantine, artifact hash and readback in their own words, then give one focused hint at a time. Keep an assertion on this synthetic fixture separate from a claim about an external dataset or deployed service.

@@ -70,7 +70,7 @@ assert(kind(Paid("zero", 0L)) == "paid")
 
 Return positive cents for Paid, negative cents for Refunded, and zero for Voided. Stored payment/refund magnitudes must remain within constructor bounds. Test observed zero and a rejected negative magnitude.
 
-**Expected:** The fixture contributes 100,100,0,-25. Refunded(r0,0) contributes 0 but remains refunded; Paid with-1 cents is rejected.
+**Expected:** The fixture contributes 100, 100, 0, -25. Refunded(r0,0) contributes 0 but remains refunded; Paid with -1 cents is rejected.
 
 ```scala
 def signedCents(event: Event): Long = {
@@ -135,7 +135,7 @@ assert(netTotal(zeroStates) == 0L && zeroStates.size == 2)
 
 Reject repeated event IDs, then return IDs in source order, net total, and counts for paid/voided/refunded including zero categories. Do not deduplicate equal monetary amounts.
 
-**Expected:** The fixture returns IDs[p1, p2, v1, r1], net 175 and counts paid 2, voided 1, refunded 1. Repeated ID same is rejected even if both amounts agree.
+**Expected:** The fixture returns IDs [p1, p2, v1, r1], net 175 and counts paid 2, voided 1, refunded 1. Repeated ID same is rejected even if both amounts agree.
 
 ```scala
 def audit(events: Seq[Event]): (Seq[String], Long, Map[String, Long]) = {

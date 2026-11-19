@@ -38,6 +38,23 @@ internal static class Program {
       }
       Check(rejected, "domain rejects empty identity");
     }
+    {
+      // Task 3: Independent construction
+      (int Total, int Rejected) Aggregate(IEnumerable<int> quantities) {
+        int total = 0;
+        int rejected = 0;
+        foreach (int quantity in quantities) {
+          if (quantity < 0) {
+            rejected++;
+          } else {
+            total = checked(total + quantity);
+          }
+        }
+        return (total, rejected);
+      }
+      var result = Aggregate(new[] { 2, -1, 3 });
+      Check(result.Total == 5 && result.Rejected == 1, "core aggregation");
+    }
     Console.WriteLine("csharp-040: passed");
     await Task.CompletedTask;
   }

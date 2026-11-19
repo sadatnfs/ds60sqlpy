@@ -17,6 +17,18 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         assert!(!starts_with_p("apple"));
         assert_eq!(owned, "pear");
     }
+
+    {
+        // Task 3: Independent construction
+        /// Area of a rectangle; both sides must be at most 65_535.
+        fn area(width: u32, height: u32) -> u32 {
+            assert!(width <= 65_535 && height <= 65_535);
+            width * height
+        }
+        assert_eq!(area(3, 4), 12);
+        assert_eq!(area(0, 9), 0);
+        assert_eq!(area(65_535, 65_535), 4_294_836_225);
+    }
     println!("rust-007: passed");
     Ok(())
 }

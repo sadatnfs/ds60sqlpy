@@ -37,12 +37,31 @@ internal static class Program {
       Check(account.Value == 2, "consistent observation");
       Check(account.Value >= 0, "valid state");
     }
+    {
+      // Task 3: Independent construction
+      var gate = new Lock();
+      int left = 100;
+      int right = 0;
+      void Transfer(int amount) {
+        lock (gate) {
+          left -= amount;
+          right += amount;
+        }
+      }
+      Task Move() => Task.Run(() => Transfer(5));
+      var moves = new List<Task>();
+      for (int i = 0; i < 10; i++) {
+        moves.Add(Move());
+      }
+      await Task.WhenAll(moves);
+      Check(left + right == 100 && right == 50, "sum preserved");
+    }
     Console.WriteLine("csharp-033: passed");
     await Task.CompletedTask;
   }
 
   public sealed class LockedCounter {
-    private readonly object gate = new();
+    private readonly Lock gate = new();
     private int value;
     public void Add() { lock (gate) value++; }
     public int Value {

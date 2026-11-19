@@ -27,7 +27,11 @@ storage and a file URI. ADD PARTITION associates the day value with its actual
 location. The resulting table is a logical description over existing bytes, not
 a conversion of arbitrary files into a transactional format.
 
-The query oracle expects IDs 1/2/3 with amounts 4/9/7 and regional totals11/9.
+The project's initialization script contains the complete registration:
+
+<!-- include: projects/hive/initialize.hql hql -->
+
+The query oracle expects IDs 1/2/3 with amounts 4/9/7 and regional totals 11 and 9.
 Record the table's exact database, name, type and location beside that result.
 An identically named table in a different Metastore can point somewhere else.
 A client connecting to an embedded local catalog by mistake can therefore see

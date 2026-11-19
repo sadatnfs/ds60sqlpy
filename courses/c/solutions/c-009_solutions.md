@@ -8,22 +8,26 @@ Pointer arithmetic is defined relative to an array object. A pointer may move am
 
 values+i points to element i and *(values+i) is equivalent to values[i] within valid bounds. end-begin produces an element count, not a byte count. A traversal can use p!=end before dereference. const int * restricts mutation through that view. Zero-length views need a documented representation; avoid performing pointer arithmetic on NULL merely because the intended length is zero.
 
-## Exercise 1: Relate indexing and arithmetic
+## Exercise 1: Relate indexing and arithmetic: change one input
 
-Read the second element through both forms.
+Copy worked example 1 into a scratch pad and change `int values[] = {2, 4, 6};` to `int values[] = {2, 5, 6};`. Before running, predict which CHECK fails and which value it now sees; then run it and restore the original line.
+
+The unchanged code is worked example 1:
 
 ```c
 int values[] = {2, 4, 6};
 CHECK(values[1] == *(values + 1) && *(values + 1) == 4);
 ```
 
-**Expected:** Both yield 4.
+**Expected:** The changed run stops with `Check failed` at the CHECK on `values[1] == *(values + 1) && *(values + 1) == 4`. Restoring the original line brings back the worked observation: both yield 4.
 
 The equivalence applies because the computed pointer remains within the live array.
 
-## Exercise 2: Measure an array interval
+## Exercise 2: Measure an array interval: debug a regression
 
-Subtract begin from one-past end.
+A regression changed one token in worked example 2, so one line now reads `int *end = values - 3;`. Run worked example 2 with that line, use the failing CHECK to locate the defect and repair it without changing the CHECK.
+
+The unchanged code is worked example 2:
 
 ```c
 int values[] = {2, 4, 6};
@@ -33,7 +37,7 @@ ptrdiff_t n = end - begin;
 CHECK(n == 3);
 ```
 
-**Expected:** The difference is 3 elements.
+**Expected:** Before the repair the run stops with `Check failed` at the CHECK on `n == 3`; after it the line reads `int *end = values + 3;` again and the difference is 3 elements.
 
 The result counts int elements. Multiplying by sizeof(int) would be a separate byte-size calculation.
 

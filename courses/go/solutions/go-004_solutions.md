@@ -8,21 +8,25 @@ A function separates a computation from its callers. Its contract names accepted
 
 func twice(x int) int declares a parameter and a return type. return ends the invocation. (int, error) declares two returned values, which callers normally bind together and check before using the result. A variadic parameter ...int accepts zero or more values; within the function it is a slice. A return from a helper returns only from that helper, not the caller.
 
-## 1. Implement a pure helper
+## 1. Implement a pure helper: predict an edited check
 
-Implement twice and check inputs 7 and 0.
+Copy worked example 1 into a scratch pad and change `check(twice(7) == 14 && twice(0) == 0, "twice")` to `check(twice(8) == 14 && twice(0) == 0, "twice")` inside its check. Before running, predict whether the check still passes and explain why; then restore it.
+
+The unchanged code is worked example 1:
 
 ```go
 check(twice(7) == 14 && twice(0) == 0, "twice")
 ```
 
-**Expected:** The results are 14 and 0.
+**Expected:** The changed run panics with `twice` because the edited check no longer holds. Restoring the original line brings back the worked observation: the results are 14 and 0.
 
 The zero case confirms the helper calculates from its input rather than returning a memorized positive result.
 
-## 2. Return an explicit failure
+## 2. Return an explicit failure: debug a regression
 
-Implement positiveArea that rejects a nonpositive dimension.
+A regression changed one token in worked example 2, so one line now reads `_, err = positiveArea(1, 4)`. Run worked example 2 with that line, use the failure to locate the defect and repair it without changing the check.
+
+The unchanged code is worked example 2:
 
 ```go
 area, err := positiveArea(3, 4)
@@ -31,7 +35,7 @@ _, err = positiveArea(0, 4)
 check(err != nil, "invalid area")
 ```
 
-**Expected:** 3 by 4 returns 12; zero width returns an error.
+**Expected:** Before the repair the program panics with `invalid area`; after it the line reads `_, err = positiveArea(0, 4)` again and 3 by 4 returns 12; zero width returns an error.
 
 The error describes a domain policy. Another geometry API might allow zero area, but its contract must say so.
 

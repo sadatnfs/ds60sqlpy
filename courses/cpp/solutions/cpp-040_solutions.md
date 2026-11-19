@@ -52,7 +52,7 @@ Specify accepted identifier characters and length.
 
 **Reasoning:** A narrow contract is easier to inspect than arbitrary path sanitization.
 
-**Verify:** Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.
+**Verify:** Check your specification against `safe_id`: it rejects an empty string, accepts at most 16 characters and allows only `a-z`, `0-9` and `_`, so no uppercase letter, dot or slash.
 
 ## Exercise 2: Test normal input
 
@@ -62,7 +62,7 @@ Validate batch_7 and 0.
 
 **Reasoning:** An identifier may be numeric without becoming a path.
 
-**Verify:** Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.
+**Verify:** Assert `safe_id("batch_7")` and `safe_id("0")`; a single digit is a valid identifier under this grammar.
 
 ## Exercise 3: Reject traversal shapes
 
@@ -72,7 +72,7 @@ Test ../secret, a/b and a backslash-separated path.
 
 **Reasoning:** Separators are outside the grammar.
 
-**Verify:** Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.
+**Verify:** Assert `!safe_id("../secret")`, `!safe_id("a/b")` and `!safe_id("a\\b")`, and confirm the program makes no `std::filesystem` call for a rejected name.
 
 ## Exercise 4: Repair overclaim
 
@@ -82,7 +82,7 @@ Explain why this is not a general symlink-safe path sandbox.
 
 **Reasoning:** Filesystem races and links require stronger host operations.
 
-**Verify:** Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.
+**Verify:** Check that your explanation says `safe_id` only validates a name, and names a case it cannot cover, such as a symbolic link inside the data directory that points elsewhere.
 
 ## Exercise 5: Enforce size
 
@@ -92,7 +92,7 @@ Test empty, 16-character and 17-character strings.
 
 **Reasoning:** Length is checked before per-character work.
 
-**Verify:** Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.
+**Verify:** Assert `!safe_id("")`, `safe_id(std::string(16, 'a'))` and `!safe_id(std::string(17, 'a'))`.
 
 ## Exercise 6: Transfer row budgets
 
@@ -102,4 +102,4 @@ Set max 100 rows and 256 bytes per row before parsing a file.
 
 **Reasoning:** Input limits and output publication must form one contract.
 
-**Verify:** Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.
+**Verify:** Feed 101 short rows, then a single 257-byte row, and confirm each run reports the limit and count it hit and writes no output file.

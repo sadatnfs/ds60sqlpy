@@ -7,19 +7,19 @@ from torch.nn import functional as F
 
 
 def verify():
-    # Exercise 1: Calculate the initial loss
+    # Worked example A: Calculate the initial loss
     x = torch.tensor([1.0, 2.0, 3.0], dtype=torch.float64)
     y = 2 * x
     w = nn.Parameter(torch.tensor(0.0, dtype=torch.float64))
     loss = ((w * x - y) ** 2).mean()
     np.testing.assert_allclose(loss.item(), 56 / 3, atol=1e-12, rtol=0)
 
-    # Exercise 2: Inspect the gradient before updating
+    # Worked example B: Inspect the gradient before updating
     loss.backward()
     np.testing.assert_allclose(w.grad.item(), -56 / 3, atol=1e-12, rtol=0)
     assert w.item() == 0
 
-    # Exercise 3: Apply exactly one SGD update
+    # Worked example C: Apply exactly one SGD update
     optimizer = torch.optim.SGD([w], lr=0.1)
     optimizer.step()
     np.testing.assert_allclose(w.item(), 28 / 15, atol=1e-12, rtol=0)
@@ -43,6 +43,24 @@ def verify():
     saved = w.item()
     optimizer.zero_grad(set_to_none=True)
     assert w.grad is None and w.item() == saved
+
+    # Exercise 1: Compute a new initial loss
+    xs = torch.tensor([1.0, 2.0], dtype=torch.float64)
+    ys = 3 * xs
+    ws = nn.Parameter(torch.tensor(0.0, dtype=torch.float64))
+    objective = ((ws * xs - ys) ** 2).mean()
+    np.testing.assert_allclose(objective.item(), 22.5, atol=1e-12, rtol=0)
+
+    # Exercise 2: Predict the gradient before stepping
+    objective.backward()
+    np.testing.assert_allclose(ws.grad.item(), -15, atol=1e-12, rtol=0)
+    assert ws.item() == 0
+
+    # Exercise 3: Apply one step with a new rate
+    sgd = torch.optim.SGD([ws], lr=0.05)
+    sgd.step()
+    np.testing.assert_allclose(ws.item(), 0.75, atol=1e-12, rtol=0)
+    np.testing.assert_allclose(((ws * xs - ys) ** 2).mean().item(), 12.65625, atol=1e-12, rtol=0)
     return {"checks": 6, "status": "passed"}
 
 

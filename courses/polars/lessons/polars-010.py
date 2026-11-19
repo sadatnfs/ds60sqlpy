@@ -1,4 +1,4 @@
-"""polars-010: worked starting point; complete the guide's six changes."""
+"""polars-010: both worked cases; complete the guide's six changes."""
 
 import tempfile
 from pathlib import Path
@@ -25,8 +25,31 @@ def example_one():
         return {"result": result.to_dicts(), "planned_columns": schema.names()}
 
 
+def example_two():
+    frame = pl.DataFrame({"group": ["A", "A", "B"], "value": [1, 9, 8]})
+    after = (
+        frame.lazy()
+        .group_by("group")
+        .agg(pl.col("value").mean().alias("mean"))
+        .filter(pl.col("mean") > 6)
+        .collect()
+    )
+    before = (
+        frame.lazy()
+        .filter(pl.col("value") > 6)
+        .group_by("group")
+        .agg(pl.col("value").mean().alias("mean"))
+        .collect()
+        .sort("group")
+    )
+    assert after["group"].to_list() == ["B"]
+    assert before["group"].to_list() == ["A", "B"]
+    return {"group_filter": after.to_dicts(), "changed_population": before.to_dicts()}
+
+
 if __name__ == "__main__":
     print(example_one())
+    print(example_two())
 
 # TODO 1: Raise the amount threshold to 15.
 # TODO 2: Add a large text field that the result does not need.

@@ -12,9 +12,9 @@
       "prerequisites": [],
       "runtime": "python-core",
       "concepts": ["document", "sentence", "token", "label", "task formulation"],
-      "outcome": "Explain and implement language as data and the unit of analysis with inspectable data and measured errors.",
-      "lab": "Use a small authored corpus to trace the calculation, compare a baseline and inspect counterexamples.",
-      "verification": "Check numerical or span-level expected results, perturb input assumptions and interpret the observed errors."
+      "outcome": "Treat a text dataset as records with identities, labels and families: validate the records, count documents, labels and tokens separately, and state which unit an evaluation score describes.",
+      "lab": "Validate four authored support-ticket records, reject a repeated ID and blank text, count documents, classes and whitespace pieces, then audit and repair a family split.",
+      "verification": "The original four rows pass and a second row with ID a raises ValueError; the fixture has 4 documents, two labels of each class and 9 pieces; unweighted accuracy stays 0.5 when the length weights are exchanged while weighted accuracy changes; the overlap {'account-reset'} disappears once a and c share a partition."
     },
     {
       "id": "nlp-002",
@@ -24,9 +24,9 @@
       "prerequisites": ["nlp-001"],
       "runtime": "python-core",
       "concepts": ["code point", "NFC", "NFKC", "encoding", "normalization"],
-      "outcome": "Explain and implement unicode, normalization and loss of information with inspectable data and measured errors.",
-      "lab": "Use a small authored corpus to trace the calculation, compare a baseline and inspect counterexamples.",
-      "verification": "Check numerical or span-level expected results, perturb input assumptions and interpret the observed errors."
+      "outcome": "Distinguish code points, UTF-8 bytes and user-visible text, choose NFC, NFD, NFKC or case folding for a stated purpose, and keep raw spans so normalization never erases provenance.",
+      "lab": "Compare two spellings of café, group compatibility characters under NFKC, case-fold Straße, decode a corrupt byte string strictly and with replacement, and store a raw span beside its NFC form.",
+      "verification": "The raw spellings differ with code-point lengths (4, 5) and become equal under NFC; NFKC forms exactly two groups of two; Straße case-folds to strasse; strict decoding fails at byte 3 while replacement decoding ends with U+FFFD; the raw [0, 5) slice still reproduces the annotation."
     },
     {
       "id": "nlp-003",
@@ -36,9 +36,9 @@
       "prerequisites": ["nlp-002"],
       "runtime": "python-core",
       "concepts": ["regex", "span", "escaping", "precision", "recall"],
-      "outcome": "Explain and implement regular expressions and explainable extraction with inspectable data and measured errors.",
-      "lab": "Use a small authored corpus to trace the calculation, compare a baseline and inspect counterexamples.",
-      "verification": "Check numerical or span-level expected results, perturb input assumptions and interpret the observed errors."
+      "outcome": "Write regular expressions that return each match with its exact span, choose between search, match and fullmatch, separate syntactic matching from semantic validity, and score an extractor against gold entities.",
+      "lab": "Extract invoice references and their spans from authored messages, reject misleading digit forms, add case alternatives that exclude 0000, and score an imperfect extractor.",
+      "verification": "The two references are returned with spans (4, 12) and (26, 34); five-digit, prefixed, underscore-prefixed and non-ASCII-digit forms do not match; only inv-7777 survives the semantic rule; TP 2, FP 1 and FN 1 give precision and recall 2/3."
     },
     {
       "id": "nlp-004",
@@ -48,9 +48,9 @@
       "prerequisites": ["nlp-003"],
       "runtime": "python-core",
       "concepts": ["word boundary", "byte pair encoding", "unknown token", "offset"],
-      "outcome": "Explain and implement segmentation, tokenization and subwords with inspectable data and measured errors.",
-      "lab": "Use a small authored corpus to trace the calculation, compare a baseline and inspect counterexamples.",
-      "verification": "Check numerical or span-level expected results, perturb input assumptions and interpret the observed errors."
+      "outcome": "Compare whitespace, punctuation-aware and subword segmentation, train byte-pair-encoding merges with a deterministic tie rule, and freeze the tokenizer so inference never changes it.",
+      "lab": "Segment \"can't pay.\" under three policies, count weighted symbol pairs for {'low': 3, 'lower': 1}, learn two merges, then encode lower, row and slow.",
+      "verification": "pay sits at [6, 9); ('l', 'o') and ('o', 'w') both count 4 and ('w', '</w>') counts 3; the learned merges are ('l', 'o') then ('lo', 'w'); lower and row round-trip while slow raises an error under the restricted alphabet."
     },
     {
       "id": "nlp-005",
@@ -60,9 +60,9 @@
       "prerequisites": ["nlp-004"],
       "runtime": "python-core",
       "concepts": ["lemma", "stem", "part of speech", "dependency", "ambiguity"],
-      "outcome": "Explain and implement morphology, syntax and linguistic structure with inspectable data and measured errors.",
-      "lab": "Use a small authored corpus to trace the calculation, compare a baseline and inspect counterexamples.",
-      "verification": "Check numerical or span-level expected results, perturb input assumptions and interpret the observed errors."
+      "outcome": "Keep part-of-speech context in lemmatization, trace a context rule and record its failure, and validate dependency head arrays while separating structural validity from the intended reading.",
+      "lab": "Lemmatize saw, studies and better with explicit POS mappings, apply a determiner rule to saw, and check one-root, range and cycle constraints on head arrays for I saw her.",
+      "verification": "saw/VERB maps to see and saw/NOUN to saw; the rule labels the old saw as VERB and the error is recorded; [1, -1, 1] is accepted while [1, 0, -1], [-1, -1], [2, -1] and empty input are rejected; [1, -1, 0] is valid but is not the intended reading."
     },
     {
       "id": "nlp-006",
@@ -72,9 +72,9 @@
       "prerequisites": ["nlp-005"],
       "runtime": "python-core",
       "concepts": ["conditional probability", "smoothing", "log likelihood", "perplexity"],
-      "outcome": "Explain and implement n-gram models, smoothing and perplexity with inspectable data and measured errors.",
-      "lab": "Use a small authored corpus to trace the calculation, compare a baseline and inspect counterexamples.",
-      "verification": "Check numerical or span-level expected results, perturb input assumptions and interpret the observed errors."
+      "outcome": "Fit an add-one smoothed bigram model with BOS, EOS and UNK, derive P(we like tea) = 0.01 and perplexity sqrt(10) by hand, and explain why perplexities from different tokenizers are not comparable.",
+      "lab": "Train on 'we like tea', 'we like coffee' and 'they like tea'; score 'we like tea', 'we like cocoa' and empty input.",
+      "verification": "Joint probability 0.01 and perplexity 3.1623 for 'we like tea'; model state unchanged after scoring 'we like cocoa'; empty input perplexity 10."
     },
     {
       "id": "nlp-007",
@@ -84,9 +84,9 @@
       "prerequisites": ["nlp-006"],
       "runtime": "python-core",
       "concepts": ["document frequency", "TF-IDF", "sparse matrix", "normalization"],
-      "outcome": "Explain and implement counts, tf-idf and sparse representations with inspectable data and measured errors.",
-      "lab": "Use a small authored corpus to trace the calculation, compare a baseline and inspect counterexamples.",
-      "verification": "Check numerical or span-level expected results, perturb input assumptions and interpret the observed errors."
+      "outcome": "Compute document frequency, smoothed IDF and L2-normalized TF-IDF rows by hand, match scikit-learn's TfidfVectorizer, and score sparse cosine retrieval without refitting on queries.",
+      "lab": "Fit TF-IDF on 'tea tea cup' and 'coffee cup', score the query tea, then transform the unseen word matcha and empty text.",
+      "verification": "Document frequencies are [1, 2, 1] for [coffee, cup, tea] and IDF is [a, 1, a] with a = log(3/2) + 1; tea scores 2a/sqrt(1 + 4a^2) against the first document and 0 against the second; matcha and empty text produce no nonzero entries and leave the vocabulary unchanged."
     },
     {
       "id": "nlp-008",
@@ -96,9 +96,9 @@
       "prerequisites": ["nlp-007"],
       "runtime": "python-core",
       "concepts": ["conditional independence", "log odds", "smoothing", "imbalance"],
-      "outcome": "Explain and implement naive bayes as a text baseline with inspectable data and measured errors.",
-      "lab": "Use a small authored corpus to trace the calculation, compare a baseline and inspect counterexamples.",
-      "verification": "Check numerical or span-level expected results, perturb input assumptions and interpret the observed errors."
+      "outcome": "Fit multinomial naive Bayes by hand with Laplace smoothing, compute stable log-space posteriors, match scikit-learn, and show how priors and missing negation context change the decision.",
+      "lab": "Aggregate class-by-feature counts for a two-term vocabulary, smooth with alpha = 1, score the probe [1, 0] with logsumexp and compare MultinomialNB.",
+      "verification": "Counts [[0, 3], [3, 1]] give likelihoods [[1/5, 4/5], [4/6, 2/6]]; the probe [1, 0] has posterior [3/13, 10/13] and MultinomialNB agrees; an all-zero probe returns the prior; urgent and not urgent receive identical posteriors under the fixed vocabulary."
     },
     {
       "id": "nlp-009",
@@ -108,9 +108,9 @@
       "prerequisites": ["nlp-008"],
       "runtime": "python-core",
       "concepts": ["logistic regression", "regularization", "threshold", "calibration"],
-      "outcome": "Explain and implement linear text classification and calibrated scores with inspectable data and measured errors.",
-      "lab": "Use a small authored corpus to trace the calculation, compare a baseline and inspect counterexamples.",
-      "verification": "Check numerical or span-level expected results, perturb input assumptions and interpret the observed errors."
+      "outcome": "Trace a logistic text classifier from features to log odds and probability, compare regularization strengths, separate the decision threshold from the model, and evaluate probabilities with the Brier score.",
+      "lab": "Evaluate a two-feature logit by hand, fit a six-message classifier with a frozen vocabulary, compare C = 0.1 with C = 10, and apply thresholds 0.5 and 0.3.",
+      "verification": "Logit 2.5 gives probability about 0.92414 and logits of +/-1000 stay finite; the vocabulary has six terms; the C = 0.1 coefficient norm is smaller; the thresholds give [False, False, True] and [False, True, True]; Brier scores are 0.41 and 0.26 and a probability of 1.2 raises ValueError."
     },
     {
       "id": "nlp-010",
@@ -120,9 +120,9 @@
       "prerequisites": ["nlp-009"],
       "runtime": "python-core",
       "concepts": ["HMM", "transition", "emission", "Viterbi", "BIO"],
-      "outcome": "Explain and implement sequence labeling and viterbi decoding with inspectable data and measured errors.",
-      "lab": "Use a small authored corpus to trace the calculation, compare a baseline and inspect counterexamples.",
-      "verification": "Check numerical or span-level expected results, perturb input assumptions and interpret the observed errors."
+      "outcome": "Decode the most probable label sequence with Viterbi in log space, check it against exhaustive enumeration, handle boundary cases, and validate BIO tag structure.",
+      "lab": "Decode two-token fixtures with backpointers, enumerate all four paths as an oracle, test empty, impossible and tied inputs, and validate three BIO sequences.",
+      "verification": "Initial scores are [0.36, 0.04]; the first fixture decodes to path [0, 1] with probability 0.0756 and the persistent fixture to V, V at 0.1386; empty input has log score 0, an impossible row raises ValueError and ties choose [0, 0]; token accuracy 2/3 recovers no exact ORG entity."
     },
     {
       "id": "nlp-011",
@@ -132,9 +132,9 @@
       "prerequisites": ["nlp-010"],
       "runtime": "python-core",
       "concepts": ["named entity", "span", "relation", "coreference", "matching"],
-      "outcome": "Explain and implement entities, relations and extraction boundaries with inspectable data and measured errors.",
-      "lab": "Use a small authored corpus to trace the calculation, compare a baseline and inspect counterexamples.",
-      "verification": "Check numerical or span-level expected results, perturb input assumptions and interpret the observed errors."
+      "outcome": "Extract entity mentions with exact character spans, resolve overlapping matches, score entity-level precision, recall and F1, and extract directed relations that abstain on negation, rumor and unresolved coreference.",
+      "lab": "Match a three-entity sentence with a dictionary, handle Acme versus Acme Labs and a repeated name, score predicted against gold mentions, and extract acquisition relations.",
+      "verification": "Spans [0, 3), [11, 20) and [24, 29) carry PER, ORG and LOC; the longer organization wins; TP 1, FP 1 and FN 2 give precision 0.5, recall 1/3 and F1 0.4; reversed company order reverses the roles and negated or rumored sentences abstain."
     },
     {
       "id": "nlp-012",
@@ -144,9 +144,9 @@
       "prerequisites": ["nlp-011"],
       "runtime": "python-core",
       "concepts": ["co-occurrence", "PMI", "embedding", "cosine", "analogy"],
-      "outcome": "Explain and implement distributional embeddings and similarity with inspectable data and measured errors.",
-      "lab": "Use a small authored corpus to trace the calculation, compare a baseline and inspect counterexamples.",
-      "verification": "Check numerical or span-level expected results, perturb input assumptions and interpret the observed errors."
+      "outcome": "Build count-based word vectors from windowed co-occurrence, transform them with positive PMI, compare words by cosine similarity, and explain what rank reduction and rotation do and do not change.",
+      "lab": "Count radius-one contexts for 'cat pet cat' without crossing document boundaries, compute PPMI for a 3-by-3 table, compare rows by cosine and compress to rank two.",
+      "verification": "The window counts are [[0, 2], [2, 0]] and separate documents add no pairs; the first PPMI cell is log(80/49) and every value is finite and nonnegative; a zero vector gives cosine None; a shared rotation leaves cosine unchanged."
     },
     {
       "id": "nlp-013",
@@ -156,9 +156,9 @@
       "prerequisites": ["nlp-012"],
       "runtime": "python-core",
       "concepts": ["LSA", "NMF", "LDA", "topic coherence", "stability"],
-      "outcome": "Explain and implement topic discovery and latent structure with inspectable data and measured errors.",
-      "lab": "Use a small authored corpus to trace the calculation, compare a baseline and inspect counterexamples.",
-      "verification": "Check numerical or span-level expected results, perturb input assumptions and interpret the observed errors."
+      "outcome": "Fit LSA, NMF and LDA to the same small corpus, interpret each component through its words and documents, and align topic identities that a refit can permute.",
+      "lab": "Fit a count vocabulary on four authored documents, then two-component TruncatedSVD, NMF and LDA, and align H with its reversed row order.",
+      "verification": "The held-out word newplanet adds no column; SVD document coordinates have shape (4, 2) with reconstruction error below the zero-matrix baseline; NMF factors are nonnegative and separate pet from wheel; each LDA row sums to 1; alignment finds permutation [1, 0] with similarities [1, 1]."
     },
     {
       "id": "nlp-014",
@@ -168,9 +168,9 @@
       "prerequisites": ["nlp-013"],
       "runtime": "python-core",
       "concepts": ["pooling", "embedding space", "negative sample", "semantic retrieval"],
-      "outcome": "Explain and implement sentence representations and semantic search with inspectable data and measured errors.",
-      "lab": "Use a small authored corpus to trace the calculation, compare a baseline and inspect counterexamples.",
-      "verification": "Check numerical or span-level expected results, perturb input assumptions and interpret the observed errors."
+      "outcome": "Pool token vectors into sentence vectors with padding masks, normalize them for cosine search, show what mean pooling loses, and compute an in-batch contrastive loss.",
+      "lab": "Mean-pool a three-row fixture with two valid positions, compare car and automobile repair sentences, test dog bites person against person bites dog, and compute the contrastive loss at temperatures 1 and 0.5.",
+      "verification": "The masked mean is [2, 3] and all-padding input raises ValueError; normalized vectors have unit norm and the synonym pair outranks dog/pet; both word orders pool to the same vector; scores [[3, 1], [1, 3]] give loss log(1 + exp(-2)), about 0.126928, which falls at temperature 0.5."
     },
     {
       "id": "nlp-015",
@@ -180,9 +180,9 @@
       "prerequisites": ["nlp-014"],
       "runtime": "python-core",
       "concepts": ["bidirectional attention", "encoder", "mask", "pooling"],
-      "outcome": "Explain and implement contextual encoders for classification and tagging with inspectable data and measured errors.",
-      "lab": "Use a small authored corpus to trace the calculation, compare a baseline and inspect counterexamples.",
-      "verification": "Check numerical or span-level expected results, perturb input assumptions and interpret the observed errors."
+      "outcome": "Compute self-attention outputs that make a token depend on its neighbors, keep padding from influencing valid positions, and train document and token heads with masked supervision.",
+      "lab": "Run scaled dot-product attention over the two bank contexts, append a padding vector, fit a small logistic document head and compute tagging loss with ignored labels.",
+      "verification": "Bank's second output coordinate changes sign between river and money; valid outputs are unchanged by padding, whose key weights are 0; the document head's loss falls from log 2 to below 0.1 with predictions [0, 1, 0, 1]; tagging loss is log(1 + exp(-2)) and all-padding or all-ignored inputs raise ValueError."
     },
     {
       "id": "nlp-016",
@@ -192,9 +192,9 @@
       "prerequisites": ["nlp-015"],
       "runtime": "python-core",
       "concepts": ["encoder decoder", "cross attention", "teacher forcing", "exposure bias"],
-      "outcome": "Explain and implement sequence-to-sequence learning and summarization with inspectable data and measured errors.",
-      "lab": "Use a small authored corpus to trace the calculation, compare a baseline and inspect counterexamples.",
-      "verification": "Check numerical or span-level expected results, perturb input assumptions and interpret the observed errors."
+      "outcome": "Build teacher-forced decoder inputs and targets, compute masked cross-attention, compare greedy and beam search, and keep extractive provenance for grounded summaries.",
+      "lab": "Shift the target [repair], compute one-query cross-attention with and without source padding, and run width-one and width-two search on an authored probability table.",
+      "verification": "[repair] becomes inputs [BOS, repair] and targets [repair, EOS]; masking the second source gives output exactly [10, 0] and an all-invalid source raises; greedy search ends at tea, EOS with probability 0.3 while the width-two beam finds coffee, EOS at 0.4; the unsupported refund query returns None."
     },
     {
       "id": "nlp-017",
@@ -204,9 +204,9 @@
       "prerequisites": ["nlp-016"],
       "runtime": "python-core",
       "concepts": ["BLEU", "ROUGE", "semantic metric", "factual support", "human judgment"],
-      "outcome": "Explain and implement evaluating generated language without a single perfect answer with inspectable data and measured errors.",
-      "lab": "Use a small authored corpus to trace the calculation, compare a baseline and inspect counterexamples.",
-      "verification": "Check numerical or span-level expected results, perturb input assumptions and interpret the observed errors."
+      "outcome": "Compute clipped n-gram precision, the brevity penalty and LCS-based ROUGE-L by hand, and keep semantic failures visible beside overlap scores.",
+      "lab": "Score a repeated-word candidate, 'the cat' against 'the cat sat' and the readiness minimal pair, then aggregate outcomes by family.",
+      "verification": "Clipped unigram precision is 0.25, not 1; the truncated candidate scores exp(-0.5); the minimal pair has LCS 3, precision 1, recall 0.75 and F1 6/7 yet is labelled a contradiction; family rates [0.5, 0] give an equal-family mean of 0.25."
     },
     {
       "id": "nlp-018",
@@ -216,9 +216,9 @@
       "prerequisites": ["nlp-017"],
       "runtime": "python-core",
       "concepts": ["language identification", "tokenization equity", "alignment", "transfer"],
-      "outcome": "Explain and implement multilingual nlp and domain shift with inspectable data and measured errors.",
-      "lab": "Use a small authored corpus to trace the calculation, compare a baseline and inspect counterexamples.",
-      "verification": "Check numerical or span-level expected results, perturb input assumptions and interpret the observed errors."
+      "outcome": "Count code points, bytes and segments across scripts, keep ambiguous language identification as an abstention, trace lossy normalization, and report language slices beside pooled metrics.",
+      "lab": "Measure a Chinese string, run a narrow language-cue rule, strip marks from résumé, case-fold İ and Straße, and compute per-language accuracy.",
+      "verification": "The Chinese string has 4 code points, 12 UTF-8 bytes and 1 whitespace segment; the cue rule returns en, es, None, None; résumé and resume collide after mark removal; English 0.9 and Spanish 0.5 on counts 10 and 2 give pooled accuracy 5/6 and macro accuracy 0.7."
     },
     {
       "id": "nlp-019",
@@ -228,9 +228,9 @@
       "prerequisites": ["nlp-018"],
       "runtime": "python-core",
       "concepts": ["annotation guide", "kappa", "adjudication", "soft label", "disagreement"],
-      "outcome": "Explain and implement annotation, agreement and uncertain labels with inspectable data and measured errors.",
-      "lab": "Use a small authored corpus to trace the calculation, compare a baseline and inspect counterexamples.",
-      "verification": "Check numerical or span-level expected results, perturb input assumptions and interpret the observed errors."
+      "outcome": "Compute raw agreement and Cohen's kappa from a confusion table, show how prevalence lowers kappa, and keep adjudicated labels separate from original ratings.",
+      "lab": "Write a binary urgency rubric, compute agreement and kappa for six paired labels and a 100-item prevalence case, then record soft labels and an adjudicated final label.",
+      "verification": "kappa 1/3 for the six-item fixture; raw agreement 0.98 with kappa about -0.0101 for the 99/100 prevalence case; soft labels [2/3, 1, 0]."
     },
     {
       "id": "nlp-020",
@@ -240,9 +240,9 @@
       "prerequisites": ["nlp-019"],
       "runtime": "python-core",
       "concepts": ["labeling function", "conflict", "uncertainty sampling", "selection bias"],
-      "outcome": "Explain and implement weak supervision and active learning with inspectable data and measured errors.",
-      "lab": "Use a small authored corpus to trace the calculation, compare a baseline and inspect counterexamples.",
-      "verification": "Check numerical or span-level expected results, perturb input assumptions and interpret the observed errors."
+      "outcome": "Aggregate weak labeling functions with abstentions, diagnose coverage, conflict and correlated sources, and select active-learning examples by uncertainty under a family budget.",
+      "lab": "Compute coverage and conflict for a four-row weak-label matrix, vote with ties, collapse duplicated sources, and select two uncertain examples with at most one per family.",
+      "verification": "Coverage is 0.75 and conflict 0.25 overall and 1/3 among covered rows; voting gives [1, 0, -1, -1]; collapsing duplicated sources turns a majority 1 into an abstention; entropy ranks indices [0, 1] first; the family-limited selection is [0, 3] and budget 0 returns an empty batch."
     },
     {
       "id": "nlp-021",
@@ -252,9 +252,9 @@
       "prerequisites": ["nlp-020"],
       "runtime": "python-core",
       "concepts": ["document family", "near duplicate", "temporal split", "bootstrap"],
-      "outcome": "Explain and implement text leakage, duplicates and evaluation design with inspectable data and measured errors.",
-      "lab": "Use a small authored corpus to trace the calculation, compare a baseline and inspect counterexamples.",
-      "verification": "Check numerical or span-level expected results, perturb input assumptions and interpret the observed errors."
+      "outcome": "Detect exact and near duplicates after a declared normalization, build time- and family-aware splits, and estimate uncertainty with a family-level bootstrap.",
+      "lab": "Hash two normalized router messages, compute token-set Jaccard for ready versus not ready, apply a time cutoff with family exclusion, and bootstrap paired family differences.",
+      "verification": "The normalized hashes match while the raw strings stay unchanged; ready and not ready have Jaccard 0.75 despite contradicting each other; cutoff 2 gives train [a1, a2, b1], test [c1] and excluded [b2]; the equal-family mean 2/15 differs from the row-weighted 0.2; the seeded bootstrap repeats exactly."
     },
     {
       "id": "nlp-022",
@@ -264,9 +264,9 @@
       "prerequisites": ["nlp-021"],
       "runtime": "python-core",
       "concepts": ["inverted index", "BM25", "hybrid retrieval", "nDCG", "MRR"],
-      "outcome": "Explain and implement retrieval pipelines and ranking evaluation with inspectable data and measured errors.",
-      "lab": "Use a small authored corpus to trace the calculation, compare a baseline and inspect counterexamples.",
-      "verification": "Check numerical or span-level expected results, perturb input assumptions and interpret the observed errors."
+      "outcome": "Build an inverted index, compute BM25 scores by hand, fuse rankings with reciprocal rank fusion, and evaluate rankings with MRR and nDCG.",
+      "lab": "Index three documents, score 'router reset' with BM25, fuse two supplied rankings with k = 60 and evaluate the ranking [d2, d0, d1].",
+      "verification": "router has postings {d0, d1}; BM25 orders d0 > d1 > d2 = 0 and an unseen query scores all zeros; fusion puts b first with score 1/62 + 1/61 and rejects duplicate IDs; MRR is 0.5 and nDCG is (7/log2(3) + 3/2)/(7 + 3/log2(3)); restricting the corpus to d0 returns only d0."
     },
     {
       "id": "nlp-023",
@@ -276,9 +276,9 @@
       "prerequisites": ["nlp-022"],
       "runtime": "python-core",
       "concepts": ["drift", "subgroup", "privacy", "lineage", "monitoring"],
-      "outcome": "Explain and implement reliable nlp systems and changing corpora with inspectable data and measured errors.",
-      "lab": "Use a small authored corpus to trace the calculation, compare a baseline and inspect counterexamples.",
-      "verification": "Check numerical or span-level expected results, perturb input assumptions and interpret the observed errors."
+      "outcome": "Filter a changing corpus by permission and freshness, fingerprint content reproducibly, measure drift with total variation, and evaluate only mature labels.",
+      "lab": "Apply a role and time rule to three source records at time 10, hash canonical records, compute total variation between [50, 50] and [80, 20], and score predictions against partly missing labels.",
+      "verification": "Only policy version 2 is returned for ops, while an unknown role or time 30 returns nothing; reordering leaves the hash unchanged and a text edit changes it; the drift distance is 0.3 and invalid count vectors are rejected; two mature labels give accuracy 1 and an all-unknown batch reports count 0 with no accuracy."
     },
     {
       "id": "nlp-024",
@@ -288,9 +288,9 @@
       "prerequisites": ["nlp-023"],
       "runtime": "python-core",
       "concepts": ["corpus", "baseline", "extraction", "retrieval", "evaluation", "error analysis"],
-      "outcome": "Explain and implement an end-to-end domain text analytics case study with inspectable data and measured errors.",
-      "lab": "Use a small authored corpus to trace the calculation, compare a baseline and inspect counterexamples.",
-      "verification": "Check numerical or span-level expected results, perturb input assumptions and interpret the observed errors."
+      "outcome": "Combine identifier extraction, a frozen text classifier and permission-aware retrieval into one reviewable support-ticket analysis whose failure paths are as explicit as its normal path.",
+      "lab": "Audit family separation, extract TKT identifiers, train the classifier and test held-out and out-of-vocabulary probes, then retrieve current permitted evidence for ops at time 10.",
+      "verification": "No family is shared between training and held-out data; TKT-301 is canonicalized and three malformed identifiers raise ValueError; the all-OOV message is reported as unsupported vocabulary; the network case returns version 2 with the unchanged approval-rule quote, while the billing role, time 30 and malformed IDs produce insufficient-evidence results or parser failures."
     }
   ],
   "sources": [

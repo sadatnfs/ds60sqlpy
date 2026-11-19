@@ -34,11 +34,11 @@ The live observation establishes effective policy for that identity and time. It
 
 **Expected:** Actual allow/deny results are recorded separately from source policy; no credentials enter the worksheet.
 
-## Exercise 5: Inspect expiry and cleanup reserve
+## Exercise 5: Bind a ClusterRole inside one namespace
 
-The worker must retain enough credential lifetime to clean up after interruption. A lease that covers only nominal work can fail at the recovery boundary. The calculation is synthetic; a real run uses observed current time and the private receipt expiry.
+Binding a ClusterRole with a RoleBinding reuses the role's rules without widening their scope: the grant applies only in the RoleBinding's namespace. Only a ClusterRoleBinding grants the rules across all namespaces. The default view ClusterRole allows reading most namespaced objects but deliberately omits Secrets, because Secret contents can include ServiceAccount credentials that would let a reader escalate. Confirm the effective answer with `kubectl auth can-i` under the owned receipt instead of reasoning only from the YAML.
 
-**Expected:** Refuse because30<80.
+**Expected:** Pods in lesson-a: allowed. Pods in lesson-b: denied, because a RoleBinding grants only inside its own namespace. Secrets in lesson-a: denied, because the default view role excludes Secrets.
 
 ## Exercise 6: Explain additive authorization
 

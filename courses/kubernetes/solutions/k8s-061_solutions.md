@@ -8,11 +8,13 @@ A topology label describes placement, such as a node or availability zone. Local
 
 Spreading replicas across zones can improve resilience to a zone failure, but only if scheduling, storage and dependencies also span the required failure domains. A local preference can concentrate traffic on a small number of endpoints if placement is uneven. Capacity and availability must be considered together.
 
-Topology features evolve with Kubernetes versions. Fields, hints and traffic-distribution semantics should be read for the actual release and data plane. The lesson teaches the reasoning with a synthetic two-zone example and does not promise that every local kind cluster can reproduce cloud-zone behavior.
+Kubernetes 1.37 offers two Service-level mechanisms. The `spec.trafficDistribution` field accepts `PreferSameZone`, which sends a caller's traffic to ready endpoints in its own zone and falls back cluster-wide when that zone has none, and `PreferSameNode`, which prefers the caller's node, then its zone, then the cluster. `PreferClose`, the first value to reach GA in 1.33, is now a deprecated alias for `PreferSameZone`. The older `service.kubernetes.io/topology-mode: Auto` annotation assigns zone hints in proportion to allocatable CPU, includes safeguards for small endpoint counts and takes precedence over the field when both are set. Without either, traffic is spread across all ready endpoints. The EndpointSlice controller publishes these preferences as hints, and the service proxy must honor them. The lesson's synthetic two-zone example does not promise that a local kind cluster reproduces cloud-zone behavior.
 
 Separate workload placement from traffic selection. Topology spread constraints influence where Pods can be scheduled; Service routing policy influences which eligible endpoint a caller uses. One does not automatically configure the other.
 
 For the synthetic example, zoneA has two ready app endpoints and zoneB has one. A local-only rule can overload the single endpoint in zoneB even when total cluster capacity appears sufficient. A failover policy must define what happens when a zone has no eligible local endpoint.
+
+A spread constraint such as `maxSkew: 1` with `topologyKey: topology.kubernetes.io/zone` and `whenUnsatisfiable: DoNotSchedule` keeps the per-zone counts of matching Pods within one of each other, which is what keeps zone preferences safe. `PreferSameZone` does not rebalance load: a zone with one endpoint sends all of its traffic there. The stricter `internalTrafficPolicy: Local` uses only endpoints on the caller's node and drops traffic when there are none, so it is a requirement rather than a preference.
 
 ## Exercise 1: Predict per-endpoint load under equal local client demand.
 
@@ -40,9 +42,9 @@ Cluster-wide counts can hide a zonal bottleneck. Choose a policy consistent with
 
 ## Exercise 5: Explain version-dependent topology behavior.
 
-Do not copy a field from a newer tutorial into an older cluster and infer it is enforced.
+Do not copy a field from a newer tutorial into an older cluster and infer it is enforced. A service proxy that ignores the hints, or an annotation that takes precedence, changes the actual routing even when the Service field is accepted by the API server.
 
-**Expected:** Use the actual API/controller/data-plane support matrix.
+**Expected:** Name the trafficDistribution values the pinned release accepts (PreferSameZone, PreferSameNode and the deprecated PreferClose), the precedence of the topology-mode annotation and whether the data plane honors EndpointSlice hints.
 
 ## Exercise 6: Defend a locality tradeoff.
 

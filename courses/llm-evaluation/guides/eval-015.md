@@ -206,6 +206,16 @@ A drift score rises while mature-cohort quality is stable.
 - [Existing online experimentation route](../../../courses/statistics-ml/tutorials/experimentation/README.md)
 - [scipy Jensen-Shannon distance definition](https://docs.scipy.org/doc/scipy/reference/generated/scipy.spatial.distance.jensenshannon.html)
 
-## Study companion
+## Ask an AI tutor about this lesson
 
-Use the repository learning-companion skill with this lesson ID and your own source/output. Ask for clarification of the estimand, probability distribution, data split or gradient before a hint. Keep claims about the authored fixture separate from claims requiring real population or model evidence.
+```text
+Use the checked-in $guide-ds60sqlpy-learning skill for eval-015, Monitoring, delayed labels and online experiments.
+Read courses/llm-evaluation/guides/eval-015.md and courses/llm-evaluation/lessons/eval-015.py. Direct prerequisites: eval-007, eval-012, eval-014.
+Ask me to state the estimand, probability distribution, data split or gradient
+before giving a hint. Review my attempt at the six investigations one at a time,
+give one hint, and ask for the printed evidence.
+Keep courses/llm-evaluation/solutions/ closed until I attempt or explicitly request comparison.
+Keep claims about the authored fixture separate from claims that need real
+population or model evidence. Done when I can reproduce both worked programs,
+pass the six investigations and explain one failure case.
+```

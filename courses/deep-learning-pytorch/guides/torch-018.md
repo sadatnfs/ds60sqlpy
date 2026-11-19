@@ -6,13 +6,19 @@ Intermediate; approximately 120 minutes. Direct prerequisites: `torch-017`. The 
 
 ## Learning objectives
 
-Normalization can introduce both state and cross-observation dependencies. The central investigation is concrete: Apply BatchNorm momentum.5 to rows 1, 3 and 3, 5. The finish condition is running mean 1, 2; batch counter 1. finite zeros with default affine initialization. A useful explanation connects the calculation to the reason it is needed, rather than treating a function name as a definition.
+Predict how BatchNorm running statistics and LayerNorm row statistics respond to train mode, eval mode and momentum conventions.
+
+Central investigation: Update a BatchNorm layer with momentum 0.5 on rows [1, 3] and [3, 5], evaluate it on an outlier row and compare LayerNorm rows alone and together.
+
+Finish condition: The running mean becomes [1, 2] and the running variance 1.5 after one step, eval leaves the running mean and batch counter unchanged, the LayerNorm row matches within 1e-6 alone or beside [100, 200], and PyTorch momentum 0.1 gives 1 where Keras momentum 0.1 gives 9.
+
+The worked examples demonstrate the mechanism; exercises 1-3 transfer it to new inputs and exercises 4-6 extend it to failures and boundary cases. A useful explanation connects the calculation to the reason it is needed, rather than treating a function name as a definition.
 
 ## Purpose and mental model
 
 Normalization can introduce both state and cross-observation dependencies. BatchNorm uses batch statistics during training and updates running statistics for later inference. LayerNorm normalizes feature values within each record and does not mix unrelated batch rows. PyTorch BatchNorm momentum specifies the weight of the new batch statistic, whereas Keras momentum specifies the retention weight of the old statistic. Equal numeric momentum arguments therefore usually mean different updates.
 
-PyTorch BatchNorm also distinguishes the variance estimate used for training normalization from the unbiased estimate used in the running-variance update. A comparison must name both. The fixture uses a batch with mean 2, 4 and momentum.5 to check running mean 1, 2 from zero. Evaluation must leave running state unchanged. Tokenwise LayerNorm is checked with a future-row perturbation to expose wrong-axis leakage.
+PyTorch BatchNorm also distinguishes the variance estimate used for training normalization from the unbiased estimate used in the running-variance update. A comparison must name both. The fixture uses a batch with mean 2, 4 and momentum 0.5 to check running mean 1, 2 from zero. Evaluation must leave running state unchanged. Tokenwise LayerNorm is checked with a future-row perturbation to expose wrong-axis leakage.
 
 ## Design decisions and when to use this method
 
@@ -44,7 +50,7 @@ Run the three worked blocks in order in one scratch file; later blocks reuse the
 
 ## Syntax anatomy and reasoning sequence
 
-nn.BatchNorm1d(2, momentum=.5) treats columns as features for an(N, C)input. train mode updates running_mean and running_var; eval mode uses stored state. nn.LayerNorm(2) reduces the last two-feature dimension independently for each row. Its default epsilon and affine parameters are part of the comparison. Track num_batches_tracked as a buffer, separate from trainable weight and bias.
+nn.BatchNorm1d(2, momentum=0.5) treats columns as features for an (N, C)input. train mode updates running_mean and running_var; eval mode uses stored state. nn.LayerNorm(2) reduces the last two-feature dimension independently for each row. Its default epsilon and affine parameters are part of the comparison. Track num_batches_tracked as a buffer, separate from trainable weight and bias.
 
 ## Trace normalization axes, state and derivatives
 
@@ -62,11 +68,11 @@ The last two rows are different models. The first LayerNorm preserves token inde
 
 In the supplied BatchNorm fixture, columns `[1, 3]` and `[3, 5]` have means `[2, 4]`. Each centered column is `[-1, 1]`. Dividing the squared-deviation sum two by sample count two gives population variance one. Dividing by count minus one gives the unbiased estimate two. PyTorch uses the first estimate for training normalization and the second for updating running variance. Its momentum weights the new statistic. With default tracked statistics, eval uses stored state; setting `track_running_stats=False` changes that contract. [PyTorch 2.9 BatchNorm1d](https://docs.pytorch.org/docs/2.9/generated/torch.nn.BatchNorm1d.html).
 
-With momentum 0.5, initial running mean zero and initial running variance one, the first update gives mean[1, 2] and variance[1.5, 1.5]. During that training call, however, the outputs use the current batch mean[2, 4] and population variance[1, 1], not those newly stored values. With initial \(\gamma=1\), \(\beta=0\), they are[[-1, -1], [1, 1]] divided by \(\sqrt{1+\epsilon}\). Calling eval afterward on the original batch instead gives[[0, 1], [2, 3]] divided by \(\sqrt{1.5+\epsilon}\). A changed output therefore does not require a changed trainable weight.
+With momentum 0.5, initial running mean zero and initial running variance one, the first update gives mean [1, 2] and variance [1.5, 1.5]. During that training call, however, the outputs use the current batch mean [2, 4] and population variance [1, 1], not those newly stored values. With initial \(\gamma=1\), \(\beta=0\), they are [[-1, -1], [1, 1]] divided by \(\sqrt{1+\epsilon}\). Calling eval afterward on the original batch instead gives [[0, 1], [2, 3]] divided by \(\sqrt{1.5+\epsilon}\). A changed output therefore does not require a changed trainable weight.
 
-For a scalar fixed batch mean b, PyTorch momentum a gives \(r_t=(1-a)r_{t-1}+ab\). Starting from zero, the solution is \(r_{t}=(1-{\left(1-a\right)}^{t})\cdot b\). With \(a=0.2\) and b=[2, 4], the first two means are[0.4, 0.8] and[0.72, 1.44]. Keras expresses the same mean recurrence using retention momentum \(m=0.8\). If both APIs instead receive 0.2, their first means differ: PyTorch gives[0.4, 0.8] while Keras gives[1.6, 3.2]. The original 0.5 fixture hides this difference because a and 1-a coincide.
+For a scalar fixed batch mean b, PyTorch momentum a gives \(r_t=(1-a)r_{t-1}+ab\). Starting from zero, the solution is \(r_{t}=(1-{\left(1-a\right)}^{t})\cdot b\). With \(a=0.2\) and b=[2, 4], the first two means are [0.4, 0.8] and [0.72, 1.44]. Keras expresses the same mean recurrence using retention momentum \(m=0.8\). If both APIs instead receive 0.2, their first means differ: PyTorch gives [0.4, 0.8] while Keras gives [1.6, 3.2]. The original 0.5 fixture hides this difference because a and 1-a coincide.
 
-Mean-recursion matching still leaves variance state unmatched. The paired TensorFlow chapter's explicit two-row probe[0, 4] has population variance four and checks Keras moving variance \(0.5\cdot 1+0.5\cdot 4=2.5\). Its unbiased sample variance is eight, so the corresponding PyTorch running update would be \(0.5\cdot 1+0.5\cdot 8=4.5\). These are predictions from the named rules, not evidence that one should transplant a variance buffer between frameworks. The paired chapter contains the Keras execution contract, and this chapter's executable checks independently establish PyTorch's1.5 update on its own fixture. Epsilon and affine defaults must also be aligned before comparing outputs.
+Mean-recursion matching still leaves variance state unmatched. The paired TensorFlow chapter's explicit two-row probe [0, 4] has population variance four and checks Keras moving variance \(0.5\cdot 1+0.5\cdot 4=2.5\). Its unbiased sample variance is eight, so the corresponding PyTorch running update would be \(0.5\cdot 1+0.5\cdot 8=4.5\). These are predictions from the named rules, not evidence that one should transplant a variance buffer between frameworks. The paired chapter contains the Keras execution contract, and this chapter's executable checks independently establish PyTorch's 1.5 update on its own fixture. Epsilon and affine defaults must also be aligned before comparing outputs.
 
 A useful geometric view is that centering removes the constant direction inside each group. For one LayerNorm group with d features, write \(g_{i}=\frac{\partial L}{\partial z_{i}}\) after incorporating any affine scale into the upstream gradient. Let \(s=\sqrt{v+\epsilon}\). Differentiating both the mean and variance gives
 
@@ -74,7 +80,7 @@ A useful geometric view is that centering removes the constant direction inside 
 
 This expression explains the dependency: an upstream derivative at one feature contributes to the means that influence other features in the same group. Summing the input derivatives gives zero, up to arithmetic error, because shifting all features by a common constant leaves the normalized values unchanged. The familiar exact removal of the radial direction is softened when epsilon is nonzero. Do not drop epsilon from a derivative calculation while retaining it in the forward pass.
 
-For row[1, 3], \(\mu=2\), \(v=1\) and \(z=\frac{[-1,1]}{\sqrt{1+\epsilon}}\). Appending a separate row[100, 200] does not change this row under LayerNorm(2), since it belongs to a different group. Changing one of the first row's own features does affect both normalized outputs. LayerNorm computes its current input statistics in both train and eval modes and uses a biased variance estimate; its learned affine values can change the final output mean and variance. [PyTorch 2.9 LayerNorm](https://docs.pytorch.org/docs/2.9/generated/torch.nn.LayerNorm.html).
+For row [1, 3], \(\mu=2\), \(v=1\) and \(z=\frac{[-1,1]}{\sqrt{1+\epsilon}}\). Appending a separate row [100, 200] does not change this row under LayerNorm(2), since it belongs to a different group. Changing one of the first row's own features does affect both normalized outputs. LayerNorm computes its current input statistics in both train and eval modes and uses a biased variance estimate; its learned affine values can change the final output mean and variance. [PyTorch 2.9 LayerNorm](https://docs.pytorch.org/docs/2.9/generated/torch.nn.LayerNorm.html).
 
 State freezing requires three independent questions. Are affine parameters receiving gradients? Can an optimizer update them? Can the layer mutate running buffers? Setting PyTorch BatchNorm weight and bias `requires_grad=False` addresses the first question, not the third. A train-mode call can still change running_mean, running_var and num_batches_tracked. Conversely eval can use fixed buffers while gradients still flow through affine parameters or inputs. These controls matter during transfer learning and sensitivity analysis.
 
@@ -86,7 +92,7 @@ Small-batch and sequential applications need an additional assumption check. A s
 
 ### Example A: Update a running mean
 
-The batch mean is 2, 4 and the new-statistic weight is.5. The result is not yet the full batch mean.
+The batch mean is 2, 4 and the new-statistic weight is 0.5. The result is not yet the full batch mean.
 
 ```python
 import numpy as np
@@ -133,33 +139,33 @@ torch.testing.assert_close(alone[0], together[0], atol=1e-6, rtol=0)
 
 ## Prediction before your attempt
 
-For the supplied fixture, name the input unit, the intermediate state and the final quantity that changes. Predict one normal result and one failure result before touching the code. In particular, explain this lesson's acceptance condition in your own words: running mean 1, 2; batch counter 1. finite zeros with default affine initialization. Preserve the prediction beside your later observations so a correction is visible. A copied expected value is not a derivation.
+For the supplied fixture, name the input unit, the intermediate state and the final quantity that changes. Predict one normal result and one failure result before touching the code. In particular, explain this lesson's acceptance condition in your own words: The running mean becomes [1, 2] and the running variance 1.5 after one step, eval leaves the running mean and batch counter unchanged, the LayerNorm row matches within 1e-6 alone or beside [100, 200], and PyTorch momentum 0.1 gives 1 where Keras momentum 0.1 gives 9. Preserve the prediction beside your later observations so a correction is visible. A copied expected value is not a derivation.
 
 ## Exercises
 
-1. **Update a running mean.** Apply BatchNorm momentum.5 to rows 1, 3 and 3, 5.
-   **Expected:** running mean 1, 2; batch counter 1.
-   **Verify:** Save the assertion results for exercise 1, including running mean 1, 2; batch counter 1.
+1. **Predict a running mean with momentum 0.25.** Apply a fresh BatchNorm1d(2, momentum=0.25) in train mode to rows [2, 4] and [6, 8].
+   **Expected:** batch means [4, 6]; running mean [1, 1.5].
+   **Verify:** In a fresh process, the exercise checks confirm `quarter_bn.running_mean` matches `torch.tensor([1.0, 1.5])` within 1e-06.
 
-2. **Freeze state during evaluation.** Call the trained layer in eval mode on 100, 200.
-   **Expected:** running mean and batch counter unchanged.
-   **Verify:** Save the assertion results for exercise 2, including running mean and batch counter unchanged.
+2. **Predict the running variance.** Inspect the same layer's running variance after that one update.
+   **Expected:** running variance [2.75, 2.75].
+   **Verify:** In a fresh process, the exercise checks confirm `quarter_bn.running_var` matches `torch.tensor([2.75, 2.75])` within 1e-06.
 
-3. **Check LayerNorm row independence.** Normalize 1, 3alone and beside 100, 200.
-   **Expected:** first row matches within 1e-6.
-   **Verify:** Save the assertion results for exercise 3, including first row matches within 1e-6.
+3. **Normalize a new LayerNorm row.** Apply a default LayerNorm(3) to the row [1, 2, 3].
+   **Expected:** approximately [-1.2247, 0, 1.2247], equal to \([-1, 0, 1]/\sqrt{2/3+10^{-5}}\) within 1e-5.
+   **Verify:** In a fresh process, the exercise checks confirm `row` matches `torch.tensor([[-1.0, 0.0, 1.0]]) / (2 / 3 + 1e-05) ** 0.5` within 1e-05.
 
-4. **Inspect running variance convention.** From initial running variance 1, use batch values 1, 3whose unbiased variance is 2 and momentum.5.
+4. **Inspect running variance convention.** From initial running variance 1, use batch values 1 and 3 (unbiased variance 2) with momentum 0.5.
    **Expected:** running variance 1.5 for each feature.
-   **Verify:** Save the assertion results for exercise 4, including running variance 1.5 for each feature.
+   **Verify:** In a fresh process, the exercise checks confirm `bn.running_var` matches `torch.tensor([1.5, 1.5])` within 1e-06; `x.var(0, correction=0).tolist() == [1.0, 1.0]` and `x.var(0, correction=1).tolist() == [2.0, 2.0]`.
 
-5. **Translate momentum explicitly.** Compute updates with old mean 0, batch mean 10 and PyTorch momentum.1versus Keras momentum.1.
+5. **Translate momentum explicitly.** Compute updates with old mean 0, batch mean 10 and PyTorch momentum 0.1 versus Keras momentum 0.1.
    **Expected:** PyTorch 1; Keras 9 under their respective conventions.
-   **Verify:** Save the assertion results for exercise 5, including PyTorch 1; Keras 9 under their respective conventions.
+   **Verify:** In a fresh process, the exercise checks confirm `torch_update == 1` and `keras_update == 9`.
 
 6. **Handle a constant feature row.** Apply LayerNorm to 5, 5 and inspect finiteness.
    **Expected:** finite zeros with default affine initialization.
-   **Verify:** Save the assertion results for exercise 6, including finite zeros with default affine initialization.
+   **Verify:** In a fresh process, the exercise checks confirm `torch.isfinite(constant).all()` and `constant` matches `torch.zeros((1, 2))` within 1e-06.
 
 ## Common pitfalls and diagnosis
 
@@ -173,7 +179,7 @@ First draw the state described in the vocabulary section. Next use the smallest 
 
 ## Self-check and retrieval
 
-Close both worked examples. Explain Running statistic, Momentum convention, Batch coupling using the lesson fixture. Reconstruct one computation from its inputs. Then change one input while retaining the mechanism and predict whether the conclusion survives. Write which part is guaranteed by the code and which part would need new observations. This last distinction prevents a tiny deterministic teaching example from being presented as evidence about an unseen population or a production model.
+Close all three worked examples. Explain Running statistic, Momentum convention, Batch coupling using the lesson fixture. Reconstruct one computation from its inputs. Then change one input while retaining the mechanism and predict whether the conclusion survives. Write which part is guaranteed by the code and which part would need new observations. This last distinction prevents a tiny deterministic teaching example from being presented as evidence about an unseen population or a production model.
 
 ## Next step
 
@@ -181,7 +187,7 @@ Revisit the direct prerequisite `torch-017` if the calculation cannot be reconst
 
 ## Sources and verification status
 
-API and mechanism reference: [PyTorch2.9 BatchNorm1d](https://docs.pytorch.org/docs/2.9/generated/torch.nn.BatchNorm1d.html), reviewed 2026-10-22. The fixture, examples, counterexamples and exercise design are original course material. See [validation](../../../docs/validation.md) for execution gates. Check CI artifacts for the exact revision and platform to determine which runtime checks actually ran; authored content alone does not establish runtime execution.
+API and mechanism reference: [PyTorch 2.9 BatchNorm1d](https://docs.pytorch.org/docs/2.9/generated/torch.nn.BatchNorm1d.html), reviewed 2026-10-22. The fixture, examples, counterexamples and exercise design are original course material. See [validation](../../../docs/validation.md) for execution gates. Check CI artifacts for the exact revision and platform to determine which runtime checks actually ran; authored content alone does not establish runtime execution.
 
 ## Interview reasoning with worked answers
 

@@ -31,7 +31,7 @@ Product dimension, including the unsold Bag member.
 A dimension count is not inferred from fact activity. Removing unsold members to shrink a model can change the intended reporting population.
 
 - Four product rows describe four catalog keys.
-- Categories are Paper,Home,Travel and colors are Blue,Red,Green.
+- Categories are Paper, Home, Travel and colors are Blue, Red, Green.
 - The dimension's domain includes valid attributes absent from current sales.
 
 ## Explained practice answers

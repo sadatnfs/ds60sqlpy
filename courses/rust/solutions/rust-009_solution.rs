@@ -15,6 +15,16 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         assert_eq!(first_word(&sentence), "pear");
         assert_eq!(first_word(""), "");
     }
+
+    {
+        // Task 3: Independent construction
+        fn last_word(text: &str) -> &str {
+            text.split_whitespace().last().unwrap_or("")
+        }
+        let sentence = String::from("pear apple");
+        assert_eq!(last_word(&sentence), "apple");
+        assert_eq!(last_word(""), "");
+    }
     println!("rust-009: passed");
     Ok(())
 }

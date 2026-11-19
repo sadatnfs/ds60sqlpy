@@ -200,6 +200,16 @@ List what this actual training run omits from an LLM deployment.
 - [PyTorch optimization mechanics](https://docs.pytorch.org/tutorials/beginner/basics/optimization_tutorial.html)
 - [PPO algorithm](https://arxiv.org/abs/1707.06347)
 
-## Study companion
+## Ask an AI tutor about this lesson
 
-Use the repository learning-companion skill with this lesson ID and your own source/output. Ask for clarification of the estimand, probability distribution, data split or gradient before a hint. Keep claims about the authored fixture separate from claims requiring real population or model evidence.
+```text
+Use the checked-in $guide-ds60sqlpy-learning skill for eval-022, Actual CPU PPO updates on a finite contextual policy.
+Read courses/llm-evaluation/guides/eval-022.md and courses/llm-evaluation/lessons/eval-022.py. Direct prerequisites: eval-018, eval-021.
+Ask me to state the estimand, probability distribution, data split or gradient
+before giving a hint. Review my attempt at the six investigations one at a time,
+give one hint, and ask for the printed evidence.
+Keep courses/llm-evaluation/solutions/ closed until I attempt or explicitly request comparison.
+Keep claims about the authored fixture separate from claims that need real
+population or model evidence. Done when I can reproduce both worked programs,
+pass the six investigations and explain one failure case.
+```

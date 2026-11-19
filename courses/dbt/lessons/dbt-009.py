@@ -1,4 +1,4 @@
-"""dbt-009: worked starting point; complete the guide's six changes."""
+"""dbt-009: both worked cases; complete the guide's six changes."""
 
 import os
 import tempfile
@@ -84,9 +84,11 @@ def example_one():
     with tempfile.TemporaryDirectory() as d:
         sql = (
             "{{ config(materialized='incremental', unique_key='id', "
-            "incremental_strategy='delete+insert') }} select * from {{ "
-            "ref('events') }} {% if is_incremental() %} where "
-            "updated_at >= (select max(updated_at)-10 from {{ this }}) "
+            "incremental_strategy='delete+insert') }}\n"
+            "select *\n"
+            "from {{ ref('events') }}\n"
+            "{% if is_incremental() %}\n"
+            "    where updated_at >= (select max(updated_at) - 10 from {{ this }})\n"
             "{% endif %}"
         )
         p = project(
@@ -106,8 +108,32 @@ def example_one():
         return {"keyed_update_and_late_insert": True, "rows_after_rerun": 3}
 
 
+def example_two():
+    with tempfile.TemporaryDirectory() as d:
+        sql = (
+            "{{ config(materialized='incremental', unique_key='id', "
+            "incremental_strategy='delete+insert') }}\n"
+            "select *\n"
+            "from {{ ref('events') }}\n"
+            "{% if is_incremental() %}\n"
+            "    where updated_at >= (select max(updated_at) - 10 from {{ this }})\n"
+            "{% endif %}"
+        )
+        p = project(
+            d, models={"current_events": sql}, seeds={"events": "id,updated_at,amount\n1,20,5\n"}
+        )
+        invoke(p, "build")
+        (p / "seeds/events.csv").write_text("id,updated_at,amount\n1,20,5\n2,7,9\n")
+        invoke(p, "build")
+        assert rows(p, "select count(*) from current_events") == [(1,)]
+        invoke(p, "run", "--full-refresh")
+        assert rows(p, "select count(*) from current_events") == [(2,)]
+        return {"outside_lookback_missed": True, "repair_requires_declared_backfill": True}
+
+
 if __name__ == "__main__":
     print(example_one())
+    print(example_two())
 
 # TODO 1: Add a record at max(updated_at)-10.
 # TODO 2: Apply the same corrected source twice.

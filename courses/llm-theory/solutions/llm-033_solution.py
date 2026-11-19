@@ -4,13 +4,13 @@ import numpy as np
 
 
 def verify():
-    # Exercise 1: Evaluate equal margins
+    # Worked example A: Evaluate equal margins
     margin = 0.1 * ((-2 - (-3)) - (-4 - (-5)))
     loss = np.logaddexp(0, -margin)
     assert margin == 0
     np.testing.assert_allclose(loss, np.log(2), atol=1e-12, rtol=0)
 
-    # Exercise 2: Favor the chosen response
+    # Worked example B: Favor the chosen response
     margin = 0.5 * (2 - 0)
     loss = np.logaddexp(0, -margin)
     np.testing.assert_allclose(loss, np.log1p(np.exp(-1)), atol=1e-12, rtol=0)
@@ -38,6 +38,20 @@ def verify():
         "online_rl_executed": False,
     }
     assert not report["factuality_verified"] and not report["online_rl_executed"]
+
+    # Exercise 1: Compute a margin from log probabilities
+    margin2 = 0.25 * ((-1 - (-4)) - (-2 - (-3)))
+    loss2 = np.logaddexp(0, -margin2)
+    assert margin2 == 0.5
+    np.testing.assert_allclose(loss2, np.log1p(np.exp(-0.5)), atol=1e-12, rtol=0)
+    assert loss2 < np.log(2)
+
+    # Exercise 2: Predict the effect of beta
+    margin3 = 1.0 * ((-1 - (-4)) - (-2 - (-3)))
+    loss3 = np.logaddexp(0, -margin3)
+    assert margin3 == 2
+    np.testing.assert_allclose(loss3, np.log1p(np.exp(-2)), atol=1e-12, rtol=0)
+    assert loss3 < loss2
     return {"checks": 6, "status": "passed"}
 
 

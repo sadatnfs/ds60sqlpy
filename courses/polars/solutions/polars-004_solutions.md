@@ -9,6 +9,14 @@ The executable reference contains the two complete worked cases with assertions.
 
 Check is_not_null and invert is_nan with an appropriate null policy. Infinity is another category and would need an is_finite check if it is forbidden.
 
+```python
+import polars as pl
+
+frame = pl.DataFrame({"x": [1.0, None, float("nan"), 4.0]})
+observed = frame.select(pl.col("x").fill_nan(None).count()).item()
+assert observed == 2
+```
+
 **Expected:** The numeric fixture has 2 such values.
 
 ## 2. Keep a missingness indicator
@@ -20,6 +28,17 @@ Create was_null from the original column before fill_null. A flag computed after
 ## 3. Change the denominator
 
 The numerical difference follows from both changed values and denominator. Neither estimate is universally correct without a missing-data model.
+
+```python
+import polars as pl
+
+frame = pl.DataFrame({"x": [1.0, None, float("nan"), 4.0]})
+means = frame.select(
+    pl.col("x").fill_nan(None).mean().alias("observed_mean"),
+    pl.col("x").fill_nan(None).fill_null(0).mean().alias("zero_filled_mean"),
+)
+assert means.row(0) == (2.5, 1.25)
+```
 
 **Expected:** Observed mean is 2.5; zero-filled mean is 1.25.
 
@@ -86,4 +105,4 @@ if __name__ == "__main__":
 
 ## Interpretation
 
-Explain how missingness changes a specific calculation. Build a table with observed, missing and invalid values, show each inclusion policy, and state which population the resulting statistic describes. Carry that accounting into downstream feature engineering so training and serving apply the same policy.
+Build a table with observed, missing and invalid values, show each inclusion policy, and state which population the resulting statistic describes. Carry that accounting into downstream feature engineering so training and serving apply the same policy.

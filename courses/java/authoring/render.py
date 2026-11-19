@@ -1,4 +1,5 @@
 import json
+import re
 import sys
 import textwrap
 from pathlib import Path
@@ -8,6 +9,13 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 from scripts.format_inline_code import canonical_markdown  # noqa: E402
+
+HERE = Path(__file__).resolve().parent
+if str(HERE) not in sys.path:
+    sys.path.insert(0, str(HERE))
+
+import variants  # noqa: E402
+from outcomes import OUTCOMES  # noqa: E402
 
 SPECS = {}
 
@@ -53,6 +61,205 @@ def program(s, blocks):
     )
 
 
+def _lower_first(text):
+    """Lower-case an ordinary leading word, leaving identifiers such as Optional intact."""
+    return text[:1].lower() + text[1:] if text[1:2].islower() else text
+
+
+def _failure(v, condition):
+    """How the qualified run fails, naming the assertion message when it is a plain literal."""
+    message = v.get("message") if v else None
+    if message and len(message) > 1 and message[0] == message[-1] == '"' and "\\" not in message:
+        shown = variants.code_span("AssertionError: " + message[1:-1])
+        return f"fails with {shown} from the assertion on {condition}"
+    return f"fails with an `AssertionError` from the assertion on {condition}"
+
+
+def _occurs(excerpt, code):
+    """Whether an edited excerpt already appears verbatim, which would make it ambiguous."""
+    return " ".join(excerpt.split()) in " ".join(code.split())
+
+
+def formatted_codes(s, path):
+    """The exercise snippets exactly as the canonical Markdown formatter prints them."""
+    document = "".join(f"```java\n{e['code']}\n```\n\n" for e in s["exercises"])
+    serialized = document.encode("utf-8", errors="backslashreplace").decode("utf-8")
+    text = canonical_markdown(serialized, root=ROOT, path=path)
+    shown = re.findall(r"^```java\n(.*?)^```$", text, re.S | re.M)
+    if len(shown) != len(s["exercises"]):
+        return [e["code"] for e in s["exercises"]]
+    return [code.rstrip("\n") for code in shown]
+
+
+def practice(ident, s):
+    """Six exercises: two derived from the worked examples, four authored investigations.
+
+    Every Verify line and hint names the exercise's own assertion and, where recorded,
+    a one-token edit that qualify_variants.py observed making that assertion fail.
+    """
+    span = variants.code_span
+    records = variants.load_records()
+    shown_codes = formatted_codes(s, f"courses/java/solutions/{ident}_solutions.md")
+    rows = []
+    for index, e in enumerate(s["exercises"]):
+        shown = shown_codes[index]
+        if len(variants.checks(shown)) != len(variants.checks(e["code"])):
+            shown = e["code"]
+        v = variants.variant(records, ident, index, e["code"], shown)
+        spans = variants.checks(shown)
+        condition = v["condition"] if v and v.get("condition") else spans[-1][2] if spans else None
+        cond = span(condition) if condition else None
+        row = {"title": e["title"], "task": e["prompt"], "expected": e["expected"]}
+        expected = _lower_first(e["expected"])
+        if v:
+            original, edited = span(v["line"]), span(v["broken"])
+            fail = _failure(v, cond)
+        example = "Example A" if index == 0 else "Example B"
+        if index == 0:
+            row["title"] = e["title"] + (
+                ": predict an edited check" if v and v["in_check"] else ": change one input"
+            )
+            if v and v["in_check"]:
+                row["task"] = (
+                    f"Copy Example A into a scratch `Main.java` and change {original} to {edited} inside its assertion. "
+                    "Before running it with `java -ea Main`, predict whether the assertion still holds and explain why; then restore it."
+                )
+            elif v:
+                row["task"] = (
+                    f"Copy Example A into a scratch `Main.java` and change {original} to {edited}. "
+                    "Before running it with `java -ea Main`, predict which assertion fails and which value it now sees; "
+                    "then run it and restore the original line."
+                )
+            elif cond:
+                row["task"] = (
+                    f"Close Example A and rebuild it in a fresh `Main.java`, keeping the assertion on {cond}. "
+                    "Then propose one input change that would make that assertion fail and explain why before trying it."
+                )
+            else:
+                row["task"] = (
+                    "Close Example A and rebuild it in a fresh `Main.java`. Then propose one input change that "
+                    "would alter its observation and explain the new result before trying it."
+                )
+            if v:
+                row["expected"] = (
+                    f"The changed run {fail}. Restoring the original line brings back the worked observation: {expected}"
+                )
+                row["verify"] = (
+                    "Compare your written prediction with the reported `AssertionError` and its stack-trace line, and "
+                    + (
+                        f"explain why the edited condition is false for the values that satisfy {cond}."
+                        if v["in_check"]
+                        else f"name the value that made {cond} false."
+                    )
+                    + " After restoring the line, the program completes without an `AssertionError` again."
+                )
+            else:
+                row["expected"] = (
+                    f"Your rebuild reproduces the worked observation ({expected.rstrip('.')})"
+                    + (
+                        f", and your proposed change makes the assertion on {cond} fail."
+                        if cond
+                        else ", and your proposed change alters it as you predicted."
+                    )
+                )
+                row["verify"] = (
+                    "Run the rebuild with `java -ea Main` first, then the changed copy, and keep both results. "
+                    + (
+                        f"Name the value that makes {cond} false in the changed copy."
+                        if cond
+                        else "Name the value that changed."
+                    )
+                )
+        elif index == 1:
+            row["title"] = e["title"] + (
+                ": diagnose an edited check" if v and v["in_check"] else ": debug a regression"
+            )
+            if v and v["in_check"]:
+                row["task"] = (
+                    f"A careless edit changed the assertion that Example B adds after Example A so that it reads {edited}. "
+                    "Run Example B with that line, explain why the edited assertion now fails for the same program state, and restore it."
+                )
+            elif v and _occurs(v["broken"], shown_codes[0] + "\n" + shown):
+                row["task"] = (
+                    f"A regression changed {original} to {edited} in the code that Example B adds after Example A. "
+                    "Run Example B with that change, use the failing assertion to explain the defect and repair it without changing the assertion."
+                )
+            elif v:
+                row["task"] = (
+                    f"A regression changed one token in the code that Example B adds after Example A, so one line now reads {edited}. "
+                    "Run Example B with that line, use the failing assertion to locate the defect and repair it without changing the assertion."
+                )
+            elif cond:
+                row["task"] = (
+                    f"Introduce one deliberate defect into a copy of Example B that makes the assertion on {cond} fail, "
+                    "then explain how the stack trace leads back to the faulty statement."
+                )
+            else:
+                row["task"] = (
+                    "Introduce one deliberate defect into the code that Example B adds after Example A and explain "
+                    "which observation exposes it, then repair it."
+                )
+            if v:
+                row["expected"] = (
+                    f"Before the repair the run {fail}; after it the line reads {original} again and {expected}"
+                )
+            else:
+                row["expected"] = (
+                    "The defective copy "
+                    + (f"fails the assertion on {cond}" if cond else "changes the observation")
+                    + f"; the repaired copy reproduces the worked observation: {expected}"
+                )
+            row["verify"] = (
+                f"Keep the failing and the repaired runs. Explain why the edited assertion rejects the same program state that {cond} accepts."
+                if v and v["in_check"]
+                else f"Keep the failing and the repaired runs. Explain why the changed token alters the value tested by {cond} for this input."
+                if v
+                else "Keep the failing and the repaired runs and name the first statement whose value differs between them."
+            )
+        elif v and not v["in_check"]:
+            row["verify"] = (
+                f"Keep an assertion equivalent to {cond}. As a control, change {original} to {edited}: the run must "
+                + fail.replace("fails with", "fail with", 1)
+                + ". Restore the line before continuing."
+            )
+        elif v:
+            row["verify"] = (
+                f"Keep an assertion equivalent to {cond}. As a control, change {original} to {edited} inside it: "
+                "the run must fail with an `AssertionError`, which shows the assertion can fail. Restore it."
+            )
+        elif cond:
+            row["verify"] = (
+                f"Keep an assertion equivalent to {cond} and confirm that `java -ea Main` completes. "
+                "Then name an input that would make it fail and explain which value changes."
+            )
+        else:
+            row["verify"] = (
+                f"Run with `java -ea Main` and compare the observed values with: {expected} "
+                "Then name an input that would change them."
+            )
+        if index == 0 and v:
+            third = f"compute the asserted value with {edited} in place before running"
+        elif index == 1 and v:
+            third = f"compare {edited} with the same line in {example} and state the claim each version makes"
+        elif v and not v["in_check"]:
+            third = f"predict the effect of changing {original} to {edited} before running anything"
+        elif cond:
+            third = f"name one input that would make {cond} false"
+        else:
+            third = "name one input that would change the observation"
+        row["hints"] = (
+            f"First restate the expected observation: {expected} "
+            + (
+                f"Then list the values read by {cond} and trace each one from its declaration"
+                if cond
+                else "Then trace each value from its declaration to the observation"
+            )
+            + f". Finally, {third}."
+        )
+        rows.append(row)
+    return rows
+
+
 def write_all():
     base = ROOT / "courses/java"
     plan = json.loads((base / "track.json").read_text())
@@ -72,10 +279,18 @@ def write_all():
             or "None. This lesson starts from a plain text source file."
         )
         terms = "\n\n".join(f"**{k}:** {v}" for k, v in s["terms"])
+        rows = practice(id, s)
         exercises = "\n\n".join(
-            f"{i}. **{e['title']}.** {e['prompt']}\n   **Expected:** {e['expected']}\n   **Verify:** Compare your assertion values or captured diagnostic with {e['expected']}"
-            for i, e in enumerate(s["exercises"], 1)
+            f"{i}. **{r['title']}.** {r['task']}\n   **Expected:** {r['expected']}\n   **Verify:** {r['verify']}"
+            for i, r in enumerate(rows, 1)
         )
+        hints = "\n".join(f"- **Exercise {i}:** {r['hints']}" for i, r in enumerate(rows, 1))
+        outcome = OUTCOMES[id]
+        if (
+            outcome.lower().startswith("explain and implement")
+            or outcome == s["mental"].split(".")[0] + "."
+        ):
+            raise ValueError(id + " needs a specific outcome")
         examples = "\n\n".join(
             f"### Example {chr(65 + i)}: {e['title']}\n\n{e['why']}\n\n```java\n{program(s, [x['code'] for x in s['exercises'][: i + 1]])}\n```\n\n**Expected:** {e['expected']}"
             for i, e in enumerate(s["exercises"][:2])
@@ -85,7 +300,7 @@ Read {guide} and {learner}. Direct prerequisites: {prereq}.
 Explain the mechanism, ask for a prediction, review my attempt, give one hint,
 request compiler/runtime evidence, and ask a fresh retrieval question.
 Keep courses/java/solutions/ closed until I request comparison or show an attempt.
-Use Java21 and the declared offline fixture. Done when I can explain the state
+Use Java 21 and the declared offline fixture. Done when I can explain the state
 transitions, pass all six exercise contracts, diagnose one failure and solve a
 new boundary case without copying the solution."""
         guide_text = f"""# {id}: {p["title"]}
@@ -96,7 +311,7 @@ new boundary case without copying the solution."""
 
 ## Learning objectives
 
-Explain {", ".join(k.lower() for k, v in s["terms"])} using a concrete program. Trace the normal execution, identify its boundary assumptions and make a failure case observable. The first investigation is {s["exercises"][0]["prompt"]} The final exercise transfers the mechanism to {s["exercises"][-1]["title"].lower()}.
+{outcome} Along the way, explain {", ".join(k.lower() for k, v in s["terms"])} using a concrete program. Trace the normal execution, identify its boundary assumptions and make a failure case observable. Exercises 1 and 2 start from the worked examples; the authored investigations begin with this task: {s["exercises"][2]["prompt"]} The final exercise transfers the mechanism to {s["exercises"][-1]["title"].lower()}.
 
 ## Purpose and mental model
 
@@ -108,7 +323,7 @@ Explain {", ".join(k.lower() for k, v in s["terms"])} using a concrete program. 
 
 ## How to run this lesson
 
-Open the Docker classroom, choose the prepared Java21 profile and save a learner pad. The pad is compiled as `Main.java` with `javac --release 21` and executed with `java -ea Main`. Assertions are enabled deliberately. A successful assertion has no output; a failed assertion throws `AssertionError` and the process should fail. Do not remove assertions to obtain a green result.
+Open the Docker classroom, choose the prepared Java 21 profile and save a learner pad. The pad is compiled as `Main.java` with `javac --release 21` and executed with `java -ea Main`. Assertions are enabled deliberately. A successful assertion has no output; a failed assertion throws `AssertionError` and the process should fail. Do not remove assertions to obtain a green result.
 
 For a prepared native JDK, copy a worked example into your own `Main.java` under ignored `.learning/expansion/{id}/`. From that directory run the same two commands on PowerShell, macOS or Linux:
 
@@ -145,7 +360,9 @@ Do not replace a precise exception with a catch-all that returns a plausible def
 
 ## Progressive hints
 
-First reconstruct the values and identities in the worked example. Next isolate the line that changes the result when one input is altered. Finally compare the normal and failure paths with the stated contract. Use a small table of input, expected value, actual value and exception type. Ask for one hint about the first incorrect assumption before requesting the entire reference implementation.
+Read one hint at a time and attempt the exercise again before reading the next. Keep a small table of input, expected value, actual value and exception type. Ask for one hint about the first incorrect assumption before requesting the entire reference implementation.
+
+{hints}
 
 ## Self-check and retrieval
 
@@ -157,7 +374,7 @@ Preserve the saved pad and the six exercise observations. Continue to the next l
 
 ## Sources and verification status
 
-[Official Java21 API or language reference]({s["source"]}), reviewed2026-10-22. Examples and exercise fixtures are original course material. Use the [validation guide](../../../docs/validation.md) and CI artifacts for the exact revision and platform to inspect actual compile/run results. Authoring, parsing, compilation, execution and learner mastery are separate forms of evidence.
+[Official Java 21 API or language reference]({s["source"]}), reviewed 2026-10-22. Examples and exercise fixtures are original course material. Use the [validation guide](../../../docs/validation.md) and CI artifacts for the exact revision and platform to inspect actual compile/run results. Authoring, parsing, compilation, execution and learner mastery are separate forms of evidence.
 
 ## Ask an AI tutor about this lesson
 
@@ -181,20 +398,25 @@ Open after an attempt or an explicit solution reveal. The executable reference r
 
 """
         code_blocks = []
-        for i, e in enumerate(s["exercises"], 1):
-            explanation_text += f"""## Exercise {i}: {e["title"]}
+        for i, (e, r) in enumerate(zip(s["exercises"], rows, strict=True), 1):
+            lead = (
+                f"The unchanged code is the part that Example {chr(64 + i)} adds:\n\n"
+                if i <= 2
+                else ""
+            )
+            explanation_text += f"""## Exercise {i}: {r["title"]}
 
-Task: {e["prompt"]}
+Task: {r["task"]}
 
 {e["why"]}
 
-```java
+{lead}```java
 {e["code"]}
 ```
 
-**Expected:** {e["expected"]}
+**Expected:** {r["expected"]}
 
-**Verify:** Compare the program values or named exception with {e["expected"]} Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.
+**Verify:** {r["verify"]}
 
 """
             code_blocks.append(f"// Exercise {i}: {e['title']}\n" + e["code"])
@@ -216,12 +438,13 @@ Run the complete reference with assertions enabled, then return to your own impl
             target.parent.mkdir(parents=True, exist_ok=True)
             target.write_text(text, encoding="utf-8", errors="backslashreplace")
         comments = []
-        for i, e in enumerate(s["exercises"], 1):
+        for i, r in enumerate(rows, 1):
             comments.append(
-                f"// Exercise {i}: {e['title']}\n"
-                + "\n".join("// " + line for line in textwrap.wrap(e["prompt"], 90))
-                + "\n// Expected: "
-                + e["expected"]
+                f"// Exercise {i}: {r['title']}\n"
+                + "\n".join("// " + line for line in textwrap.wrap(r["task"], 90))
+                + "".join(
+                    "\n// " + line for line in textwrap.wrap("Expected: " + r["expected"], 90)
+                )
             )
         (ROOT / learner).parent.mkdir(parents=True, exist_ok=True)
         (ROOT / learner).write_text(
@@ -245,9 +468,12 @@ public class Main {
                     verification_id=None,
                 )
             )
-        p["outcome"] = s["mental"].split(".")[0] + "."
-        p["lab"] = s["exercises"][0]["prompt"]
-        p["verification"] = s["exercises"][0]["expected"] + " " + s["exercises"][-1]["expected"]
+        p["outcome"] = outcome
+        p["lab"] = s["exercises"][2]["prompt"]
+        p["verification"] = s["exercises"][2]["expected"]
+    missing = set(OUTCOMES) ^ {p["id"] for p in plan["lessons"] if p["id"] in SPECS}
+    if missing:
+        raise ValueError("outcomes.py and the lesson list differ: " + ", ".join(sorted(missing)))
     inventory["lessons"].sort(key=lambda e: e["id"])
     (base / "lessons.json").write_text(json.dumps(inventory, indent=2) + "\n")
     (base / "track.json").write_text(json.dumps(plan, indent=2, ensure_ascii=False) + "\n")

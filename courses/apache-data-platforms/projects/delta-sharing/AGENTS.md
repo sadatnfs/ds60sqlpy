@@ -2,7 +2,7 @@
 
 Delta Sharing is part of Delta Lake/Linux Foundation, not an Apache project.
 The actual reference server and table store must be separately prepared and
-qualified. No corresponding1.4.1 prebuilt image/tag or release package was found.
+qualified. No corresponding 1.4.1 prebuilt image/tag or release package was found.
 Do not call an older image latest, implement a fake server or point a file URI
 at a reference server that only signs supported cloud storage paths. The portable
 client is explicitly limited to basic unpartitioned Parquet protocol reader version 1. Keep

@@ -17,7 +17,7 @@ Specified items: AddTen = SELECTEDMEASURE()+10 at lower precedence; Scale = SELE
 The literal 10 represents an illustrative compatible amount for this algebra example. A real fee policy would also define which population and measures receive it.
 
 - The outer Scale expression receives the lower-precedence AddTen expression.
-- The expansion is(187 +10)*0.9.
+- The expansion is (187 + 10)*0.9.
 - 197 multiplied by 0.9 is 177.3.
 
 ### Case B: Addition has higher precedence
@@ -30,7 +30,7 @@ The same two item definitions with AddTen as the higher-precedence outer express
 
 Passing tests for each group alone does not prove their combined behavior. Include interacting groups in a measure/context regression matrix.
 
-- The expansion is(187*0.9)+10.
+- The expansion is (187*0.9)+10.
 - The scale first yields 168.3.
 - Adding 10 gives 178.3, one more than the other order.
 

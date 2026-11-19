@@ -8,7 +8,7 @@
 > work.
 
 
-Build a subject assistant by specifying its task, sources, computation and evaluation before choosing a model update. This 24-lesson route complements the [language-model mechanisms course](../llm-theory/README.md), the [NLP foundations route](../nlp/README.md) and the [statistics book](../statistics-ml/README.md). It covers data-science extraction and analysis, grounded retrieval, actual tiny-model fine-tuning, low-rank adapters and a bounded assistant capstone.
+Build a subject assistant by specifying its task, sources, computation and evaluation before choosing a model update. This 24-lesson route complements the [language-model mechanisms course](../llm-theory/README.md), the [NLP foundations route](../nlp/README.md) and the [statistics book](../statistics-ml/README.md). It covers data-science extraction and analysis, grounded retrieval, actual tiny-model fine-tuning, low-rank adapters and a bounded assistant capstone. Continue with [LLM evaluation and alignment](../llm-evaluation/README.md) for annotation agreement, paired and clustered uncertainty, judge calibration, reward models, DPO, PPO with generalized advantage estimation and GRPO, which extend the evaluation and preference chapters 012, 013 and 019.
 
 The [authored manifest](lessons.json) is the source of truth for available lesson artifacts. The [route plan](track.json) preserves stable IDs and prerequisites. There are currently 24 authored lesson bundles. Authored content and runtime acceptance are separate: consult [validation](../../docs/validation.md) and CI artifacts for the exact revision and platform to identify the references actually executed.
 

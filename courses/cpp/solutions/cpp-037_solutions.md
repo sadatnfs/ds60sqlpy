@@ -52,7 +52,7 @@ Explain why one pass is sufficient for keep_positive.
 
 **Reasoning:** A single-pass source cannot promise a second traversal.
 
-**Verify:** Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.
+**Verify:** Check your explanation against the function body: one `for` loop reads each element once, and nothing calls `std::ranges::size` or traverses `xs` again.
 
 ## Exercise 2: Preserve multiplicity
 
@@ -62,7 +62,7 @@ Filter [-1, 0, 2, 2] with >0.
 
 **Reasoning:** Generic code still needs explicit bag semantics.
 
-**Verify:** Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.
+**Verify:** Assert `keep_positive(std::vector<int>{-1, 0, 2, 2}) == std::vector<int>{2, 2}`, as Worked example 1 does; the duplicate 2 must appear twice.
 
 ## Exercise 3: Retain ownership
 
@@ -72,7 +72,7 @@ Call with a temporary vector and use result afterward.
 
 **Reasoning:** An owning return separates result lifetime from input lifetime.
 
-**Verify:** Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.
+**Verify:** Store `auto out = keep_positive(std::vector<int>{3, -1});` and assert `out == std::vector<int>{3}` on a later line, after the temporary is destroyed.
 
 ## Exercise 4: Repair two-pass design
 
@@ -82,7 +82,7 @@ Review counting an input_range then traversing it again.
 
 **Reasoning:** Constraints must match actual operations.
 
-**Verify:** Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.
+**Verify:** Run the reviewed function on a single-pass source such as `std::views::istream<int>` over a `std::istringstream`, and confirm the second traversal sees no elements.
 
 ## Exercise 5: Check empty input
 
@@ -92,7 +92,7 @@ Use an empty vector and an empty span.
 
 **Reasoning:** Different range types share the same semantic boundary.
 
-**Verify:** Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.
+**Verify:** Assert `keep_positive(std::vector<int>{}).empty()` and `keep_positive(std::span<const int>{}).empty()`.
 
 ## Exercise 6: Transfer a projection
 
@@ -102,4 +102,4 @@ Filter records by their points while retaining complete records.
 
 **Reasoning:** A projection should not accidentally erase domain identity.
 
-**Verify:** Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.
+**Verify:** Use input with two qualifying records that have equal points, and assert the output keeps both with every field unchanged.

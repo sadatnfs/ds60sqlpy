@@ -20,9 +20,7 @@ unpivot names index columns that remain identifiers, the columns converted into 
 
 ## Run the lesson
 
-Open this subject in `/classroom`, then show its code and notes. The prepared `data-engineering` worker runs `main.py` in a fresh temporary directory. The examples use installed packages and synthetic local fixtures; no account, cloud service, network request or package download is required. Save source and notes before switching lessons. Temporary databases, project files and tracking artifacts are recreated by each complete program and removed after the job. The classroom retains the submitted source and bounded output, not an indefinitely running external service. The guide distinguishes this local execution from the deployment decisions that need an owned production environment.
-
-
+Open `polars-008` in `/classroom`. Its starter `main.py` contains both worked cases, "Reshape a paired measurement table" and "Duplicate cells require a scientific decision", and prints the dictionary each case returns. The prepared `data-engineering` worker runs it in a fresh temporary directory. An `AssertionError` means that an observation differs from the case's stated contract. The inputs are small literal tables. Cases that demonstrate Parquet scans write their files into a temporary directory that is removed when the case returns. No account, network request or package download is involved. Save source and notes before switching lessons.
 
 ## Worked case 1: Reshape a paired measurement table
 
@@ -52,7 +50,6 @@ def example_one():
 if __name__ == "__main__":
     print(example_one())
 ```
-
 
 ## Worked case 2: Duplicate cells require a scientific decision
 
@@ -84,11 +81,9 @@ if __name__ == "__main__":
     print(example_two())
 ```
 
-
 ## Practice
 
-Make each requested change in a saved copy. Compare both the expected result and the deliberately changed assumption. The separate reference explains the answers.
-
+The starter contains both worked cases, so a task can change either one. Make each change in a saved copy, run it, and compare the printed result with the task's check before opening the separate explained answers.
 
 ### 1. Add a third period
 
@@ -98,7 +93,6 @@ Add a followup column to the wide fixture and unpivot it.
 
 **Hint:** Count identifiers times selected measurements.
 
-
 ### 2. Check cell identity
 
 Count rows by id and period before pivoting.
@@ -106,7 +100,6 @@ Count rows by id and period before pivoting.
 **Check:** Each valid cell has count 1.
 
 **Hint:** A unique row id is not enough after reshaping.
-
 
 ### 3. Compare sum and mean
 
@@ -116,7 +109,6 @@ Aggregate the duplicated values 4 and 6 using both policies.
 
 **Hint:** Different aggregation means different questions.
 
-
 ### 4. Preserve missing values
 
 Replace one measurement with null and repeat the round trip.
@@ -124,7 +116,6 @@ Replace one measurement with null and repeat the round trip.
 **Check:** The same cell remains null.
 
 **Hint:** Missing is not zero.
-
 
 ### 5. Compute a paired difference
 
@@ -134,7 +125,6 @@ Calculate after minus before in wide form and verify from long records.
 
 **Hint:** Keep the id in both calculations.
 
-
 ### 6. Publish a grain statement
 
 Write the row grain for both forms.
@@ -143,20 +133,19 @@ Write the row grain for both forms.
 
 **Hint:** Column names alone do not communicate grain.
 
-
 ## Diagnose errors and misleading results
 
 Unexpected duplicate errors often reveal a real ambiguity rather than a broken pivot. Diagnose the compound key before adding an aggregation. A changed total can also result from selecting the wrong measurement columns or filling absent cells. Compare counts, key sets and a few identified cells before comparing an entire printed table.
 
 ## Transfer to independent work
 
-Reshape a repeated-measurement dataset with a checked compound key. Demonstrate a round trip and one deliberate duplicate counterexample, then explain the chosen aggregation policy. The same reasoning applies to model comparison tables, experiment metrics and data marts.
+Demonstrate a round trip and one deliberate duplicate counterexample, then explain the chosen aggregation policy. The same reasoning applies to model comparison tables, experiment metrics and data marts.
 
 ## Primary references
 
-- [Polars documentation: Reshaping while preserving identity](https://docs.pola.rs/user-guide/transformations/pivot/)
+- [Polars user guide: Pivots](https://docs.pola.rs/user-guide/transformations/pivot/)
 - [Polars Python API reference](https://docs.pola.rs/api/python/stable/reference/index.html)
 
 ## Tutor guidance
 
-Use the repository learning-companion skill for `polars-008`. Inspect the learner's own source and observations, ask for an explanation of the relevant data or state contract, and give a focused hint. Separate an assertion on this fixture from a claim about an external dataset or deployed service.
+Use the repository's `$guide-ds60sqlpy-learning` skill (`.agents/skills/guide-ds60sqlpy-learning/SKILL.md`) for `polars-008`. Inspect the learner's own source and printed output first. Ask for an explanation of unpivot, pivot, cell uniqueness, aggregation and reconciliation in their own words, then give one focused hint at a time. Keep an assertion on this synthetic fixture separate from a claim about an external dataset or deployed service.

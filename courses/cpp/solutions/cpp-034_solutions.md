@@ -15,7 +15,7 @@ Physical grouping should follow the access pattern being measured. Summing only 
 
 An array of structures stores complete records together. A structure-of-arrays layout stores each field in its own sequence. Neither layout is universally faster. The useful question is which fields the operation reads and in what order. Summing only value can benefit from dense values, while operations that need id and value together may favor a record layout.
 
-The first example stores three Sample records with IDs1, 2, 3 and values 10, 20, 30. It visits each record and adds value. The second stores just the values and uses accumulation. Both must produce60 before any timing comparison is meaningful. Equal totals are a basic correctness check; in a richer transformation, also verify that identity-to-value relationships remain intact.
+The first example stores three Sample records with IDs 1, 2, 3 and values 10, 20, 30. It visits each record and adds value. The second stores just the values and uses accumulation. Both must produce 60 before any timing comparison is meaningful. Equal totals are a basic correctness check; in a richer transformation, also verify that identity-to-value relationships remain intact.
 
 reserve(rows.size()) can avoid repeated growth allocations while materializing a values vector. It changes capacity, not size. push_back constructs the actual elements. Writing values[0] immediately after reserve on an empty vector would violate the element-access contract. This is a concrete link between performance-oriented allocation control and the ownership rules from cpp-007.
 
@@ -53,7 +53,7 @@ Sketch three records as AoS and as separate ID/value vectors.
 
 **Reasoning:** Representation must preserve the row relationship.
 
-**Verify:** Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.
+**Verify:** Check that both sketches contain the pairs (1, 10), (2, 20) and (3, 30), with the first interleaving ID and value and the second storing all IDs, then all values.
 
 ## Exercise 2: Prove result equality
 
@@ -63,7 +63,7 @@ Sum values in both representations.
 
 **Reasoning:** Correctness is checked before performance.
 
-**Verify:** Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.
+**Verify:** Assert both sums equal 60, as Worked examples 1 and 2 do, using the same three values in each layout.
 
 ## Exercise 3: Inspect reserve
 
@@ -73,7 +73,7 @@ Reserve 100 on an empty vector, then inspect size.
 
 **Reasoning:** Reserved storage is not constructed logical elements.
 
-**Verify:** Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.
+**Verify:** Assert `v.size() == 0` and `v.capacity() >= 100` after `v.reserve(100)`; do not assert an exact capacity.
 
 ## Exercise 4: Repair an unfair comparison
 
@@ -83,7 +83,7 @@ One candidate omits the value 30.
 
 **Reasoning:** Doing less work can falsely look faster.
 
-**Verify:** Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.
+**Verify:** Print each candidate's checksum before timing and assert both equal 60; the candidate without 30 produces 30, which must stop the comparison.
 
 ## Exercise 5: Measure bounded work
 
@@ -93,7 +93,7 @@ Repeat one-field summation with a fixed row cap and build mode.
 
 **Reasoning:** Layout benefits depend on access pattern and hardware.
 
-**Verify:** Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.
+**Verify:** Record the row cap, build flags, number of repetitions and each duration with its unit, and assert the checksum is identical in every repetition.
 
 ## Exercise 6: Transfer the workload
 
@@ -103,4 +103,4 @@ Now request ID and value together for every row.
 
 **Reasoning:** The useful representation follows the query pattern.
 
-**Verify:** Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.
+**Verify:** Measure combined ID and value access in both layouts with the same row cap and repetitions, and state whether your earlier one-field result still holds.

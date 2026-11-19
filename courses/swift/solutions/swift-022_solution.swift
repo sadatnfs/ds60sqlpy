@@ -24,6 +24,25 @@ struct LessonMain {
       parent = nil
       precondition(observed == nil && child.parent == nil)
     }
+
+    do {
+      // Task 3: Independent construction
+      final class Listener {
+        var events: [String] = []
+      }
+      final class Downloader {
+        weak var delegate: Listener?
+        func finish() { delegate?.events.append("finished") }
+      }
+      let downloader = Downloader()
+      var listener: Listener? = Listener()
+      downloader.delegate = listener
+      downloader.finish()
+      precondition(listener?.events == ["finished"])
+      listener = nil
+      precondition(downloader.delegate == nil)
+      downloader.finish()
+    }
     print("swift-022: passed")
   }
 }

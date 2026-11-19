@@ -22,11 +22,13 @@ Promise.all preserves input order in its result, even when operations finish in 
 
 new Promise(executor) invokes executor immediately. resolve settles a value, adopting a supplied Promise's eventual state when relevant. then returns a new Promise; returning a value fulfills that chain and throwing rejects it. await suspends only the current async function, not the entire process. finally observes completion without replacing the original result unless it throws or returns a rejected Promise. A missing return in a then callback can lose an intended nested dependency.
 
-## Exercise 1: Trace executor and reaction ordering
+## Exercise 1: Trace executor and reaction ordering: change one input
 
-Task: Record executor, synchronous continuation and then reaction.
+Task: Copy Example A into a scratch `main.mjs` and change `const observed = pending.then(value => { trace.push('reaction'); return value; });` to `const observed = pending.then(value => { trace.push('reaction!'); return value; });`. Before running it, predict which check fails and which value it now sees; then run it and restore the original line.
 
 The executor is synchronous; the registered reaction is not. The intermediate assertion makes that distinction visible before the await resumes.
+
+The unchanged code is the exercise block of Example A:
 
 ```javascript
 const trace = [];
@@ -44,15 +46,17 @@ assert.equal(await observed, 3);
 assert.deepEqual(trace, ['executor', 'sync', 'reaction']);
 ```
 
-**Expected:** executor, sync, reaction.
+**Expected:** The changed run fails with an `AssertionError` at the check `assert.deepEqual(trace, ['executor', 'sync', 'reaction'])`. Restoring the original line brings back the worked observation: executor, sync, reaction.
 
-**Verify:** Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.
+**Verify:** Compare your written prediction with the reported `AssertionError`, including its actual and expected values, and name the value that made `assert.deepEqual(trace, ['executor', 'sync', 'reaction'])` fail. After restoring the line, the program prints its `{"checks":1,"status":"passed"}` receipt again.
 
-## Exercise 2: Compose values and rejection recovery
+## Exercise 2: Compose values and rejection recovery: debug a regression
 
-Task: Double a value, throw an error, then recover through catch.
+Task: A regression changed one token in Example B, so one line now reads `.then(value => value + 2)`. Run Example B with that line, use the failing check to locate the defect and repair it without changing the check.
 
 Throwing inside a reaction rejects the Promise returned by then. catch is a rejection reaction; its returned string fulfills the next Promise rather than rethrowing the failure.
+
+The unchanged code is the exercise block of Example B:
 
 ```javascript
 const result = await Promise.resolve(4)
@@ -64,9 +68,9 @@ const result = await Promise.resolve(4)
 assert.equal(result, 'bad value 8');
 ```
 
-**Expected:** recovered message is bad value 8.
+**Expected:** Before the repair the run fails with an `AssertionError` at the check `assert.equal(result, 'bad value 8')`; after it the line reads `.then(value => value * 2)` again and recovered message is bad value 8.
 
-**Verify:** Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.
+**Verify:** Keep the failing and the repaired runs. Explain why the changed token alters the value tested by `assert.equal(result, 'bad value 8')` for this input.
 
 ## Exercise 3: Preserve input order in Promise.all
 
@@ -91,7 +95,7 @@ assert.deepEqual(await result, ['first', 'second']);
 
 **Expected:** result remains first,second.
 
-**Verify:** Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.
+**Verify:** Keep a check equivalent to `assert.deepEqual(await result, ['first', 'second'])`. As a control, change `resolveSecond('second');` to `resolveSecond('second!');`: the run must fail with an `AssertionError` at that check. Restore the line before continuing.
 
 ## Exercise 4: Inspect every outcome with allSettled
 
@@ -109,7 +113,7 @@ assert.equal(outcomes[1].reason, error);
 
 **Expected:** statuses fulfilled/rejected with their original value and reason.
 
-**Verify:** Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.
+**Verify:** Keep a check equivalent to `assert.deepEqual(outcomes[0], { status: 'fulfilled', value: 2 })`. As a control, change `const outcomes = await Promise.allSettled([Promise.resolve(2), Promise.reject(error)]);` to `const outcomes = await Promise.allSettled([Promise.resolve(3), Promise.reject(error)]);`: the run must fail with an `AssertionError` at that check. Restore the line before continuing.
 
 ## Exercise 5: Demonstrate that race does not cancel losers
 
@@ -134,7 +138,7 @@ assert.deepEqual(trace, ['late']);
 
 **Expected:** winner fast; deferred operation still completes later.
 
-**Verify:** Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.
+**Verify:** Keep a check equivalent to `assert.equal(await Promise.race([Promise.resolve('fast'), slow]), 'fast')`. As a control, change `assert.equal(await Promise.race([Promise.resolve('fast'), slow]), 'fast');` to `assert.equal(await Promise.race([Promise.resolve('fast!'), slow]), 'fast');` inside it: the run must fail with an `AssertionError`, which shows the check can fail. Restore it.
 
 ## Exercise 6: Observe FIFO microtasks before an awaited timer
 
@@ -154,7 +158,7 @@ assert.deepEqual(trace, ['sync', 'promise', 'microtask', 'timer']);
 
 **Expected:** sync,promise,microtask,timer.
 
-**Verify:** Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.
+**Verify:** Keep a check equivalent to `assert.deepEqual(trace, ['sync', 'promise', 'microtask', 'timer'])`. As a control, change `Promise.resolve().then(() => trace.push('promise'));` to `Promise.resolve().then(() => trace.push('promise!'));`: the run must fail with an `AssertionError` at that check. Restore the line before continuing.
 
 ## After comparison
 

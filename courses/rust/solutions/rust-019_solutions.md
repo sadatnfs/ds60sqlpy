@@ -1,6 +1,6 @@
 # rust-019: explanation and comparison
 
-Attempt the six guide tasks before opening this comparison. The executable reference is [rust-019_solution.rs](rust-019_solution.rs). Its assertions are always active under the prepared classroom compile settings.
+Attempt the six guide tasks before opening this comparison. The executable reference is [rust-019_solution.rs](rust-019_solution.rs). It runs both worked examples and the reference answers below, and its assertions are always active under the prepared classroom compile settings.
 
 ## Why the two examples differ
 
@@ -8,21 +8,62 @@ Attempt the six guide tasks before opening this comparison. The executable refer
 
 **Own a result when lifetime must separate:** A deliberate owned copy changes the lifetime contract rather than pretending the borrow is static. The independent owned result survives the temporary scope.
 
-## Reason through the six tasks
+## Task answers
 
-1. **Predict and explain.** Draw the valid-use regions of both inputs and the output.
+### Task 1: Predict and explain
 
-2. **Guided modification.** Test the tie policy of longer.
+Draw the valid-use regions of both inputs and the output.
 
-3. **Independent construction.** Write a borrowed prefix parser with the narrowest lifetime relationship.
+No separate reference answer has been written for this task. Example A is the evidence to compare with: The annotation prevents a caller from using the view after a required owner is gone. The output is a borrowed view of the longer input.
 
-4. **Diagnose a defect.** Try returning a local reference and explain why annotations cannot make it valid.
+### Task 2: Guided modification
 
-5. **Boundary evidence.** Test empty inputs and use after one candidate owner leaves scope.
+Test the tie policy of longer.
 
-6. **Transfer and justify.** Choose a borrowed or owned result for a cache boundary and justify cost and lifetime.
+No separate reference answer has been written for this task. Start from Example B: A deliberate owned copy changes the lifetime contract rather than pretending the borrow is static. The independent owned result survives the temporary scope.
 
-For tasks 1 and 2, use the checked values and mechanism trace in the two examples. For task 3, choose names that expose the input and result contract and retain the same invariants. For task 4, the diagnosed mistakes below supply a concrete wrong assumption: preserve its counterexample before repairing it. Task 5 needs an explicit expected value or documented rejection at the boundary, not just successful execution. For task 6, explain what changes in the new context and which part of the original mechanism remains applicable. Several representations may satisfy this transfer task; justify the choice rather than treating this reference as the only architecture.
+### Task 3: Independent construction
+
+Write a borrowed prefix parser with the narrowest lifetime relationship.
+
+**Reference answer.** The same statements run as the `Task 3` block of the reference program; here they are wrapped in `main` as a complete file.
+
+```rust
+fn main() -> Result<(), Box<dyn std::error::Error>> {
+    fn split_prefix<'a>(text: &'a str, prefix: &str) -> Option<&'a str> {
+        text.strip_prefix(prefix)
+    }
+    let line = String::from("qty:42");
+    let rest = {
+        let prefix = String::from("qty:");
+        split_prefix(&line, &prefix)
+    };
+    assert_eq!(rest, Some("42"));
+    Ok(())
+}
+```
+
+**Observe:** The rest of qty:42 is Some("42"), still usable after the prefix String is dropped.
+
+Only text shares the result's lifetime 'a; prefix gets its own shorter lifetime, so the caller can drop it while keeping the result.
+
+### Task 4: Diagnose a defect
+
+Try returning a local reference and explain why annotations cannot make it valid.
+
+No reference answer has been written for this task yet. The wrong assumptions to look for are this lesson's pitfalls: Lifetime names describe relationships, not durations in seconds. Static is not a universal fix. A lifetime annotation cannot rescue a reference to destroyed local storage.
+
+### Task 5: Boundary evidence
+
+Test empty inputs and use after one candidate owner leaves scope.
+
+No reference answer has been written for this task yet. Write the expected value or documented rejection for each boundary before running it, and compare with the checks in Example A (Return one input view) and Example B (Own a result when lifetime must separate).
+
+### Task 6: Transfer and justify
+
+Choose a borrowed or owned result for a cache boundary and justify cost and lifetime.
+
+No single reference answer exists: several designs can satisfy this transfer task. Justify yours against the mechanism described below and the vocabulary entry **Lifetime parameter**, and state one limitation of your choice.
 
 ## Mechanism and diagnostic reasoning
 
@@ -36,4 +77,4 @@ Lifetime names describe relationships, not durations in seconds. Static is not a
 
 ## Review before continuing
 
-The reference checks the worked scenarios, including their boundary distinctions. Your independent and transfer artifacts may have additional checks. Compare observations rather than only source text. Preserve any new regression case you discover and explain why it would reject a plausible wrong implementation. External project steps require their own build and platform evidence and are not established by a portable reference passing.
+Run the reference and confirm that it prints `rust-019: passed`, then reconstruct one boundary case from memory and explain which check would reject a plausible wrong implementation. External project steps need their own build and platform evidence; a passing portable reference does not establish them.

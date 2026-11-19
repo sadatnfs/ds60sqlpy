@@ -1,51 +1,43 @@
 # web-003: explanatory solutions
 
-Compare after your own attempt or an explicit solution reveal. This file explains the supplied deterministic fixtures. It does not claim that a learner or a production deployment passed.
-
-## Why the mechanism works
-
-Semantic markup tells the browser and reader what a piece of content is. A main region contains the page's primary content. Navigation groups major navigation links; a header introduces a page or section; a footer provides related closing information. These elements are not a promise of any particular position on screen. A header can appear inside an article and need not be a fixed top bar.
-
-Headings provide a hierarchy that a screen reader and a visual reader can use to scan. Use the main topic as h1 and its major subdivisions as h2, with h3 for nested detail. Choose levels for structure, not because the browser's default font size looks attractive. A section normally benefits from a heading; a generic div is appropriate when there is no additional semantic meaning.
-
-Draw the content outline before assigning tags. Use one visible main region for the primary task. Give repeated navigation regions distinct accessible labels such as `aria-label="Course"`. A skip link points to the main region's id and lets a keyboard user bypass repeated controls. Native HTML supplies roles automatically; redundant roles rarely add value.
+Open this after your own attempt. Each answer explains the lesson's synthetic fixtures; it does not show that your work or a deployment passed. The mechanism is explained in `courses/web-development/guides/web-003.md`.
 
 ## Exercise 1: Draw the heading outline of the first example.
 
-Study notes contains HTML as one second-level section.
+**Expected answer:** Study notes contains HTML as one second-level section.
 
-Trace the smallest example before editing. Name which values are source and which are observations.
+**Why:** Heading levels express nesting: an h2 inside the h1 topic is a subsection, so the outline follows the numbers, not the font sizes.
 
 ## Exercise 2: Add a sibling CSS section at the correct level.
 
-CSS and HTML both use h2 because they have the same parent topic.
+**Expected evidence:** CSS and HTML both use h2 because they have the same parent topic.
 
-Change only the named feature. Compare with the unchanged example and explain any unaffected behavior.
+**Why:** Topics that share a parent share a heading level; an h3 would make CSS a subsection of HTML.
 
 ## Exercise 3: Build a study page with landmarks and a working skip link.
 
-Header, labeled navigation, one main and footer have meaningful content; the skip target exists.
+**Expected evidence:** Header, labeled navigation, one main and footer have meaningful content; the skip target exists.
 
-Sketch the structure or data contract first. Reuse the mechanism from the examples without copying the reference.
+**Why:** Landmarks let assistive technology jump between regions, and the skip link lets keyboard users bypass repeated navigation; both depend on the target id existing exactly once.
 
 ## Exercise 4: Replace a heading used only for large text with an appropriate element.
 
-A visual callout uses CSS without corrupting the document outline.
+**Expected evidence:** A visual callout uses CSS without corrupting the document outline.
 
-Keep the failing input. Identify the first layer where the observed result differs from the intended contract.
+**Why:** Headings build the document outline that screen-reader users navigate, so a decorative heading inserts a false section.
 
 ## Exercise 5: Check the document with CSS disabled or unavailable.
 
-The reading order and heading relationships remain coherent.
+**Expected evidence:** The reading order and heading relationships remain coherent.
 
-Predict the boundary before running it. Add an explicit check or manual observation that would detect a regression.
+**Why:** Source order is the reading and focus order for most users, so a page that only makes sense visually hides a structural problem.
 
 ## Exercise 6: Explain when a div is more appropriate than section.
 
-Use a generic container when grouping does not introduce a meaningful headed section.
+**Expected answer:** Use a generic container when grouping does not introduce a meaningful headed section.
 
-Explain your choice to someone who has not seen the code. Include one limitation and the evidence needed to remove it.
+**Why:** section represents a thematic group that normally has a heading; div carries no meaning and is right for grouping that exists only for styling.
 
-## Reference comparison and limits
+## Reference comparison
 
-Read the separate executable reference, where supplied, only after retaining your attempt. Compare structure and decisions rather than matching every identifier. A different implementation is acceptable when it satisfies the same behavior, preserves accessibility and rejects the same invalid cases. The checked reference uses tiny synthetic inputs so that each transformation can be inspected. It is not a ready-to-deploy authenticated application. Server lifecycle, persistence, concurrency and security require their own integration evidence.
+Open `courses/web-development/solutions/web-003_solution.html` only after saving your attempt, and compare decisions rather than identifiers. A different implementation is acceptable when it shows the same behavior and rejects the same invalid cases. The reference checks only its named synthetic cases; its success message is not an accessibility audit or proof of responsive behavior at every size.

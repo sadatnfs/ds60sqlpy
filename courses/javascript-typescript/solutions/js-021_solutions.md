@@ -22,11 +22,13 @@ An optional property may be absent. Under this route's strict profile, reading i
 
 Use property?: Type for optional fields and readonly property: Type for a restricted view. Readonly<T> is shallow: it changes the write permissions of the immediate fields in the type, not the underlying objects. readonly T[] or ReadonlyArray<T> disallows push through that reference. Object.freeze is a runtime operation with its own shallow boundary. Object.hasOwn can distinguish property presence independently of its value.
 
-## Exercise 1: Use structural compatibility
+## Exercise 1: Use structural compatibility: change one input
 
-Task: Pass a wider named object with id and count to a function requiring only id.
+Task: Copy Example A into a scratch `main.mts` and change `const wider = { id: 'A', count: 2 };` to `const wider = { id: 'A', count: 3 };`. Before running it, predict which check fails and which value it now sees; then run it and restore the original line.
 
 Structural acceptance is useful for small interfaces, but does not strip extra fields. Treating an accepted type as an exact serialization schema can leak fields that still exist at runtime.
+
+The unchanged code is the exercise block of Example A:
 
 ```typescript
 function label(value: { id: string }): string {
@@ -42,15 +44,17 @@ function negativeTypeCheck(): void {
 void negativeTypeCheck;
 ```
 
-**Expected:** label A; original count remains 2.
+**Expected:** The changed run fails with an `AssertionError` at the check `assert.equal(wider.count, 2)`. Restoring the original line brings back the worked observation: label A; original count remains 2.
 
-**Verify:** Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.
+**Verify:** Compare your written prediction with the reported `AssertionError`, including its actual and expected values, and name the value that made `assert.equal(wider.count, 2)` fail. After restoring the line, the program prints its `{"checks":1,"status":"passed"}` receipt again.
 
-## Exercise 2: Observe mutation through an alias
+## Exercise 2: Observe mutation through an alias: debug a regression
 
-Task: Create a readonly view of a mutable record, then mutate the original reference.
+Task: A regression changed one token in Example B, so one line now reads `mutable.count = 5;`. Run Example B with that line, use the failing check to locate the defect and repair it without changing the check.
 
 The view and original reference point to the same object. Readonly is a static access restriction, not a historical snapshot or deep immutability guarantee.
+
+The unchanged code is the exercise block of Example B:
 
 ```typescript
 const mutable = { count: 1 };
@@ -64,9 +68,9 @@ function negativeTypeCheck(): void {
 void negativeTypeCheck;
 ```
 
-**Expected:** readonly view observes count changing from 1 to 4.
+**Expected:** Before the repair the run fails with an `AssertionError` at the check `assert.equal(view.count, 4)`; after it the line reads `mutable.count = 4;` again and readonly view observes count changing from 1 to 4.
 
-**Verify:** Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.
+**Verify:** Keep the failing and the repaired runs. Explain why the changed token alters the value tested by `assert.equal(view.count, 4)` for this input.
 
 ## Exercise 3: Handle absent and zero-valued optional counts
 
@@ -85,7 +89,7 @@ assert.equal(count({ count: 0 }), 0);
 
 **Expected:** absent becomes 10; explicit 0 remains 0.
 
-**Verify:** Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.
+**Verify:** Keep a check equivalent to `assert.equal(count({ count: 0 }), 0)`. As a control, change `assert.equal(count({ count: 0 }), 0);` to `assert.equal(count({ count: 1 }), 0);` inside it: the run must fail with an `AssertionError`, which shows the check can fail. Restore it.
 
 ## Exercise 4: Distinguish runtime presence from undefined
 
@@ -104,7 +108,7 @@ assert.equal(JSON.stringify(present), '{}');
 
 **Expected:** hasOwn is false versus true; JSON serializes both as empty objects.
 
-**Verify:** Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.
+**Verify:** Keep a check equivalent to `assert.equal(Object.hasOwn(present, 'count'), true)`. As a control, change `assert.equal(Object.hasOwn(present, 'count'), true);` to `assert.equal(Object.hasOwn(present, 'count!'), true);` inside it: the run must fail with an `AssertionError`, which shows the check can fail. Restore it.
 
 ## Exercise 5: Show shallow readonly and shallow freeze boundaries
 
@@ -122,7 +126,7 @@ assert.equal(Object.isFrozen(record.nested), false);
 
 **Expected:** nested count becomes 3; outer object is frozen.
 
-**Verify:** Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.
+**Verify:** Keep a check equivalent to `assert.equal(record.nested.count, 3)`. As a control, change `record.nested.count = 3;` to `record.nested.count = 4;`: the run must fail with an `AssertionError` at that check. Restore the line before continuing.
 
 ## Exercise 6: Transform a readonly array without mutation
 
@@ -144,7 +148,7 @@ void negativeTypeCheck;
 
 **Expected:** new array 2,4; input remains 1,2.
 
-**Verify:** Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.
+**Verify:** Keep a check equivalent to `assert.deepEqual(doubled, [2, 4])`. As a control, change `const doubled = values.map(value => value * 2);` to `const doubled = values.map(value => value + 2);`: the run must fail with an `AssertionError` at that check. Restore the line before continuing.
 
 ## After comparison
 

@@ -194,6 +194,16 @@ A precise improvement is below the minimum useful effect.
 - [Existing sequential and multiplicity chapter](../../../courses/statistics-ml/chapters/10-multiple-testing-sequential-inference-and-selective-inference.md)
 - [SciPy exact binomial test](https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.binomtest.html)
 
-## Study companion
+## Ask an AI tutor about this lesson
 
-Use the repository learning-companion skill with this lesson ID and your own source/output. Ask for clarification of the estimand, probability distribution, data split or gradient before a hint. Keep claims about the authored fixture separate from claims requiring real population or model evidence.
+```text
+Use the checked-in $guide-ds60sqlpy-learning skill for eval-007, Multiplicity and sequential release decisions.
+Read courses/llm-evaluation/guides/eval-007.md and courses/llm-evaluation/lessons/eval-007.py. Direct prerequisites: eval-006.
+Ask me to state the estimand, probability distribution, data split or gradient
+before giving a hint. Review my attempt at the six investigations one at a time,
+give one hint, and ask for the printed evidence.
+Keep courses/llm-evaluation/solutions/ closed until I attempt or explicitly request comparison.
+Keep claims about the authored fixture separate from claims that need real
+population or model evidence. Done when I can reproduce both worked programs,
+pass the six investigations and explain one failure case.
+```

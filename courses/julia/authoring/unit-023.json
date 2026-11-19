@@ -24,14 +24,14 @@
     },
     {
       "title": "Verify the known optimum",
-      "task": "Evaluate the quadratic at[1,-2].",
+      "task": "Evaluate the quadratic at `[1, -2]`.",
       "expected": "Objective and gradient are zero.",
       "hint": "Use the analytic structure independently.",
       "answer": "The test supports this convex fixture rather than a blanket global-convergence claim."
     },
     {
       "title": "Inspect the feasible set",
-      "task": "Minimize the scalar case only on[0,2].",
+      "task": "Minimize the scalar case only on the interval from 0 to 2.",
       "expected": "The best feasible point is near 2.",
       "hint": "The unconstrained minimizer 3 is unavailable.",
       "answer": "Constraints are part of the problem, not an optional display filter."

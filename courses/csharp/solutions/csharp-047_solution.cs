@@ -40,6 +40,23 @@ internal static class Program {
       }
       Check(rejected, "same key cannot change payload");
     }
+    {
+      // Task 3: Independent construction
+      var receipts = new Dictionary<string, int>(StringComparer.Ordinal);
+      int executions = 0;
+      int Execute(string id, int amount) {
+        if (receipts.TryGetValue(id, out int receipt)) {
+          return receipt;
+        }
+        executions++;
+        receipts[id] = amount * 10;
+        return receipts[id];
+      }
+      int first = Execute("op-1", 3);
+      int retry = Execute("op-1", 3);
+      Check(first == 30 && retry == 30, "same receipt");
+      Check(executions == 1, "command ran once");
+    }
     Console.WriteLine("csharp-047: passed");
     await Task.CompletedTask;
   }

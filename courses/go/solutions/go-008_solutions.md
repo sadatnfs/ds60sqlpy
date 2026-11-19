@@ -8,22 +8,26 @@ A struct groups named fields into one value. Naming fields makes the domain visi
 
 type Point struct { X, Y int } creates a named type with fields. Point{X:2,Y:3} uses keyed construction, so field meaning survives reordering. p.X selects a field. Comparable structs can be compared with == only if every field is comparable. A struct with a slice cannot be a map key. An anonymous embedded field promotes selectors but does not create class inheritance.
 
-## 1. Model a coordinate
+## 1. Model a coordinate: change one input
 
-Construct Point with X 2 and Y 3 and calculate Manhattan distance from the origin.
+Copy worked example 1 into a scratch pad and change `p := Point{X: 2, Y: 3}` to `p := Point{X: 3, Y: 3}`. Before running, predict which check fails and which value it now sees; then run it and restore the original line.
+
+The unchanged code is worked example 1:
 
 ```go
 p := Point{X: 2, Y: 3}
 check(p.X+p.Y == 5, "point")
 ```
 
-**Expected:** The distance is 5.
+**Expected:** The changed run panics with `point` because `p.X+p.Y == 5` no longer holds. Restoring the original line brings back the worked observation: the distance is 5.
 
 Named fields document the coordinate meaning. This tiny case assumes nonnegative coordinates; a general distance function needs absolute values.
 
-## 2. Observe scalar copy
+## 2. Observe scalar copy: debug a regression
 
-Copy a Point and change the copied X field.
+A regression changed one token in worked example 2, so one line now reads `a := Point{X: 3, Y: 3}`. Run worked example 2 with that line, use the failure to locate the defect and repair it without changing the check.
+
+The unchanged code is worked example 2:
 
 ```go
 a := Point{X: 2, Y: 3}
@@ -32,7 +36,7 @@ b.X = 9
 check(a.X == 2 && b.X == 9, "struct copy")
 ```
 
-**Expected:** The original X remains 2.
+**Expected:** Before the repair the program panics with `struct copy`; after it the line reads `a := Point{X: 2, Y: 3}` again and the original X remains 2.
 
 Both fields contain scalar values, so assignment produces independent field storage.
 

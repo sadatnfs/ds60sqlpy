@@ -7,7 +7,7 @@ from torch.nn import functional as F
 
 
 def verify():
-    # Exercise 1: Calculate a known affine layer
+    # Worked example A: Calculate a known affine layer
     layer = nn.Linear(3, 1, bias=True, dtype=torch.float64)
     with torch.no_grad():
         layer.weight.copy_(torch.tensor([[1.0, 0.0, -1.0]], dtype=torch.float64))
@@ -18,11 +18,11 @@ def verify():
         out, torch.tensor([[0.0], [2.0]], dtype=torch.float64), atol=1e-12, rtol=0
     )
 
-    # Exercise 2: Inspect registered state
+    # Worked example B: Inspect registered state
     assert sum(p.numel() for p in layer.parameters()) == 4
     assert set(layer.state_dict()) == {"weight", "bias"}
 
-    # Exercise 3: Compare with a mathematical matrix
+    # Worked example C: Compare with a mathematical matrix
     mathematical_w = layer.weight.T
     assert tuple(mathematical_w.shape) == (3, 1)
     torch.testing.assert_close(x @ mathematical_w + layer.bias, out, atol=1e-12, rtol=0)
@@ -50,6 +50,29 @@ def verify():
         pass
     else:
         raise AssertionError("wrong feature width accepted")
+
+    # Exercise 1: Compute a new affine output
+    small = nn.Linear(2, 1, dtype=torch.float64)
+    with torch.no_grad():
+        small.weight.copy_(torch.tensor([[2.0, -1.0]], dtype=torch.float64))
+        small.bias.fill_(0.5)
+    inputs = torch.tensor([[1.0, 1.0], [0.0, 2.0]], dtype=torch.float64)
+    scored = small(inputs)
+    torch.testing.assert_close(
+        scored, torch.tensor([[1.5], [-1.5]], dtype=torch.float64), atol=1e-12, rtol=0
+    )
+
+    # Exercise 2: Predict a parameter count
+    wide = nn.Linear(4, 3)
+    assert (
+        sum(p.numel() for p in wide.parameters()) == 15
+        and tuple(wide.weight.shape) == (3, 4)
+        and tuple(wide.bias.shape) == (3,)
+    )
+
+    # Exercise 3: Rebuild the output by hand
+    manual = inputs @ small.weight.T + small.bias
+    torch.testing.assert_close(manual, scored, atol=1e-12, rtol=0)
     return {"checks": 6, "status": "passed"}
 
 

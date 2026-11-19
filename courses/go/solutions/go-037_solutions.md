@@ -8,27 +8,31 @@ A controller repeatedly compares desired and observed state and takes a bounded 
 
 Represent desired and observed state as small values, then return a typed action such as create, update or none. Avoid embedding API calls inside every conditional. The adapter performs an action, records evidence and schedules another observation. A real controller often converges over several reconciliations rather than blocking until every resource becomes ready. Status should describe observed facts, including the generation to which they apply.
 
-## 1. Plan a missing child
+## 1. Plan a missing child: predict an edited check
 
-Observe no child for a desired replica count of 3.
+Copy worked example 1 into a scratch pad and change `check(plan(3, false, 0) == "create", "missing child")` to `check(plan(3, true, 0) == "create", "missing child")` inside its check. Before running, predict whether the check still passes and explain why; then restore it.
+
+The unchanged code is worked example 1:
 
 ```go
 check(plan(3, false, 0) == "create", "missing child")
 ```
 
-**Expected:** The action is create.
+**Expected:** The changed run panics with `missing child` because the edited check no longer holds. Restoring the original line brings back the worked observation: the action is create.
 
 The planner reports intent without performing a cluster mutation. The adapter still needs an exact owner identity.
 
-## 2. Plan a changed child
+## 2. Plan a changed child: diagnose an edited check
 
-Observe an existing child with count 2 while desired is 3.
+A careless edit changed the check in worked example 2 so that it reads `check(plan(3, true, 3) == "update", "changed child")`. Run worked example 2 with that line, explain why the edited check now fails for the same program state, and restore it.
+
+The unchanged code is worked example 2:
 
 ```go
 check(plan(3, true, 2) == "update", "changed child")
 ```
 
-**Expected:** The action is update.
+**Expected:** Before the repair the program panics with `changed child`; after it the line reads `check(plan(3, true, 2) == "update", "changed child")` again and the action is update.
 
 The update is justified by a current difference, not by assuming a prior event was delivered once.
 

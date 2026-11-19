@@ -1,4 +1,4 @@
-"""polars-005: worked starting point; complete the guide's six changes."""
+"""polars-005: both worked cases; complete the guide's six changes."""
 
 import polars as pl
 
@@ -25,8 +25,26 @@ def example_one():
     return {"weighted_rates": output.to_dicts(), "wrong_equal_row_mean": naive}
 
 
+def example_two():
+    frame = pl.DataFrame({"group": ["A", "A", "B"], "value": [2, None, None]})
+    result = (
+        frame.group_by("group")
+        .agg(
+            pl.len().alias("rows"),
+            pl.col("value").count().alias("observed"),
+            pl.col("value").mean().alias("mean"),
+        )
+        .sort("group")
+    )
+    assert result["rows"].to_list() == [2, 1]
+    assert result["observed"].to_list() == [1, 0]
+    assert result["mean"].to_list() == [2.0, None]
+    return {"grain": "one row per group", "summary": result.to_dicts()}
+
+
 if __name__ == "__main__":
     print(example_one())
+    print(example_two())
 
 # TODO 1: Pool all three rate rows without grouping.
 # TODO 2: Add a group with 0 successes and 0 trials.

@@ -15,9 +15,9 @@ A concurrency test must know which state it is waiting for. The readiness future
 
 A concurrency test needs observable synchronization points. A promise/future pair can signal that a worker reached a chosen state. join confirms that a worker has terminated. These facts are stronger than waiting an arbitrary number of milliseconds. A sleep changes the chance of an ordering but does not establish that the expected event happened.
 
-In the first program, the worker assigns42 and then fulfills a promise. Waiting on the future establishes the result's availability before main checks it. The worker is still joined to close its lifetime. Startup, publication and termination are separate events even when they occur close together in a tiny example.
+In the first program, the worker assigns 42 and then fulfills a promise. Waiting on the future establishes the result's availability before main checks it. The worker is still joined to close its lifetime. Startup, publication and termination are separate events even when they occur close together in a tiny example.
 
-The second program repeats a fixed invariant twenty times:two participants each increment the same atomic counter100 times, and the joined result must be200. Repetition can expose some timing-sensitive defects, but it does not enumerate all possible schedules. A passing stress loop is bounded evidence, not proof that a race is impossible. The synchronization argument remains necessary.
+The second program repeats a fixed invariant twenty times: two participants each increment the same atomic counter 100 times, and the joined result must be 200. Repetition can expose some timing-sensitive defects, but it does not enumerate all possible schedules. A passing stress loop is bounded evidence, not proof that a race is impossible. The synchronization argument remains necessary.
 
 A supervisor timeout makes a deadlock or unresponsive worker a finite test failure. The timeout belongs outside the potentially stuck code path when necessary; a worker that never returns cannot reliably report its own timeout after the fact. Retain the phase, last observed synchronization point and cancellation outcome so the failure is diagnosable.
 
@@ -53,7 +53,7 @@ Name the purpose of the ready handshake.
 
 **Reasoning:** join remains necessary for the final assertion.
 
-**Verify:** Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.
+**Verify:** Check your answer against Worked example 1: `started.get()` returns only after `ready.set_value()`, and `worker.join()` is still needed before the program ends.
 
 ## Exercise 2: Run bounded stress
 
@@ -63,7 +63,7 @@ Repeat the 200-count scenario 20 times.
 
 **Reasoning:** A finite repetition count gives a declared work budget.
 
-**Verify:** Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.
+**Verify:** Confirm Worked example 2 runs 20 trials, asserts `count == 200` in every trial and never sleeps.
 
 ## Exercise 3: Add a timeout contract
 
@@ -73,7 +73,7 @@ Wrap the host test process in a finite supervisor deadline.
 
 **Reasoning:** The timeout belongs outside potentially deadlocked worker code.
 
-**Verify:** Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.
+**Verify:** Run a deliberately deadlocked scratch copy under `timeout 10` (or `ctest --timeout 10`) and confirm a timeout result, status 124 from `timeout`, instead of a hang.
 
 ## Exercise 4: Repair timing assumptions
 
@@ -83,7 +83,7 @@ Replace a fixed sleep used to infer startup with a promise.
 
 **Reasoning:** Wall-clock delay cannot prove a state transition.
 
-**Verify:** Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.
+**Verify:** Confirm the repaired test calls `set_value()` in the worker and `get()` on the matching future before the main thread continues, and that no `sleep_for` remains.
 
 ## Exercise 5: Qualify TSan separately
 
@@ -93,7 +93,7 @@ Use an existing supported compiler with -fsanitize=thread on an owned host copy.
 
 **Reasoning:** The browser normal profile does not claim TSan coverage.
 
-**Verify:** Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.
+**Verify:** Record the exact compile command, its status and the run status, or write unavailable with the compiler's error message if it rejects `-fsanitize=thread`.
 
 ## Exercise 6: Transfer negative control
 
@@ -103,4 +103,4 @@ Introduce a plain counter race only in a separately instrumented scratch test.
 
 **Reasoning:** A clean correct example alone does not demonstrate detector sensitivity.
 
-**Verify:** Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.
+**Verify:** Confirm the ThreadSanitizer report names a data race on the plain counter in the scratch file, then rebuild Worked example 2 with the same flags and confirm it reports nothing.

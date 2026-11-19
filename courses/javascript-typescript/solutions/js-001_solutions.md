@@ -18,35 +18,39 @@ This course uses ES modules with the .mjs extension for JavaScript. Modules have
 
 An import statement loads a declared module binding. The node: prefix identifies a built-in Node module rather than an installed package. const creates a binding that cannot be reassigned, while the object it references may still be mutable. import.meta.url identifies the current ES module. typeof can inspect an undeclared host global without throwing, which is useful for distinguishing Node from a browser without pretending to implement the missing API.
 
-## Exercise 1: Inspect the actual host
+## Exercise 1: Inspect the actual host: predict an edited check
 
-Task: Check that the prepared runtime is Node 24 and that process exists.
+Task: Copy Example A into a scratch `main.mjs` and change `assert.equal(Number(process.versions.node.split('.')[0]), 24);` to `assert.equal(Number(process.versions.node.split('.')[1]), 24);` inside its check. Before running it, predict whether the check still passes and explain why; then restore it.
 
 The version check verifies the actual process rather than trusting a file extension. The prepared profile is the supported baseline for later host APIs.
+
+The unchanged code is the exercise block of Example A:
 
 ```javascript
 assert.equal(Number(process.versions.node.split('.')[0]), 24);
 assert.equal(process.release.name, 'node');
 ```
 
-**Expected:** major version 24; process.release.name is node.
+**Expected:** The changed run fails with an `AssertionError` at the check `assert.equal(Number(process.versions.node.split('.')[0]), 24)`. Restoring the original line brings back the worked observation: major version 24; process.release.name is node.
 
-**Verify:** Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.
+**Verify:** Compare your written prediction with the reported `AssertionError`, including its actual and expected values, and explain why the edited check rejects the values that `assert.equal(Number(process.versions.node.split('.')[0]), 24)` accepts. After restoring the line, the program prints its `{"checks":1,"status":"passed"}` receipt again.
 
-## Exercise 2: Distinguish browser globals
+## Exercise 2: Distinguish browser globals: diagnose an edited check
 
-Task: Inspect document and window using typeof inside Node.
+Task: A careless edit changed a check in Example B so that it reads `assert.equal(typeof window, 'undefined!');`. Run Example B with that line, explain why the edited check now fails for the same program state, and restore it.
 
 A browser DOM lesson cannot be validated by a Node run that never had a document. Later browser chapters use separate real HTML fixtures.
+
+The unchanged code is the exercise block of Example B:
 
 ```javascript
 assert.equal(typeof document, 'undefined');
 assert.equal(typeof window, 'undefined');
 ```
 
-**Expected:** both undefined.
+**Expected:** Before the repair the run fails with an `AssertionError` at the check `assert.equal(typeof window, 'undefined')`; after it the line reads `assert.equal(typeof window, 'undefined');` again and both undefined.
 
-**Verify:** Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.
+**Verify:** Keep the failing and the repaired runs. Explain why the edited check rejects the same program state that `assert.equal(typeof window, 'undefined')` accepts.
 
 ## Exercise 3: Use language arithmetic independently of host APIs
 
@@ -62,7 +66,7 @@ assert.notEqual(total, '5');
 
 **Expected:** number 5; not strictly equal to string 5.
 
-**Verify:** Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.
+**Verify:** Keep a check equivalent to `assert.equal(total, 5)`. As a control, change `const total = 2 + 3;` to `const total = 2 - 3;`: the run must fail with an `AssertionError` at that check. Restore the line before continuing.
 
 ## Exercise 4: Inspect module identity
 
@@ -77,7 +81,7 @@ assert.ok(import.meta.url.endsWith('.mjs'));
 
 **Expected:** a file URL ending in .mjs in the classroom.
 
-**Verify:** Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.
+**Verify:** Keep a check equivalent to `assert.ok(import.meta.url.endsWith('.mjs'))`. As a control, change `assert.ok(import.meta.url.endsWith('.mjs'));` to `assert.ok(import.meta.url.endsWith('.mjs!'));` inside it: the run must fail with an `AssertionError`, which shows the check can fail. Restore it.
 
 ## Exercise 5: Observe strict module function calls
 
@@ -94,7 +98,7 @@ assert.equal(receiver(), undefined);
 
 **Expected:** this is undefined.
 
-**Verify:** Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.
+**Verify:** Keep a check equivalent to `assert.equal(receiver(), undefined)` and confirm that the reference still passes. Then name an input that would make it fail and explain which value changes.
 
 ## Exercise 6: Await a real Promise result
 
@@ -111,7 +115,7 @@ assert.equal(value, 7);
 
 **Expected:** observed value 7 after await.
 
-**Verify:** Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.
+**Verify:** Keep a check equivalent to `assert.equal(value, 7)`. As a control, change `const pending = Promise.resolve(7);` to `const pending = Promise.resolve(8);`: the run must fail with an `AssertionError` at that check. Restore the line before continuing.
 
 ## After comparison
 

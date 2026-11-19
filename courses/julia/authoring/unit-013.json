@@ -21,7 +21,7 @@
     },
     {
       "title": "Reject incompatible axes",
-      "task": "Broadcast a length 4 vector with the 2-by -3 fixture.",
+      "task": "Broadcast a length 4 vector with the 2-by-3 fixture.",
       "expected": "A DimensionMismatch occurs.",
       "hint": "Compatible axes are not determined by total element count.",
       "answer": "Shape validation prevents a silent interpretation of an unintended operation."
@@ -36,14 +36,14 @@
     {
       "title": "Trace a manual recurrence",
       "task": "Shift a vector left-to-right by reading the preceding updated element.",
-      "expected": "The example becomes[1,1,1,1].",
+      "expected": "The example becomes `[1, 1, 1, 1]`.",
       "hint": "A later read sees an earlier write.",
       "answer": "The loop implements a recurrence, not a simultaneous snapshot assignment."
     },
     {
       "title": "Preserve a snapshot",
       "task": "Read the shift input from an explicit copy.",
-      "expected": "The example becomes[1,1,2,3].",
+      "expected": "The example becomes `[1, 1, 2, 3]`.",
       "hint": "Separate source and destination storage.",
       "answer": "The copy changes the read/write dependency and therefore the algorithm."
     },

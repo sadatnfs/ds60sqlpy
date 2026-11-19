@@ -20,11 +20,13 @@ Default parameters apply when an argument is undefined, not when it is null. Ord
 
 A function declaration introduces a named callable; an arrow expression creates a function value. Returning a nested function forms a closure over its surrounding bindings. let and const are block-scoped, while var is function-scoped. The default syntax name=value is evaluated when the argument is undefined. Use call or bind only when receiver behavior is part of the contract, not as a substitute for understanding the callsite.
 
-## Exercise 1: Call a pure function
+## Exercise 1: Call a pure function: predict an edited check
 
-Task: Use add with 2, 3 and with negative 1, 1.
+Task: Copy Example A into a scratch `main.mjs` and change `assert.equal(add(-1, 1), 0);` to `assert.equal(add(-2, 1), 0);` inside its check. Before running it, predict whether the check still passes and explain why; then restore it.
 
 The function depends only on its arguments and changes no external state. Boundary examples can be tested independently.
+
+The unchanged code is the exercise block of Example A:
 
 ```javascript
 function add(left, right) {
@@ -34,15 +36,17 @@ assert.equal(add(2, 3), 5);
 assert.equal(add(-1, 1), 0);
 ```
 
-**Expected:** 5 and 0.
+**Expected:** The changed run fails with an `AssertionError` at the check `assert.equal(add(-1, 1), 0)`. Restoring the original line brings back the worked observation: 5 and 0.
 
-**Verify:** Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.
+**Verify:** Compare your written prediction with the reported `AssertionError`, including its actual and expected values, and explain why the edited check rejects the values that `assert.equal(add(-1, 1), 0)` accepts. After restoring the line, the program prints its `{"checks":1,"status":"passed"}` receipt again.
 
-## Exercise 2: Build independent closures
+## Exercise 2: Build independent closures: diagnose an edited check
 
-Task: Create two counters; increment the first twice and the second once.
+Task: A careless edit changed a check in Example B so that it reads `assert.equal(second(), 2);`. Run Example B with that line, explain why the edited check now fails for the same program state, and restore it.
 
 Each factory call creates a separate captured binding. Equal initial values do not imply shared counter state.
+
+The unchanged code is the exercise block of Example B:
 
 ```javascript
 const first = counter();
@@ -52,9 +56,9 @@ assert.equal(first(), 2);
 assert.equal(second(), 1);
 ```
 
-**Expected:** first 1, 2; second 1.
+**Expected:** Before the repair the run fails with an `AssertionError` at the check `assert.equal(second(), 1)`; after it the line reads `assert.equal(second(), 1);` again and first 1, 2; second 1.
 
-**Verify:** Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.
+**Verify:** Keep the failing and the repaired runs. Explain why the edited check rejects the same program state that `assert.equal(second(), 1)` accepts.
 
 ## Exercise 3: Compare let and var loop capture
 
@@ -79,7 +83,7 @@ assert.deepEqual(
 
 **Expected:** let returns 0, 1, 2; var returns 3, 3, 3.
 
-**Verify:** Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.
+**Verify:** Keep a check equivalent to `assert.deepEqual(shared.map((fn) => fn()), [3, 3, 3])`. As a control, change `for (var index = 0; index < 3; index += 1) shared.push(() => index);` to `for (var index = 0; index <= 3; index += 1) shared.push(() => index);`: the run must fail with an `AssertionError` at that check. Restore the line before continuing.
 
 ## Exercise 4: Distinguish undefined from null defaults
 
@@ -98,7 +102,7 @@ assert.equal(label(null), null);
 
 **Expected:** default used for the first two; null preserved.
 
-**Verify:** Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.
+**Verify:** Keep a check equivalent to `assert.equal(label(), 'guest')`. As a control, change `function label(value = 'guest') {` to `function label(value = 'guest!') {`: the run must fail with an `AssertionError` at that check. Restore the line before continuing.
 
 ## Exercise 5: Observe an ordinary receiver
 
@@ -119,7 +123,7 @@ assert.equal(item.read.call({ value: 9 }), 9);
 
 **Expected:** 4 and 9.
 
-**Verify:** Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.
+**Verify:** Keep a check equivalent to `assert.equal(item.read.call({ value: 9 }), 9)`. As a control, change `assert.equal(item.read.call({ value: 9 }), 9);` to `assert.equal(item.read.call({ value: 10 }), 9);` inside it: the run must fail with an `AssertionError`, which shows the check can fail. Restore it.
 
 ## Exercise 6: Reject an invalid factory configuration
 
@@ -136,7 +140,7 @@ assert.deepEqual([next(), next()], [2, 4]);
 
 **Expected:** TypeError for 0 and 1.5; step 2 yields 2, 4.
 
-**Verify:** Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.
+**Verify:** Keep a check equivalent to `assert.deepEqual([next(), next()], [2, 4])`. As a control, change `const next = counter(2);` to `const next = counter(3);`: the run must fail with an `AssertionError` at that check. Restore the line before continuing.
 
 ## After comparison
 

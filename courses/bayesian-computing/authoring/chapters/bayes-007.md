@@ -26,7 +26,7 @@ Posterior geometry can vary across the parameter space. A step size suitable in 
 
 The No-U-Turn Sampler adaptively chooses trajectory lengths using a criterion intended to avoid retracing a path unnecessarily. It also operates within a careful transition construction; simply stopping an arbitrary integrator when a path looks circular is not an implementation of NUTS.
 
-Prepared libraries report quantities such as divergences, tree depth, step size and energy diagnostics. A divergence is evidence that the numerical exploration encountered a problematic region under the configured algorithm. It should be investigated in relation to parameters and geometry, not automatically discarded as an inconvenient warning.
+Prepared libraries report quantities such as divergences, tree depth, step size and energy diagnostics. A divergence is evidence that the numerical exploration encountered a problematic region under the configured algorithm. A run used for inference should report zero divergent transitions after warmup; even a handful means some region was not followed accurately, and the resulting estimates can be biased. Investigate divergences in relation to parameters and geometry, not as an inconvenient warning to discard.
 
 Mass-matrix terminology varies across interfaces. Some expose a metric or inverse mass rather than the mass itself. Record the convention before interpreting a fitted matrix. Confusing a covariance with its inverse can reverse an intended rescaling and make computation worse.
 

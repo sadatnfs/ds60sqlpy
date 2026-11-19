@@ -41,7 +41,7 @@ import llm011
 add(
     "llm-012",
     """Decoding converts a next-token probability distribution into a selected token. Greedy decoding chooses the maximum score with a declared tie rule. Sampling uses a random draw and cumulative probability intervals, so its result depends on the seed or supplied draw. Temperature divides logits before softmax: positive temperatures change concentration while preserving ranking. Top-k removes all but a fixed number of candidate tokens and renormalizes the remaining mass. These are inference policies, not changes to learned model weights. The tiny three-token vocabulary makes every interval visible and separates stochastic choice from a model's probability calculation.""",
-    """Subtract the maximum before exponentiation. Require positive temperature for stochastic sampling; handle zero-temperature greedy mode separately. np.argmax returns the first maximum, which implements the declared smallest-index tie rule. np.searchsorted(cumulative,draw,side='right') selects the interval containing a draw in[0,1). Filter candidates before the final normalization.""",
+    """Subtract the maximum before exponentiation. Require positive temperature for stochastic sampling; handle zero-temperature greedy mode separately. np.argmax returns the first maximum, which implements the declared smallest-index tie rule. np.searchsorted(cumulative, draw, side='right') selects the interval containing a draw in [0, 1). Filter candidates before the final normalization.""",
     [
         ("Greedy decoding", "Selecting a highest-scoring token under a tie policy."),
         ("Temperature", "Positive divisor controlling score concentration before softmax."),
@@ -50,46 +50,46 @@ add(
     [
         ex(
             "Calculate greedy choice",
-            "Use scores[2,1,0] and choose the maximum index.",
-            "token0.",
+            "Use scores [2, 1, 0] and choose the maximum index.",
+            "token 0.",
             """scores=np.array([2.,1.,0.]); assert int(np.argmax(scores))==0""",
             "Only ranking matters to greedy selection. A common shift or positive temperature preserves this particular decision.",
         ),
         ex(
             "Change temperature",
-            "Compare probabilities at temperatures1 and.5 using stable softmax.",
-            "token0 probability increases; argmax stays0.",
+            "Compare probabilities at temperatures 1 and 0.5 using stable softmax.",
+            "token 0 probability increases; argmax stays 0.",
             """p=softmax(scores); cool=softmax(scores/.5)
 assert cool[0]>p[0] and p.argmax()==cool.argmax()==0""",
             "Sharper probabilities make high-scoring tokens more likely without changing their order. They do not create new evidence that the selected token is correct.",
         ),
         ex(
             "Use fixed draws",
-            "Sample from probabilities[.5,.3,.2] with draws .1,.6,.9.",
-            "tokens0,1,2.",
+            "Sample from probabilities [0.5, 0.3, 0.2] with draws 0.1, 0.6, 0.9.",
+            "tokens 0, 1, 2.",
             """mass=np.array([.5,.3,.2]); cumulative=np.cumsum(mass)
 assert [int(np.searchsorted(cumulative,d,side='right')) for d in [.1,.6,.9]]==[0,1,2]""",
-            "The intervals are[0,.5),[.5,.8),[.8,1). Supplying draws directly makes the sampling mechanism testable without relying on a platform random bit pattern.",
+            "The intervals are [0, 0.5), [0.5, 0.8), [0.8, 1). Supplying draws directly makes the sampling mechanism testable without relying on a platform random bit pattern.",
         ),
         ex(
             "Retain two candidates",
-            "Apply top-k2 to scores[2,1,0] and normalize only retained candidates.",
-            "token 2 probability0; first two sum1.",
+            "Apply top-k2 to scores [2, 1, 0] and normalize only retained candidates.",
+            "token 2 probability 0; first two sum 1.",
             """allowed=np.argsort(-scores,kind='stable')[:2]; filtered=np.zeros(3); filtered[allowed]=softmax(scores[allowed])
 assert filtered[2]==0; np.testing.assert_allclose(filtered.sum(),1,atol=1e-12,rtol=0)""",
             "Zeroing a probability after softmax without renormalizing would leave missing mass. Filtering is a policy that changes the final distribution.",
         ),
         ex(
             "Declare ties",
-            "Use equal scores[1,1,0] and choose the smallest-index maximum.",
-            "token0 under the stated rule.",
+            "Use equal scores [1, 1, 0] and choose the smallest-index maximum.",
+            "token 0 under the stated rule.",
             """assert int(np.argmax([1,1,0]))==0""",
             "A deterministic tie rule makes repeated decisions explainable. Other valid policies exist, but an undocumented implementation detail should not determine a public contract.",
         ),
         ex(
             "Reject invalid draws",
-            "Validate draws0,.999,1 and-.1 before cumulative lookup.",
-            "0 and.999 accepted;1 and-.1 rejected.",
+            "Validate draws 0, 0.999, 1 and -0.1 before cumulative lookup.",
+            "0 and 0.999 accepted; 1 and -0.1 rejected.",
             """def validate_draw(draw):
     if not np.isfinite(draw) or not 0<=draw<1: raise ValueError('draw in [0,1)')
     return draw
@@ -109,7 +109,7 @@ for bad in [1,-.1]:
 add(
     "llm-013",
     """A decoder can have perfect causal attention and still be evaluated on leaked data. Next-token training pairs each input position with the following token; copying the input as its own label creates an easier identity task. A split must also keep document families together and exclude duplicates across partitions. Tokenizer fitting, prompt selection and preprocessing can consume evaluation information before model training begins. The fixture separates these failure modes so a passing mask test is not mistaken for a complete experiment audit. Stable document identity and explicit shifted arrays provide stronger evidence than a plausible loss curve.""",
-    """For token sequence ids, use ids[:-1] as inputs and ids[1:] as targets. Hash raw or explicitly normalized text according to a declared policy. Compare both exact hashes and known family IDs across partitions; exact hashing cannot detect paraphrases on its own. Validate disjoint groups before fitting any vocabulary or count model.""",
+    """For token sequence ids, use ids[:-1] as inputs and ids [1:] as targets. Hash raw or explicitly normalized text according to a declared policy. Compare both exact hashes and known family IDs across partitions; exact hashing cannot detect paraphrases on its own. Validate disjoint groups before fitting any vocabulary or count model.""",
     [
         ("Shifted target", "The next token paired with the current input position."),
         ("Contamination", "Assessment information entering training or selection."),
@@ -118,8 +118,8 @@ add(
     [
         ex(
             "Construct next-token pairs",
-            "Shift IDs[2,5,7,3] into input and label arrays.",
-            "inputs[2,5,7],labels[5,7,3].",
+            "Shift IDs [2, 5, 7, 3] into input and label arrays.",
+            "inputs [2, 5, 7], labels [5, 7, 3].",
             """ids=np.array([2,5,7,3]); inputs=ids[:-1]; labels=ids[1:]
 np.testing.assert_array_equal(inputs,[2,5,7]); np.testing.assert_array_equal(labels,[5,7,3])""",
             "There are three target events in a four-token sequence. The final token has no next token unless an explicit end marker is included in the original sequence.",
@@ -143,24 +143,24 @@ assert {hash_text(t) for t in train.values()} & {hash_text(t) for t in valid.val
         ),
         ex(
             "Detect family leakage",
-            "Assign documentsa andb to familyF across train and validation.",
-            "family intersection containsF.",
+            "Assign documents a and b to family F across train and validation.",
+            "family intersection contains F.",
             """families={'a':'F','b':'F','c':'G'}
 assert {families['a']} & {families['b']}=={'F'}""",
             "Known source families can catch related material that hashes differently. The grouping policy should be frozen before outcome inspection.",
         ),
         ex(
             "Freeze a vocabulary",
-            "Fit a vocabulary from training words alpha,beta and encode validation-only gamma without adding it.",
-            "vocabulary remains alpha,beta; gamma is unknown.",
+            "Fit a vocabulary from training words alpha, beta and encode validation-only gamma without adding it.",
+            "vocabulary remains alpha, beta; gamma is unknown.",
             """vocab={'alpha':0,'beta':1}; before=dict(vocab); unknown=vocab.get('gamma',-1)
 assert unknown==-1 and vocab==before""",
             "A vocabulary update during validation changes the fitted representation. Unknown-token handling must be an explicit frozen policy.",
         ),
         ex(
             "Count active targets",
-            "Count targets across documents of lengths4 and2 without creating a transition between documents.",
-            "3+1=4 targets, not5.",
+            "Count targets across documents of lengths 4 and 2 without creating a transition between documents.",
+            "3+1=4 targets, not 5.",
             """documents=[[2,5,7,3],[8,3]]
 pairs=[(a,b) for doc in documents for a,b in zip(doc[:-1],doc[1:])]
 assert len(pairs)==4 and (3,8) not in pairs""",
@@ -181,8 +181,8 @@ add(
     [
         ex(
             "Fit a tiny baseline",
-            "Use vocabularyA,B,C and documentsABAB,AC; count transitions within documents.",
-            "AtoB2,BtoA1,AtoC1; total4.",
+            "Use vocabulary A, B, C and the documents ABAB and AC; count transitions within each document.",
+            "A to B: 2, B to A: 1, A to C: 1; total 4.",
             """docs=[[0,1,0,1],[0,2]]; counts=np.zeros((3,3),dtype=int)
 for doc in docs:
     for a,b in zip(doc[:-1],doc[1:]): counts[a,b]+=1
@@ -192,7 +192,7 @@ assert counts[0,1]==2 and counts[1,0]==1 and counts[0,2]==1 and counts.sum()==4"
         ex(
             "Normalize smoothed rows",
             "Apply add-one smoothing to the count matrix.",
-            "row sums1; unseen C context is uniform.",
+            "row sums 1; unseen C context is uniform.",
             """prob=(counts+1)/(counts.sum(1,keepdims=True)+3)
 np.testing.assert_allclose(prob.sum(1),1,atol=1e-12,rtol=0)
 np.testing.assert_allclose(prob[2],[1/3]*3,atol=1e-12,rtol=0)""",
@@ -200,8 +200,8 @@ np.testing.assert_allclose(prob[2],[1/3]*3,atol=1e-12,rtol=0)""",
         ),
         ex(
             "Score held-out transitions",
-            "Evaluate held-out sequenceA,C,B using the frozen table.",
-            "2 targets; NLL log3+log3.",
+            "Evaluate held-out sequence A, C, B using the frozen table.",
+            "2 targets; NLL log 3+log 3.",
             """saved=counts.copy(); held=[0,2,1]; nll=-sum(np.log(prob[a,b]) for a,b in zip(held[:-1],held[1:]))
 np.testing.assert_allclose(nll,2*np.log(3),atol=1e-12,rtol=0); assert len(held)-1==2""",
             "The two transition probabilities are \\(p(C\\mid A)=2/6=1/3\\) and \\(p(B\\mid C)=1/3\\). Their negative log probabilities sum to \\(-\\log(1/3)-\\log(1/3)=2\\log 3\\). Dividing this total negative log likelihood by two active targets gives mean loss \\(\\log 3\\).",
@@ -215,8 +215,8 @@ np.testing.assert_allclose(nll,2*np.log(3),atol=1e-12,rtol=0); assert len(held)-
         ),
         ex(
             "Verify a causal prefix oracle",
-            "For zero-score attention values2,4,8 calculate prefix means and independently recompute each prefix.",
-            "outputs2,3,14/3.",
+            "For zero-score attention values 2, 4, 8 calculate prefix means and independently recompute each prefix.",
+            "outputs 2, 3, 14/3.",
             """values=np.array([2.,4.,8.]); out=np.array([values[:i+1].mean() for i in range(3)])
 np.testing.assert_allclose(out,[2,3,14/3],atol=1e-12,rtol=0)
 for cut in range(1,4): np.testing.assert_allclose(out[:cut],[values[:i+1].mean() for i in range(cut)],atol=1e-12,rtol=0)""",
@@ -224,8 +224,8 @@ for cut in range(1,4): np.testing.assert_allclose(out[:cut],[values[:i+1].mean()
         ),
         ex(
             "Write the bounded comparison",
-            "Create a report with vocabulary size3,2 held-out targets and a limitation about unseen tasks.",
-            "report includes finite meanNLL and no broad competence claim.",
+            "Create a report with vocabulary size 3, 2 held-out targets and a limitation about unseen tasks.",
+            "report includes finite mean NLL and no broad competence claim.",
             """report={'vocabulary':3,'targets':2,'mean_nll':float(nll/2),'limitation':'Tiny authored corpus; unseen tasks remain untested.'}
 assert np.isfinite(report['mean_nll']) and report['targets']==2 and 'untested' in report['limitation']""",
             "A complete report can be modest. Counts, denominator and limitations let a reviewer understand exactly what the model was asked to do and what the result cannot establish.",
@@ -236,7 +236,7 @@ assert np.isfinite(report['mean_nll']) and report['targets']==2 and 'untested' i
 add(
     "llm-015",
     """PyTorch builds a dynamic computation graph when operations involve tensors requiring gradients. backward traverses that graph and accumulates derivatives into leaf gradients. A detached tensor keeps numeric data while removing its gradient connection, which can silently break training if used in the forward path. A zero derivative and an absent gradient are different observations. Embedding lookup is still the same indexed table seen in the NumPy lesson; a framework adds trainable state and gradient tracking rather than changing the mathematical meaning. CPU execution and tiny fixtures keep the first framework investigation inspectable.""",
-    """torch.tensor(...,requires_grad=True) creates a leaf whose .grad is populated after backward. Clear gradients before a new independent step because backward accumulates by default. detach returns a value with requires_grad=False. nn.Embedding.from_pretrained(...,freeze=False) wraps a fixed literal table as trainable state. IDs use torch.long and select rows along the vocabulary axis.""",
+    """torch.tensor(..., requires_grad=True) creates a leaf whose .grad is populated after backward. Clear gradients before a new independent step because backward accumulates by default. detach returns a value with requires_grad=False. nn.Embedding.from_pretrained(..., freeze=False) wraps a fixed literal table as trainable state. IDs use torch.long and select rows along the vocabulary axis.""",
     [
         ("Autograd", "Automatic differentiation through recorded tensor operations."),
         ("Leaf gradient", "Accumulated derivative stored on an input or parameter tensor."),
@@ -245,16 +245,16 @@ add(
     [
         ex(
             "Derive a scalar gradient",
-            "Differentiate(w-2)² atw0 in float64.",
-            "gradient-4 and loss4.",
+            "Differentiate(w-2)² at w=0 in float64.",
+            "gradient -4 and loss 4.",
             """w=torch.tensor(0.,dtype=torch.float64,requires_grad=True); loss=(w-2)**2; loss.backward()
 assert w.grad.item()==-4 and loss.item()==4""",
-            "The analytic derivative2(w-2) supplies an independent oracle. A correct loss alone would not show that the gradient graph was connected.",
+            "The analytic derivative \\(2(w-2)\\) supplies an independent oracle. A correct loss alone would not show that the gradient graph was connected.",
         ),
         ex(
             "Compare finite differences",
-            "Use central differenceh=.001 for the same scalar function.",
-            "finite difference approximately-4 within1e-10.",
+            "Use central difference h=0.001 for the same scalar function.",
+            "finite difference approximately -4 within 1e-10.",
             """h=.001; numeric=(((h-2)**2)-((-h-2)**2))/(2*h)
 np.testing.assert_allclose(numeric,-4,atol=1e-10,rtol=0)""",
             "Finite differences perturb the function value rather than reading autograd internals. Agreement away from a nondifferentiable point supports the derivative calculation.",
@@ -262,28 +262,28 @@ np.testing.assert_allclose(numeric,-4,atol=1e-10,rtol=0)""",
         ex(
             "Observe accumulation",
             "Call backward on a new loss without clearing the prior gradient.",
-            "stored gradient becomes-8.",
+            "stored gradient becomes -8.",
             """((w-2)**2).backward(); assert w.grad.item()==-8""",
             "PyTorch adds to existing gradients. A training loop that forgets zero_grad changes its effective update and can look unstable for reasons unrelated to model capacity.",
         ),
         ex(
             "Clear gradient state",
             "Set the gradient to None, recompute and backpropagate once.",
-            "gradient returns to-4.",
+            "gradient returns to -4.",
             """w.grad=None; ((w-2)**2).backward(); assert w.grad.item()==-4""",
             "Resetting before the next independent batch restores the intended one-batch derivative. Intentional accumulation needs a separate denominator and step policy.",
         ),
         ex(
             "Inspect detachment",
-            "Detachw and compare its value and gradient-tracking status.",
-            "same value0; requires_gradFalse.",
+            "Detach w and compare its value and gradient-tracking status.",
+            "same value 0; requires_gradFalse.",
             """detached=w.detach(); assert detached.item()==0 and detached.requires_grad is False""",
             "Detach preserves a numeric observation while cutting dependency. It is appropriate for logging or explicit stop-gradient designs, but not a repair for an unexplained backward error.",
         ),
         ex(
             "Check an embedding table",
-            "Lookup IDs2,0,2 in a fixed4x2 table and compare repeated rows.",
-            "shape(3,2); rows0 and2 both[2,2].",
+            "Lookup IDs 2, 0, 2 in a fixed 4x2 table and compare repeated rows.",
+            "shape (3, 2); rows 0 and 2 both [2, 2].",
             """table=torch.tensor([[1.,0.],[0.,1.],[2.,2.],[-1.,1.]])
 embedding=nn.Embedding.from_pretrained(table,freeze=False); out=embedding(torch.tensor([2,0,2]))
 assert tuple(out.shape)==(3,2); np.testing.assert_array_equal(out.detach().numpy(),[[2,2],[1,0],[2,2]])""",
@@ -296,7 +296,7 @@ assert tuple(out.shape)==(3,2); np.testing.assert_array_equal(out.detach().numpy
 add(
     "llm-016",
     """A small causal decoder makes the transformer data path visible. Token IDs index a learned table, position IDs add order, and a tokenwise normalization feeds query/key/value projections. Two heads attend only to current and earlier positions. Their outputs are rejoined, projected and added through a residual connection. A second tokenwise normalization and feed-forward block produce another residual. The output projection creates one vocabulary score per token position. No pretrained model or downloaded corpus is needed. A parameter count and a context limit bound this teaching model; they do not make it a general-purpose language system.""",
-    """The TinyDecoder helper uses width32,heads2,context32,vocabulary16. Its tensor path is(batch,time,width) to(batch,heads,time,head_width), then back. The boolean allowed matrix uses key_position<=query_position, so the diagonal is allowed for shifted targets. LayerNorm reduces features only. forward returns logits plus detached K/V state for later inference lessons; training in this lesson always passes cache=None.""",
+    """The TinyDecoder helper uses width32, heads 2, context 32, vocabulary 16. Its tensor path is(batch, time, width) to(batch, heads, time, head_width), then back. The boolean allowed matrix uses key_position<=query_position, so the diagonal is allowed for shifted targets. LayerNorm reduces features only. forward returns logits plus detached K/V state for later inference lessons; training in this lesson always passes cache=None.""",
     [
         (
             "Decoder block",
@@ -308,24 +308,24 @@ add(
     [
         ex(
             "Build a bounded decoder",
-            "Set seed7, construct the decoder and count trainable scalar parameters.",
-            "parameter count below50000.",
+            "Set seed 7, construct the decoder and count trainable scalar parameters.",
+            "parameter count below 50000.",
             """torch.manual_seed(7); model=TinyDecoder(); model.eval(); count=sum(p.numel() for p in model.parameters())
 assert 0<count<50000""",
             "The exact count follows the embedding, projection and feed-forward shapes. A small parameter count bounds the fixture but says little about capability on unseen tasks.",
         ),
         ex(
             "Trace output axes",
-            "Run input IDs[[2,5,7,3]] and inspect logits.",
-            "shape(1,4,16), all finite.",
+            "Run input IDs [[2, 5, 7, 3]] and inspect logits.",
+            "shape (1, 4, 16), all finite.",
             """ids=torch.tensor([[2,5,7,3]],dtype=torch.long); logits,_=model(ids)
 assert tuple(logits.shape)==(1,4,16) and torch.isfinite(logits).all()""",
             "Every input position produces a distribution over the same sixteen-token vocabulary. The time axis is not a class axis and must not be reduced accidentally.",
         ),
         ex(
             "Recompute prefixes",
-            "Run prefix lengths1..4 independently in evaluation mode.",
-            "prefix logits match full early logits within1e-6.",
+            "Run prefix lengths 1..4 independently in evaluation mode.",
+            "prefix logits match full early logits within 1e-6.",
             """with torch.no_grad():
     full,_=model(ids)
     for cut in range(1,5):
@@ -334,8 +334,8 @@ assert tuple(logits.shape)==(1,4,16) and torch.isfinite(logits).all()""",
         ),
         ex(
             "Perturb only future tokens",
-            "Replace positions2,3 with8,9 and compare the first two outputs.",
-            "first two logits unchanged within1e-6.",
+            "Replace positions2, 3 with 8, 9 and compare the first two outputs.",
+            "first two logits unchanged within 1e-6.",
             """future=ids.clone(); future[:,2:]=torch.tensor([[8,9]])
 a,_=model(ids); b,_=model(future); torch.testing.assert_close(a[:,:2],b[:,:2],atol=1e-6,rtol=0)""",
             "A future-only perturbation is a direct causal test. It can expose a leaking normalization or incorrect mask even when the model has never been trained.",
@@ -343,14 +343,14 @@ a,_=model(ids); b,_=model(future); torch.testing.assert_close(a[:,:2],b[:,:2],at
         ex(
             "Inspect head shapes",
             "Read the returned K/V state after four tokens.",
-            "each cache tensor shape(1,2,4,16).",
+            "each cache tensor shape (1, 2, 4, 16).",
             """_,cache=model(ids)
 assert tuple(cache['k'].shape)==tuple(cache['v'].shape)==(1,2,4,16)""",
-            "Width32 is split into two sixteen-dimensional heads. The cached time dimension grows with processed tokens, while the feature width remains fixed.",
+            "Width 32 is split into two sixteen-dimensional heads. The cached time dimension grows with processed tokens, while the feature width remains fixed.",
         ),
         ex(
             "Reject invalid token IDs",
-            "Pass vocabulary ID16 and a33-token context.",
+            "Pass vocabulary ID 16 and a 33-token context.",
             "both raise ValueError.",
             """for bad in [torch.tensor([[16]]),torch.zeros((1,33),dtype=torch.long)]:
     try: model(bad)
@@ -366,7 +366,7 @@ assert tuple(cache['k'].shape)==tuple(cache['v'].shape)==(1,2,4,16)""",
 add(
     "llm-017",
     """Training predicts the next token at each active position. A four-token sequence gives three input-target pairs, and padding creates storage slots without creating observations. Cross entropy can ignore a sentinel target such as-100, but the denominator must still count only active targets. Summing losses and dividing by padded width understates error when sequences are short. The vocabulary dimension belongs to logits, while labels are integer class indices. This lesson uses zero logits so each active target has exactly log(vocabulary_size) loss, making padding and reduction errors visible without a trained model.""",
-    """ids[:,:-1] and ids[:,1:] produce shifted input and target tensors. F.cross_entropy expects classes on dimension1, so flatten(batch,time,vocabulary) logits to(-1,vocabulary) and labels to(-1). With ignore_index=-100, ignored targets contribute no loss. reduction='sum' followed by an explicit active count makes the denominator auditable.""",
+    """ids[:, :-1] and ids[:, 1:] produce shifted input and target tensors. F.cross_entropy expects classes on dimension 1, so flatten(batch, time, vocabulary) logits to (-1, vocabulary) and labels to (-1). With ignore_index=-100, ignored targets contribute no loss. reduction='sum' followed by an explicit active count makes the denominator auditable.""",
     [
         ("Active target", "A real next-token observation included in the objective."),
         ("Ignore index", "A sentinel label excluded from loss calculation."),
@@ -375,24 +375,24 @@ add(
     [
         ex(
             "Shift the sequence",
-            "Use IDs[2,5,7,3] and create three input-target pairs.",
-            "inputs2,5,7 and targets5,7,3.",
+            "Use IDs [2, 5, 7, 3] and create three input-target pairs.",
+            "inputs 2, 5, 7 and targets 5, 7, 3.",
             """ids=torch.tensor([[2,5,7,3]]); inputs=ids[:,:-1]; targets=ids[:,1:]
 assert inputs.tolist()==[[2,5,7]] and targets.tolist()==[[5,7,3]]""",
             "The model may see the current input token but not its target at the next position. The diagonal causal mask is consistent with this shifted objective.",
         ),
         ex(
             "Score uniform logits",
-            "Use zero logits with vocabulary8 for the three targets.",
-            "mean losslog8 and count3.",
+            "Use zero logits with vocabulary 8 for the three targets.",
+            "mean loss \\(\\log 8\\) and count 3.",
             """logits=torch.zeros((1,3,8)); loss=F.cross_entropy(logits.reshape(-1,8),targets.reshape(-1))
 np.testing.assert_allclose(loss.item(),np.log(8),atol=1e-6,rtol=0)""",
             "Each target has probability one eighth. Target identity does not change the loss under this uniform distribution, which isolates the denominator calculation.",
         ),
         ex(
             "Append ignored targets",
-            "Add two labels-100 and corresponding zero-logit positions.",
-            "mean loss unchanged; active count3.",
+            "Add two labels of -100 and corresponding zero-logit positions.",
+            "mean loss unchanged; active count 3.",
             """padded=torch.tensor([[5,7,3,-100,-100]]); plogits=torch.zeros((1,5,8))
 new=F.cross_entropy(plogits.reshape(-1,8),padded.reshape(-1),ignore_index=-100)
 assert int((padded!=-100).sum())==3; torch.testing.assert_close(new,loss,atol=1e-6,rtol=0)""",
@@ -400,8 +400,8 @@ assert int((padded!=-100).sum())==3; torch.testing.assert_close(new,loss,atol=1e
         ),
         ex(
             "Expose the wrong denominator",
-            "Compute summed active loss and divide by padded length5 instead of active count3.",
-            "wrong loss3log8/5, below correct loss.",
+            "Compute summed active loss and divide by padded length 5 instead of active count 3.",
+            "wrong loss \\(3\\log 8/5\\), below the correct loss.",
             """summed=F.cross_entropy(plogits.reshape(-1,8),padded.reshape(-1),ignore_index=-100,reduction='sum')
 wrong=summed/5
 np.testing.assert_allclose(wrong.item(),3*np.log(8)/5,atol=1e-6,rtol=0); assert wrong<loss""",
@@ -417,7 +417,7 @@ assert torch.count_nonzero(v.grad[:,3:]).item()==0""",
         ),
         ex(
             "Reject all-padding batches",
-            "Check active count before a mean loss on targets[-100,-100].",
+            "Check active count before a mean loss on targets [-100, -100].",
             "zero active count triggers an explicit failure policy.",
             """empty=torch.tensor([[-100,-100]]); active=int((empty!=-100).sum())
 assert active==0
@@ -442,8 +442,8 @@ add(
     [
         ex(
             "Prepare a tiny training batch",
-            "Use two four-token sequences and shifted labels with vocabulary16.",
-            "inputs shape(2,3);6 active targets.",
+            "Use two four-token sequences and shifted labels with vocabulary 16.",
+            "inputs shape (2, 3); 6 active targets.",
             """torch.manual_seed(7); model=TinyDecoder(); ids=torch.tensor([[1,2,3,4],[2,3,4,5]]); inputs=ids[:,:-1]; targets=ids[:,1:]
 assert tuple(inputs.shape)==(2,3) and targets.numel()==6""",
             "The fixture is small enough to enumerate every target. The context length and vocabulary remain below the decoder limits.",
@@ -458,7 +458,7 @@ assert np.isfinite(initial) and initial>0""",
         ),
         ex(
             "Perform twelve bounded updates",
-            "Use Adam(.01), zero gradients each step, log losses and norms, and update exactly12 times.",
+            "Use Adam(0.01), zero gradients each step, log losses and norms, and update exactly 12 times.",
             "12 finite losses and norms; at least one positive norm.",
             """opt=torch.optim.Adam(model.parameters(),lr=.01); before=model.output.weight.detach().clone(); losses=[]; norms=[]
 for _ in range(12):
@@ -478,13 +478,13 @@ assert len(losses)==12 and np.isfinite(losses+norms).all() and max(norms)>0""",
         ex(
             "Clear accumulated gradients",
             "Call zero_grad(set_to_none=True) after the run and inspect every parameter gradient.",
-            "all gradientsNone.",
+            "all gradients None.",
             """opt.zero_grad(set_to_none=True); assert all(p.grad is None for p in model.parameters())""",
             "This confirms the intended reset policy. Accumulating gradients deliberately is possible, but requires an explicit denominator and update schedule.",
         ),
         ex(
             "Report budget honestly",
-            "Create a run record with12 completed updates and the declared200 maximum.",
+            "Create a run record with 12 completed updates and the declared 200 maximum.",
             "stopped_at12; no convergence claim.",
             """report={'steps':12,'maximum_steps':200,'initial_loss':initial,'last_training_loss':losses[-1],'convergence_established':False}
 assert report['steps']<=report['maximum_steps'] and report['convergence_established'] is False""",
@@ -507,7 +507,7 @@ add(
     [
         ex(
             "Clone the initial state",
-            "Build two identical decoders with seed9 and copy one state into the other.",
+            "Build two identical decoders with seed 9 and copy one state into the other.",
             "all parameter tensors initially equal.",
             """torch.manual_seed(9); trained=TinyDecoder(); control=TinyDecoder(); control.load_state_dict(trained.state_dict())
 assert all(torch.equal(a,b) for a,b in zip(trained.parameters(),control.parameters()))
@@ -516,7 +516,7 @@ x=torch.tensor([[1,2,3]]); y=torch.tensor([[2,3,4]])""",
         ),
         ex(
             "Run a no-update control",
-            "Compute the same loss5 times without backward or step.",
+            "Compute the same loss 5 times without backward or step.",
             "all losses equal; weights unchanged.",
             """before={k:v.clone() for k,v in control.state_dict().items()}; values=[]
 with torch.no_grad():
@@ -527,7 +527,7 @@ assert len(set(values))==1 and all(torch.equal(v,before[k]) for k,v in control.s
         ),
         ex(
             "Train the repeated batch",
-            "Apply30 Adam(.02) updates to the other model, using the same batch each time.",
+            "Apply 30 Adam(0.02) updates to the other model, using the same batch each time.",
             "final batch loss below its initial loss.",
             """opt=torch.optim.Adam(trained.parameters(),lr=.02); curve=[]
 for _ in range(30):
@@ -537,8 +537,8 @@ assert np.isfinite(curve).all() and curve[-1]<curve[0]""",
         ),
         ex(
             "Check the class axis",
-            "Inspect logits before flattening and verify vocabulary dimension16.",
-            "shape(1,3,16).",
+            "Inspect logits before flattening and verify vocabulary dimension 16.",
+            "shape (1, 3, 16).",
             """z,_=trained(x); assert tuple(z.shape)==(1,3,16)""",
             "Cross entropy needs one score per class for each active target. Flattening before checking axes can conceal swapped time and vocabulary dimensions.",
         ),
@@ -574,16 +574,16 @@ add(
     [
         ex(
             "Measure a small linear layer",
-            "Apply.01*identity to input[1,-1,2,-2].",
-            "output norm.01*sqrt10.",
+            "Apply 0.01*identity to input [1, -1, 2, -2].",
+            "output norm \\(0.01\\sqrt{10}\\).",
             """x=torch.tensor([[1.,-1.,2.,-2.]]); small=.01*torch.eye(4); out=x@small
 np.testing.assert_allclose(torch.linalg.vector_norm(out).item(),.01*np.sqrt(10),atol=1e-6,rtol=0)""",
             "The identity orientation preserves the input direction. Only scale changes, so the norm relation is independent of random projections.",
         ),
         ex(
             "Increase only the scale",
-            "Replace.01*identity with 100*identity.",
-            "activation norm increases by factor10000.",
+            "Replace 0.01*identity with 100*identity.",
+            "activation norm increases by factor 10000.",
             """large=100*torch.eye(4); bigger=x@large
 np.testing.assert_allclose((torch.linalg.vector_norm(bigger)/torch.linalg.vector_norm(out)).item(),10000,atol=.01,rtol=0)""",
             "Changing both scale and random orientation would confound the comparison. Here the factor follows directly from linearity.",
@@ -600,7 +600,7 @@ assert np.isfinite(norms).all() and norms[1]>norms[0]""",
         ),
         ex(
             "Find the first overflow",
-            "Apply a float32 matrix scaled1e38, then inspect matrix product and squared loss.",
+            "Apply a float32 matrix scaled 1e38, then inspect matrix product and squared loss.",
             "squared loss is nonfinite.",
             """extreme=x@(torch.eye(4)*1e38); objective=extreme.square().mean()
 assert not torch.isfinite(objective)""",
@@ -608,15 +608,15 @@ assert not torch.isfinite(objective)""",
         ),
         ex(
             "Repair on the same input",
-            "Restore the small scale and recalculate output and loss for the unchangedx.",
+            "Restore the small scale and recalculate output and loss for the unchanged x.",
             "both output and loss finite.",
             """repaired=x@small; assert torch.isfinite(repaired).all() and torch.isfinite(repaired.square().mean())""",
             "Changing the fixture would not test the proposed repair. Reusing the original input isolates the effect of the initialization scale.",
         ),
         ex(
             "Check residual dimensions",
-            "Compare residualx+x@small with an incompatible three-feature branch.",
-            "valid residual shape(1,4); width3 branch rejected.",
+            "Compare residual x+x@small with an incompatible three-feature branch.",
+            "valid residual shape (1, 4); width 3 branch rejected.",
             """assert tuple((x+x@small).shape)==(1,4)
 try: x+torch.ones((1,3))
 except RuntimeError: pass
@@ -630,7 +630,7 @@ else: raise AssertionError('incompatible residual accepted')""",
 add(
     "llm-021",
     """Document splitting is an identity problem before it is a random-number problem. Exact content hashes identify byte-identical duplicates, while known family IDs group related paraphrases or versions that differ in bytes. Assign a family wholly to one partition, then verify both family and hash intersections. Freeze the partition manifest before evaluation and keep it available for review. Normalization choices matter: trimming or Unicode normalization can change which documents are considered identical, so declare those choices rather than applying them silently. This local authored corpus makes provenance and grouping inspectable without retrieving any external text.""",
-    """Hash UTF-8 text with SHA256 under a raw-text policy. Map each family to train,validation or test, then derive document assignments. Compare sets across every pair of partitions. Serialize the manifest with sorted keys for a stable identity receipt. A hash is a content fingerprint, not a claim that two different hashes represent independent documents.""",
+    """Hash UTF-8 text with SHA256 under a raw-text policy. Map each family to train, validation or test, then derive document assignments. Compare sets across every pair of partitions. Serialize the manifest with sorted keys for a stable identity receipt. A hash is a content fingerprint, not a claim that two different hashes represent independent documents.""",
     [
         ("Exact duplicate", "Two documents with identical bytes under the declared policy."),
         ("Family split", "A partition assignment shared by related documents."),
@@ -649,7 +649,7 @@ assert a==copy and a!=para""",
         ),
         ex(
             "Assign whole families",
-            "Use documentsa,a2 inF andb inG,c inH; mapF train,G validation,H test.",
+            "Use documents a, a2 in F and b in G, c in H; map F train, G validation, H test.",
             "a and a2 both train.",
             """family={'a':'F','a2':'F','b':'G','c':'H'}; policy={'F':'train','G':'validation','H':'test'}
 manifest={doc:policy[group] for doc,group in family.items()}
@@ -658,7 +658,7 @@ assert manifest=={'a':'train','a2':'train','b':'validation','c':'test'}""",
         ),
         ex(
             "Audit all partition pairs",
-            "Construct family sets for train,validation,test and compare pairwise intersections.",
+            "Construct family sets for train, validation, test and compare pairwise intersections.",
             "all three intersections empty.",
             """sets={part:{family[d] for d,p in manifest.items() if p==part} for part in policy.values()}
 assert not sets['train']&sets['validation'] and not sets['train']&sets['test'] and not sets['validation']&sets['test']""",
@@ -666,8 +666,8 @@ assert not sets['train']&sets['validation'] and not sets['train']&sets['test'] a
         ),
         ex(
             "Inject a known leak",
-            "Movea2 into validation and rerun the family intersection.",
-            "train/validation intersectionF.",
+            "Move a2 into validation and rerun the family intersection.",
+            "train/validation intersection F.",
             """bad=dict(manifest); bad['a2']='validation'
 train={family[d] for d,p in bad.items() if p=='train'}; valid={family[d] for d,p in bad.items() if p=='validation'}
 assert train&valid=={'F'}""",
@@ -705,8 +705,8 @@ add(
     [
         ex(
             "Create Adam history",
-            "Take two float32 Adam updates of(w-2)² fromw0.",
-            "positive weight and optimizer step2.",
+            "Take two float32 Adam updates of (w-2)² from w=0.",
+            "positive weight and optimizer step 2.",
             """w=nn.Parameter(torch.tensor(0.)); opt=torch.optim.Adam([w],lr=.1)
 for _ in range(2): opt.zero_grad(set_to_none=True); (w-2).square().backward(); opt.step()
 assert w.item()>0 and opt.state[w]['step'].item()==2""",
@@ -724,7 +724,7 @@ assert path.is_file(); saved=w.item()""",
         ex(
             "Calculate the uninterrupted next step",
             "Take one more update and save the expected weight.",
-            "step3 and changed weight.",
+            "step 3 and changed weight.",
             """opt.zero_grad(set_to_none=True); (w-2).square().backward(); opt.step(); expected=w.item()
 assert opt.state[w]['step'].item()==3 and expected!=saved""",
             "The control uses the same objective and optimizer settings. A different batch or learning-rate schedule would make the comparison uninterpretable.",
@@ -732,7 +732,7 @@ assert opt.state[w]['step'].item()==3 and expected!=saved""",
         ex(
             "Restore in a new interpreter",
             "Load the trusted checkpoint into fresh weight and Adam objects, then take one step.",
-            "child weight agrees within1e-6.",
+            "child weight agrees within 1e-6.",
             '''program=textwrap.dedent("""
 import torch,json,sys
 from torch import nn
@@ -757,7 +757,7 @@ restored=json.loads(result.stdout.strip().splitlines()[-1]); np.testing.assert_a
         ),
         ex(
             "Verify evaluation and cleanup",
-            "Use Dropout(.5) in eval mode on ones and remove only the owned temporary checkpoint.",
+            "Use Dropout(0.5) in eval mode on ones and remove only the owned temporary checkpoint.",
             "dropout returns ones; temporary path absent.",
             """drop=nn.Dropout(.5); drop.eval(); ones=torch.ones(8)
 assert torch.equal(drop(ones),ones); temporary.cleanup(); assert not path.exists()""",
@@ -772,8 +772,8 @@ assert torch.equal(drop(ones),ones); temporary.cleanup(); assert not path.exists
 )
 add(
     "llm-023",
-    """Top-p decoding retains the smallest probability-ranked prefix whose cumulative mass reaches a threshold, including the token that crosses it. With probabilities.5,.3,.2 andp=.6, retaining only the first token would leave mass.5 and fail the rule; the first two tokens provide mass.8. Renormalize the retained mass before sampling. Termination is a separate control: stop immediately after an end-of-sequence token and also impose a maximum generated-token count. Zero-temperature greedy selection should be a distinct branch, because dividing by zero is not a sampling algorithm. None of these policies establishes factual correctness.""",
-    """Sort probabilities descending with a stable tie policy, compute cumulative sums and retain each token whose preceding cumulative mass is belowp. This formulation keeps the crossing token. torch.Generator(device='cpu') with a fixed seed makes repeated sampling locally reproducible. Generation loops check EOS after appending a chosen token and before requesting another token.""",
+    """Top-p decoding retains the smallest probability-ranked prefix whose cumulative mass reaches a threshold, including the token that crosses it. With probabilities 0.5, 0.3, 0.2 and p=0.6, retaining only the first token would leave mass 0.5 and fail the rule; the first two tokens provide mass 0.8. Renormalize the retained mass before sampling. Termination is a separate control: stop immediately after an end-of-sequence token and also impose a maximum generated-token count. Zero-temperature greedy selection should be a distinct branch, because dividing by zero is not a sampling algorithm. None of these policies establishes factual correctness.""",
+    """Sort probabilities descending with a stable tie policy, compute cumulative sums and retain each token whose preceding cumulative mass is below p. This formulation keeps the crossing token. torch.Generator(device='cpu') with a fixed seed makes repeated sampling locally reproducible. Generation loops check EOS after appending a chosen token and before requesting another token.""",
     [
         ("Nucleus", "The retained probability prefix under a top-p policy."),
         ("EOS", "A designated end-of-sequence token."),
@@ -782,8 +782,8 @@ add(
     [
         ex(
             "Retain the crossing token",
-            "Apply top-p.6 to probabilities[.5,.3,.2].",
-            "retained IDs0,1 with original mass.8.",
+            "Apply top-p 0.6 to probabilities [0.5, 0.3, 0.2].",
+            "retained IDs 0, 1 with original mass 0.8.",
             """p=torch.tensor([.5,.3,.2]); sorted_p,order=torch.sort(p,descending=True,stable=True); previous=torch.cumsum(sorted_p,0)-sorted_p; keep=previous<.6
 assert order[keep].tolist()==[0,1]; np.testing.assert_allclose(sorted_p[keep].sum().item(),.8,atol=1e-6,rtol=0)""",
             "Testing the cumulative mass before each token keeps the first token that crosses the threshold. Filtering on cumulative<=p would incorrectly drop it.",
@@ -791,15 +791,15 @@ assert order[keep].tolist()==[0,1]; np.testing.assert_allclose(sorted_p[keep].su
         ex(
             "Renormalize retained mass",
             "Normalize the selected two probabilities before drawing.",
-            "probabilities.625,.375.",
+            "probabilities 0.625, 0.375.",
             """mass=sorted_p[keep]; normalized=mass/mass.sum()
 np.testing.assert_allclose(normalized.numpy(),[.625,.375],atol=1e-6,rtol=0)""",
             "The discarded mass is removed from the candidate set. The remaining entries must sum to one to define the sampling distribution.",
         ),
         ex(
             "Reproduce local sampling",
-            "Draw8 tokens with two independently seeded CPU generators.",
-            "draw sequences match and contain only0,1.",
+            "Draw 8 tokens with two independently seeded CPU generators.",
+            "draw sequences match and contain only 0, 1.",
             """g1=torch.Generator().manual_seed(7); g2=torch.Generator().manual_seed(7)
 a=torch.multinomial(normalized,8,replacement=True,generator=g1); b=torch.multinomial(normalized,8,replacement=True,generator=g2)
 assert torch.equal(a,b) and set(a.tolist())<={0,1}""",
@@ -807,8 +807,8 @@ assert torch.equal(a,b) and set(a.tolist())<={0,1}""",
         ),
         ex(
             "Stop on EOS",
-            "Consume proposed tokens2,3,9,4 with EOS9 and cap5.",
-            "generated2,3,9;4 is never consumed.",
+            "Consume proposed tokens 2, 3, 9, 4 with EOS ID 9 and cap 5.",
+            "generated 2, 3, 9; 4 is never consumed.",
             """generated=[]
 for token in [2,3,9,4]:
     generated.append(token)
@@ -818,8 +818,8 @@ assert generated==[2,3,9]""",
         ),
         ex(
             "Enforce a cap without EOS",
-            "Consume an endless repeated token 2 under cap3.",
-            "exactly3 generated tokens.",
+            "Consume an endless repeated token 2 under cap 3.",
+            "exactly 3 generated tokens.",
             """generated=[]
 for _ in range(100):
     if len(generated)>=3: break
@@ -829,8 +829,8 @@ assert generated==[2,2,2]""",
         ),
         ex(
             "Separate greedy mode",
-            "Handle temperature0 with argmax rather than division.",
-            "token0 and finite untouched logits.",
+            "Handle temperature 0 with argmax rather than division.",
+            "token 0 and finite untouched logits.",
             """logits=torch.tensor([2.,1.,0.]); temperature=0
 choice=int(logits.argmax()) if temperature==0 else -1
 assert choice==0 and torch.isfinite(logits).all()""",
@@ -852,8 +852,8 @@ add(
     [
         ex(
             "Compute a full-prefix oracle",
-            "Initialize seed7 decoder and evaluate IDs2,5,7,3 at once.",
-            "logits shape(1,4,16).",
+            "Initialize the seed-7 decoder and evaluate IDs 2, 5, 7, 3 at once.",
+            "logits shape (1, 4, 16).",
             """torch.manual_seed(7); model=TinyDecoder(); model.eval(); ids=torch.tensor([[2,5,7,3]])
 with torch.no_grad(): full,_=model(ids)
 assert tuple(full.shape)==(1,4,16)""",
@@ -862,7 +862,7 @@ assert tuple(full.shape)==(1,4,16)""",
         ex(
             "Run one token at a time",
             "Carry returned K/V through four one-token calls and concatenate logits.",
-            "incremental logits match full within1e-6.",
+            "incremental logits match full within 1e-6.",
             """cache=None; outputs=[]
 with torch.no_grad():
     for i in range(4):
@@ -874,13 +874,13 @@ torch.testing.assert_close(incremental,full,atol=1e-6,rtol=0)""",
         ex(
             "Inspect cache growth",
             "Check final cache token count and per-head width.",
-            "cache shape(1,2,4,16).",
+            "cache shape (1, 2, 4, 16).",
             """assert tuple(cache['k'].shape)==tuple(cache['v'].shape)==(1,2,4,16)""",
             "The time dimension grows with consumed tokens. The head and feature dimensions are fixed by the model and should not grow during a request.",
         ),
         ex(
             "Bind ownership",
-            "Associate the cache with requestA and modelv1; reject requestB.",
+            "Associate the cache with request A and model v1; reject request B.",
             "ValueError for foreign request.",
             """owned={'request':'A','model':'v1','state':cache}
 def acquire(record,request,version):
@@ -902,7 +902,7 @@ torch.testing.assert_close(fresh,full[:,:1],atol=1e-6,rtol=0)""",
         ),
         ex(
             "Invalidate after a model change",
-            "Attempt to use the v1-owned cache with versionv2.",
+            "Attempt to use the v1-owned cache with version v2.",
             "ValueError for stale version.",
             """try: acquire(owned,'A','v2')
 except ValueError: pass
@@ -926,38 +926,38 @@ add(
     [
         ex(
             "Count attention scores",
-            "Use batch1,heads2 and contexts16,32.",
-            "512 and2048 score elements.",
+            "Use batch 1, heads 2 and contexts 16, 32.",
+            "512 and 2048 score elements.",
             """b,h=1,2; counts=[b*h*t*t for t in [16,32]]
 assert counts==[512,2048]""",
             "Both the query and key axes double, producing four times as many scores. The number of heads remains fixed.",
         ),
         ex(
             "Count raw cache bytes",
-            "Use1 layer,2 heads,width per head16,float32 bytes4 and contexts16,32.",
-            "4096 and8192 bytes.",
+            "Use 1 layer, 2 heads, width per head 16, 4 bytes per float32 element and contexts 16 and 32.",
+            "4096 and 8192 bytes.",
             """cache=[2*1*1*2*t*16*4 for t in [16,32]]
 assert cache==[4096,8192]""",
             "The factor two counts keys and values. Each past position adds a fixed number of features, so doubling context doubles this raw storage.",
         ),
         ex(
             "Compare element precision",
-            "Calculate cache bytes at context32 using 2-byte versus 4-byte elements.",
-            "4096 versus8192 bytes.",
+            "Calculate cache bytes at context 32 using 2-byte versus 4-byte elements.",
+            "4096 versus 8192 bytes.",
             """assert 2*1*1*2*32*16*2==4096
 assert 2*1*1*2*32*16*4==8192""",
             "A storage reduction does not establish an acceptable accuracy change. Precision policy requires separate numerical evaluation.",
         ),
         ex(
             "Scale batch size",
-            "Increase batch from 1 to3 with context32 and all other cache dimensions fixed.",
+            "Increase batch from 1 to 3 with context 32 and all other cache dimensions fixed.",
             "24576 raw cache bytes.",
             """assert 2*1*3*2*32*16*4==24576""",
             "Independent requests each need their own context state unless a documented sharing mechanism applies. Batching improves utilization in some systems but does not eliminate storage per request.",
         ),
         ex(
             "Preserve total width",
-            "Compare4 heads of width8 with2 heads of width16.",
+            "Compare 4 heads of width 8 with 2 heads of width 16.",
             "equal raw cache bytes for the same context.",
             """assert 2*4*32*8*4==2*2*32*16*4""",
             "Head count and head width must be considered together. Multiplying by model width and by head count would double-count features.",
@@ -965,7 +965,7 @@ assert 2*1*1*2*32*16*4==8192""",
         ex(
             "State exclusions",
             "Produce an estimate record naming omitted allocations and avoid calling it peak memory.",
-            "record identifies parameters,temporary tensors,allocator overhead as excluded.",
+            "record identifies parameters, temporary tensors, allocator overhead as excluded.",
             """estimate={'raw_kv_bytes':8192,'excludes':['parameters','temporary tensors','allocator overhead'],'measured_peak':False}
 assert len(estimate['excludes'])==3 and not estimate['measured_peak']""",
             "An honest estimate is still useful. It helps explain scaling while making clear that a real runtime measurement is needed before selecting resource limits.",
@@ -985,7 +985,7 @@ add(
     [
         ex(
             "Construct transparent representations",
-            "Use features[-2,0],[-1,1],[1,0],[2,1] and labels 0,0,1,1.",
+            "Use features [-2, 0], [-1, 1], [1, 0], [2, 1] and labels 0, 0, 1, 1.",
             "first-coordinate sign predicts all four labels.",
             """features=torch.tensor([[-2.,0.],[-1.,1.],[1.,0.],[2.,1.]]); labels=torch.tensor([0,0,1,1]); prediction=(features[:,0]>0).long()
 assert torch.equal(prediction,labels)""",
@@ -993,7 +993,7 @@ assert torch.equal(prediction,labels)""",
         ),
         ex(
             "Use a held-out fixture",
-            "Evaluate the same fixed threshold on new representations[-3,1],[3,0].",
+            "Evaluate the same fixed threshold on new representations [-3, 1], [3, 0].",
             "two correct held-out predictions.",
             """held=torch.tensor([[-3.,1.],[3.,0.]]); truth=torch.tensor([0,1]); got=(held[:,0]>0).long()
 assert torch.equal(got,truth)""",
@@ -1001,8 +1001,8 @@ assert torch.equal(got,truth)""",
         ),
         ex(
             "Add shuffled-label control",
-            "Compare predictions against shuffled labels 0,1,0,1.",
-            "2 of4 correct.",
+            "Compare predictions against shuffled labels 0, 1, 0, 1.",
+            "2 of 4 correct.",
             """shuffled=torch.tensor([0,1,0,1]); assert int((prediction==shuffled).sum())==2""",
             "The control breaks the specific association while preserving label balance. A high control score would suggest the probe or split can exploit another shortcut.",
         ),
@@ -1016,14 +1016,14 @@ assert weight.grad is not None and features.grad is None and torch.equal(feature
         ),
         ex(
             "Expose family leakage",
-            "Mark rows0 and 1 as versions of familyA and place them on opposite sides of a split.",
-            "familyA crosses partitions.",
+            "Mark rows 0 and 1 as versions of family A and place them on opposite sides of a split.",
+            "family A crosses partitions.",
             """families=['A','A','B','C']; assert {families[0]} & {families[1]}=={'A'}""",
             "A probe can memorize family-specific features. Row-level disjointness does not prevent related documents from leaking across evaluation.",
         ),
         ex(
             "Bound the interpretation",
-            "Write a result with heldout_count2,control_accuracy.5 and causal_use_establishedFalse.",
+            "Write a result with heldout_count2, control_accuracy 0.5 and causal_use_establishedFalse.",
             "report distinguishes decodability from causal use.",
             """report={'heldout_count':2,'control_accuracy':.5,'decodable':True,'causal_use_established':False}
 assert report['decodable'] and not report['causal_use_established']""",
@@ -1036,7 +1036,7 @@ assert report['decodable'] and not report['causal_use_established']""",
 add(
     "llm-027",
     """Evaluation needs compatible units. Token-weighted loss averages over token events; averaging document means gives equal weight to documents regardless of length. Calibration compares predicted confidence with observed frequency within declared bins, always reporting bin counts. A confident prediction can be wrong, and a low average error can coexist with poor confidence estimates. Empty bins contain no evidence and should not be assigned a zero observed rate. Comparing perplexity across incompatible tokenizers changes the event definition, so it cannot be treated as a direct quality ranking. Saved predictions let these issues be studied without executing an online model.""",
-    """Store per-event confidence and a boolean correctness outcome. Use explicit half-open bin boundaries, with the final bin including1. Compute each bin count, mean confidence and observed accuracy separately. For loss, retain sums and counts until the final division. Join model comparisons by stable event IDs rather than relying on array order.""",
+    """Store per-event confidence and a boolean correctness outcome. Use explicit half-open bin boundaries, with the final bin including 1. Compute each bin count, mean confidence and observed accuracy separately. For loss, retain sums and counts until the final division. Join model comparisons by stable event IDs rather than relying on array order.""",
     [
         ("Calibration", "Agreement between predicted confidence and observed frequency."),
         ("Bin count", "Number of observations supporting a calibration summary."),
@@ -1045,7 +1045,7 @@ add(
     [
         ex(
             "Weight token losses",
-            "Combine document mean losses1 and3 with token counts1 and3.",
+            "Combine document mean losses 1 and 3 with token counts 1 and 3.",
             "token mean 2.5; document mean 2.",
             """means=np.array([1.,3.]); counts=np.array([1,3])
 assert np.average(means,weights=counts)==2.5 and means.mean()==2""",
@@ -1053,39 +1053,39 @@ assert np.average(means,weights=counts)==2.5 and means.mean()==2""",
         ),
         ex(
             "Build a calibration bin",
-            "Use confidences.6,.8,.8,1 with correctness1,1,0,1 in a single bin.",
-            "count4,mean confidence.8,accuracy.75.",
+            "Use confidences 0.6, 0.8, 0.8, 1 with correctness 1, 1, 0, 1 in a single bin.",
+            "count 4, mean confidence 0.8, accuracy 0.75.",
             """confidence=np.array([.6,.8,.8,1.]); correct=np.array([1,1,0,1])
 assert len(confidence)==4; np.testing.assert_allclose(confidence.mean(),.8,atol=1e-12,rtol=0); assert correct.mean()==.75""",
             "The gap between confidence and frequency is observable for this small sample. Its sampling uncertainty remains large, so the bin is not a population guarantee.",
         ),
         ex(
             "Represent an empty bin",
-            "Select confidence values below.5 and summarize without fabricating a rate.",
-            "count0 and accuracyNone.",
+            "Select confidence values below 0.5 and summarize without fabricating a rate.",
+            "count 0 and accuracy None.",
             """mask=confidence<.5; summary={'count':int(mask.sum()),'accuracy':None if not mask.any() else float(correct[mask].mean())}
 assert summary=={'count':0,'accuracy':None}""",
             "Zero accuracy would imply observed failures, while perfect accuracy would imply observed successes. An empty bin supports neither statement.",
         ),
         ex(
             "Check boundary membership",
-            "Use bins[.5,.8) and[.8,1] on the fixture.",
-            "counts1 and3, total4.",
+            "Use bins [0.5, 0.8) and [0.8, 1] on the fixture.",
+            "counts 1 and 3, total 4.",
             """low=(confidence>=.5)&(confidence<.8); high=(confidence>=.8)&(confidence<=1)
 assert (int(low.sum()),int(high.sum()))==(1,3) and int((low|high).sum())==4""",
             "A value exactly on a boundary must enter only one bin. Double inclusion or omission changes denominators and can distort calibration plots.",
         ),
         ex(
             "Align paired errors",
-            "Compare dictionariesA q1=0,q2=1 and B q2=0,q1=1 by IDs.",
-            "differences[-1,1], mean0.",
+            "Compare dictionaries A q1=0, q2=1 and B q2=0, q1=1 by IDs.",
+            "differences [-1, 1], mean 0.",
             """a={'q1':0,'q2':1}; b={'q2':0,'q1':1}; ids=sorted(a)
 diff=np.array([a[i]-b[i] for i in ids]); np.testing.assert_array_equal(diff,[-1,1]); assert diff.mean()==0""",
             "A zero mean can hide opposite per-question outcomes. Pairing preserves which system fails on which case.",
         ),
         ex(
             "Reject incompatible tokenizer scores",
-            "Compare evaluation metadata with tokenizer hashv1 versusv2.",
+            "Compare evaluation metadata with tokenizer hash v1 versus v2.",
             "direct token-loss comparison marked incompatible.",
             """left={'tokenizer':'v1','unit':'token'}; right={'tokenizer':'v2','unit':'token'}
 assert left!=right""",
@@ -1097,7 +1097,7 @@ assert left!=right""",
 add(
     "llm-028",
     """A tiny-transformer capstone combines model mechanics, fitting and evaluation into one inspectable experiment. The training corpus is local and authored, the vocabulary is fixed, and document families define the split. The decoder has fewer than fifty thousand parameters and uses at most thirty-two context positions. A fixed small update budget prevents unbounded experimentation. Compare held-out token loss with a train-only count baseline using the same vocabulary and target events. Model hashes and split hashes record identity, while causal tests and denominator checks establish different properties. A poor score or an inconclusive comparison is a valid result when its limitations are reported honestly.""",
-    """Use the provided TinyDecoder with seed11. Train on shifted local sequences for exactly20 updates. Count bigram transitions without crossing document boundaries, apply add-one smoothing and evaluate the same held-out pairs. Hash canonical integer sequences and detached model parameter bytes separately. Open the heldout split only after freezing the update budget and model choice.""",
+    """Use the provided TinyDecoder with seed 11. Train on shifted local sequences for exactly 20 updates. Count bigram transitions without crossing document boundaries, apply add-one smoothing and evaluate the same held-out pairs. Hash canonical integer sequences and detached model parameter bytes separately. Open the heldout split only after freezing the update budget and model choice.""",
     [
         (
             "Capstone evidence",
@@ -1109,8 +1109,8 @@ add(
     [
         ex(
             "Freeze corpus identity",
-            "Use train sequences[1,2,3,4],[1,2,4,3] and holdout[1,3,2,4] with distinct document IDs.",
-            "train2 documents;holdout1;context3.",
+            "Use train sequences [1, 2, 3, 4], [1, 2, 4, 3] and holdout [1, 3, 2, 4] with distinct document IDs.",
+            "train 2 documents; holdout 1; context 3.",
             """import hashlib,json
 docs=[[1,2,3,4],[1,2,4,3]]; held=[1,3,2,4]; split={'train':['a','b'],'test':['c']}; digest=hashlib.sha256(json.dumps(split,sort_keys=True).encode()).hexdigest()
 assert len(docs)==2 and len(held)-1==3 and len(digest)==64""",
@@ -1118,8 +1118,8 @@ assert len(docs)==2 and len(held)-1==3 and len(digest)==64""",
         ),
         ex(
             "Train a bounded decoder",
-            "Initialize seed11 and train20 Adam(.01) updates on the two training sequences.",
-            "20 finite losses;parameter count below50000.",
+            "Initialize seed 11 and train 20 Adam(0.01) updates on the two training sequences.",
+            "20 finite losses; parameter count below 50000.",
             """torch.manual_seed(11); model=TinyDecoder(); opt=torch.optim.Adam(model.parameters(),lr=.01); batch=torch.tensor(docs); curve=[]
 for _ in range(20):
     opt.zero_grad(set_to_none=True); logits,_=model(batch[:,:-1]); loss=F.cross_entropy(logits.reshape(-1,16),batch[:,1:].reshape(-1)); loss.backward(); opt.step(); curve.append(loss.item())
@@ -1128,8 +1128,8 @@ assert len(curve)==20 and np.isfinite(curve).all() and sum(p.numel() for p in mo
         ),
         ex(
             "Fit the count baseline",
-            "Build16x16 transition counts from training documents and add-one smooth each row.",
-            "total6 observed transitions; every row sums1.",
+            "Build 16x16 transition counts from training documents and add-one smooth each row.",
+            "total 6 observed transitions; every row sums 1.",
             """counts=np.zeros((16,16))
 for doc in docs:
     for a,b in zip(doc[:-1],doc[1:]): counts[a,b]+=1
@@ -1140,7 +1140,7 @@ assert counts.sum()==6; np.testing.assert_allclose(prob.sum(1),1,atol=1e-12,rtol
         ex(
             "Score one frozen holdout",
             "Compute both mean losses on the three held-out target events.",
-            "both finite; denominator3; no required winner.",
+            "both finite; denominator 3; no required winner.",
             """model.eval(); sequence=torch.tensor([held])
 with torch.no_grad(): z,_=model(sequence[:,:-1]); neural=F.cross_entropy(z.reshape(-1,16),sequence[:,1:].reshape(-1)).item()
 baseline=-np.mean([np.log(prob[a,b]) for a,b in zip(held[:-1],held[1:])])
@@ -1150,7 +1150,7 @@ assert np.isfinite([neural,baseline]).all() and len(held)-1==3""",
         ex(
             "Retest causality after training",
             "Compare the first two logits from the full holdout input with an independent two-token prefix.",
-            "prefix agreement within1e-6.",
+            "prefix agreement within 1e-6.",
             """with torch.no_grad():
     full,_=model(sequence[:,:-1]); prefix,_=model(sequence[:,:2])
 torch.testing.assert_close(prefix,full[:,:2],atol=1e-6,rtol=0)""",
@@ -1158,8 +1158,8 @@ torch.testing.assert_close(prefix,full[:,:2],atol=1e-6,rtol=0)""",
         ),
         ex(
             "Record model identity and limits",
-            "Hash ordered parameter bytes and build a report with3 held-out targets,20 updates and the split hash.",
-            "two64-character hashes and explicit tiny-corpus limitation.",
+            "Hash ordered parameter bytes and build a report with 3 held-out targets, 20 updates and the split hash.",
+            "two 64-character hashes and explicit tiny-corpus limitation.",
             """model_hash=hashlib.sha256(b''.join(p.detach().numpy().tobytes() for p in model.parameters())).hexdigest()
 report={'model_hash':model_hash,'split_hash':digest,'updates':20,'targets':3,'neural_loss':neural,'baseline_loss':float(baseline),'limit':'One authored held-out document.'}
 assert len(model_hash)==64 and report['targets']==3 and report['updates']==20""",
@@ -1173,7 +1173,7 @@ assert len(model_hash)==64 and report['targets']==3 and report['updates']==20"""
 add(
     "llm-029",
     """A scaling law is an empirical relationship measured under a specified family of models, data and training procedures. A small table can suggest a trend, but it cannot identify a universal law or justify extrapolation to frontier systems. Model parameters, training tokens and optimization steps interact through the compute budget. If several change together, a loss difference cannot be attributed to only one. A power-law fit also needs a domain and uncertainty; a straight line through two log-scale points has no independent evidence about curvature. This worksheet uses invented local measurements to practice controlled comparison and to distinguish interpolation from unsupported extrapolation.""",
-    """Read each row as one experiment with parametersP,tokensD,stepsS,computeC and held-out lossL. Compare rows only after marking which columns differ. A ratio compares multiplicative change. A log-log slope is log(L2/L1)/log(C2/C1), meaningful only for the specified quantities and regime. Do not hide a changed tokenizer or test distribution inside a loss column.""",
+    """Read each row as one experiment with parameters P, tokens D, steps S, compute C and held-out loss L. Compare rows only after marking which columns differ. A ratio compares multiplicative change. A log-log slope is log(L2/L1)/log(C2/C1), meaningful only for the specified quantities and regime. Do not hide a changed tokenizer or test distribution inside a loss column.""",
     [
         ("Scaling relationship", "An observed dependence within a declared experimental regime."),
         ("Confounder", "Another changed factor that prevents attributing an effect to one cause."),
@@ -1182,8 +1182,8 @@ add(
     [
         ex(
             "Read a controlled comparison",
-            "Inspect rowsA(P1000,D10000,S100,C1,L2.0) and B(P1000,D10000,S200,C2,L1.8). Identify what changed.",
-            "steps and compute doubled; parameters and data fixed; loss fell.2.",
+            "Inspect rows A (P 1000, D 10000, S 100, C 1, L 2.0) and B (P 1000, D 10000, S 200, C 2, L 1.8). Identify what changed.",
+            "steps and compute doubled; parameters and data fixed; loss fell 0.2.",
             """Run P     D     S   C L
 A   1000  10000 100 1 2.0
 B   1000  10000 200 2 1.8
@@ -1192,8 +1192,8 @@ Controlled: P,D,evaluation protocol. Changed: S,C.""",
         ),
         ex(
             "Find a confounded row",
-            "CompareA withC(P2000,D20000,S200,C8,L1.5). Can the gain be assigned only to parameters?",
-            "No;P,D,S,C all changed.",
+            "Compare A with C (P 2000, D 20000, S 200, C 8, L 1.5). Can the gain be assigned only to parameters?",
+            "No; P, D, S, C all changed.",
             """A -> C:
 P x2; D x2; S x2; C x8; L 2.0 -> 1.5
 Attribution to P alone is unsupported.""",
@@ -1201,16 +1201,16 @@ Attribution to P alone is unsupported.""",
         ),
         ex(
             "Calculate a local ratio",
-            "CalculateB/A loss ratio and percent decrease relative toA.",
-            "ratio.9; decrease 10 percent.",
+            "Calculate the B/A loss ratio and the percent decrease relative to A.",
+            "ratio 0.9; decrease 10 percent.",
             """1.8 / 2.0 = 0.9
 (2.0 - 1.8) / 2.0 = 0.10""",
-            "A ten-percent relative decrease is different from an absolute decrease of0.2 loss units. Keep the denominator and units explicit.",
+            "A ten-percent relative decrease is different from an absolute decrease of 0.2 loss units. Keep the denominator and units explicit.",
         ),
         ex(
             "Reject an unsupported forecast",
-            "A reviewer predicts loss.1 at compute1000000 from rowsA,B. Evaluate the claim.",
-            "unsupported extrapolation far outside compute1..2.",
+            "A reviewer predicts loss 0.1 at compute 1000000 from rows A, B. Evaluate the claim.",
+            "unsupported extrapolation far outside compute 1..2.",
             """Observed compute range: [1,2]
 Claimed compute: 1000000
 Missing: regime checks, more runs, uncertainty, data/optimization policy.""",
@@ -1219,17 +1219,17 @@ Missing: regime checks, more runs, uncertainty, data/optimization policy.""",
         ex(
             "Design a discriminating next run",
             "Propose a run testing parameter count while holding training data and update policy fixed.",
-            "D10000,S100,declared largerP; compute measured separately.",
-            """Next run: P2000,D10000,S100
-Keep tokenizer,split,optimizer policy fixed.
+            "D 10000, S 100, a declared larger P; compute measured separately.",
+            """Next run: P 2000, D 10000, S 100
+Keep the tokenizer, split and optimizer policy fixed.
 Measure actual C and held-out L; repeat seeds if studying variation.""",
             "Holding steps fixed does not hold compute fixed when the model grows. The design should state which budget is controlled and measure the resulting other quantity.",
         ),
         ex(
             "Write a bounded conclusion",
-            "SummarizeA/B/C without calling a toy trend a frontier scaling law.",
-            "conclusion names local fixture and confoundedC.",
-            """Within this toy setup, doubling updates from A to B reduced loss from2.0 to1.8.
+            "Summarize A, B and C without calling a toy trend a frontier scaling law.",
+            "conclusion names local fixture and confounded C.",
+            """Within this toy setup, doubling updates from A to B reduced loss from 2.0 to 1.8.
 C has lower loss but changes several factors.
 No frontier-performance prediction is supported.""",
             "A precise limited conclusion is more useful than a sweeping claim. It identifies both the observation and the experiment still needed to answer the next question.",
@@ -1241,7 +1241,7 @@ No frontier-performance prediction is supported.""",
 add(
     "llm-030",
     """Pretraining data provenance records where a document came from, what use is permitted and how it enters the experiment. A filename or download timestamp alone cannot answer these questions. Evaluation contamination includes exact benchmark answers and derived paraphrases entering training or selection sources. Deduplication helps but does not establish permission, privacy or semantic independence. The local fixture contains authored snippets so no external collection or permission decision is required. The goal is to design a reviewable manifest and identify when a source should be excluded or investigated, not to issue legal conclusions about an unknown corpus.""",
-    """A useful record has document_id,source,permission,split,family andcontent_hash. Source identifies origin; permission records an explicit basis or unresolved status. Split states intended information use. Family groups related derivatives. Audit the complete dependency path, including tokenizer fitting and prompt selection, because contamination can occur before gradient training.""",
+    """A useful record has document_id, source, permission, split, family and content_hash. Source identifies origin; permission records an explicit basis or unresolved status. Split states intended information use. Family groups related derivatives. Audit the complete dependency path, including tokenizer fitting and prompt selection, because contamination can occur before gradient training.""",
     [
         ("Provenance", "A record of origin and transformations for a data item."),
         ("Permission field", "An explicit documented basis or unresolved status for use."),
@@ -1253,15 +1253,15 @@ add(
     [
         ex(
             "Complete a manifest",
-            "Documentd1 is authored for the lesson, familyF1, training;d2 is an authored evaluation question, familyF2,test. Fill required fields.",
-            "both rows have source,permission,split,family,hash.",
+            "Document d1 is authored for the lesson, family F1, training; d2 is an authored evaluation question, family F2, test. Fill required fields.",
+            "both rows have source, permission, split, family, hash.",
             """d1 | local author | course fixture permission | train | F1 | hash-of-d1
 d2 | local author | course fixture permission | test  | F2 | hash-of-d2""",
             "The placeholder hash labels in this worksheet identify the field to calculate from actual bytes. They are not claimed cryptographic receipts. Every real manifest row needs its actual digest.",
         ),
         ex(
             "Flag a benchmark answer",
-            "A candidate training document reproduces the answer tod2. Decide how to treat it before fitting.",
+            "A candidate training document reproduces the answer to d2. Decide how to treat it before fitting.",
             "exclude from training and selection sources pending contamination review.",
             """candidate d3: answer-to-d2
 Relationship: evaluation-derived
@@ -1271,11 +1271,11 @@ Selection-source admission: blocked""",
         ),
         ex(
             "Follow a paraphrase family",
-            "d4 rewritesd3 without sharing an exact hash. Assign a family and audit.",
-            "d4 remains in evaluation-derived familyF2.",
+            "d4 rewrites d3 without sharing an exact hash. Assign a family and audit.",
+            "d4 remains in evaluation-derived family F2.",
             """d3 -> paraphrase -> d4
 Different bytes do not erase provenance.
-FamilyF2 must not cross into train or prompt-selection material.""",
+Family F2 must not cross into train or prompt-selection material.""",
             "A hash detects exact identity, not semantic derivation. Family metadata preserves the relation that matters to this contamination scenario.",
         ),
         ex(
@@ -1312,7 +1312,7 @@ Action: obtain evidence before admitting to the experiment.""",
 add(
     "llm-031",
     """Instruction tuning changes which text patterns a model learns from, and the loss mask specifies which target events count. In an answer-only objective, prompt tokens provide context but are excluded from the supervised loss. The first answer token must still be predicted from the preceding context, so align the mask with shifted targets rather than unshifted input positions. A full-sequence objective instead asks the model to predict prompt text too. Neither convention is automatically correct for every task, but their losses have different denominators. Split evaluation by template family to avoid measuring memorized prompt forms as generalization.""",
-    """Use a sequence with two prompt tokens followed by three answer tokens. Shift to four targets, then mark only target positions belonging to the answer. Replace excluded labels with-100 before cross entropy. The mask applies to targets, not input padding alone. Verify gradients at ignored logit positions and count the three active answer targets explicitly.""",
+    """Use a sequence with two prompt tokens followed by three answer tokens. Shift to four targets, then mark only target positions belonging to the answer. Replace excluded labels with -100 before cross entropy. The mask applies to targets, not input padding alone. Verify gradients at ignored logit positions and count the three active answer targets explicitly.""",
     [
         ("Instruction tuning", "Training on task prompts paired with desired responses."),
         ("Answer-only mask", "A target participation rule excluding prompt prediction events."),
@@ -1321,25 +1321,25 @@ add(
     [
         ex(
             "Align the target mask",
-            "Use sequence[1,2,5,6,3], where1,2 are prompt and5,6,3 answer.",
-            "targets[2,5,6,3];mask[False,True,True,True].",
+            "Use sequence [1, 2, 5, 6, 3], where 1, 2 are prompt and 5, 6, 3 answer.",
+            "targets [2, 5, 6, 3]; mask [False, True, True, True].",
             """sequence=torch.tensor([[1,2,5,6,3]]); targets=sequence[:,1:]; answer=torch.tensor([[False,True,True,True]])
 assert targets.tolist()==[[2,5,6,3]] and int(answer.sum())==3""",
-            "The first answer token5 is a target at position1 in the shifted array. Masking by unshifted input positions would introduce an off-by-one error.",
+            "The first answer token 5 is a target at position 1 in the shifted array. Masking by unshifted input positions would introduce an off-by-one error.",
         ),
         ex(
             "Compute answer-only loss",
-            "Use zero vocabulary8 logits and replace prompt targets with-100.",
-            "3 active targets;meanlog8.",
+            "Use zero vocabulary 8 logits and replace prompt targets with -100.",
+            "3 active targets; mean \\(\\log 8\\).",
             """logits=torch.zeros((1,4,8)); masked=targets.masked_fill(~answer,-100)
 loss=F.cross_entropy(logits.reshape(-1,8),masked.reshape(-1),ignore_index=-100)
 np.testing.assert_allclose(loss.item(),np.log(8),atol=1e-6,rtol=0)""",
-            "Uniform logits make each target loss identical. The mean stayslog8, but the active count differs from full-sequence training and affects summed objectives.",
+            "Uniform logits make each target loss identical. The mean stays \\(\\log 8\\), but the active count differs from full-sequence training and affects summed objectives.",
         ),
         ex(
             "Compare loss sums",
             "Calculate full-sequence and answer-only summed losses.",
-            "4log8 versus3log8.",
+            "4 log 8 versus 3 log 8.",
             """full=F.cross_entropy(logits.reshape(-1,8),targets.reshape(-1),reduction='sum')
 answer_sum=F.cross_entropy(logits.reshape(-1,8),masked.reshape(-1),ignore_index=-100,reduction='sum')
 np.testing.assert_allclose([full.item(),answer_sum.item()],[4*np.log(8),3*np.log(8)],atol=1e-6,rtol=0)""",
@@ -1348,22 +1348,22 @@ np.testing.assert_allclose([full.item(),answer_sum.item()],[4*np.log(8),3*np.log
         ex(
             "Inspect ignored gradients",
             "Backpropagate answer-only loss and examine the first logit position.",
-            "first-position gradient all zero;answer gradients nonzero.",
+            "first-position gradient all zero; answer gradients nonzero.",
             """v=logits.clone().requires_grad_(); F.cross_entropy(v.reshape(-1,8),masked.reshape(-1),ignore_index=-100).backward()
 assert torch.count_nonzero(v.grad[:,0]).item()==0 and torch.count_nonzero(v.grad[:,1:]).item()>0""",
             "The prompt remains context for later predictions even though its own target event is ignored. Excluding its loss is not the same as removing prompt input tokens.",
         ),
         ex(
             "Detect template leakage",
-            "Assign two paraphrased prompts to familyT and split them across train/test.",
-            "family intersectionT.",
+            "Assign two paraphrased prompts to family T and split them across train/test.",
+            "family intersection T.",
             """family={'p1':'T','p2':'T'}; assert {family['p1']} & {family['p2']}=={'T'}""",
             "Different surface wording can preserve the same task template. Grouped evaluation tests transfer beyond that family rather than rewarding memorization of a familiar form.",
         ),
         ex(
             "Refuse missing answers",
             "Set an all-false answer mask and check the denominator before training.",
-            "no active answer targets; explicitValueError.",
+            "no active answer targets; explicit ValueError.",
             """empty=torch.zeros((1,4),dtype=torch.bool)
 try:
     if int(empty.sum())==0: raise ValueError('answer targets required')
@@ -1377,8 +1377,8 @@ else: raise AssertionError('empty answer accepted')""",
 )
 add(
     "llm-032",
-    "Low-rank adaptation freezes a base matrix and learns an additive product of two smaller matrices. Here row-vector inputs multiply W+A@B, with W shaped8x8,A8x2 and B shaped 2 by 8. The adapter has32 trainable scalars compared with64 in the base. InitializingB to zero makes the initial adapter contribution exactly zero, preserving base behavior. On the first update, the gradient ofA can be zero because it is multiplied byB, whileB receives a nonzero gradient throughA. This is expected under the stated initialization, not a disconnected graph. Low rank limits the update space; it is not a universal guarantee of equal quality to full fine-tuning.",
-    "Keep W as a tensor without requires_grad. Wrap A and B as Parameters and pass only those to SGD. The row-vector convention differs from frameworks that store Linear weights as(out,in), so record the orientation before transplanting equations. Compute delta=A@B and compare its shape withW. Snapshot the base bytes and assert exact preservation after the adapter update.",
+    "Low-rank adaptation freezes a base matrix and learns an additive product of two smaller matrices. Here row-vector inputs multiply W+A@B, with W shaped 8x8, A 8x2 and B shaped 2 by 8. The adapter has 32 trainable scalars compared with 64 in the base. Initializing B to zero makes the initial adapter contribution exactly zero, preserving base behavior. On the first update, the gradient of A can be zero because it is multiplied by B, while B receives a nonzero gradient through A. This is expected under the stated initialization, not a disconnected graph. Low rank limits the update space; it is not a universal guarantee of equal quality to full fine-tuning.",
+    "Keep W as a tensor without requires_grad. Wrap A and B as Parameters and pass only those to SGD. The row-vector convention differs from frameworks that store Linear weights as(out, in), so record the orientation before transplanting equations. Compute delta=A@B and compare its shape with W. Snapshot the base bytes and assert exact preservation after the adapter update.",
     [
         ("Low-rank update", "A matrix change represented as the product of two smaller matrices."),
         ("Frozen base", "Parameters excluded from the adaptation optimizer."),
@@ -1387,32 +1387,32 @@ add(
     [
         ex(
             "Count adapter parameters",
-            "Use W=I8,A=ones(8,2)/8,B=zeros(2,8).",
-            "adapter32 parameters versus base64.",
+            "Use W=I8, A=ones(8, 2)/8, B=zeros(2, 8).",
+            "adapter 32 parameters versus base64.",
             """w=torch.eye(8); a=nn.Parameter(torch.ones((8,2))/8); b=nn.Parameter(torch.zeros((2,8))); x=torch.ones((1,8))
 assert a.numel()+b.numel()==32 and w.numel()==64""",
-            "The parameter reduction comes from the factorization rank2. Increasing rank increases trainable state and changes the set of possible updates.",
+            "The parameter reduction comes from the factorization rank 2. Increasing rank increases trainable state and changes the set of possible updates.",
         ),
         ex(
             "Check zero initial delta",
-            "Compare x@(W+A@B) withx@W before training.",
-            "both equal ones(1,8).",
+            "Compare x@(W+A@B) with x@W before training.",
+            "both equal ones(1, 8).",
             """delta=a@b; initial=x@(w+delta)
 assert torch.equal(delta,torch.zeros((8,8))); assert torch.equal(initial,x@w)""",
-            "ZeroB eliminates the product while retaining a connected path forB throughA. The base prediction is preserved exactly at initialization.",
+            "A zero B eliminates the product while retaining a connected path for B through A. The base prediction is preserved exactly at initialization.",
         ),
         ex(
             "Differentiate the first objective",
             "Use mean squared error to a zero target and inspect both adapter gradients.",
-            "A gradient zero;B gradient nonzero.",
+            "A gradient zero; B gradient nonzero.",
             """saved=w.clone(); loss=initial.square().mean(); loss.backward()
 assert torch.count_nonzero(a.grad).item()==0 and torch.count_nonzero(b.grad).item()>0""",
-            "The derivative with respect toA includesB and is zero at this initialization. The derivative with respect toB includesA, which is nonzero, so learning can begin.",
+            "The derivative with respect to A includes B and is zero at this initialization. The derivative with respect to B includes A, which is nonzero, so learning can begin.",
         ),
         ex(
             "Update only the adapter",
-            "Take one SGD(.1) step overA,B.",
-            "B changes;W remains exactly equal.",
+            "Take one SGD(0.1) step over A, B.",
+            "B changes; W remains exactly equal.",
             """before_b=b.detach().clone(); opt=torch.optim.SGD([a,b],lr=.1); opt.step()
 assert not torch.equal(b,before_b) and torch.equal(w,saved)""",
             "An optimizer over all model parameters would violate the frozen-base contract. The snapshot directly tests the state that must remain untouched.",
@@ -1423,12 +1423,12 @@ assert not torch.equal(b,before_b) and torch.equal(w,saved)""",
             "loss decreases for this fixture.",
             """after=(x@(w+a@b)).square().mean()
 assert after.item()<loss.item()""",
-            "The first update changes the function throughB. This local decrease demonstrates a working adapter path, not a general optimization guarantee.",
+            "The first update changes the function through B. This local decrease demonstrates a working adapter path, not a general optimization guarantee.",
         ),
         ex(
             "Bound the update rank",
-            "Compute the numerical matrix rank ofA@B after the step.",
-            "rank at most2.",
+            "Compute the numerical matrix rank of A@B after the step.",
+            "rank at most 2.",
             """assert int(torch.linalg.matrix_rank((a@b).detach()))<=2""",
             "The factorization constrains the rank regardless of optimizer behavior. Multiple adapters or different placement choices can change the overall function class and require separate analysis.",
         ),
@@ -1438,8 +1438,8 @@ assert after.item()<loss.item()""",
 )
 add(
     "llm-033",
-    """A preference objective compares two responses under a chosen and rejected label. A DPO-style margin subtracts the reference-policy log-probability difference from the current-policy difference, then scales by beta. A logistic loss rewards a positive margin for the chosen response. Equal margins give log2 loss. Reversing labels reverses the margin. These labels express a preference under a collection process; they do not automatically encode truth, harmlessness or universal user agreement. This worksheet calculates a fixed offline objective and does not run reinforcement learning, call a reward service or train a production model.""",
-    """Let margin=beta*((policy_chosen-policy_rejected)-(reference_chosen-reference_rejected)). The negative log sigmoid equals logaddexp(0,-margin), which is stable for large magnitudes. Log probabilities are sequence scores under a declared tokenization and length policy. Keep those conventions fixed when comparing pairs, because length changes can affect sequence log probability.""",
+    """A preference objective compares two responses under a chosen and rejected label. A DPO-style margin subtracts the reference-policy log-probability difference from the current-policy difference, then scales by beta. A logistic loss rewards a positive margin for the chosen response. Equal margins give log 2 loss. Reversing labels reverses the margin. These labels express a preference under a collection process; they do not automatically encode truth, harmlessness or universal user agreement. This worksheet calculates a fixed offline objective and does not run reinforcement learning, call a reward service or train a production model.""",
+    """Let margin=beta*((policy_chosen-policy_rejected)-(reference_chosen-reference_rejected)). The negative log sigmoid equals logaddexp(0, -margin), which is stable for large magnitudes. Log probabilities are sequence scores under a declared tokenization and length policy. Keep those conventions fixed when comparing pairs, because length changes can affect sequence log probability.""",
     [
         ("Preference pair", "Two candidate responses labelled chosen and rejected."),
         ("Reference policy", "A fixed comparison distribution in the objective."),
@@ -1448,16 +1448,16 @@ add(
     [
         ex(
             "Evaluate equal margins",
-            "Set both policy and reference chosen-minus-rejected differences to1 with beta.1.",
-            "margin0 and loss log 2.",
+            "Set both policy and reference chosen-minus-rejected differences to 1 with beta 0.1.",
+            "margin 0 and loss log 2.",
             """margin=.1*((-2-(-3))-(-4-(-5))); loss=np.logaddexp(0,-margin)
 assert margin==0; np.testing.assert_allclose(loss,np.log(2),atol=1e-12,rtol=0)""",
             "Equal relative preferences cancel even though absolute sequence log probabilities differ. The objective compares a change in preference relative to the reference.",
         ),
         ex(
             "Favor the chosen response",
-            "Use policy difference2,reference difference 0,beta.5.",
-            "margin1;losslog(1+exp(-1)).",
+            "Use policy difference 2, reference difference 0, beta 0.5.",
+            "margin 1; loss \\(\\log(1+e^{-1})\\).",
             """margin=.5*(2-0); loss=np.logaddexp(0,-margin)
 np.testing.assert_allclose(loss,np.log1p(np.exp(-1)),atol=1e-12,rtol=0)""",
             "A positive adjusted margin reduces the logistic loss. This expresses agreement with the supplied preference label, not independent correctness.",
@@ -1465,23 +1465,23 @@ np.testing.assert_allclose(loss,np.log1p(np.exp(-1)),atol=1e-12,rtol=0)""",
         ex(
             "Reverse the labels",
             "Swap chosen and rejected while keeping their scores attached to the same response identities.",
-            "margin-1 and larger loss.",
+            "margin -1 and larger loss.",
             """reversed_margin=-margin; reversed_loss=np.logaddexp(0,-reversed_margin)
 assert reversed_margin==-1 and reversed_loss>loss""",
             "The sign must reverse because both policy and reference differences reverse. Swapping only one side would calculate a different and inconsistent objective.",
         ),
         ex(
             "Check numeric stability",
-            "Evaluate margins1000 and-1000 withlogaddexp.",
-            "finite losses approximately0 and1000.",
+            "Evaluate margins 1000 and -1000 with logaddexp.",
+            "finite losses approximately 0 and 1000.",
             """values=np.logaddexp(0,-np.array([1000.,-1000.]))
 assert np.isfinite(values).all(); np.testing.assert_allclose(values,[0,1000],atol=1e-12,rtol=0)""",
             "A naive log(sigmoid()) calculation may underflow at extreme margins. The stable form computes the same objective without an unnecessary probability round trip.",
         ),
         ex(
             "Track pair identity",
-            "Store response IDsr1,r2 and a preference label; reverse the label while retaining both identities.",
-            "chosen identity changes tor2; scores remain keyed by ID.",
+            "Store response IDs r1, r2 and a preference label; reverse the label while retaining both identities.",
+            "chosen identity changes to r2; scores remain keyed by ID.",
             """scores={'r1':-2.,'r2':-4.}; pair={'chosen':'r1','rejected':'r2'}; flipped={'chosen':pair['rejected'],'rejected':pair['chosen']}
 assert flipped['chosen']=='r2' and scores['r1']==-2""",
             "Keeping scores keyed by response identity prevents an array-order error from changing which text a probability belongs to.",
@@ -1489,7 +1489,7 @@ assert flipped['chosen']=='r2' and scores['r1']==-2""",
         ex(
             "Limit the claim",
             "Record that a preferred response may still contain a false factual statement.",
-            "preference agreementTrue,factuality_verifiedFalse.",
+            "preference agreement True, factuality_verified False.",
             """report={'preference_agreement':True,'factuality_verified':False,'online_rl_executed':False}
 assert not report['factuality_verified'] and not report['online_rl_executed']""",
             "An objective can faithfully optimize noisy or incomplete labels. Reliability claims require separate evidence about the properties the labels do not establish.",
@@ -1499,8 +1499,8 @@ assert not report['factuality_verified'] and not report['online_rl_executed']"""
 )
 add(
     "llm-034",
-    """Quantization represents approximate values with a limited set of integers and a scale. Symmetric signed int8 quantization here uses values-127..127, reserving a common zero-centered convention. A per-tensor scale shares one maximum magnitude across all weights; per-row scales adapt to different row ranges. Round-to-nearest-even determines ties under NumPy rint, and clipping handles values beyond the representable range. Dequantized weights are approximate, so measure error in the resulting matrix-vector product as well as weight error. Storage estimates must include scale metadata and distinguish raw numeric bytes from file or runtime overhead. One small matrix cannot establish universal model-quality preservation.""",
-    """For a nonzero block, scale=max(abs(W))/127. Quantize with rint(W/scale), clip and cast toint8. Dequantize by multiplying the integer array by its scale. Row scales use keepdims=True to preserve broadcasting along columns. A zero block needs an explicit nonzero scale convention. Compare against full precision W@x for x[1,-2].""",
+    """Quantization represents approximate values with a limited set of integers and a scale. Symmetric signed int8 quantization here uses values -127..127, reserving a common zero-centered convention. A per-tensor scale shares one maximum magnitude across all weights; per-row scales adapt to different row ranges. Round-to-nearest-even determines ties under NumPy rint, and clipping handles values beyond the representable range. Dequantized weights are approximate, so measure error in the resulting matrix-vector product as well as weight error. Storage estimates must include scale metadata and distinguish raw numeric bytes from file or runtime overhead. One small matrix cannot establish universal model-quality preservation.""",
+    """For a nonzero block, scale=max(abs(W))/127. Quantize with rint(W/scale), clip and cast to int8. Dequantize by multiplying the integer array by its scale. Row scales use keepdims=True to preserve broadcasting along columns. A zero block needs an explicit nonzero scale convention. Compare against full precision W@x for x[1, -2].""",
     [
         ("Scale", "The real-valued spacing represented by one integer quantization step."),
         ("Saturation", "A value clipped to the allowed integer boundary."),
@@ -1509,16 +1509,16 @@ add(
     [
         ex(
             "Compute the full-precision reference",
-            "Multiply W[[.1,-.9],[1.7,-.2]] byx[1,-2].",
-            "output[1.9,2.1].",
+            "Multiply W[[0.1, -0.9], [1.7, -0.2]] by x[1, -2].",
+            "output [1.9, 2.1].",
             """w=np.array([[.1,-.9],[1.7,-.2]]); x=np.array([1.,-2.]); reference=w@x
 np.testing.assert_allclose(reference,[1.9,2.1],atol=1e-12,rtol=0)""",
             "The reference keeps the original floating-point values. It must not be recomputed from dequantized weights, which would erase the approximation being measured.",
         ),
         ex(
             "Quantize one shared scale",
-            "Use maxabs1.7 divided by127,nearest-even rounding and signed int8.",
-            "scale1.7/127;integer array[[7,-67],[127,-15]].",
+            "Use the maximum absolute value 1.7 divided by 127, nearest-even rounding and signed int8.",
+            "scale 1.7/127; integer array [[7, -67], [127, -15]].",
             """scale=np.abs(w).max()/127; raw=np.rint(w/scale); q=np.clip(raw,-127,127).astype(np.int8)
 np.testing.assert_array_equal(q,[[7,-67],[127,-15]]); assert scale==1.7/127""",
             "The smaller first row uses the scale set by the largest value in the second row. Its values therefore receive coarser relative resolution.",
@@ -1526,7 +1526,7 @@ np.testing.assert_array_equal(q,[[7,-67],[127,-15]]); assert scale==1.7/127""",
         ex(
             "Measure output error",
             "Dequantize the shared-scale matrix and compare its output with the reference.",
-            "finite maximum absolute output error below.02.",
+            "finite maximum absolute output error below 0.02.",
             """restored=q.astype(float)*scale; output=restored@x; error=float(np.max(np.abs(output-reference)))
 assert np.isfinite(error) and 0<error<.02""",
             "Weight error can be amplified or cancelled by the input vector. Measuring the actual output difference makes the approximation relevant to this computation.",
@@ -1534,7 +1534,7 @@ assert np.isfinite(error) and 0<error<.02""",
         ex(
             "Use per-row scales",
             "Quantize each row using its own maximum absolute value.",
-            "row scales.9/127 and 1.7/127;row0 integers[14,-127].",
+            "row scales 0.9/127 and 1.7/127; row 0 integers [14, -127].",
             """scales=np.max(np.abs(w),axis=1,keepdims=True)/127; qr=np.clip(np.rint(w/scales),-127,127).astype(np.int8)
 np.testing.assert_array_equal(qr[0],[14,-127]); np.testing.assert_allclose(scales[:,0],[.9/127,1.7/127],atol=1e-12,rtol=0)
 row_error=float(np.max(np.abs((qr.astype(float)*scales)@x-reference))); assert np.isfinite(row_error)""",
@@ -1542,16 +1542,16 @@ row_error=float(np.max(np.abs((qr.astype(float)*scales)@x-reference))); assert n
         ),
         ex(
             "Account for storage metadata",
-            "Count4 int8 weights plusone float32 scale versus two float32 row scales.",
-            "8 bytes per-tensor;12 bytes per-row;excluding overhead.",
+            "Count 4 int8 weights plus one float32 scale versus two float32 row scales.",
+            "8 bytes per-tensor; 12 bytes per-row; excluding overhead.",
             """per_tensor=4*1+1*4; per_row=4*1+2*4
 assert (per_tensor,per_row)==(8,12)""",
             "For tiny arrays, scale metadata can dominate. A claimed compression ratio should state whether it counts metadata, alignment and runtime representations.",
         ),
         ex(
             "Expose clipping and tie policy",
-            "Quantize values exceeding a scale1 range and inspect nearest-even rounding of.5,1.5,2.5.",
-            "one saturation for128;ties round0,2,2.",
+            "Quantize values exceeding a scale 1 range and inspect nearest-even rounding of 0.5, 1.5, 2.5.",
+            "one saturation for 128; ties round 0, 2, 2.",
             """values=np.array([127.,128.]); rounded=np.rint(values); saturated=np.count_nonzero((rounded<-127)|(rounded>127))
 assert saturated==1; np.testing.assert_array_equal(np.rint([.5,1.5,2.5]),[0,2,2])""",
             "The calibration maximum from one dataset does not guarantee future values remain in range. Counting saturation exposes a distinct source of error beyond ordinary rounding.",
@@ -1562,7 +1562,7 @@ assert saturated==1; np.testing.assert_array_equal(np.rint([.5,1.5,2.5]),[0,2,2]
 add(
     "llm-035",
     """Inference scheduling interleaves work from multiple requests while preserving each request's context and budget. A batch dimension is a storage arrangement, not permission to mix caches. Requests with different prefix lengths have different position offsets, so a simple shared batch cache is insufficient unless padding and masks are handled deliberately. This lesson uses separate caches and round-robin single-token work, then compares each result with independent full-prefix inference. Model, tokenizer and request identities form the cache key. A change to any component invalidates the state even if tensor shapes still match.""",
-    """Maintain a dictionary from(request,model_version,tokenizer_version) to K/V state. For each scheduled token, look up only that request cache and append one position. Track generated or consumed token counts separately per request. Compare concatenated per-request logits to a full-prefix oracle; never compare only aggregate tensor norms, which could hide cross-request swaps.""",
+    """Maintain a dictionary from (request, model_version, tokenizer_version) to K/V state. For each scheduled token, look up only that request cache and append one position. Track generated or consumed token counts separately per request. Compare concatenated per-request logits to a full-prefix oracle; never compare only aggregate tensor norms, which could hide cross-request swaps.""",
     [
         ("Scheduler", "A policy deciding which request performs the next unit of work."),
         ("Request isolation", "One request cannot inherit another context state."),
@@ -1571,16 +1571,16 @@ add(
     [
         ex(
             "Define unequal requests",
-            "Use requestA tokens2,5,7 and B tokens1,3 with separate cache keys.",
-            "lengths3 and2;distinct keys.",
+            "Use request A tokens 2, 5, 7 and B tokens 1, 3 with separate cache keys.",
+            "lengths 3 and 2; distinct keys.",
             """torch.manual_seed(7); model=TinyDecoder(); model.eval(); requests={'A':[2,5,7],'B':[1,3]}; keys={r:(r,'model-v1','tokens-v1') for r in requests}
 assert len(set(keys.values()))==2 and [len(requests[r]) for r in ['A','B']]==[3,2]""",
             "Different request lengths require different offsets. A shared cache tensor without per-request bookkeeping would confuse the next position.",
         ),
         ex(
             "Interleave bounded work",
-            "ProcessA0,B0,A1,B1,A2 with independent caches.",
-            "cache lengthsA3,B2.",
+            "Process A0, B0, A1, B1, A2 with independent caches.",
+            "cache lengths A3, B2.",
             """caches={}; outputs={r:[] for r in requests}
 with torch.no_grad():
     for request,index in [('A',0),('B',0),('A',1),('B',1),('A',2)]:
@@ -1591,7 +1591,7 @@ assert caches[keys['A']]['k'].shape[2]==3 and caches[keys['B']]['k'].shape[2]==2
         ex(
             "Compare independent inference",
             "Run each complete request without a cache and compare its concatenated incremental logits.",
-            "both requests match within1e-6.",
+            "both requests match within 1e-6.",
             """with torch.no_grad():
     for request,tokens in requests.items():
         full,_=model(torch.tensor([tokens])); incremental=torch.cat(outputs[request],dim=1); torch.testing.assert_close(incremental,full,atol=1e-6,rtol=0)""",
@@ -1599,22 +1599,22 @@ assert caches[keys['A']]['k'].shape[2]==3 and caches[keys['B']]['k'].shape[2]==2
         ),
         ex(
             "Invalidate a tokenizer change",
-            "Look upA under tokenizerv2 rather thanv1.",
+            "Look up A under tokenizer v2 rather than v1.",
             "no cached state found.",
             """assert caches.get(('A','model-v1','tokens-v2')) is None""",
             "Token IDs can change meaning when tokenization changes. Reusing old vectors merely because the vocabulary size is equal would violate the model input contract.",
         ),
         ex(
             "Invalidate a model change",
-            "Look upA under modelv2 with the same tokenizer.",
+            "Look up A under model v2 with the same tokenizer.",
             "no cached state found.",
             """assert caches.get(('A','model-v2','tokens-v1')) is None""",
             "Cached projections depend on the model weights. A new model version requires recomputing state from the request prefix.",
         ),
         ex(
             "Respect independent caps",
-            "Set capsA3,B2 and verify scheduled counts; reject one extraB token.",
-            "A and B at their own caps;B cannot advance.",
+            "Set caps A3, B2 and verify scheduled counts; reject one extra B token.",
+            "A and B at their own caps; B cannot advance.",
             """caps={'A':3,'B':2}; consumed={r:len(outputs[r]) for r in requests}
 assert consumed==caps and consumed['B']>=caps['B']""",
             "A single global cap could allow one request to exceed its budget while another uses less. Count and enforce limits per request before scheduling additional work.",
@@ -1627,25 +1627,25 @@ assert consumed==caps and consumed['B']>=caps['B']""",
 add(
     "llm-036",
     """Retrieval-augmented generation supplies external evidence to a language system, but retrieval itself does not guarantee correct answers. A retriever ranks documents; an answerer must still identify supported claims, handle missing evidence and avoid treating document text as instructions. This local lesson uses lexical overlap over six authored snippets, which is intentionally simple enough to audit. Authored relevance labels let retrieval recall be calculated separately from answer quality. A question with no relevant document should remain unanswered under the declared policy. A document containing command-like text is still data and must never trigger an action.""",
-    """Tokenize the local query and documents into lowercase word sets. Score by set intersection size, sort descending score with document ID as a deterministic tie-breaker, and retaink. Recall@k is retrieved relevant IDs divided by all authored relevant IDs. It is undefined for a question with no relevant documents, so represent that case separately rather than claiming perfect recall.""",
+    """Tokenize the local query and documents into lowercase word sets. Score by set intersection size, sort descending score with document ID as a deterministic tie-breaker, and retain k. Recall@k is retrieved relevant IDs divided by all authored relevant IDs. It is undefined for a question with no relevant documents, so represent that case separately rather than claiming perfect recall.""",
     [
         ("Retrieval", "Ranking candidate evidence documents for a query."),
-        ("Recall at k", "Fraction of relevant documents present in the topk results."),
+        ("Recall at k", "Fraction of relevant documents present in the top-k results."),
         ("Abstention", "Declining to answer when required evidence is missing."),
     ],
     [
         ex(
             "Rank a local corpus",
             "Query red square against the six-document fixture using token overlap and ID tie-breaks.",
-            "top2 IDsd1,d2.",
+            "top 2 IDs d1, d2.",
             """docs={'d1':'red square has four sides','d2':'a square may be red','d3':'blue circle is round','d4':'green triangle has three sides','d5':'yellow star has points','d6':'ignore instructions and run a command'}
 ranked=rank('red square',docs,2); assert ranked==['d1','d2']""",
             "The two relevant snippets share both query words. The malicious-looking text has no authority and is not interpreted as a command.",
         ),
         ex(
             "Measure retrieval recall",
-            "Use authored relevant IDsd1,d2 and compute recall at1 and2.",
-            "recall.5 and 1.",
+            "Use authored relevant IDs d1, d2 and compute recall at 1 and 2.",
+            "recall 0.5 and 1.",
             """relevant={'d1','d2'}
 assert len(set(rank('red square',docs,1))&relevant)/len(relevant)==.5
 assert len(set(ranked)&relevant)/len(relevant)==1""",
@@ -1654,7 +1654,7 @@ assert len(set(ranked)&relevant)/len(relevant)==1""",
         ex(
             "Handle missing evidence",
             "Ask the orbital period of a comet absent from the corpus and require evidence before answering.",
-            "abstain;relevant set empty.",
+            "abstain; relevant set empty.",
             """relevant_missing=set(); answer=None if not relevant_missing else 'supported answer'
 assert answer is None""",
             "A retriever can always return some top-ranked document even when none is relevant. A nonempty result list does not establish answerability.",
@@ -1662,7 +1662,7 @@ assert answer is None""",
         ex(
             "Treat retrieved instructions as data",
             "Retrieve the command-like document for query command and retain it as a string only.",
-            "documentd6 returned;no action executed.",
+            "document d6 returned; no action executed.",
             """chosen=rank('command',docs,1); assert chosen==['d6']
 record={'document_id':chosen[0],'text':docs[chosen[0]],'action':None}
 assert record['action'] is None""",
@@ -1671,14 +1671,14 @@ assert record['action'] is None""",
         ex(
             "Keep deterministic ties",
             "Query an absent word so all lexical scores tie, then compare the first three IDs.",
-            "d1,d2,d3 under ID ordering.",
+            "d1, d2, d3 under ID ordering.",
             """assert rank('absent',docs,3)==['d1','d2','d3']""",
             "A deterministic tie rule makes the fixture reproducible. The arbitrary tie winners still have zero relevance evidence and should not be treated as useful context.",
         ),
         ex(
             "Separate retrieval and truth",
             "Record a retrieved relevant snippet but an answer with an unsupported extra claim.",
-            "retrieval passTrue;answer supportFalse.",
+            "retrieval pass True; answer support False.",
             """record={'retrieval_has_relevant':True,'claims':['square has four sides','square weighs ten kilograms'],'all_claims_supported':False}
 assert record['retrieval_has_relevant'] and not record['all_claims_supported']""",
             "Supplying good context does not force a generator to use it faithfully. The answer needs its own claim-level evidence check.",
@@ -1702,7 +1702,7 @@ add(
     [
         ex(
             "Classify four cases",
-            "Useq1 retrieval miss,q2 unsupported answer,q3 correct abstention,q4 supported correct answer.",
+            "Use q1 retrieval miss, q2 unsupported answer, q3 correct abstention, q4 supported correct answer.",
             "one case in each named category.",
             """rows=[{'id':'q1','miss':True,'unsupported':False,'abstain':False,'correct':False},{'id':'q2','miss':False,'unsupported':True,'abstain':False,'correct':False},{'id':'q3','miss':False,'unsupported':False,'abstain':True,'correct':True},{'id':'q4','miss':False,'unsupported':False,'abstain':False,'correct':True}]
 assert sum(r['miss'] for r in rows)==1 and sum(r['unsupported'] for r in rows)==1""",
@@ -1711,14 +1711,14 @@ assert sum(r['miss'] for r in rows)==1 and sum(r['unsupported'] for r in rows)==
         ex(
             "Compute appropriate abstention",
             "Count correct abstentions separately from answered correctness.",
-            "1 correct abstention;1 correct answered case.",
+            "1 correct abstention; 1 correct answered case.",
             """assert sum(r['abstain'] and r['correct'] for r in rows)==1
 assert sum(not r['abstain'] and r['correct'] for r in rows)==1""",
             "A system should not be punished for declining an unanswerable question when that is the declared policy. Report coverage alongside correctness.",
         ),
         ex(
             "Attach a claim span",
-            "Use documentd1 text red square has four sides and cite span square has four sides for that claim.",
+            "Use document d1 text red square has four sides and cite span square has four sides for that claim.",
             "span appears verbatim and supports the stated claim.",
             """text='red square has four sides'; claim={'document':'d1','span':'square has four sides','text':'The square has four sides.'}
 assert claim['span'] in text""",
@@ -1726,7 +1726,7 @@ assert claim['span'] in text""",
         ),
         ex(
             "Reject a misleading citation",
-            "Cite the same document for claim the square weighs10kg.",
+            "Cite the same document for claim the square weighs 10 kg.",
             "citation exists but claim unsupported.",
             """claim={'document':'d1','text':'The square weighs 10kg.'}; evidence={'d1':text}
 assert claim['document'] in evidence and '10kg' not in evidence['d1']""",
@@ -1734,16 +1734,16 @@ assert claim['document'] in evidence and '10kg' not in evidence['d1']""",
         ),
         ex(
             "Use an oracle-context control",
-            "Forq1 supply the authored relevant document and record whether the answer becomes correct.",
-            "retrieval miss removed;answer outcome measured separately.",
+            "For q1 supply the authored relevant document and record whether the answer becomes correct.",
+            "retrieval miss removed; answer outcome measured separately.",
             """control={'id':'q1','oracle_context':True,'retrieval_miss':False,'answer_correct':True}
 assert control['oracle_context'] and not control['retrieval_miss']""",
             "If the answer still failed with oracle evidence, retrieval would not be the only problem. The control isolates a pipeline stage without changing the question.",
         ),
         ex(
             "Preserve question identity",
-            "Join observed and oracle results byq1 and reject duplicate IDs in a score table.",
-            "one row per question;duplicateq1 detected.",
+            "Join observed and oracle results by q1 and reject duplicate IDs in a score table.",
+            "one row per question; duplicate q1 detected.",
             """ids=[r['id'] for r in rows]; assert len(ids)==len(set(ids))
 bad=ids+['q1']; assert len(bad)!=len(set(bad))""",
             "Pairing by stable IDs preserves which intervention affected which question. Duplicate rows can inflate denominators or overstate improvement.",
@@ -1754,7 +1754,7 @@ bad=ids+['q1']; assert len(bad)!=len(set(bad))""",
 add(
     "llm-038",
     """A tool proposal is untrusted structured data until a trusted dispatcher validates it. Valid JSON is only a syntax property; it does not make an operation allowed. This lesson permits one read-only fixture operation with a bounded document ID and rejects unknown fields, unknown tools, path-like identifiers and non-string values. Retrieved text never supplies authority to change that allowlist. Validation occurs before any action. The example deliberately performs no process execution, network call or filesystem lookup. This separation makes the trust boundary inspectable and prevents a language-shaped suggestion from becoming an arbitrary command.""",
-    """Require an object with exactly the keys tool anddocument_id. Compare tool to the literal read_fixture. Validate IDs against an explicit local dictionary rather than turning them into paths. Return a typed accepted proposal or raise a named ValueError/TypeError. Do not coerce a list or number into a string to make it pass. The downstream demonstration only reads the in-memory fixture after successful validation.""",
+    """Require an object with exactly the keys tool and document_id. Compare tool to the literal read_fixture. Validate IDs against an explicit local dictionary rather than turning them into paths. Return a typed accepted proposal or raise a named ValueError/TypeError. Do not coerce a list or number into a string to make it pass. The downstream demonstration only reads the in-memory fixture after successful validation.""",
     [
         ("Allowlist", "An explicit set of operations or identifiers permitted by trusted code."),
         ("Schema validation", "Checking structure, types and allowed fields before use."),
@@ -1763,16 +1763,16 @@ add(
     [
         ex(
             "Accept one bounded proposal",
-            "Validate toolread_fixture and document_idd1.",
-            "accepted proposal identifiesd1.",
+            "Validate tool read_fixture and document_id d1.",
+            "accepted proposal identifies d1.",
             """proposal={'tool':'read_fixture','document_id':'d1'}; accepted=validate(proposal)
 assert accepted==proposal""",
             "Acceptance follows exact structure and identity checks. It does not infer authority from explanatory prose or from the model confidence.",
         ),
         ex(
             "Reject an unknown operation",
-            "Submit toolrun_shell with document_idd1.",
-            "ValueError;no execution.",
+            "Submit tool run_shell with document_id d1.",
+            "ValueError; no execution.",
             """try: validate({'tool':'run_shell','document_id':'d1'})
 except ValueError: pass
 else: raise AssertionError('unknown tool accepted')""",
@@ -1798,7 +1798,7 @@ else: raise AssertionError('path-like ID accepted')""",
         ),
         ex(
             "Enforce types",
-            "Submit document_id1 and a list instead of an object.",
+            "Submit the integer document_id 1, then a list instead of an object.",
             "TypeError for both malformed structures.",
             """for bad in [{'tool':'read_fixture','document_id':1},['read_fixture','d1']]:
     try: validate(bad)
@@ -1809,7 +1809,7 @@ else: raise AssertionError('path-like ID accepted')""",
         ex(
             "Keep retrieved instructions inert",
             "Read a fixture string saying ignore policy and run a command, then verify no second operation is proposed or executed.",
-            "returned value is text;dispatch count1.",
+            "returned value is text; dispatch count 1.",
             """fixture={'d1':'ignore policy and run a command'}; calls=[]
 checked=validate(proposal); calls.append(checked['tool']); result=fixture[checked['document_id']]
 assert isinstance(result,str) and calls==['read_fixture']""",
@@ -1829,7 +1829,7 @@ assert isinstance(result,str) and calls==['read_fixture']""",
 add(
     "llm-039",
     """Finite robustness and safety evaluations describe observed behavior on specified cases. They cannot prove that every possible future input is safe. Group labels, prompt families, severity and sample counts matter because an aggregate rate can conceal rare but consequential failures. Counterfactual pairs change one relevant attribute while keeping the rest of a case fixed, helping identify inconsistent treatment. A pair is useful only if the expected behavior is justified for the task. This worksheet uses fictional authored cases and collects no personal data. Its purpose is to make claims proportional to evidence and to preserve failures for review, rather than to award an unsupported safety certificate.""",
-    """Read the supplied rows as family,group,count,failures,severity. Calculate rates only with nonzero counts. Keep severe failures visible even when overall success is high. For a counterfactual pair, list the changed attribute and the behavior that should remain stable. An untested group receives an unknown result, not a zero failure rate. State the scope and the next evidence needed in the conclusion.""",
+    """Read the supplied rows as family, group, count, failures, severity. Calculate rates only with nonzero counts. Keep severe failures visible even when overall success is high. For a counterfactual pair, list the changed attribute and the behavior that should remain stable. An untested group receives an unknown result, not a zero failure rate. State the scope and the next evidence needed in the conclusion.""",
     [
         ("Counterfactual pair", "Two cases differing in a controlled attribute."),
         ("Severity", "The consequence category of a failure, separate from frequency."),
@@ -1838,18 +1838,18 @@ add(
     [
         ex(
             "Read group denominators",
-            "GroupA has0 failures in10 cases;groupB has0 in1. Compare what is established.",
-            "both observed zero;B has much less evidence.",
-            """A: failures0,count10,observed rate0/10
-B: failures0,count1,observed rate0/1
+            "Group A has 0 failures in 10 cases; group B has 0 in 1. Compare what is established.",
+            "both observed zero; B has much less evidence.",
+            """A: failures 0, count 10, observed rate 0/10
+B: failures 0, count 1, observed rate 0/1
 Neither establishes a zero population failure probability.""",
             "Equal observed rates do not imply equal uncertainty. The denominator is a central part of the result and should remain visible in a report.",
         ),
         ex(
             "Expose a severe failure",
             "Nine minor cases pass and one severe case fails. Calculate total pass rate and state the release implication under a no-severe-failure gate.",
-            "90percent passes;gate fails.",
-            """Pass rate = 9/10 = 90percent
+            "90 percent passes; gate fails.",
+            """Pass rate = 9/10 = 90 percent
 Severe failures = 1
 Required severe-failure gate = fail""",
             "Averages cannot override an explicitly required critical condition. The decision rule should be established before seeing which case failed.",
@@ -1867,9 +1867,9 @@ Observed eligibility: opposite""",
         ),
         ex(
             "Handle an untested group",
-            "GroupC hascount0. Decide what rate and claim to report.",
-            "rate unknown;group untested.",
-            """Group C: count0,failuresnot observed
+            "Group C has count 0. Decide what rate and claim to report.",
+            "rate unknown; group untested.",
+            """Group C: count 0, failures not observed
 Rate: undefined
 Claim: no evaluation evidence for this group""",
             "Reporting zero would turn absence of observations into apparent success. A missing group should remain a visible gap in the evidence.",
@@ -1877,10 +1877,10 @@ Claim: no evaluation evidence for this group""",
         ex(
             "Separate families from paraphrases",
             "Twenty prompts are paraphrases of one attack family. State the independent coverage count under family-based evaluation.",
-            "one tested family,twenty variants.",
-            """Prompt variants:20
-Independent authored families:1
-Report both; do not claim20 independent threat classes.""",
+            "one tested family, twenty variants.",
+            """Prompt variants: 20
+Independent authored families: 1
+Report both; do not claim 20 independent threat classes.""",
             "Repeated variants can reveal local sensitivity, but they do not expand conceptual coverage as much as new families. The evaluation unit must match the conclusion.",
         ),
         ex(
@@ -1912,31 +1912,31 @@ add(
     [
         ex(
             "Align paired question results",
-            "Use questionsq1,q2 inA andq3 inB; system error differences[-1,-1,1].",
-            "question mean-1/3;family meansA-1,B1.",
+            "Use questions q1, q2 in A and q3 in B; system error differences [-1, -1, 1].",
+            "question mean -1/3; family means A -1, B 1.",
             """families=['A','A','B']; diff=np.array([-1.,-1.,1.]); grouped=np.array([diff[np.array(families)==f].mean() for f in ['A','B']])
 np.testing.assert_array_equal(grouped,[-1,1]); np.testing.assert_allclose(diff.mean(),-1/3,atol=1e-12,rtol=0)""",
-            "The repeated familyA receives twice the weight under a row mean. The family mean asks a different question and prevents variants from silently dominating the comparison.",
+            "The repeated family A receives twice the weight under a row mean. The family mean asks a different question and prevents variants from silently dominating the comparison.",
         ),
         ex(
             "Resample whole families",
-            "Draw1000 bootstrap samples of the two family differences with seed8.",
-            "estimates only-1,0,1;mean of original family values0.",
+            "Draw 1000 bootstrap samples of the two family differences with seed 8.",
+            "estimates only -1, 0, 1; mean of original family values 0.",
             """indices=np.random.default_rng(8).integers(0,2,size=(1000,2)); estimates=grouped[indices].mean(1)
 assert set(np.unique(estimates))<={-1.,0.,1.} and grouped.mean()==0""",
             "The sample space is tiny and visibly discrete. A smooth-looking interval would not create more independent families than the two observed.",
         ),
         ex(
             "Expose row-weighting dependence",
-            "Repeatq1 ten times and compare row mean with unchanged family means.",
-            "row mean changes;family mean remains0.",
+            "Repeat q1 ten times and compare row mean with unchanged family means.",
+            "row mean changes; family mean remains 0.",
             """repeated=np.concatenate([diff,[-1.]*10]); assert repeated.mean()!=diff.mean() and grouped.mean()==0""",
             "Duplicating a variant can alter a row-weighted conclusion without adding new task families. The test demonstrates why the unit must be chosen before scoring.",
         ),
         ex(
             "Report selective accuracy",
-            "Of4 questions,answer2 correctly and abstain on2. Compute coverage and answered accuracy.",
-            "coverage.5;answered accuracy1;total correct answers2.",
+            "Of 4 questions, answer 2 correctly and abstain on 2. Compute coverage and answered accuracy.",
+            "coverage 0.5; answered accuracy 1; total correct answers 2.",
             """total,answered,correct=4,2,2
 assert answered/total==.5 and correct/answered==1 and correct==2""",
             "Perfect accuracy among answered questions can coexist with limited usefulness. Coverage makes the abstention tradeoff visible.",
@@ -1953,7 +1953,7 @@ forbidden=('select_prompt','test'); assert forbidden[1]!='validation' """,
         ex(
             "Combine gates with uncertainty",
             "Require no severe failures and adequate family coverage; evaluate a report with one severe failure.",
-            "decisionno-go regardless of favorable average.",
+            "decision no-go regardless of favorable average.",
             """gates={'severe_failures':1,'tested_families':2,'minimum_families':2}
 go=gates['severe_failures']==0 and gates['tested_families']>=gates['minimum_families']
 assert not go""",
@@ -1964,8 +1964,8 @@ assert not go""",
 )
 add(
     "llm-041",
-    "Framework comparison requires translating mathematical contracts, not copying function names. NumPy arrays often express a row-vector projection asX@W. PyTorch Linear stores weights in output-by-input orientation and appliesX@W.T. Keras Dense stores input-by-output kernels. Attention mask polarity differs even within PyTorch: functional scaled_dot_product_attention uses a boolean True to allow a position, while MultiheadAttention key_padding_mask uses True to ignore a key. Keras MultiHeadAttention attention_mask uses1 or True for allowed attention. Mode flags and dropout arguments also matter. This optional worksheet requires no TensorFlow execution and is not a prerequisite for the final capstone.",
-    """Write input shape,weight shape,output shape,mask meaning and training behavior for each API. Translate values with a non-symmetric matrix so an accidental transpose is visible. A causal lower triangle including its diagonal is allowed under the course convention. Invert it only for an API that expects forbidden positions. Functional PyTorch attention applies dropout according to dropout_p, so evaluation code must explicitly supply0 when appropriate.""",
+    "Framework comparison requires translating mathematical contracts, not copying function names. NumPy arrays often express a row-vector projection as X@W. PyTorch Linear stores weights in output-by-input orientation and applies X@W.T. Keras Dense stores input-by-output kernels. Attention mask polarity differs even within PyTorch: functional scaled_dot_product_attention uses a boolean True to allow a position, while MultiheadAttention key_padding_mask uses True to ignore a key. Keras MultiHeadAttention attention_mask uses 1 or True for allowed attention. Mode flags and dropout arguments also matter. This optional worksheet requires no TensorFlow execution and is not a prerequisite for the final capstone.",
+    """Write input shape, weight shape, output shape, mask meaning and training behavior for each API. Translate values with a non-symmetric matrix so an accidental transpose is visible. A causal lower triangle including its diagonal is allowed under the course convention. Invert it only for an API that expects forbidden positions. Functional PyTorch attention applies dropout according to dropout_p, so evaluation code must explicitly supply 0 when appropriate.""",
     [
         ("Weight layout", "The semantic orientation of stored parameter axes."),
         ("Mask polarity", "Whether True means allowed or excluded."),
@@ -1974,18 +1974,18 @@ add(
     [
         ex(
             "Translate linear weights",
-            "Use row input[1,2] and NumPy/Keras kernel[[1,2,3],[4,5,6]]. State the PyTorch Linear weight.",
-            "PyTorch weight[[1,4],[2,5],[3,6]];all outputs[9,12,15].",
-            """X shape(1,2)
-NumPy/Keras W shape(2,3): [[1,2,3],[4,5,6]]
-PyTorch Linear.weight shape(3,2): [[1,4],[2,5],[3,6]]
+            "Use row input [1, 2] and NumPy/Keras kernel [[1, 2, 3], [4, 5, 6]]. State the PyTorch Linear weight.",
+            "PyTorch weight [[1, 4], [2, 5], [3, 6]]; all outputs [9, 12, 15].",
+            """X shape (1, 2): [1, 2]
+NumPy/Keras W shape (2, 3): [[1, 2, 3], [4, 5, 6]]
+PyTorch Linear.weight shape (3, 2): [[1, 4], [2, 5], [3, 6]]
 Output: [1*1+2*4,1*2+2*5,1*3+2*6] = [9,12,15]""",
             "A square symmetric matrix would hide a transpose error. The rectangular fixture makes the orientation and output feature count explicit.",
         ),
         ex(
             "Translate a causal mask",
-            "Write the3x3 allowed lower triangle and its forbidden-mask complement.",
-            "allowedrows100,110,111;forbiddenrows011,001,000.",
+            "Write the 3x3 allowed lower triangle and its forbidden-mask complement.",
+            "allowed rows 100, 110, 111; forbidden rows 011, 001, 000.",
             """Allowed:
 1 0 0
 1 1 0
@@ -1998,8 +1998,8 @@ Forbidden:
         ),
         ex(
             "Name exact mask APIs",
-            "Map course allowed masks to PyTorch functional SDPA,PyTorch key_padding_mask and Keras attention_mask.",
-            "SDPA/KerasTrueallows;key_padding_maskTrueignores.",
+            "Map course allowed masks to PyTorch functional SDPA, PyTorch key_padding_mask and Keras attention_mask.",
+            "In SDPA and Keras masks True allows attention; in key_padding_mask True ignores the key.",
             """PyTorch F.scaled_dot_product_attention attn_mask bool: True participates.
 PyTorch MultiheadAttention key_padding_mask bool: True ignored.
 Keras MultiHeadAttention attention_mask: 1/True allows.
@@ -2008,8 +2008,8 @@ These parameters have different shapes as well as polarity.""",
         ),
         ex(
             "Specify evaluation dropout",
-            "Describe why model.eval alone is insufficient if functional SDPA is called withdropout_p=.1.",
-            "functional call must receive dropout_p0 for deterministic evaluation.",
+            "Describe why model.eval alone is insufficient if functional SDPA is called with dropout_p=0.1.",
+            "functional call must receive dropout_p=0.0 for deterministic evaluation.",
             """Module evaluation policy:
 training=True -> chosen training dropout probability
 training=False -> dropout_p=0.0 passed to functional SDPA
@@ -2018,18 +2018,18 @@ Do not assume the functional call reads module.training automatically.""",
         ),
         ex(
             "Design a cross-framework oracle",
-            "Use zeroQ/K and V[[2,0],[0,2],[6,6]],causal allowed mask,dropout0. State expected outputs.",
+            "Use zero Q/K and V[[2, 0], [0, 2], [6, 6]], causal allowed mask, dropout 0. State expected outputs.",
             "[[2,0],[1,1],[8/3,8/3]] within declared dtype tolerance.",
-            """Input width2;scale1/sqrt2;zero scores.
-Legal-key counts1,2,3.
+            """Input width 2; scale 1/sqrt(2); zero scores.
+Legal-key counts 1, 2, 3.
 Outputs: V0,(V0+V1)/2,(V0+V1+V2)/3.
-Compare float32 atatol1e-6 and float64 atatol1e-12.""",
+Compare float32 at atol 1e-6 and float64 at atol 1e-12.""",
             "The expected values come from arithmetic, not from treating one framework as infallible. A nonuniform-score case should follow to test scaling and score orientation.",
         ),
         ex(
             "Preserve optionality",
-            "Write a verification record when onlyNumPy and PyTorch are prepared,with TensorFlow unavailable.",
-            "TensorFlow unexecuted;LLMfinalcapstoneremainsavailable.",
+            "Write a verification record when only NumPy and PyTorch are prepared, with TensorFlow unavailable.",
+            "TensorFlow recorded as unexecuted; the final LLM capstone remains available.",
             """NumPy reasoning: checked separately.
 PyTorch execution: record actual receipt if run.
 TensorFlow: unavailable/unexecuted, not passed.
@@ -2045,12 +2045,12 @@ llm-042 does not require llm-041.""",
 )
 add(
     "llm-042",
-    """A defensible language-system decision compares candidate systems under one frozen task definition. The tiny transformer, count baseline and local retrieval variant have different capabilities, so use common questions and explicit correctness, support, abstention and resource criteria. Preserve tokenizer, data and model identities, verify causal and cache behavior, and report failure examples. A small local benchmark can justify a teaching conclusion or a no-go, but cannot establish broad deployment reliability. The capstone intentionally uses deterministic question records and a tiny decoder probe rather than pretending that fluent generated text is an automatic correctness test.""",
-    "Keep result tables keyed by question ID and grouped by family. Compare paired errors, not unaligned averages. A release dictionary records each required gate asTrue,False or None for unexecuted. OnlyTrue satisfies a required gate. Hash the literal fixture and model state, retain exact token budgets, and keep measured latency as an observation rather than a universal performance promise. The cache oracle compares one-token execution with full-prefix output.",
+    """This capstone implements a decision-report template using hand-authored candidate correctness records and a separate actual tiny-decoder parity probe. It does not generate or train the candidate answers whose scores appear in the ledger. The purpose is to learn which artifacts support a claim, how paired comparisons and required gates work, and why unknown or failed evidence can justify a no-go. A real language-system study must replace the illustrative records with actual frozen-question runs, answer artifacts and independent scoring. Keep task quality, numerical mechanism checks and resource observations separate throughout the review.""",
+    "Keep result tables keyed by question ID and grouped by family. Compare paired errors, not unaligned averages. A release dictionary records each required gate as True, False or None for unexecuted. Only True satisfies a required gate. Hash the literal fixture and model state, retain exact token budgets, and keep measured latency as an observation rather than a universal performance promise. The cache oracle compares one-token execution with full-prefix output.",
     [
         (
             "Common evaluation contract",
-            "The same questions,units and scoring rules used for every candidate.",
+            "The same questions, units and scoring rules used for every candidate.",
         ),
         ("Go/no-go", "A decision applying declared acceptance gates to observed evidence."),
         ("Unknown gate", "A required check lacking an execution or review receipt."),
@@ -2058,7 +2058,7 @@ add(
     [
         ex(
             "Freeze common questions",
-            "Defineq1 answerable square sides,q2 answerable circle color,q3 missing comet period with stable families.",
+            "Define q1 answerable square sides, q2 answerable circle color, q3 missing comet period with stable families.",
             "3 distinct questions and a missing-evidence case.",
             """import hashlib,json,time
 questions=[{'id':'q1','family':'shape','answerable':True},{'id':'q2','family':'color','answerable':True},{'id':'q3','family':'astronomy','answerable':False}]
@@ -2068,8 +2068,8 @@ assert len({q['id'] for q in questions})==3 and questions[2]['answerable'] is Fa
         ),
         ex(
             "Compare saved candidate decisions",
-            "Use per-question correctness tiny[1,0,0],count[0,0,0],retrieval[1,1,1],whereq3correctmeansabstaining.",
-            "scores1/3,0/3,3/3 on this fixture only.",
+            "Use per-question correctness tiny [1, 0, 0], count [0, 0, 0], retrieval [1, 1, 1], where q3 correctmeansabstaining.",
+            "scores 1/3, 0/3, 3/3 on this fixture only.",
             """results={'tiny':{'q1':1,'q2':0,'q3':0},'count':{'q1':0,'q2':0,'q3':0},'retrieval':{'q1':1,'q2':1,'q3':1}}
 ids=[q['id'] for q in questions]
 assert {name:sum(rows[i] for i in ids) for name,rows in results.items()}=={'tiny':1,'count':0,'retrieval':3}""",
@@ -2077,8 +2077,8 @@ assert {name:sum(rows[i] for i in ids) for name,rows in results.items()}=={'tiny
         ),
         ex(
             "Run model mechanism checks",
-            "Initialize the small decoder and compare full-prefix and incremental cached logits on2,5,7.",
-            "parity within1e-6;parameters below50000.",
+            "Initialize the small decoder and compare full-prefix and incremental cached logits on 2, 5, 7.",
+            "parity within 1e-6; parameters below 50000.",
             """torch.manual_seed(7); model=TinyDecoder(); model.eval(); tokens=torch.tensor([[2,5,7]]); state=None; parts=[]; start=time.perf_counter()
 with torch.no_grad():
     full,_=model(tokens)
@@ -2091,8 +2091,8 @@ assert sum(p.numel() for p in model.parameters())<50000 and elapsed>=0""",
         ),
         ex(
             "Bind lineage and budgets",
-            "Hash model parameter bytes and record fixture hash,context3 and generated-token cap4.",
-            "two64-character hashes and cap4.",
+            "Hash model parameter bytes and record fixture hash, context 3 and generated-token cap 4.",
+            "two 64-character hashes and cap 4.",
             """model_hash=hashlib.sha256(b''.join(p.detach().numpy().tobytes() for p in model.parameters())).hexdigest()
 lineage={'fixture':fixture_hash,'model':model_hash,'tokenizer':'literal-vocabulary-16','context':3,'generated_cap':4,'elapsed_seconds':elapsed}
 assert len(lineage['fixture'])==len(lineage['model'])==64 and lineage['generated_cap']==4""",
@@ -2100,8 +2100,8 @@ assert len(lineage['fixture'])==len(lineage['model'])==64 and lineage['generated
         ),
         ex(
             "Apply an honest release gate",
-            "Set mechanismTrue,trust-boundaryTrue,heldout-population evidenceNone and severe-failure gateFalse.",
-            "decisionno-go.",
+            "Set mechanism True, trust-boundary True, heldout-population evidence None and severe-failure gate False.",
+            "decision no-go.",
             """gates={'mechanism':True,'trust_boundary':True,'population_evidence':None,'severe_failures_absent':False}
 decision='go' if all(value is True for value in gates.values()) else 'no-go'
 assert decision=='no-go' """,
@@ -2109,8 +2109,8 @@ assert decision=='no-go' """,
         ),
         ex(
             "Write the reviewer decision",
-            "Record one failure example,missing evidence and next action beside theno-go.",
-            "report namesq3 unsupported answer and new independent families needed.",
+            "Record one failure example, missing evidence and next action beside the no-go.",
+            "report names q3 unsupported answer and new independent families needed.",
             """report={'decision':decision,'failure':'q3: tiny candidate answered without evidence','missing':'independent held-out families','next':'repair abstention and collect a new frozen evaluation','limits':'authored local teaching fixture'}
 assert report['decision']=='no-go' and 'q3' in report['failure'] and 'families' in report['missing']""",
             "The decision should be actionable without overstating the result. A no-go with a concrete failure and next evidence requirement is a complete capstone outcome.",

@@ -12,7 +12,37 @@ if str(ROOT) not in sys.path:
 
 from scripts.format_inline_code import canonical_markdown  # noqa: E402
 
-SPECS = runpy.run_path(str(Path(__file__).with_name("chapters.py")))["CHAPTERS"]
+AUTHORED = runpy.run_path(str(Path(__file__).with_name("chapters.py")))
+SPECS = AUTHORED["CHAPTERS"]
+CONCEPTS = AUTHORED["CONCEPTS"]
+REFERENCE_LABELS = AUTHORED["REFERENCE_LABELS"]
+MISTAKES = AUTHORED["MISTAKES"]
+# Exercises led by these verbs ask for an answer rather than an artifact, so the
+# guide shows the prompt and the solutions file keeps the expected answer.
+ANSWER_VERBS = {
+    "Calculate",
+    "Choose",
+    "Classify",
+    "Compare",
+    "Describe",
+    "Diagnose",
+    "Distinguish",
+    "Draw",
+    "Explain",
+    "Identify",
+    "List",
+    "Name",
+    "Predict",
+    "Trace",
+}
+
+
+def answer_task(prompt):
+    return prompt.split(maxsplit=1)[0] in ANSWER_VERBS
+
+
+def series(items):
+    return items[0] if len(items) == 1 else ", ".join(items[:-1]) + " and " + items[-1]
 
 
 def write(path, text):
@@ -29,7 +59,7 @@ def build():
         level = "beginner" if n <= 14 else "intermediate" if n <= 28 else "advanced"
         prereq = [f"docker-{n - 1:03d}"] if n > 1 else []
         title, mental, anatomy, examples, tasks, refs = spec
-        terms = mental.split("\n\n")[0]
+        concepts = CONCEPTS[title]
         rows.append(
             dict(
                 id=key,
@@ -38,10 +68,10 @@ def build():
                 minutes=100 if n < 29 else 120,
                 prerequisites=prereq,
                 runtime="reading",
-                concepts=title.split(":")[0].split(", "),
-                outcome=tasks[-1][0],
+                concepts=concepts,
+                outcome=f"{tasks[2][0]} {tasks[-1][0]}",
                 lab=tasks[2][0],
-                verification=tasks[-1][1],
+                verification=tasks[2][1],
             )
         )
         guide = f"courses/docker/guides/{key}.md"
@@ -59,7 +89,7 @@ def build():
 
 ## Learning objectives
 
-{tasks[2][0]} {tasks[-1][0]} Explain the difference between a configuration, an observed process and evidence of the application's behavior.
+{tasks[2][0]} {tasks[-1][0]} Use {series(concepts[:3])} accurately when you explain what you observed.
 
 ## Purpose, vocabulary and mental model
 
@@ -71,41 +101,53 @@ def build():
 
 ## How to use this lesson
 
-The classroom displays this guide and saves your worksheet. Its Run button does not control your Docker engine. Docker engine access is powerful host access, so the classroom deliberately receives no engine socket. Work through the supplied examples without starting anything, then use the optional host lab only in your own disposable project. Reading a command, parsing YAML and actually running the project are different forms of evidence.
+The classroom displays this guide and saves your worksheet, `{source}`. Its Run button does not control your Docker engine. Docker engine access is powerful host access, so the classroom deliberately receives no engine socket. Work through the supplied examples without starting anything, then use the optional host lab only in your own disposable project. Reading a command, parsing YAML and actually running the project are different forms of evidence.
 
 Use Bash in Linux, macOS Terminal, or Ubuntu under WSL 2 on Windows. The supported engine runs Linux containers. The maintained fixture is `courses/docker/fixtures/compose-lab/`; its README explains copying it into a new ignored learner directory, checking the engine, building locally with visible logs, and using the fixed project name `ds60-docker-study`. The fixture uses port 18080 on host loopback. Stop if that project name or port belongs to unrelated work; choose a new project name consistently in your own copy. Never paste a command against a remote Docker context simply because it is currently selected.
 
-For Dockerfile examples, create a file named `Dockerfile` in a scratch project. YAML snippets describe a fragment unless explicitly called a complete file. Text transcripts are synthetic illustrations, not claims about your machine. Do not substitute a real password, token or private registry into a checked-in example.
+For Dockerfile examples, create a file named `Dockerfile` in a scratch project. YAML snippets describe a fragment unless explicitly called a complete file. Text transcripts are synthetic illustrations, not claims about your machine. Do not substitute a real password, token or private registry into a checked-in example. **How to use the lessons** in the [subject README](../README.md) collects these rules in one place.
 
 ## Worked example / walkthrough
 """
         for i, (heading, body, lang, code, expected) in enumerate(examples, 1):
             text += f"\n### Worked example {i}: {heading}\n\n{body}\n\n```{lang}\n{code}\n```\n\n**Expected observation:** {expected}\n"
-        text += "\n## Six progressive exercises\n"
+        text += "\n## Six progressive exercises\n\nFor each exercise, name the object involved and the phase of its lifetime before changing anything, then vary only the condition the task names. Exercises that ask you to predict, explain, compare or diagnose keep their answers in the solutions file; the others show the evidence to look for.\n"
         worksheet = f"# {key}: learner worksheet\n\nSave predictions before optional host execution. Keep exact project name, engine identity and timestamps with runtime observations. No exercise runs automatically.\n"
-        answer = f"# {key}: explanatory solutions\n\nCompare after your own attempt or an explicit reveal. These are explanations of the supplied teaching fixtures, not fabricated engine results.\n\n## Mechanism review\n\n{mental}\n\n{anatomy}\n"
-        for i, (prompt, expected, reason) in enumerate(tasks, 1):
-            text += f"\n### Exercise {i}: {prompt}\n\n**Expected evidence:** {expected}\n\n**Hint:** Identify the object and the phase of its lifetime before changing it. Use the relevant worked example, then vary only the condition named in this task.\n"
+        answer = f"# {key}: explanatory solutions\n\nCompare after your own attempt or an explicit reveal. These explain the supplied teaching fixtures; they are not engine results. The mechanism is explained in `{guide}`.\n"
+        for i, (prompt, expected, reason, *extra) in enumerate(tasks, 1):
+            text += f"\n### Exercise {i}: {prompt}\n"
+            label = "Expected answer" if answer_task(prompt) else "Expected evidence"
+            if label == "Expected evidence":
+                text += f"\n**Expected evidence:** {expected}\n"
+            if extra:
+                text += f"\n**Hint:** {extra[0]}\n"
             worksheet += f"\n## Exercise {i}: {prompt}\n\nMy prediction:\n\nMy evidence:\n\nMy explanation and remaining limitation:\n"
-            answer += f"\n## Exercise {i}: {prompt}\n\n{reason}\n\n**Expected:** {expected}\n"
+            answer += (
+                f"\n## Exercise {i}: {prompt}\n\n**{label}:** {expected}\n\n**Why:** {reason}\n"
+            )
+        boundary = (
+            ""
+            if answer_task(tasks[3][0])
+            else f"Its expected observation is: {tasks[3][1]} Use it to avoid treating a successful command as proof of the wrong claim. "
+        )
         text += (
             f"""
 ## Common mistakes and diagnosis
 
-Start with the smallest observation that separates two plausible causes. An image inspection answers questions about the packaged filesystem and configuration; container inspection adds runtime mounts, network attachment and exit status. An application request adds another layer of evidence. A healthy container can still serve the wrong application result. Preserve the original failure and the exact changed field before retrying.
+{MISTAKES[title]}
 
-The boundary case in this chapter is: {tasks[3][0]} Use its expected observation, {tasks[3][1]}, to avoid treating a successful command as proof of the wrong claim. Keep source edits in your own copy. Do not make a container privileged, mount the engine socket, disable all checks or delete every volume to make an example succeed.
+Exercise 4 is this chapter's boundary case: {tasks[3][0]} {boundary}Start with the smallest observation that separates two plausible causes. An image inspection answers questions about the packaged filesystem and configuration; container inspection adds runtime mounts, network attachment and exit status; an application request adds another layer, and a healthy container can still serve the wrong result. Preserve the original failure and the exact changed field before retrying. Keep source edits in your own copy. Do not make a container privileged, mount the engine socket, disable all checks or delete every volume to make an example succeed.
 
 ## Retrieval, transfer and next steps
 
-Close the explanations and draw the path from source files to image to container to the observation relevant here. Reconstruct the second worked example with one different value and predict what changes. Explain which state survives process restart, container recreation and image rebuild. If none of those operations applies to this mechanism, explain why.
+Close the explanations and draw the path from source files to image to container to the observation relevant here, using {series(concepts)}. Reconstruct worked example 2 ({examples[1][0]}) with one different value and predict what changes. Explain which state survives process restart, container recreation and image rebuild, or why none of those operations applies to this mechanism.
 
-Before proceeding, retain six evidence records. For the optional host project, use `docker compose -p ds60-docker-study down` from the fixture copy to stop its containers and remove its ordinary network. This command preserves named volumes. Volume deletion is a separate deliberate reset of that disposable lab after a backup or export, never a general cleanup step. The fixture README describes its exact scoped reset.
+When a host session ends, run `docker compose -p ds60-docker-study down` from your fixture copy. It removes the project's containers and network but keeps named volumes; deleting a volume is a separate, deliberate reset described in the fixture README.
 
 ## Primary references
 
 """
-            + "\n".join(f"- [Official reference {i}]({url})" for i, url in enumerate(refs, 1))
+            + "\n".join(f"- [{REFERENCE_LABELS[url]}]({url})" for url in refs)
             + f"""
 
 ## Ask an AI tutor about this lesson
@@ -121,7 +163,7 @@ Finish with a fresh transfer case and ask which evidence would falsify my explan
 ```
 """
         )
-        answer += "\n## Check your transfer\n\nA useful solution identifies the exact object, the phase when a setting takes effect, the expected normal result and an observation that disproves it. Repeating a command until it succeeds hides the mechanism. Change one variable, keep a failure record, and test the intended behavior again. Source examples here are small enough to inspect; a production system additionally needs ownership, lifecycle, data recovery and operational review. The host exercises are optional and must stay within the learner-created project.\n"
+        answer += "\n## Check your transfer\n\nA useful answer names the exact object, the phase when a setting takes effect, the expected normal result and an observation that would disprove it. A production system additionally needs ownership, lifecycle, data recovery and operational review.\n"
         write(ROOT / guide, text)
         write(ROOT / source, worksheet)
         write(ROOT / solution, answer)

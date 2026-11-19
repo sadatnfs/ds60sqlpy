@@ -4,7 +4,7 @@ Open after an attempt or an explicit solution reveal. The executable reference r
 
 ## Mechanism review
 
-A Java program begins as text. The compiler checks syntax and types, then writes bytecode in a class file. The Java Virtual Machine loads that bytecode and invokes a recognized entry point. Compilation and execution are different stages: a missing semicolon prevents compilation, while division by zero can fail after the program starts. This course uses a public class named Main stored in Main.java. The main method is static so the launcher can call it without first creating an object. Its String array parameter contains command-line arguments. Assertions are optional in ordinary Java launches, so the classroom deliberately enables them with-ea. A printed success message cannot replace a check that would fail on incorrect behavior.
+A Java program begins as text. The compiler checks syntax and types, then writes bytecode in a class file. The Java Virtual Machine loads that bytecode and invokes a recognized entry point. Compilation and execution are different stages: a missing semicolon prevents compilation, while division by zero can fail after the program starts. This course uses a public class named Main stored in Main.java. The main method is static so the launcher can call it without first creating an object. Its String array parameter contains command-line arguments. Assertions are optional in ordinary Java launches, so the classroom deliberately enables them with -ea. A printed success message cannot replace a check that would fail on incorrect behavior.
 
 **Source:** Human-readable Java text compiled before execution.
 
@@ -14,13 +14,15 @@ A Java program begins as text. The compiler checks syntax and types, then writes
 
 ## Reading the reference
 
-The class braces enclose methods, and the main-method braces enclose statements. public makes the entry point accessible, static associates it with the class, void means it returns no value, and String[] declares an array of text arguments. System.out.println writes one line. A semicolon ends most statements. javac --release21 selects the source/API target; java-ea Main loads the compiled class from the classpath. Read the first compiler diagnostic before looking for runtime output.
+The class braces enclose methods, and the main-method braces enclose statements. public makes the entry point accessible, static associates it with the class, void means it returns no value, and String[] declares an array of text arguments. System.out.println writes one line. A semicolon ends most statements. javac --release 21 selects the source/API target; java-ea Main loads the compiled class from the classpath. Read the first compiler diagnostic before looking for runtime output.
 
-## Exercise 1: Print a first result
+## Exercise 1: Print a first result: change one input
 
-Task: Create a message variable containing Hello, Java and print it once.
+Task: Copy Example A into a scratch `Main.java` and change `String message = "Hello, Java";` to `String message = "Hello, Java!";`. Before running it with `java -ea Main`, predict which assertion fails and which value it now sees; then run it and restore the original line.
 
 The variable holds a reference to a String value. println adds a line separator, while the assertion checks the content independently of terminal formatting.
+
+The unchanged code is the part that Example A adds:
 
 ```java
 String message = "Hello, Java";
@@ -28,15 +30,17 @@ System.out.println(message);
 assert message.equals("Hello, Java");
 ```
 
-**Expected:** one line Hello, Java.
+**Expected:** The changed run fails with an `AssertionError` from the assertion on `message.equals("Hello, Java")`. Restoring the original line brings back the worked observation: one line Hello, Java.
 
-**Verify:** Compare the program values or named exception with one line Hello, Java. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.
+**Verify:** Compare your written prediction with the reported `AssertionError` and its stack-trace line, and name the value that made `message.equals("Hello, Java")` false. After restoring the line, the program completes without an `AssertionError` again.
 
-## Exercise 2: Evaluate before printing
+## Exercise 2: Evaluate before printing: diagnose an edited check
 
-Task: Compute2+3 into an int and build the string total=5.
+Task: A careless edit changed the assertion that Example B adds after Example A so that it reads `assert line.equals("total=6");`. Run Example B with that line, explain why the edited assertion now fails for the same program state, and restore it.
 
 The numeric addition happens before concatenation because it is assigned first. Mixing strings and numbers in one expression can change which plus operators mean concatenation.
+
+The unchanged code is the part that Example B adds:
 
 ```java
 int total = 2 + 3;
@@ -45,15 +49,15 @@ assert total == 5;
 assert line.equals("total=5");
 ```
 
-**Expected:** integer5 and text total=5.
+**Expected:** Before the repair the run fails with an `AssertionError` from the assertion on `line.equals("total=5")`; after it the line reads `assert line.equals("total=5");` again and integer 5 and text total=5.
 
-**Verify:** Compare the program values or named exception with integer5 and text total=5. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.
+**Verify:** Keep the failing and the repaired runs. Explain why the edited assertion rejects the same program state that `line.equals("total=5")` accepts.
 
 ## Exercise 3: Trace sequential state
 
-Task: Start count1,increment it,then multiply it by3.
+Task: Start count 1, increment it, then multiply it by 3.
 
-Statements execute in order within this single thread. Reversing the last two operations would produce4, so the final value depends on the state transition sequence.
+Statements execute in order within this single thread. Reversing the last two operations would produce 4, so the final value depends on the state transition sequence.
 
 ```java
 int count = 1;
@@ -62,9 +66,9 @@ count = count * 3;
 assert count == 6;
 ```
 
-**Expected:** final count6.
+**Expected:** final count 6.
 
-**Verify:** Compare the program values or named exception with final count6. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.
+**Verify:** Keep an assertion equivalent to `count == 6`. As a control, change `count = count + 1;` to `count = count - 1;`: the run must fail with an `AssertionError` from the assertion on `count == 6`. Restore the line before continuing.
 
 ## Exercise 4: Verify assertion mode
 
@@ -81,11 +85,11 @@ assert enabled;
 
 **Expected:** assertion-enabled flag true.
 
-**Verify:** Compare the program values or named exception with assertion-enabled flag true. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.
+**Verify:** Keep an assertion equivalent to `enabled = true`. As a control, change `assert enabled = true;` to `assert enabled = false;` inside it: the run must fail with an `AssertionError`, which shows the assertion can fail. Restore it.
 
 ## Exercise 5: Separate runtime failure
 
-Task: Divide an integer by a variable containing0 and catch exactly ArithmeticException.
+Task: Divide an integer by a variable containing 0 and catch exactly ArithmeticException.
 
 The source is well typed and can compile, but the operation fails at runtime. Catching the specific exception distinguishes this expected fixture from unrelated failures.
 
@@ -100,9 +104,9 @@ try {
 assert dividedByZero;
 ```
 
-**Expected:** ArithmeticException observed;program continues after the catch.
+**Expected:** ArithmeticException observed; program continues after the catch.
 
-**Verify:** Compare the program values or named exception with ArithmeticException observed;program continues after the catch. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.
+**Verify:** Keep an assertion equivalent to `dividedByZero`. As a control, change `int zero = 0;` to `int zero = 1;`: the run must fail with an `AssertionError` from the assertion on `dividedByZero`. Restore the line before continuing.
 
 ## Exercise 6: Observe a real compiler diagnostic
 
@@ -143,7 +147,7 @@ try (var files = compiler.getStandardFileManager(diagnostics, null, null)) {
 
 **Expected:** compiler result false and at least one ERROR diagnostic.
 
-**Verify:** Compare the program values or named exception with compiler result false and at least one ERROR diagnostic. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.
+**Verify:** Keep an assertion equivalent to `diagnostics.getDiagnostics().stream().anyMatch(d -> d.getKind() == javax.tools.Diagnostic.Kind.ERROR)`. As a control, change `.anyMatch(d -> d.getKind() == javax.tools.Diagnostic.Kind.ERROR);` to `.anyMatch(d -> d.getKind() != javax.tools.Diagnostic.Kind.ERROR);` inside it: the run must fail with an `AssertionError`, which shows the assertion can fail. Restore it.
 
 ## After comparing the answer
 

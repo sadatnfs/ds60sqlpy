@@ -1,51 +1,43 @@
 # web-005: explanatory solutions
 
-Compare after your own attempt or an explicit solution reveal. This file explains the supplied deterministic fixtures. It does not claim that a learner or a production deployment passed.
-
-## Why the mechanism works
-
-Lists express relationships that paragraphs do not. An ordered list describes a sequence where position matters. An unordered list groups peers without requiring order. A description list pairs terms with explanations. These structures help reading tools announce item counts and relationships. A row of hyphens in plain text may look like a list but does not expose that structure.
-
-A quotation identifies borrowed language and should have a source when appropriate. Code identifies literal program text, while pre preserves whitespace. The combination pre and code is useful for multiline snippets. Long lines still need an overflow policy. Never use a quotation element simply to indent text or a list merely to create a visual column.
-
-A list contains li elements; nested lists belong inside the parent li they elaborate. A description list contains dt terms and dd explanations. A short inline token uses code without pre. Literal less-than signs in displayed code must be escaped because the containing HTML still has to parse correctly.
+Open this after your own attempt. Each answer explains the lesson's synthetic fixtures; it does not show that your work or a deployment passed. The mechanism is explained in `courses/web-development/guides/web-005.md`.
 
 ## Exercise 1: Choose a list type for steps and an unordered tool collection.
 
-Steps use ol; interchangeable peer tools use ul.
+**Expected answer:** Steps use ol; interchangeable peer tools use ul.
 
-Trace the smallest example before editing. Name which values are source and which are observations.
+**Why:** An ordered list communicates sequence, so assistive technology announces item numbers; an unordered list signals interchangeable items.
 
 ## Exercise 2: Add two vocabulary terms with definitions.
 
-A dl contains paired dt and dd elements.
+**Expected evidence:** A dl contains paired dt and dd elements.
 
-Change only the named feature. Compare with the unchanged example and explain any unaffected behavior.
+**Why:** A description list associates each dt with its dd, so the relationship is expressed by markup instead of bold text.
 
 ## Exercise 3: Build a study checklist with a code example and glossary.
 
-The page exposes list, code and definition structures without relying on spacing.
+**Expected evidence:** The page exposes list, code and definition structures without relying on spacing.
 
-Sketch the structure or data contract first. Reuse the mechanism from the examples without copying the reference.
+**Why:** Each element tells browsers and assistive technology what the content is, so the page stays meaningful without spacing or color.
 
 ## Exercise 4: Repair a nested list placed as a sibling of its parent item.
 
-The nested list belongs inside the associated li.
+**Expected evidence:** The nested list belongs inside the associated li.
 
-Keep the failing input. Identify the first layer where the observed result differs from the intended contract.
+**Why:** ul and ol may contain only li children, so a sublist must sit inside an item to show that it belongs to that step.
 
 ## Exercise 5: Test a long code line in a narrow preview.
 
-The code region can scroll without making the entire page horizontally overflow.
+**Expected evidence:** The code region can scroll without making the entire page horizontally overflow.
 
-Predict the boundary before running it. Add an explicit check or manual observation that would detect a regression.
+**Why:** overflow-x: auto on the code container creates a local scroll area, so the rest of the page keeps its width.
 
 ## Exercise 6: Explain the difference between preserving whitespace and preserving meaning.
 
-Pre preserves formatting; semantic elements additionally communicate content roles.
+**Expected answer:** Pre preserves formatting; semantic elements additionally communicate content roles.
 
-Explain your choice to someone who has not seen the code. Include one limitation and the evidence needed to remove it.
+**Why:** pre only preserves spaces and line breaks; semantic elements state what the content is, which whitespace alone cannot.
 
-## Reference comparison and limits
+## Reference comparison
 
-Read the separate executable reference, where supplied, only after retaining your attempt. Compare structure and decisions rather than matching every identifier. A different implementation is acceptable when it satisfies the same behavior, preserves accessibility and rejects the same invalid cases. The checked reference uses tiny synthetic inputs so that each transformation can be inspected. It is not a ready-to-deploy authenticated application. Server lifecycle, persistence, concurrency and security require their own integration evidence.
+Open `courses/web-development/solutions/web-005_solution.html` only after saving your attempt, and compare decisions rather than identifiers. A different implementation is acceptable when it shows the same behavior and rejects the same invalid cases. The reference checks only its named synthetic cases; its success message is not an accessibility audit or proof of responsive behavior at every size.

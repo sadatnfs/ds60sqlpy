@@ -3,11 +3,11 @@ package main
 import "fmt"
 
 func main() {
-	// Exercise 1: Accept explicit secure configuration: Validate an HTTPS endpoint, lesson namespace and explicit context name.
-	// Expected: The configuration is accepted.
+	// Exercise 1: Accept explicit secure configuration: predict an edited check: Copy worked example 1 into a scratch pad and change `check(validateTarget("https://cluster.invalid:6443", "lesson", "owned-lesson") == nil, "target")` to `check(validateTarget("https://cluster.invalid:6443!", "lesson", "owned-lesson") == nil, "target")` inside its check. Before running, predict whether the check still passes and explain why; then restore it.
+	// Expected: The changed run panics with `target` because the edited check no longer holds. Restoring the original line brings back the worked observation: the configuration is accepted.
 
-	// Exercise 2: Reject insecure transport: Validate an HTTP endpoint.
-	// Expected: The configuration is rejected.
+	// Exercise 2: Reject insecure transport: diagnose an edited check: A careless edit changed the check in worked example 2 so that it reads `check(validateTarget("http://cluster.invalid", "lesson", "owned-lesson") == nil, "TLS")`. Run worked example 2 with that line, explain why the edited check now fails for the same program state, and restore it.
+	// Expected: Before the repair the program panics with `TLS`; after it the line reads `check(validateTarget("http://cluster.invalid", "lesson", "owned-lesson") != nil, "TLS")` again and the configuration is rejected.
 
 	// Exercise 3: Reject ambient context selection: Omit the context name.
 	// Expected: Validation rejects the configuration.

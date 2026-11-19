@@ -34,6 +34,17 @@ internal static class Program {
       }
       Check(resource.Closed, "exception still cleans up");
     }
+    {
+      // Task 3: Independent construction
+      string ReadAll(Stream stream) {
+        var encoding = Encoding.UTF8;
+        using var reader = new StreamReader(stream, encoding, leaveOpen: true);
+        return reader.ReadToEnd();
+      }
+      using var source = new MemoryStream(Encoding.UTF8.GetBytes("data"));
+      Check(ReadAll(source) == "data", "content read");
+      Check(source.CanRead, "caller-owned stream stays open");
+    }
     Console.WriteLine("csharp-024: passed");
     await Task.CompletedTask;
   }

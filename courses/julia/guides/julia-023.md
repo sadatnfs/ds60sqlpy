@@ -8,7 +8,7 @@ Use a prepared optimization library while checking the objective, feasible set a
 
 ## Classroom execution
 
-Choose **Julia language and scientific computing** in `/classroom`, open this unit, and select its prepared `julia` runtime. The worker starts a fresh `main.jl` process with two Julia threads, a fixed package environment, no startup file and offline package settings. Both worked examples are complete under that environment. Save your current pad before replacing it. No package, model or dataset is fetched by a lesson.
+Open `julia-023` in `/classroom` with its prepared `julia` runtime. Worked case A (minimize a convex quadratic) and worked case B (a feasible boundary changes the answer) are complete programs: save your current pad, paste one of them and press Run. The learner file contains the six investigations below; the explained reference ends by printing `julia-023: all reference checks passed`. The [course overview](../README.md) describes the shared runtime: a fresh offline `main.jl` process with two threads and a fixed package environment.
 
 ## Specify the optimization problem first
 
@@ -20,7 +20,7 @@ A convergence flag is a diagnostic under an algorithm's stopping criteria. It is
 
 ## Worked case A: minimize a convex quadratic
 
-The first objective has a unique known minimum at[1,-2]. Its gradient is supplied through ForwardDiff using an in-place callback. The program checks the returned point, objective value and gradient norm independently of the optimizer's status flag. The small convex construction makes a global conclusion possible because of its mathematical structure, not because the method is named BFGS.
+The first objective has a unique known minimum at `[1, -2]`. Its gradient is supplied through ForwardDiff using an in-place callback. The program checks the returned point, objective value and gradient norm independently of the optimizer's status flag. The small convex construction makes a global conclusion possible because of its mathematical structure, not because the method is named BFGS.
 
 ```julia
 using Test
@@ -108,7 +108,7 @@ Replace a minimization objective with its negative.
 
 ### 2. Verify the known optimum
 
-Evaluate the quadratic at[1,-2].
+Evaluate the quadratic at `[1, -2]`.
 
 **Expected:** Objective and gradient are zero.
 
@@ -116,7 +116,7 @@ Evaluate the quadratic at[1,-2].
 
 ### 3. Inspect the feasible set
 
-Minimize the scalar case only on[0,2].
+Minimize the scalar case only on the interval from 0 to 2.
 
 **Expected:** The best feasible point is near 2.
 
@@ -153,4 +153,4 @@ Observe a lower training objective after optimization.
 
 ## Study companion
 
-Use the repository learning-companion skill with this lesson ID, your prediction and your actual source/output. Ask for a diagnosis of the first incorrect type, shape, state transition or assumption. Keep observed execution distinct from a timing claim, inferred mathematical result or external deployment.
+A repository-aware assistant with the learning-companion skill can review `julia-023` with you. Give it your prediction for one investigation, your source and the actual output, and ask it to find the first incorrect assumption about Optim, BFGS, gradient, bounded optimization or convergence.

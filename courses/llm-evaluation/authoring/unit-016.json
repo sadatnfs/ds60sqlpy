@@ -9,6 +9,7 @@
     "unknown gates"
   ],
   "outcome": "Compute and seal a complete held-out decision packet from the connected synthetic ledger, preserving all failed and unknown conditions.",
+  "verification": "Changing one constraint passes only the coverage gate, a missing protocol result and a critical failure each fail their gates, editing the artifact invalidates the old digest, and the memo states no-go with all four failing conditions.",
   "level": "advanced",
   "runtime": "python-core",
   "minutes": 120,
@@ -40,7 +41,7 @@
       "task": "Explain the positive bound for a separate hypothetical campaign with zero failures in 200 trials.",
       "expected": "Finite observations do not imply zero population risk.",
       "hint": "State the binomial and sampling assumptions.",
-      "answer": "The expression 1-alpha^(1/n) assumes independent representative Bernoulli trials. It is separate from the actual authored held-out ledger, which contains one critical failure, and supplies no real-population estimate."
+      "answer": "The expression \\(1-\\alpha^{1/n}\\) assumes independent representative Bernoulli trials. It is separate from the actual authored held-out ledger, which contains one critical failure, and supplies no real-population estimate."
     },
     {
       "title": "Detect an artifact edit",

@@ -6,7 +6,7 @@ Compare these answers only after an attempt or an explicit solution reveal. They
 
 Normalization has three distinct contracts: which values share statistics, which state changes during training, and which affine parameters are learned. BatchNorm and LayerNorm can use similar arithmetic while differing on all three. A layer name or an axis number is not enough to infer the dependency structure.
 
-For BatchNormalization(axis=-1) on input [N,C], the final axis identifies separate channels whose statistics are retained. The reduction happens over the other axis N. On channels-last images [N,H,W,C], separate channel statistics reduce over N,H,W. In contrast, LayerNormalization(axis=-1) reduces the final feature axis itself. On [N,T,D] it computes a distinct mean and variance for every [N,T] token, reducing D and preserving the token positions. These opposite roles for the axis argument are a common source of plausible-looking but incorrect comparisons.
+For BatchNormalization(axis=-1) on input [N, C], the final axis identifies separate channels whose statistics are retained. The reduction happens over the other axis N. On channels-last images [N, H, W, C], separate channel statistics reduce over N, H, W. In contrast, LayerNormalization(axis=-1) reduces the final feature axis itself. On [N, T, D] it computes a distinct mean and variance for every [N, T] token, reducing D and preserving the token positions. These opposite roles for the axis argument are a common source of plausible-looking but incorrect comparisons.
 
 BatchNorm uses current-batch statistics during a training call and updates moving statistics for later inference. Its scale gamma and offset beta are trainable parameters, while moving mean and variance are nontrainable state updated by the layer. Inference uses the stored state and should not update it. LayerNorm uses the current row's feature statistics in both ordinary training and inference, without maintaining running batch statistics. Its learned affine parameters still matter.
 
@@ -28,28 +28,28 @@ The main fixture keeps the familiar Keras momentum 0.5 example, then adds moment
 
 | Layer and input | Axis argument means | Reduction axes | Statistic shape before broadcasting |
 | --- | --- | --- | --- |
-| BatchNorm on [N,C] | retain C distinct channels | N | [C] |
-| BatchNorm on [N,H,W,C] | retain C distinct channels | N,H,W | [C] |
-| LayerNorm on [N,T,D] | reduce D features | D | [N,T,1] |
-| LayerNorm on [N,H,W,C] with axis=-1 | reduce channels at each location | C | [N,H,W,1] |
+| BatchNorm on [N, C] | retain C distinct channels | N | [C] |
+| BatchNorm on [N, H, W, C] | retain C distinct channels | N, H, W | [C] |
+| LayerNorm on [N, T, D] | reduce D features | D | [N, T, 1] |
+| LayerNorm on [N, H, W, C] with axis=-1 | reduce channels at each location | C | [N, H, W, 1] |
 
 The last row is not whole-image normalization. Likewise, PyTorch's common channels-first convolution layout requires its own axis reasoning. Translate tensor layout before comparing framework calls. A statistical reduction can preserve the final output shape while changing which observations influence one another.
 
 ### Calculate current and moving statistics
 
-For batch [[1,3],[3,5]], the per-channel mean is [2,4]. Each channel has centered values [-1,1] and population variance 1. With initial moving mean [0,0] and Keras momentum \(m=0.5\), the update m*old+(1-m)*batch gives [1,2]. A second identical batch gives [1.5,3]. With a constant batch mean and zero initial mean, the value after t updates is \(1-{m}^{t}\) times that batch mean. Early inference statistics still reflect their initialization.
+For batch [[1, 3], [3, 5]], the per-channel mean is [2, 4]. Each channel has centered values [-1, 1] and population variance 1. With initial moving mean [0, 0] and Keras momentum \(m=0.5\), the update m*old+(1-m)*batch gives [1, 2]. A second identical batch gives [1.5, 3]. With a constant batch mean and zero initial mean, the value after t updates is \(1-{m}^{t}\) times that batch mean. Early inference statistics still reflect their initialization.
 
-The initial moving variance is one. The main batch's variance is also one, so that state would not visibly change. A separate probe [[0,0],[4,4]] has population variance four per channel. The Keras update with \(m=0.5\) gives \(0.5\cdot 1+0.5\cdot 4=2.5\). PyTorch's documented running-variance update uses the unbiased batch estimate, which is eight for those two observations, so matching its new-batch weight to 0.5 gives 4.5 instead. The TensorFlow fixture executes the Keras result; the paired PyTorch chapter separately exercises that framework's state convention.
+The initial moving variance is one. The main batch's variance is also one, so that state would not visibly change. A separate probe [[0, 0], [4, 4]] has population variance four per channel. The Keras update with \(m=0.5\) gives \(0.5\cdot 1+0.5\cdot 4=2.5\). PyTorch's documented running-variance update uses the unbiased batch estimate, which is eight for those two observations, so matching its new-batch weight to 0.5 gives 4.5 instead. The TensorFlow fixture executes the Keras result; the paired PyTorch chapter separately exercises that framework's state convention.
 
 ### Training output is not inference output
 
-With \(\gamma=1\), \(\beta=0\) and explicit \(\epsilon=0.001\), the training output of the main batch is \(\frac{[[-1,-1],[1,1]]}{\sqrt{1.001}}\). After one moving-state update, inference instead subtracts [1,2] and divides by \(\sqrt{1.001}\), giving \(\frac{[[0,1],[2,3]]}{\sqrt{1.001}}\). It need not be centered on the new inference batch. Using inference mode on unrepresentative or barely initialized state can therefore produce a different result even when no trainable weight changed.
+With \(\gamma=1\), \(\beta=0\) and explicit \(\epsilon=0.001\), the training output of the main batch is \(\frac{[[-1,-1],[1,1]]}{\sqrt{1.001}}\). After one moving-state update, inference instead subtracts [1, 2] and divides by \(\sqrt{1.001}\), giving \(\frac{[[0,1],[2,3]]}{\sqrt{1.001}}\). It need not be centered on the new inference batch. Using inference mode on unrepresentative or barely initialized state can therefore produce a different result even when no trainable weight changed.
 
-LayerNorm on row [1,3] uses row mean 2 and variance 1. Appending [100,200] as another row does not change those statistics. Learned gamma/beta are omitted from this hand arithmetic by using their default initial values. After affine parameters are learned, the final output need not retain zero mean even though the normalized internal values are centered.
+LayerNorm on row [1, 3] uses row mean 2 and variance 1. Appending [100,200] as another row does not change those statistics. Learned gamma/beta are omitted from this hand arithmetic by using their default initial values. After affine parameters are learned, the final output need not retain zero mean even though the normalized internal values are centered.
 
 ## Exercise 1: Update and inspect moving state
 
-The question is: Apply Keras BatchNorm with momentum 0.5 to [[1,3],[3,5]], then use a separate variance-four probe.
+The question is: Apply Keras BatchNorm with momentum 0.5 to [[1, 3], [3, 5]], then use a separate variance-four probe.
 
 The mean update reveals old-versus-new weighting. The separate variance probe is necessary because a batch variance equal to the initial moving variance would hide whether an update occurred. The output expectation uses current-batch statistics, not the newly updated moving mean.
 
@@ -67,9 +67,9 @@ probe(tf.constant([[0.0, 0.0], [4.0, 4.0]]), training=True)
 np.testing.assert_allclose(probe.moving_variance.numpy(), [2.5, 2.5], atol=1e-6, rtol=0)
 ```
 
-**Expected:** moving mean [1,2]; main variance stays [1,1]; variance-four probe updates moving variance to [2.5,2.5].
+**Expected:** moving mean [1, 2]; main variance stays [1, 1]; variance-four probe updates moving variance to [2.5, 2.5].
 
-**Verify:** Compare the computed values or written argument with moving mean [1,2]; main variance stays [1,1]; variance-four probe updates moving variance to [2.5,2.5].
+**Verify:** In a fresh process, the exercise checks confirm `bn.moving_mean.numpy()` matches `[1, 2]` within 1e-6; `bn.moving_variance.numpy()` matches `[1, 1]` within 1e-6; `training_output.numpy()` matches `expected` within 1e-6 and `probe.moving_variance.numpy()` matches `[2.5, 2.5]` within 1e-6.
 
 ## Exercise 2: Freeze evaluation state
 
@@ -92,13 +92,13 @@ np.testing.assert_array_equal(bn.moving_variance.numpy(), variance_before)
 assert not np.allclose(evaluation, training_output)
 ```
 
-**Expected:** moving state stays unchanged; inference output uses mean [1,2] and differs from training output.
+**Expected:** moving state stays unchanged; inference output uses mean [1, 2] and differs from training output.
 
-**Verify:** Compare the computed values or written argument with moving state stays unchanged; inference output uses mean [1,2] and differs from training output.
+**Verify:** In a fresh process, the exercise checks confirm `evaluation` matches `expected` within 1e-6; `bn.moving_mean.numpy()` equals `mean_before`; `bn.moving_variance.numpy()` equals `variance_before` and `not np.allclose(evaluation, training_output)`.
 
 ## Exercise 3: Test LayerNorm row independence
 
-The question is: Normalize [1,3] alone and as the first row beside [100,200].
+The question is: Normalize [1, 3] alone and as the first row beside [100,200].
 
 The reduced feature axis belongs to one row. No statistic from the unrelated second row enters the first output. This property depends on the selected axes, not merely on the LayerNorm name.
 
@@ -113,7 +113,7 @@ assert len(ln.non_trainable_variables) == 0
 
 **Expected:** the first output is unchanged; LayerNorm has no running-statistic variables.
 
-**Verify:** Compare the computed values or written argument with the first output is unchanged; LayerNorm has no running-statistic variables.
+**Verify:** In a fresh process, the exercise checks confirm `alone` matches `together` within 1e-6; `alone` matches `np.array([-1.0, 1.0]) / np.sqrt(1.001)` within 1e-6 and `len(ln.non_trainable_variables) == 0`.
 
 ## Exercise 4: Expose actual BatchNorm batch dependence
 
@@ -139,7 +139,7 @@ np.testing.assert_array_equal(large[0] - large.mean(axis=0), [-33, -66])
 
 **Expected:** the output changes and matches independent per-channel NumPy mean/variance calculations.
 
-**Verify:** Compare the computed values or written argument with the output changes and matches independent per-channel NumPy mean/variance calculations.
+**Verify:** In a fresh process, the exercise checks confirm for every `batch` in `[small, large]`, `observed` matches `expected` within 1e-6; `not np.allclose(outputs[0], outputs[1])` and `large[0] - large.mean(axis=0)` equals `[-33, -66]`.
 
 ## Exercise 5: Repeat updates and translate asymmetric momentum
 
@@ -166,9 +166,9 @@ assert not np.allclose(keras_first, torch_same_number_formula)
 np.testing.assert_allclose(keras_first, torch_matched_formula, atol=1e-12, rtol=0)
 ```
 
-**Expected:** 0.5 repeat gives [1.5,3]; Keras0.8 first/second means are [0.4,0.8] and [0.72,1.44]; matching Torch new-batch weight is 0.2.
+**Expected:** 0.5 repeat gives [1.5, 3]; Keras 0.8 first/second means are [0.4, 0.8] and [0.72, 1.44]; matching Torch new-batch weight is 0.2.
 
-**Verify:** Compare the computed values or written argument with 0.5 repeat gives [1.5,3]; Keras0.8 first/second means are [0.4,0.8] and [0.72,1.44]; matching Torch new-batch weight is 0.2.
+**Verify:** In a fresh process, the exercise checks confirm `bn.moving_mean.numpy()` matches `[1.5, 3]` within 1e-6; `asymmetric.moving_mean.numpy()` matches `[0.4, 0.8]` within 1e-6; `asymmetric.moving_mean.numpy()` matches `[0.72, 1.44]` within 1e-6; `not np.allclose(keras_first, torch_same_number_formula)` and 1 further check.
 
 ## Exercise 6: Handle constant rows and frozen BatchNorm
 
@@ -196,7 +196,7 @@ np.testing.assert_allclose(output, expected, atol=2e-5, rtol=0)
 
 **Expected:** LayerNorm returns finite zeros; frozen Keras BatchNorm preserves moving state and uses its inference statistics.
 
-**Verify:** Compare the computed values or written argument with LayerNorm returns finite zeros; frozen Keras BatchNorm preserves moving state and uses its inference statistics.
+**Verify:** In a fresh process, the exercise checks confirm `np.isfinite(constant).all()`; `constant` matches `[[0, 0]]` within 1e-6; `bn.moving_mean.numpy()` equals `before_mean`; `bn.moving_variance.numpy()` equals `before_variance` and 1 further check.
 
 ## Review after comparison
 

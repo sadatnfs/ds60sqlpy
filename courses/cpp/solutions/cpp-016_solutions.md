@@ -55,7 +55,7 @@ Copy a Batch and mutate the copy.
 
 **Reasoning:** The vector member owns its own copied storage.
 
-**Verify:** Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.
+**Verify:** After `b.values[0] = 9`, assert `a.values == std::vector<int>{1, 2}` and `b.values == std::vector<int>{9, 2}`, as Worked example 1 does.
 
 ## Exercise 2: Inspect the receiver
 
@@ -65,7 +65,7 @@ Move Batch([1, 2, 3]) into a new owner.
 
 **Reasoning:** The target has a specified transferred value.
 
-**Verify:** Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.
+**Verify:** Assert `receiver.values == std::vector<int>{1, 2, 3}` after `std::move`, and make no assertion about the source's contents.
 
 ## Exercise 3: Reuse the source
 
@@ -75,7 +75,7 @@ Assign Batch([4]) to the moved-from source.
 
 **Reasoning:** Valid but unspecified permits reassignment.
 
-**Verify:** Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.
+**Verify:** After the move, assign `a = Batch{{4}, "new"}` and assert `a.values == std::vector<int>{4}`, as Worked example 2 does with `a.values[0] == 4`.
 
 ## Exercise 4: Repair an invalid assumption
 
@@ -85,7 +85,7 @@ Remove a test requiring every moved-from vector to be empty.
 
 **Reasoning:** An implementation observation is not a portable postcondition.
 
-**Verify:** Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.
+**Verify:** Confirm no remaining assertion reads a moved-from vector's size or elements; the tests may only check the receiver's values and that the source can be assigned or destroyed.
 
 ## Exercise 5: Keep rule of zero
 
@@ -95,7 +95,7 @@ List special members needed for Batch.
 
 **Reasoning:** Standard fields already express ownership.
 
-**Verify:** Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.
+**Verify:** Check that your list adds no destructor, copy or move member, then confirm Worked examples 1 and 2 still compile and pass with the struct unchanged.
 
 ## Exercise 6: Transfer to return values
 
@@ -105,4 +105,4 @@ Return Batch from a factory and store it.
 
 **Reasoning:** Return by value allows elision or moves without a dangling reference.
 
-**Verify:** Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.
+**Verify:** Write a function returning `Batch{{5, 6}, "made"}`, store the result, and assert its values and label on a later line, after the factory has returned.

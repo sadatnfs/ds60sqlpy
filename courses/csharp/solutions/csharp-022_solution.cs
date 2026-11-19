@@ -36,6 +36,19 @@ internal static class Program {
       Check(rejected, "validation occurs at call boundary");
       Check(RangeFrom(2, 3).Sum() == 9, "complete enumeration");
     }
+    {
+      // Task 3: Independent construction
+      IEnumerable<int> Cumulative(IEnumerable<int> values) {
+        int total = 0;
+        foreach (int value in values) {
+          total = checked(total + value);
+          yield return total;
+        }
+      }
+      int[] totals = Cumulative(new[] { 1, 2, 3 }).ToArray();
+      Check(totals.SequenceEqual(new[] { 1, 3, 6 }), "running totals");
+      Check(!Cumulative(Array.Empty<int>()).Any(), "empty input");
+    }
     Console.WriteLine("csharp-022: passed");
     await Task.CompletedTask;
   }

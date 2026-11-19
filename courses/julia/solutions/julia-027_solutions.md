@@ -6,7 +6,7 @@ The executable reference is `julia-027_reference.jl`. Its checks cover the state
 
 Qualified access works even without bringing the export into the caller namespace.
 
-**Expected observation:** The result is[-1,1].
+**Expected observation:** The result is `[-1, 1]`.
 
 ## 2. Trace exports
 

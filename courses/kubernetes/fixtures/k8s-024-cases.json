@@ -7,12 +7,12 @@
     {
       "exercise": 1,
       "task": "Identify base resource and overlay replica transform.",
-      "expected": "One local Deployment base plus explicit dev1/test2 overrides."
+      "expected": "One local Deployment base plus explicit dev (1 replica) and test (2 replicas) overrides."
     },
     {
       "exercise": 2,
       "task": "Run the pinned local renderer if available and retain its version/output.",
-      "expected": "Actual output is compared with expected JSON;missing tool is recorded as unavailable."
+      "expected": "Actual output is compared with expected JSON; missing tool is recorded as unavailable."
     },
     {
       "exercise": 3,
@@ -22,7 +22,7 @@
     {
       "exercise": 4,
       "task": "Explain the teacher-controller/lesson-review conflict.",
-      "expected": "The same field has competing intent;manager identity and current UID/version are recorded."
+      "expected": "The same field has competing intent; manager identity and current UID/version are recorded."
     },
     {
       "exercise": 5,
@@ -31,8 +31,8 @@
     },
     {
       "exercise": 6,
-      "task": "Record source overlay,renderer version,rendered hash,diff and any actual apply/readback.",
-      "expected": "A reviewer can separate render,admission,reconciliation and application evidence."
+      "task": "Record source overlay, renderer version, rendered hash, diff and any actual apply/readback.",
+      "expected": "A reviewer can separate render, admission, reconciliation and application evidence."
     }
   ]
 }

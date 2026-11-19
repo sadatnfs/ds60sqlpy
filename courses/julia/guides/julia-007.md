@@ -8,7 +8,7 @@ Trace array storage and indexing while choosing deliberately between copies and 
 
 ## Classroom execution
 
-Choose **Julia language and scientific computing** in `/classroom`, open this unit, and select its prepared `julia` runtime. The worker starts a fresh `main.jl` process with two Julia threads, a fixed package environment, no startup file and offline package settings. Both worked examples are complete under that environment. Save your current pad before replacing it. No package, model or dataset is fetched by a lesson.
+Open `julia-007` in `/classroom` with its prepared `julia` runtime. Worked case A (inspect a column-major matrix) and worked case B (mutate a view and a copy) are complete programs: save your current pad, paste one of them and press Run. The learner file contains the six investigations below; the explained reference ends by printing `julia-007: all reference checks passed`. The [course overview](../README.md) describes the shared runtime: a fresh offline `main.jl` process with two threads and a fixed package environment.
 
 ## Shape and storage are separate descriptions
 
@@ -20,7 +20,7 @@ Indexing a slice with an ordinary range often produces a copy, while `view` or `
 
 ## Worked case A: inspect a column-major matrix
 
-Reshaping the values 1 through 6 into a2-by -3 matrix fills its first column before the second. The example checks selected coordinates, the complete shape and the sum. `reshape` can share the underlying data, so a shape transformation should not automatically be treated as a deep copy.
+Reshaping the values 1 through 6 into a 2-by-3 matrix fills its first column before the second. The example checks selected coordinates, the complete shape and the sum. `reshape` can share the underlying data, so a shape transformation should not automatically be treated as a deep copy.
 
 ```julia
 using Test
@@ -82,9 +82,9 @@ The examples verify concrete storage-sharing and shape properties. They do not c
 
 ### 1. Read a shape
 
-Compare a length 2 vector with a2-by -1 matrix.
+Compare a length 2 vector with a 2-by-1 matrix.
 
-**Expected:** Their sizes are(2,) and(2,1).
+**Expected:** Their sizes are `(2,)` and `(2, 1)`.
 
 **Hint:** Element count does not determine the number of axes.
 
@@ -92,7 +92,7 @@ Compare a length 2 vector with a2-by -1 matrix.
 
 Locate value 5 in the reshaped matrix.
 
-**Expected:** It is at row 1,column 3.
+**Expected:** It is at row 1, column 3.
 
 **Hint:** Follow columns through the input vector.
 
@@ -135,4 +135,4 @@ Read index 0 from a standard two-element vector.
 
 ## Study companion
 
-Use the repository learning-companion skill with this lesson ID, your prediction and your actual source/output. Ask for a diagnosis of the first incorrect type, shape, state transition or assumption. Keep observed execution distinct from a timing claim, inferred mathematical result or external deployment.
+A repository-aware assistant with the learning-companion skill can review `julia-007` with you. Give it your prediction for one investigation, your source and the actual output, and ask it to find the first incorrect assumption about array shape, column major, copy, view or aliasing.

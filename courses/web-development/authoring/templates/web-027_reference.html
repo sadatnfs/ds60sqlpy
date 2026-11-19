@@ -5,35 +5,86 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Accessible form feedback with a pure validation function</title>
     <style>
-          :root { color-scheme: light; font-family: system-ui, sans-serif; line-height: 1.6; }
-          body { margin: 0; padding: 1.5rem; color: #172033; background: #f8fafc; }
-          main { max-width: 65rem; margin-inline: auto; }
-          a { color: #0753a4; }
-          button, input, select, textarea { font: inherit; }
-          button { cursor: pointer; }
-          :focus-visible { outline: 3px solid #a34000; outline-offset: 3px; }
-          #reference-status { display: block; margin-block-start: 2rem; border-block-start: 1px solid #64748b; padding-block-start: 1rem; }
-      input[aria-invalid=true] { border: 2px solid #9c2300; } #error { min-block-size: 1.6em; }
+      :root {
+        color-scheme: light;
+        font-family: system-ui, sans-serif;
+        line-height: 1.6;
+      }
+      body {
+        margin: 0;
+        padding: 1.5rem;
+        color: #172033;
+        background: #f8fafc;
+      }
+      main {
+        max-width: 65rem;
+        margin-inline: auto;
+      }
+      button,
+      input {
+        font: inherit;
+      }
+      button {
+        cursor: pointer;
+      }
+      :focus-visible {
+        outline: 3px solid #a34000;
+        outline-offset: 3px;
+      }
+      #reference-status {
+        display: block;
+        margin-block-start: 2rem;
+        border-block-start: 1px solid #64748b;
+        padding-block-start: 1rem;
+      }
+      input[aria-invalid="true"] {
+        border: 2px solid #9c2300;
+      }
+      #error {
+        min-block-size: 1.6em;
+      }
     </style>
   </head>
   <body>
-    <main
-      ><h1>Plan one study session</h1><label for="minutes">Minutes, 5 to 120</label
-      ><input id="minutes" inputmode="numeric" aria-describedby="error" value="30" /><button
-        id="validate"
-        type="button"
-        >Check locally</button
-      ><p id="error" role="status"></p
-    ></main>
+    <main>
+      <h1>Plan one study session</h1>
+      <p>
+        <label for="minutes">Minutes, 5 to 120</label>
+        <input id="minutes" inputmode="numeric" aria-describedby="error" value="30" />
+        <button id="validate" type="button">Check locally</button>
+      </p>
+      <p id="error" role="status"></p>
+    </main>
     <output id="reference-status" aria-live="polite">Reference checks pending.</output>
     <script>
       "use strict";
       function check(condition, message) {
         if (!condition) throw new Error(message);
       }
-      function validate(value) { if (value.trim() === '') return 'Enter minutes.'; const minutes = Number(value); return Number.isFinite(minutes) && minutes >= 5 && minutes <= 120 ? '' : 'Use 5 to 120 minutes.'; } const input = document.querySelector('#minutes'); const error = document.querySelector('#error'); document.querySelector('#validate').addEventListener('click', () => { const message = validate(input.value); input.setAttribute('aria-invalid', message ? 'true' : 'false'); error.textContent = message || 'Valid local plan. Nothing has been submitted.'; });
-      check(validate('') !== '', 'Empty value accepted'); check(validate('121') !== '', 'Upper bound ignored'); check(validate('30') === '', 'Valid value rejected');
-      document.querySelector("#reference-status").textContent = "web-027 reference checks passed. Complete the manual observations in the guide.";
+      // Pure rule: whole decimal minutes only, so Number never sees 0x1e, 1e2 or 7.5.
+      function validate(value) {
+        const text = value.trim();
+        if (text === "") return "Enter minutes.";
+        if (!/^\d{1,3}$/.test(text)) return "Use whole minutes from 5 to 120.";
+        const minutes = Number(text);
+        return minutes >= 5 && minutes <= 120 ? "" : "Use 5 to 120 minutes.";
+      }
+      const input = document.querySelector("#minutes");
+      const error = document.querySelector("#error");
+      document.querySelector("#validate").addEventListener("click", () => {
+        const message = validate(input.value);
+        input.setAttribute("aria-invalid", message ? "true" : "false");
+        error.textContent = message || "Valid local plan. Nothing has been submitted.";
+      });
+      check(validate("") !== "", "Empty value accepted");
+      check(validate("   ") !== "", "Whitespace accepted");
+      check(validate("121") !== "", "Upper bound ignored");
+      check(validate("0x1e") !== "", "Hexadecimal accepted");
+      check(validate("1e2") !== "", "Exponent accepted");
+      check(validate("7.5") !== "", "Fraction accepted");
+      check(validate(" 30 ") === "", "Valid value rejected");
+      document.querySelector("#reference-status").textContent =
+        "web-027 reference checks passed. Complete the manual observations in the guide.";
       console.log("web-027 reference checks passed");
     </script>
   </body>

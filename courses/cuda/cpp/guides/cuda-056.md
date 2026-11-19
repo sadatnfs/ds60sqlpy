@@ -10,9 +10,10 @@ own capability checks and are not prerequisites for opening this chapter.
 
 ## Learning objectives
 
-Explain asynchronous copies, barriers and software pipelines using the concrete cases below. Produce correct tails, synchronization checks and a measured explanation of whether overlap helped.
-Distinguish an algorithmic calculation, a compiled artifact and an actual device
-observation when explaining what your work establishes.
+Work through *Asynchronous copies, barriers and software pipelines* with the concrete cases below. Finish with this evidence:
+correct tails, synchronization checks and a measured explanation of whether overlap helped. Distinguish an algorithmic
+calculation, a compiled artifact and an actual device observation when explaining
+what your work establishes.
 
 ## Purpose, vocabulary and mental model
 
@@ -20,28 +21,20 @@ Within-GPU asynchronous copy mechanisms can move tiles from global to shared sto
 
 ## How to run and study this lesson
 
-Open this chapter in `/classroom` and use its saved reading worksheet. The primary
-reading pad does not execute CUDA. The two examples, six tasks and separate
-explanations are usable offline on macOS, Linux and Windows through WSL 2 with
-the ordinary classroom. An AMD, Intel or Apple GPU does not make this CUDA C++
-source executable through Docker.
-
-For the bounded CPU calculation, select **CPU model (Python)** in this lesson.
-That variant keeps its own source and result history under the same chapter. Its
-answer-free starter supplies literal fixtures and the task contract; implement
-the model and assertions before replacing its deliberate incomplete-work error.
-The separate [CPU reference](../references/cuda-056_cpu.py) uses only Python's
-standard library. For an optional terminal workflow, run this from the repository
-root in a prepared Python environment:
+Use the saved reading worksheet in `/classroom`; the reading pad does not execute
+CUDA. For the bounded calculation, select **CPU model (Python)**, whose
+answer-free starter supplies the literal fixtures and task contract. The
+[CUDA C++ study workflow](../README.md) covers platforms, optional GPU
+compilation and evidence labels. In a prepared Python environment you can also
+run the separate [CPU reference](../references/cuda-056_cpu.py) from the
+repository root:
 
 ```sh
 python courses/cuda/cpp/references/cuda-056_cpu.py
 ```
 
-The assertions check the stated numerical result or model invariant. Console text
-is evidence of this CPU reference only. The [CUDA C++ study workflow](../README.md)
-explains optional GPU compilation, paths, hardware requirements and evidence labels.
-No lesson opening downloads a model, installs a driver or starts a GPU job.
+Its assertions check the stated numerical result or model invariant; console
+text is evidence of this CPU model only, not of CUDA execution.
 
 ## Worked example 1: trace the mechanism
 
@@ -64,10 +57,9 @@ print({"slot_lifetime": states, "offset_address_aligned_to_16": False})
 {'slot_lifetime': ['free', 'copying', 'ready', 'consuming', 'done', 'free'], 'offset_address_aligned_to_16': False}
 ```
 
-Tiny floating-point display differences across platforms are acceptable only
-where the explicit assertions use a tolerance; integers, shapes and ordering
-must still satisfy their exact contracts. A printed hypothetical duration is a
-model output, not a measured GPU benchmark.
+Integers, shapes and ordering must match exactly; only assertions with an explicit
+tolerance accept small floating-point differences. A printed duration is a model
+output, not a measured GPU benchmark.
 
 ## Worked example 2: change a meaningful condition
 
@@ -79,75 +71,55 @@ valid. Keep the original case as a regression check when changing a boundary.
 
 ## Six progressive exercises
 
+Exercises 1 and 2 are guided reconstructions of the worked examples; exercises
+3-6 change an input, diagnose a defect, test a boundary and transfer the idea.
+For each one, keep the calculation, output, diagram or failure policy you
+produce so another reader can compare it with the worked cases. If the hint is
+not enough, reread the mechanism paragraph and the bounded CPU assertion.
+
 ### Exercise 1
 
 Predict and trace the first worked example before running its CPU reference. Write every intermediate quantity that leads to the stated result, including units or ownership where applicable.
 
-**Self-check:** Retain the requested calculation, output, diagram or explicit failure policy so another reader can compare it with the worked cases.
-
-**Hint 1:** Start with the literal input and intermediate quantities in worked example 1.
-
-**Hint 2:** Review the mechanism paragraph and the relevant bounded CPU assertion; separate mathematical reasoning from optional device evidence.
+**Hint:** Start with the literal input and intermediate quantities in worked example 1.
 
 ### Exercise 2
 
 Reconstruct the second worked example without copying its conclusion. Identify the changed input or condition, show the resulting calculation or dependency, and explain why it differs from the first example.
 
-**Self-check:** Retain the requested calculation, output, diagram or explicit failure policy so another reader can compare it with the worked cases.
-
-**Hint 1:** Identify exactly which condition changes in worked example 2.
-
-**Hint 2:** Review the mechanism paragraph and the relevant bounded CPU assertion; separate mathematical reasoning from optional device evidence.
+**Hint:** Identify exactly which condition changes in worked example 2.
 
 ### Exercise 3
 
 List the lifetime states of one tile slot.
 
-**Self-check:** Retain the requested calculation, output, diagram or explicit failure policy so another reader can compare it with the worked cases.
-
-**Hint 1:** Use the first worked example to establish the relevant quantities, then change only the requested input.
-
-**Hint 2:** Review the mechanism paragraph and the relevant bounded CPU assertion; separate mathematical reasoning from optional device evidence.
+**Hint:** Use the first worked example to establish the relevant quantities, then change only the requested input.
 
 ### Exercise 4
 
 A consumer reads immediately after initiating a copy. Diagnose it.
 
-**Self-check:** Retain the requested calculation, output, diagram or explicit failure policy so another reader can compare it with the worked cases.
-
-**Hint 1:** Locate the failed phase or violated dependency before proposing a repair.
-
-**Hint 2:** Review the mechanism paragraph and the relevant bounded CPU assertion; separate mathematical reasoning from optional device evidence.
+**Hint:** Locate the failed phase or violated dependency before proposing a repair.
 
 ### Exercise 5
 
 What happens to a partial final tile?
 
-**Self-check:** Retain the requested calculation, output, diagram or explicit failure policy so another reader can compare it with the worked cases.
-
-**Hint 1:** Check what the algorithm is allowed to read, write or assume at this boundary.
-
-**Hint 2:** Review the mechanism paragraph and the relevant bounded CPU assertion; separate mathematical reasoning from optional device evidence.
+**Hint:** Check what the algorithm is allowed to read, write or assume at this boundary.
 
 ### Exercise 6
 
 Choose whether to add asynchronous staging.
 
-**Self-check:** Retain the requested calculation, output, diagram or explicit failure policy so another reader can compare it with the worked cases.
-
-**Hint 1:** State the output contract and which observations are needed in the new application.
-
-**Hint 2:** Review the mechanism paragraph and the relevant bounded CPU assertion; separate mathematical reasoning from optional device evidence.
+**Hint:** State the output contract and which observations are needed in the new application.
 
 ## Common mistakes and diagnosis
 
 A tempting but incorrect claim in this chapter is: **initiating a copy makes its destination immediately readable. .**
 
 For the concrete failure exercise, a consumer reads immediately after initiating a copy. Diagnose it.
-Preserve the original input and the stage where behavior diverged. Compare with
-the CPU model or dependency diagram before changing hardware configuration.
-A compiler result, synthetic timing model, profiler counter and returned numeric
-answer support different claims. Record unavailable hardware honestly.
+Preserve the original input and the stage where behavior diverged, and compare
+with the CPU model before changing hardware configuration.
 
 ## Self-check, retrieval and transfer
 
@@ -160,9 +132,8 @@ choice; it does not certify hardware qualification or expert mastery.
 
 ## Primary references
 
-These are further technical references. The chapter and local CPU model remain
-readable offline. Check the documentation matching your deliberately prepared
-toolkit before optional hardware execution.
+Check the documentation that matches your prepared toolkit before optional
+hardware execution.
 
 - [Asynchronous copies](https://docs.nvidia.com/cuda/cuda-programming-guide/04-special-topics/async-copies.html)
 

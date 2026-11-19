@@ -28,7 +28,7 @@ There is sampling uncertainty about the unknown rate, outcome randomness conditi
 
 A decision report should include the expected-value gap between plausible actions and how accurately that gap has been calculated. If the gap is negligible compared with operational costs or model uncertainty, a stable simpler action may be reasonable. That is a decision judgment that should be made explicitly.
 
-The finite program uses a fixed seed for reproducibility, but a fixed seed is not a guarantee of accuracy. Review the actual diagnostics and the exact-oracle discrepancy. Short-run R-hat or effective-size summaries can look acceptable for one parameter while the expected loss difference remains imprecise.
+The finite program uses a fixed seed for reproducibility, but a fixed seed is not a guarantee of accuracy. Review the actual diagnostics and the exact-oracle discrepancy. Short-run R-hat or effective-size summaries can pass the screen for one parameter (R-hat below 1.01, at least 100 bulk effective draws per chain) while the expected loss difference remains imprecise; the decision needs its own Monte Carlo error.
 
 ## Answered scientific discussion
 

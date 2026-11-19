@@ -21,7 +21,7 @@ def attention(q, k, v, allowed):
 
 
 def verify():
-    # Exercise 1: Compute uniform causal mixtures
+    # Worked example A: Compute uniform causal mixtures
     q = torch.zeros((3, 2), dtype=torch.float64)
     v = torch.tensor([[2.0, 0.0], [0.0, 2.0], [6.0, 6.0]], dtype=torch.float64)
     allowed = torch.ones((3, 3), dtype=torch.bool).tril()
@@ -33,7 +33,7 @@ def verify():
         rtol=0,
     )
 
-    # Exercise 2: Perturb only the future
+    # Worked example B: Perturb only the future
     future = v.clone()
     future[2] = torch.tensor([100.0, 200.0])
     changed = attention(q, q, future, allowed)
@@ -42,7 +42,7 @@ def verify():
         changed[2], torch.tensor([34.0, 202 / 3], dtype=torch.float64), atol=1e-12, rtol=0
     )
 
-    # Exercise 3: Recompute nonuniform prefixes
+    # Worked example C: Recompute nonuniform prefixes
     non = torch.tensor([[1.0, 0.0], [0.0, 1.0], [1.0, 1.0]], dtype=torch.float64)
     full = attention(non, non, v, allowed)
     for cut in range(1, 4):
@@ -70,6 +70,39 @@ def verify():
     # Exercise 6: Keep inference dropout disabled
     again = attention(q, q, v, allowed)
     torch.testing.assert_close(again, out, atol=0, rtol=0)
+
+    # Exercise 1: Mix new values causally
+    zq = torch.zeros((3, 2), dtype=torch.float64)
+    vv = torch.tensor([[4.0, 0.0], [0.0, 4.0], [1.0, 1.0]], dtype=torch.float64)
+    causal = torch.ones((3, 3), dtype=torch.bool).tril()
+    torch.testing.assert_close(
+        attention(zq, zq, vv, causal),
+        torch.tensor([[4.0, 0.0], [2.0, 2.0], [5 / 3, 5 / 3]], dtype=torch.float64),
+        atol=1e-12,
+        rtol=0,
+    )
+
+    # Exercise 2: Predict a bidirectional change
+    full_mask = torch.ones((3, 3), dtype=torch.bool)
+    moved = vv.clone()
+    moved[2] = torch.tensor([10.0, 10.0])
+    torch.testing.assert_close(
+        attention(zq, zq, moved, full_mask),
+        torch.full((3, 2), 14 / 3, dtype=torch.float64),
+        atol=1e-12,
+        rtol=0,
+    )
+
+    # Exercise 3: Compute one nonuniform weight
+    qk = torch.eye(2, dtype=torch.float64)
+    weight = 1 / (1 + np.exp(-1 / np.sqrt(2)))
+    result = attention(qk, qk, qk, torch.ones((2, 2), dtype=torch.bool).tril())
+    torch.testing.assert_close(
+        result,
+        torch.tensor([[1.0, 0.0], [1 - weight, weight]], dtype=torch.float64),
+        atol=1e-12,
+        rtol=0,
+    )
     return {"checks": 6, "status": "passed"}
 
 

@@ -6,13 +6,19 @@ Intermediate; approximately 120 minutes. Direct prerequisites: `torch-022`. The 
 
 ## Learning objectives
 
-A custom training loop can fail by disconnecting the graph, forgetting an update, reusing old gradients or applying an incorrect reduction. The central investigation is concrete: Detach \({\left(w-2\right)}^{2}\) before backward and inspect tracking. The finish condition is detached loss `requires_grad` False; backward raises RuntimeError. nonnegative and below \(\frac{56}{675}\). A useful explanation connects the calculation to the reason it is needed, rather than treating a function name as a definition.
+Debug a custom training loop by checking graph connectivity, gradient clearing and norm clipping one state transition at a time.
+
+Central investigation: Detach a loss by mistake, repair two exact SGD updates and clip the gradient [3, 4] to norm 1 before stepping.
+
+Finish condition: The detached loss cannot backpropagate, the repaired weights are \(\frac{28}{15}\) then \(\frac{448}{225}\), clipping returns the original norm 5 and the gradient [0.6, 0.8], the clipped step gives approximately [-0.06, -0.08], and an infinite gradient raises RuntimeError.
+
+The worked examples demonstrate the mechanism; exercises 1-3 transfer it to new inputs and exercises 4-6 extend it to failures and boundary cases. A useful explanation connects the calculation to the reason it is needed, rather than treating a function name as a definition.
 
 ## Purpose and mental model
 
 A custom training loop can fail by disconnecting the graph, forgetting an update, reusing old gradients or applying an incorrect reduction. Debug the first small state transition before adding epochs and logging infrastructure. A gradient of None means no stored derivative was produced for that parameter; a zero tensor may be a valid derivative. Clearing with set_to_none preserves that diagnostic distinction.
 
-Gradient clipping limits a norm after backward and before the optimizer step. It does not repair invalid labels, nonfinite forward values or a data leak. The clip function returns the pre-clipping norm, which is useful for diagnostics. Repeatedly clipping large gradients may indicate an underlying objective or scale problem rather than a complete fix. This lesson uses exact scalar updates and a3, 4gradient vector so all observations have independent oracles.
+Gradient clipping limits a norm after backward and before the optimizer step. It does not repair invalid labels, nonfinite forward values or a data leak. The clip function returns the pre-clipping norm, which is useful for diagnostics. Repeatedly clipping large gradients may indicate an underlying objective or scale problem rather than a complete fix. This lesson uses exact scalar updates and a [3, 4] gradient vector so all observations have independent oracles.
 
 ## Design decisions and when to use this method
 
@@ -59,13 +65,13 @@ The loss at the final weight is \(\frac{56}{151875}\). A logged loss tensor calc
 
 backward adds to stored gradient buffers. If the second step does not clear the first gradient, the stored value becomes \(\frac{-56}{3}-\frac{56}{45}=\frac{-896}{45}\), and the next weight becomes \(\frac{868}{225}\) rather than \(\frac{448}{225}\). That precise wrong trace distinguishes accidental accumulation from a wrong derivative formula. `set_to_none=True` also makes absence visible: None means no stored gradient was produced for that parameter in the relevant pass, whereas a connected derivative can be an actual zero. An optimizer may treat those cases differently, especially with state or decay.
 
-Intentional microbatch accumulation needs a global denominator. Split the same three rows into one row and two rows at \(w=0\). The local mean gradients are -4 and -26. Averaging those means equally gives -15, but the full-data gradient is(1×(-4)+2×(-26))/3=\(\frac{-56}{3}\). One correct implementation weights each local mean by its valid-example count divided by the total, or accumulates local summed losses and divides by the total valid count. For padded tokens or sample weights, the denominator is the valid weight mass, not necessarily the number of stored rows.
+Intentional microbatch accumulation needs a global denominator. Split the same three rows into one row and two rows at \(w=0\). The local mean gradients are -4 and -26. Averaging those means equally gives -15, but the full-data gradient is (1×(-4)+2×(-26))/3=\(\frac{-56}{3}\). One correct implementation weights each local mean by its valid-example count divided by the total, or accumulates local summed losses and divides by the total valid count. For padded tokens or sample weights, the denominator is the valid weight mass, not necessarily the number of stored rows.
 
 This algebra assumes an additive loss evaluated at the same parameter state with equivalent forward behavior. Updating parameters between microbatches is a different trajectory. BatchNorm statistics, dropout draws, contrastive in-batch negatives and other batch-dependent computations can make a large batch differ even when gradient normalization is correct. State the scope of an equivalence claim rather than using accumulation as a universal replacement.
 
-Norm clipping is another nonlinear boundary. Concatenate the participating parameter gradients into g. L2 clipping uses approximately g'=g×min(1, c/||g||), with a small numerical stabilizer in the implementation. For[3, 4], the norm is five and \(c=1\) gives approximately[0.6, 0.8]. The function returns the original five while mutating gradients in place. Starting from zero, plain SGD at 0.1 then moves to approximately[-0.06, -0.08]. [PyTorch 2.9 clip_grad_norm_](https://docs.pytorch.org/docs/2.9/generated/torch.nn.utils.clip_grad_norm_.html).
+Norm clipping is another nonlinear boundary. Concatenate the participating parameter gradients into g. L2 clipping uses approximately g'=g×min(1, c/||g||), with a small numerical stabilizer in the implementation. For [3, 4], the norm is five and \(c=1\) gives approximately [0.6, 0.8]. The function returns the original five while mutating gradients in place. Starting from zero, plain SGD at 0.1 then moves to approximately [-0.06, -0.08]. [PyTorch 2.9 clip_grad_norm_](https://docs.pytorch.org/docs/2.9/generated/torch.nn.utils.clip_grad_norm_.html).
 
-Clipping each contribution before accumulation can change the result. Scalar contributions 100 and-99 sum to one; clipping their sum to magnitude one leaves one. Clipping each separately to±1 and then adding gives zero. Therefore clip at the declared update boundary after the intended weighting and accumulation. With scaled gradients, unscale before applying a threshold expressed in ordinary gradient units.
+Clipping each contribution before accumulation can change the result. Scalar contributions 100 and -99 sum to one; clipping their sum to magnitude one leaves one. Clipping each separately to±1 and then adding gives zero. Therefore clip at the declared update boundary after the intended weighting and accumulation. With scaled gradients, unscale before applying a threshold expressed in ordinary gradient units.
 
 Clipping limits the supplied gradient norm. It does not universally bound optimizer displacement when momentum, adaptive preconditioning, weight decay or retained state also affect the update. It also cannot repair invalid labels, nonfinite forward values or leakage. `error_if_nonfinite=True` makes an infinite/NaN norm a refusal rather than a meaningful update. The unchanged CPU fixture checks these local distinctions; it does not qualify mixed-precision or distributed execution.
 
@@ -127,37 +133,37 @@ assert before.item() == 5
 torch.testing.assert_close(parameter.grad, torch.tensor([0.6, 0.8]), atol=1e-6, rtol=0)
 ```
 
-**Expected:** returned norm 5; new gradient approximately.6, .8.
+**Expected:** returned norm 5; new gradient approximately 0.6, 0.8.
 
 ## Prediction before your attempt
 
-For the supplied fixture, name the input unit, the intermediate state and the final quantity that changes. Predict one normal result and one failure result before touching the code. In particular, explain this lesson's acceptance condition in your own words: detached loss `requires_grad` False; backward raises RuntimeError. nonnegative and below \(\frac{56}{675}\). Preserve the prediction beside your later observations so a correction is visible. A copied expected value is not a derivation.
+For the supplied fixture, name the input unit, the intermediate state and the final quantity that changes. Predict one normal result and one failure result before touching the code. In particular, explain this lesson's acceptance condition in your own words: The detached loss cannot backpropagate, the repaired weights are \(\frac{28}{15}\) then \(\frac{448}{225}\), clipping returns the original norm 5 and the gradient [0.6, 0.8], the clipped step gives approximately [-0.06, -0.08], and an infinite gradient raises RuntimeError. Preserve the prediction beside your later observations so a correction is visible. A copied expected value is not a derivation.
 
 ## Exercises
 
-1. **Expose detachment.** Detach \({\left(w-2\right)}^{2}\) before backward and inspect tracking.
-   **Expected:** detached loss `requires_grad` False; backward raises RuntimeError.
-   **Verify:** Save the assertion results for exercise 1, including detached loss `requires_grad` False; backward raises RuntimeError.
+1. **Detect a detached intermediate.** With Parameter w=1, compute h=(3w).detach() and loss=(h-1)**2, then inspect tracking and attempt backward.
+   **Expected:** `loss.requires_grad` is False and backward raises RuntimeError.
+   **Verify:** In a fresh process, the exercise checks confirm `not cut.requires_grad` and `cut.backward()` raises `RuntimeError`.
 
-2. **Repair two exact updates.** Use x 1, 2, 3, y = 2x, w = 0 and two SGD with rate 0.1 steps with gradient clearing.
-   **Expected:** weights \(\frac{28}{15}\) then \(\frac{448}{225}\).
-   **Verify:** Save the assertion results for exercise 2, including weights \(\frac{28}{15}\) then \(\frac{448}{225}\).
+2. **Trace two updates on a new target.** Train w from 0 on x = 1, 2, 3 with y = 3x, two SGD steps with learning rate 0.1, clearing gradients before each.
+   **Expected:** weights 2.8 then 224/75.
+   **Verify:** In a fresh process, the exercise checks confirm `seen` matches `[2.8, 224 / 75]` within 1e-12.
 
-3. **Inspect norm clipping.** Assign gradient 3, 4 to a parameter vector and clip to norm 1.
-   **Expected:** returned norm 5; new gradient approximately.6, .8.
-   **Verify:** Save the assertion results for exercise 3, including returned norm 5; new gradient approximately.6, .8.
+3. **Clip a new gradient.** Assign gradient [6, 8] to a parameter vector and clip it to norm 5.
+   **Expected:** returned norm 10; clipped gradient approximately [3, 4].
+   **Verify:** In a fresh process, the exercise checks confirm `norm.item() == 10` and `vector.grad` matches `torch.tensor([3.0, 4.0])` within 1e-05.
 
 4. **Apply the clipped update.** Use SGD with rate 0.1 after clipping and inspect the parameter.
-   **Expected:** approximately-.06, -.08.
-   **Verify:** Save the assertion results for exercise 4, including approximately-.06, -.08.
+   **Expected:** approximately -0.06, -0.08.
+   **Verify:** In a fresh process, the exercise checks confirm `parameter.detach()` matches `torch.tensor([-0.06, -0.08])` within 1e-06.
 
 5. **Reject nonfinite gradient norms.** Assign an infinite gradient and request error_if_nonfinite True.
    **Expected:** RuntimeError before a valid update.
-   **Verify:** Save the assertion results for exercise 5, including RuntimeError before a valid update.
+   **Verify:** In a fresh process, the exercise checks confirm `torch.nn.utils.clip_grad_norm_([bad], 1.0, error_if_nonfinite=True)` raises `RuntimeError`.
 
 6. **Recompute post-update loss.** Calculate current loss after the two scalar updates and compare with the one-step oracle.
    **Expected:** nonnegative and below \(\frac{56}{675}\).
-   **Verify:** Save the assertion results for exercise 6, including nonnegative and below \(\frac{56}{675}\).
+   **Verify:** In a fresh process, the exercise checks confirm `0 <= after < 56 / 675`.
 
 ## Common pitfalls and diagnosis
 
@@ -171,7 +177,7 @@ First draw the state described in the vocabulary section. Next use the smallest 
 
 ## Self-check and retrieval
 
-Close both worked examples. Explain Disconnected loss, Gradient clipping, Update trace using the lesson fixture. Reconstruct one computation from its inputs. Then change one input while retaining the mechanism and predict whether the conclusion survives. Write which part is guaranteed by the code and which part would need new observations. This last distinction prevents a tiny deterministic teaching example from being presented as evidence about an unseen population or a production model.
+Close all three worked examples. Explain Disconnected loss, Gradient clipping, Update trace using the lesson fixture. Reconstruct one computation from its inputs. Then change one input while retaining the mechanism and predict whether the conclusion survives. Write which part is guaranteed by the code and which part would need new observations. This last distinction prevents a tiny deterministic teaching example from being presented as evidence about an unseen population or a production model.
 
 ## Next step
 
@@ -179,7 +185,7 @@ Revisit the direct prerequisite `torch-022` if the calculation cannot be reconst
 
 ## Sources and verification status
 
-API and mechanism reference: [PyTorch2.9 reference](https://docs.pytorch.org/docs/2.9/index.html), reviewed 2026-10-22. The fixture, examples, counterexamples and exercise design are original course material. See [validation](../../../docs/validation.md) for execution gates. Check CI artifacts for the exact revision and platform to determine which runtime checks actually ran; authored content alone does not establish runtime execution.
+API and mechanism reference: [PyTorch 2.9 reference](https://docs.pytorch.org/docs/2.9/index.html), reviewed 2026-10-22. The fixture, examples, counterexamples and exercise design are original course material. See [validation](../../../docs/validation.md) for execution gates. Check CI artifacts for the exact revision and platform to determine which runtime checks actually ran; authored content alone does not establish runtime execution.
 
 ## Interview reasoning with worked answers
 

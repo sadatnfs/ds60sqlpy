@@ -8,7 +8,7 @@ Use calendar arithmetic deliberately and reconstruct features using both event a
 
 ## Classroom execution
 
-Choose **Julia language and scientific computing** in `/classroom`, open this unit, and select its prepared `julia` runtime. The worker starts a fresh `main.jl` process with two Julia threads, a fixed package environment, no startup file and offline package settings. Both worked examples are complete under that environment. Save your current pad before replacing it. No package, model or dataset is fetched by a lesson.
+Open `julia-018` in `/classroom` with its prepared `julia` runtime. Worked case A (month arithmetic and clamping) and worked case B (choose an available historical value) are complete programs: save your current pad, paste one of them and press Run. The learner file contains the six investigations below; the explained reference ends by printing `julia-018: all reference checks passed`. The [course overview](../README.md) describes the shared runtime: a fresh offline `main.jl` process with two threads and a fixed package environment.
 
 ## Calendar time is not one uniform integer
 
@@ -143,7 +143,7 @@ Look up the feature on January 3.
 
 Look up at the exact availability timestamp.
 
-**Expected:** The inclusive fixture admits the row.
+**Expected:** The inclusive cutoff returns the row whose availability time equals the lookup time.
 
 **Hint:** Use the declared boundary policy.
 
@@ -170,4 +170,4 @@ Receive a daylight-saving-ambiguous local timestamp.
 
 ## Study companion
 
-Use the repository learning-companion skill with this lesson ID, your prediction and your actual source/output. Ask for a diagnosis of the first incorrect type, shape, state transition or assumption. Keep observed execution distinct from a timing claim, inferred mathematical result or external deployment.
+A repository-aware assistant with the learning-companion skill can review `julia-018` with you. Give it your prediction for one investigation, your source and the actual output, and ask it to find the first incorrect assumption about Dates, calendar period, duration, point-in-time or tie rule.

@@ -47,6 +47,27 @@ internal static class Program {
       completion.SetResult(9);
       Check(await completion.Task == 9, "underlying result still arrives");
     }
+    {
+      // Task 3: Independent construction
+      var committed = new List<int>();
+      using var source = new CancellationTokenSource();
+      void Process(int[] items, CancellationToken token) {
+        foreach (int item in items) {
+          token.ThrowIfCancellationRequested();
+          committed.Add(item);
+          if (item == 2) {
+            source.Cancel();
+          }
+        }
+      }
+      bool stopped = false;
+      try {
+        Process(new[] { 1, 2, 3 }, source.Token);
+      } catch (OperationCanceledException) {
+        stopped = true;
+      }
+      Check(stopped && committed.SequenceEqual(new[] { 1, 2 }), "kept work");
+    }
     Console.WriteLine("csharp-030: passed");
     await Task.CompletedTask;
   }

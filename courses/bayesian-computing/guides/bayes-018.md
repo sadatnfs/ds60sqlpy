@@ -28,7 +28,7 @@ The fixture's covariate .5 lies within the observed design range. Predicting far
 
 ## Diagnose compiler and model failures separately
 
-A mismatch between the number of design columns and coefficient length is a shape error. A misplaced row/vector transpose can cause a type error or express a different calculation. Read the compiler's line and column information against the exact submitted source; do not assume a diagnostic from an older receipt refers to a later edited pad.
+A mismatch between the number of design columns and coefficient length is a shape error. A misplaced row/vector transpose can cause a type error or express a different calculation. Read the compiler's line and column information against the exact submitted source; do not assume a diagnostic from an older saved run refers to a later edited pad.
 
 A model can compile while being poorly identified. Nearly duplicate columns can create a strong posterior correlation, as the earlier PyMC geometry tutorial demonstrated. Weak data on sigma can also make prior choices important. Examine actual sampler diagnostics and predictive behavior after type correctness is established.
 
@@ -42,7 +42,7 @@ Scale priors in the units of the variables. A prior standard deviation of two on
 
 ## Complete reproducible program
 
-The prepared Stan pad compiles and samples `main.stan` with fixed bounded settings. Its tiny data are declared in `transformed data`; this pad has no separate JSON editor. The linked project explains standard data-block workflows. Runtime: `stan-cpu`.
+The prepared Stan pad compiles `main.stan` and samples two chains with 100 warmup and 100 retained draws each. Its tiny data are declared in `transformed data`; this pad has no separate JSON editor. The linked project explains standard data-block workflows. These teaching-sized chains can fail the convergence screen from `bayes-006` (R-hat below 1.01, at least 100 bulk and tail effective draws per chain, no divergences); read the printed diagnostics against it before interpreting any estimate. Runtime: `stan-cpu`.
 
 ```stan
 transformed data {

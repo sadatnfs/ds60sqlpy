@@ -21,8 +21,8 @@
       ],
       "outcome": "Trace driver and executor placement and distinguish browser ports from Spark RPC.",
       "runtime": "reading",
-      "lab": "Trace driver and executor placement and distinguish browser ports from Spark RPC.",
-      "verification": "Compare the two worked cases and retain source-bound observations; configuration alone is not runtime evidence."
+      "lab": "Follow worked case A (\"trace a separate driver\") and worked case B (\"move the driver, then change the address\") in the owned cluster-lab workshop and compare each observation with the chapter and the qualification ledger.",
+      "verification": "Keep the commands and observations from both worked cases that show this outcome: Trace driver and executor placement and distinguish browser ports from Spark RPC. A parsed configuration alone is not runtime evidence."
     },
     {
       "id": "spark-deploy-002",
@@ -40,8 +40,8 @@
       ],
       "outcome": "Bind a native prepared Spark image to its immutable identity and explain notebook preparation.",
       "runtime": "reading",
-      "lab": "Bind a native prepared Spark image to its immutable identity and explain notebook preparation.",
-      "verification": "Compare the two worked cases and retain source-bound observations; configuration alone is not runtime evidence."
+      "lab": "Follow worked case A (\"inspect and save an existing image\") and worked case B (\"prepare a notebook image independently\") in the owned cluster-lab workshop and compare each observation with the chapter and the qualification ledger.",
+      "verification": "Keep the commands and observations from both worked cases that show this outcome: Bind a native prepared Spark image to its immutable identity and explain notebook preparation. A parsed configuration alone is not runtime evidence."
     },
     {
       "id": "spark-deploy-003",
@@ -59,13 +59,13 @@
       ],
       "outcome": "Start and resume a scoped master/two-worker/separate-driver lab without registry access or state deletion.",
       "runtime": "reading",
-      "lab": "Start and resume a scoped master/two-worker/separate-driver lab without registry access or state deletion.",
-      "verification": "Compare the two worked cases and retain source-bound observations; configuration alone is not runtime evidence."
+      "lab": "Follow worked case A (\"bring up the owned services\") and worked case B (\"stop, resume and replace without deleting evidence\") in the owned cluster-lab workshop and compare each observation with the chapter and the qualification ledger.",
+      "verification": "Keep the commands and observations from both worked cases that show this outcome: Start and resume a scoped master/two-worker/separate-driver lab without registry access or state deletion. A parsed configuration alone is not runtime evidence."
     },
     {
       "id": "spark-deploy-004",
       "title": "Submit a bounded distributed fit",
-      "level": "beginner",
+      "level": "intermediate",
       "minutes": 60,
       "prerequisites": [
         "spark-deploy-003",
@@ -79,8 +79,8 @@
       ],
       "outcome": "Check partition coverage, closed-form fitting and future-covariate prediction without collecting observations.",
       "runtime": "reading",
-      "lab": "Check partition coverage, closed-form fitting and future-covariate prediction without collecting observations.",
-      "verification": "Compare the two worked cases and retain source-bound observations; configuration alone is not runtime evidence."
+      "lab": "Follow worked case A (\"submit and inspect the bounded fit\") and worked case B (\"reason about a rejected collection\") in the owned cluster-lab workshop and compare each observation with the chapter and the qualification ledger.",
+      "verification": "Keep the commands and observations from both worked cases that show this outcome: Check partition coverage, closed-form fitting and future-covariate prediction without collecting observations. A parsed configuration alone is not runtime evidence."
     },
     {
       "id": "spark-deploy-005",
@@ -99,8 +99,8 @@
       ],
       "outcome": "Distinguish supported JVM cluster submission from unsupported Standalone Python cluster mode.",
       "runtime": "reading",
-      "lab": "Distinguish supported JVM cluster submission from unsupported Standalone Python cluster mode.",
-      "verification": "Compare the two worked cases and retain source-bound observations; configuration alone is not runtime evidence."
+      "lab": "Follow worked case A (\"submit the bundled JVM example\") and worked case B (\"change only the deploy mode for Python\") in the owned cluster-lab workshop and compare each observation with the chapter and the qualification ledger.",
+      "verification": "Keep the commands and observations from both worked cases that show this outcome: Distinguish supported JVM cluster submission from unsupported Standalone Python cluster mode. A parsed configuration alone is not runtime evidence."
     },
     {
       "id": "spark-deploy-006",
@@ -118,8 +118,8 @@
       ],
       "outcome": "Connect an explicitly prepared notebook kernel to executors and clean up its owned Spark session.",
       "runtime": "reading",
-      "lab": "Connect an explicitly prepared notebook kernel to executors and clean up its owned Spark session.",
-      "verification": "Compare the two worked cases and retain source-bound observations; configuration alone is not runtime evidence."
+      "lab": "Follow worked case A (\"start a prepared session and run one action\") and worked case B (\"reproduce a stale-session configuration\") in the owned cluster-lab workshop and compare each observation with the chapter and the qualification ledger.",
+      "verification": "Keep the commands and observations from both worked cases that show this outcome: Connect an explicitly prepared notebook kernel to executors and clean up its owned Spark session. A parsed configuration alone is not runtime evidence."
     },
     {
       "id": "spark-deploy-007",
@@ -138,8 +138,8 @@
       ],
       "outcome": "Diagnose a reachable master with an unreachable advertised driver address.",
       "runtime": "reading",
-      "lab": "Diagnose a reachable master with an unreachable advertised driver address.",
-      "verification": "Compare the two worked cases and retain source-bound observations; configuration alone is not runtime evidence."
+      "lab": "Follow worked case A (\"trace the working two-way path\") and worked case B (\"interpret an unreachable loopback advertisement\") in the owned cluster-lab workshop and compare each observation with the chapter and the qualification ledger.",
+      "verification": "Keep the commands and observations from both worked cases that show this outcome: Diagnose a reachable master with an unreachable advertised driver address. A parsed configuration alone is not runtime evidence."
     },
     {
       "id": "spark-deploy-008",
@@ -158,8 +158,8 @@
       ],
       "outcome": "Place each dependency at its actual importing process and test source/architecture identity.",
       "runtime": "reading",
-      "lab": "Place each dependency at its actual importing process and test source/architecture identity.",
-      "verification": "Compare the two worked cases and retain source-bound observations; configuration alone is not runtime evidence."
+      "lab": "Follow worked case A (\"distribute pure Python source\") and worked case B (\"add a native numerical dependency\") in the owned cluster-lab workshop and compare each observation with the chapter and the qualification ledger.",
+      "verification": "Keep the commands and observations from both worked cases that show this outcome: Place each dependency at its actual importing process and test source/architecture identity. A parsed configuration alone is not runtime evidence."
     },
     {
       "id": "spark-deploy-009",
@@ -177,8 +177,8 @@
       ],
       "outcome": "Bind UI evidence to the actual application while keeping access scoped to loopback or an authorized tunnel.",
       "runtime": "reading",
-      "lab": "Bind UI evidence to the actual application while keeping access scoped to loopback or an authorized tunnel.",
-      "verification": "Compare the two worked cases and retain source-bound observations; configuration alone is not runtime evidence."
+      "lab": "Follow worked case A (\"inspect a live held application\") and worked case B (\"reach an owned Kubernetes driver securely\") in the owned cluster-lab workshop and compare each observation with the chapter and the qualification ledger.",
+      "verification": "Keep the commands and observations from both worked cases that show this outcome: Bind UI evidence to the actual application while keeping access scoped to loopback or an authorized tunnel. A parsed configuration alone is not runtime evidence."
     },
     {
       "id": "spark-deploy-010",
@@ -196,8 +196,8 @@
       ],
       "outcome": "Inspect completed application history after container replacement without replaying its computation.",
       "runtime": "reading",
-      "lab": "Inspect completed application history after container replacement without replaying its computation.",
-      "verification": "Compare the two worked cases and retain source-bound observations; configuration alone is not runtime evidence."
+      "lab": "Follow worked case A (\"read a completed application\") and worked case B (\"replace containers and retain history\") in the owned cluster-lab workshop and compare each observation with the chapter and the qualification ledger.",
+      "verification": "Keep the commands and observations from both worked cases that show this outcome: Inspect completed application history after container replacement without replaying its computation. A parsed configuration alone is not runtime evidence."
     },
     {
       "id": "spark-deploy-011",
@@ -216,13 +216,13 @@
       ],
       "outcome": "Identify which state must survive worker, driver and container failure and choose a compatible storage boundary.",
       "runtime": "reading",
-      "lab": "Identify which state must survive worker, driver and container failure and choose a compatible storage boundary.",
-      "verification": "Compare the two worked cases and retain source-bound observations; configuration alone is not runtime evidence."
+      "lab": "Follow worked case A (\"distinguish durable output from scratch\") and worked case B (\"transfer the design to Kubernetes\") in the owned cluster-lab workshop and compare each observation with the chapter and the qualification ledger.",
+      "verification": "Keep the commands and observations from both worked cases that show this outcome: Identify which state must survive worker, driver and container failure and choose a compatible storage boundary. A parsed configuration alone is not runtime evidence."
     },
     {
       "id": "spark-deploy-012",
       "title": "Budget memory, cores, PIDs and results",
-      "level": "intermediate",
+      "level": "advanced",
       "minutes": 90,
       "prerequisites": [
         "spark-deploy-004",
@@ -236,8 +236,8 @@
       ],
       "outcome": "Diagnose memory, thread and result-size failures using distinct resource evidence.",
       "runtime": "reading",
-      "lab": "Diagnose memory, thread and result-size failures using distinct resource evidence.",
-      "verification": "Compare the two worked cases and retain source-bound observations; configuration alone is not runtime evidence."
+      "lab": "Follow worked case A (\"compute a concurrency budget\") and worked case B (\"diagnose three different failures\") in the owned cluster-lab workshop and compare each observation with the chapter and the qualification ledger.",
+      "verification": "Keep the commands and observations from both worked cases that show this outcome: Diagnose memory, thread and result-size failures using distinct resource evidence. A parsed configuration alone is not runtime evidence."
     },
     {
       "id": "spark-deploy-013",
@@ -256,8 +256,8 @@
       ],
       "outcome": "Bind an owned in-flight worker stop to task attempts and complete numerical result coverage.",
       "runtime": "reading",
-      "lab": "Bind an owned in-flight worker stop to task attempts and complete numerical result coverage.",
-      "verification": "Compare the two worked cases and retain source-bound observations; configuration alone is not runtime evidence."
+      "lab": "Follow worked case A (\"observe, stop and verify recovery\") and worked case B (\"restore capacity without replacing data\") in the owned cluster-lab workshop and compare each observation with the chapter and the qualification ledger.",
+      "verification": "Keep the commands and observations from both worked cases that show this outcome: Bind an owned in-flight worker stop to task attempts and complete numerical result coverage. A parsed configuration alone is not runtime evidence."
     },
     {
       "id": "spark-deploy-014",
@@ -276,8 +276,8 @@
       ],
       "outcome": "Review an explicit-target Kubernetes submission and distinguish allocation, image and application failures.",
       "runtime": "reading",
-      "lab": "Review an explicit-target Kubernetes submission and distinguish allocation, image and application failures.",
-      "verification": "Compare the two worked cases and retain source-bound observations; configuration alone is not runtime evidence."
+      "lab": "Follow worked case A (\"review a bounded submission plan\") and worked case B (\"separate image failure from code failure\") in the owned cluster-lab workshop and compare each observation with the chapter and the qualification ledger.",
+      "verification": "Keep the commands and observations from both worked cases that show this outcome: Review an explicit-target Kubernetes submission and distinguish allocation, image and application failures. A parsed configuration alone is not runtime evidence."
     },
     {
       "id": "spark-deploy-015",
@@ -297,8 +297,8 @@
       ],
       "outcome": "Give one notebook driver a reachable Service and verify executor ownership and cleanup boundaries.",
       "runtime": "reading",
-      "lab": "Give one notebook driver a reachable Service and verify executor ownership and cleanup boundaries.",
-      "verification": "Compare the two worked cases and retain source-bound observations; configuration alone is not runtime evidence."
+      "lab": "Follow worked case A (\"configure the in-cluster client\") and worked case B (\"detect a selector collision\") in the owned cluster-lab workshop and compare each observation with the chapter and the qualification ledger.",
+      "verification": "Keep the commands and observations from both worked cases that show this outcome: Give one notebook driver a reachable Service and verify executor ownership and cleanup boundaries. A parsed configuration alone is not runtime evidence."
     },
     {
       "id": "spark-deploy-016",
@@ -317,8 +317,8 @@
       ],
       "outcome": "Separate notebook, Kubernetes, Spark and storage authorization and test a narrow policy.",
       "runtime": "reading",
-      "lab": "Separate notebook, Kubernetes, Spark and storage authorization and test a narrow policy.",
-      "verification": "Compare the two worked cases and retain source-bound observations; configuration alone is not runtime evidence."
+      "lab": "Follow worked case A (\"inspect the intended permission boundary\") and worked case B (\"a policy that blocks the API as well as the internet\") in the owned cluster-lab workshop and compare each observation with the chapter and the qualification ledger.",
+      "verification": "Keep the commands and observations from both worked cases that show this outcome: Separate notebook, Kubernetes, Spark and storage authorization and test a narrow policy. A parsed configuration alone is not runtime evidence."
     },
     {
       "id": "spark-deploy-017",
@@ -337,8 +337,8 @@
       ],
       "outcome": "Plan an explicitly authorized provider deployment while preserving untested-environment boundaries.",
       "runtime": "reading",
-      "lab": "Plan an explicitly authorized provider deployment while preserving untested-environment boundaries.",
-      "verification": "Compare the two worked cases and retain source-bound observations; configuration alone is not runtime evidence."
+      "lab": "Follow worked case A (\"translate storage without changing the result contract\") and worked case B (\"place resources across zones deliberately\") in the owned cluster-lab workshop and compare each observation with the chapter and the qualification ledger.",
+      "verification": "Keep the commands and observations from both worked cases that show this outcome: Plan an explicitly authorized provider deployment while preserving untested-environment boundaries. A parsed configuration alone is not runtime evidence."
     },
     {
       "id": "spark-deploy-018",
@@ -357,8 +357,8 @@
       ],
       "outcome": "Combine source, topology, numerical, recovery and retained-state evidence without promoting planned checks to success.",
       "runtime": "reading",
-      "lab": "Combine source, topology, numerical, recovery and retained-state evidence without promoting planned checks to success.",
-      "verification": "Compare the two worked cases and retain source-bound observations; configuration alone is not runtime evidence."
+      "lab": "Follow worked case A (\"assemble a local acceptance record\") and worked case B (\"reject a plausible but incomplete recovery claim\") in the owned cluster-lab workshop and compare each observation with the chapter and the qualification ledger.",
+      "verification": "Keep the commands and observations from both worked cases that show this outcome: Combine source, topology, numerical, recovery and retained-state evidence without promoting planned checks to success. A parsed configuration alone is not runtime evidence."
     }
   ]
 }

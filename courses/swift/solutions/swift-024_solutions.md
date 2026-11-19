@@ -1,6 +1,6 @@
 # swift-024: explanation and comparison
 
-Attempt the six guide tasks before opening this comparison. The executable reference is [swift-024_solution.swift](swift-024_solution.swift). Its assertions are always active under the prepared classroom compile settings.
+Attempt the six guide tasks before opening this comparison. The executable reference is [swift-024_solution.swift](swift-024_solution.swift). It runs both worked examples and the reference answers below, and its assertions are always active under the prepared classroom compile settings.
 
 ## Why the two examples differ
 
@@ -8,21 +8,64 @@ Attempt the six guide tasks before opening this comparison. The executable refer
 
 **Distinguish file and network locations:** A URL is not permission to access its target; the example classifies values without contacting either target. The two URLs carry different location schemes.
 
-## Reason through the six tasks
+## Task answers
 
-1. **Predict and explain.** Trace acquisition, use and defer cleanup.
+### Task 1: Predict and explain
 
-2. **Guided modification.** Write and read two separate small files under the owned directory.
+Trace acquisition, use and defer cleanup.
 
-3. **Independent construction.** Persist a Codable value in a temporary file and validate after reading.
+No separate reference answer has been written for this task. Example A is the evidence to compare with: Random path identity prevents collisions while content and assertions remain deterministic. The UTF-8 bytes round-trip in a uniquely owned location.
 
-4. **Diagnose a defect.** Diagnose assuming worker temporary files survive container replacement.
+### Task 2: Guided modification
 
-5. **Boundary evidence.** Test empty bytes and a missing file as distinct outcomes.
+Write and read two separate small files under the owned directory.
 
-6. **Transfer and justify.** Design a durable app save with atomic replacement and a recoverable previous version.
+No separate reference answer has been written for this task. Start from Example B: A URL is not permission to access its target; the example classifies values without contacting either target. The two URLs carry different location schemes.
 
-For tasks 1 and 2, use the checked values and mechanism trace in the two examples. For task 3, choose names that expose the input and result contract and retain the same invariants. For task 4, the diagnosed mistakes below supply a concrete wrong assumption: preserve its counterexample before repairing it. Task 5 needs an explicit expected value or documented rejection at the boundary, not just successful execution. For task 6, explain what changes in the new context and which part of the original mechanism remains applicable. Several representations may satisfy this transfer task; justify the choice rather than treating this reference as the only architecture.
+### Task 3: Independent construction
+
+Persist a Codable value in a temporary file and validate after reading.
+
+**Reference answer.** It runs as the `Task 3` block of the reference program.
+
+```swift
+struct Stock: Codable, Equatable {
+  let name: String
+  let quantity: Int
+}
+let manager = FileManager.default
+let folder = manager.temporaryDirectory.appendingPathComponent(
+  UUID().uuidString, isDirectory: true)
+try manager.createDirectory(at: folder, withIntermediateDirectories: true)
+defer { try? manager.removeItem(at: folder) }
+let file = folder.appendingPathComponent("stock.json")
+let saved = Stock(name: "pear", quantity: 3)
+try JSONEncoder().encode(saved).write(to: file)
+let restored = try JSONDecoder().decode(Stock.self, from: Data(contentsOf: file))
+precondition(restored == saved && restored.quantity >= 0)
+```
+
+**Observe:** The value read back equals the saved one and passes the quantity check; the folder is removed at the end of the block.
+
+The folder is unique to this run, defer removes it on every exit path, and the decoded value is checked before use.
+
+### Task 4: Diagnose a defect
+
+Diagnose assuming worker temporary files survive container replacement.
+
+No reference answer has been written for this task yet. The wrong assumptions to look for are this lesson's pitfalls: Never remove an arbitrary caller-provided directory. A normalized path does not defeat symlink races. Try? in cleanup intentionally suppresses a secondary error here; production code should record cleanup failure appropriately.
+
+### Task 5: Boundary evidence
+
+Test empty bytes and a missing file as distinct outcomes.
+
+No reference answer has been written for this task yet. Write the expected value or documented rejection for each boundary before running it, and compare with the checks in Example A (Round-trip in an owned directory) and Example B (Distinguish file and network locations).
+
+### Task 6: Transfer and justify
+
+Design a durable app save with atomic replacement and a recoverable previous version.
+
+No single reference answer exists: several designs can satisfy this transfer task. Justify yours against the mechanism described below and the vocabulary entry **File URL**, and state one limitation of your choice.
 
 ## Mechanism and diagnostic reasoning
 
@@ -36,4 +79,4 @@ Never remove an arbitrary caller-provided directory. A normalized path does not 
 
 ## Review before continuing
 
-The reference checks the worked scenarios, including their boundary distinctions. Your independent and transfer artifacts may have additional checks. Compare observations rather than only source text. Preserve any new regression case you discover and explain why it would reject a plausible wrong implementation. External project steps require their own build and platform evidence and are not established by a portable reference passing.
+Run the reference and confirm that it prints `swift-024: passed`, then reconstruct one boundary case from memory and explain which check would reject a plausible wrong implementation. External project steps need their own build and platform evidence; a passing portable reference does not establish them.

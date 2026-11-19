@@ -1,10 +1,10 @@
 # spark-002: Scala values, types, expressions, and the REPL
 
-Authored classroom lesson. Content availability and runtime readiness are separate checks. Read the current capability notice before running. No opening or saving this lesson installs tools, starts a cluster or proves mastery.
+Authored classroom lesson. Content availability and runtime readiness are separate checks. Read the current capability notice before running. Opening or saving this lesson does not install tools, start a cluster or prove mastery.
 
 ## Level and prerequisites
 
-Beginner; 60 minutes. Direct design prerequisites: `spark-001`. Use the subject browser to open prerequisite lessons or review their concepts. Runtime readiness is checked separately before execution.
+Beginner; 60 minutes. Direct prerequisites: `spark-001`. Use the subject browser to open prerequisite lessons or review their concepts. Runtime readiness is checked separately before execution.
 
 Learner artifact: [spark-002.scala](../lessons/spark-002.scala). Keep [solutions](../solutions/spark-002_solutions.md) closed until an attempt or explicit reveal.
 
@@ -19,11 +19,14 @@ Scala evaluates expressions to values. `val total: Long = ...` binds a name to o
 
 The worker entry point is `object Main` with `def main(args: Array[String]): Unit`. Read it as a named singleton containing the program start function. Array[String] holds optional launch arguments, which this lesson ignores; Unit means the start function returns no useful value. Braces group statements. println writes one output line. The [Scala basics tour](https://docs.scala-lang.org/tour/basics.html) distinguishes immutable values, variables, blocks and functions.
 
+The REPL in this lesson's title is Scala's read-eval-print loop: an interactive prompt that reads one expression, evaluates it, prints the result and waits for the next one. The [Scala REPL overview](https://docs.scala-lang.org/overviews/repl/overview.html) explains that each input line is compiled separately and earlier results stay in scope. This classroom does not open a REPL. It compiles the whole lesson file and runs `main`, so `println` is how you see a value. If you install [Scala CLI](https://scala-cli.virtuslab.org/docs/commands/repl) on your own machine, `scala-cli repl -S 2.13.18` opens a Scala 2.13 prompt where typing `120L + 30L` shows the `Long` result 150. Use it to try one expression, then move that expression into the lesson file.
+
 - **val:** an immutable name binding
-- **Long:** a signed64-bit integral value; use L on these small literal examples
+- **Long:** a signed 64-bit integral value; use L on these small literal examples
 - **String:** text inside double quotes
 - **expression:** code that produces a value
 - **interpolation:** s"total=$total" inserts a named value into text
+- **REPL:** an interactive read-eval-print loop that evaluates one expression at a time; this classroom compiles a file instead
 
 ## Worked example / walkthrough
 
@@ -58,9 +61,9 @@ println(label)
 
 Keep three named prices and calculate their total.
 
-**Inputs/evidence:** For spark-002 Exercise 1, 125L,200L,75L.
+**Inputs/evidence:** For spark-002 Exercise 1, 125L, 200L, 75L.
 
-**Expected result/shape:** For spark-002 Exercise 1, total is400L.
+**Expected result/shape:** For spark-002 Exercise 1, total is 400L.
 
 **Verify:** For spark-002 Exercise 1, assert total==400L and print the named value.
 
@@ -76,7 +79,7 @@ Compare Int and Long at a documented boundary.
 
 **Inputs/evidence:** For spark-002 Exercise 2, 2147483647L+1L and an intentionally reviewed Int-only variant.
 
-**Expected result/shape:** For spark-002 Exercise 2, Long result2147483648L; reject relying on the overflowing Int value as money.
+**Expected result/shape:** For spark-002 Exercise 2, Long result 2147483648L; reject relying on the overflowing Int value as money.
 
 **Verify:** For spark-002 Exercise 2, run the Long assertion; explain why the narrower arithmetic is a different contract.
 
@@ -90,9 +93,9 @@ Compare Int and Long at a documented boundary.
 
 Bind a450L budget and compute remaining cents.
 
-**Inputs/evidence:** For spark-002 Exercise 3, budget450L,total400L.
+**Inputs/evidence:** For spark-002 Exercise 3, budget 450L, total 400L.
 
-**Expected result/shape:** For spark-002 Exercise 3, remaining50L.
+**Expected result/shape:** For spark-002 Exercise 3, remaining 50L.
 
 **Verify:** For spark-002 Exercise 3, assert the difference, not merely the total.
 
@@ -100,13 +103,13 @@ Bind a450L budget and compute remaining cents.
 
 1. Which amount is available first?
 2. Remaining means budget minus spending.
-3. 450L-400L is50L.
+3. 450L-400L is 50L.
 
 ### Exercise 4: Return a branch value
 
 Use an if expression for the budget label.
 
-**Inputs/evidence:** For spark-002 Exercise 4, remaining50L, threshold0L.
+**Inputs/evidence:** For spark-002 Exercise 4, remaining 50L, threshold 0L.
 
 **Expected result/shape:** For spark-002 Exercise 4, String message is within budget.
 
@@ -124,7 +127,7 @@ Review `val budget=450L; budget=350L` and repair without mutation.
 
 **Inputs/evidence:** For spark-002 Exercise 5, one immutable binding and a proposed reassignment.
 
-**Expected result/shape:** For spark-002 Exercise 5, compile-time rejection; repaired code uses a new name revisedBudget with350L.
+**Expected result/shape:** For spark-002 Exercise 5, compile-time rejection; repaired code uses a new name revisedBudget with 350L.
 
 **Verify:** For spark-002 Exercise 5, retain the compiler error category and show the new-name repair; do not include broken code in the final reference.
 
@@ -136,13 +139,13 @@ Review `val budget=450L; budget=350L` and repair without mutation.
 
 ### Exercise 6: Transfer the budget
 
-Repeat the calculation with350L and predict the sign.
+Repeat the calculation with 350L and predict the sign.
 
-**Inputs/evidence:** For spark-002 Exercise 6, same400L basket,new350L budget.
+**Inputs/evidence:** For spark-002 Exercise 6, same 400L basket, new 350L budget.
 
 **Expected result/shape:** For spark-002 Exercise 6, remaining-50L and over budget label.
 
-**Verify:** For spark-002 Exercise 6, assert both changed outputs while the original total stays400L.
+**Verify:** For spark-002 Exercise 6, assert both changed outputs while the original total stays 400L.
 
 **Progressive hints:**
 
@@ -172,7 +175,7 @@ Continue with [spark-003](spark-003.md), which puts these expression rules behin
 ```text
 Use $guide-ds60sqlpy-learning to coach spark-002.
 Read courses/scala-spark/guides/spark-002.md and courses/scala-spark/lessons/spark-002.scala.
-Direct design prerequisites: `spark-001`. This lesson is authored; check its current runtime readiness and direct prerequisites.
+Direct prerequisites: `spark-001`. This lesson is authored; check its current runtime readiness and direct prerequisites.
 Explain one mechanism, ask me to predict, let me attempt one exercise, then give one hint at a time.
 Do not read courses/scala-spark/solutions/ until I make an honest attempt or explicitly ask for a reveal.
 Review my exact values, diagnostics or written evidence; distinguish source inspection, process success and verified understanding.

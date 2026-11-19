@@ -63,9 +63,9 @@ Window partitioning keeps entities independent, and the ordering fields express 
 
 ### Exercise 3: Select stable winners across physical layouts
 
-Validate candidates, rank them and retain rank 1. Compare winner IDs after repartitioning to 1,3 and 4 partitions, then compare an equivalentSQL row_number query.
+Validate candidates, rank them and retain rank 1. Compare winner IDs after repartitioning to 1,3 and 4 partitions, then compare an equivalent SQL row_number query.
 
-**Expected:** Every case yields event IDs[3,6,8], one per entity. SQL returns the same literal winners.
+**Expected:** Every case yields event IDs [3, 6, 8], one per entity. SQL returns the same literal winners.
 
 ```scala
 def winners(events: DataFrame): DataFrame = {
@@ -88,7 +88,7 @@ The input gate and complete order jointly establish the selection contract. Repa
 
 Use dense_rank ordered only by descending event_time with NULL last, returning all rank 1 candidates. Report the candidate IDs rather than choosing an arbitrary winner.
 
-**Expected:** Top-time candidates[2,3,5,6,8]. Entities A and B each have two admissible candidates under the incomplete rule.
+**Expected:** Top-time candidates [2, 3, 5, 6, 8]. Entities A and B each have two admissible candidates under the incomplete rule.
 
 ```scala
 def topTimeCandidates(events: DataFrame): DataFrame = {
@@ -194,10 +194,10 @@ def previous_evidence(events):
     )
 ```
 
-The previous identity proves which occurrence supplied the lagged field. Zero gaps expose tied timestamps rather than pretending the ID order supplies elapsed time. EntityC shows that a known predecessor does not guarantee a known duration. Prediction features would additionally need event-time and availability-time eligibility; this reproducible lag alone does not establish a leakage-free historical feature.
+The previous identity proves which occurrence supplied the lagged field. Zero gaps expose tied timestamps rather than pretending the ID order supplies elapsed time. Entity C shows that a known predecessor does not guarantee a known duration. Prediction features would additionally need event-time and availability-time eligibility; this reproducible lag alone does not establish a leakage-free historical feature.
 
 **Verification evidence:** Assert the complete identity/gap rows and explain zero gaps and the known previous ID with unknown duration.
 
 ## Execution and interpretation
 
-Run the complete reference in its prepared fixed worker. The small fixture is constructed inside the program,so opening a lesson does not fetch data. A final success line is printed only after the reference assertions complete. Plan observations,partition evidence and resource measurements apply to the actual local configuration; they do not establish cluster-scale performance. Session cleanup is explicit,and any additional owned file/query lifecycle is described in the lesson.
+Run the complete reference in its prepared fixed worker. The small fixture is constructed inside the program, so opening a lesson does not fetch data. A final success line is printed only after the reference assertions complete. Plan observations, partition evidence and resource measurements apply to the actual local configuration; they do not establish cluster-scale performance. Session cleanup is explicit, and any additional owned file/query lifecycle is described in the lesson.

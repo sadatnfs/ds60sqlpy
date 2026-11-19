@@ -9,6 +9,31 @@ The executable reference contains the two complete worked cases with assertions.
 
 Publish both the rate and a named status or denominator. Consumers can then distinguish no observations from missing source counts.
 
+```python
+# Uses the tempfile import and the project(), invoke() and rows() helpers in main.py.
+with tempfile.TemporaryDirectory() as d:
+    macro = (
+        "{% macro safe_ratio(n, d) %} case when {{ d }} = 0 then "
+        "null else cast({{ n }} as double) / {{ d }} end {% endmacro %}"
+    )
+    p = project(
+        d,
+        models={
+            "rates": (
+                "select id, {{ safe_ratio('successes', 'trials') }} as rate, "
+                "trials = 0 as invalid_denominator from {{ ref('counts') }}"
+            )
+        },
+        seeds={"counts": "id,successes,trials\n1,1,4\n2,0,0\n"},
+        macros={"safe_ratio": macro},
+    )
+    invoke(p, "build")
+    assert rows(p, "select id, rate, invalid_denominator from rates order by id") == [
+        (1, 0.25, False),
+        (2, None, True),
+    ]
+```
+
 **Expected:** Zero-trial rows remain identifiable.
 
 ## 2. Check integer behavior
@@ -129,9 +154,9 @@ def rows(root, sql):
 def example_one():
     with tempfile.TemporaryDirectory() as d:
         macro = (
-            "{% macro safe_ratio(n, d) %} case when {{ d }} = 0 then "
-            "null else cast({{ n }} as double) / {{ d }} end {% "
-            "endmacro %}"
+            "{% macro safe_ratio(n, d) %}\n"
+            "    case when {{ d }} = 0 then null else cast({{ n }} as double) / {{ d }} end\n"
+            "{% endmacro %}"
         )
         p = project(
             d,
@@ -172,4 +197,4 @@ if __name__ == "__main__":
 
 ## Interpretation
 
-Review a macro through its source, emitted SQL and actual result. Keep domain assumptions explicit and test contrasting numeric cases. Use abstraction to make a calculation consistent without hiding the evidence needed to validate it.
+Keep domain assumptions explicit and test contrasting numeric cases. Use abstraction to make a calculation consistent without hiding the evidence needed to validate it.

@@ -52,7 +52,7 @@ Document v1, 7, 125 field order and units.
 
 **Reasoning:** Representation should be interpretable without the original struct.
 
-**Verify:** Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.
+**Verify:** Check your document against `encode(7, 125) == "v1,7,125"`: the version comes first, the ID second and the cents third, and the unit is named.
 
 ## Exercise 2: Check zero values
 
@@ -62,7 +62,7 @@ Encode ID 0 and cents 0.
 
 **Reasoning:** Zero must survive round-trip as data.
 
-**Verify:** Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.
+**Verify:** Assert `encode(0, 0) == "v1,0,0"`; zero values must still produce all three fields.
 
 ## Exercise 3: Build a strict decoder
 
@@ -72,7 +72,7 @@ Require v1 and exactly three comma-separated fields.
 
 **Reasoning:** Version and full-field-count checks prevent ambiguity.
 
-**Verify:** Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.
+**Verify:** Assert your decoder rejects `"v2,7,125"` and `"v1,7,125,junk"` but accepts `"v1,7,125"` as ID 7 and 125 cents.
 
 ## Exercise 4: Reject raw layout
 
@@ -82,7 +82,7 @@ Explain why writing sizeof(record) is not a portable format.
 
 **Reasoning:** A memory representation is not a schema.
 
-**Verify:** Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.
+**Verify:** Check that your explanation ties each hazard to a concrete case, for example `sizeof(long)` being 4 on 64-bit Windows but 8 on 64-bit Linux.
 
 ## Exercise 5: Resolve a path
 
@@ -92,7 +92,7 @@ Print current_path and records/batch.csv absolute resolution in an owned directo
 
 **Reasoning:** Relative locations depend on the working directory.
 
-**Verify:** Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.
+**Verify:** Print `std::filesystem::current_path()` and `std::filesystem::absolute("records/batch.csv")`, and confirm the second path starts with the first.
 
 ## Exercise 6: Transfer versioning
 
@@ -102,4 +102,4 @@ Design v2 with a fourth status field.
 
 **Reasoning:** Schema changes need compatibility decisions.
 
-**Verify:** Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.
+**Verify:** Feed `"v2,7,125,paid"` to the v1 reader and confirm it is rejected rather than decoded as ID 7 and 125 cents; only the v2 reader may accept it.

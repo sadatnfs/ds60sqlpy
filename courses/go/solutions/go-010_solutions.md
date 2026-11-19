@@ -8,22 +8,26 @@ A method associates behavior with a named type. An interface describes a set of 
 
 func (c Counter) Value() int declares a value receiver. func (c *Counter) Add(n int) uses a pointer receiver. type Valuer interface { Value() int } declares required behavior. A type assertion value, ok := item.(Concrete) checks a dynamic type safely. Prefer the comma-ok form when failure is expected, rather than a panic-producing assertion.
 
-## 1. Dispatch through behavior
+## 1. Dispatch through behavior: change one input
 
-Store Counter with value 3 in a Valuer interface.
+Copy worked example 1 into a scratch pad and change `var v Valuer = Counter{N: 3}` to `var v Valuer = Counter{N: 4}`. Before running, predict which check fails and which value it now sees; then run it and restore the original line.
+
+The unchanged code is worked example 1:
 
 ```go
 var v Valuer = Counter{N: 3}
 check(v.Value() == 3, "interface dispatch")
 ```
 
-**Expected:** Calling Value returns 3.
+**Expected:** The changed run panics with `interface dispatch` because `v.Value() == 3` no longer holds. Restoring the original line brings back the worked observation: calling Value returns 3.
 
 The concrete type satisfies the interface without declaring that relationship. The caller depends only on the method contract.
 
-## 2. Mutate through a method
+## 2. Mutate through a method: debug a regression
 
-Call Add on a pointer to Counter starting at 3.
+A regression changed one token in worked example 2, so one line now reads `c := Counter{N: 4}`. Run worked example 2 with that line, use the failure to locate the defect and repair it without changing the check.
+
+The unchanged code is worked example 2:
 
 ```go
 c := Counter{N: 3}
@@ -31,7 +35,7 @@ c.Add(2)
 check(c.N == 5, "pointer receiver")
 ```
 
-**Expected:** Its value becomes 5.
+**Expected:** Before the repair the program panics with `pointer receiver`; after it the line reads `c := Counter{N: 3}` again and its value becomes 5.
 
 The language can take the address of this addressable variable for the method call. The pointer receiver makes the mutation effective on the original value.
 

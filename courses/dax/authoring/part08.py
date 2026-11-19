@@ -84,8 +84,8 @@ LESSONS = [
                     "constant per product; all amounts USD."
                 ),
                 [
-                    "Line costs are 4,1,10,6,4,5,4,10, totaling 44.",
-                    "Profit is 187 -44 =143.",
+                    "Line costs are 4, 1, 10, 6, 4, 5, 4, 10, totaling 44.",
+                    "Profit is 187 - 44 = 143.",
                     "Margin is 143/187, evaluated from the same all-row population.",
                 ],
                 (
@@ -359,8 +359,8 @@ LESSONS = [
             "expression forms the outer structure, and the "
             "lower-precedence expression replaces its SELECTEDMEASURE "
             "placeholder. A higher-precedence scale item therefore "
-            "produces (Revenue +10)*0.9. Reversing the groups' "
-            "precedence produces Revenue*0.9 +10. Write the expanded "
+            "produces (Revenue + 10)*0.9. Reversing the groups' "
+            "precedence produces Revenue*0.9 + 10. Write the expanded "
             "tree before calculating.\n\nDynamic format strings have "
             "their own precedence interaction. The highest-precedence "
             "applicable calculation-group format string determines "
@@ -391,7 +391,7 @@ LESSONS = [
                 ),
                 [
                     "The outer Scale expression receives the lower-precedence AddTen expression.",
-                    "The expansion is(187 +10)*0.9.",
+                    "The expansion is (187 + 10)*0.9.",
                     "197 multiplied by 0.9 is 177.3.",
                 ],
                 (
@@ -410,7 +410,7 @@ LESSONS = [
                     "higher-precedence outer expression."
                 ),
                 [
-                    "The expansion is(187*0.9)+10.",
+                    "The expansion is (187*0.9)+10.",
                     "The scale first yields 168.3.",
                     "Adding 10 gives 178.3, one more than the other order.",
                 ],
@@ -925,7 +925,7 @@ LESSONS = [
             t(
                 "Add a third observed month with revenue 10 at the end.",
                 "Use the declared ascending positions.",
-                "The running values become 67,123,133 for that expanded snapshot.",
+                "The running values become 67, 123, 133 for that expanded snapshot.",
             ),
             t(
                 "Write the intended visual expression and its scope contract.",

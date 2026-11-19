@@ -20,7 +20,7 @@ Use a new tape for every step. w.assign_sub(rate*gradient) mutates the tracked v
 
 The question is: Compute(w-2)² before opening a tape and ask that tape for its gradient.
 
-The tape cannot reconstruct operations it never recorded. The numerical loss4 alone does not reveal this missing dependency.
+The tape cannot reconstruct operations it never recorded. The numerical loss 4 alone does not reveal this missing dependency.
 
 ```python
 w = tf.Variable(0.0, dtype=tf.float64)
@@ -32,11 +32,11 @@ assert tape.gradient(loss, w) is None
 
 **Expected:** gradient is None.
 
-**Verify:** Compare the computed values or written argument with gradient is None.
+**Verify:** In a fresh process, the exercise checks confirm `tape.gradient(loss, w) is None`.
 
 ## Exercise 2: Distinguish an actual zero
 
-The question is: Compute the same objective inside the tape atw2.
+The question is: Compute the same objective inside the tape at w=2.
 
 The path exists and its slope is zero at the optimum. Replacing every None with zero would make these semantically different observations indistinguishable.
 
@@ -48,15 +48,15 @@ g = tape.gradient(loss, optimum)
 assert g is not None and float(g) == 0
 ```
 
-**Expected:** gradient is a tensor equal0.
+**Expected:** gradient is a tensor equal 0.
 
-**Verify:** Compare the computed values or written argument with gradient is a tensor equal0.
+**Verify:** In a fresh process, the exercise checks confirm `g is not None` and `float(g) == 0`.
 
 ## Exercise 3: Repair two updates
 
-The question is: Use x = [1, 2, 3],y = 2x,w = 0 and rate 0.1 for exactly 2 steps.
+The question is: Use x = [1, 2, 3], y = 2x, w = 0 and rate 0.1 for exactly 2 steps.
 
-The first update is28/15 and the second moves closer to2. This exact recurrence tests the loop order independently of framework metrics.
+The first update is 28/15 and the second moves closer to 2. This exact recurrence tests the loop order independently of framework metrics.
 
 ```python
 x = tf.constant([1.0, 2.0, 3.0], tf.float64)
@@ -73,13 +73,13 @@ for _ in range(2):
 np.testing.assert_allclose(float(w), 448 / 225, atol=1e-12, rtol=0)
 ```
 
-**Expected:** weight448/225 within1e-12.
+**Expected:** weight 448/225 within 1e-12.
 
-**Verify:** Compare the computed values or written argument with weight448/225 within1e-12.
+**Verify:** In a fresh process, the exercise checks confirm for every `_` in `range(2)`, `g is not None` and `float(w)` matches `448 / 225` within 1e-12.
 
 ## Exercise 4: Recompute loss after assignment
 
-The question is: Compare the two-step loss with the one-step loss56/675.
+The question is: Compare the two-step loss with the one-step loss 56/675.
 
 A loss tensor saved from before assignment does not retroactively change when the variable changes. The new loss requires a new forward calculation.
 
@@ -90,7 +90,7 @@ assert 0 <= after < 56 / 675
 
 **Expected:** two-step loss is smaller and nonnegative.
 
-**Verify:** Compare the computed values or written argument with two-step loss is smaller and nonnegative.
+**Verify:** In a fresh process, the exercise checks confirm `0 <= after < 56 / 675`.
 
 ## Exercise 5: Check gradient finiteness
 
@@ -109,7 +109,7 @@ assert not bool(tf.reduce_all(tf.math.is_finite(g))) and float(w) == saved
 
 **Expected:** gradient is nonfinite and rejected before assignment.
 
-**Verify:** Compare the computed values or written argument with gradient is nonfinite and rejected before assignment.
+**Verify:** In a fresh process, the exercise checks confirm `not bool(tf.reduce_all(tf.math.is_finite(g)))` and `float(w) == saved`.
 
 ## Exercise 6: Compare an analytic recurrence
 
@@ -126,9 +126,9 @@ for _ in range(2):
 np.testing.assert_allclose(history, expected, atol=1e-12, rtol=0)
 ```
 
-**Expected:** both recorded states match within1e-12.
+**Expected:** both recorded states match within 1e-12.
 
-**Verify:** Compare the computed values or written argument with both recorded states match within1e-12.
+**Verify:** In a fresh process, the exercise checks confirm `history` matches `expected` within 1e-12.
 
 ## Review after comparison
 

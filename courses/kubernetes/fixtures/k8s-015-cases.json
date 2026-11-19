@@ -6,18 +6,18 @@
   "cases": [
     {
       "exercise": 1,
-      "task": "Explain the decision made by startup,readiness and liveness.",
-      "expected": "Initialization gate,traffic eligibility and restart policy are distinguished."
+      "task": "Explain the decision made by startup, readiness and liveness.",
+      "expected": "Initialization gate, traffic eligibility and restart policy are distinguished."
     },
     {
       "exercise": 2,
-      "task": "Use the admitted source and record its actual bounded healthy result.",
-      "expected": "Startup delay is configured3;controller/backend/client checks eventually establish the observed healthy baseline."
+      "task": "Add DS60_STARTUP_DELAY_SECONDS set to 3, a startupProbe on /startup (periodSeconds 1, failureThreshold 10) and a livenessProbe on /live (periodSeconds 2, failureThreshold 2) to the starter, then Run it and record the bounded healthy result.",
+      "expected": "Startup delay is configured 3; controller/backend/client checks eventually establish the observed healthy baseline."
     },
     {
       "exercise": 3,
       "task": "Analyze case A and identify what additional evidence would show recovery.",
-      "expected": "No direct restart claim;new Ready/endpoint/client observations are required after repair."
+      "expected": "No direct restart claim; new Ready/endpoint/client observations are required after repair."
     },
     {
       "exercise": 4,
@@ -27,7 +27,7 @@
     {
       "exercise": 5,
       "task": "Compare /startup or /live with /missing in a scratch admitted configuration.",
-      "expected": "The wrong path returns404;the actual bounded result and cleanup must be recorded rather than inventing a fixed timing."
+      "expected": "The wrong path returns 404; the actual bounded result and cleanup must be recorded rather than inventing a fixed timing."
     },
     {
       "exercise": 6,

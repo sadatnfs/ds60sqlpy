@@ -80,7 +80,7 @@ def main():
     else:
         raise AssertionError("unexpected custom_vjp forward-mode support")
 
-    print("jax-022" + ": 8 asserted cases passed")
+    print("jax-022: 8 asserted cases passed")
 
 
 if __name__ == "__main__":

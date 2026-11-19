@@ -16,44 +16,49 @@ A retrieval-and-answer pipeline has several failure opportunities. The retriever
 
 Represent each question with relevant document IDs, retrieved IDs, answer correctness, claim support and abstention status. Compute named integer counters rather than a single opaque score. A support link needs both a document ID and the span that entails the claim. Oracle context changes only retrieval input, leaving the answer task and scoring rubric fixed.
 
-## Exercise 1: Classify four cases
+## Exercise 1: Classify five new cases
 
-The question is: Useq1 retrieval miss,q2 unsupported answer,q3 correct abstention,q4 supported correct answer.
+The question is: Use r1 and r2 retrieval misses, r3 an unsupported answer, r4 a correct supported answer and r5 an abstention on an answerable question.
 
-The categories locate different mechanisms. A shared final error rate would not reveal whether to improve retrieval, answer grounding or abstention policy.
+An abstention is only correct when the question cannot be answered from the evidence. Recording r5 as an incorrect abstention keeps caution from being counted as success.
 
 ```python
-rows = [
-    {"id": "q1", "miss": True, "unsupported": False, "abstain": False, "correct": False},
-    {"id": "q2", "miss": False, "unsupported": True, "abstain": False, "correct": False},
-    {"id": "q3", "miss": False, "unsupported": False, "abstain": True, "correct": True},
-    {"id": "q4", "miss": False, "unsupported": False, "abstain": False, "correct": True},
+rows2 = [
+    {"id": "r1", "miss": True, "unsupported": False, "abstain": False, "correct": False},
+    {"id": "r2", "miss": True, "unsupported": False, "abstain": False, "correct": False},
+    {"id": "r3", "miss": False, "unsupported": True, "abstain": False, "correct": False},
+    {"id": "r4", "miss": False, "unsupported": False, "abstain": False, "correct": True},
+    {"id": "r5", "miss": False, "unsupported": False, "abstain": True, "correct": False},
 ]
-assert sum(r["miss"] for r in rows) == 1 and sum(r["unsupported"] for r in rows) == 1
+assert sum(r["miss"] for r in rows2) == 2 and sum(r["unsupported"] for r in rows2) == 1
+assert (
+    sum(r["abstain"] for r in rows2) == 1 and sum(r["abstain"] and r["correct"] for r in rows2) == 0
+)
 ```
 
-**Expected:** one case in each named category.
+**Expected:** 2 retrieval misses, 1 unsupported answer, 1 abstention that was not appropriate and 1 correct answer.
 
-**Verify:** Compare the computed values or written argument with one case in each named category.
+**Verify:** In a fresh process, the exercise checks confirm `sum((r['miss'] for r in rows2)) == 2`, `sum((r['unsupported'] for r in rows2)) == 1`, `sum((r['abstain'] for r in rows2)) == 1` and `sum((r['abstain'] and r['correct'] for r in rows2)) == 0`.
 
-## Exercise 2: Compute appropriate abstention
+## Exercise 2: Predict coverage and answered accuracy
 
-The question is: Count correct abstentions separately from answered correctness.
+The question is: From the five new cases, compute the share of questions answered and the accuracy among answered questions.
 
-A system should not be punished for declining an unanswerable question when that is the declared policy. Report coverage alongside correctness.
+Four of five questions were answered and only r4 was correct. Reporting coverage beside answered accuracy prevents abstentions from silently raising or lowering the headline score.
 
 ```python
-assert sum(r["abstain"] and r["correct"] for r in rows) == 1
-assert sum(not r["abstain"] and r["correct"] for r in rows) == 1
+answered = [r for r in rows2 if not r["abstain"]]
+assert len(answered) / len(rows2) == 0.8
+assert sum(r["correct"] for r in answered) / len(answered) == 0.25
 ```
 
-**Expected:** 1 correct abstention;1 correct answered case.
+**Expected:** coverage 0.8; answered accuracy 0.25.
 
-**Verify:** Compare the computed values or written argument with 1 correct abstention;1 correct answered case.
+**Verify:** In a fresh process, the exercise checks confirm `len(answered) / len(rows2) == 0.8` and `sum((r['correct'] for r in answered)) / len(answered) == 0.25`.
 
 ## Exercise 3: Attach a claim span
 
-The question is: Use documentd1 text red square has four sides and cite span square has four sides for that claim.
+The question is: Use document d1 text red square has four sides and cite span square has four sides for that claim.
 
 Substring presence checks citation location, while semantic support still requires reasoning. The fixture makes that reasoning straightforward; arbitrary text overlap would not be enough.
 
@@ -65,11 +70,11 @@ assert claim["span"] in text
 
 **Expected:** span appears verbatim and supports the stated claim.
 
-**Verify:** Compare the computed values or written argument with span appears verbatim and supports the stated claim.
+**Verify:** In a fresh process, the exercise checks confirm `claim['span'] in text`.
 
 ## Exercise 4: Reject a misleading citation
 
-The question is: Cite the same document for claim the square weighs10kg.
+The question is: Cite the same document for claim the square weighs 10 kg.
 
 Document existence is weaker than claim entailment. A valid-looking source link can accompany an unsupported statement.
 
@@ -81,11 +86,11 @@ assert claim["document"] in evidence and "10kg" not in evidence["d1"]
 
 **Expected:** citation exists but claim unsupported.
 
-**Verify:** Compare the computed values or written argument with citation exists but claim unsupported.
+**Verify:** In a fresh process, the exercise checks confirm `claim['document'] in evidence` and `'10kg' not in evidence['d1']`.
 
 ## Exercise 5: Use an oracle-context control
 
-The question is: Forq1 supply the authored relevant document and record whether the answer becomes correct.
+The question is: For q1 supply the authored relevant document and record whether the answer becomes correct.
 
 If the answer still failed with oracle evidence, retrieval would not be the only problem. The control isolates a pipeline stage without changing the question.
 
@@ -94,13 +99,13 @@ control = {"id": "q1", "oracle_context": True, "retrieval_miss": False, "answer_
 assert control["oracle_context"] and not control["retrieval_miss"]
 ```
 
-**Expected:** retrieval miss removed;answer outcome measured separately.
+**Expected:** retrieval miss removed; answer outcome measured separately.
 
-**Verify:** Compare the computed values or written argument with retrieval miss removed;answer outcome measured separately.
+**Verify:** In a fresh process, the exercise checks confirm `control['oracle_context']` and `not control['retrieval_miss']`.
 
 ## Exercise 6: Preserve question identity
 
-The question is: Join observed and oracle results byq1 and reject duplicate IDs in a score table.
+The question is: Join observed and oracle results by q1 and reject duplicate IDs in a score table.
 
 Pairing by stable IDs preserves which intervention affected which question. Duplicate rows can inflate denominators or overstate improvement.
 
@@ -111,9 +116,9 @@ bad = ids + ["q1"]
 assert len(bad) != len(set(bad))
 ```
 
-**Expected:** one row per question;duplicateq1 detected.
+**Expected:** one row per question; duplicate q1 detected.
 
-**Verify:** Compare the computed values or written argument with one row per question;duplicateq1 detected.
+**Verify:** In a fresh process, the exercise checks confirm `len(ids) == len(set(ids))` and `len(bad) != len(set(bad))`.
 
 ## Review after comparison
 

@@ -28,7 +28,7 @@ def exercise_2():
 
 
 # Exercise 3: Reject a singular fixture
-# Apply the declared admission policy to [[1,2],[2,4]].
+# Apply the declared validation policy, `admitted_matrix`, to [[1,2],[2,4]].
 def exercise_3():
     raise NotImplementedError("Reject a singular fixture")
 

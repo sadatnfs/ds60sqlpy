@@ -8,7 +8,7 @@ Compare explicit numerical approximations with known solutions and distinguish s
 
 ## Classroom execution
 
-Choose **Julia language and scientific computing** in `/classroom`, open this unit, and select its prepared `julia` runtime. The worker starts a fresh `main.jl` process with two Julia threads, a fixed package environment, no startup file and offline package settings. Both worked examples are complete under that environment. Save your current pad before replacing it. No package, model or dataset is fetched by a lesson.
+Open `julia-024` in `/classroom` with its prepared `julia` runtime. Worked case A (refine a decay approximation) and worked case B (bracket a root) are complete programs: save your current pad, paste one of them and press Run. The learner file contains the six investigations below; the explained reference ends by printing `julia-024: all reference checks passed`. One program in this unit publishes a bounded Plotly figure with its description and exact table. The [course overview](../README.md) describes the shared runtime: a fresh offline `main.jl` process with two threads and a fixed package environment.
 
 ## A finite answer is not necessarily an accurate answer
 
@@ -190,7 +190,7 @@ The programs use known small problems and deterministic checks. They establish t
 
 Compare Euler with 4 and 20 steps for rate 1.
 
-**Expected:** The fine final value is closer to exp(-1).
+**Expected:** The fine final value is closer to `exp(-1)`.
 
 **Hint:** Use the analytic solution as an independent reference.
 
@@ -204,7 +204,7 @@ Use rate 3 with 2 Euler steps.
 
 ### 3. Require a root bracket
 
-Try x squared plus 1 on[-1,1].
+Try x squared plus 1 on the bracket from -1 to 1.
 
 **Expected:** The helper rejects the absent sign change.
 
@@ -241,4 +241,4 @@ Compare a root-position tolerance with a function residual.
 
 ## Study companion
 
-Use the repository learning-companion skill with this lesson ID, your prediction and your actual source/output. Ask for a diagnosis of the first incorrect type, shape, state transition or assumption. Keep observed execution distinct from a timing claim, inferred mathematical result or external deployment.
+A repository-aware assistant with the learning-companion skill can review `julia-024` with you. Give it your prediction for one investigation, your source and the actual output, and ask it to find the first incorrect assumption about Euler method, stability, bisection, quadrature or error budget.

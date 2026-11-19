@@ -14,6 +14,17 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         use domain::double;
         assert_eq!(double(3), 6);
     }
+
+    {
+        // Task 3: Independent construction
+        mod pricing {
+            pub fn total(unit: u32, quantity: u32) -> Option<u32> {
+                unit.checked_mul(quantity)
+            }
+        }
+        assert_eq!(pricing::total(4, 5), Some(20));
+        assert_eq!(pricing::total(u32::MAX, 2), None);
+    }
     println!("rust-023: passed");
     Ok(())
 }

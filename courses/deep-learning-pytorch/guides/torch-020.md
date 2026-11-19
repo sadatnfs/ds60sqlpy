@@ -6,7 +6,13 @@ Intermediate; approximately 120 minutes. Direct prerequisites: `torch-019`. The 
 
 ## Learning objectives
 
-Pooling reduces local spatial information. The central investigation is concrete: Pool patch 1, 3; 2, 4 with a 2-by-2 window. The finish condition is max 4; average 2.5. left->right->left. A useful explanation connects the calculation to the reason it is needed, rather than treating a function name as a definition.
+Compare max and average pooling and apply augmentations whose labels transform consistently with the image.
+
+Central investigation: Pool the patch [[1, 3], [2, 4]], flip it horizontally, change its non-maximum pixel and map a directional label under reflection.
+
+Finish condition: Max pooling gives 4 and average 2.5, the flip gives rows [3, 1] and [4, 2] and round-trips exactly, lowering pixel 1 to 0 keeps max 4 but average becomes 2.25, and the label maps left to right and back.
+
+The worked examples demonstrate the mechanism; exercises 1-3 transfer it to new inputs and exercises 4-6 extend it to failures and boundary cases. A useful explanation connects the calculation to the reason it is needed, rather than treating a function name as a definition.
 
 ## Purpose and mental model
 
@@ -46,7 +52,7 @@ F.max_pool2d and avg_pool2d operate on NCHW tensors. torch.flip(image, dims=(-1,
 
 ## Trace discarded information, gradients and target semantics
 
-For the patch[[1, 3], [2, 4]], max pooling returns 4 and average pooling returns(1+3+2+4)/4=2.5. Now change only the first entry from 1 to 0. The maximum stays 4, while the average becomes 9/4=2.25. The two maps are therefore not interchangeable summaries even though both return one number. Many different patches share the same maximum, so no later layer can reconstruct all discarded values from that output alone.
+For the patch [[1, 3], [2, 4]], max pooling returns 4 and average pooling returns (1+3+2+4)/4=2.5. Now change only the first entry from 1 to 0. The maximum stays 4, while the average becomes 9/4=2.25. The two maps are therefore not interchangeable summaries even though both return one number. Many different patches share the same maximum, so no later layer can reconstruct all discarded values from that output alone.
 
 Consider an upstream derivative \(g=1\) for this one pooled output. With a unique maximum, the max-pool backward route sends one to the selected 4 and zero to the other positions. Average pooling sends \(\frac{1}{4}\) to every entry. This explains the perturbation result locally: a small change to the nonmaximum 1 has zero first-order effect on the max but a quarter-sized effect on the average. Raising 3 past 4 changes the selected maximum, so the derivative route changes at that boundary. At a tie there is no unique ordinary derivative of the max function; do not assume gradients are split equally or use a tied point as a smooth finite-difference oracle.
 
@@ -56,7 +62,7 @@ Padding conventions matter on negative inputs. PyTorch max pooling uses implicit
 
 A local pool can be invariant to permutations inside one fixed window, but shifting an image can move values between windows. Max pooling is not a general guarantee that the complete model ignores translations. Stride and window boundaries can discard small features or alias a pattern. Whether that tradeoff helps depends on the task and the downstream representation, not only the smaller tensor shape.
 
-The horizontal flip reverses the width axis, which is the final axis in this NCHW fixture. Applying it twice restores the original pixel arrangement. That proves an involution of indices. It does not prove that the intermediate image retains its label. If the target is a direction, the full transform is(image, label)→(flipped_image, opposite_direction), and applying that full transform twice restores both components. Keeping left while reversing the arrow would manufacture an inconsistent training example.
+The horizontal flip reverses the width axis, which is the final axis in this NCHW fixture. Applying it twice restores the original pixel arrangement. That proves an involution of indices. It does not prove that the intermediate image retains its label. If the target is a direction, the full transform is (image, label)→(flipped_image, opposite_direction), and applying that full transform twice restores both components. Keeping left while reversing the arrow would manufacture an inconsistent training example.
 
 The same reasoning extends to structured targets. A segmentation mask must use the same geometric transform as its image. A box or keypoint needs its coordinates transformed under the declared origin and pixel convention. A crop can remove the evidence needed for a classification label. A library offering the operation says nothing about whether these task assumptions hold. When augmented siblings come from one original source, keep their family inside the intended training/evaluation split; otherwise a visually altered duplicate can leak source information across the split.
 
@@ -105,33 +111,33 @@ assert torch.equal(torch.flip(flipped, dims=(-1,)), image)
 
 ## Prediction before your attempt
 
-For the supplied fixture, name the input unit, the intermediate state and the final quantity that changes. Predict one normal result and one failure result before touching the code. In particular, explain this lesson's acceptance condition in your own words: max 4; average 2.5. left->right->left. Preserve the prediction beside your later observations so a correction is visible. A copied expected value is not a derivation.
+For the supplied fixture, name the input unit, the intermediate state and the final quantity that changes. Predict one normal result and one failure result before touching the code. In particular, explain this lesson's acceptance condition in your own words: Max pooling gives 4 and average 2.5, the flip gives rows [3, 1] and [4, 2] and round-trips exactly, lowering pixel 1 to 0 keeps max 4 but average becomes 2.25, and the label maps left to right and back. Preserve the prediction beside your later observations so a correction is visible. A copied expected value is not a derivation.
 
 ## Exercises
 
-1. **Compare local reductions.** Pool patch 1, 3; 2, 4 with a 2-by-2 window.
-   **Expected:** max 4; average 2.5.
-   **Verify:** Save the assertion results for exercise 1, including max 4; average 2.5.
+1. **Pool a new patch.** Pool the patch [[5, -1], [2, 6]] with a 2-by-2 window.
+   **Expected:** max 6; average 3.
+   **Verify:** In a fresh process, the exercise checks confirm `F.max_pool2d(patch, 2).item() == 6` and `F.avg_pool2d(patch, 2).item() == 3`.
 
-2. **Inspect a horizontal flip.** Flip the width axis and read the pixel s.
-   **Expected:** rows 3, 1 and 4, 2.
-   **Verify:** Save the assertion results for exercise 2, including rows 3, 1 and 4, 2.
+2. **Flip the height axis instead.** Flip the same patch along the height axis and read its rows.
+   **Expected:** rows [2, 6] and [5, -1].
+   **Verify:** In a fresh process, the exercise checks confirm `vertical[0, 0].tolist() == [[2.0, 6.0], [5.0, -1.0]]`.
 
-3. **Check the round trip.** Flip the image horizontal l y twice.
-   **Expected:** exact original values.
-   **Verify:** Save the assertion results for exercise 3, including exact original values.
+3. **Pool a 4-by-4 map.** Apply 2-by-2 max and average pooling to the 4-by-4 map with values 0..15.
+   **Expected:** max [[5, 7], [13, 15]]; average [[2.5, 4.5], [10.5, 12.5]].
+   **Verify:** In a fresh process, the exercise checks confirm `F.max_pool2d(grid, 2).tolist() == [[[[5.0, 7.0], [13.0, 15.0]]]]` and `F.avg_pool2d(grid, 2).tolist() == [[[[2.5, 4.5], [10.5, 12.5]]]]`.
 
-4. **Expose discarded information.** Change only the non maximum pixel 1 to0 and compare pool s.
+4. **Expose discarded information.** Change only the non-maximum pixel 1 to 0 and compare both pools.
    **Expected:** max still 4; average 2.25.
-   **Verify:** Save the assertion results for exercise 4, including max still 4; average 2.25.
+   **Verify:** In a fresh process, the exercise checks confirm `F.max_pool2d(changed, 2).item() == 4` and `F.avg_pool2d(changed, 2).item() == 2.25`.
 
 5. **Keep evaluation transforms deterministic.** Define a transform that flips only in training and returns an owned copy in evaluation.
    **Expected:** evaluation equals source and does not alias it.
-   **Verify:** Save the assertion results for exercise 5, including evaluation equals source and does not alias it.
+   **Verify:** In a fresh process, the exercise checks confirm `torch.equal(evaluated, image)` and `image[0, 0, 0, 0].item() == 1`.
 
-6. **Transform directional labels consistently.** Map left to right under horizontal reflect i on and check the inverse.
+6. **Transform directional labels consistently.** Map left to right under horizontal reflection and check the inverse.
    **Expected:** left->right->left.
-   **Verify:** Save the assertion results for exercise 6, including left->right->left.
+   **Verify:** In a fresh process, the exercise checks confirm `labels['left'] == 'right'` and `labels[labels['left']] == 'left'`.
 
 ## Common pitfalls and diagnosis
 
@@ -145,7 +151,7 @@ First draw the state described in the vocabulary section. Next use the smallest 
 
 ## Self-check and retrieval
 
-Close both worked examples. Explain Pooling, Augmentation, Label invariance using the lesson fixture. Reconstruct one computation from its inputs. Then change one input while retaining the mechanism and predict whether the conclusion survives. Write which part is guaranteed by the code and which part would need new observations. This last distinction prevents a tiny deterministic teaching example from being presented as evidence about an unseen population or a production model.
+Close all three worked examples. Explain Pooling, Augmentation, Label invariance using the lesson fixture. Reconstruct one computation from its inputs. Then change one input while retaining the mechanism and predict whether the conclusion survives. Write which part is guaranteed by the code and which part would need new observations. This last distinction prevents a tiny deterministic teaching example from being presented as evidence about an unseen population or a production model.
 
 ## Next step
 
@@ -153,7 +159,7 @@ Revisit the direct prerequisite `torch-019` if the calculation cannot be reconst
 
 ## Sources and verification status
 
-API and mechanism reference: [PyTorch2.9 reference](https://docs.pytorch.org/docs/2.9/index.html), reviewed 2026-10-22. The fixture, examples, counterexamples and exercise design are original course material. See [validation](../../../docs/validation.md) for execution gates. Check CI artifacts for the exact revision and platform to determine which runtime checks actually ran; authored content alone does not establish runtime execution.
+API and mechanism reference: [PyTorch 2.9 reference](https://docs.pytorch.org/docs/2.9/index.html), reviewed 2026-10-22. The fixture, examples, counterexamples and exercise design are original course material. See [validation](../../../docs/validation.md) for execution gates. Check CI artifacts for the exact revision and platform to determine which runtime checks actually ran; authored content alone does not establish runtime execution.
 
 ## Interview reasoning with worked answers
 

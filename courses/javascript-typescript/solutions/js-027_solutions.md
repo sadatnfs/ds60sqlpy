@@ -22,11 +22,13 @@ Cancellation remains a runtime cooperation protocol. A signal annotation proves 
 
 A Result union carries either ok:true with value or ok:false with an error category. Narrow ok before reading the payload. An async function wraps a returned result in a Promise. Catch variables are unknown under strict checking. instanceof Error permits reading message, while matching a documented name or code determines whether translation is appropriate. Re-throw unrecognized failures to retain diagnosis.
 
-## Exercise 1: Await and narrow a result
+## Exercise 1: Await and narrow a result: predict an edited check
 
-Task: Look up a known id and an absent id.
+Task: Copy Example A into a scratch `main.mts` and change `assert.deepEqual(await lookup('missing'), { ok: false, error: 'not_found' });` to `assert.deepEqual(await lookup('missing'), { ok: true, error: 'not_found' });` inside its check. Before running it, predict whether the check still passes and explain why; then restore it.
 
 Await establishes completion; the discriminant establishes domain success. Both conditions are needed before accessing the payload.
+
+The unchanged code is the exercise block of Example A:
 
 ```typescript
 const present = await lookup('A');
@@ -35,15 +37,17 @@ assert.equal(present.value, 7);
 assert.deepEqual(await lookup('missing'), { ok: false, error: 'not_found' });
 ```
 
-**Expected:** known value 7; absent error not_found.
+**Expected:** The changed run fails with an `AssertionError` at the check `assert.deepEqual(await lookup('missing'), { ok: false, error: 'not_found' })`. Restoring the original line brings back the worked observation: known value 7; absent error not_found.
 
-**Verify:** Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.
+**Verify:** Compare your written prediction with the reported `AssertionError`, including its actual and expected values, and explain why the edited check rejects the values that `assert.deepEqual(await lookup('missing'), { ok: false, error: 'not_found' })` accepts. After restoring the line, the program prints its `{"checks":1,"status":"passed"}` receipt again.
 
-## Exercise 2: Show a failure result does not invoke catch
+## Exercise 2: Show a failure result does not invoke catch: debug a regression
 
-Task: Attach catch to a lookup returning a not_found value.
+Task: A regression changed one token in Example B, so one line now reads `let caught = 1;`. Run Example B with that line, use the failing check to locate the defect and repair it without changing the check.
 
 A result value is ordinary fulfilled data even when it describes a domain failure. The caller must branch on it explicitly.
+
+The unchanged code is the exercise block of Example B:
 
 ```typescript
 let caught = 0;
@@ -55,9 +59,9 @@ assert.equal(caught, 0);
 assert.deepEqual(result, { ok: false, error: 'not_found' });
 ```
 
-**Expected:** catch count 0; result still not_found.
+**Expected:** Before the repair the run fails with an `AssertionError` at the check `assert.equal(caught, 0)`; after it the line reads `let caught = 0;` again and catch count 0; result still not_found.
 
-**Verify:** Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.
+**Verify:** Keep the failing and the repaired runs. Explain why the changed token alters the value tested by `assert.equal(caught, 0)` for this input.
 
 ## Exercise 3: Translate recognized cancellation
 
@@ -74,7 +78,7 @@ assert.deepEqual(await pending, { ok: false, error: 'cancelled' });
 
 **Expected:** failure result cancelled.
 
-**Verify:** Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.
+**Verify:** Keep a check equivalent to `assert.deepEqual(await pending, { ok: false, error: 'cancelled' })`. As a control, change `assert.deepEqual(await pending, { ok: false, error: 'cancelled' });` to `assert.deepEqual(await pending, { ok: true, error: 'cancelled' });` inside it: the run must fail with an `AssertionError`, which shows the check can fail. Restore it.
 
 ## Exercise 4: Inspect an unknown rejection reason
 
@@ -95,7 +99,7 @@ try {
 
 **Expected:** diagnostic unclassified failure.
 
-**Verify:** Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.
+**Verify:** Keep a check equivalent to `assert.equal(message(error), 'unclassified failure')`. As a control, change `return error instanceof Error ? error.message : 'unclassified failure';` to `return error instanceof Error ? error.message : 'unclassified failure!';`: the run must fail with an `AssertionError` at that check. Restore the line before continuing.
 
 ## Exercise 5: Preserve every batch outcome
 
@@ -118,7 +122,7 @@ assert.deepEqual(summaries, ['value:2', 'error:offline']);
 
 **Expected:** value:2 and error:offline.
 
-**Verify:** Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.
+**Verify:** Keep a check equivalent to `assert.deepEqual(summaries, ['value:2', 'error:offline'])`. As a control, change `Promise.resolve(2),` to `Promise.resolve(3),`: the run must fail with an `AssertionError` at that check. Restore the line before continuing.
 
 ## Exercise 6: Reject unresolved and unnarrowed access
 
@@ -139,7 +143,7 @@ assert.deepEqual(await lookup('A'), { ok: true, value: 7 });
 
 **Expected:** expected diagnostics for value before await or before narrowing.
 
-**Verify:** Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.
+**Verify:** Keep a check equivalent to `assert.deepEqual(await lookup('A'), { ok: true, value: 7 })`. As a control, change `assert.deepEqual(await lookup('A'), { ok: true, value: 7 });` to `assert.deepEqual(await lookup('A!'), { ok: true, value: 7 });` inside it: the run must fail with an `AssertionError`, which shows the check can fail. Restore it.
 
 ## After comparison
 

@@ -60,6 +60,53 @@ Your ordinary draft saving continues independently. Opening history, changing
 lessons or reloading never turns live execution on by itself. PHP uses its
 separate CLI worker and has no automatic browser execution.
 
+## How to run lessons
+
+Each guide's **Classroom execution and offline inputs** section names the
+lesson's pad and reference. This section holds the details they share.
+
+### HTML and CSS lessons (`web-001` to `web-030`)
+
+Choose **HTML browser preview**. The pad is one complete HTML document with
+embedded CSS and, where taught, inline JavaScript. Each run recreates an
+isolated preview that does not contact a server, submit real forms, read
+cookies, fetch assets or load a CDN, so every fixture is inline and synthetic.
+The browser's native parser keeps classic-script ordering, shared lexical
+bindings, inline modules and real DOMContentLoaded and load events. External
+module imports stay blocked, and navigation metadata such as base and meta
+http-equiv is rejected. No host compiler is needed.
+
+Run your own source after each exercise and inspect the page after keyboard
+input, resizing and zoom. A reference's checks inspect only its named initial
+conditions. Its success message is not an accessibility audit, proof of
+responsive behavior at every size or evidence that you wrote the solution.
+Save your source before comparing it with a reference.
+
+### PHP lessons (`web-031` to `web-056`)
+
+Choose the **PHP CLI** worker. The pad is staged as `main.php` and runs as a
+bounded Linux process with prepared PHP and PDO SQLite, so no host PHP is
+needed. Start the file with `<?php`; a pure PHP file needs no closing tag.
+Output is text: PHP-generated HTML appears as escaped output, not as a
+rendered page.
+
+Requests, identities, sessions and database rows in these lessons are
+synthetic local inputs. CLI runs are fresh processes, not persistent HTTP
+requests, and an array that represents a cookie is not a browser cookie.
+SQLite examples use an in-memory database and do not connect to the classroom
+PostgreSQL service. Network servers, uploads, mail, Composer downloads and
+production credentials are outside the pad's contract, and a passing function
+test does not qualify a server integration.
+
+### Reading and lab lessons (`web-057` to `web-060`)
+
+These lessons are design worksheets. The classroom saves the worksheet but
+does not start an HTTP server, install packages or control Docker. A command
+in these guides is a proposal until you deliberately run it against your own
+disposable project. The optional lab is `fixtures/php-http-lab/`; read its
+README before preparing it, and do not expose the learning server to the
+internet or reuse real account data.
+
 ## Choose a route
 
 | Lessons | What you build and explain |

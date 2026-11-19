@@ -1,12 +1,18 @@
 // Answer-free learner source. Save your own copy before editing.
-// Exercise 1: Observe a live binding
-// Import a mutable counter and its increment function, then inspect the count before and
-// after incrementing.
-// Expected: count changes from 0 to 1 through the imported namespace.
+// Exercise 1: Observe a live binding: change one input
+// Copy Example A into a scratch `main.mjs` and change `1;` to `2;`. Before running it,
+// predict which check fails and which value it now sees; then run it and restore the
+// original line.
+// Expected: The changed run fails with an `AssertionError` at the check
+// `assert.equal(module.count, 1)`. Restoring the original line brings back the worked
+// observation: count changes from 0 to 1 through the imported namespace.
 
-// Exercise 2: Resolve a relative dependency
-// Create a main module importing twice from ./math.mjs, then call its export.
-// Expected: answer equals 8.
+// Exercise 2: Resolve a relative dependency: debug a regression
+// A regression changed one token in Example B, so one line now reads `3`. Run Example B with
+// that line, use the failing check to locate the defect and repair it without changing the
+// check.
+// Expected: Before the repair the run fails with an `AssertionError` at the check
+// `assert.equal(module.answer, 8)`; after it the line reads `2` again and answer equals 8.
 
 // Exercise 3: Prove cached module identity
 // Import one URL twice and compare the namespace and exported object.

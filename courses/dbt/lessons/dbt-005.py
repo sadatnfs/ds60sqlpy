@@ -1,4 +1,4 @@
-"""dbt-005: worked starting point; complete the guide's six changes."""
+"""dbt-005: both worked cases; complete the guide's six changes."""
 
 import json
 import os
@@ -118,8 +118,13 @@ def example_one():
     return freshness_case(False)
 
 
+def example_two():
+    return freshness_case(True)
+
+
 if __name__ == "__main__":
     print(example_one())
+    print(example_two())
 
 # TODO 1: Allow three days for the deliberately old source.
 # TODO 2: Describe how a future loaded_at value can mislead an age check.

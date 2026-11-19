@@ -22,11 +22,16 @@ credentials remain in an untracked environment file passed to the Docker client.
 They never appear in maintained notebooks, source payloads or receipts. Default
 local server execution is omitted until a compatible native stack is prepared.
 
+**Execution boundary.** Both requests in case A go to a prepared Atlas server with
+untracked fixture credentials; the repository supplies the client and its 401 or
+403 check but no server. Case B is a governance record you can write without a
+server.
+
 ## Worked case A: permitted and rejected API requests
 
 On the explicitly owned fixture server, perform a permitted metadata read using
 the configured test principal. Repeat the read with a deliberately invalid fixture
-password and require the actual401 or403 response. This negative check establishes
+password and require an actual 401 or 403 response. This negative check establishes
 rejection at the Atlas API boundary, not a particular distinction between unknown
 identity and insufficient permissions.
 
@@ -96,7 +101,7 @@ bash run.sh apply
 bash run.sh check
 ```
 
-Check requires actual401/403 for a deliberately invalid fixture credential. A valid-principal authorization comparison and actual denied data-engine query remain independent tests.
+Check requires an actual 401 or 403 for a deliberately invalid fixture credential. A valid-principal authorization comparison and actual denied data-engine query remain independent tests.
 
 Prepared payloads are not actual Atlas observations. Never place credentials or
 Authorization headers in notebooks, source, command arguments or receipts.

@@ -15,7 +15,7 @@ A span consists conceptually of an address and a count. Copying a span copies th
 
 A span describes a contiguous sequence using an address and an extent. A string_view describes characters similarly. Neither owns the underlying storage. Copying a view copies that description, not the elements, so the owner must remain alive and its storage valid for every use. A view is useful for avoiding unnecessary copies only when that lifetime relationship is clear.
 
-The first program borrows a vector through span<const int> and selects subspan(1, 2). The offset1 skips the first element and count 2 selects4 and 6. The sum is 10. The operation does not allocate a new vector. The caller must satisfy the subspan bounds; a view type does not make every offset/count automatically safe. Validate externally supplied ranges before constructing or slicing views.
+The first program borrows a vector through span<const int> and selects subspan(1, 2). The offset 1 skips the first element and count 2 selects 4 and 6. The sum is 10. The operation does not allocate a new vector. The caller must satisfy the subspan bounds; a view type does not make every offset/count automatically safe. Validate externally supplied ranges before constructing or slicing views.
 
 The second program creates a two-character view over alpha. Changing the first character of the owning string in place makes the view observe Al. This illustrates aliasing: the view is not a frozen snapshot. A string reallocation or destruction would instead invalidate the view. The safe example changes an existing character without altering storage capacity and checks the result while the owner remains in scope.
 
@@ -54,7 +54,7 @@ Draw vector storage and its span.
 
 **Reasoning:** A view stores a location and length.
 
-**Verify:** Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.
+**Verify:** Check that the drawing shows `xs` owning the three ints and the span holding only a pointer and a length into that same buffer, with no second copy of the values.
 
 ## Exercise 2: Select a subrange
 
@@ -64,7 +64,7 @@ Sum the final two values of [2, 4, 6].
 
 **Reasoning:** The borrowed slice starts at offset 1.
 
-**Verify:** Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.
+**Verify:** Assert `sum_view(std::span<const int>(xs).subspan(1, 2)) == 10` and `xs == std::vector<int>{2, 4, 6}`; Worked example 1 checks the sum.
 
 ## Exercise 3: Write a bounds guard
 
@@ -74,7 +74,7 @@ Validate offset=2, count=2 for size=3 before subspan.
 
 **Reasoning:** Avoid overflow by checking count<=size-offset after offset<=size.
 
-**Verify:** Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.
+**Verify:** Check `offset <= size && count <= size - offset` before calling `subspan`, and assert the check is false for offset 2, count 2 and size 3 but true for count 1.
 
 ## Exercise 4: Repair invalidation
 
@@ -84,7 +84,7 @@ Review span created before vector growth that reallocates.
 
 **Reasoning:** Reallocation replaces the underlying buffer.
 
-**Verify:** Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.
+**Verify:** Compare `xs.data()` before and after the growth, and confirm the reviewed code builds a new span from `xs` after any `push_back` that may reallocate.
 
 ## Exercise 5: Test empty view
 
@@ -94,7 +94,7 @@ Pass an empty span to `sum_view`.
 
 **Reasoning:** An empty range has a valid identity total.
 
-**Verify:** Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.
+**Verify:** Assert `sum_view(std::span<const int>{}) == 0`; `std::accumulate` over an empty range returns its initial value without reading an element.
 
 ## Exercise 6: Transfer lifetime reasoning
 
@@ -104,4 +104,4 @@ Review string_view returned from a local string.
 
 **Reasoning:** A view cannot retain a destroyed local buffer.
 
-**Verify:** Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.
+**Verify:** Trace the local `std::string` to the function's closing brace, and confirm the repaired version returns `std::string` or takes the text from a caller whose owner outlives the result.

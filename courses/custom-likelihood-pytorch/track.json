@@ -21,8 +21,8 @@
         "latent dependence"
       ],
       "outcome": "Derive a Bernoulli score and explain why repeated-subject observations do not factor marginally.",
-      "lab": "Read the two complete worked cases, reproduce their evidence and compare their assumptions.",
-      "verification": "Complete source-bound clp-001 investigation with explicit numerical diagnostics and explicit scientific limits; no mastery grade."
+      "lab": "Compute the Bernoulli negative log likelihood and its probability gradient for three independent trials, then compare one repeated subject's probability of two successes.",
+      "verification": "The loss matches the torch distribution and the gradient equals -2/0.4 + 1/0.6; the same-subject probability of two successes is 0.34, larger than the independent marginal product."
     },
     {
       "id": "clp-002",
@@ -39,8 +39,8 @@
         "partition invariance"
       ],
       "outcome": "Recover the declared weighted objective from unequal partition numerators and masses.",
-      "lab": "Read the two complete worked cases, reproduce their evidence and compare their assumptions.",
-      "verification": "Complete source-bound clp-002 investigation with explicit numerical diagnostics and explicit scientific limits; no mastery grade."
+      "lab": "Combine unequal partition numerators and weight masses into the declared weighted mean, then replicate the weighting measure.",
+      "verification": "Weighted sum 92 over mass 8 gives mean 11.5 (an equal-partition average gives 8.5) with global gradient -3; multiplying every weight by 7 leaves the mean unchanged."
     },
     {
       "id": "clp-003",
@@ -58,8 +58,8 @@
         "gradient oracle"
       ],
       "outcome": "Compare independent analytic, finite-difference and automatic derivatives for normal and decay models.",
-      "lab": "Read the two complete worked cases, reproduce their evidence and compare their assumptions.",
-      "verification": "Complete source-bound clp-003 investigation with explicit numerical diagnostics and explicit scientific limits; no mastery grade."
+      "lab": "Compare analytic, central finite-difference and autograd derivatives for a Gaussian location score and a nonlinear decay model.",
+      "verification": "Autograd matches the analytic Gaussian and decay gradients within 1e-12, and the best finite-difference error is below 1e-8 in float64."
     },
     {
       "id": "clp-004",
@@ -77,8 +77,8 @@
         "positive scales"
       ],
       "outcome": "Distinguish parameter reparameterization from observation and prior density transformations.",
-      "lab": "Read the two complete worked cases, reproduce their evidence and compare their assumptions.",
-      "verification": "Complete source-bound clp-004 investigation with explicit numerical diagnostics and explicit scientific limits; no mastery grade."
+      "lab": "Fit a positive scale through a log parameterization, then build a lognormal observation density with its Jacobian.",
+      "verification": "The scale gradient is 0 at the MLE while a spurious parameter Jacobian gives -1; the lognormal density integrates to 1 within 1e-5, and the transformed correlation has derivative 1 - rho^2."
     },
     {
       "id": "clp-005",
@@ -87,7 +87,7 @@
       "minutes": 90,
       "prerequisites": [
         "clp-004",
-        "r-043"
+        "statistics-011"
       ],
       "runtime": "llm-torch-cpu",
       "concepts": [
@@ -96,8 +96,8 @@
         "variance estimation"
       ],
       "outcome": "Recover Gaussian coefficients and maximum-likelihood scale from an independent least-squares oracle.",
-      "lab": "Read the two complete worked cases, reproduce their evidence and compare their assumptions.",
-      "verification": "Complete source-bound clp-005 investigation with explicit numerical diagnostics and explicit scientific limits; no mastery grade."
+      "lab": "Jointly fit Gaussian coefficients and log scale by maximum likelihood, then recenter the predictor and compare fitted values.",
+      "verification": "Coefficients match the least-squares closed form within 2e-6, the fitted scale equals the MLE sigma rather than the unbiased root, recentering leaves fitted values unchanged and the maximum gradient is below 2e-4."
     },
     {
       "id": "clp-006",
@@ -106,7 +106,7 @@
       "minutes": 90,
       "prerequisites": [
         "clp-005",
-        "r-049"
+        "statistics-022"
       ],
       "runtime": "llm-torch-cpu",
       "concepts": [
@@ -115,8 +115,8 @@
         "sensitivity geometry"
       ],
       "outcome": "Fit a transformed nonlinear curve and diagnose the information lost in a short observation window.",
-      "lab": "Read the two complete worked cases, reproduce their evidence and compare their assumptions.",
-      "verification": "Complete source-bound clp-006 investigation with explicit numerical diagnostics and explicit scientific limits; no mastery grade."
+      "lab": "Recover a known decay curve on log-transformed amplitude and rate, then shorten the observation window and compare conditioning.",
+      "verification": "The fit recovers the generating parameters within 3e-5 with gradient below 1e-4, and the short window's condition number exceeds 100 times the long window's."
     },
     {
       "id": "clp-007",
@@ -134,8 +134,8 @@
         "separation"
       ],
       "outcome": "Check stable logistic scores and recognize when separated data have no finite coefficient MLE.",
-      "lab": "Read the two complete worked cases, reproduce their evidence and compare their assumptions.",
-      "verification": "Complete source-bound clp-007 investigation with explicit numerical diagnostics and explicit scientific limits; no mastery grade."
+      "lab": "Fit logistic regression on overlapping outcomes and check its analytic gradient, then follow the loss along an increasing slope for separated data.",
+      "verification": "The autograd gradient matches X^T(p - y) within 1e-12 and the fit's gradient is below 1e-6; on separated data the loss falls at every step, so no finite MLE exists, while the stable loss stays finite at extreme logits."
     },
     {
       "id": "clp-008",
@@ -153,8 +153,8 @@
         "boundary estimate"
       ],
       "outcome": "Fit an exposure-adjusted event rate and distinguish expected counts from rates.",
-      "lab": "Read the two complete worked cases, reproduce their evidence and compare their assumptions.",
-      "verification": "Complete source-bound clp-008 investigation with explicit numerical diagnostics and explicit scientific limits; no mastery grade."
+      "lab": "Fit a common Poisson rate with a log-exposure offset, then forecast counts at a new exposure.",
+      "verification": "The rate is 0.875 events per exposure unit with score 0 at the MLE, manual and library log likelihoods agree, and doubling exposure doubles the expected count."
     },
     {
       "id": "clp-009",
@@ -163,7 +163,7 @@
       "minutes": 90,
       "prerequisites": [
         "clp-004",
-        "r-048"
+        "statistics-028"
       ],
       "runtime": "llm-torch-cpu",
       "concepts": [
@@ -172,8 +172,8 @@
         "survival likelihood"
       ],
       "outcome": "Construct event and survival contributions and account for delayed entry in time at risk.",
-      "lab": "Read the two complete worked cases, reproduce their evidence and compare their assumptions.",
-      "verification": "Complete source-bound clp-009 investigation with explicit numerical diagnostics and explicit scientific limits; no mastery grade."
+      "lab": "Fit an exponential rate from events and censored times, then add delayed entry and recompute time at risk.",
+      "verification": "The censoring-aware rate is 0.15 (0.10 with one fewer event) with zero score, the naive all-events rate is larger, and delayed entry gives 3/16.5."
     },
     {
       "id": "clp-010",
@@ -182,7 +182,7 @@
       "minutes": 90,
       "prerequisites": [
         "clp-005",
-        "r-043"
+        "statistics-011"
       ],
       "runtime": "llm-torch-cpu",
       "concepts": [
@@ -191,8 +191,8 @@
         "noise calibration"
       ],
       "outcome": "Jointly fit a mean and covariate scale while detecting a missing likelihood normalization term.",
-      "lab": "Read the two complete worked cases, reproduce their evidence and compare their assumptions.",
-      "verification": "Complete source-bound clp-010 investigation with explicit numerical diagnostics and explicit scientific limits; no mastery grade."
+      "lab": "Fit a mean and a covariate-dependent log scale for two noise regimes, then remove the normalization term and inflate the scale.",
+      "verification": "Parameters recover (0, 0, log 3), so the group scales are 1 and 3; without the log-scale term the loss keeps falling as the scale inflates, while the proper NLL rises."
     },
     {
       "id": "clp-011",
@@ -201,7 +201,7 @@
       "minutes": 90,
       "prerequisites": [
         "clp-008",
-        "bayes-022"
+        "statistics-021"
       ],
       "runtime": "llm-torch-cpu",
       "concepts": [
@@ -210,8 +210,8 @@
         "scale collapse"
       ],
       "outcome": "Evaluate a stable marginalized mixture and explain label invariance and likelihood degeneracy.",
-      "lab": "Read the two complete worked cases, reproduce their evidence and compare their assumptions.",
-      "verification": "Complete source-bound clp-011 investigation with explicit numerical diagnostics and explicit scientific limits; no mastery grade."
+      "lab": "Evaluate a two-component mixture with log-sum-exp at a remote observation, then swap labels and shrink one component onto a single point.",
+      "verification": "Stable log probabilities match the library mixture while the direct probability underflows to 0; label swapping leaves the likelihood unchanged, and the log likelihood keeps rising as one component's scale shrinks from 1 to 0.01."
     },
     {
       "id": "clp-012",
@@ -220,7 +220,7 @@
       "minutes": 90,
       "prerequisites": [
         "clp-006",
-        "r-049"
+        "statistics-012"
       ],
       "runtime": "llm-torch-cpu",
       "concepts": [
@@ -229,8 +229,8 @@
         "complete panels"
       ],
       "outcome": "Evaluate complete-panel likelihoods and detect false covariance introduced across subject boundaries.",
-      "lab": "Read the two complete worked cases, reproduce their evidence and compare their assumptions.",
-      "verification": "Complete source-bound clp-012 investigation with explicit numerical diagnostics and explicit scientific limits; no mastery grade."
+      "lab": "Evaluate the AR(1) likelihood for two complete independent panels, then flatten them into one series across the subject boundary.",
+      "verification": "The panel NLL matches an independent oracle, rho = 0 reproduces the iid likelihood, and the cross-boundary series gives a different NLL."
     },
     {
       "id": "clp-013",
@@ -248,8 +248,8 @@
         "global penalty"
       ],
       "outcome": "Distinguish MLE, ridge and MAP and preserve a single global penalty across partitions.",
-      "lab": "Read the two complete worked cases, reproduce their evidence and compare their assumptions.",
-      "verification": "Complete source-bound clp-013 investigation with explicit numerical diagnostics and explicit scientific limits; no mastery grade."
+      "lab": "Add one ridge penalty to a partitioned objective and compare it with MAP, then duplicate the penalty in every partition.",
+      "verification": "The penalty added once matches the MAP gradient; each duplicate adds precision * mu^2 / 2 and shrinks the estimate further, so duplicated < penalized < MLE."
     },
     {
       "id": "clp-014",
@@ -258,7 +258,7 @@
       "minutes": 90,
       "prerequisites": [
         "clp-006",
-        "r-039"
+        "statistics-008"
       ],
       "runtime": "llm-torch-cpu",
       "concepts": [
@@ -267,8 +267,8 @@
         "weak identification"
       ],
       "outcome": "Diagnose redundant parameters and refit nuisance parameters when profiling a nonlinear rate.",
-      "lab": "Read the two complete worked cases, reproduce their evidence and compare their assumptions.",
-      "verification": "Complete source-bound clp-014 investigation with explicit numerical diagnostics and explicit scientific limits; no mastery grade."
+      "lab": "Inspect the Hessian of a model with duplicated design columns, then profile a nonlinear decay rate by refitting the nuisance parameters.",
+      "verification": "The Hessian has eigenvalues 0 and 60, coefficient pairs with the same sum have identical NLL, the long-window profile is minimized at rate 0.7 and the short-window profile contrast is under one-thousandth of the long one."
     },
     {
       "id": "clp-015",
@@ -286,8 +286,8 @@
         "evaluation accounting"
       ],
       "outcome": "Implement deterministic optimizer closures and distinguish returned step loss from final objective.",
-      "lab": "Read the two complete worked cases, reproduce their evidence and compare their assumptions.",
-      "verification": "Complete source-bound clp-015 investigation with explicit numerical diagnostics and explicit scientific limits; no mastery grade."
+      "lab": "Minimize the same objective with L-BFGS from two starting values and with Adam, counting every closure call.",
+      "verification": "Every fit reaches mean 1.5 within 2e-5; L-BFGS evaluates the objective more often than it steps, and the loss returned by step() exceeds the recomputed final objective."
     },
     {
       "id": "clp-016",
@@ -305,8 +305,8 @@
         "detached graph"
       ],
       "outcome": "Verify Hessians independently and detect deliberately broken gradient paths.",
-      "lab": "Read the two complete worked cases, reproduce their evidence and compare their assumptions.",
-      "verification": "Complete source-bound clp-016 investigation with explicit numerical diagnostics and explicit scientific limits; no mastery grade."
+      "lab": "Compare an autograd Hessian with its analytic matrix and run gradcheck, then detach part of the graph and try an in-place update of a leaf.",
+      "verification": "The Hessian equals [[3.2, 3], [3, 5.2]], gradcheck passes for the correct function and fails for the detached one, and the in-place leaf update is rejected."
     },
     {
       "id": "clp-017",
@@ -324,8 +324,8 @@
         "lognormal expectation"
       ],
       "outcome": "Separate mean, observation and new-group uncertainty and distinguish transformed means from medians.",
-      "lab": "Read the two complete worked cases, reproduce their evidence and compare their assumptions.",
-      "verification": "Complete source-bound clp-017 investigation with explicit numerical diagnostics and explicit scientific limits; no mastery grade."
+      "lab": "Separate mean, observation and new-group variance of forecasts with the delta method, then compare the mean and median of a lognormal prediction.",
+      "verification": "At time 0 the variances are 0.05 for the mean, 0.14 for a new observation and 0.30 for a new group; the lognormal mean exp(0.58) exceeds the median exp(0.4)."
     },
     {
       "id": "clp-018",
@@ -334,7 +334,7 @@
       "minutes": 90,
       "prerequisites": [
         "clp-016",
-        "r-042"
+        "statistics-008"
       ],
       "runtime": "llm-torch-cpu",
       "concepts": [
@@ -343,8 +343,8 @@
         "weak information"
       ],
       "outcome": "Compare model, iid and cluster variance calculations and enumerate a whole-cluster bootstrap.",
-      "lab": "Read the two complete worked cases, reproduce their evidence and compare their assumptions.",
-      "verification": "Complete source-bound clp-018 investigation with explicit numerical diagnostics and explicit scientific limits; no mastery grade."
+      "lab": "Compare model-based, iid sandwich and cluster sandwich variances for four clusters with duplicated measurements, then enumerate every whole-cluster bootstrap sample.",
+      "verification": "The iid sandwich variance is 0.625 while the cluster sandwich and the exact cluster bootstrap both give 1.25, and a weakly informed curvature matrix is rejected."
     },
     {
       "id": "clp-019",
@@ -362,8 +362,8 @@
         "serial reduction oracle"
       ],
       "outcome": "Derive the global mean gradient under rank averaging and inspect sampler padding and dropping.",
-      "lab": "Read the two complete worked cases, reproduce their evidence and compare their assumptions.",
-      "verification": "Complete source-bound clp-019 investigation with explicit numerical diagnostics and explicit scientific limits; no mastery grade."
+      "lab": "Compute the global mean gradient for unequal local batches, compare naive rank averaging with corrected multipliers, then inspect padded and drop-last sampler shards.",
+      "verification": "The global gradient is -3, naive rank averaging gives -1.75 and the corrected multipliers recover -3; padding fills six slots with index 0 twice, and drop_last keeps indices 0 to 3."
     },
     {
       "id": "clp-020",
@@ -382,8 +382,8 @@
         "reproducibility"
       ],
       "outcome": "Fit and audit a shared nonlinear panel model with explicit prediction and evidence limitations.",
-      "lab": "Read the two complete worked cases, reproduce their evidence and compare their assumptions.",
-      "verification": "Complete source-bound clp-020 investigation with explicit numerical diagnostics and explicit scientific limits; no mastery grade."
+      "lab": "Fit the shared nonlinear panel model, audit its gradient and information, predict conditionally on each group, then refit under false independence.",
+      "verification": "Parameters recover (2.5, 0.55, 0.6) with maximum gradient below 5e-4 and a positive minimum information eigenvalue; the independence fit recovers the same means, so compare the reported conditional and independence forecast errors instead."
     }
   ]
 }

@@ -9,7 +9,7 @@ Copy to .learning before editing. Six independent attempts belong below.
 # Expected: base output equals input; no trainable base variables.
 
 # Exercise 2: Train a new head
-# Attach a zero-initialized one-unit head; fit targets[1,2,3] for one SGD step.
+# Attach a zero-initialized one-unit head; fit targets [1, 2, 3] for one SGD step.
 # Expected: at least one head coefficient changes.
 
 # Exercise 3: Prove base preservation

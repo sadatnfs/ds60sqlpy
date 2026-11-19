@@ -5,15 +5,48 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Data interfaces: filtering tables and honest visual summaries: my attempt</title>
     <style>
-      /* Implement the lesson-specific CSS. Keep keyboard focus visible. */
+      /* Write the CSS for the exercises here. Keep keyboard focus visible. */
     </style>
   </head>
   <body>
-    <!-- web-028: Build a filterable local study table with an explicit empty state. -->
-    <!-- Save your prediction, then implement the six exercises from the guide. -->
+    <!--
+      web-028 exercises. Hints are in the guide; answers are in the solutions folder.
+      1. Predict the rows retained for a forty-minute threshold.
+      2. Add a clear filter label and a result count.
+      3. Build a filterable local study table with an explicit empty state.
+      4. Diagnose a filter that permanently removes source records.
+      5. Test a threshold that returns no records.
+      6. Explain how this table connects to D3 without changing the statistical claim.
+    -->
     <main>
-      <h1>Data interfaces: filtering tables and honest visual summaries</h1>
-      <!-- Build your own document here. The reference is separate. -->
+      <h1>Study minutes</h1>
+      <select id="threshold">
+        <option value="0">All records</option>
+        <option value="40">40 minutes</option>
+        <option value="100">100 minutes</option>
+      </select>
+      <table>
+        <caption> Local synthetic study records </caption>
+        <thead>
+          <tr>
+            <th scope="col">Subject</th>
+            <th scope="col">Minutes</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
     </main>
+    <script>
+      "use strict";
+
+      // Worked example 1: Derived records
+      // const visible = rows.filter((row) => row.minutes >= 40);
+
+      // Worked example 2: A safe table cell
+      // const cell = document.createElement('td');
+      // cell.textContent = row.subject;
+
+      // Write the JavaScript for the exercises here.
+    </script>
   </body>
 </html>

@@ -6,7 +6,7 @@ Advanced, approximately 120 minutes. Direct prerequisites: `java-034`
 
 ## Learning objectives
 
-Explain response grain, repository port, http adapter, contract test using a concrete program. Trace the normal execution, identify its boundary assumptions and make a failure case observable. The first investigation is Summarize group A over amounts 10,20 and group B over 5. The final exercise transfers the mechanism to preserve storage and close the owned listener.
+Build and test a small local HTTP data service that validates queries strictly and leaves its storage unchanged. Along the way, explain response grain, repository port, http adapter, contract test using a concrete program. Trace the normal execution, identify its boundary assumptions and make a failure case observable. Exercises 1 and 2 start from the worked examples; the authored investigations begin with this task: GET group C, which passes syntax but has no records. The final exercise transfers the mechanism to preserve storage and close the owned listener.
 
 ## Purpose and mental model
 
@@ -158,7 +158,7 @@ public class Main {
 
 **Expected:** A count 2, total 30; B count 1, total 5.
 
-### Example B: Read a successful HTTPsummary
+### Example B: Read a successful HTTP summary
 
 The exact body check fixes the public schema and integer representation. The source counts remain independently known.
 
@@ -278,7 +278,7 @@ public class Main {
 }
 ```
 
-**Expected:** status 200 andexactJSONwithcount2,total 30.
+**Expected:** status 200 and exact JSON with count 2, total 30.
 
 ## Prediction before your attempt
 
@@ -286,29 +286,29 @@ Read the source from the entry point and name each value before executing it. Id
 
 ## Exercises
 
-1. **Verify the domain summary.** Summarize group A over amounts 10,20 and group B over 5.
-   **Expected:** A count 2, total 30; B count 1, total 5.
-   **Verify:** Compare your assertion values or captured diagnostic with A count 2, total 30; B count 1, total 5.
+1. **Verify the domain summary: change one input.** Copy Example A into a scratch `Main.java` and change `List.of(new Row("a1", "A", 10), new Row("a2", "A", 20), new Row("b1", "B", 5));` to `List.of(new Row("a1", "A", 10), new Row("a2", "A", 20), new Row("b1", "B", 6));`. Before running it with `java -ea Main`, predict which assertion fails and which value it now sees; then run it and restore the original line.
+   **Expected:** The changed run fails with an `AssertionError` from the assertion on `summarize(repository, "B").equals(new Summary("B", 1, 5))`. Restoring the original line brings back the worked observation: A count 2, total 30; B count 1, total 5.
+   **Verify:** Compare your written prediction with the reported `AssertionError` and its stack-trace line, and name the value that made `summarize(repository, "B").equals(new Summary("B", 1, 5))` false. After restoring the line, the program completes without an `AssertionError` again.
 
-2. **Read a successful HTTPsummary.** GET/summary?group=Afromtheownedserver.
-   **Expected:** status 200 andexactJSONwithcount2,total 30.
-   **Verify:** Compare your assertion values or captured diagnostic with status 200 andexactJSONwithcount2,total 30.
+2. **Read a successful HTTP summary: diagnose an edited check.** A careless edit changed the assertion that Example B adds after Example A so that it reads `\"count\":3`. Run Example B with that line, explain why the edited assertion now fails for the same program state, and restore it.
+   **Expected:** Before the repair the run fails with an `AssertionError` from the assertion on `response.statusCode() == 200 && response.body().equals("{\"group\":\"A\",\"count\":2,\"total\":30}")`; after it the line reads `\"count\":2` again and status 200 and exact JSON with count 2, total 30.
+   **Verify:** Keep the failing and the repaired runs. Explain why the edited assertion rejects the same program state that `response.statusCode() == 200 && response.body().equals("{\"group\":\"A\",\"count\":2,\"total\":30}")` accepts.
 
-3. **Report an unknown valid group.** GETgroupC,which passes syntax buthasnorecords.
-   **Expected:** status404 withnot_found error.
-   **Verify:** Compare your assertion values or captured diagnostic with status404 withnot_found error.
+3. **Report an unknown valid group.** GET group C, which passes syntax but has no records.
+   **Expected:** status 404 with not_found error.
+   **Verify:** Keep an assertion equivalent to `response.statusCode() == 404 && response.body().contains("not_found")`. As a control, change `var response = send(client, server.uri("/summary?group=C"), "GET");` to `var response = send(client, server.uri("/summary?group=C!"), "GET");`: the run must fail with an `AssertionError` from the assertion on `response.statusCode() == 404 && response.body().contains("not_found")`. Restore the line before continuing.
 
-4. **Reject ambiguous or malformed queries.** Send duplicate group parameters andalowercasegroup.
-   **Expected:** bothstatus400.
-   **Verify:** Compare your assertion values or captured diagnostic with bothstatus400.
+4. **Reject ambiguous or malformed queries.** Send duplicate group parameters and a lowercase group.
+   **Expected:** both status 400.
+   **Verify:** Keep an assertion equivalent to `duplicate == 400 && lowercase == 400`. As a control, change `int duplicate = send(client, server.uri("/summary?group=A&group=B"), "GET").statusCode();` to `int duplicate = send(client, server.uri("/summary?group=A&group=B"), "GET!").statusCode();`: the run must fail with an `AssertionError` from the assertion on `duplicate == 400 && lowercase == 400`. Restore the line before continuing.
 
-5. **Reject unsupported methods andpathlookalikes.** POST to the summary route andGET/summary-extra.
-   **Expected:** 405 and404 respectively.
-   **Verify:** Compare your assertion values or captured diagnostic with 405 and404 respectively.
+5. **Reject unsupported methods and path lookalikes.** POST to the summary route and GET /summary-extra.
+   **Expected:** 405 and 404 respectively.
+   **Verify:** Keep an assertion equivalent to `post == 405 && lookalike == 404`. As a control, change `assert post == 405 && lookalike == 404;` to `assert post != 405 && lookalike == 404;` inside it: the run must fail with an `AssertionError`, which shows the assertion can fail. Restore it.
 
-6. **Preserve storage and close the owned listener.** Comparetherepositorybefore/afterrequests and close the server.
+6. **Preserve storage and close the owned listener.** Compare the repository before/after requests and close the server.
    **Expected:** 3 unchanged records; closed flag true.
-   **Verify:** Compare your assertion values or captured diagnostic with 3 unchanged records; closed flag true.
+   **Verify:** Keep an assertion equivalent to `server.closed && repository.rows().equals(before) && repository.rows().size() == 3`. As a control, change `assert server.closed && repository.rows().equals(before) && repository.rows().size() == 3;` to `assert server.closed && repository.rows().equals(before) && repository.rows().size() != 3;` inside it: the run must fail with an `AssertionError`, which shows the assertion can fail. Restore it.
 
 ## Common pitfalls and diagnosis
 
@@ -318,7 +318,14 @@ Do not replace a precise exception with a catch-all that returns a plausible def
 
 ## Progressive hints
 
-First reconstruct the values and identities in the worked example. Next isolate the line that changes the result when one input is altered. Finally compare the normal and failure paths with the stated contract. Use a small table of input, expected value, actual value and exception type. Ask for one hint about the first incorrect assumption before requesting the entire reference implementation.
+Read one hint at a time and attempt the exercise again before reading the next. Keep a small table of input, expected value, actual value and exception type. Ask for one hint about the first incorrect assumption before requesting the entire reference implementation.
+
+- **Exercise 1:** First restate the expected observation: A count 2, total 30; B count 1, total 5. Then list the values read by `summarize(repository, "B").equals(new Summary("B", 1, 5))` and trace each one from its declaration. Finally, compute the asserted value with `List.of(new Row("a1", "A", 10), new Row("a2", "A", 20), new Row("b1", "B", 6));` in place before running.
+- **Exercise 2:** First restate the expected observation: status 200 and exact JSON with count 2, total 30. Then list the values read by `response.statusCode() == 200 && response.body().equals("{\"group\":\"A\",\"count\":2,\"total\":30}")` and trace each one from its declaration. Finally, compare `\"count\":3` with the same line in Example B and state the claim each version makes.
+- **Exercise 3:** First restate the expected observation: status 404 with not_found error. Then list the values read by `response.statusCode() == 404 && response.body().contains("not_found")` and trace each one from its declaration. Finally, predict the effect of changing `var response = send(client, server.uri("/summary?group=C"), "GET");` to `var response = send(client, server.uri("/summary?group=C!"), "GET");` before running anything.
+- **Exercise 4:** First restate the expected observation: both status 400. Then list the values read by `duplicate == 400 && lowercase == 400` and trace each one from its declaration. Finally, predict the effect of changing `int duplicate = send(client, server.uri("/summary?group=A&group=B"), "GET").statusCode();` to `int duplicate = send(client, server.uri("/summary?group=A&group=B"), "GET!").statusCode();` before running anything.
+- **Exercise 5:** First restate the expected observation: 405 and 404 respectively. Then list the values read by `post == 405 && lookalike == 404` and trace each one from its declaration. Finally, name one input that would make `post == 405 && lookalike == 404` false.
+- **Exercise 6:** First restate the expected observation: 3 unchanged records; closed flag true. Then list the values read by `server.closed && repository.rows().equals(before) && repository.rows().size() == 3` and trace each one from its declaration. Finally, name one input that would make `server.closed && repository.rows().equals(before) && repository.rows().size() == 3` false.
 
 ## Self-check and retrieval
 
@@ -330,7 +337,7 @@ Preserve the saved pad and the six exercise observations. Continue to the next l
 
 ## Sources and verification status
 
-[Official Java21 API or language reference](https://docs.oracle.com/en/java/javase/21/docs/api/jdk.httpserver/com/sun/net/httpserver/HttpServer.html), reviewed2026-10-22. Examples and exercise fixtures are original course material. Use the [validation guide](../../../docs/validation.md) and CI artifacts for the exact revision and platform to inspect actual compile/run results. Authoring, parsing, compilation, execution and learner mastery are separate forms of evidence.
+[Official Java 21 API or language reference](https://docs.oracle.com/en/java/javase/21/docs/api/jdk.httpserver/com/sun/net/httpserver/HttpServer.html), reviewed 2026-10-22. Examples and exercise fixtures are original course material. Use the [validation guide](../../../docs/validation.md) and CI artifacts for the exact revision and platform to inspect actual compile/run results. Authoring, parsing, compilation, execution and learner mastery are separate forms of evidence.
 
 ## Ask an AI tutor about this lesson
 
@@ -340,7 +347,7 @@ Read courses/java/guides/java-035.md and courses/java/lessons/java-035.java. Dir
 Explain the mechanism, ask for a prediction, review my attempt, give one hint,
 request compiler/runtime evidence, and ask a fresh retrieval question.
 Keep courses/java/solutions/ closed until I request comparison or show an attempt.
-Use Java21 and the declared offline fixture. Done when I can explain the state
+Use Java 21 and the declared offline fixture. Done when I can explain the state
 transitions, pass all six exercise contracts, diagnose one failure and solve a
 new boundary case without copying the solution.
 ```

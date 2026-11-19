@@ -1,4 +1,4 @@
-"""mle-003: worked starting point; complete the guide's six changes."""
+"""mle-003: both worked cases; complete the guide's six changes."""
 
 
 def example_one():
@@ -29,8 +29,20 @@ def example_one():
     return {"features": totals.to_dicts(), "event_end_is_exclusive": True}
 
 
+def example_two():
+    import polars as pl
+
+    requests = pl.DataFrame({"request": [1, 2, 3]})
+    selected = pl.DataFrame({"request": [1, 2], "value": [0.0, 4.0]})
+    joined = requests.join(selected, on="request", how="left", validate="1:1")
+    assert joined["value"].to_list() == [0.0, 4.0, None]
+    assert joined.height == 3
+    return {"zero_and_missing_are_distinct": True, "coverage": 2 / 3}
+
+
 if __name__ == "__main__":
     print(example_one())
+    print(example_two())
 
 # TODO 1: Change the event boundary deliberately and compare the result.
 # TODO 2: Create a request for an entity with no eligible history.

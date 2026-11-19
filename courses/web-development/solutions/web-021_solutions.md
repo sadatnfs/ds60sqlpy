@@ -1,51 +1,43 @@
 # web-021: explanatory solutions
 
-Compare after your own attempt or an explicit solution reveal. This file explains the supplied deterministic fixtures. It does not claim that a learner or a production deployment passed.
-
-## Why the mechanism works
-
-A media query responds to the viewport or device environment. A container query can respond to an ancestor container's size, which is useful when the same component appears in a wide article and a narrow sidebar on the same page. The component should adapt to the space it receives instead of assuming it always spans the viewport.
-
-Size containment changes how a container participates in sizing. Declare it deliberately on an appropriate wrapper, not on every element. A size query targets an eligible ancestor, not the queried element itself. Keep a useful base layout so the component remains readable in environments where the query is unsupported or never matches.
-
-Set `container-type:inline-size` on a wrapper, optionally with a container-name. Inside `@container`, adjust the descendant component when its wrapper is wide enough. Prefer logical dimensions so the design does not unnecessarily assume a writing direction. This chapter demonstrates progressive enhancement; the unqueried stacked card remains functional.
+Open this after your own attempt. Each answer explains the lesson's synthetic fixtures; it does not show that your work or a deployment passed. The mechanism is explained in `courses/web-development/guides/web-021.md`.
 
 ## Exercise 1: Explain why two cards on the same viewport can use different layouts.
 
-Their query containers can have different widths.
+**Expected answer:** Their query containers can have different widths.
 
-Trace the smallest example before editing. Name which values are source and which are observations.
+**Why:** Container queries test the nearest query container, so the same component can match in one slot and not in another.
 
 ## Exercise 2: Add a container wrapper around a reusable card.
 
-The card has an explicit local sizing context.
+**Expected evidence:** The card has an explicit local sizing context.
 
-Change only the named feature. Compare with the unchanged example and explain any unaffected behavior.
+**Why:** An element cannot query its own size, so the wrapper must establish the container that the card's rules test.
 
 ## Exercise 3: Render the same component in wide and narrow slots.
 
-Each instance adapts independently while preserving its content.
+**Expected evidence:** Each instance adapts independently while preserving its content.
 
-Sketch the structure or data contract first. Reuse the mechanism from the examples without copying the reference.
+**Why:** Each instance evaluates the query against its own container, so they adapt independently.
 
 ## Exercise 4: Diagnose a query that never matches because no ancestor is eligible.
 
-Inspect container-type and the relevant ancestor relationship.
+**Expected answer:** Inspect container-type and the relevant ancestor relationship.
 
-Keep the failing input. Identify the first layer where the observed result differs from the intended contract.
+**Why:** A container query only matches when an ancestor establishes size containment; without one, the query never applies.
 
 ## Exercise 5: Disable the query and inspect the fallback.
 
-The baseline stacked component remains usable.
+**Expected evidence:** The baseline stacked component remains usable.
 
-Predict the boundary before running it. Add an explicit check or manual observation that would detect a regression.
+**Why:** The baseline rules outside the query must work on their own, because the query is an enhancement.
 
 ## Exercise 6: Choose between a viewport query and a container query for a sidebar card.
 
-A container query fits a component whose available space depends on placement.
+**Expected answer:** A container query fits a component whose available space depends on placement.
 
-Explain your choice to someone who has not seen the code. Include one limitation and the evidence needed to remove it.
+**Why:** A card in a sidebar gets the sidebar's width, so a container query describes its real space better than the viewport.
 
-## Reference comparison and limits
+## Reference comparison
 
-Read the separate executable reference, where supplied, only after retaining your attempt. Compare structure and decisions rather than matching every identifier. A different implementation is acceptable when it satisfies the same behavior, preserves accessibility and rejects the same invalid cases. The checked reference uses tiny synthetic inputs so that each transformation can be inspected. It is not a ready-to-deploy authenticated application. Server lifecycle, persistence, concurrency and security require their own integration evidence.
+Open `courses/web-development/solutions/web-021_solution.html` only after saving your attempt, and compare decisions rather than identifiers. A different implementation is acceptable when it shows the same behavior and rejects the same invalid cases. The reference checks only its named synthetic cases; its success message is not an accessibility audit or proof of responsive behavior at every size.

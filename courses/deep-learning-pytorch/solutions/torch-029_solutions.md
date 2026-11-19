@@ -4,9 +4,9 @@ Compare these answers only after an attempt or an explicit solution reveal. They
 
 ## Mechanism review
 
-Numerical stability concerns how an equivalent mathematical expression behaves in a finite representation. Logits 1000, 999 define a valid two-class distribution, but directly exponentiating them overflows common floating-point types. Subtracting a shared maximum before softmax preserves the distribution. CrossEntropyLoss and log sum exp implement stable combined operations that avoid unnecessary probability round trips.
+Numerical stability concerns how an equivalent mathematical expression behaves in a finite representation. Logits 1000, 999 define a valid two-class distribution, but directly exponentiating them overflows common floating-point types. Subtracting a shared maximum before softmax preserves the distribution. CrossEntropyLoss and logsumexp implement stable combined operations that avoid unnecessary probability round trips.
 
-Precision and range differ across float16, bfloat 16, float32 and float64. Automatic mixed precision selects operation dtypes under a backend policy; gradient scaling addresses underflow in certain training paths. Those mechanisms require hardware-specific validation. This default CPU lesson checks stable objectives and dtype limits without claiming GPU speed or a qualified mixed-precision training configuration. A stable loss can still optimize the wrong labels or denominator, so numerical and semantic checks remain separate.
+Precision and range differ across float16, bfloat16, float32 and float64. Automatic mixed precision selects operation dtypes under a backend policy; gradient scaling addresses underflow in certain training paths. Those mechanisms require hardware-specific validation. This default CPU lesson checks stable objectives and dtype limits without claiming GPU speed or a qualified mixed-precision training configuration. A stable loss can still optimize the wrong labels or denominator, so numerical and semantic checks remain separate.
 
 **Overflow:** A result exceeding the numeric type's representable range.
 
@@ -24,7 +24,7 @@ Use F.cross_entropy on raw logits and torch.logsumexp for a stable log normalize
 
 For logits z=[1000, 999], the first-class probability is \(\frac{\exp(1000)}{\exp(1000)+\exp(999)}\). Dividing numerator and denominator by \(\exp(1000)\) gives \(\frac{1}{1+\exp(-1)}\), approximately 0.731059. The other probability is approximately 0.268941. The mathematical ratio is well defined even though directly materializing \(\exp(1000)\) overflows the types used in the counterexample.
 
-More generally, subtracting the same finite m from every logit preserves softmax in exact arithmetic. Choosing \(m=\max(z)\) makes every shifted exponent at most one and at least one exactly one. For the target 0 loss, the shifted form is \(\log(1+\exp(-1))\), approximately 0.313262. The gradient is p-one_hot(target), or approximately[-0.268941, 0.268941]. Its entries sum to zero because a common logit shift does not change the objective. This gives an independent forward and backward contract.
+More generally, subtracting the same finite m from every logit preserves softmax in exact arithmetic. Choosing \(m=\max(z)\) makes every shifted exponent at most zero, so every shifted exponential is at most one and at least one equals one. For the target 0 loss, the shifted form is \(\log(1+\exp(-1))\), approximately 0.313262. The gradient is p-one_hot(target), or approximately [-0.268941, 0.268941]. Its entries sum to zero because a common logit shift does not change the objective. This gives an independent forward and backward contract.
 
 Stability is more specific than a function name. logsumexp avoids raw exponential overflow, but computing a large logsumexp value and then subtracting a nearly equal large target logit can still lose precision. A fused logits loss or log_softmax formulation can preserve the small relative difference more directly. Similarly, computing a tiny probability and then taking its log can underflow where a direct log-probability calculation remains finite. Inspect intermediate representation rather than assuming algebraic equivalence implies equal floating-point error.
 
@@ -32,16 +32,16 @@ Range and precision are different properties:
 
 | Type | Approximate maximum finite magnitude | Relative spacing near one |
 | --- | --- | --- |
-| float16 | 65, 504 | \({2}^{-10}\) |
-| bfloat 16 | \(3.39\cdot {10}^{38}\) | \({2}^{-7}\) |
+| float16 | 65504 | \({2}^{-10}\) |
+| bfloat16 | \(3.39\cdot {10}^{38}\) | \({2}^{-7}\) |
 | float32 | \(3.4\cdot {10}^{38}\) | \({2}^{-23}\) |
 | float64 | \(1.8\cdot {10}^{308}\) | \({2}^{-52}\) |
 
-bfloat 16 has a much wider exponent range than float16 but fewer fraction bits. A value can avoid overflow while still be represented coarsely. Epsilon near one is not a universal absolute tolerance for all magnitudes or all algorithms. Summation length, conditioning, cancellation and the operations actually performed matter. [PyTorch 2.9 numerical accuracy](https://docs.pytorch.org/docs/2.9/notes/numerical_accuracy.html).
+bfloat16 has a much wider exponent range than float16 but fewer fraction bits. A value can avoid overflow while still be represented coarsely. Epsilon near one is not a universal absolute tolerance for all magnitudes or all algorithms. Summation length, conditioning, cancellation and the operations actually performed matter. [PyTorch 2.9 numerical accuracy](https://docs.pytorch.org/docs/2.9/notes/numerical_accuracy.html).
 
-Shift invariance also has a finite-representation limit. If a huge common offset has already rounded two distinct logits to the same stored value, subtracting their maximum cannot recover the lost difference. The lesson's1000 and 999 remain distinct and are therefore an appropriate stability fixture. A NaN input is a different case: maximum subtraction does not repair it, and the explicit validator rejects it before evaluating the objective.
+Shift invariance also has a finite-representation limit. If a huge common offset has already rounded two distinct logits to the same stored value, subtracting their maximum cannot recover the lost difference. The lesson's 1000 and 999 remain distinct and are therefore an appropriate stability fixture. A NaN input is a different case: maximum subtraction does not repair it, and the explicit validator rejects it before evaluating the objective.
 
-Autocast selects operation dtypes according to a backend policy. It is not equivalent to converting every model tensor and intermediate to float16. Some operations may run or accumulate in higher precision, while others use a lower-precision path. Eligibility and kernel behavior are device/version specific. A CPU bfloat 16 path and a CUDA float16 path therefore need separate acceptance rather than one generic mixed-precision label. [PyTorch 2.9 AMP](https://docs.pytorch.org/docs/2.9/amp.html).
+Autocast selects operation dtypes according to a backend policy. It is not equivalent to converting every model tensor and intermediate to float16. Some operations may run or accumulate in higher precision, while others use a lower-precision path. Eligibility and kernel behavior are device/version specific. A CPU bfloat16 path and a CUDA float16 path therefore need separate acceptance rather than one generic mixed-precision label. [PyTorch 2.9 AMP](https://docs.pytorch.org/docs/2.9/amp.html).
 
 Gradient scaling addresses another boundary. Multiplying a scalar loss by s multiplies its derivatives by s. An update workflow can compute those scaled derivatives, unscale them back to ordinary units, and detect nonfinite values before an optimizer step. This can protect some small backward values from underflow. It cannot recover information already lost in the forward pass or make an invalid loss meaningful.
 
@@ -49,52 +49,57 @@ Clipping thresholds must be applied to unscaled gradients if they are defined in
 
 A stable finite loss can still optimize the wrong example pairing, class index or reduction. Conversely, a finite forward value can have a problematic derivative at a singular or extreme point. Check forward inputs, loss, gradients and resulting parameter state as separate stages. The default examples retain small deterministic CPU work and make no throughput or accelerator-memory claim.
 
-## Exercise 1: Expose naive overflow
+## Exercise 1: Find the float64 overflow boundary
 
-The question is: Exponentiate float32 logits 1000, 999 directly.
+The question is: Exponentiate float64 values 709 and 710.
 
-The underlying probabilities are well defined. The failure comes from an unstable intermediate representation, not an impossible classification task.
+The float64 maximum is about 1.8e308, between \(e^{709}\) and \(e^{710}\); for float32 the boundary lies between 88 and 89.
 
 ```python
-logits = torch.tensor([1000.0, 999.0], dtype=torch.float32)
-naive = torch.exp(logits)
-assert torch.isinf(naive).all()
+big = torch.tensor([709.0, 710.0], dtype=torch.float64)
+grown = torch.exp(big)
+assert torch.isfinite(grown[0]) and torch.isinf(grown[1])
 ```
 
-**Expected:** both exponentials infinite.
+**Expected:** \(e^{709}\) is finite (about 8.2e307); \(e^{710}\) overflows to inf.
 
-**Verify:** Compare the computed values or written argument with both exponentials infinite.
+**Verify:** In a fresh process, the exercise checks confirm `torch.isfinite(grown[0])` and `torch.isinf(grown[1])`.
 
-## Exercise 2: Compute a stable class loss
+## Exercise 2: Compute a stable loss for target 1
 
-The question is: Use target 0 with the same logits.
+The question is: Use float32 logits [1000, 998] with target class 1.
 
-The meaningful score difference is one. The stable combined objective avoids constructing enormous raw exponential values.
-
-```python
-stable = F.cross_entropy(logits[None, :], torch.tensor([0]))
-np.testing.assert_allclose(stable.item(), np.log1p(np.exp(-1)), atol=1e-6, rtol=0)
-```
-
-**Expected:** loss \(\log(1+\exp(-1))\) within 1e-6.
-
-**Verify:** Compare the computed values or written argument with loss \(\log(1+\exp(-1))\) within 1e-6.
-
-## Exercise 3: Check shift invariance
-
-The question is: Compare softmax 1000, 999 with softmax 0, -1.
-
-A common logit shift cancels from the normalizer. This property is useful for detecting wrong-axis or inconsistent-clipping implementations.
+cross_entropy subtracts the maximum logit internally, so only the difference of 2 matters.
 
 ```python
-torch.testing.assert_close(
-    torch.softmax(logits, 0), torch.softmax(torch.tensor([0.0, -1.0]), 0), atol=1e-6, rtol=0
+wide_logits = torch.tensor([[1000.0, 998.0]])
+np.testing.assert_allclose(
+    F.cross_entropy(wide_logits, torch.tensor([1])).item(), np.log1p(np.exp(2)), atol=1e-5, rtol=0
 )
 ```
 
-**Expected:** probabilities match within 1e-6.
+**Expected:** loss \(\log(1+e^{2})\), about 2.1269, within 1e-5.
 
-**Verify:** Compare the computed values or written argument with probabilities match within 1e-6.
+**Verify:** In a fresh process, the exercise checks confirm `F.cross_entropy(wide_logits, torch.tensor([1])).item()` matches `np.log1p(np.exp(2))` within 1e-05.
+
+## Exercise 3: Check a new shift
+
+The question is: Compare the softmax of [1000, 998] with the softmax of [5, 3].
+
+Subtracting 995 from both logits leaves the probabilities unchanged.
+
+```python
+torch.testing.assert_close(
+    torch.softmax(wide_logits[0], 0), torch.softmax(torch.tensor([5.0, 3.0]), 0), atol=1e-6, rtol=0
+)
+np.testing.assert_allclose(
+    torch.softmax(torch.tensor([5.0, 3.0]), 0)[0].item(), 1 / (1 + np.exp(-2)), atol=1e-6, rtol=0
+)
+```
+
+**Expected:** both are about [0.8808, 0.1192] and match within 1e-6.
+
+**Verify:** In a fresh process, the exercise checks confirm `torch.softmax(wide_logits[0], 0)` matches `torch.softmax(torch.tensor([5.0, 3.0]), 0)` within 1e-06 and `torch.softmax(torch.tensor([5.0, 3.0]), 0)[0].item()` matches `1 / (1 + np.exp(-2))` within 1e-06.
 
 ## Exercise 4: Inspect stable gradients
 
@@ -111,28 +116,28 @@ np.testing.assert_allclose(values.grad.sum().item(), 0, atol=1e-6, rtol=0)
 
 **Expected:** finite gradients summing approximately 0.
 
-**Verify:** Compare the computed values or written argument with finite gradients summing approximately 0.
+**Verify:** In a fresh process, the exercise checks confirm `torch.isfinite(values.grad).all()` and `values.grad.sum().item()` matches `0` within 1e-06.
 
 ## Exercise 5: Compare dtype ranges explicitly
 
-The question is: Inspect float16 and bfloat 16 maximum values and float32 epsilon.
+The question is: Inspect float16 and bfloat16 maximum values and float32 epsilon.
 
-bfloat 16 has a wider exponent range but fewer fraction bits than float16. Range alone does not determine accuracy or backend support.
+bfloat16 has a wider exponent range but fewer fraction bits than float16. Range alone does not determine accuracy or backend support.
 
 ```python
 assert torch.finfo(torch.bfloat16).max > torch.finfo(torch.float16).max
 assert torch.finfo(torch.float32).eps > 0
 ```
 
-**Expected:** bfloat 16 range exceeds float16; float32 epsilon positive.
+**Expected:** bfloat16 range exceeds float16; float32 epsilon positive.
 
-**Verify:** Compare the computed values or written argument with bfloat 16 range exceeds float16; float32 epsilon positive.
+**Verify:** In a fresh process, the exercise checks confirm `torch.finfo(torch.bfloat16).max > torch.finfo(torch.float16).max` and `torch.finfo(torch.float32).eps > 0`.
 
 ## Exercise 6: Reject a nonfinite input contract
 
-The question is: Pass aN aN logit through an explicit finite-input validator.
+The question is: Pass a NaN logit through an explicit finite-input validator.
 
-Stable algebra protects particular finite inputs from avoidable overflow. It does not turn aN aN source into a meaningful probability model.
+Stable algebra protects particular finite inputs from avoidable overflow. It does not turn a NaN source into a meaningful probability model.
 
 ```python
 def checked_loss(value, target):
@@ -151,7 +156,7 @@ else:
 
 **Expected:** ValueError before loss evaluation.
 
-**Verify:** Compare the computed values or written argument with ValueError before loss evaluation.
+**Verify:** In a fresh process, the exercise checks confirm `checked_loss(torch.tensor([[0.0, float('nan')]]), torch.tensor([0]))` raises `ValueError`.
 
 ## Review after comparison
 

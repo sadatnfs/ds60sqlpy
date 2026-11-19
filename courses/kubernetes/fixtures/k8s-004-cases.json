@@ -6,8 +6,8 @@
   "cases": [
     {
       "exercise": 1,
-      "task": "Write the caller,namespace,API group,resource,name and verb for an owned hello Deployment read.",
-      "expected": "A six-field request includes apps/deployments,hello,get and the explicit leased namespace."
+      "task": "Write the caller, namespace, API group, resource, name and verb for an owned hello Deployment read.",
+      "expected": "A six-field request includes apps/deployments, hello, get and the explicit leased namespace."
     },
     {
       "exercise": 2,
@@ -26,8 +26,8 @@
     },
     {
       "exercise": 5,
-      "task": "Evaluate a synthetic lease expiring in30seconds for60seconds of work plus15seconds cleanup and5seconds margin.",
-      "expected": "Refuse because30<80."
+      "task": "A RoleBinding in namespace lesson-a references the built-in ClusterRole view. Predict whether the bound identity can list Pods in lesson-a, list Pods in lesson-b and list Secrets in lesson-a.",
+      "expected": "Pods in lesson-a: allowed. Pods in lesson-b: denied, because a RoleBinding grants only inside its own namespace. Secrets in lesson-a: denied, because the default view role excludes Secrets."
     },
     {
       "exercise": 6,

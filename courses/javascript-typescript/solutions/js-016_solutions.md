@@ -20,34 +20,44 @@ Reading a whole small file is straightforward. Streaming allows incremental proc
 
 ## Reading the implementation
 
-mkdtemp allocates a unique directory under tmpdir. writeFile with flag wx rejects an existing file instead of replacing it. readFile with utf8 decodes text; without an encoding it returns bytes. createReadStream with encoding utf8 retains incomplete character sequences between chunks. createInterface with crlfDelay:Infinity treats CRLF consistently across chunks. for await consumes lines until completion, and finally closes both the interface and stream. Path containment based only on resolve does not defend against symlink races, so the lesson's lexical name check is scoped to files it creates itself.
+mkdtemp allocates a unique directory under tmpdir. writeFile with flag wx rejects an existing file instead of replacing it. readFile with utf8 decodes text; without an encoding it returns bytes. createReadStream with encoding utf8 retains incomplete character sequences between chunks. createInterface with crlfDelay:Infinity treats CRLF consistently across chunks. for await consumes lines until completion, and finally closes both the interface and stream. open returns a FileHandle; declaring it with await using closes it when its block ends by awaiting its Symbol.asyncDispose method, and a closed handle reports fd -1. Path containment based only on resolve does not defend against symlink races, so the lesson's lexical name check is scoped to files it creates itself.
 
-## Exercise 1: Read a small UTF-8 file
+## Exercise 1: Read a small UTF-8 file: change one input
 
-Task: Write one line containing an emoji, then compare text length and byte length.
+Task: Copy Example A into a scratch `main.mjs` and change `const text = 'A😀B\n';` to `const text = 'A😀B\n!';`. Before running it, predict which check fails and which value it now sees; then run it and restore the original line.
 
-The emoji occupies four UTF-8 bytes and two UTF-16 code units. Neither byte count nor JavaScript string length is a universal count of user-perceived characters.
+The emoji occupies four UTF-8 bytes and two UTF-16 code units. Neither byte count nor JavaScript string length is a universal count of user-perceived characters. The await using declaration closes the FileHandle when its block ends, even if a read throws, so no descriptor stays open; the retained reference only proves that by reporting fd -1.
+
+The unchanged code is the exercise block of Example A:
 
 ```javascript
 await withDirectory(async (directory) => {
   const path = join(directory, 'message.txt');
   const text = 'A😀B\n';
   await writeFile(path, text, { encoding: 'utf8', flag: 'wx' });
+  let owned;
+  {
+    await using handle = await open(path, 'r');
+    owned = handle;
+    assert.equal((await handle.readFile()).length, 7);
+  }
+  assert.equal(owned.fd, -1);
   assert.equal(await readFile(path, 'utf8'), text);
-  assert.equal((await readFile(path)).length, 7);
   assert.equal(text.length, 5);
 });
 ```
 
-**Expected:** text round-trips; UTF-8 byte length exceeds code-unit length.
+**Expected:** The changed run fails with an `AssertionError` at the check `assert.equal((await handle.readFile()).length, 7)`. Restoring the original line brings back the worked observation: text round-trips; 7 UTF-8 bytes versus 5 code units; the handle reports fd -1 after its block.
 
-**Verify:** Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.
+**Verify:** Compare your written prediction with the reported `AssertionError`, including its actual and expected values, and name the value that made `assert.equal((await handle.readFile()).length, 7)` fail. After restoring the line, the program prints its `{"checks":1,"status":"passed"}` receipt again.
 
-## Exercise 2: Preserve characters and lines across chunks
+## Exercise 2: Preserve characters and lines across chunks: debug a regression
 
-Task: Stream two lines with a two-byte highWaterMark and decode using readline.
+Task: A regression changed one token in Example B, so one line now reads `await writeFile(path, 'A😀B\r\nsecond\n!', 'utf8');`. Run Example B with that line, use the failing check to locate the defect and repair it without changing the check.
 
 The stream decoder retains incomplete UTF-8 sequences, while readline retains incomplete lines. Chunk size is not a record size or a guarantee about the bytes held by every layer.
+
+The unchanged code is the exercise block of Example B:
 
 ```javascript
 await withDirectory(async (directory) => {
@@ -57,9 +67,9 @@ await withDirectory(async (directory) => {
 });
 ```
 
-**Expected:** lines are A😀B and second, without a corrupt replacement character.
+**Expected:** Before the repair the run fails with an `AssertionError` at the check `assert.deepEqual(await readLines(path), ['A😀B', 'second'])`; after it the line reads `await writeFile(path, 'A😀B\r\nsecond\n', 'utf8');` again and lines are A😀B and second, without a corrupt replacement character.
 
-**Verify:** Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.
+**Verify:** Keep the failing and the repaired runs. Explain why the changed token alters the value tested by `assert.deepEqual(await readLines(path), ['A😀B', 'second'])` for this input.
 
 ## Exercise 3: Refuse accidental overwrite
 
@@ -81,7 +91,7 @@ await withDirectory(async (directory) => {
 
 **Expected:** second creation rejects with EEXIST; original first remains.
 
-**Verify:** Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.
+**Verify:** Keep a check equivalent to `assert.equal(await readFile(path, 'utf8'), 'first')`. As a control, change `await writeFile(path, 'first', { flag: 'wx' });` to `await writeFile(path, 'first!', { flag: 'wx' });`: the run must fail with an `AssertionError` at that check. Restore the line before continuing.
 
 ## Exercise 4: Distinguish a missing file
 
@@ -100,7 +110,7 @@ await withDirectory(async (directory) => {
 
 **Expected:** ENOENT rejection.
 
-**Verify:** Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.
+**Verify:** Keep a check equivalent to `assert.rejects(readFile(join(directory, 'missing.txt')), (error) => error.code === 'ENOENT')`. As a control, change `await assert.rejects(readFile(join(directory, 'missing.txt')), error => error.code === 'ENOENT');` to `await assert.rejects(readFile(join(directory, 'missing.txt')), error => error.code !== 'ENOENT');` inside it: the run must fail with an `AssertionError`, which shows the check can fail. Restore it.
 
 ## Exercise 5: Restrict a learner-supplied fixture name
 
@@ -117,7 +127,7 @@ for (const name of ['../report.txt', '/tmp/report.txt', 'a/b.txt', 'a\\b.txt']) 
 
 **Expected:** only report.txt is accepted.
 
-**Verify:** Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.
+**Verify:** Keep a check equivalent to `assert.equal(fixtureName('report.txt'), 'report.txt')`. As a control, change `assert.equal(fixtureName('report.txt'), 'report.txt');` to `assert.equal(fixtureName('report.txt'), 'report.txt!');` inside it: the run must fail with an `AssertionError`, which shows the check can fail. Restore it.
 
 ## Exercise 6: Handle an empty text stream
 
@@ -135,7 +145,7 @@ await withDirectory(async (directory) => {
 
 **Expected:** no lines.
 
-**Verify:** Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.
+**Verify:** Keep a check equivalent to `assert.deepEqual(await readLines(path), [])` and confirm that the reference still passes. Then name an input that would make it fail and explain which value changes.
 
 ## After comparison
 

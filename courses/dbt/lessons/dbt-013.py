@@ -1,6 +1,7 @@
-"""dbt-013: worked starting point; complete the guide's six changes."""
+"""dbt-013: both worked cases; complete the guide's six changes."""
 
 import os
+import shutil
 import tempfile
 from pathlib import Path
 
@@ -84,7 +85,7 @@ def example_one():
             d,
             models={
                 "base": "{{ config(tags=['feature']) }} select 1 as x",
-                "child": "select x+1 as x from {{ ref('base') }}",
+                "child": "select x + 1 as x from {{ ref('base') }}",
                 "unrelated": "select 9 as x",
             },
         )
@@ -98,8 +99,40 @@ def example_one():
         return {"selected_models": sorted(selected)}
 
 
+def example_two():
+    with tempfile.TemporaryDirectory() as d:
+        p = project(
+            d, models={"base": "select 1 as x", "child": "select x + 1 as x from {{ ref('base') }}"}
+        )
+        invoke(p, "parse")
+        state = p / "previous_state"
+        state.mkdir()
+        shutil.copyfile(p / "target/manifest.json", state / "manifest.json")
+        (p / "models/base.sql").write_text("select 2 as x")
+        selected = names(
+            invoke(
+                p,
+                "ls",
+                "--state",
+                str(state),
+                "--select",
+                "state:modified+",
+                "--resource-type",
+                "model",
+                "--output",
+                "name",
+            )
+        )
+        assert set(selected) == {"base", "child"}, selected
+        return {
+            "changed_and_downstream": sorted(selected),
+            "state_is_not_a_quality_certificate": True,
+        }
+
+
 if __name__ == "__main__":
     print(example_one())
+    print(example_two())
 
 # TODO 1: Select tag:feature without the plus suffix.
 # TODO 2: Edit the unrelated model and inspect state selection.

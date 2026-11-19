@@ -6,7 +6,7 @@ Advanced; about 120 minutes, with additional time for the optional host experime
 
 ## Learning objectives
 
-Build a failure-domain matrix. Choose an orchestration approach for a stated workload. Explain the difference between a configuration, an observed process and evidence of the application's behavior.
+Build a failure-domain matrix. Choose an orchestration approach for a stated workload. Use single-host Compose, orchestration and scheduling accurately when you explain what you observed.
 
 ## Purpose, vocabulary and mental model
 
@@ -24,11 +24,11 @@ Before changing platforms, write the failure model. What happens if a process ex
 
 ## How to use this lesson
 
-The classroom displays this guide and saves your worksheet. Its Run button does not control your Docker engine. Docker engine access is powerful host access, so the classroom deliberately receives no engine socket. Work through the supplied examples without starting anything, then use the optional host lab only in your own disposable project. Reading a command, parsing YAML and actually running the project are different forms of evidence.
+The classroom displays this guide and saves your worksheet, `courses/docker/lessons/docker-036.md`. Its Run button does not control your Docker engine. Docker engine access is powerful host access, so the classroom deliberately receives no engine socket. Work through the supplied examples without starting anything, then use the optional host lab only in your own disposable project. Reading a command, parsing YAML and actually running the project are different forms of evidence.
 
 Use Bash in Linux, macOS Terminal, or Ubuntu under WSL 2 on Windows. The supported engine runs Linux containers. The maintained fixture is `courses/docker/fixtures/compose-lab/`; its README explains copying it into a new ignored learner directory, checking the engine, building locally with visible logs, and using the fixed project name `ds60-docker-study`. The fixture uses port 18080 on host loopback. Stop if that project name or port belongs to unrelated work; choose a new project name consistently in your own copy. Never paste a command against a remote Docker context simply because it is currently selected.
 
-For Dockerfile examples, create a file named `Dockerfile` in a scratch project. YAML snippets describe a fragment unless explicitly called a complete file. Text transcripts are synthetic illustrations, not claims about your machine. Do not substitute a real password, token or private registry into a checked-in example.
+For Dockerfile examples, create a file named `Dockerfile` in a scratch project. YAML snippets describe a fragment unless explicitly called a complete file. Text transcripts are synthetic illustrations, not claims about your machine. Do not substitute a real password, token or private registry into a checked-in example. **How to use the lessons** in the [subject README](../README.md) collects these rules in one place.
 
 ## Worked example / walkthrough
 
@@ -60,58 +60,50 @@ published port -> explicit external traffic design
 
 ## Six progressive exercises
 
+For each exercise, name the object involved and the phase of its lifetime before changing anything, then vary only the condition the task names. Exercises that ask you to predict, explain, compare or diagnose keep their answers in the solutions file; the others show the evidence to look for.
+
 ### Exercise 1: Predict whether Compose survives host loss automatically.
 
-**Expected evidence:** Not without an external recovery design.
-
-**Hint:** Identify the object and the phase of its lifetime before changing it. Use the relevant worked example, then vary only the condition named in this task.
+**Hint:** Ask what restarts the project if the host itself fails.
 
 ### Exercise 2: Identify the classroom reason for Compose.
 
-**Expected evidence:** A reproducible local application with understandable resource ownership.
-
-**Hint:** Identify the object and the phase of its lifetime before changing it. Use the relevant worked example, then vary only the condition named in this task.
+**Hint:** Ask what a learner needs to own and understand on one machine.
 
 ### Exercise 3: Build a failure-domain matrix.
 
 **Expected evidence:** Process, container, engine, host and external dependency rows.
 
-**Hint:** Identify the object and the phase of its lifetime before changing it. Use the relevant worked example, then vary only the condition named in this task.
+**Hint:** For each row, name what fails and what recovers it.
 
 ### Exercise 4: Diagnose a mechanical volume translation to Kubernetes.
 
-**Expected evidence:** A storage class and data recovery model are still required.
-
-**Hint:** Identify the object and the phase of its lifetime before changing it. Use the relevant worked example, then vary only the condition named in this task.
+**Hint:** Ask what replaces a named volume's storage and its backup in a cluster.
 
 ### Exercise 5: Explain why a load balancer does not replicate a database.
 
-**Expected evidence:** Traffic distribution and data durability are separate mechanisms.
-
-**Hint:** Identify the object and the phase of its lifetime before changing it. Use the relevant worked example, then vary only the condition named in this task.
+**Hint:** Ask what a load balancer copies: requests or data.
 
 ### Exercise 6: Choose an orchestration approach for a stated workload.
 
-**Expected evidence:** A reasoned choice based on availability, scaling, operations and learning cost.
-
-**Hint:** Identify the object and the phase of its lifetime before changing it. Use the relevant worked example, then vary only the condition named in this task.
+**Hint:** Weigh availability needs against operating and learning cost.
 
 ## Common mistakes and diagnosis
 
-Start with the smallest observation that separates two plausible causes. An image inspection answers questions about the packaged filesystem and configuration; container inspection adds runtime mounts, network attachment and exit status. An application request adds another layer of evidence. A healthy container can still serve the wrong application result. Preserve the original failure and the exact changed field before retrying.
+Treating Compose restart policies as host-failure recovery. Translating volumes to Kubernetes without a storage and backup design. Expecting a load balancer to replicate data.
 
-The boundary case in this chapter is: Diagnose a mechanical volume translation to Kubernetes. Use its expected observation, A storage class and data recovery model are still required., to avoid treating a successful command as proof of the wrong claim. Keep source edits in your own copy. Do not make a container privileged, mount the engine socket, disable all checks or delete every volume to make an example succeed.
+Exercise 4 is this chapter's boundary case: Diagnose a mechanical volume translation to Kubernetes. Start with the smallest observation that separates two plausible causes. An image inspection answers questions about the packaged filesystem and configuration; container inspection adds runtime mounts, network attachment and exit status; an application request adds another layer, and a healthy container can still serve the wrong result. Preserve the original failure and the exact changed field before retrying. Keep source edits in your own copy. Do not make a container privileged, mount the engine socket, disable all checks or delete every volume to make an example succeed.
 
 ## Retrieval, transfer and next steps
 
-Close the explanations and draw the path from source files to image to container to the observation relevant here. Reconstruct the second worked example with one different value and predict what changes. Explain which state survives process restart, container recreation and image rebuild. If none of those operations applies to this mechanism, explain why.
+Close the explanations and draw the path from source files to image to container to the observation relevant here, using single-host Compose, orchestration, scheduling and failure domain. Reconstruct worked example 2 (Map only what actually transfers) with one different value and predict what changes. Explain which state survives process restart, container recreation and image rebuild, or why none of those operations applies to this mechanism.
 
-Before proceeding, retain six evidence records. For the optional host project, use `docker compose -p ds60-docker-study down` from the fixture copy to stop its containers and remove its ordinary network. This command preserves named volumes. Volume deletion is a separate deliberate reset of that disposable lab after a backup or export, never a general cleanup step. The fixture README describes its exact scoped reset.
+When a host session ends, run `docker compose -p ds60-docker-study down` from your fixture copy. It removes the project's containers and network but keeps named volumes; deleting a volume is a separate, deliberate reset described in the fixture README.
 
 ## Primary references
 
-- [Official reference 1](https://docs.docker.com/compose/intro/features-uses/)
-- [Official reference 2](https://kubernetes.io/docs/concepts/overview/)
+- [Why use Compose](https://docs.docker.com/compose/intro/features-uses/)
+- [Kubernetes overview](https://kubernetes.io/docs/concepts/overview/)
 
 ## Ask an AI tutor about this lesson
 

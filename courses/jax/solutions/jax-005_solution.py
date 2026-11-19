@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import math
 import numpy as np
 import jax
 import jax.numpy as jnp
@@ -85,7 +84,7 @@ def main():
     k1, k2 = jax.random.split(key)
     assert not same_key(k1, k2)
 
-    print("jax-005" + ": 8 asserted cases passed")
+    print("jax-005: 8 asserted cases passed")
 
 
 if __name__ == "__main__":

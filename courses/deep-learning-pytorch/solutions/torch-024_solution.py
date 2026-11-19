@@ -7,7 +7,7 @@ from torch.nn import functional as F
 
 
 def verify():
-    # Exercise 1: Freeze the geometric task
+    # Worked example A: Freeze the geometric task
     x = torch.tensor([[-2.0], [-1.0], [1.0], [2.0]])
     y = torch.tensor([[0.0], [0.0], [1.0], [1.0]])
     test_x = torch.tensor([[-3.0], [3.0]])
@@ -16,7 +16,7 @@ def verify():
     test_ids = {"e", "f"}
     assert not train_ids & test_ids and len(test_ids) == 2
 
-    # Exercise 2: Fit explicit normalization
+    # Worked example B: Fit explicit normalization
     mean = x.mean(0)
     scale = x.std(0, correction=0)
     tx = (x - mean) / scale
@@ -24,7 +24,7 @@ def verify():
     assert mean.item() == 0
     np.testing.assert_allclose(scale.item(), np.sqrt(2.5), atol=1e-6, rtol=0)
 
-    # Exercise 3: Train a fixed classifier
+    # Worked example C: Train a fixed classifier
     model = nn.Linear(1, 1, bias=False)
     with torch.no_grad():
         model.weight.zero_()
@@ -59,6 +59,31 @@ def verify():
         group: (int(broken[i] != truth[i]), 1) for i, group in enumerate(["negative", "positive"])
     }
     assert report == {"negative": (0, 1), "positive": (1, 1)}
+
+    # Exercise 1: Fit normalization on new training values
+    fresh_x = torch.tensor([[0.0], [2.0], [4.0], [6.0]])
+    centre = fresh_x.mean(0)
+    spread = fresh_x.std(0, correction=0)
+    assert centre.item() == 3
+    np.testing.assert_allclose(spread.item(), np.sqrt(5), atol=1e-6, rtol=0)
+    np.testing.assert_allclose(
+        ((torch.tensor([[8.0]]) - centre) / spread).item(), np.sqrt(5), atol=1e-6, rtol=0
+    )
+
+    # Exercise 2: Count a new confusion table
+    predicted = torch.tensor([True, False, True, True])
+    actual = torch.tensor([True, False, False, True])
+    counts = {
+        "TP": int((predicted & actual).sum()),
+        "TN": int((~predicted & ~actual).sum()),
+        "FP": int((predicted & ~actual).sum()),
+        "FN": int((~predicted & actual).sum()),
+    }
+    assert counts == {"TP": 2, "TN": 1, "FP": 1, "FN": 0}
+
+    # Exercise 3: Classify with a fixed weight
+    logits_t = 2 * torch.tensor([-1.5, -0.2, 0.0, 0.4])
+    assert (logits_t >= 0).tolist() == [False, False, True, True]
     return {"checks": 6, "status": "passed"}
 
 

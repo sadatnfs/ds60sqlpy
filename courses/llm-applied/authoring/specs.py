@@ -784,8 +784,8 @@ This lesson uses a curated synonym map and a two-hop document graph. It does not
     [
         ex(
             "Apply a controlled synonym rewrite",
-            "Rewritebuy rate usingbuy->purchase while preserving the original question.",
-            "rewrittenpurchase rate;original unchanged.",
+            "Rewrite buy rate using the rule buy -> purchase while preserving the original question.",
+            "rewritten query purchase rate; original question unchanged.",
             """original='buy rate'; rewritten=rewrite(original,{'buy':'purchase'})
 assert rewritten=='purchase rate' and original=='buy rate' """,
             "The substitution is explicitly authored. A learned rewrite would need evaluation for intent preservation and unsupported expansion.",
@@ -1330,7 +1330,7 @@ This chapter deliberately implements a narrower mechanism: symmetric uniform sig
     [
         ex(
             "Quantize a fixed matrix",
-            "QuantizeW[[.1,-.9],[1.7,-.2]] with scale 1.7/7 andnearest-even rounding.",
+            "Quantize W = [[0.1, -0.9], [1.7, -0.2]] with scale 1.7/7 and round-half-to-even.",
             "codes[[0,-4],[7,-1]].",
             """original=np.array([[.1,-.9],[1.7,-.2]],dtype=np.float32); scale=float(np.abs(original).max()/7)
 codes=np.clip(np.rint(original/scale),-7,7).astype(np.int8)
@@ -1636,8 +1636,8 @@ Do not train a retriever on the final relevance benchmark and then present its s
 )
 add(
     "llm-applied-021",
-    "A realistic pretrained-model adaptation recipe introduces dependencies that the tiny offline exercises deliberately avoid: model weights,tokenizer files,chat templates,library versions,artifact licenses and larger resource needs. These are part of the experiment,not setup trivia. A model name pointing to a moving branch is not a reproducible identity. Pin an exact repository revision and record hashes of the downloaded files. Keep the acquisition step separate from local training so an offline run cannot silently fetch missing assets.\n\nThe optional recipe targetsHuggingFaceTB/SmolLM2-135M-Instruct at revision12fd25f77366fa6b3b4b768ec3050bf629380bac,whose model card was checked asApache-2.0 during authoring. This is a small pretrained model for a bounded demonstration, not a recommended production assistant. The recipe pins direct package versions,uses a literal local prompt-completion dataset,checks chat-template prefix alignment and answer-only masks,and runs at most10CPU updates. The optional recipe has separate bounded Linux arm64 execution evidence for ten full-SFT and LoRA updates, while its generation probe produced an incorrect formula despite evidence. Learners must still explicitly prepare their own dependencies and assets; mechanics success does not establish subject expertise. No default lesson downloads a model or calls a paid service.",
-    """The prepared scripts live underfixtures/pretrained. prepare_assets.py requires an explicit network acknowledgement and downloads only the pinned model snapshot into a new learner-owned directory. It records SHA256 hashes. train_local.py useslocal_files_only=True andtrust_remote_code=False,checks the manifest and refuses a nonempty output directory. TRL SFTTrainer receives conversational prompt/completion records withcompletion_only_loss=True. Before training,the script inspects tokenized examples and a collated batch to ensure prompt labels are ignored and answer labels remain active. The model itself performs the causal label shift;do not shift labels twice.""",
+    "A realistic pretrained-model adaptation recipe introduces dependencies that the tiny offline exercises deliberately avoid: model weights,tokenizer files,chat templates,library versions,artifact licenses and larger resource needs. These are part of the experiment,not setup trivia. A model name pointing to a moving branch is not a reproducible identity. Pin an exact repository revision and record hashes of the downloaded files. Keep the acquisition step separate from local training so an offline run cannot silently fetch missing assets.\n\nThe optional recipe targets HuggingFaceTB/SmolLM2-135M-Instruct at revision 12fd25f77366fa6b3b4b768ec3050bf629380bac,whose model card was checked as Apache-2.0 during authoring. This is a small pretrained model for a bounded demonstration, not a recommended production assistant. The recipe pins direct package versions,uses a literal local prompt-completion dataset,checks chat-template prefix alignment and answer-only masks,and runs at most 10 CPU updates. The optional recipe has separate bounded Linux arm64 execution evidence for ten full-SFT and LoRA updates, while its generation probe produced an incorrect formula despite evidence. Learners must still explicitly prepare their own dependencies and assets; mechanics success does not establish subject expertise. No default lesson downloads a model or calls a paid service.",
+    """The prepared scripts live under fixtures/pretrained. prepare_assets.py requires an explicit network acknowledgement and downloads only the pinned model snapshot into a new learner-owned directory. It records SHA256 hashes. train_local.py uses local_files_only=True and trust_remote_code=False, checks the manifest and refuses a nonempty output directory. TRL SFTTrainer receives conversational prompt/completion records with completion_only_loss=True. Before training,the script inspects tokenized examples and a collated batch to ensure prompt labels are ignored and answer labels remain active. The model itself performs the causal label shift;do not shift labels twice.""",
     [
         (
             "Pinned revision",
@@ -1746,7 +1746,7 @@ Separate extraction,computation and explanation. An extraction proposal becomes 
     [
         ex(
             "Execute a bounded grouped mean",
-            "Use rows A1,A3,B10 and the admittedgroup_mean request.",
+            "Use rows A1, A3, B10 and the admitted group_mean request.",
             "A count2 mean 2;B count1 mean 10.",
             """rows=[{'id':'a1','group':'A','value':1.},{'id':'a2','group':'A','value':3.},{'id':'b1','group':'B','value':10.}]
 request={'operation':'group_mean','group_by':'group','value':'value'}
@@ -1948,7 +1948,7 @@ The default capstone assembles an offline extractive RAG baseline over authored 
     [
         ex(
             "Answer a supported domain definition",
-            "Ask the public assistant forconversion_definition.",
+            "Ask the public assistant for conversion_definition.",
             "answered with metric-v1 citation and source text.",
             """assistant=Assistant(DOCUMENTS,{'public'},'corpus-v1')
 answer=assistant.answer('conversion_definition')

@@ -25,7 +25,7 @@
     {
       "exercise": 5,
       "task": "Explain version-dependent topology behavior.",
-      "expected": "Use the actual API/controller/data-plane support matrix."
+      "expected": "Name the trafficDistribution values the pinned release accepts (PreferSameZone, PreferSameNode and the deprecated PreferClose), the precedence of the topology-mode annotation and whether the data plane honors EndpointSlice hints."
     },
     {
       "exercise": 6,

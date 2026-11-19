@@ -6,13 +6,13 @@ Advanced, approximately 120 minutes. Direct prerequisites: `java-025`
 
 ## Learning objectives
 
-Explain package, classpath, named module, export using a concrete program. Trace the normal execution, identify its boundary assumptions and make a failure case observable. The first investigation is Read `String.class` module and package names. The final exercise transfers the mechanism to reject a missing module dependency.
+Compile and run a two-module application and read its module descriptors, exports and dependency errors. Along the way, explain package, classpath, named module, export using a concrete program. Trace the normal execution, identify its boundary assumptions and make a failure case observable. Exercises 1 and 2 start from the worked examples; the authored investigations begin with this task: Create the owned greeting/application fixture and compile both with --module-source-path. The final exercise transfers the mechanism to reject a missing module dependency.
 
 ## Purpose and mental model
 
-Packages organize class names and access boundaries. Aclasspath tells the runtime where unnamed-module classes can be found;it does not change the package declared in source. Java's module system adds explicit requires and exports relationships. Apublic class in a package is not automatically accessible from another named module unless the package is exported. Module boundaries therefore add a level beyond public/private declarations.
+Packages organize class names and access boundaries. A classpath tells the runtime where unnamed-module classes can be found; it does not change the package declared in source. Java's module system adds explicit requires and exports relationships. A public class in a package is not automatically accessible from another named module unless the package is exported. Module boundaries therefore add a level beyond public/private declarations.
 
-This lesson includes a real two-module source fixture:a greeting library exports its package,and an application requires that module. The defaultMain.java diagnostic writes the same tiny fixture into an owned temporary directory,invokes the prepared JDK compiler,inspects module descriptors and runs the application in a bounded child JVM. No external dependency is downloaded. The separate checked-in fixture and manual commands let a learner inspect the file layout directly.
+This lesson includes a real two-module source fixture:a greeting library exports its package, and an application requires that module. The default Main.java diagnostic writes the same tiny fixture into an owned temporary directory, invokes the prepared JDK compiler, inspects module descriptors and runs the application in a bounded child JVM. No external dependency is downloaded. The separate checked-in fixture and manual commands let a learner inspect the file layout directly.
 
 ## Vocabulary and concepts
 
@@ -22,7 +22,7 @@ This lesson includes a real two-module source fixture:a greeting library exports
 
 **Named module:** A unit declaring dependencies and exported packages.
 
-**Export:** Permission for other modules to access a package's publicAPI.
+**Export:** Permission for other modules to access a package's public API.
 
 ## How to run this lesson
 
@@ -43,13 +43,13 @@ The [two-module fixture](../fixtures/java-026/README.md) contains the exact sour
 
 ## Syntax anatomy and execution trace
 
-The source root contains one directory per module,each withmodule-info.java and package directories. javac --module-source-path selects that layout and-m names the modules to compile. java --module-path selects compiled modules and-mmodule/class starts the application. ModuleFinder reads descriptors without treating filenames as module identities. The child process uses a fixed local Java executable and bounded wait. The child process inherits the prepared environment unchanged. JVM startup notices such as JAVA_TOOL_OPTIONS belong to stderr, while the application result belongs to stdout. Capture both streams separately in owned files so diagnostics cannot corrupt an exact output comparison; include stderr when a child fails. Do not remove inherited CPU or resource settings to make a test pass.
+The source root contains one directory per module, each with module-info.java and package directories. javac --module-source-path selects that layout and -m names the modules to compile. java --module-path selects compiled modules and -m module/class starts the application. ModuleFinder reads descriptors without treating filenames as module identities. The child process uses a fixed local Java executable and bounded wait. The child process inherits the prepared environment unchanged. JVM startup notices such as JAVA_TOOL_OPTIONS belong to stderr, while the application result belongs to stdout. Capture both streams separately in owned files so diagnostics cannot corrupt an exact output comparison; include stderr when a child fails. Do not remove inherited CPU or resource settings to make a test pass.
 
 ## Worked example / walkthrough
 
 ### Example A: Inspect a platform module
 
-The fully qualified class name,package and module are distinct identities. Apackage name alone does not establish module membership.
+The fully qualified class name, package and module are distinct identities. A package name alone does not establish module membership.
 
 ```java
 import java.util.*;
@@ -155,11 +155,11 @@ public class Main {
 }
 ```
 
-**Expected:** module `java.base`;package `java.lang`.
+**Expected:** module `java.base`; package `java.lang`.
 
 ### Example B: Inspect the classroom classpath context
 
-The classroom compiles a singleMain.java andlaunches it by classpath. The separate fixture demonstrates named-module execution rather than pretending the pad itself is modular.
+The classroom compiles a single Main.java and launches it by classpath. The separate fixture demonstrates named-module execution rather than pretending the pad itself is modular.
 
 ```java
 import java.util.*;
@@ -275,29 +275,29 @@ Read the source from the entry point and name each value before executing it. Id
 
 ## Exercises
 
-1. **Inspect a platform module.** Read `String.class` module and package names.
-   **Expected:** module `java.base`;package `java.lang`.
-   **Verify:** Compare your assertion values or captured diagnostic with module `java.base`;package `java.lang`.
+1. **Inspect a platform module: predict an edited check.** Copy Example A into a scratch `Main.java` and change `assert String.class.getPackageName().equals("java.lang");` to `assert String.class.getPackageName().equals("java.lang!");` inside its assertion. Before running it with `java -ea Main`, predict whether the assertion still holds and explain why; then restore it.
+   **Expected:** The changed run fails with an `AssertionError` from the assertion on `String.class.getPackageName().equals("java.lang")`. Restoring the original line brings back the worked observation: module `java.base`; package `java.lang`.
+   **Verify:** Compare your written prediction with the reported `AssertionError` and its stack-trace line, and explain why the edited condition is false for the values that satisfy `String.class.getPackageName().equals("java.lang")`. After restoring the line, the program completes without an `AssertionError` again.
 
-2. **Inspect the classroom classpath context.** ReadMain.class module metadata.
-   **Expected:** Main belongs to the unnamed module in the standard classpath launch.
-   **Verify:** Compare your assertion values or captured diagnostic with Main belongs to the unnamed module in the standard classpath launch.
+2. **Inspect the classroom classpath context: diagnose an edited check.** A careless edit changed the assertion that Example B adds after Example A so that it reads `assert Main.class.getModule().isNamed();`. Run Example B with that line, explain why the edited assertion now fails for the same program state, and restore it.
+   **Expected:** Before the repair the run fails with an `AssertionError` from the assertion on `!Main.class.getModule().isNamed()`; after it the line reads `assert !Main.class.getModule().isNamed();` again and main belongs to the unnamed module in the standard classpath launch.
+   **Verify:** Keep the failing and the repaired runs. Explain why the edited assertion rejects the same program state that `!Main.class.getModule().isNamed()` accepts.
 
-3. **Compile two real modules.** Create the owned greeting/application fixture and compile both with--module-source-path.
-   **Expected:** compiler exit 0 andmodule-info.class files present.
-   **Verify:** Compare your assertion values or captured diagnostic with compiler exit 0 andmodule-info.class files present.
+3. **Compile two real modules.** Create the owned greeting/application fixture and compile both with --module-source-path.
+   **Expected:** compiler exit 0 and module-info.class files present.
+   **Verify:** Keep an assertion equivalent to `java.nio.file.Files.isRegularFile(fixture.output.resolve("course.app/module-info.class"))`. As a control, change `fixture.output.resolve("course.app/module-info.class")` to `fixture.output.resolve("course.app/module-info.class!")` inside it: the run must fail with an `AssertionError`, which shows the assertion can fail. Restore it.
 
 4. **Inspect declared dependencies and exports.** Read the compiled descriptors with ModuleFinder.
-   **Expected:** app requirescourse.greeting;library exportsedu.example.greeting.
-   **Verify:** Compare your assertion values or captured diagnostic with app requirescourse.greeting;library exportsedu.example.greeting.
+   **Expected:** app requires course.greeting; library exports edu.example.greeting.
+   **Verify:** Keep an assertion equivalent to `library.exports().stream().anyMatch(item -> item.source().equals("edu.example.greeting"))`. As a control, change `.anyMatch(item -> item.source().equals("edu.example.greeting"));` to `.anyMatch(item -> item.source().equals("edu.example.greeting!"));` inside it: the run must fail with an `AssertionError`, which shows the assertion can fail. Restore it.
 
-5. **Run the modular application.** Launch the compiled app in a fresh childJVM with the fixed module path.
-   **Expected:** stdoutHello, modules! andexit0.
-   **Verify:** Compare your assertion values or captured diagnostic with stdoutHello, modules! andexit0.
+5. **Run the modular application.** Launch the compiled app in a fresh child JVM with the fixed module path.
+   **Expected:** stdout Hello, modules! and exit 0.
+   **Verify:** Keep an assertion equivalent to `output.strip().equals("Hello, modules!")`. As a control, change `assert output.strip().equals("Hello, modules!");` to `assert output.strip().equals("Hello, modules!!");` inside it: the run must fail with an `AssertionError`, which shows the assertion can fail. Restore it.
 
-6. **Reject a missing module dependency.** Compile an app requiringcourse.missing instead ofcourse.greeting.
+6. **Reject a missing module dependency.** Compile an app requiring course.missing instead of course.greeting.
    **Expected:** nonzero compiler exit and captured diagnostic.
-   **Verify:** Compare your assertion values or captured diagnostic with nonzero compiler exit and captured diagnostic.
+   **Verify:** Keep an assertion equivalent to `compiled != 0 && !fixture.diagnostics.isBlank()`. As a control, change `fixture.source.resolve("course.app/module-info.java"),` to `fixture.source.resolve("course.app/module-info.java!"),`: the run must fail with an `AssertionError` from the assertion on `compiled != 0 && !fixture.diagnostics.isBlank()`. Restore the line before continuing.
 
 ## Common pitfalls and diagnosis
 
@@ -307,7 +307,14 @@ Do not replace a precise exception with a catch-all that returns a plausible def
 
 ## Progressive hints
 
-First reconstruct the values and identities in the worked example. Next isolate the line that changes the result when one input is altered. Finally compare the normal and failure paths with the stated contract. Use a small table of input, expected value, actual value and exception type. Ask for one hint about the first incorrect assumption before requesting the entire reference implementation.
+Read one hint at a time and attempt the exercise again before reading the next. Keep a small table of input, expected value, actual value and exception type. Ask for one hint about the first incorrect assumption before requesting the entire reference implementation.
+
+- **Exercise 1:** First restate the expected observation: module `java.base`; package `java.lang`. Then list the values read by `String.class.getPackageName().equals("java.lang")` and trace each one from its declaration. Finally, compute the asserted value with `assert String.class.getPackageName().equals("java.lang!");` in place before running.
+- **Exercise 2:** First restate the expected observation: main belongs to the unnamed module in the standard classpath launch. Then list the values read by `!Main.class.getModule().isNamed()` and trace each one from its declaration. Finally, compare `assert Main.class.getModule().isNamed();` with the same line in Example B and state the claim each version makes.
+- **Exercise 3:** First restate the expected observation: compiler exit 0 and module-info.class files present. Then list the values read by `java.nio.file.Files.isRegularFile(fixture.output.resolve("course.app/module-info.class"))` and trace each one from its declaration. Finally, name one input that would make `java.nio.file.Files.isRegularFile(fixture.output.resolve("course.app/module-info.class"))` false.
+- **Exercise 4:** First restate the expected observation: app requires course.greeting; library exports edu.example.greeting. Then list the values read by `library.exports().stream().anyMatch(item -> item.source().equals("edu.example.greeting"))` and trace each one from its declaration. Finally, name one input that would make `library.exports().stream().anyMatch(item -> item.source().equals("edu.example.greeting"))` false.
+- **Exercise 5:** First restate the expected observation: stdout Hello, modules! and exit 0. Then list the values read by `output.strip().equals("Hello, modules!")` and trace each one from its declaration. Finally, name one input that would make `output.strip().equals("Hello, modules!")` false.
+- **Exercise 6:** First restate the expected observation: nonzero compiler exit and captured diagnostic. Then list the values read by `compiled != 0 && !fixture.diagnostics.isBlank()` and trace each one from its declaration. Finally, predict the effect of changing `fixture.source.resolve("course.app/module-info.java"),` to `fixture.source.resolve("course.app/module-info.java!"),` before running anything.
 
 ## Self-check and retrieval
 
@@ -319,7 +326,7 @@ Preserve the saved pad and the six exercise observations. Continue to the next l
 
 ## Sources and verification status
 
-[Official Java21 API or language reference](https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/module/ModuleFinder.html), reviewed2026-10-22. Examples and exercise fixtures are original course material. Use the [validation guide](../../../docs/validation.md) and CI artifacts for the exact revision and platform to inspect actual compile/run results. Authoring, parsing, compilation, execution and learner mastery are separate forms of evidence.
+[Official Java 21 API or language reference](https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/module/ModuleFinder.html), reviewed 2026-10-22. Examples and exercise fixtures are original course material. Use the [validation guide](../../../docs/validation.md) and CI artifacts for the exact revision and platform to inspect actual compile/run results. Authoring, parsing, compilation, execution and learner mastery are separate forms of evidence.
 
 ## Ask an AI tutor about this lesson
 
@@ -329,7 +336,7 @@ Read courses/java/guides/java-026.md and courses/java/lessons/java-026.java. Dir
 Explain the mechanism, ask for a prediction, review my attempt, give one hint,
 request compiler/runtime evidence, and ask a fresh retrieval question.
 Keep courses/java/solutions/ closed until I request comparison or show an attempt.
-Use Java21 and the declared offline fixture. Done when I can explain the state
+Use Java 21 and the declared offline fixture. Done when I can explain the state
 transitions, pass all six exercise contracts, diagnose one failure and solve a
 new boundary case without copying the solution.
 ```

@@ -1,4 +1,4 @@
-"""dbt-016: worked starting point; complete the guide's six changes."""
+"""dbt-016: both worked cases; complete the guide's six changes."""
 
 import os
 import tempfile
@@ -86,9 +86,10 @@ def example_one():
             d,
             models={
                 "metrics": (
-                    "select cohort, sum(successes)::double/nullif(sum(trials),0"
-                    ") as rate, sum(trials) as denominator from {{ "
-                    "ref('counts') }} group by cohort"
+                    "select cohort, sum(successes)::double / nullif(sum(trials), 0) as rate, "
+                    "sum(trials) as denominator\n"
+                    "from {{ ref('counts') }}\n"
+                    "group by cohort"
                 )
             },
             seeds={"counts": "cohort,successes,trials\nA,1,1\nA,9,99\nB,1,2\n"},
@@ -101,8 +102,24 @@ def example_one():
         return {"rates": {"A": 0.1, "B": 0.5}, "denominators": {"A": 100, "B": 2}}
 
 
+def example_two():
+    with tempfile.TemporaryDirectory() as d:
+        p = project(
+            d,
+            models={
+                "wrong": "select avg(successes::double / trials) as rate from {{ ref('counts') }}"
+            },
+            seeds={"counts": "successes,trials\n1,1\n9,99\n"},
+        )
+        invoke(p, "build")
+        value = rows(p, "select rate from wrong")[0][0]
+        assert abs(value - 0.1) > 0.4
+        return {"equal_row_rate": value, "correct_trial_weighted_rate": 0.1}
+
+
 if __name__ == "__main__":
     print(example_one())
+    print(example_two())
 
 # TODO 1: Specify which trial records belong in the metric.
 # TODO 2: Compute the all-trial rate.

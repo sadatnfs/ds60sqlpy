@@ -17,7 +17,7 @@ A reusable library separates its public contract from implementation and from th
 
 The public Record owns integer id and cents values. It does not retain a view into the input, so a successful result survives after the caller's raw string is destroyed. The parser still borrows the input while reading it. A library that returned views into a temporary normalization buffer would violate that lifetime contract even if its ordinary example happened to print correct values.
 
-The grammar is exactly two comma-separated nonnegative integer fields. The parser checks delimiter count, both conversion results, full consumption and domain ranges. The suffix fixture 7, 125x rejects a plausible permissive parser that accepts a numeric prefix. Valid0, 0 prevents the opposite bug of treating zero as absence. These cases are independent of packaging and should pass before the library is exported.
+The grammar is exactly two comma-separated nonnegative integer fields. The parser checks delimiter count, both conversion results, full consumption and domain ranges. The suffix fixture 7, 125x rejects a plausible permissive parser that accepts a numeric prefix. Valid 0, 0 prevents the opposite bug of treating zero as absence. These cases are independent of packaging and should pass before the library is exported.
 
 The real record-library fixture contains a public header, implementation, independent consumer and CMake target. Building the consumer against that target tests whether the header declares everything it needs and whether the implementation is actually linked. A combined single-file source cannot expose a missing exported include path or omitted library object in the same way.
 
@@ -27,7 +27,7 @@ A library release also needs a stability policy. Changing the accepted grammar, 
 
 ## Debugging the contract
 
-If a consumer compiles only inside the library source tree, inspect public includes and exported target properties. If it links without the intended library, check whether a header accidentally contains a duplicate implementation. If parsing passes normal rows but accepts125x, inspect full consumption. If a returned record changes when raw input is edited, look for borrowed fields where the public contract promised owning values.
+If a consumer compiles only inside the library source tree, inspect public includes and exported target properties. If it links without the intended library, check whether a header accidentally contains a duplicate implementation. If parsing passes normal rows but accepts 125x, inspect full consumption. If a returned record changes when raw input is edited, look for borrowed fields where the public contract promised owning values.
 <!-- depth:end -->
 
 ## Worked example 1
@@ -55,7 +55,7 @@ Document parse_record input grammar and result ownership.
 
 **Reasoning:** Consumers need semantic rules beyond signatures.
 
-**Verify:** Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.
+**Verify:** Check your grammar against `parse_record("7,125")` succeeding and `parse_record("7,125x")` failing, and state that the returned `Record` holds copied ints, not views into the input.
 
 ## Exercise 2: Build independent fixture
 
@@ -65,7 +65,7 @@ Use [7, 125; 0, 0; 7, 125x; 7, -1] as four records.
 
 **Reasoning:** Expected results are hand-written independently.
 
-**Verify:** Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.
+**Verify:** Assert `parse_record` succeeds for `"7,125"` and `"0,0"` and returns an empty optional for `"7,125x"` and `"7,-1"`.
 
 ## Exercise 3: Package a consumer
 
@@ -75,7 +75,7 @@ Split header, implementation and CLI into the host project.
 
 **Reasoning:** A single-file worker cannot establish packaging.
 
-**Verify:** Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.
+**Verify:** Confirm `CMakeLists.txt` declares a library target for the parser and an executable target that links it, then build both and run the executable.
 
 ## Exercise 4: Inject a regression
 
@@ -85,7 +85,7 @@ Remove the full-consumption check in a scratch implementation.
 
 **Reasoning:** A plausible parsing shortcut is the negative control.
 
-**Verify:** Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.
+**Verify:** Run Worked example 2's `assert(!parse_record("7,125x"))` against the scratch version and confirm it aborts; restoring the full-consumption check makes it pass.
 
 ## Exercise 5: Check boundary ownership
 
@@ -95,7 +95,7 @@ Return a parsed record after input string goes out of scope.
 
 **Reasoning:** No borrowed string_view survives in the result.
 
-**Verify:** Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.
+**Verify:** Parse from a `std::string` declared in an inner scope, keep only the `std::optional<Record>`, and assert `id == 7` and `cents == 125` after the scope ends.
 
 ## Exercise 6: Deliver compatibility evidence
 
@@ -105,4 +105,4 @@ Run a consumer against current public header and library.
 
 **Reasoning:** A reviewer must reproduce the consumer boundary.
 
-**Verify:** Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.
+**Verify:** Build a separate consumer that includes only the public header and links the built library, and keep its test output beside the compiler version and architecture.

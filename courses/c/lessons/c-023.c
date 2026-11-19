@@ -1,13 +1,24 @@
 #include <stdio.h>
 
 int main(void) {
-  /* Exercise 1: Insert and retrieve
-     Store key 1 with value 7.
-     Expected: Lookup succeeds with 7. */
+  /* Exercise 1: Insert and retrieve: predict an edited check
+     Copy worked example 1 into a scratch pad and change `CHECK(table_put(&t, 1,
+     7) && table_get(&t, 1, &out) && out == 7);` to `CHECK(table_put(&t, 2, 7)
+     && table_get(&t, 1, &out) && out == 7);` inside its CHECK. Before running,
+     predict whether the CHECK still holds and explain why; then restore it.
+     Expected: The changed run stops with `Check failed` at the CHECK on
+     `table_put(&t, 1, 7) && table_get(&t, 1, &out) && out == 7`. Restoring the
+     original line brings back the worked observation: lookup succeeds with 7.
+   */
 
-  /* Exercise 2: Resolve a collision
-     Insert keys 1 and 9, which share the initial slot.
-     Expected: Both values remain retrievable. */
+  /* Exercise 2: Resolve a collision: diagnose an edited check
+     A careless edit changed the CHECK in worked example 2 so that it reads
+     `CHECK(table_put(&t, 1, 10) && table_put(&t, 10, 90));`. Run worked example
+     2 with that line, explain why the edited CHECK now fails for the same
+     program state, and restore it. Expected: Before the repair the run stops
+     with `Check failed` at the CHECK on `table_get(&t, 9, &out) && out == 90`;
+     after it the line reads `CHECK(table_put(&t, 1, 10) && table_put(&t, 9,
+     90));` again and both values remain retrievable. */
 
   /* Exercise 3: Replace an existing key
      Write key 2 twice with different values.

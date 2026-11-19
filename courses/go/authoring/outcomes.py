@@ -1,0 +1,58 @@
+"""Lesson outcomes for the published Go route: one observable ability per lesson.
+
+render.py requires an entry for every generated lesson ID and rejects templated text.
+MINUTES overrides the level-based estimate where a lesson is larger than its stage.
+"""
+
+OUTCOMES = {
+    "go-001": "Compile and run a one-file Go program and replace a printed claim with a checked value.",
+    "go-002": "Predict integer division, narrowing conversions and floating rounding, and reject invalid numeric text instead of defaulting to zero.",
+    "go-003": "Write loops with an explicit invariant that handle empty input, exact boundaries and early exit correctly.",
+    "go-004": "Design functions that return results and errors explicitly and show which arguments a call can or cannot change.",
+    "go-005": "Predict when two slices share a backing array and make independent copies or capacity-limited appends on purpose.",
+    "go-006": "Distinguish a missing map key from a stored zero value and produce a deterministic report from map data.",
+    "go-007": "Count and slice text by bytes or runes deliberately and reject malformed UTF-8 instead of guessing.",
+    "go-008": "Model a small domain with structs, predict copy behavior, and validate values before they enter the model.",
+    "go-009": "Use pointers to share or update state on purpose, guard nil, and separate copying a value from mutating a target.",
+    "go-010": "Define behavior through interfaces and methods, choose value or pointer receivers, and detect the typed-nil interface trap.",
+    "go-011": "Wrap errors with %w and recover causes with errors.Is, errors.As and errors.Join instead of comparing message text.",
+    "go-012": "Predict defer order and argument capture, and keep cleanup running when a deliberate panic is recovered at a boundary.",
+    "go-013": "Use standard-library packages through their exported API and read the module, go and toolchain directives in go.mod.",
+    "go-014": "Write table-driven checks with exact endpoints and a counterexample that rejects a plausible wrong implementation.",
+    "go-015": "Write a generic function whose constraint admits exactly the operations it needs, including named underlying types.",
+    "go-016": "Write closures with independent state and an iterator that stops early when its consumer breaks out of a range loop.",
+    "go-017": "Stream data through io.Reader and io.Writer with explicit size limits and exact record framing.",
+    "go-018": "Read files through fs.FS, distinguish missing from empty files, and confine real file access to an owned directory with os.Root.",
+    "go-019": "Decode JSON strictly by rejecting unknown fields and trailing documents and preserving large integers as json.Number.",
+    "go-020": "Parse CSV with encoding/csv and reject ragged rows, blank numeric fields and wrong headers with precise errors.",
+    "go-021": "Implement a command-line interface with flag that applies explicit precedence and rejects unknown or invalid options.",
+    "go-022": "Write an HTTP handler and test its status codes, methods, routes and headers in process with httptest.",
+    "go-023": "Call an HTTP service with a cancelable context, close every response body and enforce a response size limit.",
+    "go-024": "Start goroutines and prove their completion with a WaitGroup or channel instead of sleeping.",
+    "go-025": "Design channel ownership so exactly one sender closes, receivers detect closure, and buffering is bounded.",
+    "go-026": "Combine select with context cancellation and deadlines so that work stops promptly and reports why.",
+    "go-027": "Protect shared invariants with a mutex, sync.Once or typed atomics and explain which operations each one makes safe.",
+    "go-028": "Build a bounded worker pool that returns results in input order and leaves no goroutine running.",
+    "go-029": "Publish data between goroutines through a channel, a closed channel or an atomic value, and explain why an unsynchronized read is a data race.",
+    "go-030": "Implement a binary search with correct boundaries and compare work and allocation instead of guessing performance.",
+    "go-031": "Emit structured log/slog events with correlation fields and redact sensitive values before logging.",
+    "go-032": "Escape output for its context, enforce input byte budgets and compare secrets in constant time.",
+    "go-033": "Model a repository transaction that commits valid changes, rolls back failures and keeps retries idempotent.",
+    "go-034": "Check the running build target against a supported set and model a graceful shutdown that drains work honestly.",
+    "go-035": "Decode Kubernetes object JSON and separate desired spec from observed status, name from UID and equality from version order.",
+    "go-036": "Evaluate label selectors with explicit presence rules and separate selection from endpoint readiness.",
+    "go-037": "Write a reconcile function that plans only the changes needed and becomes a no-op once state has converged.",
+    "go-038": "Implement optimistic concurrency that rejects stale resource versions and rereads current state before a retry.",
+    "go-039": "Apply list-watch events to a local cache and restart from a fresh list when watch history has expired.",
+    "go-040": "Classify failures as retryable or invalid and bound retries with capped delays and a total budget.",
+    "go-041": "Configure a client-go project from an explicit, secure cluster configuration and refuse ambient credentials.",
+    "go-042": "Read from an informer-style cache safely by copying before mutation, gating on synchronization and queueing keys.",
+    "go-043": "Use a finalizer to finish exact-owner cleanup before deletion completes, without removing other controllers' finalizers.",
+    "go-044": "Derive a least-authority RBAC rule set from a controller's actual reads and writes.",
+    "go-045": "Model lease-based leader election and explain why a fencing check is still needed after a takeover.",
+    "go-046": "Write an admission decision function that validates exact boundaries, echoes the request UID and has no side effects in dry run.",
+    "go-047": "Test controller logic with fakes that count calls and preserve error causes before running against an owned cluster.",
+    "go-048": "Design a resumable controller that converges from any starting state, refuses replacement objects and survives restarts.",
+}
+
+MINUTES = {"go-048": 180}

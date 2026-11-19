@@ -6,11 +6,11 @@ Beginner, approximately 90 minutes. Direct prerequisites: `java-010`
 
 ## Learning objectives
 
-Explain equality contract, hash code, comparator using a concrete program. Trace the normal execution, identify its boundary assumptions and make a failure case observable. The first investigation is Create two equal Point records and insert one into a map. The final exercise transfers the mechanism to keep identity and display separate.
+Implement consistent equals, hashCode and Comparator ordering and show the failures that inconsistent keys cause. Along the way, explain equality contract, hash code, comparator using a concrete program. Trace the normal execution, identify its boundary assumptions and make a failure case observable. Exercises 1 and 2 start from the worked examples; the authored investigations begin with this task: Insert two different people of age 20 into a TreeSet comparing age only. The final exercise transfers the mechanism to keep identity and display separate.
 
 ## Purpose and mental model
 
-Equality, hashing and ordering are related contracts with different roles. equals determines logical sameness; equal objects must have equalhashCode values so hash collections can find them. Unequal objects may share a hash, and the collection resolves collisions through equality. A comparator defines order and can consider two unequal objects tied. Tree-based sets use comparison equality for uniqueness, so a comparator that ignores an identity field can collapse distinct records. Mutable map keys are dangerous because changing a field used in hashing can make the entry unreachable through normal lookup. Prefer immutable value keys and deterministic tie-breakers.
+Equality, hashing and ordering are related contracts with different roles. equals determines logical sameness; equal objects must have equal hashCode values so hash collections can find them. Unequal objects may share a hash, and the collection resolves collisions through equality. A comparator defines order and can consider two unequal objects tied. Tree-based sets use comparison equality for uniqueness, so a comparator that ignores an identity field can collapse distinct records. Mutable map keys are dangerous because changing a field used in hashing can make the entry unreachable through normal lookup. Prefer immutable value keys and deterministic tie-breakers.
 
 ## Vocabulary and concepts
 
@@ -37,7 +37,7 @@ The public class name and source filename must agree. Each worked example below 
 
 ## Syntax anatomy and execution trace
 
-Records generate component-basedequals andhashCode. Comparator.comparing selects a primary sort key;thenComparing supplies a tie-breaker. HashMap lookup uses hashing and equality, nottoString. A key should remain stable while stored. For numeric ordering useInteger.compare rather than subtraction, because subtracting extreme values can overflow and reverse the intended sign.
+Records generate component-based equals and hashCode. Comparator.comparing selects a primary sort key; thenComparing supplies a tie-breaker. HashMap lookup uses hashing and equality, not toString. A key should remain stable while stored. For numeric ordering use Integer.compare rather than subtraction, because subtracting extreme values can overflow and reverse the intended sign.
 
 ## Worked example / walkthrough
 
@@ -129,7 +129,7 @@ public class Main {
 }
 ```
 
-**Expected:** IDs c,a,b.
+**Expected:** IDs c, a, b.
 
 ## Prediction before your attempt
 
@@ -137,29 +137,29 @@ Read the source from the entry point and name each value before executing it. Id
 
 ## Exercises
 
-1. **Use immutable value keys.** Create two equal Point records and insert one into a map.
-   **Expected:** lookup with the other returns origin; hashes equal.
-   **Verify:** Compare your assertion values or captured diagnostic with lookup with the other returns origin; hashes equal.
+1. **Use immutable value keys: change one input.** Copy Example A into a scratch `Main.java` and change `Point a = new Point(0, 0),` to `Point a = new Point(1, 0),`. Before running it with `java -ea Main`, predict which assertion fails and which value it now sees; then run it and restore the original line.
+   **Expected:** The changed run fails with an `AssertionError` from the assertion on `a.equals(b) && a.hashCode() == b.hashCode() && map.get(b).equals("origin")`. Restoring the original line brings back the worked observation: lookup with the other returns origin; hashes equal.
+   **Verify:** Compare your written prediction with the reported `AssertionError` and its stack-trace line, and name the value that made `a.equals(b) && a.hashCode() == b.hashCode() && map.get(b).equals("origin")` false. After restoring the line, the program completes without an `AssertionError` again.
 
-2. **Sort with a tie-breaker.** Sort people(age20,idb),(age20,ida),(age18,idc) by age then ID.
-   **Expected:** IDs c,a,b.
-   **Verify:** Compare your assertion values or captured diagnostic with IDs c,a,b.
+2. **Sort with a tie-breaker: debug a regression.** A regression changed one token in the code that Example B adds after Example A, so one line now reads `List.of(new Person("b", 20), new Person("a", 21), new Person("c", 18))`. Run Example B with that line, use the failing assertion to locate the defect and repair it without changing the assertion.
+   **Expected:** Before the repair the run fails with an `AssertionError` from the assertion on `people.stream().map(Person::id).toList().equals(List.of("c", "a", "b"))`; after it the line reads `List.of(new Person("b", 20), new Person("a", 20), new Person("c", 18))` again and IDs c, a, b.
+   **Verify:** Keep the failing and the repaired runs. Explain why the changed token alters the value tested by `people.stream().map(Person::id).toList().equals(List.of("c", "a", "b"))` for this input.
 
-3. **Expose comparator uniqueness.** Insert two different people ofage20 into a TreeSet comparingage only.
-   **Expected:** setsize1 despite unequal records.
-   **Verify:** Compare your assertion values or captured diagnostic with setsize1 despite unequal records.
+3. **Expose comparator uniqueness.** Insert two different people of age 20 into a TreeSet comparing age only.
+   **Expected:** set size 1 despite unequal records.
+   **Verify:** Keep an assertion equivalent to `byAge.size() == 1 && !new Person("a", 20).equals(new Person("b", 20))`. As a control, change `byAge.add(new Person("a", 20));` to `byAge.add(new Person("a", 21));`: the run must fail with an `AssertionError` from the assertion on `byAge.size() == 1 && !new Person("a", 20).equals(new Person("b", 20))`. Restore the line before continuing.
 
-4. **Demonstrate mutable-key failure.** Insert a key withhash1,mutate its hash field to2,and attempt lookup with the same object.
-   **Expected:** lookup fails in this fixture while mapsize remains1.
-   **Verify:** Compare your assertion values or captured diagnostic with lookup fails in this fixture while mapsize remains1.
+4. **Demonstrate mutable-key failure.** Insert a key with hash 1, mutate its hash field to 2, and attempt lookup with the same object.
+   **Expected:** lookup fails in this fixture while map size remains 1.
+   **Verify:** Keep an assertion equivalent to `mutable.get(key) == null && mutable.size() == 1`. As a control, change `MutableKey key = new MutableKey(1);` to `MutableKey key = new MutableKey(2);`: the run must fail with an `AssertionError` from the assertion on `mutable.get(key) == null && mutable.size() == 1`. Restore the line before continuing.
 
-5. **Avoid comparator subtraction.** CompareInteger.MIN_VALUE and 1 usingInteger.compare.
-   **Expected:** negative result;subtraction overflows positive.
-   **Verify:** Compare your assertion values or captured diagnostic with negative result;subtraction overflows positive.
+5. **Avoid comparator subtraction.** Compare Integer.MIN_VALUE and 1 using Integer.compare.
+   **Expected:** negative result; subtraction overflows positive.
+   **Verify:** Keep an assertion equivalent to `Integer.MIN_VALUE - 1 > 0`. As a control, change `assert Integer.MIN_VALUE - 1 > 0;` to `assert Integer.MIN_VALUE + 1 > 0;` inside it: the run must fail with an `AssertionError`, which shows the assertion can fail. Restore it.
 
-6. **Keep identity and display separate.** Give twoPoints the same formatted label but different coordinates;compare values.
+6. **Keep identity and display separate.** Give two Points the same formatted label but different coordinates; compare values.
    **Expected:** display labels equal; points unequal.
-   **Verify:** Compare your assertion values or captured diagnostic with display labels equal; points unequal.
+   **Verify:** Keep an assertion equivalent to `labelLeft.equals(labelRight) && !left.equals(right)`. As a control, change `String labelLeft = "point",` to `String labelLeft = "point!",`: the run must fail with an `AssertionError` from the assertion on `labelLeft.equals(labelRight) && !left.equals(right)`. Restore the line before continuing.
 
 ## Common pitfalls and diagnosis
 
@@ -169,7 +169,14 @@ Do not replace a precise exception with a catch-all that returns a plausible def
 
 ## Progressive hints
 
-First reconstruct the values and identities in the worked example. Next isolate the line that changes the result when one input is altered. Finally compare the normal and failure paths with the stated contract. Use a small table of input, expected value, actual value and exception type. Ask for one hint about the first incorrect assumption before requesting the entire reference implementation.
+Read one hint at a time and attempt the exercise again before reading the next. Keep a small table of input, expected value, actual value and exception type. Ask for one hint about the first incorrect assumption before requesting the entire reference implementation.
+
+- **Exercise 1:** First restate the expected observation: lookup with the other returns origin; hashes equal. Then list the values read by `a.equals(b) && a.hashCode() == b.hashCode() && map.get(b).equals("origin")` and trace each one from its declaration. Finally, compute the asserted value with `Point a = new Point(1, 0),` in place before running.
+- **Exercise 2:** First restate the expected observation: IDs c, a, b. Then list the values read by `people.stream().map(Person::id).toList().equals(List.of("c", "a", "b"))` and trace each one from its declaration. Finally, compare `List.of(new Person("b", 20), new Person("a", 21), new Person("c", 18))` with the same line in Example B and state the claim each version makes.
+- **Exercise 3:** First restate the expected observation: set size 1 despite unequal records. Then list the values read by `byAge.size() == 1 && !new Person("a", 20).equals(new Person("b", 20))` and trace each one from its declaration. Finally, predict the effect of changing `byAge.add(new Person("a", 20));` to `byAge.add(new Person("a", 21));` before running anything.
+- **Exercise 4:** First restate the expected observation: lookup fails in this fixture while map size remains 1. Then list the values read by `mutable.get(key) == null && mutable.size() == 1` and trace each one from its declaration. Finally, predict the effect of changing `MutableKey key = new MutableKey(1);` to `MutableKey key = new MutableKey(2);` before running anything.
+- **Exercise 5:** First restate the expected observation: negative result; subtraction overflows positive. Then list the values read by `Integer.MIN_VALUE - 1 > 0` and trace each one from its declaration. Finally, name one input that would make `Integer.MIN_VALUE - 1 > 0` false.
+- **Exercise 6:** First restate the expected observation: display labels equal; points unequal. Then list the values read by `labelLeft.equals(labelRight) && !left.equals(right)` and trace each one from its declaration. Finally, predict the effect of changing `String labelLeft = "point",` to `String labelLeft = "point!",` before running anything.
 
 ## Self-check and retrieval
 
@@ -181,7 +188,7 @@ Preserve the saved pad and the six exercise observations. Continue to the next l
 
 ## Sources and verification status
 
-[Official Java21 API or language reference](https://docs.oracle.com/en/java/javase/21/docs/api/index.html), reviewed2026-10-22. Examples and exercise fixtures are original course material. Use the [validation guide](../../../docs/validation.md) and CI artifacts for the exact revision and platform to inspect actual compile/run results. Authoring, parsing, compilation, execution and learner mastery are separate forms of evidence.
+[Official Java 21 API or language reference](https://docs.oracle.com/en/java/javase/21/docs/api/index.html), reviewed 2026-10-22. Examples and exercise fixtures are original course material. Use the [validation guide](../../../docs/validation.md) and CI artifacts for the exact revision and platform to inspect actual compile/run results. Authoring, parsing, compilation, execution and learner mastery are separate forms of evidence.
 
 ## Ask an AI tutor about this lesson
 
@@ -191,7 +198,7 @@ Read courses/java/guides/java-011.md and courses/java/lessons/java-011.java. Dir
 Explain the mechanism, ask for a prediction, review my attempt, give one hint,
 request compiler/runtime evidence, and ask a fresh retrieval question.
 Keep courses/java/solutions/ closed until I request comparison or show an attempt.
-Use Java21 and the declared offline fixture. Done when I can explain the state
+Use Java 21 and the declared offline fixture. Done when I can explain the state
 transitions, pass all six exercise contracts, diagnose one failure and solve a
 new boundary case without copying the solution.
 ```

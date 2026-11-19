@@ -17,7 +17,7 @@ Copy to .learning before editing. Six independent attempts belong below.
 # Expected: module features equal manual features; the asymmetric probe distinguishes the two orientations.
 
 # Exercise 4: Inspect activation gradients
-# Differentiate ReLU at-2 and 2.
+# Differentiate ReLU at -2 and 2.
 # Expected: gradients 0 and 1.
 
 # Exercise 5: Expose identical-unit symmetry
@@ -25,8 +25,8 @@ Copy to .learning before editing. Six independent attempts belong below.
 # Expected: two unit outputs match on every row.
 
 # Exercise 6: Transfer to continuous inputs
-# Evaluate the fixed construction at(.2, .8) and(.8, .2).
-# Expected: both.6; the function is absolute difference.
+# Evaluate the fixed construction at (0.2, 0.8) and (0.8, 0.2).
+# Expected: both 0.6; the function is absolute difference.
 
 if __name__ == "__main__":
     print("Read the guide and implement the six exercises in your saved copy.")

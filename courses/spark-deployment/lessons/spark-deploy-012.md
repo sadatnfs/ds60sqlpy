@@ -1,6 +1,6 @@
 # spark-deploy-012: Budget memory, cores, PIDs and results
 
-Tutorial mode. Stage: intermediate. Direct prerequisites: `spark-deploy-004`, `spark-039`.
+Tutorial mode. Stage: advanced. Direct prerequisites: `spark-deploy-004`, `spark-039`.
 
 Read this tutorial in the classroom. Its commands run only in the separately prepared [owned workshop](../projects/cluster-lab/README.md); there is no pad Run action. Examples describe expected observations. Check the workshop qualification ledger for actual execution evidence.
 
@@ -18,6 +18,23 @@ worker-b: one advertised core -> at most one one-core executor task at once
 input: eight partitions
 idealized minimum scheduling waves: eight / two = four
 ```
+
+The application side of the budget is set in `conf/spark-defaults.conf`:
+
+From [`projects/cluster-lab/conf/spark-defaults.conf`](../projects/cluster-lab/conf/spark-defaults.conf):
+
+```properties
+spark.driver.memory                  1g
+spark.driver.maxResultSize           1m
+spark.executor.memory                512m
+spark.executor.cores                 1
+spark.cores.max                      2
+```
+
+`spark.cores.max 2` caps the application at two cores across the cluster, and
+`spark.driver.maxResultSize 1m` makes an oversized collect fail instead of
+exhausting driver memory. The container limits in `compose.yaml` are a separate,
+outer bound.
 
 This arithmetic models available task slots, not measured timing. Empty partitions, scheduler delay, Python startup, skew and retries alter elapsed time. Increasing partitions can improve balance but also increases overhead and the number of returned summaries. Increasing executor cores changes concurrency, memory and native thread pressure together.
 

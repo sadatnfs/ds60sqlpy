@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import argparse
 import csv
+import functools
 import hashlib
 import importlib
 import importlib.util
@@ -38,6 +39,162 @@ BOUNDARY = (
     "compare and export source; do not interpret a comparison "
     "or completion marker as a passed program run."
 )
+
+
+REFERENCE_TOPICS = {
+    "learn.microsoft.com/en-us/analysis-services/tabular-models/calculation-groups": (
+        "Analysis Services: calculation groups"
+    ),
+    "learn.microsoft.com/en-us/analysis-services/tmdl/tmdl-overview": "Analysis Services: TMDL",
+    "learn.microsoft.com/en-us/dax/best-practices/dax-avoid-avoid-filter-as-filter-argument": (
+        "DAX best practice: avoid FILTER as a filter argument"
+    ),
+    "learn.microsoft.com/en-us/dax/best-practices/dax-divide-function-operator": (
+        "DAX best practice: DIVIDE versus the division operator"
+    ),
+    "learn.microsoft.com/en-us/dax/best-practices/dax-user-defined-functions": (
+        "DAX: user-defined functions"
+    ),
+    "learn.microsoft.com/en-us/dax/best-practices/dax-variables": ("DAX best practice: variables"),
+    "learn.microsoft.com/en-us/dax/dax-operator-reference": "DAX operator reference",
+    "learn.microsoft.com/en-us/dax/dax-overview": "DAX overview",
+    "learn.microsoft.com/en-us/dax/dax-queries": "DAX queries",
+    "learn.microsoft.com/en-us/dax/var-dax": "DAX keyword: VAR",
+    "learn.microsoft.com/en-us/fabric/fundamentals/direct-lake-overview": "Fabric: Direct Lake",
+    "learn.microsoft.com/en-us/fabric/security/service-admin-row-level-security": (
+        "Fabric and Power BI: row-level security"
+    ),
+    "learn.microsoft.com/en-us/power-bi/connect-data/desktop-directquery-about": (
+        "Power BI: DirectQuery"
+    ),
+    "learn.microsoft.com/en-us/power-bi/create-reports/desktop-dynamic-format-strings": (
+        "Power BI: dynamic format strings"
+    ),
+    "learn.microsoft.com/en-us/power-bi/create-reports/desktop-performance-analyzer": (
+        "Power BI: Performance Analyzer"
+    ),
+    "learn.microsoft.com/en-us/power-bi/developer/projects/projects-overview": (
+        "Power BI Desktop projects"
+    ),
+    "learn.microsoft.com/en-us/power-bi/guidance/import-modeling-data-reduction": (
+        "Power BI guidance: data reduction for import models"
+    ),
+    "learn.microsoft.com/en-us/power-bi/guidance/model-date-tables": (
+        "Power BI guidance: date tables"
+    ),
+    "learn.microsoft.com/en-us/power-bi/guidance/relationships-active-inactive": (
+        "Power BI guidance: active and inactive relationships"
+    ),
+    "learn.microsoft.com/en-us/power-bi/guidance/relationships-many-to-many": (
+        "Power BI guidance: many-to-many relationships"
+    ),
+    "learn.microsoft.com/en-us/power-bi/guidance/star-schema": "Power BI guidance: star schema",
+    "learn.microsoft.com/en-us/power-bi/transform-model/desktop-calculations-options": (
+        "Power BI: calculation options"
+    ),
+    "learn.microsoft.com/en-us/power-bi/transform-model/desktop-composite-models": (
+        "Power BI: composite models"
+    ),
+    "learn.microsoft.com/en-us/power-bi/transform-model/desktop-relationships-understand": (
+        "Power BI: model relationships"
+    ),
+    "learn.microsoft.com/en-us/power-bi/transform-model/desktop-time-intelligence": (
+        "Power BI: time intelligence"
+    ),
+    "learn.microsoft.com/en-us/power-bi/transform-model/desktop-visual-calculations-overview": (
+        "Power BI: visual calculations"
+    ),
+    "learn.microsoft.com/en-us/power-bi/transform-model/value-filter-behavior": (
+        "Power BI: value filter behavior"
+    ),
+    "daxstudio.org/docs/features/traces/server-timings-options": "DAX Studio: server timings",
+    "www.sqlbi.com/articles/mark-as-date-table": "SQLBI: Mark as date table",
+}
+
+
+def reference_label(url):
+    "Name a reference from its URL so the link says what it documents."
+
+    path = url.split("://", 1)[1].split("#", 1)[0].rstrip("/")
+    slug = path.rsplit("/", 1)[-1]
+    if path.startswith("learn.microsoft.com/en-us/dax/") and slug.endswith("-function-dax"):
+        return "DAX function: " + slug.removesuffix("-function-dax").upper()
+    if path not in REFERENCE_TOPICS:
+        raise ValueError(f"Add a reference label for {url}")
+    return REFERENCE_TOPICS[path]
+
+
+def spoken(items):
+    items = list(items)
+    return items[0] if len(items) == 1 else ", ".join(items[:-1]) + " and " + items[-1]
+
+
+def verification(spec):
+    "Name the lesson's own cases and result columns in its catalog check."
+
+    titles = [f"case {chr(65 + i)} ({case['title']})" for i, case in enumerate(spec["cases"])]
+    columns = list(dict.fromkeys(col["name"] for case in spec["cases"] for col in case["columns"]))
+    return (
+        f"Write a row and filter-context trace for {spoken(titles)}, then match "
+        f"{spoken(columns)} with the hand-derived reference tables. Nothing is "
+        "executed or graded automatically."
+    )
+
+
+@functools.cache
+def model_spec(name):
+    return json.loads(model_artifacts()[f"courses/dax/models/{name}/model.json"])
+
+
+def model_note(spec, model):
+    "Explain how the lesson's named model differs from the shared retail star."
+
+    queries = "\n".join(case["query"] for case in spec["cases"])
+    notes = []
+    if spec["model"] == "unknown-member":
+        notes.append(
+            "This lesson uses the `unknown-member` model. It has the same star, but "
+            "Sales row S9 carries ProductKey 999, which has no Product row. The "
+            "relationship therefore groups S9 under a blank Product member instead "
+            "of dropping it."
+        )
+    star = {"Product", "Customer", "Sales", "Date"}
+    used = {
+        table["name"]
+        for table in model["tables"]
+        if table["name"] not in star and f"{table['name']}[" in queries
+    }
+    if used:
+        links = [
+            f"`{rel['from_table']}[{rel['from_column']}]` → `{rel['to_table']}[{rel['to_column']}]`"
+            for rel in model["relationships"]
+            if {rel["from_table"], rel["to_table"]} & used
+        ]
+        related = {
+            name for rel in model["relationships"] for name in (rel["from_table"], rel["to_table"])
+        }
+        loose = sorted(used - related)
+        text = (
+            f"This lesson also uses the `{spec['model']}` model's "
+            f"{spoken(f'`{name}`' for name in sorted(used))} table"
+            f"{'s' if len(used) > 1 else ''}."
+        )
+        if links:
+            text += f" Its declared one-to-many relationships are {spoken(links)}."
+        if loose:
+            text += (
+                f" {spoken(f'`{name}`' for name in loose)} "
+                f"{'have' if len(loose) > 1 else 'has'} no relationship, so a filter on "
+                f"another table reaches {'them' if len(loose) > 1 else 'it'} only if the "
+                "expression transfers the filter explicitly."
+            )
+        notes.append(text)
+    if "DATATABLE" in queries:
+        notes.append(
+            "A case builds a query-local `DATATABLE`. That table exists only inside "
+            "its query and has no relationship to any model table."
+        )
+    return notes
 
 
 def all_lessons():
@@ -183,6 +340,7 @@ def guide(spec):
             "+------> Sales\n```"
         ),
         "",
+        *[line for note in model_note(spec, model_spec(spec["model"])) for line in (note, "")],
         (
             "All amounts in ordinary Sales are USD after the line "
             "discount, before tax and returns. The Date fixture is "
@@ -248,8 +406,8 @@ def guide(spec):
         (
             "Retain your formula or written reasoning, the stated "
             "context, contributing rows or values, and a conclusion "
-            "with its unit. This is a manual learning record, not an "
-            "execution receipt."
+            "with its unit. These notes are your own study record; "
+            "they do not show that a formula ran."
         ),
         "",
     ]
@@ -298,9 +456,7 @@ def guide(spec):
             "",
         ]
     content += ["## Official references and evidence limits", ""]
-    content += [
-        f"- [Official documentation {i}]({url})" for i, url in enumerate(spec["sources"], 1)
-    ]
+    content += [f"- [{reference_label(url)}]({url})" for url in spec["sources"]]
     content += [
         "",
         (
@@ -405,11 +561,7 @@ def artifacts():
                 "concepts": spec["concepts"],
                 "outcome": spec["outcome"],
                 "lab": spec["practice"][2]["question"],
-                "verification": (
-                    "Compare a written context trace with the named "
-                    "hand-derived reference; no execution or automatic "
-                    "correctness claim."
-                ),
+                "verification": verification(spec),
             }
         )
         admitted.append(

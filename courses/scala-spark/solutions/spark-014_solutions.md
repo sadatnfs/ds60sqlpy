@@ -71,7 +71,7 @@ The accepted relation represents source validity, not paid-revenue eligibility. 
 
 Return source_row, event_id, team, amount_cents, status, rejection_reason for rejected records, ordered by source_row when inspected. Keep the original values, including the missing event ID.
 
-**Expected:** Rows are(11,11, A,10, mystery, unknown_status) and (12, NULL, A,5, paid, missing_id). Accepted and quarantined counts sum to 12.
+**Expected:** Rows are (11, 11, A, 10, mystery, unknown_status) and (12, NULL, A, 5, paid, missing_id). Accepted and quarantined counts sum to 12.
 
 ```scala
 def quarantine(frame: DataFrame): DataFrame = {
@@ -155,7 +155,7 @@ The wrong projection erases the field distinguishing two real events, then disti
 
 Validate at most 100 unique nonmissing source_row occurrences, unique positive accepted event IDs, and accepted-plus-quarantine conservation before returning a SQL paid summary. Reject a duplicate accepted event ID. Compare SQL output to the same literal groups.
 
-**Expected:** The base 12-row batch passes and matches all six golden groups. Appending source_row13 with a second event_id1 rejects publication instead of choosing a winner.
+**Expected:** The base 12-row batch passes and matches all six golden groups. Appending source_row 13 with a second event_id 1 rejects publication instead of choosing a winner.
 
 ```scala
 def auditedSqlReport(spark: SparkSession, frame: DataFrame): DataFrame = {
@@ -209,4 +209,4 @@ The final gate validates the occurrence and event grains before presenting a rep
 
 ## Execution and interpretation
 
-Run the complete reference in its prepared fixed worker. The small fixture is constructed inside the program,so opening a lesson does not fetch data. A final success line is printed only after the reference assertions complete. Plan observations,partition evidence and resource measurements apply to the actual local configuration; they do not establish cluster-scale performance. Session cleanup is explicit,and any additional owned file/query lifecycle is described in the lesson.
+Run the complete reference in its prepared fixed worker. The small fixture is constructed inside the program, so opening a lesson does not fetch data. A final success line is printed only after the reference assertions complete. Plan observations, partition evidence and resource measurements apply to the actual local configuration; they do not establish cluster-scale performance. Session cleanup is explicit, and any additional owned file/query lifecycle is described in the lesson.

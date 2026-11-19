@@ -1,6 +1,6 @@
 # spark-041: Explained paired reference solutions
 
-Read the [guide](../guides/spark-041.md) and attempt one language first. The [Scala reference](spark-041_solution.scala) and [PySpark reference](spark-041_solution.py) are complete single-file programs with explicit local sessions and finally-based stop. Each compares with literal expectations;matching two implementations alone would not rule out a shared mistake.
+Read the [guide](../guides/spark-041.md) and attempt one language first. The [Scala reference](spark-041_solution.scala) and [PySpark reference](spark-041_solution.py) are complete single-file programs with explicit local sessions and finally-based stop. Each compares with literal expectations; matching two implementations alone would not rule out a shared mistake.
 
 ## Exercises and reasoning
 
@@ -21,7 +21,7 @@ def version_receipt(spark):
     return runtime_versions(spark)
 ```
 
-The receipt describes the runtime actually executing the tests. Scala probes the bundled python 3 with a fixed bounded metadata script;PySpark reads its own interpreter and the actual JVM. An absent Arrow distribution is recorded without fetching it. None of these strings proves a second environment has run the golden suite.
+The receipt describes the runtime actually executing the tests. Scala probes the bundled python 3 with a fixed bounded metadata script; PySpark reads its own interpreter and the actual JVM. An absent Arrow distribution is recorded without fetching it. None of these strings proves a second environment has run the golden suite.
 
 **Verification evidence:** Inspect actual values and reject a claimed target qualification based only on a proposed version string.
 
@@ -29,7 +29,7 @@ The receipt describes the runtime actually executing the tests. Scala probes the
 
 Evaluate the supplied four-row bag plus exact decimal and timezone expressions.
 
-**Expected:** 4 rows,3 known amounts, total 200,3 distinct IDs;decimal 12345678.90;instant 19:00UTC.
+**Expected:** 4 rows,3 known amounts, total 200,3 distinct IDs; decimal 12345678.90;instant 19:00UTC.
 
 ```scala
 def goldenMetrics(frame: DataFrame): Seq[Long] = {
@@ -69,7 +69,7 @@ def require_compatible(old_keys, new_keys):
         raise ValueError("State-key change requires separate checkpoint and output")
 ```
 
-This is an explicit application preflight refusal, not a fabricated Spark engine exception. It protects the old state before launching an incompatible query. Spark documents restrictions on changes to stateful operators and schemas;the safe rehearsal uses a separate recovery namespace rather than deleting or editing checkpoint internals.
+This is an explicit application preflight refusal, not a fabricated Spark engine exception. It protects the old state before launching an incompatible query. Spark documents restrictions on changes to stateful operators and schemas; the safe rehearsal uses a separate recovery namespace rather than deleting or editing checkpoint internals.
 
 **Verification evidence:** Compare owned-query count before/after the refusal and confirm the old checkpoint/output remain present and unchanged.
 
@@ -108,7 +108,7 @@ The changed state key admits a second amount for the same ID. That can be a vali
 
 Resume the original ID-only query with its original checkpoint after the candidate is rejected.
 
-**Expected:** The same baseline query ID resumes;the new occurrence of already-seen ID 1 does not add a row;baseline output stays 1:100,2:200.
+**Expected:** The same baseline query ID resumes; the new occurrence of already-seen ID 1 does not add a row; baseline output stays 1:100,2:200.
 
 ```scala
 def rollback(spark: SparkSession, input: Path, checkpoint: Path, output: Path): RunReceipt = {
@@ -129,7 +129,7 @@ The original state is available because the candidate never reused or reset it. 
 
 Require a qualified target profile, golden-suite pass, compatible recovery design and product acceptance before promotion.
 
-**Expected:** The supplied unqualified target or failed candidate is rejected;all four true permits a proposal in this pure decision model.
+**Expected:** The supplied unqualified target or failed candidate is rejected; all four true permits a proposal in this pure decision model.
 
 ```scala
 def mayPromote(
@@ -153,4 +153,4 @@ The gate keeps missing evidence visible. Only the current Spark 4.0.1 stack is e
 
 ## Execution and interpretation
 
-Run the complete reference in its prepared fixed worker. The small fixture is constructed inside the program,so opening a lesson does not fetch data. A final success line is printed only after the reference assertions complete. Plan observations,partition evidence and resource measurements apply to the actual local configuration;they do not establish cluster-scale performance. Session cleanup is explicit,and any additional owned file/query lifecycle is described in the lesson.
+Run the complete reference in its prepared fixed worker. The small fixture is constructed inside the program, so opening a lesson does not fetch data. A final success line is printed only after the reference assertions complete. Plan observations, partition evidence and resource measurements apply to the actual local configuration; they do not establish cluster-scale performance. Session cleanup is explicit, and any additional owned file/query lifecycle is described in the lesson.

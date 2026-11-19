@@ -6,7 +6,7 @@ Advanced; about 120 minutes, with additional time for the optional host experime
 
 ## Learning objectives
 
-Design a parallel test partition. Write a release gate with honest limitations. Explain the difference between a configuration, an observed process and evidence of the application's behavior.
+Design a parallel test partition. Write a release gate with honest limitations. Use continuous integration, test stage and artifact promotion accurately when you explain what you observed.
 
 ## Purpose, vocabulary and mental model
 
@@ -24,11 +24,11 @@ For this project, images are built locally in CI for testing and are not pushed 
 
 ## How to use this lesson
 
-The classroom displays this guide and saves your worksheet. Its Run button does not control your Docker engine. Docker engine access is powerful host access, so the classroom deliberately receives no engine socket. Work through the supplied examples without starting anything, then use the optional host lab only in your own disposable project. Reading a command, parsing YAML and actually running the project are different forms of evidence.
+The classroom displays this guide and saves your worksheet, `courses/docker/lessons/docker-031.md`. Its Run button does not control your Docker engine. Docker engine access is powerful host access, so the classroom deliberately receives no engine socket. Work through the supplied examples without starting anything, then use the optional host lab only in your own disposable project. Reading a command, parsing YAML and actually running the project are different forms of evidence.
 
 Use Bash in Linux, macOS Terminal, or Ubuntu under WSL 2 on Windows. The supported engine runs Linux containers. The maintained fixture is `courses/docker/fixtures/compose-lab/`; its README explains copying it into a new ignored learner directory, checking the engine, building locally with visible logs, and using the fixed project name `ds60-docker-study`. The fixture uses port 18080 on host loopback. Stop if that project name or port belongs to unrelated work; choose a new project name consistently in your own copy. Never paste a command against a remote Docker context simply because it is currently selected.
 
-For Dockerfile examples, create a file named `Dockerfile` in a scratch project. YAML snippets describe a fragment unless explicitly called a complete file. Text transcripts are synthetic illustrations, not claims about your machine. Do not substitute a real password, token or private registry into a checked-in example.
+For Dockerfile examples, create a file named `Dockerfile` in a scratch project. YAML snippets describe a fragment unless explicitly called a complete file. Text transcripts are synthetic illustrations, not claims about your machine. Do not substitute a real password, token or private registry into a checked-in example. **How to use the lessons** in the [subject README](../README.md) collects these rules in one place.
 
 ## Worked example / walkthrough
 
@@ -61,58 +61,54 @@ This is a schema sketch, not a completed test result.
 
 ## Six progressive exercises
 
+For each exercise, name the object involved and the phase of its lifetime before changing anything, then vary only the condition the task names. Exercises that ask you to predict, explain, compare or diagnose keep their answers in the solutions file; the others show the evidence to look for.
+
 ### Exercise 1: Predict what a unit test cannot prove about packaging.
 
-**Expected evidence:** Missing image files or a wrong final command can remain undetected.
-
-**Hint:** Identify the object and the phase of its lifetime before changing it. Use the relevant worked example, then vary only the condition named in this task.
+**Hint:** List what a unit test never touches, such as the image's files and command.
 
 ### Exercise 2: Separate source ZIP and image artifacts.
 
 **Expected evidence:** Source input package versus built executable filesystem.
 
-**Hint:** Identify the object and the phase of its lifetime before changing it. Use the relevant worked example, then vary only the condition named in this task.
+**Hint:** Ask which artifact you would run and which you would review.
 
 ### Exercise 3: Design a parallel test partition.
 
 **Expected evidence:** Independent groups with explicit ownership for shared fixtures.
 
-**Hint:** Identify the object and the phase of its lifetime before changing it. Use the relevant worked example, then vary only the condition named in this task.
+**Hint:** Group the tests so that no two groups write the same fixture.
 
 ### Exercise 4: Diagnose rebuilding between acceptance and deployment.
 
-**Expected evidence:** The new artifact may not match the tested identity.
-
-**Hint:** Identify the object and the phase of its lifetime before changing it. Use the relevant worked example, then vary only the condition named in this task.
+**Hint:** Compare the digest that passed acceptance with the one deployed.
 
 ### Exercise 5: Explain cleanup after a failed CI job.
 
-**Expected evidence:** Remove job-owned runtime resources while retaining bounded diagnostic evidence.
-
-**Hint:** Identify the object and the phase of its lifetime before changing it. Use the relevant worked example, then vary only the condition named in this task.
+**Hint:** Keep logs and identities, then remove only resources the job created.
 
 ### Exercise 6: Write a release gate with honest limitations.
 
 **Expected evidence:** Named actual checks on exact artifacts, plus visible skipped surfaces.
 
-**Hint:** Identify the object and the phase of its lifetime before changing it. Use the relevant worked example, then vary only the condition named in this task.
+**Hint:** Name each check, the artifact it ran on and what was skipped.
 
 ## Common mistakes and diagnosis
 
-Start with the smallest observation that separates two plausible causes. An image inspection answers questions about the packaged filesystem and configuration; container inspection adds runtime mounts, network attachment and exit status. An application request adds another layer of evidence. A healthy container can still serve the wrong application result. Preserve the original failure and the exact changed field before retrying.
+Rebuilding the image after tests and deploying an untested artifact. Letting parallel jobs share one fixture. Hiding skipped checks behind a green summary.
 
-The boundary case in this chapter is: Diagnose rebuilding between acceptance and deployment. Use its expected observation, The new artifact may not match the tested identity., to avoid treating a successful command as proof of the wrong claim. Keep source edits in your own copy. Do not make a container privileged, mount the engine socket, disable all checks or delete every volume to make an example succeed.
+Exercise 4 is this chapter's boundary case: Diagnose rebuilding between acceptance and deployment. Start with the smallest observation that separates two plausible causes. An image inspection answers questions about the packaged filesystem and configuration; container inspection adds runtime mounts, network attachment and exit status; an application request adds another layer, and a healthy container can still serve the wrong result. Preserve the original failure and the exact changed field before retrying. Keep source edits in your own copy. Do not make a container privileged, mount the engine socket, disable all checks or delete every volume to make an example succeed.
 
 ## Retrieval, transfer and next steps
 
-Close the explanations and draw the path from source files to image to container to the observation relevant here. Reconstruct the second worked example with one different value and predict what changes. Explain which state survives process restart, container recreation and image rebuild. If none of those operations applies to this mechanism, explain why.
+Close the explanations and draw the path from source files to image to container to the observation relevant here, using continuous integration, test stage, artifact promotion and immutable digest. Reconstruct worked example 2 (Define a source-bound receipt) with one different value and predict what changes. Explain which state survives process restart, container recreation and image rebuild, or why none of those operations applies to this mechanism.
 
-Before proceeding, retain six evidence records. For the optional host project, use `docker compose -p ds60-docker-study down` from the fixture copy to stop its containers and remove its ordinary network. This command preserves named volumes. Volume deletion is a separate deliberate reset of that disposable lab after a backup or export, never a general cleanup step. The fixture README describes its exact scoped reset.
+When a host session ends, run `docker compose -p ds60-docker-study down` from your fixture copy. It removes the project's containers and network but keeps named volumes; deleting a volume is a separate, deliberate reset described in the fixture README.
 
 ## Primary references
 
-- [Official reference 1](https://docs.docker.com/build/ci/github-actions/)
-- [Official reference 2](https://docs.docker.com/build/ci/github-actions/test-before-push/)
+- [Docker Build GitHub Actions](https://docs.docker.com/build/ci/github-actions/)
+- [Test before push with GitHub Actions](https://docs.docker.com/build/ci/github-actions/test-before-push/)
 
 ## Ask an AI tutor about this lesson
 

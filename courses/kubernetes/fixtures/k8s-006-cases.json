@@ -6,28 +6,28 @@
   "cases": [
     {
       "exercise": 1,
-      "task": "Trace Deployment,ReplicaSet and Pod controller references for the baseline.",
+      "task": "Trace Deployment, ReplicaSet and Pod controller references for the baseline.",
       "expected": "A UID-linked graph connects exactly two owned Pods to the intended Deployment."
     },
     {
       "exercise": 2,
-      "task": "Interpret generation4 with observedGeneration3 and readyReplicas2.",
+      "task": "Interpret generation 4 with observedGeneration 3 and readyReplicas 2.",
       "expected": "Latest desired state not yet confirmed observed."
     },
     {
       "exercise": 3,
-      "task": "Use the allowed two-replica source in a qualified browser operation.",
-      "expected": "Two Ready owned Pod UIDs and cleanup evidence,with a new Run identity."
+      "task": "The starter declares replicas: 1. Change it to 2, then Run the source in a qualified browser operation.",
+      "expected": "Two Ready owned Pod UIDs and cleanup evidence, with a new Run identity."
     },
     {
       "exercise": 4,
-      "task": "With a stateful owned host capability,delete only the recorded Pod UID and wait for replacement.",
-      "expected": "Pod set changes from{pod-1,pod-2} to{pod-2,pod-3} in the synthetic trace; live names/UIDs are recorded separately."
+      "task": "With a stateful owned host capability, delete only the recorded Pod UID and wait for replacement.",
+      "expected": "Pod set changes from {pod-1, pod-2} to {pod-2, pod-3} in the synthetic trace; live names/UIDs are recorded separately."
     },
     {
       "exercise": 5,
       "task": "Add a foreign-controller Pod to a synthetic list while removing one owned Pod.",
-      "expected": "Raw count2 but owned Ready count1,so acceptance fails."
+      "expected": "Raw count 2 but owned Ready count 1, so acceptance fails."
     },
     {
       "exercise": 6,

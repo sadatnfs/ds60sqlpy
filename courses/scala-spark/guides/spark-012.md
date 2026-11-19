@@ -1,22 +1,22 @@
 # spark-012: SparkSession, explicit schemas, and bounded actions
 
-Authored paired Scala/PySpark teaching content. The default fixtures are tiny,local and deterministic. Runtime acceptance,logical correctness and learner understanding remain separate evidence.
+Authored paired Scala/PySpark teaching content. The default fixtures are tiny, local and deterministic. Runtime acceptance, logical correctness and learner understanding remain separate evidence.
 
 ## Level and prerequisites
 
-Beginner; approximately 120 minutes. Direct design prerequisites: `spark-001`. The prepared baseline is Spark 4.0.1,Scala binary2.13,JDK 17 and Python 3.12. Read the [execution baseline](../execution-baseline.md); a proposed future tuple is not a runtime receipt.
+Beginner; approximately 90 minutes. Direct prerequisites: `spark-001`. The prepared baseline is Spark 4.0.1, Scala binary 2.13, JDK 17 and Python 3.12. Read the [execution baseline](../execution-baseline.md).
 
 ## How to run this lesson
 
-Open `spark-012` in the classroom and choose the Scala or PySpark implementation you understand. Prepare only its fixed `spark-local-scala` or `spark-local-python` profile,save your pad and run the complete source. Scala stages as `Main.scala` with `object Main`; Python stages as `main.py` with a main guard. Each program creates its own local[2] session,disables the UI,binds the driver to loopback and stops the session in finally. No external dataset,package download,JDBC connection or cloud service is requested.
+Open `spark-012` in the classroom and choose the Scala or PySpark implementation you understand. Prepare only its fixed `spark-local-scala` or `spark-local-python` profile, save your pad and run the complete source. Scala stages as `Main.scala` with `object Main`; Python stages as `main.py` with a main guard. Each program creates its own local[2] session, disables the UI, binds the driver to loopback and stops the session in finally. No external dataset, package download, JDBC connection or cloud service is requested.
 
 The [Scala learner](../lessons/spark-012.scala) and [PySpark learner](../lessons/spark-012.py) run two complete demonstrations and retain six explicit task stubs. Use the [explained solutions](../solutions/spark-012_solutions.md) only after an attempt or an explicit worked comparison; the [Scala reference](../solutions/spark-012_solution.scala) and [PySpark reference](../solutions/spark-012_solution.py) contain complete assertions. A bounded collect is used only for the declared tiny fixture; do not copy it onto an unbounded or large production table.
 
 ## Learning objectives
 
 - Create an owned local session and a typed schema, then distinguish transformations from actions in either API.
-- State the input and output grain,schema,NULL policy and ordering before executing a transformation.
-- Compare each language implementation with independent literal expectations,not only with the other implementation.
+- State the input and output grain, schema, NULL policy and ordering before executing a transformation.
+- Compare each language implementation with independent literal expectations, not only with the other implementation.
 
 ## Vocabulary and concepts
 
@@ -140,7 +140,7 @@ The filter expression defines the selected relation; count and the bounded fixtu
 
 Return ordered field triples(name, simpleString, nullable) for a DataFrame. Check the fixture rather than inferring correctness from a printed schema alone.
 
-**Expected result/shape:** The triples are(event_id, bigint, false),(team, string, true),(amount_cents, bigint, true).
+**Expected result/shape:** The triples are (event_id, bigint, false), (team, string, true), (amount_cents, bigint, true).
 
 **Verify:** Compare the complete triples with literals in both languages, including all nullability flags.
 
@@ -152,7 +152,7 @@ Return a DataFrame plan selecting team A without collecting or counting inside t
 
 **Expected result/shape:** The returned frame contains two rows when evaluated; raw still has four. The function body contains only a filter transformation.
 
-**Verify:** Assert returned count 2, ordered IDs[1,3] and raw count 4 at explicit action sites.
+**Verify:** Assert returned count 2, ordered IDs [1, 3] and raw count 4 at explicit action sites.
 
 **Progressive hint:** Return frame.filter with a Column predicate; put count/collect in the reference checks.
 
@@ -202,11 +202,11 @@ If a schema assertion fails, compare names, types and nullability separately rat
 
 ## Self-check
 
-Explain the contract of `schemaFields` / `schema_fields` without reading its solution. Trace the specified boundary case,then explain the final exercise's evidence and limitation. Identify where a transformation builds a plan and where an action requests execution. Retain exact values or operator evidence rather than treating a successful process exit as proof of the whole learning objective.
+Explain the contract of `schemaFields` / `schema_fields` without reading its solution. Trace the specified boundary case, then explain the final exercise's evidence and limitation. Identify where a transformation builds a plan and where an action requests execution. Retain exact values or operator evidence rather than treating a successful process exit as proof of the whole learning objective.
 
 ## Next step
 
-Use the [course route](../README.md) to continue. Paired-language agreement is useful only when both outputs also satisfy the independent fixture contract. Keep runtime/profile receipts separate from any cluster-performance or production-recovery claim.
+Use the [course route](../README.md) to continue. Paired-language agreement is useful only when both outputs also satisfy the independent fixture contract. A successful local run is not evidence of cluster performance or production recovery.
 
 ## Primary sources and official APIs
 
@@ -218,8 +218,8 @@ Use the [course route](../README.md) to continue. Paired-language agreement is u
 
 ```text
 Use $guide-ds60sqlpy-learning to coach me through spark-012: SparkSession, explicit schemas, and bounded actions.
-Read courses/scala-spark/guides/spark-012.md and courses/scala-spark/lessons/spark-012.scala;the paired sources are courses/scala-spark/lessons/spark-012.scala and courses/scala-spark/lessons/spark-012.py.
-Direct prerequisites: spark-001. Explain the schema,row grain and new Scala/Python/Spark syntax,ask me to predict a concrete result,then inspect my attempt. Give one hint at a time,review exact result and boundary evidence,and ask retrieval questions in my own words. Do not read solutions/ until I ask or have made an honest attempt.
-Use only the prepared local[2] worker profile and owned job scratch. Do not download dependencies,start a remote service,reset existing checkpoints or alter unrelated learner work.
+Read courses/scala-spark/guides/spark-012.md and courses/scala-spark/lessons/spark-012.scala; the paired sources are courses/scala-spark/lessons/spark-012.scala and courses/scala-spark/lessons/spark-012.py.
+Direct prerequisites: spark-001. Explain the schema, row grain and new Scala/Python/Spark syntax, ask me to predict a concrete result, then inspect my attempt. Give one hint at a time, review exact result and boundary evidence, and ask retrieval questions in my own words. Do not read solutions/ until I ask or have made an honest attempt.
+Use only the prepared local[2] worker profile and owned job scratch. Do not download dependencies, start a remote service, reset existing checkpoints or alter unrelated learner work.
 Done when all six contracts have inspected evidence and I can explain the stated assumptions and a meaningful failure case.
 ```

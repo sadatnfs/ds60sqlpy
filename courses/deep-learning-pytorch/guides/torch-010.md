@@ -6,7 +6,13 @@ Beginner; approximately 120 minutes. Direct prerequisites: `torch-009`. The prer
 
 ## Learning objectives
 
-A Dataset is an interface for retrieving observations, not a guarantee that the experiment is leakage-free. The central investigation is concrete: Create eight records with groups A, A, B, B, C, C, D, D and values 1, 3, 5, 7, 20, 22, 30, 32. The finish condition is length 8; item 0 has ID 0, group A, value 1. 16, 18, 26, 28. A useful explanation connects the calculation to the reason it is needed, rather than treating a function name as a definition.
+Build a Dataset and group-aware Subsets so that preprocessing statistics are fitted only on training groups.
+
+Central investigation: Load eight account records, hold out whole groups C and D, fit a centering mean on A and B, then contrast a row-level split.
+
+Finish condition: Group sets are disjoint, the training mean stays 4 even after a held-out value changes to 3200, the frozen transform maps held-out values to 16, 18, 26 and 28, and the alternating row split lets all four groups cross.
+
+The worked examples demonstrate the mechanism; exercises 1-3 transfer it to new inputs and exercises 4-6 extend it to failures and boundary cases. A useful explanation connects the calculation to the reason it is needed, rather than treating a function name as a definition.
 
 ## Purpose and mental model
 
@@ -48,19 +54,19 @@ Subclass Dataset and implement __len__ and__getitem__. A Subset stores a sequenc
 
 ## Trace selection, fitted state and delegated access
 
-The eight literal records form four account groups. Training selects original indices 0, 1, 2, 3 fromA and B; assessment selects 4, 5, 6, 7 fromC and D. The two Subset objects do not copy or redefine those records. They map their local index into the original dataset. Thus assessment[0] returns original identity 4, accountC, value 20. A local batch position zero is not a replacement for the source identity.
+The eight literal records form four account groups. Training selects original indices 0, 1, 2, 3 from A and B; assessment selects 4, 5, 6, 7 from C and D. The two Subset objects do not copy or redefine those records. They map their local index into the original dataset. Thus assessment[0] returns original identity 4, account C, value 20. A local batch position zero is not a replacement for the source identity.
 
 | Population | Original identities | Values | Mean |
 | --- | --- | --- | --- |
-| Training accountsA, B | 0, 1, 2, 3 | 1, 3, 5, 7 | 4 |
-| Assessment accountsC, D | 4, 5, 6, 7 | 20, 22, 30, 32 | 26 |
+| Training accounts A, B | 0, 1, 2, 3 | 1, 3, 5, 7 | 4 |
+| Assessment accounts C, D | 4, 5, 6, 7 | 20, 22, 30, 32 | 26 |
 | All records | 0..7 | All eight values | 15 |
 
-Each item returns a scalar tensor plus identity and group metadata. Stacking the four selected training scalars creates a tensor shaped(4, ), whose mean is the fitted normalization state. Applying that scalar to four assessment values yields[16, 18, 26, 28]. Those transformed assessment values do not have mean zero, and they should not be forced to. Their nonzero mean is information about the assessment population relative to the training baseline.
+Each item returns a scalar tensor plus identity and group metadata. Stacking the four selected training scalars creates a tensor shaped (4, ), whose mean is the fitted normalization state. Applying that scalar to four assessment values yields [16, 18, 26, 28]. Those transformed assessment values do not have mean zero, and they should not be forced to. Their nonzero mean is information about the assessment population relative to the training baseline.
 
 The held-out perturbation is a direct test of the information boundary. Replacing only the final assessment value 32 with 3200 leaves the training values and mean four unchanged. The global mean changes from 15 to 411 because the total becomes 3288 over eight records. A preprocessing path whose fitted training mean changes under this perturbation has consumed assessment information, even if no target label was read.
 
-Alternating row indices produces superficially balanced four-row sets but puts one row from every account on each side. Row-ID intersections are empty while the account-group intersection isA, B, C, D. If the claim concerns new accounts, this is a failure before any neural layer is built. A stronger optimizer or more epochs cannot undo that information crossing.
+Alternating row indices produces superficially balanced four-row sets but puts one row from every account on each side. Row-ID intersections are empty while the account-group intersection is A, B, C, D. If the claim concerns new accounts, this is a failure before any neural layer is built. A stronger optimizer or more epochs cannot undo that information crossing.
 
 Dataset is an access interface, not an isolation or immutability guarantee. Subset delegates to the underlying dataset, so later mutation of that object's values can change what a subset returns. A retrieved scalar tensor may also share storage with its source. Use out-of-place transformations or an explicit ownership boundary when mutation is intended, and freeze the fitted preprocessing state independently of mutable dataset access. [PyTorch 2.9 Dataset, Subset and data loading](https://docs.pytorch.org/docs/2.9/data.html).
 
@@ -130,33 +136,33 @@ assert mean.item() == 4
 
 ## Prediction before your attempt
 
-For the supplied fixture, name the input unit, the intermediate state and the final quantity that changes. Predict one normal result and one failure result before touching the code. In particular, explain this lesson's acceptance condition in your own words: length 8; item 0 has ID 0, group A, value 1. 16, 18, 26, 28. Preserve the prediction beside your later observations so a correction is visible. A copied expected value is not a derivation.
+For the supplied fixture, name the input unit, the intermediate state and the final quantity that changes. Predict one normal result and one failure result before touching the code. In particular, explain this lesson's acceptance condition in your own words: Group sets are disjoint, the training mean stays 4 even after a held-out value changes to 3200, the frozen transform maps held-out values to 16, 18, 26 and 28, and the alternating row split lets all four groups cross. Preserve the prediction beside your later observations so a correction is visible. A copied expected value is not a derivation.
 
 ## Exercises
 
-1. **Inspect a literal Dataset.** Create eight records with groups A, A, B, B, C, C, D, D and values 1, 3, 5, 7, 20, 22, 30, 32.
-   **Expected:** length 8; item 0 has ID 0, group A, value 1.
-   **Verify:** Save the assertion results for exercise 1, including length 8; item 0 has ID 0, group A, value 1.
+1. **Inspect a different record.** Read item 5 of the literal Accounts dataset.
+   **Expected:** ID 5, group C, value 22.
+   **Verify:** In a fresh process, the exercise checks confirm `record[0] == 5`, `record[1] == 'C'` and `record[2].item() == 22`.
 
-2. **Select whole groups.** Train on accounts A, B and holdout C, D using Subset.
-   **Expected:** four records each; group intersection empty.
-   **Verify:** Save the assertion results for exercise 2, including four records each; group intersection empty.
+2. **Hold out a different pair of groups.** Train on groups A and C and hold out B and D with Subset; check the group sets and the training mean.
+   **Expected:** disjoint group sets; training mean 11.5.
+   **Verify:** In a fresh process, the exercise checks confirm `{row[1] for row in fit} == {'A', 'C'}`; `not {row[1] for row in fit} & {row[1] for row in held}` and `torch.stack([row[2] for row in fit]).mean().item() == 11.5`.
 
-3. **Fit only training values.** Calculate the mean from the four training tensors.
-   **Expected:** mean 4.
-   **Verify:** Save the assertion results for exercise 3, including mean 4.
+3. **Apply the new frozen transform.** Center the held-out values with the training mean 11.5.
+   **Expected:** -6.5, -4.5, 18.5, 20.5.
+   **Verify:** In a fresh process, the exercise checks confirm `shifted_values` matches `torch.tensor([-6.5, -4.5, 18.5, 20.5], dtype=torch.float64)` exactly.
 
 4. **Perturb only assessment values.** Replace the final held-out value with 3200 in a copied dataset and recompute the training mean.
    **Expected:** training mean unchanged 4; global mean changes.
-   **Verify:** Save the assertion results for exercise 4, including training mean unchanged 4; global mean changes.
+   **Verify:** In a fresh process, the exercise checks confirm `new_mean.item() == 4` and `changed.values.mean() != dataset.values.mean()`.
 
 5. **Expose row-level leakage.** Assign alternating indices to train/test and inspect group intersection.
-   **Expected:** allA, B, C, D cross.
-   **Verify:** Save the assertion results for exercise 5, including allA, B, C, D cross.
+   **Expected:** all four account groups A, B, C and D cross the split.
+   **Verify:** In a fresh process, the exercise checks confirm `left & right == set('ABCD')`.
 
 6. **Apply the frozen transform.** Center held-out values with the training mean.
    **Expected:** 16, 18, 26, 28.
-   **Verify:** Save the assertion results for exercise 6, including 16, 18, 26, 28.
+   **Verify:** In a fresh process, the exercise checks confirm `centered` matches `torch.tensor([16.0, 18.0, 26.0, 28.0], dtype=torch.float64)` exactly.
 
 ## Common pitfalls and diagnosis
 
@@ -170,7 +176,7 @@ First draw the state described in the vocabulary section. Next use the smallest 
 
 ## Self-check and retrieval
 
-Close both worked examples. Explain Map-style Dataset, Subset, Split unit using the lesson fixture. Reconstruct one computation from its inputs. Then change one input while retaining the mechanism and predict whether the conclusion survives. Write which part is guaranteed by the code and which part would need new observations. This last distinction prevents a tiny deterministic teaching example from being presented as evidence about an unseen population or a production model.
+Close all three worked examples. Explain Map-style Dataset, Subset, Split unit using the lesson fixture. Reconstruct one computation from its inputs. Then change one input while retaining the mechanism and predict whether the conclusion survives. Write which part is guaranteed by the code and which part would need new observations. This last distinction prevents a tiny deterministic teaching example from being presented as evidence about an unseen population or a production model.
 
 ## Next step
 
@@ -178,7 +184,7 @@ Revisit the direct prerequisite `torch-009` if the calculation cannot be reconst
 
 ## Sources and verification status
 
-API and mechanism reference: [PyTorch2.9 data utilities](https://docs.pytorch.org/docs/2.9/data.html), reviewed 2026-10-22. The fixture, examples, counterexamples and exercise design are original course material. See [validation](../../../docs/validation.md) for execution gates. Check CI artifacts for the exact revision and platform to determine which runtime checks actually ran; authored content alone does not establish runtime execution.
+API and mechanism reference: [PyTorch 2.9 data utilities](https://docs.pytorch.org/docs/2.9/data.html), reviewed 2026-10-22. The fixture, examples, counterexamples and exercise design are original course material. See [validation](../../../docs/validation.md) for execution gates. Check CI artifacts for the exact revision and platform to determine which runtime checks actually ran; authored content alone does not establish runtime execution.
 
 ## Interview reasoning with worked answers
 

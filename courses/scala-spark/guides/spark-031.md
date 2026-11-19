@@ -1,22 +1,22 @@
 # spark-031: Structured Streaming with finite microbatches
 
-Authored paired Scala/PySpark teaching content. The default fixtures are tiny,local and deterministic. Runtime acceptance,logical correctness and learner understanding remain separate evidence.
+Authored paired Scala/PySpark teaching content. The default fixtures are tiny, local and deterministic. Runtime acceptance, logical correctness and learner understanding remain separate evidence.
 
 ## Level and prerequisites
 
-Advanced; approximately 120 minutes. Direct design prerequisites: `spark-030`. The prepared baseline is Spark 4.0.1,Scala binary2.13,JDK 17 and Python 3.12. Read the [execution baseline](../execution-baseline.md); a proposed future tuple is not a runtime receipt.
+Advanced; approximately 105 minutes. Direct prerequisites: `spark-030`. The prepared baseline is Spark 4.0.1, Scala binary 2.13, JDK 17 and Python 3.12. Read the [execution baseline](../execution-baseline.md).
 
 ## How to run this lesson
 
-Open `spark-031` in the classroom and choose the Scala or PySpark implementation you understand. Prepare only its fixed `spark-local-scala` or `spark-local-python` profile,save your pad and run the complete source. Scala stages as `Main.scala` with `object Main`; Python stages as `main.py` with a main guard. Each program creates its own local[2] session,disables the UI,binds the driver to loopback and stops the session in finally. No external dataset,package download,JDBC connection or cloud service is requested.
+Open `spark-031` in the classroom and choose the Scala or PySpark implementation you understand. Prepare only its fixed `spark-local-scala` or `spark-local-python` profile, save your pad and run the complete source. Scala stages as `Main.scala` with `object Main`; Python stages as `main.py` with a main guard. Each program creates its own local[2] session, disables the UI, binds the driver to loopback and stops the session in finally. No external dataset, package download, JDBC connection or cloud service is requested.
 
 The [Scala learner](../lessons/spark-031.scala) and [PySpark learner](../lessons/spark-031.py) run two complete demonstrations and retain six explicit task stubs. Use the [explained solutions](../solutions/spark-031_solutions.md) only after an attempt or an explicit worked comparison; the [Scala reference](../solutions/spark-031_solution.scala) and [PySpark reference](../solutions/spark-031_solution.py) contain complete assertions. A bounded collect is used only for the declared tiny fixture; do not copy it onto an unbounded or large production table.
 
 ## Learning objectives
 
 - Model an unbounded relation while running a finite, reproducible local streaming exercise.
-- State the input and output grain,schema,NULL policy and ordering before executing a transformation.
-- Compare each language implementation with independent literal expectations,not only with the other implementation.
+- State the input and output grain, schema, NULL policy and ordering before executing a transformation.
+- Compare each language implementation with independent literal expectations, not only with the other implementation.
 
 ## Vocabulary and concepts
 
@@ -32,7 +32,7 @@ The [Scala learner](../lessons/spark-031.scala) and [PySpark learner](../lessons
 
 - **Atomic file arrival:** Making a complete new file visible to a file source in one publication step instead of exposing a file while it is still being written.
 
-A streaming relation models arrivals that could continue indefinitely, but a learning run can still be finite and reproducible. This lesson provides exactly three files with three records each and usesAvailableNow. The source can divide that available data into microbatches because maxFilesPerTrigger is one. After processing the finite available files, the query terminates. It does not keep a socket open or depend on a wall-clock producer.
+A streaming relation models arrivals that could continue indefinitely, but a learning run can still be finite and reproducible. This lesson provides exactly three files with three records each and uses AvailableNow. The source can divide that available data into microbatches because maxFilesPerTrigger is one. After processing the finite available files, the query terminates. It does not keep a socket open or depend on a wall-clock producer.
 
 The files are written completely in a sibling staging directory under a fresh owned root, then moved atomically into input. Every destination filename is new. The file source expects arrivals to be complete and does not treat editing an already processed file as a safe update protocol. This local same-filesystem move is a controlled fixture mechanism; remote storage systems require their own supported publication semantics.
 
@@ -179,7 +179,7 @@ The driver-only parse of nine fixed strings supplies an independent completeness
 
 Write each declared file in the owned staging directory, then atomically move it into input under a new batch-N.json name. Reject invalid names or an existing destination.
 
-**Expected result/shape:** Three input files, each with 3 completeJSON records; no staging temporary file remains. Reusing batch-0.json is rejected.
+**Expected result/shape:** Three input files, each with 3 complete JSON records; no staging temporary file remains. Reusing batch-0.json is rejected.
 
 **Verify:** Assert the file count and explicit existing-name rejection before starting any query.
 
@@ -187,7 +187,7 @@ Write each declared file in the owned staging directory, then atomically move it
 
 ### Exercise 2: Construct an explicit streaming relation without starting it
 
-Read the owned JSON input through readStream with the declared schema and maxFilesPerTrigger 1. Return the streamingDataFrame; do not call an ordinary batch collect on it.
+Read the owned JSON input through readStream with the declared schema and maxFilesPerTrigger 1. Return the streaming DataFrame; do not call an ordinary batch collect on it.
 
 **Expected result/shape:** isStreaming is true, columns are id, team, amount and their types are bigint, string, bigint. No query is started by construction alone.
 
@@ -199,7 +199,7 @@ Read the owned JSON input through readStream with the declared schema and maxFil
 
 Group by team and compute row_count, known_amounts and total_amount. Use the same expression for streaming and batch relations without filling unknown amounts.
 
-**Expected result/shape:** The streaming result remains streaming and has one state/result row per team. Its eventual literal result isA(4,3,15), B(3,2,35), C(2,2,30).
+**Expected result/shape:** The streaming result remains streaming and has one state/result row per team. Its eventual literal result is A(4,3,15), B(3,2,35), C(2,2,30).
 
 **Verify:** Assert output columns and streaming status now; verify the exact final tuples after bounded execution.
 
@@ -227,9 +227,9 @@ Return(batch_id, num_input_rows) from retained query progress. Sum input rows an
 
 ### Exercise 6: Compare final streaming output with batch and literal oracles
 
-Read the final memory table, compare its ordered summary tuples with a batch read of the same nine source records, and compare both with the literalA/B/C oracle.
+Read the final memory table, compare its ordered summary tuples with a batch read of the same nine source records, and compare both with the literal A/B/C oracle.
 
-**Expected result/shape:** ExactlyA(4,3,15), B(3,2,35), C(2,2,30), whose record counts sum 9, known counts 7 and amounts 80.
+**Expected result/shape:** Exactly A(4,3,15), B(3,2,35), C(2,2,30), whose record counts sum 9, known counts 7 and amounts 80.
 
 **Verify:** Assert both path comparisons and the independent literal tuple list; confirm no active query remains before cleanup.
 
@@ -241,15 +241,15 @@ Do not write partially completed files into the watched input directory or reuse
 
 ## Self-check
 
-Explain the contract of `publishFile` / `publish_file` without reading its solution. Trace the specified boundary case,then explain the final exercise's evidence and limitation. Identify where a transformation builds a plan and where an action requests execution. Retain exact values or operator evidence rather than treating a successful process exit as proof of the whole learning objective.
+Explain the contract of `publishFile` / `publish_file` without reading its solution. Trace the specified boundary case, then explain the final exercise's evidence and limitation. Identify where a transformation builds a plan and where an action requests execution. Retain exact values or operator evidence rather than treating a successful process exit as proof of the whole learning objective.
 
 ## Next step
 
-Use the [course route](../README.md) to continue. Paired-language agreement is useful only when both outputs also satisfy the independent fixture contract. Keep runtime/profile receipts separate from any cluster-performance or production-recovery claim.
+Use the [course route](../README.md) to continue. Paired-language agreement is useful only when both outputs also satisfy the independent fixture contract. A successful local run is not evidence of cluster performance or production recovery.
 
 ## Primary sources and official APIs
 
-- [Spark 4.0.1 file sources,triggers,output modes and query lifecycle](https://spark.apache.org/docs/4.0.1/streaming/apis-on-dataframes-and-datasets.html)
+- [Spark 4.0.1 file sources, triggers, output modes and query lifecycle](https://spark.apache.org/docs/4.0.1/streaming/apis-on-dataframes-and-datasets.html)
 
 - [Spark 4.0.1 checkpoint configuration limits](https://spark.apache.org/docs/4.0.1/streaming/additional-information.html)
 
@@ -257,8 +257,8 @@ Use the [course route](../README.md) to continue. Paired-language agreement is u
 
 ```text
 Use $guide-ds60sqlpy-learning to coach me through spark-031: Structured Streaming with finite microbatches.
-Read courses/scala-spark/guides/spark-031.md and courses/scala-spark/lessons/spark-031.scala;the paired sources are courses/scala-spark/lessons/spark-031.scala and courses/scala-spark/lessons/spark-031.py.
-Direct prerequisites: spark-030. Explain the schema,row grain and new Scala/Python/Spark syntax,ask me to predict a concrete result,then inspect my attempt. Give one hint at a time,review exact result and boundary evidence,and ask retrieval questions in my own words. Do not read solutions/ until I ask or have made an honest attempt.
-Use only the prepared local[2] worker profile and owned job scratch. Do not download dependencies,start a remote service,reset existing checkpoints or alter unrelated learner work.
+Read courses/scala-spark/guides/spark-031.md and courses/scala-spark/lessons/spark-031.scala; the paired sources are courses/scala-spark/lessons/spark-031.scala and courses/scala-spark/lessons/spark-031.py.
+Direct prerequisites: spark-030. Explain the schema, row grain and new Scala/Python/Spark syntax, ask me to predict a concrete result, then inspect my attempt. Give one hint at a time, review exact result and boundary evidence, and ask retrieval questions in my own words. Do not read solutions/ until I ask or have made an honest attempt.
+Use only the prepared local[2] worker profile and owned job scratch. Do not download dependencies, start a remote service, reset existing checkpoints or alter unrelated learner work.
 Done when all six contracts have inspected evidence and I can explain the stated assumptions and a meaningful failure case.
 ```

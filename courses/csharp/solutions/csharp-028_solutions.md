@@ -1,6 +1,6 @@
 # csharp-028: explanation and comparison
 
-Attempt the six guide tasks before opening this comparison. The executable reference is [csharp-028_solution.cs](csharp-028_solution.cs). Its assertions are always active under the prepared classroom compile settings.
+Attempt the six guide tasks before opening this comparison. The executable reference is [csharp-028_solution.cs](csharp-028_solution.cs). It runs both worked examples and the reference answers below, and its assertions are always active under the prepared classroom compile settings.
 
 ## Why the two examples differ
 
@@ -8,21 +8,56 @@ Attempt the six guide tasks before opening this comparison. The executable refer
 
 **Detect a plausible wrong function:** A property complements examples but does not replace the domain-specific expected values. The zero case catches the incorrect default, and clamping twice changes nothing further.
 
-## Reason through the six tasks
+## Task answers
 
-1. **Predict and explain.** Explain which wrong implementations each case would reject.
+### Task 1: Predict and explain
 
-2. **Guided modification.** Add an extreme integer case without overflow.
+Explain which wrong implementations each case would reject.
 
-3. **Independent construction.** Write table-driven checks for your inventory quantity validator.
+No separate reference answer has been written for this task. Example A is the evidence to compare with: The literal expectations come from the stated clamp rule, not a duplicated implementation. Negative, zero and positive cases preserve their intended categories.
 
-4. **Diagnose a defect.** Diagnose an assertion comparing a function call with the same call.
+### Task 2: Guided modification
 
-5. **Boundary evidence.** Test idempotence and an independently derived boundary value.
+Add an extreme integer case without overflow.
 
-6. **Transfer and justify.** Separate unit and integration evidence for a JSON file importer.
+No separate reference answer has been written for this task. Start from Example B: A property complements examples but does not replace the domain-specific expected values. The zero case catches the incorrect default, and clamping twice changes nothing further.
 
-For tasks 1 and 2, use the checked values and mechanism trace in the two examples. For task 3, choose names that expose the input and result contract and retain the same invariants. For task 4, the diagnosed mistakes below supply a concrete wrong assumption: preserve its counterexample before repairing it. Task 5 needs an explicit expected value or documented rejection at the boundary, not just successful execution. For task 6, explain what changes in the new context and which part of the original mechanism remains applicable. Several representations may satisfy this transfer task; justify the choice rather than treating this reference as the only architecture.
+### Task 3: Independent construction
+
+Write table-driven checks for your inventory quantity validator.
+
+**Reference answer.** It runs as the `Task 3` block of the reference program.
+
+```csharp
+bool ValidQuantity(int value) => value >= 0 && value <= 1000;
+int[] inputs = { -1, 0, 1000, 1001 };
+bool[] expected = { false, true, true, false };
+for (int i = 0; i < inputs.Length; i++) {
+  Check(ValidQuantity(inputs[i]) == expected[i], $"case {inputs[i]}");
+}
+```
+
+**Observe:** All four rows pass, including both edges of the 0 to 1000 range.
+
+Each row pairs an input with an expected answer written independently, and the boundary rows make an off-by-one implementation fail.
+
+### Task 4: Diagnose a defect
+
+Diagnose an assertion comparing a function call with the same call.
+
+No reference answer has been written for this task yet. The wrong assumptions to look for are this lesson's pitfalls: Tests that always print success or catch their own assertion failures provide misleading evidence. A flaky test weakens trust even when production code is correct. Random generation requires a reproducible seed and a clear oracle.
+
+### Task 5: Boundary evidence
+
+Test idempotence and an independently derived boundary value.
+
+No reference answer has been written for this task yet. Write the expected value or documented rejection for each boundary before running it, and compare with the checks in Example A (Use independently derived cases) and Example B (Detect a plausible wrong function).
+
+### Task 6: Transfer and justify
+
+Separate unit and integration evidence for a JSON file importer.
+
+No single reference answer exists: several designs can satisfy this transfer task. Justify yours against the mechanism described below and the vocabulary entry **Test oracle**, and state one limitation of your choice.
 
 ## Mechanism and diagnostic reasoning
 
@@ -36,4 +71,4 @@ Tests that always print success or catch their own assertion failures provide mi
 
 ## Review before continuing
 
-The reference checks the worked scenarios, including their boundary distinctions. Your independent and transfer artifacts may have additional checks. Compare observations rather than only source text. Preserve any new regression case you discover and explain why it would reject a plausible wrong implementation. External project steps require their own build and platform evidence and are not established by a portable reference passing.
+Run the reference and confirm that it prints `csharp-028: passed`, then reconstruct one boundary case from memory and explain which check would reject a plausible wrong implementation. External project steps need their own build and platform evidence; a passing portable reference does not establish them.

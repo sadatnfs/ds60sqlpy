@@ -40,6 +40,27 @@ struct LessonMain {
       let total = await ledger.total
       precondition(conflict && total == 3)
     }
+
+    do {
+      // Task 3: Independent construction
+      actor ReceiptLedger {
+        private var receipts: [String: Int] = [:]
+        private(set) var executions = 0
+        func apply(id: String, amount: Int) -> Int {
+          if let receipt = receipts[id] { return receipt }
+          executions += 1
+          receipts[id] = amount
+          return amount
+        }
+        func receipt(for id: String) -> Int? { receipts[id] }
+      }
+      let ledger = ReceiptLedger()
+      _ = await ledger.apply(id: "one", amount: 3)
+      let found = await ledger.receipt(for: "one")
+      let missing = await ledger.receipt(for: "two")
+      let executions = await ledger.executions
+      precondition(found == 3 && missing == nil && executions == 1)
+    }
     print("swift-032: passed")
   }
 }

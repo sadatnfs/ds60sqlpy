@@ -134,9 +134,9 @@ def example_one():
             d,
             models={
                 "events": (
-                    "{{ config(materialized='table') }} select range as id, "
-                    "range % 5 as segment, range % 7 as amount from "
-                    "range(10000)"
+                    "{{ config(materialized='table') }}\n"
+                    "select range as id, range % 5 as segment, range % 7 as amount\n"
+                    "from range(10000)"
                 )
             },
         )
@@ -167,8 +167,8 @@ def example_two():
         p = project(
             d,
             models={
-                "events": "select * from (values (1,5),(1,5),(2,7)) as t(id,amount)",
-                "incorrect_fast_path": "select distinct id,amount from {{ ref('events') }}",
+                "events": "select * from (values (1, 5), (1, 5), (2, 7)) as t(id, amount)",
+                "incorrect_fast_path": "select distinct id, amount from {{ ref('events') }}",
             },
         )
         invoke(p, "build")
@@ -193,4 +193,4 @@ if __name__ == "__main__":
 
 ## Interpretation
 
-Measure database work with a correctness oracle and a clearly defined interval. Review plans as evidence about this query and version, retain multiset/ordering semantics and include the complete refresh/read workload when choosing materializations.
+Review plans as evidence about this query and version, retain multiset/ordering semantics and include the complete refresh/read workload when choosing materializations.

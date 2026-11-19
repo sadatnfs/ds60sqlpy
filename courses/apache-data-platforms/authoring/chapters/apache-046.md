@@ -27,6 +27,20 @@ closed its window. All three belong to the first two-second window. The source
 then advances its watermark to 2000. The actual window operator emits east total 11
 from two records and west total 9 from one record.
 
+The timeline source emits events and watermarks itself, which is why the job passes
+`WatermarkStrategy.noWatermarks()` instead of generating watermarks from timestamps:
+
+<!-- include: projects/flink/src/TimelineSource.java from="if (command.event == null)" to="else output.collect" java -->
+
+The windowed branch of the job then groups events by key into two-second event-time
+windows and routes records that arrive after their window closed to a side output:
+
+<!-- include: projects/flink/src/WorkshopJobs.java from="var windows = events" to="result = windows.union" java -->
+
+A source that derives watermarks from timestamps would instead use a strategy such
+as `WatermarkStrategy.forBoundedOutOfOrderness(Duration.ofMillis(500))`, whose
+watermark trails the largest timestamp seen by that 500 ms bound.
+
 The checker compares window start, end, key, count and amount, not only the grand
 total. An implementation using processing time might accidentally produce a
 plausible overall sum while assigning it to the wrong window. Keeping exact

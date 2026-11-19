@@ -32,6 +32,13 @@ internal static class Program {
       Func<Metric, int> getCount = value => value.Count;
       Check(getCount(metric) == 4, "typed projection");
     }
+    {
+      // Task 3: Independent construction
+      var metrics = new[] { new Metric(2), new Metric(5) };
+      Func<Metric, int> count = metric => metric.Count;
+      int total = metrics.Sum(count);
+      Check(total == 7, "typed projection");
+    }
     Console.WriteLine("csharp-045: passed");
     await Task.CompletedTask;
   }

@@ -17,6 +17,15 @@ struct LessonMain {
       precondition(String(text[..<firstEnd]) == "A")
       precondition(String(text[firstEnd...]) == "😀B")
     }
+
+    do {
+      // Task 3: Independent construction
+      func firstCharacter(_ text: String) -> Character? {
+        text.first
+      }
+      precondition(firstCharacter("😀B") == "😀")
+      precondition(firstCharacter("") == nil)
+    }
     print("swift-004: passed")
   }
 }

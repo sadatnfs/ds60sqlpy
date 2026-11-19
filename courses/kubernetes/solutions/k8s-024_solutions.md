@@ -14,7 +14,7 @@ The browser does not run Kustomize or arbitrary apply commands. A reviewed rende
 
 The overlay expresses the intended environment difference. Local paths and a small resource set make review tractable and avoid a hidden network dependency.
 
-**Expected:** One local Deployment base plus explicit dev1/test2 overrides.
+**Expected:** One local Deployment base plus explicit dev (1 replica) and test (2 replicas) overrides.
 
 ## Exercise 2: Render with prepared tooling
 

@@ -8,9 +8,11 @@ Cancellation is cooperative: a context signals that work should stop, but does n
 
 context.WithCancel returns a child and cancel function. Done closes on cancellation; Err explains cancellation or deadline expiry. WithDeadline accepts a past time for deterministic testing. A select arm receiving from ctx.Done cooperates with cancellation. Context values carry request-scoped metadata, not optional function arguments, authentication guarantees or mutable application state.
 
-## 1. Cancel a child
+## 1. Cancel a child: predict an edited check
 
-Create a cancelable context and cancel it.
+Copy worked example 1 into a scratch pad and change `check(ctx.Err() == context.Canceled, "cancel")` to `check(ctx.Err() != context.Canceled, "cancel")` inside its check. Before running, predict whether the check still passes and explain why; then restore it.
+
+The unchanged code is worked example 1:
 
 ```go
 ctx, cancel := context.WithCancel(context.Background())
@@ -18,13 +20,15 @@ cancel()
 check(ctx.Err() == context.Canceled, "cancel")
 ```
 
-**Expected:** Err returns context.Canceled.
+**Expected:** The changed run panics with `cancel` because the edited check no longer holds. Restoring the original line brings back the worked observation: err returns context.Canceled.
 
 Cancellation is visible through Err and the closed Done channel. Repeated cancel calls are safe.
 
-## 2. Propagate parent cancellation
+## 2. Propagate parent cancellation: diagnose an edited check
 
-Derive a child and cancel its parent.
+A careless edit changed the check in worked example 2 so that it reads `check(parent.Err() != context.Canceled && child.Err() == context.Canceled, "tree")`. Run worked example 2 with that line, explain why the edited check now fails for the same program state, and restore it.
+
+The unchanged code is worked example 2:
 
 ```go
 parent, cancel := context.WithCancel(context.Background())
@@ -34,7 +38,7 @@ cancel()
 check(parent.Err() == context.Canceled && child.Err() == context.Canceled, "tree")
 ```
 
-**Expected:** Both contexts become canceled.
+**Expected:** Before the repair the program panics with `tree`; after it the line reads `check(parent.Err() == context.Canceled && child.Err() == context.Canceled, "tree")` again and both contexts become canceled.
 
 A child cannot extend work beyond the lifetime requested by its parent.
 

@@ -6,7 +6,7 @@ Read the [guide](../guides/spark-020.md) and attempt one language first. The [Sc
 
 ### Exercise 1: Establish logical content independently of layout
 
-Return the ordered list of(id, key, value) tuples for the declared 24-row fixture. Compare its full bag with the literal arithmetic rule and compute count, distinct IDs, sum(id), sum(value).
+Return the ordered list of (id, key, value) tuples for the declared 24-row fixture. Compare its full bag with the literal arithmetic rule and compute count, distinct IDs, sum(id), sum(value).
 
 **Expected:** IDs 0..23 appear once, key=id%4, value=10*id. Metrics are 24,24,276,2760.
 
@@ -76,7 +76,7 @@ The result demonstrates reduction and the absence of expansion for this classic 
 
 Return partition_id, row_count, id_total for occupied partitions of the supplied relation. Record total partition metadata separately and do not manufacture empty-partition rows.
 
-**Expected:** Ledger row_count sums 24 and id_total sums 276; each recorded partition ID lies in[0, total_partitions). Occupied count may be lower than total.
+**Expected:** Ledger row_count sums 24 and id_total sums 276; each recorded partition ID lies in [0, total_partitions). Occupied count may be lower than total.
 
 ```scala
 def partitionLedger(frame: DataFrame): DataFrame = {
@@ -102,7 +102,7 @@ The ledger turns a physical layout into inspectable run evidence while reconcili
 
 ### Exercise 5: Verify ordering only within its promised scope
 
-Return a relation sorted within each partition by key ascending, id ascending. Inspect the sequence of(key, id) pairs within each recorded partition and preserve the logical bag.
+Return a relation sorted within each partition by key ascending, id ascending. Inspect the sequence of (key, id) pairs within each recorded partition and preserve the logical bag.
 
 **Expected:** Every occupied partition sequence is sorted; the complete canonical relation is unchanged. No raw global collect sequence is required.
 
@@ -125,7 +125,7 @@ The operator promises order inside a partition and the test checks exactly that 
 
 Order key descending then event identity id ascending and return the first 5 rows. Repeat after several input layouts.
 
-**Expected:** IDs[3,7,11,15,19], allkey 3 and values[30,70,110,150,190]. The final sixthkey 3 row is outside the limit.
+**Expected:** IDs [3, 7, 11, 15, 19], allkey 3 and values [30, 70, 110, 150, 190]. The final sixthkey 3 row is outside the limit.
 
 ```scala
 def preview(frame: DataFrame): Seq[(Long, Long, Long)] = {
@@ -156,4 +156,4 @@ The complete ordering converts a relation into a specified display sequence befo
 
 ## Execution and interpretation
 
-Run the complete reference in its prepared fixed worker. The small fixture is constructed inside the program,so opening a lesson does not fetch data. A final success line is printed only after the reference assertions complete. Plan observations,partition evidence and resource measurements apply to the actual local configuration; they do not establish cluster-scale performance. Session cleanup is explicit,and any additional owned file/query lifecycle is described in the lesson.
+Run the complete reference in its prepared fixed worker. The small fixture is constructed inside the program, so opening a lesson does not fetch data. A final success line is printed only after the reference assertions complete. Plan observations, partition evidence and resource measurements apply to the actual local configuration; they do not establish cluster-scale performance. Session cleanup is explicit, and any additional owned file/query lifecycle is described in the lesson.

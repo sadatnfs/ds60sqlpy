@@ -15,6 +15,18 @@ Keep names stable and avoid accidental collisions. A namespace is a source-resol
 
 Record the source change and affected consumers. A local path can change even when no remote version declaration changes.
 
+```python
+# Uses the tempfile import and the package_project(), invoke() and rows() helpers in main.py.
+with tempfile.TemporaryDirectory() as d:
+    p = package_project(d)
+    (p / "local_packages/classroom_utils/macros/add_one.sql").write_text(
+        "{% macro add_one(value) %} (({{ value }}) + 2) {% endmacro %}"
+    )
+    invoke(p, "deps")
+    invoke(p, "build")
+    assert rows(p, "select answer from answer") == [(43,)]
+```
+
 **Expected:** The output becomes 43.
 
 ## 3. Read the lock artifact
@@ -138,7 +150,7 @@ def package_project(directory):
     local = p / "local_packages/classroom_utils"
     (local / "macros").mkdir(parents=True)
     (local / "dbt_project.yml").write_text(
-        "name: classroom_utils\nversion: '1.0'\nconfig-version: 2\nmacro-paths: [macros]\n"
+        'name: classroom_utils\nversion: "1.0"\nconfig-version: 2\nmacro-paths: [macros]\n'
     )
     (local / "macros/add_one.sql").write_text(
         "{% macro add_one(value) %} (({{ value }}) + 1) {% endmacro %}"
@@ -184,4 +196,4 @@ if __name__ == "__main__":
 
 ## Interpretation
 
-Prepare and inspect a real reusable dbt dependency with an explicit source boundary. Demonstrate its missing-dependency failure and a reviewed source change. Extend the same discipline to external packages only in a deliberately prepared project with suitable version and trust controls.
+Demonstrate its missing-dependency failure and a reviewed source change. Extend the same discipline to external packages only in a deliberately prepared project with suitable version and trust controls.

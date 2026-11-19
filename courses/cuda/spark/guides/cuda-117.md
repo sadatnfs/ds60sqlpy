@@ -102,10 +102,6 @@ Do not download packages, models or data by opening this lesson. Do not attach a
 
 GPU Spark is a separate owned external workflow. The ordinary `spark-local-scala` and `spark-local-python` profiles are CPU Spark. Keep the GPU plugin disabled or absent for a CPU-only baseline. Per-operator CPU fallback inside a working GPU plugin environment is a different condition from having no compatible GPU. Never mount a host Docker socket or ambient kubeconfig into an ordinary lesson worker.
 
-## Ask an AI tutor about this lesson
-
-> I am studying `cuda-117` using `courses/cuda/spark/guides/cuda-117.md` and `courses/cuda/spark/lessons/cuda-117.md`. Help me reason about Nulls, decimals, timestamps and equality contracts. Start with my current attempt and the two worked examples. Ask which backend actually ran, give one progressive hint, and do not reveal the separate solution or mark progress unless I request it.
-
 ## Primary references
 
 - [cuDF Spark plugin release and compatibility matrix](https://nvidia.github.io/cudf-spark/docs/download.html)
@@ -114,3 +110,14 @@ GPU Spark is a separate owned external workflow. The ordinary `spark-local-scala
 - [Apache Spark SQL performance tuning](https://spark.apache.org/docs/latest/sql-performance-tuning.html)
 
 Use the version-matched documentation of your prepared environment. These references describe interfaces and supported boundaries; the chapter's synthetic examples and CPU models are original teaching material.
+
+## Ask an AI tutor about this lesson
+
+```text
+Use the checked-in $guide-ds60sqlpy-learning skill for cuda-117: Nulls, decimals, timestamps and equality contracts.
+Read courses/cuda/spark/guides/cuda-117.md and courses/cuda/spark/lessons/cuda-117.md.
+Start with my current attempt and the two worked examples, and ask which backend actually ran.
+Give one progressive hint at a time. Keep the separate solution closed and do not mark
+progress unless I request it. Treat synthetic timings and CPU models as model evidence,
+not as GPU or cluster measurements.
+```

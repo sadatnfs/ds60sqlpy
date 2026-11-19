@@ -20,7 +20,7 @@
       ],
       "outcome": "Explain what a revenue number means by identifying the model, grain and eligible rows.",
       "lab": "Write a one-row query that names the output QuantitySold.",
-      "verification": "Compare a written context trace with the named hand-derived reference; no execution or automatic correctness claim."
+      "verification": "Write a row and filter-context trace for case A (All eight lines) and case B (Notebook product only), then match NetRevenue with the hand-derived reference tables. Nothing is executed or graded automatically."
     },
     {
       "id": "dax-002",
@@ -40,7 +40,7 @@
       ],
       "outcome": "Distinguish sales lines, orders and customers before selecting an aggregation.",
       "lab": "Write the average revenue per order measure.",
-      "verification": "Compare a written context trace with the named hand-derived reference; no execution or automatic correctness claim."
+      "verification": "Write a row and filter-context trace for case A (Whole model counts) and case B (One multi-line order), then match Lines, Orders and Revenue with the hand-derived reference tables. Nothing is executed or graded automatically."
     },
     {
       "id": "dax-003",
@@ -59,7 +59,7 @@
       ],
       "outcome": "Trace a dimension selection through an active relationship to the exact contributing fact rows.",
       "lab": "Draw the two paths that meet at Sales.",
-      "verification": "Compare a written context trace with the named hand-derived reference; no execution or automatic correctness claim."
+      "verification": "Write a row and filter-context trace for case A (Paper products) and case B (Paper in the North), then match Revenue with the hand-derived reference tables. Nothing is executed or graded automatically."
     },
     {
       "id": "dax-004",
@@ -78,7 +78,7 @@
       ],
       "outcome": "Predict asymmetric filter propagation and identify when a SQL join analogy breaks.",
       "lab": "Write a query returning both populations with unambiguous labels.",
-      "verification": "Compare a written context trace with the named hand-derived reference; no execution or automatic correctness claim."
+      "verification": "Write a row and filter-context trace for case A (Dimension-to-fact propagation) and case B (Fact filter does not flow backward), then match VisibleProducts, Lines and Revenue with the hand-derived reference tables. Nothing is executed or graded automatically."
     },
     {
       "id": "dax-005",
@@ -99,7 +99,7 @@
       ],
       "outcome": "Distinguish scalar expressions, table expressions and named model measures in a readable query.",
       "lab": "Write a query returning three rows in descending SaleID order.",
-      "verification": "Compare a written context trace with the named hand-derived reference; no execution or automatic correctness claim."
+      "verification": "Write a row and filter-context trace for case A (A scalar wrapped as a table) and case B (A projected two-row result), then match RevenueUSD, Line and Amount with the hand-derived reference tables. Nothing is executed or graded automatically."
     },
     {
       "id": "dax-006",
@@ -120,7 +120,7 @@
       ],
       "outcome": "Produce a model-quality ledger that separates an invalid dimension key from an unmatched fact key.",
       "lab": "Write an issue ledger with type, evidence and disposition.",
-      "verification": "Compare a written context trace with the named hand-derived reference; no execution or automatic correctness claim."
+      "verification": "Write a row and filter-context trace for case A (A duplicate-key diagnostic, not a loaded dimension) and case B (An unmatched fact key), then match Rows, UniqueKeys and ProductKey with the hand-derived reference tables. Nothing is executed or graded automatically."
     },
     {
       "id": "dax-007",
@@ -141,7 +141,7 @@
       ],
       "outcome": "Keep a numeric measure numeric and explain why its display label is a separate concern.",
       "lab": "Write a result row containing quantity, revenue and revenue per unit.",
-      "verification": "Compare a written context trace with the named hand-derived reference; no execution or automatic correctness claim."
+      "verification": "Write a row and filter-context trace for case A (A row of distinct types) and case B (A number and its text label), then match Count, Ratio, Larger, Day, NumericRevenue and DisplayText with the hand-derived reference tables. Nothing is executed or graded automatically."
     },
     {
       "id": "dax-008",
@@ -161,7 +161,7 @@
       ],
       "outcome": "Explain coercion and choose a deliberate missing-value display policy.",
       "lab": "Write a label distinguishing no sales from positive revenue.",
-      "verification": "Compare a written context trace with the named hand-derived reference; no execution or automatic correctness claim."
+      "verification": "Write a row and filter-context trace for case A (Blank coercion is operator-specific) and case B (An existing product with no sales), then match LooseZero, StrictZero, PlusFive, TimesFive, Products, SalesRows, Revenue and DisplayRevenue with the hand-derived reference tables. Nothing is executed or graded automatically."
     },
     {
       "id": "dax-009",
@@ -182,7 +182,7 @@
       ],
       "outcome": "Separate a row's stored calculation from a scalar reevaluated for a query context.",
       "lab": "Write a calculated-column expression for a line's gross amount.",
-      "verification": "Compare a written context trace with the named hand-derived reference; no execution or automatic correctness claim."
+      "verification": "Write a row and filter-context trace for case A (Stored row amounts and their formula) and case B (A measure over a selected population), then match Line, Stored, Reconstructed, Revenue and Quantity with the hand-derived reference tables. Nothing is executed or graded automatically."
     },
     {
       "id": "dax-010",
@@ -204,7 +204,7 @@
       ],
       "outcome": "Choose an aggregation whose input grain and total behavior match the metric definition.",
       "lab": "Write two separate measures for catalog customers and customers with sales.",
-      "verification": "Compare a written context trace with the named hand-derived reference; no execution or automatic correctness claim."
+      "verification": "Write a row and filter-context trace for case A (Whole-model populations) and case B (Paper's overlapping order population), then match Revenue, Lines, Orders and CustomersWithSales with the hand-derived reference tables. Nothing is executed or graded automatically."
     },
     {
       "id": "dax-011",
@@ -224,7 +224,7 @@
       ],
       "outcome": "Derive a ratio at its declared population and distinguish an undefined ratio from zero.",
       "lab": "Write a measure that leaves undefined rates blank.",
-      "verification": "Compare a written context trace with the named hand-derived reference; no execution or automatic correctness claim."
+      "verification": "Write a row and filter-context trace for case A (A ratio of sufficient totals) and case B (Explicit undefined-ratio policy), then match Revenue, Units, NetPerUnit, DefaultResult, ChosenDisplay and ZeroNumerator with the hand-derived reference tables. Nothing is executed or graded automatically."
     },
     {
       "id": "dax-012",
@@ -245,7 +245,7 @@
       ],
       "outcome": "Predict when a variable freezes a value and when a measure is reevaluated in modified context.",
       "lab": "Rewrite a filtered share with separately named numerator and denominator.",
-      "verification": "Compare a written context trace with the named hand-derived reference; no execution or automatic correctness claim."
+      "verification": "Write a row and filter-context trace for case A (Binding before a new filter) and case B (Binding inside Blue before removing it), then match FrozenInBlue, RecomputedInBlue, FrozenWithoutColor and RecomputedWithoutColor with the hand-derived reference tables. Nothing is executed or graded automatically."
     },
     {
       "id": "dax-013",
@@ -265,7 +265,7 @@
       ],
       "outcome": "Explain why iterating Product does not by itself filter a raw Sales aggregation.",
       "lab": "Write a projection that shows both raw and transitioned sums.",
-      "verification": "Compare a written context trace with the named hand-derived reference; no execution or automatic correctness claim."
+      "verification": "Write a row and filter-context trace for case A (A row label beside an unfiltered sum) and case B (Transition the current product into a filter), then match Product, RawSum and Revenue with the hand-derived reference tables. Nothing is executed or graded automatically."
     },
     {
       "id": "dax-014",
@@ -285,7 +285,7 @@
       ],
       "outcome": "Record a complete context ledger and explain two cells with the same measure definition.",
       "lab": "Write a context ledger for North, Home and 2025.",
-      "verification": "Compare a written context trace with the named hand-derived reference; no execution or automatic correctness claim."
+      "verification": "Write a row and filter-context trace for case A (One region in one year) and case B (A multi-selection retains the year), then match Revenue with the hand-derived reference tables. Nothing is executed or graded automatically."
     },
     {
       "id": "dax-015",
@@ -305,7 +305,7 @@
       ],
       "outcome": "Predict replacement on one column while retaining unrelated filters.",
       "lab": "Write a measure that forces year 2025 but retains region.",
-      "verification": "Compare a written context trace with the named hand-derived reference; no execution or automatic correctness claim."
+      "verification": "Write a row and filter-context trace for case A (Replace Blue with Red) and case B (Add Color while retaining Category), then match Original, RedRevenue, PaperRevenue and BluePaperRevenue with the hand-derived reference tables. Nothing is executed or graded automatically."
     },
     {
       "id": "dax-016",
@@ -324,7 +324,7 @@
       ],
       "outcome": "Explain why sibling filter arguments differ from deliberately nested evaluation.",
       "lab": "Write a context ledger for each sibling expression.",
-      "verification": "Compare a written context trace with the named hand-derived reference; no execution or automatic correctness claim."
+      "verification": "Write a row and filter-context trace for case A (Sibling filters use the incoming key maximum) and case B (Nested context before computing the key), then match IncomingMaxKey and Revenue with the hand-derived reference tables. Nothing is executed or graded automatically."
     },
     {
       "id": "dax-017",
@@ -345,7 +345,7 @@
       ],
       "outcome": "Trace a raw aggregation and a measure reference inside an iterator without treating context transition as a row pointer.",
       "lab": "Write the simplest formula for this additive revenue total.",
-      "verification": "Compare a written context trace with the named hand-derived reference; no execution or automatic correctness claim."
+      "verification": "Write a row and filter-context trace for case A (Eight repetitions versus eight individual amounts) and case B (Measure invocation transitions each customer), then match RawRepeated, Transitioned, CustomerRows and SumOfCustomerRevenue with the hand-derived reference tables. Nothing is executed or graded automatically."
     },
     {
       "id": "dax-018",
@@ -367,7 +367,7 @@
       ],
       "outcome": "Build a measure-dependent selection by evaluating the measure for each candidate member.",
       "lab": "Write a selection for customers with revenue above 55.",
-      "verification": "Compare a written context trace with the named hand-derived reference; no execution or automatic correctness claim."
+      "verification": "Write a row and filter-context trace for case A (Products above fifty) and case B (A stricter threshold), then match Products and Revenue with the hand-derived reference tables. Nothing is executed or graded automatically."
     },
     {
       "id": "dax-019",
@@ -387,7 +387,7 @@
       ],
       "outcome": "Choose between forcing a value and respecting an existing selection on the same column.",
       "lab": "Write a selected-subgroup measure for Trade customers.",
-      "verification": "Compare a written context trace with the named hand-derived reference; no execution or automatic correctness claim."
+      "verification": "Write a row and filter-context trace for case A (A disjoint subgroup stays empty) and case B (An overlapping subgroup is retained), then match ForcedRed, RedWithinSelection, SelectedRevenue and BlueWithinSelection with the hand-derived reference tables. Nothing is executed or graded automatically."
     },
     {
       "id": "dax-020",
@@ -407,7 +407,7 @@
       ],
       "outcome": "State which filters a share denominator removes and which it retains.",
       "lab": "Write the denominator contract in plain language before coding.",
-      "verification": "Compare a written context trace with the named hand-derived reference; no execution or automatic correctness claim."
+      "verification": "Write a row and filter-context trace for case A (Share within the retained category) and case B (All products within North), then match Numerator, CategoryDenominator, Share and RegionalDenominator with the hand-derived reference tables. Nothing is executed or graded automatically."
     },
     {
       "id": "dax-021",
@@ -428,7 +428,7 @@
       ],
       "outcome": "Derive an iterator result and explain how blank rows affect its denominator.",
       "lab": "Write a customer-level average revenue for customers with sales.",
-      "verification": "Compare a written context trace with the named hand-derived reference; no execution or automatic correctness claim."
+      "verification": "Write a row and filter-context trace for case A (Calculate additive row amounts) and case B (Average sold products or the complete catalog), then match Gross, Net, NonblankProducts and AllCatalogProducts with the hand-derived reference tables. Nothing is executed or graded automatically."
     },
     {
       "id": "dax-022",
@@ -448,7 +448,7 @@
       ],
       "outcome": "Locate a variable's binding context and avoid repeating one total for every member.",
       "lab": "Write an iterator whose variable intentionally holds one global denominator.",
-      "verification": "Compare a written context trace with the named hand-derived reference; no execution or automatic correctness claim."
+      "verification": "Write a row and filter-context trace for case A (One shared total versus one value per product) and case B (An incoming filtered total is still shared), then match SharedScalarSum and PerProductSum with the hand-derived reference tables. Nothing is executed or graded automatically."
     },
     {
       "id": "dax-023",
@@ -469,7 +469,7 @@
       ],
       "outcome": "Reconcile row values and a grand-total ratio without forcing the total to sum visible cells.",
       "lab": "Write a separately named equal-category average.",
-      "verification": "Compare a written context trace with the named hand-derived reference; no execution or automatic correctness claim."
+      "verification": "Write a row and filter-context trace for case A (Category-level prices) and case B (The total and an intentionally different measure), then match Category, Revenue, Units, NetPerUnit, PooledNetPerUnit and SumOfCategoryRatios with the hand-derived reference tables. Nothing is executed or graded automatically."
     },
     {
       "id": "dax-024",
@@ -490,7 +490,7 @@
       ],
       "outcome": "Differentiate share of an explicitly selected population from share of all model products.",
       "lab": "Write a denominator specification for a chart with a year slicer.",
-      "verification": "Compare a written context trace with the named hand-derived reference; no execution or automatic correctness claim."
+      "verification": "Write a row and filter-context trace for case A (Share of the selected product set) and case B (Share of all products instead), then match Product, Revenue, SelectedTotal, Share and AllProductTotal with the hand-derived reference tables. Nothing is executed or graded automatically."
     },
     {
       "id": "dax-025",
@@ -512,7 +512,7 @@
       ],
       "outcome": "Reconcile unmatched facts without confusing the stored dimension with its semantic blank member.",
       "lab": "Write the reconciliation equation for product reporting.",
-      "verification": "Compare a written context trace with the named hand-derived reference; no execution or automatic correctness claim."
+      "verification": "Write a row and filter-context trace for case A (Stored keys versus semantic members) and case B (Reconcile the unknown amount), then match ValuesMembers, StoredDistinctKeys, UnknownRevenue and AllRevenue with the hand-derived reference tables. Nothing is executed or graded automatically."
     },
     {
       "id": "dax-026",
@@ -534,7 +534,7 @@
       ],
       "outcome": "Predict which rows survive a projection, an extension and a grouped summary.",
       "lab": "Write an intermediate-table ledger for a revenue-threshold calculation.",
-      "verification": "Compare a written context trace with the named hand-derived reference; no execution or automatic correctness claim."
+      "verification": "Write a row and filter-context trace for case A (Extend every candidate key) and case B (A grouped summary omits an all-blank group), then match ProductKey and Revenue with the hand-derived reference tables. Nothing is executed or graded automatically."
     },
     {
       "id": "dax-027",
@@ -555,7 +555,7 @@
       ],
       "outcome": "Explain why a virtual column's model identity matters in addition to its visible values.",
       "lab": "Write a disconnected selection mapping for product keys 1 and 3.",
-      "verification": "Compare a written context trace with the named hand-derived reference; no execution or automatic correctness claim."
+      "verification": "Write a row and filter-context trace for case A (A direct key projection retains its model identity) and case B (Restore an explicitly detached mapping), then match CandidateRows, Revenue, WithoutTarget and WithTarget with the hand-derived reference tables. Nothing is executed or graded automatically."
     },
     {
       "id": "dax-028",
@@ -576,7 +576,7 @@
       ],
       "outcome": "Distinguish membership operations from bag concatenation and preserve a deliberate key population.",
       "lab": "Write an eligible-product union that should contain each key once.",
-      "verification": "Compare a written context trace with the named hand-derived reference; no execution or automatic correctness claim."
+      "verification": "Write a row and filter-context trace for case A (Intersection and one-sided difference) and case B (UNION keeps repeated membership rows), then match IntersectionRows, PaperOnlyRows, CombinedRows and DistinctKeys with the hand-derived reference tables. Nothing is executed or graded automatically."
     },
     {
       "id": "dax-029",
@@ -596,7 +596,7 @@
       ],
       "outcome": "Reconcile order-date and ship-date totals without changing the fact amounts.",
       "lab": "Write a clearly named shipment-revenue measure.",
-      "verification": "Compare a written context trace with the named hand-derived reference; no execution or automatic correctness claim."
+      "verification": "Write a row and filter-context trace for case A (January order versus shipment attribution) and case B (February absorbs the delayed shipment), then match OrderRevenue and ShipRevenue with the hand-derived reference tables. Nothing is executed or graded automatically."
     },
     {
       "id": "dax-030",
@@ -617,7 +617,7 @@
       ],
       "outcome": "Model overlapping customer groups and reconcile unique reach without enabling ambiguous filter paths.",
       "lab": "Write a reconciliation for the two audience totals.",
-      "verification": "Compare a written context trace with the named hand-derived reference; no execution or automatic correctness claim."
+      "verification": "Write a row and filter-context trace for case A (Newsletter's two customers) and case B (Prospects overlaps the first audience), then match RawRevenue and AudienceRevenue with the hand-derived reference tables. Nothing is executed or graded automatically."
     },
     {
       "id": "dax-031",
@@ -638,7 +638,7 @@
       ],
       "outcome": "Distinguish calendar coverage, observed facts and data-availability boundaries.",
       "lab": "Write a date-table quality checklist.",
-      "verification": "Compare a written context trace with the named hand-derived reference; no execution or automatic correctness claim."
+      "verification": "Write a row and filter-context trace for case A (January calendar versus event dates) and case B (A date exists without a sale), then match CalendarDates, OrderDatesWithSales, SalesRows and Revenue with the hand-derived reference tables. Nothing is executed or graded automatically."
     },
     {
       "id": "dax-032",
@@ -659,7 +659,7 @@
       ],
       "outcome": "Derive a YTD measure by enumerating its date boundary and eligible fact rows.",
       "lab": "Write a YTD audit ledger.",
-      "verification": "Compare a written context trace with the named hand-derived reference; no execution or automatic correctness claim."
+      "verification": "Write a row and filter-context trace for case A (An early January anchor) and case B (An anchor in February), then match CurrentDay and YTD with the hand-derived reference tables. Nothing is executed or graded automatically."
     },
     {
       "id": "dax-033",
@@ -679,7 +679,7 @@
       ],
       "outcome": "Separate a full-period comparison from an as-of comparison and explain the sign change.",
       "lab": "Write a metric title that exposes the as-of boundary.",
-      "verification": "Compare a written context trace with the named hand-derived reference; no execution or automatic correctness claim."
+      "verification": "Write a row and filter-context trace for case A (Completed January versus completed January) and case B (An explicit as-of comparison), then match Current, Prior and Growth with the hand-derived reference tables. Nothing is executed or graded automatically."
     },
     {
       "id": "dax-034",
@@ -699,7 +699,7 @@
       ],
       "outcome": "Explain why a mean over observed sale days differs from revenue per eligible calendar day.",
       "lab": "Write a complete rolling-window contract.",
-      "verification": "Compare a written context trace with the named hand-derived reference; no execution or automatic correctness claim."
+      "verification": "Write a row and filter-context trace for case A (A three-calendar-day denominator) and case B (Two different averages over the same window), then match Days, Revenue, RevenuePerCalendarDay, SaleDayAverage and ObservedCalendarAverage with the hand-derived reference tables. Nothing is executed or graded automatically."
     },
     {
       "id": "dax-035",
@@ -720,7 +720,7 @@
       ],
       "outcome": "Define a fiscal year explicitly and distinguish fiscal-to-date from a completed fiscal year.",
       "lab": "Write a fiscal-to-date metric caption.",
-      "verification": "Compare a written context trace with the named hand-derived reference; no execution or automatic correctness claim."
+      "verification": "Write a row and filter-context trace for case A (Two neighboring fiscal labels) and case B (Available fiscal-year-to-date revenue), then match Day, FiscalYear and FiscalYTDRevenue with the hand-derived reference tables. Nothing is executed or graded automatically."
     },
     {
       "id": "dax-036",
@@ -741,7 +741,7 @@
       ],
       "outcome": "Explain why a calendar reference can represent a different year definition than a classic date column.",
       "lab": "Write a review checklist for adding an external calendar object.",
-      "verification": "Compare a written context trace with the named hand-derived reference; no execution or automatic correctness claim."
+      "verification": "Write a row and filter-context trace for case A (Classic Gregorian YTD) and case B (The declared February-start retail calendar), then match GregorianYTD and RetailYTD with the hand-derived reference tables. Nothing is executed or graded automatically."
     },
     {
       "id": "dax-037",
@@ -763,7 +763,7 @@
       ],
       "outcome": "Specify tie behavior separately from deterministic ordering and selection size.",
       "lab": "Write a ranking specification including its comparison population.",
-      "verification": "Compare a written context trace with the named hand-derived reference; no execution or automatic correctness claim."
+      "verification": "Write a row and filter-context trace for case A (Dense and skip ranks) and case B (Tied cutoff versus a deliberate tie-breaker), then match Name, Score, DenseRank, SkipRank, TopTwoByScoreRows and TopTwoWithTieBreakerRows with the hand-derived reference tables. Nothing is executed or graded automatically."
     },
     {
       "id": "dax-038",
@@ -784,7 +784,7 @@
       ],
       "outcome": "Distinguish a positional row window from a calendar interval and identify the ordering contract.",
       "lab": "Specify a per-customer chronological ordering.",
-      "verification": "Compare a written context trace with the named hand-derived reference; no execution or automatic correctness claim."
+      "verification": "Write a row and filter-context trace for case A (First two positions), case B (Last two positions), case C (INDEX chooses one absolute position) and case D (OFFSET identifies a previous row), then match Line, Amount, SaleID and NetAmount with the hand-derived reference tables. Nothing is executed or graded automatically."
     },
     {
       "id": "dax-039",
@@ -806,7 +806,7 @@
       ],
       "outcome": "Choose a time aggregation that matches a balance rather than summing repeated states.",
       "lab": "Write a staleness acceptance rule for carried balances.",
-      "verification": "Compare a written context trace with the named hand-derived reference; no execution or automatic correctness claim."
+      "verification": "Write a row and filter-context trace for case A (Two states are not one closing balance) and case B (An explicitly carried-forward subset), then match SummedSnapshots, ClosingUnits and CarriedUnits with the hand-derived reference tables. Nothing is executed or graded automatically."
     },
     {
       "id": "dax-040",
@@ -828,7 +828,7 @@
       ],
       "outcome": "Separate enrolled members, active members and unavailable follow-up periods.",
       "lab": "Write a cohort metric contract.",
-      "verification": "Compare a written context trace with the named hand-derived reference; no execution or automatic correctness claim."
+      "verification": "Write a row and filter-context trace for case A (January cohort at one-month age) and case B (A newer cohort has unavailable follow-up), then match EligibleMembers, ActiveAtEntry, ActiveAtAgeOne, RetentionAtAgeOne and EntryActivityRate with the hand-derived reference tables. Nothing is executed or graded automatically."
     },
     {
       "id": "dax-041",
@@ -850,7 +850,7 @@
       ],
       "outcome": "Align actuals with a monthly category budget without copying a whole-month target into a daily metric.",
       "lab": "Specify a uniform daily allocation for January Paper.",
-      "verification": "Compare a written context trace with the named hand-derived reference; no execution or automatic correctness claim."
+      "verification": "Write a row and filter-context trace for case A (A comparable full-month category) and case B (A daily selection is not assigned the monthly target), then match Actual, ComparableBudget and Variance with the hand-derived reference tables. Nothing is executed or graded automatically."
     },
     {
       "id": "dax-042",
@@ -872,7 +872,7 @@
       ],
       "outcome": "Convert compatible transactions before aggregation and diagnose a misleading latest-rate shortcut.",
       "lab": "Write a rate-coverage quality rule.",
-      "verification": "Compare a written context trace with the named hand-derived reference; no execution or automatic correctness claim."
+      "verification": "Write a row and filter-context trace for case A (Convert each transaction before adding) and case B (A latest-rate shortcut changes the policy), then match ConvertedUSD, LocalEUR, CorrectUSD and NaiveLatestRateUSD with the hand-derived reference tables. Nothing is executed or graded automatically."
     },
     {
       "id": "dax-043",
@@ -894,7 +894,7 @@
       ],
       "outcome": "Build a small reusable measure family with explicit units and dependency boundaries.",
       "lab": "Draw the dependency graph and annotate units.",
-      "verification": "Compare a written context trace with the named hand-derived reference; no execution or automatic correctness claim."
+      "verification": "Write a row and filter-context trace for case A (Whole-model profit graph) and case B (The same family under Blue), then match Revenue, Cost, Profit and Margin with the hand-derived reference tables. Nothing is executed or graded automatically."
     },
     {
       "id": "dax-044",
@@ -915,7 +915,7 @@
       ],
       "outcome": "Describe a reusable transformation while preventing it from changing incompatible measures.",
       "lab": "Write the calculation-item expression and its applicability contract.",
-      "verification": "Compare a written context trace with the named hand-derived reference; no execution or automatic correctness claim."
+      "verification": "Write a row and filter-context trace for case A (Current measures before an item) and case B (Expanded guarded fee item), then match Revenue, Units, RevenueAfterFee and UnitsUnchanged with the hand-derived reference tables. Nothing is executed or graded automatically."
     },
     {
       "id": "dax-045",
@@ -934,7 +934,7 @@
       ],
       "outcome": "Expand interacting calculation items and distinguish numeric transformation from display selection.",
       "lab": "Write a regression grid for two interacting groups.",
-      "verification": "Compare a written context trace with the named hand-derived reference; no execution or automatic correctness claim."
+      "verification": "Write a row and filter-context trace for case A (Scale has higher precedence) and case B (Addition has higher precedence), then match ExpandedValue with the hand-derived reference tables. Nothing is executed or graded automatically."
     },
     {
       "id": "dax-046",
@@ -957,7 +957,7 @@
       ],
       "outcome": "Define a small reusable function with a clear parameter domain and default behavior.",
       "lab": "Write a function contract with units and domain.",
-      "verification": "Compare a written context trace with the named hand-derived reference; no execution or automatic correctness claim."
+      "verification": "Write a row and filter-context trace for case A (Default and explicit rates) and case B (A valid zero and an invalid rate), then match DefaultFee, ExplicitTwentyPercent, FullFee and InvalidRate with the hand-derived reference tables. Nothing is executed or graded automatically."
     },
     {
       "id": "dax-047",
@@ -979,7 +979,7 @@
       ],
       "outcome": "Predict whether a UDF receives a precomputed value or an expression evaluated under its own modifier.",
       "lab": "Write documentation warning callers about context changes.",
-      "verification": "Compare a written context trace with the named hand-derived reference; no execution or automatic correctness claim."
+      "verification": "Write a row and filter-context trace for case A (Unfiltered caller) and case B (Red caller and a Blue-transforming function), then match EagerValue and DeferredExpression with the hand-derived reference tables. Nothing is executed or graded automatically."
     },
     {
       "id": "dax-048",
@@ -1001,7 +1001,7 @@
       ],
       "outcome": "Distinguish a visual running total from a reusable semantic-model measure.",
       "lab": "Write the intended visual expression and its scope contract.",
-      "verification": "Compare a written context trace with the named hand-derived reference; no execution or automatic correctness claim."
+      "verification": "Write a row and filter-context trace for case A (Ascending month snapshot) and case B (Reversed visual order), then match Position, Month, Revenue and RunningRevenue with the hand-derived reference tables. Nothing is executed or graded automatically."
     },
     {
       "id": "dax-049",
@@ -1022,7 +1022,7 @@
       ],
       "outcome": "Separate an expression's semantics, model cardinality and observed engine performance.",
       "lab": "Write a performance-claim checklist.",
-      "verification": "Compare a written context trace with the named hand-derived reference; no execution or automatic correctness claim."
+      "verification": "Write a row and filter-context trace for case A (Fact-column cardinalities) and case B (Dimension attributes have another grain), then match SalesRows, ProductKeys, OrderDates, SaleIDs, ProductRows, Categories and Colors with the hand-derived reference tables. Nothing is executed or graded automatically."
     },
     {
       "id": "dax-050",
@@ -1043,7 +1043,7 @@
       ],
       "outcome": "Estimate candidate-table size without confusing a logical table with measured physical work.",
       "lab": "Choose a population for a complete customer/product coverage matrix.",
-      "verification": "Compare a written context trace with the named hand-derived reference; no execution or automatic correctness claim."
+      "verification": "Write a row and filter-context trace for case A (Possible customer/product pairs) and case B (Adding a complete calendar dimension), then match CandidatePairs, ObservedPairs, CandidateCells and ObservedCells with the hand-derived reference tables. Nothing is executed or graded automatically."
     },
     {
       "id": "dax-051",
@@ -1065,7 +1065,7 @@
       ],
       "outcome": "Find a context where two similar predicates differ before treating one as an optimization.",
       "lab": "Write a minimum semantic regression grid.",
-      "verification": "Compare a written context trace with the named hand-derived reference; no execution or automatic correctness claim."
+      "verification": "Write a row and filter-context trace for case A (An unfiltered agreement case) and case B (The same-column selection exposes a difference), then match TableFilter, ColumnFilter and IntersectingColumn with the hand-derived reference tables. Nothing is executed or graded automatically."
     },
     {
       "id": "dax-052",
@@ -1088,7 +1088,7 @@
       ],
       "outcome": "Explain why broad filter removal and same-table combinations need model-aware reasoning.",
       "lab": "Write a denominator-debugging ledger.",
-      "verification": "Compare a written context trace with the named hand-derived reference; no execution or automatic correctness claim."
+      "verification": "Write a row and filter-context trace for case A (Fact-table removal reaches related dimensions) and case B (Requested values are not all existing pairs), then match Original, ClearExpandedSales, ClearAmountOnly, RequestedPairs and ExistingPairs with the hand-derived reference tables. Nothing is executed or graded automatically."
     },
     {
       "id": "dax-053",
@@ -1110,7 +1110,7 @@
       ],
       "outcome": "Interpret a supplied timing scenario while separating it from an actual DAX execution receipt.",
       "lab": "Write a real benchmark protocol without running it here.",
-      "verification": "Compare a written context trace with the named hand-derived reference; no execution or automatic correctness claim."
+      "verification": "Write a row and filter-context trace for case A (Cold and warm are different conditions) and case B (Best trial and average can disagree), then match SyntheticColdMeanMs, SyntheticWarmMeanMs, MeanA, MedianA, BestA, MeanB, MedianB and BestB with the hand-derived reference tables. Nothing is executed or graded automatically."
     },
     {
       "id": "dax-054",
@@ -1132,7 +1132,7 @@
       ],
       "outcome": "Review a grouped cost rewrite under explicit assumptions before proposing a performance measurement.",
       "lab": "Write a release decision for this proposed rewrite.",
-      "verification": "Compare a written context trace with the named hand-derived reference; no execution or automatic correctness claim."
+      "verification": "Write a row and filter-context trace for case A (Whole-model parity under a constant product cost) and case B (Parity under a region and year selection), then match LineCost and GroupedCost with the hand-derived reference tables. Nothing is executed or graded automatically."
     },
     {
       "id": "dax-055",
@@ -1154,7 +1154,7 @@
       ],
       "outcome": "Separate a metric's definition from data freshness, storage mode and external capability.",
       "lab": "Write a storage-mode capability review.",
-      "verification": "Compare a written context trace with the named hand-derived reference; no execution or automatic correctness claim."
+      "verification": "Write a row and filter-context trace for case A (Same data, same defined amount) and case B (A refresh boundary can explain a difference), then match FixedFixtureRevenue, EquivalentSnapshotRevenue, StoredSnapshot and HypotheticalLaterSource with the hand-derived reference tables. Nothing is executed or graded automatically."
     },
     {
       "id": "dax-056",
@@ -1176,7 +1176,7 @@
       ],
       "outcome": "Distinguish a removable analytical filter from an engine-enforced role restriction.",
       "lab": "Write a real RLS acceptance record template.",
-      "verification": "Compare a written context trace with the named hand-derived reference; no execution or automatic correctness claim."
+      "verification": "Write a row and filter-context trace for case A (An ordinary filter can be removed) and case B (Expected behavior under an enforced NorthViewer role), then match SelectedRevenue, AfterRemovingCustomerFilters and VisibleRevenue with the hand-derived reference tables. Nothing is executed or graded automatically."
     },
     {
       "id": "dax-057",
@@ -1197,7 +1197,7 @@
       ],
       "outcome": "Reason about a dynamic region policy, including unmapped identities and policy-table exposure.",
       "lab": "Write a default-deny mapping test matrix.",
-      "verification": "Compare a written context trace with the named hand-derived reference; no execution or automatic correctness claim."
+      "verification": "Write a row and filter-context trace for case A (A mapped synthetic principal) and case B (An unmapped principal is denied by the declared policy), then match VisibleCustomers, VisibleRevenue and HasVisibleRows with the hand-derived reference tables. Nothing is executed or graded automatically."
     },
     {
       "id": "dax-058",
@@ -1220,7 +1220,7 @@
       ],
       "outcome": "Produce a reviewable commercial metric specification with explicit populations and adjustment policies.",
       "lab": "Write the capstone's metric and model specification.",
-      "verification": "Compare a written context trace with the named hand-derived reference; no execution or automatic correctness claim."
+      "verification": "Write a row and filter-context trace for case A (Reconcile named monetary populations) and case B (Compare an aligned two-month core population), then match CoreNetSales, RefundsAttributedToSales, AdjustedCoreRevenue, SeparateForeignUSD, CoreBeforeRefund, Refunds, AdjustedCore, Budget and Variance with the hand-derived reference tables. Nothing is executed or graded automatically."
     },
     {
       "id": "dax-059",
@@ -1243,7 +1243,7 @@
       ],
       "outcome": "Build an experiment-quality semantic report without treating repeated events or displayed estimates as causal proof.",
       "lab": "Write the quality matrix needed before interpreting the arm contrast.",
-      "verification": "Compare a written context trace with the named hand-derived reference; no execution or automatic correctness claim."
+      "verification": "Write a row and filter-context trace for case A (Assignment and exposure integrity) and case B (Display supplied uncertainty without overstating it), then match Arm, Assigned, Converted, ExposedUnits, ExposureEvents, AssignedUnitRate, Rate, WilsonLower and WilsonUpper with the hand-derived reference tables. Nothing is executed or graded automatically."
     },
     {
       "id": "dax-060",
@@ -1267,7 +1267,7 @@
       ],
       "outcome": "Assemble a reviewable model change with expected role/context results and explicit unperformed deployment checks.",
       "lab": "Produce an offline change-review packet for the grouped-cost rewrite.",
-      "verification": "Compare a written context trace with the named hand-derived reference; no execution or automatic correctness claim."
+      "verification": "Write a row and filter-context trace for case A (Expected NorthViewer regression row) and case B (Expected SouthViewer regression row), then match Revenue, LineCost, GroupedCost and AfterCustomerFilterRemoval with the hand-derived reference tables. Nothing is executed or graded automatically."
     }
   ]
 }

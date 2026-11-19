@@ -39,6 +39,21 @@ internal static class Program {
       Check(Classify(60) == "pass", "at boundary");
       Check(Classify(101) == "invalid", "outside domain");
     }
+    {
+      // Task 3: Independent construction
+      string Temperature(int celsius) {
+        if (celsius < 0) {
+          return "below zero";
+        }
+        if (celsius == 0) {
+          return "zero";
+        }
+        return "above zero";
+      }
+      Check(Temperature(-5) == "below zero", "negative");
+      Check(Temperature(0) == "zero", "zero");
+      Check(Temperature(12) == "above zero", "positive");
+    }
     Console.WriteLine("csharp-005: passed");
     await Task.CompletedTask;
   }

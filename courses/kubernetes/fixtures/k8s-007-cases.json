@@ -7,12 +7,12 @@
     {
       "exercise": 1,
       "task": "Compare Deployment template app=hello with Service selector app=hello and app=wrong.",
-      "expected": "Matching selector finds the intended set;wrong selector has no intended backends."
+      "expected": "Matching selector finds the intended set; wrong selector has no intended backends."
     },
     {
       "exercise": 2,
-      "task": "Read Service port,targetPort and container port name/number.",
-      "expected": "Client8080 -> targetPort http -> container8080."
+      "task": "Read Service port, targetPort and container port name/number.",
+      "expected": "Client 8080 -> targetPort http -> container 8080."
     },
     {
       "exercise": 3,
@@ -21,18 +21,18 @@
     },
     {
       "exercise": 4,
-      "task": "Change only the allowed Service selector to app=wrong in an owned Run,then restore it.",
-      "expected": "No matching ready backends;bounded failure and cleanup;restored source can pass separately."
+      "task": "The starter's Service selects app=wrong. Run it unchanged and record the failure, then restore app=hello and Run again.",
+      "expected": "The unchanged starter has no matching ready backends and fails within its bound, with cleanup; the restored source can pass in a separate Run."
     },
     {
       "exercise": 5,
       "task": "Inspect the fresh client Job and exact /version result after backend checks.",
-      "expected": "Job/Pod ownership and exit0 accompany the expected ds60-fixture-v1 payload contract."
+      "expected": "Job/Pod ownership and exit 0 accompany the expected ds60-fixture-v1 payload contract."
     },
     {
       "exercise": 6,
       "task": "Explain a scoped host experiment using another Service without touching unrelated objects.",
-      "expected": "A separate capability,unique owned resource receipt,selector/port/backend/client checks and UID-aware cleanup are specified."
+      "expected": "A separate capability, unique owned resource receipt, selector/port/backend/client checks and UID-aware cleanup are specified."
     }
   ]
 }

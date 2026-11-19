@@ -17,6 +17,18 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         let result = consume();
         assert_eq!(result, "owned");
     }
+
+    {
+        // Task 3: Independent construction
+        fn apply_times(times: usize, mut step: impl FnMut()) {
+            for _ in 0..times {
+                step();
+            }
+        }
+        let mut value = 1;
+        apply_times(3, || value *= 2);
+        assert_eq!(value, 8);
+    }
     println!("rust-021: passed");
     Ok(())
 }

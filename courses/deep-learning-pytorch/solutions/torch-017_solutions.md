@@ -16,11 +16,11 @@ The fixture uses weights 1, -2 and unit activations. It separates data loss from
 
 ## Reading the implementation
 
-nn.Dropout(p=.5) scales retained training activations by \(\frac{1}{1-p}\). Call train or eval to select behavior. Compute sum(abs(w)) and \(\operatorname{sum}({w}^{2})\) for declared penalty conventions, then multiply by an explicit coefficient. A half-scaled squared penalty would have a different derivative. Keep metrics and penalty components separate in logs.
+nn.Dropout(\(p=0.5\)) scales retained training activations by \(\frac{1}{1-p}\). Call train or eval to select behavior. Compute sum(abs(w)) and \(\operatorname{sum}({w}^{2})\) for declared penalty conventions, then multiply by an explicit coefficient. A half-scaled squared penalty would have a different derivative. Keep metrics and penalty components separate in logs.
 
 ## Derive the objective, random transformation and gradient
 
-The fixture has w=[1, -2]. The absolute-value sum is three, the squared-value sum is five, and the Euclidean norm is \(\sqrt{5}\). These are different quantities. This chapter's squared L2 penalty is lambda times the sum of squared weights, without a one-half factor. At \(\lambda=0.1\) it contributes 0.5 to the objective and gradient[0.2, -0.4]. Doubling both weights doubles the L1 sum to six but quadruples the squared sum to twenty. That scale dependence matters when preprocessing changes the meaning of a unit weight.
+The fixture has w=[1, -2]. The absolute-value sum is three, the squared-value sum is five, and the Euclidean norm is \(\sqrt{5}\). These are different quantities. This chapter's squared L2 penalty is lambda times the sum of squared weights, without a one-half factor. At \(\lambda=0.1\) it contributes 0.5 to the objective and gradient [0.2, -0.4]. Doubling both weights doubles the L1 sum to six but quadruples the squared sum to twenty. That scale dependence matters when preprocessing changes the meaning of a unit weight.
 
 Suppose one coordinate has data gradient \(g=0.3\), parameter \(w=1\) and learning rate \(\eta=0.1\). Ordinary SGD on data loss plus \(0.1\cdot {w}^{2}\) uses total gradient \(0.3+0.2=0.5\) and gives w'=0.95. The update can also be written (1-2*eta*lambda)w-eta*g. An SGD weight-decay coefficient 0.2 corresponds to this particular explicit penalty convention. A coefficient 0.1 would correspond to a half-scaled objective and would instead give 0.96 for this example. A shared name or numeric coefficient does not fix the objective's convention.
 
@@ -47,57 +47,58 @@ Exercise six deliberately uses the second row: an evaluation-mode Dropout still 
 
 For an interview, explain why a training loss can rise after regularization while validation loss improves: the optimized objective includes a penalty or stochastic computation, so it is not the same measured quantity as deterministic predictive loss. Then ask whether the validation comparison was selected repeatedly and whether independent evidence remains. Conversely, lower weight norm by itself does not establish better calibrated probabilities, useful rankings or smaller out-of-population error.
 
-## Exercise 1: Calculate two penalties
+## Exercise 1: Compute penalties for a new vector
 
-The question is: Use weights 1, -2 and compute L1 and squared L2 sums.
+The question is: Use weights 3, -4, 0 and compute the L1 and squared L2 sums.
 
-The squared L2penalty is not the square root norm. Naming the convention avoids a factor or square-root mismatch when comparing implementations.
-
-```python
-w = torch.tensor([1.0, -2.0])
-assert w.abs().sum().item() == 3 and w.square().sum().item() == 5
-```
-
-**Expected:** \(L_{1}=3\); squared \(L_{2}=5\).
-
-**Verify:** Compare the computed values or written argument with \(L_{1}=3\); squared \(L_{2}=5\).
-
-## Exercise 2: Check evaluation dropout
-
-The question is: Apply Dropout.5 in eval mode to ones twice.
-
-The local inference behavior is deterministic. Other pipeline components can still be random, so a full model needs its own evaluation contract.
+L1 adds absolute values; squared L2 adds squares, so the zero weight contributes to neither.
 
 ```python
-drop = nn.Dropout(0.5)
-drop.eval()
-x = torch.ones((4, 8))
-assert torch.equal(drop(x), x) and torch.equal(drop(x), x)
+penalized = torch.tensor([3.0, -4.0, 0.0])
+assert penalized.abs().sum().item() == 7 and penalized.square().sum().item() == 25
 ```
 
-**Expected:** both outputs exactly ones.
+**Expected:** L1 = 7; squared L2 = 25.
 
-**Verify:** Compare the computed values or written argument with both outputs exactly ones.
+**Verify:** In a fresh process, the exercise checks confirm `penalized.abs().sum().item() == 7` and `penalized.square().sum().item() == 25`.
 
-## Exercise 3: Check training invariants
+## Exercise 2: Predict train-mode values for p=0.25
 
-The question is: Switch the same layer to train mode and inspect output values.
+The question is: Apply Dropout(0.25) in train mode to a (3, 5) tensor of ones and inspect every value.
 
-The test does not require a particular mask or count of zeros. Such a pattern would overfit the random implementation rather than the Dropout contract.
+Retained activations are scaled by \(\frac{1}{1-p}\) so the expected value stays 1; the exact retained pattern is random.
 
 ```python
-drop.train()
-sampled = drop(x)
-assert tuple(sampled.shape) == (4, 8) and set(sampled.unique().tolist()) <= {0.0, 2.0}
+quarter = nn.Dropout(0.25)
+quarter.train()
+kept = quarter(torch.ones((3, 5)))
+assert tuple(kept.shape) == (3, 5) and all(
+    value == 0 or abs(value - 4 / 3) < 1e-6 for value in kept.flatten().tolist()
+)
 ```
 
-**Expected:** shape(4, 8); only 0 or2.
+**Expected:** shape (3, 5); each value is 0 or 4/3.
 
-**Verify:** Compare the computed values or written argument with shape(4, 8); only 0 or2.
+**Verify:** In a fresh process, the exercise checks confirm `tuple(kept.shape) == (3, 5)` and `all((value == 0 or abs(value - 4 / 3) < 1e-06 for value in kept.flatten().tolist()))`.
+
+## Exercise 3: Confirm eval disables the new rate
+
+The question is: Switch the same Dropout(0.25) layer to eval mode and apply it to the ones tensor.
+
+Eval mode makes Dropout the identity regardless of p.
+
+```python
+quarter.eval()
+assert torch.equal(quarter(torch.ones((3, 5))), torch.ones((3, 5)))
+```
+
+**Expected:** output exactly equals the input.
+
+**Verify:** In a fresh process, the exercise checks confirm `torch.equal(quarter(torch.ones((3, 5))), torch.ones((3, 5)))`.
 
 ## Exercise 4: Separate data and penalty terms
 
-The question is: Combine data loss 2 with coefficient.1 times squared L2.
+The question is: Combine data loss 2 with coefficient 0.1 times squared L2.
 
 A total objective may change while the predictive error stays fixed. Logging components helps distinguish those mechanisms.
 
@@ -107,13 +108,13 @@ penalty = 0.1 * w.square().sum()
 assert penalty.item() == 0.5 and (data_loss + penalty).item() == 2.5
 ```
 
-**Expected:** penalty.5; total 2.5.
+**Expected:** penalty 0.5; total 2.5.
 
-**Verify:** Compare the computed values or written argument with penalty.5; total 2.5.
+**Verify:** In a fresh process, the exercise checks confirm `penalty.item() == 0.5` and `(data_loss + penalty).item() == 2.5`.
 
 ## Exercise 5: Differentiate the explicit penalty
 
-The question is: Differentiate \(0.1\cdot \operatorname{sum}(v\cdot v)\) at v=[1, -2].
+The question is: Differentiate 0 \(0.1\cdot \operatorname{sum}(v\cdot v)\) at v=[1, -2].
 
 The derivative contains 2*coefficient*v under this definition. Copying a coefficient from a half-scaled objective would change the update.
 
@@ -123,9 +124,9 @@ v = torch.tensor([1.0, -2.0], requires_grad=True)
 torch.testing.assert_close(v.grad, torch.tensor([0.2, -0.4]), atol=1e-6, rtol=0)
 ```
 
-**Expected:** gradient [.2, -.4].
+**Expected:** gradient [0.2, -0.4].
 
-**Verify:** Compare the computed values or written argument with gradient [.2, -.4].
+**Verify:** In a fresh process, the exercise checks confirm `v.grad` matches `torch.tensor([0.2, -0.4])` within 1e-06.
 
 ## Exercise 6: Keep mode separate from gradients
 
@@ -143,7 +144,7 @@ assert observed.requires_grad and torch.equal(differentiable.grad, torch.ones(3)
 
 **Expected:** output still requires grad; backward gives ones.
 
-**Verify:** Compare the computed values or written argument with output still requires grad; backward gives ones.
+**Verify:** In a fresh process, the exercise checks confirm `observed.requires_grad` and `torch.equal(differentiable.grad, torch.ones(3))`.
 
 ## Review after comparison
 

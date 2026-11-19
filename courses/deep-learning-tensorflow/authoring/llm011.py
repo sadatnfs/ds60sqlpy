@@ -54,23 +54,23 @@ This chapter first treats head splitting as a layout operation, then performs an
 Residual connections and feed-forward networks complete different parts of the block. A residual adds a branch result back to its input and therefore requires matching shapes and meanings. It does not concatenate the two vectors. A tokenwise feed-forward network applies shared affine maps and a nonlinearity to each token independently. It can transform contextual features already mixed by attention without introducing another direct reduction across token positions.
 
 The next decoder chapter combines these operations with learned embeddings, positional information and normalization. Here the goals are narrower and inspectable: preserve feature membership while splitting and joining, compute distinct head distributions, prove a causal-prefix property through the actual attention operation, and distinguish a valid residual sum from a shape-compatible but semantically wrong layout.""",
-    r"""### Trace the split and inverse
+    """### Trace the split and inverse
 
-For X:[T,D] with T=2,D=4,H=2, the head width is d=D/H=2. Reshape [2,4] to [2,2,2] interpreted as [token,head,head_feature], then transpose to [head,token,head_feature]. These dimensions happen to have the same sizes, making axis names more informative than the printed shape alone.
+For X:[T, D] with T=2, D=4, H=2, the head width is d=D/H=2. Reshape [2, 4] to [2, 2, 2] interpreted as [token, head, head_feature], then transpose to [head, token, head_feature]. These dimensions happen to have the same sizes, making axis names more informative than the printed shape alone.
 
-With rows [0,1,2,3] and [4,5,6,7], head zero contains [[0,1],[4,5]], while head one contains [[2,3],[6,7]]. The inverse must first transpose [head,token,feature] back to [token,head,feature], then merge the last two axes. Flattening the head-major tensor directly instead creates rows [0,1,4,5] and [2,3,6,7]. Both arrays have shape [2,4], but the wrong version mixes features from different tokens.
+With rows [0, 1, 2, 3] and [4, 5, 6, 7], head zero contains [[0, 1], [4, 5]], while head one contains [[2, 3], [6, 7]]. The inverse must first transpose [head, token, feature] back to [token, head, feature], then merge the last two axes. Flattening the head-major tensor directly instead creates rows [0, 1, 4, 5] and [2, 3, 6, 7]. Both arrays have shape [2, 4], but the wrong version mixes features from different tokens.
 
 ### Compute attention within each head
 
-The batched multiplication Q_h K_h^T produces [H,T,T], one query-by-key matrix for each head. The normalization axis is the final key axis. For a width-two head the scale is sqrt(2), and a causal Boolean triangle [T,T] broadcasts across the head axis. Multiplying weights [H,T,T] by V [H,T,2] returns [H,T,2]. Rejoining produces [T,4], preserving the width needed by a residual path.
+The batched multiplication Q_h K_h^T produces [H, T, T], one query-by-key matrix for each head. The normalization axis is the final key axis. For a width-two head the scale is sqrt(2), and a causal Boolean triangle [T, T] broadcasts across the head axis. Multiplying weights [H, T, T] by V [H, T, 2] returns [H, T, 2]. Rejoining produces [T, 4], preserving the width needed by a residual path.
 
-For the three-token identity-projection fixture, head zero contains [1,0],[0,1],[1,1], while head one contains [1,1],[1,0],[0,1]. At query row one, the causal mask permits keys zero and one. Head zero has scores [0,1/sqrt(2)] and weights [1/(1+a),a/(1+a)] with a=exp(1/sqrt(2)). Head one has equal allowed scores [1/sqrt(2),1/sqrt(2)] and weights [1/2,1/2]. Their mixtures are therefore approximately [0.33023845,0.66976155] and exactly [1,0.5]. Concatenation gives [0.33023845,0.66976155,1,0.5] before any learned output projection.
+For the three-token identity-projection fixture, head zero contains [1, 0], [0, 1], [1, 1], while head one contains [1, 1], [1, 0], [0, 1]. At query row one, the causal mask permits keys zero and one. Head zero has scores [0,1/sqrt(2)] and weights [1/(1+a),a/(1+a)] with a=exp(1/sqrt(2)). Head one has equal allowed scores [1/sqrt(2),1/sqrt(2)] and weights [1/2,1/2]. Their mixtures are therefore approximately [0.33023845, 0.66976155] and exactly [1, 0.5]. Concatenation gives [0.33023845, 0.66976155, 1, 0.5] before any learned output projection.
 
 ### Residual and feed-forward equations
 
 A residual computes R(x)=x+F(x). If F(x)=2x, R(x)=3x and its Jacobian is 3I. If F(x)=0, the residual is the identity. If F(x)=-x, the sum is zero and the Jacobian is zero. Thus the identity contribution can improve the available path, but a residual connection is not a universal proof against vanishing, exploding or cancelled gradients.
 
-A usual feed-forward branch has F(x_t)=activation(x_t W1+b1) W2+b2, using the same weights at every token t. W1 can expand the hidden feature width and W2 return it to D for residual addition. The teaching fixture chooses identity weights and b1=-2 so the first row [0,1,2,3] becomes [0,0,0,1]. This isolates nonlinearity and tokenwise independence. A pair of affine maps without a nonlinearity collapses to one affine map; adding width alone would not create that nonlinear behavior.""",
+A usual feed-forward branch has F(x_t)=activation(x_t W1+b1) W2+b2, using the same weights at every token t. W1 can expand the hidden feature width and W2 return it to D for residual addition. The teaching fixture chooses identity weights and b1=-2 so the first row [0, 1, 2, 3] becomes [0, 0, 0, 1]. This isolates nonlinearity and tokenwise independence. A pair of affine maps without a nonlinearity collapses to one affine map; adding width alone would not create that nonlinear behavior.""",
     [
         (
             "Attention head",
@@ -88,7 +88,7 @@ A usual feed-forward branch has F(x_t)=activation(x_t W1+b1) W2+b2, using the sa
         ex(
             "Split and rejoin",
             "Split X=[[0,1,2,3],[4,5,6,7]] into two heads, inspect membership, then invert the layout.",
-            "head zero is [[0,1],[4,5]], head one is [[2,3],[6,7]], and rejoining restores X exactly.",
+            "head zero is [[0, 1], [4, 5]], head one is [[2, 3], [6, 7]], and rejoining restores X exactly.",
             r"""values = np.arange(8).reshape(2, 4)
 heads = split_heads(values, 2)
 np.testing.assert_array_equal(heads[0], [[0, 1], [4, 5]])
@@ -113,7 +113,7 @@ assert residual.shape == values.shape""",
         ex(
             "Use a tokenwise nonlinear block",
             "Apply the explicit identity-weight, bias-minus-two feed-forward branch to two token rows.",
-            "first output [0,0,0,1]; changing the second token does not change the first output.",
+            "first output [0, 0, 0, 1]; changing the second token does not change the first output.",
             r"""values = np.arange(8, dtype=np.float64).reshape(2, 4)
 output = tokenwise_feed_forward(values)
 np.testing.assert_array_equal(output[0], [0, 0, 0, 1])
@@ -154,7 +154,7 @@ for length in [1, 2, 3]:
         ex(
             "Detect a wrong rejoin",
             "Flatten the head-major tensor directly and compare values with the correctly inverted transpose.",
-            "the wrong [2,4] result differs despite matching shape; the inverse operation restores X.",
+            "the wrong [2, 4] result differs despite matching shape; the inverse operation restores X.",
             r"""values = np.arange(8).reshape(2, 4)
 heads = split_heads(values, 2)
 wrong = heads.reshape(2, 4)

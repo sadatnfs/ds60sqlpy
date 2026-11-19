@@ -8,7 +8,7 @@
     "ingressClassName": "lesson-ingress",
     "rules": [
       {
-        "host": "lesson.local",
+        "host": "lesson.example.test",
         "http": {
           "paths": [
             {

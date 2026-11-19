@@ -22,19 +22,19 @@ Subclass Dataset and implement __len__ and__getitem__. A Subset stores a sequenc
 
 ## Trace selection, fitted state and delegated access
 
-The eight literal records form four account groups. Training selects original indices 0, 1, 2, 3 fromA and B; assessment selects 4, 5, 6, 7 fromC and D. The two Subset objects do not copy or redefine those records. They map their local index into the original dataset. Thus assessment[0] returns original identity 4, accountC, value 20. A local batch position zero is not a replacement for the source identity.
+The eight literal records form four account groups. Training selects original indices 0, 1, 2, 3 from A and B; assessment selects 4, 5, 6, 7 from C and D. The two Subset objects do not copy or redefine those records. They map their local index into the original dataset. Thus assessment[0] returns original identity 4, account C, value 20. A local batch position zero is not a replacement for the source identity.
 
 | Population | Original identities | Values | Mean |
 | --- | --- | --- | --- |
-| Training accountsA, B | 0, 1, 2, 3 | 1, 3, 5, 7 | 4 |
-| Assessment accountsC, D | 4, 5, 6, 7 | 20, 22, 30, 32 | 26 |
+| Training accounts A, B | 0, 1, 2, 3 | 1, 3, 5, 7 | 4 |
+| Assessment accounts C, D | 4, 5, 6, 7 | 20, 22, 30, 32 | 26 |
 | All records | 0..7 | All eight values | 15 |
 
-Each item returns a scalar tensor plus identity and group metadata. Stacking the four selected training scalars creates a tensor shaped(4, ), whose mean is the fitted normalization state. Applying that scalar to four assessment values yields[16, 18, 26, 28]. Those transformed assessment values do not have mean zero, and they should not be forced to. Their nonzero mean is information about the assessment population relative to the training baseline.
+Each item returns a scalar tensor plus identity and group metadata. Stacking the four selected training scalars creates a tensor shaped (4, ), whose mean is the fitted normalization state. Applying that scalar to four assessment values yields [16, 18, 26, 28]. Those transformed assessment values do not have mean zero, and they should not be forced to. Their nonzero mean is information about the assessment population relative to the training baseline.
 
 The held-out perturbation is a direct test of the information boundary. Replacing only the final assessment value 32 with 3200 leaves the training values and mean four unchanged. The global mean changes from 15 to 411 because the total becomes 3288 over eight records. A preprocessing path whose fitted training mean changes under this perturbation has consumed assessment information, even if no target label was read.
 
-Alternating row indices produces superficially balanced four-row sets but puts one row from every account on each side. Row-ID intersections are empty while the account-group intersection isA, B, C, D. If the claim concerns new accounts, this is a failure before any neural layer is built. A stronger optimizer or more epochs cannot undo that information crossing.
+Alternating row indices produces superficially balanced four-row sets but puts one row from every account on each side. Row-ID intersections are empty while the account-group intersection is A, B, C, D. If the claim concerns new accounts, this is a failure before any neural layer is built. A stronger optimizer or more epochs cannot undo that information crossing.
 
 Dataset is an access interface, not an isolation or immutability guarantee. Subset delegates to the underlying dataset, so later mutation of that object's values can change what a subset returns. A retrieved scalar tensor may also share storage with its source. Use out-of-place transformations or an explicit ownership boundary when mutation is intended, and freeze the fitted preprocessing state independently of mutable dataset access. [PyTorch 2.9 Dataset, Subset and data loading](https://docs.pytorch.org/docs/2.9/data.html).
 
@@ -42,55 +42,59 @@ Keeping identity and group fields does not require feeding them into the model a
 
 Finally, four assessment rows here represent only two held-out account families. The fixture is too small and too structured to establish reliable population performance. Its useful evidence is that the access interface, group isolation and preprocessing boundary behave as declared. Later evaluation should preserve the relevant independent units when estimating uncertainty rather than treating correlated rows as additional independent accounts.
 
-## Exercise 1: Inspect a literal Dataset
+## Exercise 1: Inspect a different record
 
-The question is: Create eight records with groups A, A, B, B, C, C, D, D and values 1, 3, 5, 7, 20, 22, 30, 32.
+The question is: Read item 5 of the literal Accounts dataset.
 
-The dataset returns metadata beside the tensor. A value-only interface would make it harder to audit group membership and record conservation.
-
-```python
-dataset = Accounts()
-assert len(dataset) == 8
-identity, group, value = dataset[0]
-assert identity == 0 and group == "A" and value.item() == 1
-```
-
-**Expected:** length 8; item 0 has ID 0, group A, value 1.
-
-**Verify:** Compare the computed values or written argument with length 8; item 0 has ID 0, group A, value 1.
-
-## Exercise 2: Select whole groups
-
-The question is: Train on accounts A, B and holdout C, D using Subset.
-
-The grouping policy precedes the subset construction. Subset itself would happily accept a leaking row-level split.
+The dataset returns the original index with the group label, so downstream code can audit identities.
 
 ```python
-train_ids = [i for i in range(len(dataset)) if dataset[i][1] in {"A", "B"}]
-test_ids = [i for i in range(len(dataset)) if i not in train_ids]
-train = torch.utils.data.Subset(dataset, train_ids)
-test = torch.utils.data.Subset(dataset, test_ids)
-assert len(train) == len(test) == 4 and not {row[1] for row in train} & {row[1] for row in test}
+record = Accounts()[5]
+assert record[0] == 5 and record[1] == "C" and record[2].item() == 22
 ```
 
-**Expected:** four records each; group intersection empty.
+**Expected:** ID 5, group C, value 22.
 
-**Verify:** Compare the computed values or written argument with four records each; group intersection empty.
+**Verify:** In a fresh process, the exercise checks confirm `record[0] == 5`, `record[1] == 'C'` and `record[2].item() == 22`.
 
-## Exercise 3: Fit only training values
+## Exercise 2: Hold out a different pair of groups
 
-The question is: Calculate the mean from the four training tensors.
+The question is: Train on groups A and C and hold out B and D with Subset; check the group sets and the training mean.
 
-The statistic is fitted state. Even without labels, it would leak assessment information if computed over the entire dataset.
+The training values are 1, 3, 20 and 22. A different group choice changes the fitted statistic, which is why it must be fitted after the split.
 
 ```python
-mean = torch.stack([row[2] for row in train]).mean()
-assert mean.item() == 4
+pool = Accounts()
+keep = [i for i in range(len(pool)) if pool[i][1] in {"A", "C"}]
+rest = [i for i in range(len(pool)) if i not in keep]
+fit = torch.utils.data.Subset(pool, keep)
+held = torch.utils.data.Subset(pool, rest)
+assert {row[1] for row in fit} == {"A", "C"} and not {row[1] for row in fit} & {
+    row[1] for row in held
+}
+assert torch.stack([row[2] for row in fit]).mean().item() == 11.5
 ```
 
-**Expected:** mean 4.
+**Expected:** disjoint group sets; training mean 11.5.
 
-**Verify:** Compare the computed values or written argument with mean 4.
+**Verify:** In a fresh process, the exercise checks confirm `{row[1] for row in fit} == {'A', 'C'}`; `not {row[1] for row in fit} & {row[1] for row in held}` and `torch.stack([row[2] for row in fit]).mean().item() == 11.5`.
+
+## Exercise 3: Apply the new frozen transform
+
+The question is: Center the held-out values with the training mean 11.5.
+
+The held-out values 5, 7, 30 and 32 are transformed with the frozen training statistic, never with their own mean.
+
+```python
+shifted_values = torch.stack([row[2] for row in held]) - 11.5
+torch.testing.assert_close(
+    shifted_values, torch.tensor([-6.5, -4.5, 18.5, 20.5], dtype=torch.float64), atol=0, rtol=0
+)
+```
+
+**Expected:** -6.5, -4.5, 18.5, 20.5.
+
+**Verify:** In a fresh process, the exercise checks confirm `shifted_values` matches `torch.tensor([-6.5, -4.5, 18.5, 20.5], dtype=torch.float64)` exactly.
 
 ## Exercise 4: Perturb only assessment values
 
@@ -108,7 +112,7 @@ assert new_mean.item() == 4 and changed.values.mean() != dataset.values.mean()
 
 **Expected:** training mean unchanged 4; global mean changes.
 
-**Verify:** Compare the computed values or written argument with training mean unchanged 4; global mean changes.
+**Verify:** In a fresh process, the exercise checks confirm `new_mean.item() == 4` and `changed.values.mean() != dataset.values.mean()`.
 
 ## Exercise 5: Expose row-level leakage
 
@@ -122,9 +126,9 @@ right = {dataset[i][1] for i in range(1, 8, 2)}
 assert left & right == set("ABCD")
 ```
 
-**Expected:** allA, B, C, D cross.
+**Expected:** all four account groups A, B, C and D cross the split.
 
-**Verify:** Compare the computed values or written argument with allA, B, C, D cross.
+**Verify:** In a fresh process, the exercise checks confirm `left & right == set('ABCD')`.
 
 ## Exercise 6: Apply the frozen transform
 
@@ -141,7 +145,7 @@ torch.testing.assert_close(
 
 **Expected:** 16, 18, 26, 28.
 
-**Verify:** Compare the computed values or written argument with 16, 18, 26, 28.
+**Verify:** In a fresh process, the exercise checks confirm `centered` matches `torch.tensor([16.0, 18.0, 26.0, 28.0], dtype=torch.float64)` exactly.
 
 ## Review after comparison
 

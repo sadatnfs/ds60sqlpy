@@ -419,8 +419,8 @@ Localization separates user-facing text from program identity. Keep stable IDs i
     ),
     (
         "Keep identity separate from translation",
-        'let identity = "lesson-one"\nlet titles = ["en": "Read", "fr": "Lire"]\nprecondition(titles["en"] != titles["fr"])\nprecondition(identity == "lesson-one")',
-        "Display text changes while identity remains stable.",
+        'let titles = ["en": "Read", "fr": "Lire"]\nlet saved: [String: Bool] = ["lesson-one": true]\nfunc row(id: String, language: String) -> String {\n  let state = saved[id] == true ? "complete" : "incomplete"\n  return "\\(titles[language] ?? id): \\(state)"\n}\nprecondition(row(id: "lesson-one", language: "en") == "Read: complete")\nprecondition(row(id: "lesson-one", language: "fr") == "Lire: complete")',
+        "Switching language changes the title from Read to Lire while the completion saved under lesson-one still shows complete.",
         "Saved work and navigation should not break when a learner changes language.",
     ),
     [

@@ -193,4 +193,4 @@ if __name__ == "__main__":
 
 ## Interpretation
 
-Use controlled fixtures to test transformation logic and real-data checks to test integration. Include at least one counterexample that would detect a plausible defect, and retain the source and expected rows needed to explain the result.
+Include at least one counterexample that would detect a plausible defect, and retain the source and expected rows needed to explain the result.

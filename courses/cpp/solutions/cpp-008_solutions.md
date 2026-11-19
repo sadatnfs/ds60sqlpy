@@ -54,7 +54,7 @@ Draw input, copied output and borrowed parameter.
 
 **Reasoning:** References alias; vectors own storage.
 
-**Verify:** Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.
+**Verify:** Check the drawing against Worked example 1: the temporary `{2, 4}` and `out` are the two owners, and `xs` inside `doubled` is only another name for the temporary.
 
 ## Exercise 2: Predict mutation
 
@@ -64,7 +64,7 @@ Change output[0] to 99 after doubled([2, 4]).
 
 **Reasoning:** The result owns independent elements.
 
-**Verify:** Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.
+**Verify:** Keep the input in a named vector, then assert `input[0] == 2 && output[0] == 99` after the write, as Worked example 2 does for `xs` and `ys`.
 
 ## Exercise 3: Write a const observer
 
@@ -74,7 +74,7 @@ Write size_of(const vector<int>&) without mutation.
 
 **Reasoning:** A read-only observer does not need a value copy.
 
-**Verify:** Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.
+**Verify:** Assert `size_of({2, 4}) == 2` and `size_of({}) == 0`, and confirm the function also accepts a `const std::vector<int>` variable.
 
 ## Exercise 4: Diagnose const assignment
 
@@ -84,7 +84,7 @@ Attempt xs[0]=9 through const vector<int>& in a scratch file.
 
 **Reasoning:** The const access path forbids writing an element.
 
-**Verify:** Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.
+**Verify:** Compile the scratch file with the lesson flags and keep the error that points at the `xs[0] = 9` line; after deleting that write the file must compile without warnings.
 
 ## Exercise 5: Identify a lifetime bug
 
@@ -94,7 +94,7 @@ Review a function returning const vector<int>& to its local result.
 
 **Reasoning:** The local owner dies at return, regardless of const.
 
-**Verify:** Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.
+**Verify:** Trace where the local result is destroyed and confirm the reviewed return type is `const std::vector<int>&`; the repaired signature returns `std::vector<int>` and compiles without warnings.
 
 ## Exercise 6: Transfer a safe result
 
@@ -104,4 +104,4 @@ Call doubled with temporary [5] and retain the result.
 
 **Reasoning:** Owning the returned value extends the useful lifetime safely.
 
-**Verify:** Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.
+**Verify:** Store `auto kept = doubled(std::vector<int>{5});` and assert `kept == std::vector<int>{10}` on a later line, after the temporary argument is gone.

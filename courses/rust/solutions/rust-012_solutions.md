@@ -1,6 +1,6 @@
 # rust-012: explanation and comparison
 
-Attempt the six guide tasks before opening this comparison. The executable reference is [rust-012_solution.rs](rust-012_solution.rs). Its assertions are always active under the prepared classroom compile settings.
+Attempt the six guide tasks before opening this comparison. The executable reference is [rust-012_solution.rs](rust-012_solution.rs). It runs both worked examples and the reference answers below, and its assertions are always active under the prepared classroom compile settings.
 
 ## Why the two examples differ
 
@@ -8,21 +8,73 @@ Attempt the six guide tasks before opening this comparison. The executable refer
 
 **Reject without partial mutation:** Validation occurs before changing state, preserving the prior valid value. Excess demand is rejected and zero is an allowed no-op.
 
-## Reason through the six tasks
+## Task answers
 
-1. **Predict and explain.** Explain the capability expressed by each method receiver.
+### Task 1: Predict and explain
 
-2. **Guided modification.** Add a checked restock method.
+Explain the capability expressed by each method receiver.
 
-3. **Independent construction.** Create a bounded counter with private state and validated operations.
+No separate reference answer has been written for this task. Example A is the evidence to compare with: The method owns both the affordability check and the subtraction. A successful reservation leaves three units.
 
-4. **Diagnose a defect.** Diagnose subtracting before checking available stock.
+### Task 2: Guided modification
 
-5. **Boundary evidence.** Test zero, exact-stock and excess reservations.
+Add a checked restock method.
 
-6. **Transfer and justify.** Choose a consuming method when an operation should make the prior state unavailable.
+No separate reference answer has been written for this task. Start from Example B: Validation occurs before changing state, preserving the prior valid value. Excess demand is rejected and zero is an allowed no-op.
 
-For tasks 1 and 2, use the checked values and mechanism trace in the two examples. For task 3, choose names that expose the input and result contract and retain the same invariants. For task 4, the diagnosed mistakes below supply a concrete wrong assumption: preserve its counterexample before repairing it. Task 5 needs an explicit expected value or documented rejection at the boundary, not just successful execution. For task 6, explain what changes in the new context and which part of the original mechanism remains applicable. Several representations may satisfy this transfer task; justify the choice rather than treating this reference as the only architecture.
+### Task 3: Independent construction
+
+Create a bounded counter with private state and validated operations.
+
+**Reference answer.** The same statements run as the `Task 3` block of the reference program; here they are wrapped in `main` as a complete file.
+
+```rust
+fn main() -> Result<(), Box<dyn std::error::Error>> {
+    struct Counter {
+        value: u32,
+        limit: u32,
+    }
+    impl Counter {
+        fn new(limit: u32) -> Self {
+            Self { value: 0, limit }
+        }
+        fn increment(&mut self) -> bool {
+            if self.value == self.limit {
+                return false;
+            }
+            self.value += 1;
+            true
+        }
+    }
+    let mut counter = Counter::new(2);
+    assert!(counter.increment() && counter.increment());
+    assert!(!counter.increment());
+    assert_eq!(counter.value, 2);
+    Ok(())
+}
+```
+
+**Observe:** Two increments succeed, the third is refused, and the value stays at the limit 2.
+
+The fields are private to the defining module, so callers can change the counter only through increment, which checks the limit first.
+
+### Task 4: Diagnose a defect
+
+Diagnose subtracting before checking available stock.
+
+No reference answer has been written for this task yet. The wrong assumptions to look for are this lesson's pitfalls: Public writable fields can bypass invariants. Unsigned types prevent negative representation but do not prevent overflow. A method taking &mut self is not automatically safe for unsynchronized sharing across threads.
+
+### Task 5: Boundary evidence
+
+Test zero, exact-stock and excess reservations.
+
+No reference answer has been written for this task yet. Write the expected value or documented rejection for each boundary before running it, and compare with the checks in Example A (Reserve within an invariant) and Example B (Reject without partial mutation).
+
+### Task 6: Transfer and justify
+
+Choose a consuming method when an operation should make the prior state unavailable.
+
+No single reference answer exists: several designs can satisfy this transfer task. Justify yours against the mechanism described below and the vocabulary entry **Struct**, and state one limitation of your choice.
 
 ## Mechanism and diagnostic reasoning
 
@@ -36,4 +88,4 @@ Public writable fields can bypass invariants. Unsigned types prevent negative re
 
 ## Review before continuing
 
-The reference checks the worked scenarios, including their boundary distinctions. Your independent and transfer artifacts may have additional checks. Compare observations rather than only source text. Preserve any new regression case you discover and explain why it would reject a plausible wrong implementation. External project steps require their own build and platform evidence and are not established by a portable reference passing.
+Run the reference and confirm that it prints `rust-012: passed`, then reconstruct one boundary case from memory and explain which check would reject a plausible wrong implementation. External project steps need their own build and platform evidence; a passing portable reference does not establish them.

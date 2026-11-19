@@ -3,7 +3,7 @@
   "title": "Censoring, risk sets and survival models",
   "level": "advanced",
   "minutes": 140,
-  "prerequisites": ["r-047"],
+  "prerequisites": ["r-043"],
   "concepts": [
     "right censoring",
     "risk set",

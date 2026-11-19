@@ -8,9 +8,11 @@ Generics express algorithms whose structure is shared across several types. A ty
 
 `func first[T any](items []T) (T,bool)` declares a type parameter `T`. `var zero T` obtains its zero value for an empty result. A custom constraint such as `interface { ~int | ~int64 }` admits named types with those underlying types. Type inference often determines `T` from arguments. A constraint belongs to compile-time capability checking; it is not runtime validation of application data.
 
-## 1. Reuse an element contract
+## 1. Reuse an element contract: change one input
 
-Call first with an integer slice and a string slice.
+Copy worked example 1 into a scratch pad and change `a, okA := first([]int{4, 5})` to `a, okA := first([]int{5, 5})`. Before running, predict which check fails and which value it now sees; then run it and restore the original line.
+
+The unchanged code is worked example 1:
 
 ```go
 a, okA := first([]int{4, 5})
@@ -18,20 +20,22 @@ b, okB := first([]string{"red", "blue"})
 check(okA && okB && a == 4 && b == "red", "generic first")
 ```
 
-**Expected:** The results are 4 and red with presence true.
+**Expected:** The changed run panics with `generic first` because `okA && okB && a == 4 && b == "red"` no longer holds. Restoring the original line brings back the worked observation: the results are 4 and red with presence true.
 
 The algorithm needs indexing and length, not knowledge of the element representation. That makes any an honest constraint here.
 
-## 2. Handle a generic empty value
+## 2. Handle a generic empty value: diagnose an edited check
 
-Call first with an empty integer slice.
+A careless edit changed the check in worked example 2 so that it reads `check(v != 0 && !ok, "empty generic")`. Run worked example 2 with that line, explain why the edited check now fails for the same program state, and restore it.
+
+The unchanged code is worked example 2:
 
 ```go
 v, ok := first([]int{})
 check(v == 0 && !ok, "empty generic")
 ```
 
-**Expected:** The result is zero with presence false.
+**Expected:** Before the repair the program panics with `empty generic`; after it the line reads `check(v == 0 && !ok, "empty generic")` again and the result is zero with presence false.
 
 A zero value alone cannot distinguish an empty input from a first element equal to zero. The boolean preserves that information.
 

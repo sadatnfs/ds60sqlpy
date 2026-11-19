@@ -2,6 +2,8 @@
 
 `unit-001.json` through `unit-024.json` hold route metadata and six concrete investigations per unit. `chapters/` holds original teaching prose. Each chapter has exactly one `{{WORKED_A}}` and `{{WORKED_B}}` insertion point. `programs/` holds standalone numerical or PyTorch reference programs, split by stable section comments. The builder extracts complete worked programs, formats Python using the repository Ruff configuration, and generates guides, learner files, executable references, explanatory solutions and manifests. Optional `_plotly.py.in` source fragments add three separate chart variants.
 
+Each unit's `verification` field is the authored finish condition published in `track.json`, and every guide ends with an "Ask an AI tutor about this lesson" section whose fenced prompt names the unit, its files and prerequisites.
+
 Run from a prepared contributor environment:
 
 ```sh

@@ -20,7 +20,7 @@
       "id": "julia-001",
       "runtime": "julia",
       "lab": "Use accepted 20 and rejected 3.",
-      "verification": "The complete reference prints 'julia-001: all reference checks passed' after its numerical and failure-case checks."
+      "verification": "Reproduce the stated observations, for example: The total is 23. y remains 4."
     },
     {
       "title": "Numbers, promotion, overflow and exactness",
@@ -40,7 +40,7 @@
       "id": "julia-002",
       "runtime": "julia",
       "lab": "Compute quotient and remainder for 7 divided by 2.",
-      "verification": "The complete reference prints 'julia-002: all reference checks passed' after its numerical and failure-case checks."
+      "verification": "Reproduce the stated observations, for example: The integer quotient is 3 and remainder 1. The result equals 3//10 exactly."
     },
     {
       "title": "Strings, Unicode and indexing boundaries",
@@ -59,8 +59,8 @@
       "outcome": "Process text without confusing byte positions, Unicode characters and visible grapheme clusters.",
       "id": "julia-003",
       "runtime": "julia",
-      "lab": "Move from the first to the second character in the UTF -8 fixture.",
-      "verification": "The complete reference prints 'julia-003: all reference checks passed' after its numerical and failure-case checks."
+      "lab": "Move from the first to the second character in the UTF-8 fixture.",
+      "verification": "Reproduce the stated observations, for example: nextind returns 3."
     },
     {
       "title": "Conditions, equality and explicit missing decisions",
@@ -80,7 +80,7 @@
       "id": "julia-004",
       "runtime": "julia",
       "lab": "Compare rates 0/5 and 0/0 under the helper policy.",
-      "verification": "The complete reference prints 'julia-004: all reference checks passed' after its numerical and failure-case checks."
+      "verification": "Reproduce the stated observations, for example: The first is 0; the second is nothing."
     },
     {
       "title": "Loops, ranges, comprehensions and scope",
@@ -100,7 +100,7 @@
       "id": "julia-005",
       "runtime": "julia",
       "lab": "List values from 1:3.",
-      "verification": "The complete reference prints 'julia-005: all reference checks passed' after its numerical and failure-case checks."
+      "verification": "Reproduce the stated observations, for example: The range contains 1, 2 and 3. Use 3:-1:1."
     },
     {
       "title": "Functions, keywords, closures and argument sharing",
@@ -120,7 +120,7 @@
       "id": "julia-006",
       "runtime": "julia",
       "lab": "Call affine on 5 without keywords.",
-      "verification": "The complete reference prints 'julia-006: all reference checks passed' after its numerical and failure-case checks."
+      "verification": "Reproduce the stated observations, for example: The result is 5. The result is 3."
     },
     {
       "title": "Arrays, shapes, copies and views",
@@ -139,8 +139,8 @@
       "outcome": "Trace array storage and indexing while choosing deliberately between copies and shared views.",
       "id": "julia-007",
       "runtime": "julia",
-      "lab": "Compare a length 2 vector with a2-by -1 matrix.",
-      "verification": "The complete reference prints 'julia-007: all reference checks passed' after its numerical and failure-case checks."
+      "lab": "Compare a length 2 vector with a 2-by-1 matrix.",
+      "verification": "Reproduce the stated observations, for example: Their sizes are (2,) and (2, 1). It is at row 1, column 3."
     },
     {
       "title": "Tuples, named records, dictionaries and sets",
@@ -161,7 +161,7 @@
       "id": "julia-008",
       "runtime": "julia",
       "lab": "Represent a single integer as a tuple.",
-      "verification": "The complete reference prints 'julia-008: all reference checks passed' after its numerical and failure-case checks."
+      "verification": "Reproduce the stated observations, for example: Use (7,), including its comma. Counts are 1 and 2 while the set has two distinct labels."
     },
     {
       "title": "Errors, tests and explicit input contracts",
@@ -182,7 +182,7 @@
       "id": "julia-009",
       "runtime": "julia",
       "lab": "Calculate the mean of -1 and 1.",
-      "verification": "The complete reference prints 'julia-009: all reference checks passed' after its numerical and failure-case checks."
+      "verification": "Reproduce the stated observations, for example: The result is the valid number 0."
     },
     {
       "title": "Composite types, constructors and nested mutability",
@@ -202,7 +202,7 @@
       "id": "julia-010",
       "runtime": "julia",
       "lab": "Attempt to construct a measurement with an unsupported unit.",
-      "verification": "The complete reference prints 'julia-010: all reference checks passed' after its numerical and failure-case checks."
+      "verification": "Reproduce the stated observations, for example: Its stored value is Float64."
     },
     {
       "title": "Multiple dispatch and method specificity",
@@ -222,7 +222,7 @@
       "id": "julia-011",
       "runtime": "julia",
       "lab": "Construct a circle with radius 0.",
-      "verification": "The complete reference prints 'julia-011: all reference checks passed' after its numerical and failure-case checks."
+      "verification": "Reproduce the stated observations, for example: Its area is 0."
     },
     {
       "title": "Parametric types and generic numerical code",
@@ -242,7 +242,7 @@
       "id": "julia-012",
       "runtime": "julia",
       "lab": "Sum 1//3 and 2//3.",
-      "verification": "The complete reference prints 'julia-012: all reference checks passed' after its numerical and failure-case checks."
+      "verification": "Reproduce the stated observations, for example: The result is exactly 1//1. The explicit additive identity is 0."
     },
     {
       "title": "Broadcasting, axes and mutation order",
@@ -263,7 +263,7 @@
       "id": "julia-013",
       "runtime": "julia",
       "lab": "Add one offset per column to a matrix.",
-      "verification": "The complete reference prints 'julia-013: all reference checks passed' after its numerical and failure-case checks."
+      "verification": "Reproduce the stated observations, for example: The example becomes [1, 1, 1, 1]. The example becomes [1, 1, 2, 3]."
     },
     {
       "title": "Missing values, absence and nonfinite measurements",
@@ -283,8 +283,8 @@
       "outcome": "Keep missingness and numerical failure distinct and report the denominator used by each aggregation policy.",
       "id": "julia-014",
       "runtime": "julia",
-      "lab": "Summarize 1,missing,3 using observed values.",
-      "verification": "The complete reference prints 'julia-014: all reference checks passed' after its numerical and failure-case checks."
+      "lab": "Summarize [1, missing, 3] using observed values.",
+      "verification": "Reproduce the stated observations, for example: Total 3, observed 2 and mean 2. The mean becomes 4/3."
     },
     {
       "title": "DataFrames transformations and grouped summaries",
@@ -305,7 +305,7 @@
       "id": "julia-015",
       "runtime": "julia",
       "lab": "Scale the score column by 10 using ByRow.",
-      "verification": "The complete reference prints 'julia-015: all reference checks passed' after its numerical and failure-case checks."
+      "verification": "Reproduce the stated observations, for example: The output column contains 1, 2 and 3 under the explicit name scaled. It reports 2 rows, 1 observed score and mean 1."
     },
     {
       "title": "Joins, key validation and duplicate fanout",
@@ -325,7 +325,7 @@
       "id": "julia-016",
       "runtime": "julia",
       "lab": "Join the duplicated right-side entity 1 observations.",
-      "verification": "The complete reference prints 'julia-016: all reference checks passed' after its numerical and failure-case checks."
+      "verification": "Reproduce the stated observations, for example: The left entity 1 weight appears twice. Two entity rows and weight total 300 are preserved."
     },
     {
       "title": "Typed CSV input and round-trip data contracts",
@@ -346,7 +346,7 @@
       "id": "julia-017",
       "runtime": "julia",
       "lab": "Read 001 as a declared string.",
-      "verification": "The complete reference prints 'julia-017: all reference checks passed' after its numerical and failure-case checks."
+      "verification": "Reproduce the stated observations, for example: Its leading zeros remain."
     },
     {
       "title": "Dates, availability time and historical features",
@@ -366,7 +366,7 @@
       "id": "julia-018",
       "runtime": "julia",
       "lab": "Compare one month with thirty days from January 31 in the fixture.",
-      "verification": "The complete reference prints 'julia-018: all reference checks passed' after its numerical and failure-case checks."
+      "verification": "Reproduce the stated observations, for example: They end on February 29 and March 1. The fixture ends on March 29 versus March 31."
     },
     {
       "title": "Linear algebra, conditioning and nonunique solutions",
@@ -387,7 +387,7 @@
       "id": "julia-019",
       "runtime": "julia",
       "lab": "Multiply the computed vector by the original matrix.",
-      "verification": "The complete reference prints 'julia-019: all reference checks passed' after its numerical and failure-case checks."
+      "verification": "Reproduce the stated observations, for example: The products are 7 and 3-2im."
     },
     {
       "title": "Distributions, random state and Monte Carlo evidence",
@@ -407,8 +407,8 @@
       "outcome": "Use explicit random generators, compare simulation with analytic quantities and preserve the distinction between numerical and sampling uncertainty.",
       "id": "julia-020",
       "runtime": "julia",
-      "lab": "Construct Normal(2,3).",
-      "verification": "The complete reference prints 'julia-020: all reference checks passed' after its numerical and failure-case checks."
+      "lab": "Construct Normal(2, 3).",
+      "verification": "Reproduce the stated observations, for example: The mean is 2 and variance 9."
     },
     {
       "title": "Regression fitting, regularization and held-out assessment",
@@ -430,7 +430,7 @@
       "id": "julia-021",
       "runtime": "julia",
       "lab": "Fit the exact line without a penalty.",
-      "verification": "The complete reference prints 'julia-021: all reference checks passed' after its numerical and failure-case checks."
+      "verification": "Reproduce the stated observations, for example: The coefficients are approximately [1, 2]. The selected penalty is 2."
     },
     {
       "title": "Forward-mode automatic differentiation",
@@ -450,8 +450,8 @@
       "outcome": "Differentiate supported numerical functions and validate derivatives while preserving the numeric representation carried by dual numbers.",
       "id": "julia-022",
       "runtime": "julia",
-      "lab": "Compute the gradient of x1 squared plus 3x2 squared at[2,3].",
-      "verification": "The complete reference prints 'julia-022: all reference checks passed' after its numerical and failure-case checks."
+      "lab": "Compute the gradient of x1 squared plus 3x2 squared at [2, 3].",
+      "verification": "Reproduce the stated observations, for example: The result is [4, 18]. Gradients are [1, 1] and [0.5, 0.5]."
     },
     {
       "title": "Optimization objectives, constraints and convergence",
@@ -472,7 +472,7 @@
       "id": "julia-023",
       "runtime": "julia",
       "lab": "Replace a minimization objective with its negative.",
-      "verification": "The complete reference prints 'julia-023: all reference checks passed' after its numerical and failure-case checks."
+      "verification": "Reproduce the stated observations, for example: The best feasible point is near 2."
     },
     {
       "title": "Numerical methods, stability and error contracts",
@@ -494,7 +494,7 @@
       "id": "julia-024",
       "runtime": "julia",
       "lab": "Compare Euler with 4 and 20 steps for rate 1.",
-      "verification": "The complete reference prints 'julia-024: all reference checks passed' after its numerical and failure-case checks."
+      "verification": "Reproduce the stated observations, for example: The fine final value is closer to exp(-1). The refined approximation is closer to 1/3."
     },
     {
       "title": "Inference, profiling and measured performance",
@@ -514,8 +514,8 @@
       "outcome": "Explain which work a timing includes, inspect type inference and measure a small kernel without turning machine-dependent timing into a correctness assertion.",
       "id": "julia-025",
       "runtime": "julia",
-      "lab": "Trace total after each element of [1.0,2.0,3.0].",
-      "verification": "The complete reference prints 'julia-025: all reference checks passed' after its numerical and failure-case checks."
+      "lab": "Trace total after each element of [1.0, 2.0, 3.0].",
+      "verification": "Reproduce the stated observations, for example: The values are 1, 5 and 14. The result is Float32(5)."
     },
     {
       "title": "Allocation, mutation and alias-safe numerical work",
@@ -537,7 +537,7 @@
       "id": "julia-026",
       "runtime": "julia",
       "lab": "Compute the two entries before running the first case.",
-      "verification": "The complete reference prints 'julia-026: all reference checks passed' after its numerical and failure-case checks."
+      "verification": "Reproduce the stated observations, for example: The final vector is [11, 11]. The new vector is [5, 5]."
     },
     {
       "title": "Modules, source loading and reproducible projects",
@@ -558,8 +558,8 @@
       "outcome": "Separate namespaces from source files, execute a tiny owned multi-file project offline, and distinguish locked dependencies from code loading.",
       "id": "julia-027",
       "runtime": "julia",
-      "lab": "Call LocalStats.center on[2,4].",
-      "verification": "The complete reference prints 'julia-027: all reference checks passed' after its numerical and failure-case checks."
+      "lab": "Call LocalStats.center on [2, 4].",
+      "verification": "Reproduce the stated observations, for example: The result is [-1, 1]."
     },
     {
       "title": "Property testing and reproducible numerical evidence",
@@ -580,8 +580,8 @@
       "outcome": "Combine hand-derived cases, generated inputs and invariants so that a plausible but incorrect transformation cannot pass by comparing only to itself.",
       "id": "julia-028",
       "runtime": "julia",
-      "lab": "Compute probabilities for[2,5,3] by hand.",
-      "verification": "The complete reference prints 'julia-028: all reference checks passed' after its numerical and failure-case checks."
+      "lab": "Compute probabilities for weights [2, 5, 3] by hand.",
+      "verification": "Reproduce the stated observations, for example: The result is [0.2, 0.5, 0.3]. The sum exceeds Float64 range."
     },
     {
       "title": "Tasks, channels and bounded asynchronous pipelines",
@@ -603,7 +603,7 @@
       "id": "julia-029",
       "runtime": "julia",
       "lab": "Describe what happens when a producer fills a capacity-two buffer.",
-      "verification": "The complete reference prints 'julia-029: all reference checks passed' after its numerical and failure-case checks."
+      "verification": "Reproduce the stated observations, for example: The result is [4, 0, 9]."
     },
     {
       "title": "Threads, ownership and deterministic reductions",
@@ -624,7 +624,7 @@
       "id": "julia-030",
       "runtime": "julia",
       "lab": "Compute the sum of squares through 100 from the closed-form formula.",
-      "verification": "The complete reference prints 'julia-030: all reference checks passed' after its numerical and failure-case checks."
+      "verification": "Reproduce the stated observations, for example: The result is 338350. The empty range contributes 0."
     },
     {
       "title": "Expressions, hygienic macros and C interoperability",
@@ -646,8 +646,8 @@
       "outcome": "Inspect syntax without evaluating untrusted text, implement a hygienic single-evaluation macro and call a precisely typed Linux C function.",
       "id": "julia-031",
       "runtime": "julia",
-      "lab": "Identify the head and first argument of parsed 1+2.",
-      "verification": "The complete reference prints 'julia-031: all reference checks passed' after its numerical and failure-case checks."
+      "lab": "Identify the head and first argument of parsed 1 + 2.",
+      "verification": "Reproduce the stated observations, for example: The head is :call and the function symbol is :+. The counter would be 2."
     },
     {
       "title": "Scientific capstone: an auditable offline modeling report",
@@ -673,7 +673,7 @@
       "id": "julia-032",
       "runtime": "julia",
       "lab": "Explain what one row and one ID represent.",
-      "verification": "The complete reference prints 'julia-032: all reference checks passed' after its numerical and failure-case checks."
+      "verification": "Reproduce the stated observations, for example: Penalty 2 is selected. Residuals are -1/7 and -2/7; MSE is 5/98."
     }
   ]
 }

@@ -3,7 +3,7 @@
   "title": "Plotly traces and layout from explicit data",
   "level": "advanced",
   "minutes": 140,
-  "prerequisites": ["r-056"],
+  "prerequisites": ["r-055"],
   "concepts": [
     "trace",
     "layout",

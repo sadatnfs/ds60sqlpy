@@ -20,15 +20,13 @@ cast(pl.Int64, strict=False) changes the parsed column while retaining failed co
 
 ## Run the lesson
 
-Open this subject in `/classroom`, then show its code and notes. The prepared `data-engineering` worker runs `main.py` in a fresh temporary directory. The examples use installed packages and synthetic local fixtures; no account, cloud service, network request or package download is required. Save source and notes before switching lessons. Temporary databases, project files and tracking artifacts are recreated by each complete program and removed after the job. The classroom retains the submitted source and bounded output, not an indefinitely running external service. The guide distinguishes this local execution from the deployment decisions that need an owned production environment.
-
-
+Open `polars-003` in `/classroom`. Its starter `main.py` contains both worked cases, "Separate missing input from invalid input" and "Decimal arithmetic and narrowing bounds", and prints the dictionary each case returns. The prepared `data-engineering` worker runs it in a fresh temporary directory. An `AssertionError` means that an observation differs from the case's stated contract. The inputs are small literal tables. Cases that demonstrate Parquet scans write their files into a temporary directory that is removed when the case returns. No account, network request or package download is involved. Save source and notes before switching lessons.
 
 ## Worked case 1: Separate missing input from invalid input
 
 The first program keeps id and units_text, derives units, and creates separate invalid and missing subsets. It also executes the strict path to prove that the invalid token is rejected. This demonstrates a policy choice with observable consequences rather than silently using a permissive conversion.
 
-**Expected evidence:** Record 2 is malformed, record 3 is missing, and parsed units are[2,null,null,4].
+**Expected evidence:** Record 2 is malformed, record 3 is missing, and parsed units are [2, null, null, 4].
 
 ```python
 import polars as pl
@@ -55,12 +53,11 @@ if __name__ == "__main__":
     print(example_one())
 ```
 
-
 ## Worked case 2: Decimal arithmetic and narrowing bounds
 
 The second program constructs decimal values from strings, so binary approximation is not introduced before the Decimal object exists. It contrasts exact decimal addition with a narrowing integer conversion whose second value is outside the target range.
 
-**Expected evidence:** Decimal total is 0.30; the Int8 conversion gives[127,null].
+**Expected evidence:** Decimal total is 0.30; the Int8 conversion gives [127, null].
 
 ```python
 from decimal import Decimal
@@ -84,11 +81,9 @@ if __name__ == "__main__":
     print(example_two())
 ```
 
-
 ## Practice
 
-Make each requested change in a saved copy. Compare both the expected result and the deliberately changed assumption. The separate reference explains the answers.
-
+The starter contains both worked cases, so a task can change either one. Make each change in a saved copy, run it, and compare the printed result with the task's check before opening the separate explained answers.
 
 ### 1. Introduce a whitespace token
 
@@ -98,7 +93,6 @@ Replace bad with a whitespace-only string and define its category.
 
 **Hint:** Use string stripping while preserving the raw token.
 
-
 ### 2. Keep a rejection denominator
 
 Compute the malformed share of the original four records.
@@ -106,7 +100,6 @@ Compute the malformed share of the original four records.
 **Check:** Malformed share is 1/4, separately from 1/4 missing.
 
 **Hint:** Use original row count.
-
 
 ### 3. Make rejection fail closed
 
@@ -116,15 +109,13 @@ Require that every nonmissing numeric token parses.
 
 **Hint:** Count invalid rows before returning clean data.
 
-
 ### 4. Investigate a bound
 
-Try values-129,-128,127,128 as Int8.
+Try the values -129, -128, 127 and 128 as Int8.
 
-**Check:** Only-128 and 127 are representable.
+**Check:** Only -128 and 127 are representable.
 
 **Hint:** Signed 8-bit values have 256 states.
-
 
 ### 5. Avoid early float conversion
 
@@ -134,7 +125,6 @@ Construct Decimal values using strings rather than floats.
 
 **Hint:** Conversion after approximation cannot recover an unknown intended decimal.
 
-
 ### 6. Specify rounding
 
 Describe how a third decimal place should be handled before storage at scale 2.
@@ -143,20 +133,19 @@ Describe how a third decimal place should be handled before storage at scale 2.
 
 **Hint:** A display format is not a data policy.
 
-
 ## Diagnose errors and misleading results
 
 A permissive cast that increases null counts is not automatically data loss: it may be correct rejection of bad text. It becomes an analysis defect when the original token, count or reason disappears. Check integer bounds before narrowing and retain exact input strings for decimal parsing. Locale-specific separators, percent signs and mixed units need explicit parsing rules; stripping every nondigit can manufacture plausible but incorrect numbers.
 
 ## Transfer to independent work
 
-Implement a parsing policy that preserves rejected evidence. Extend the fixture with one malformed token, one missing token and one out-of-range value, and reconcile every original identifier into exactly one outcome. For scientific measurements, also state approximation tolerance; for exact decimal quantities, state scale and rounding independently of display formatting.
+Extend the fixture with one malformed token, one missing token and one out-of-range value, and reconcile every original identifier into exactly one outcome. For scientific measurements, also state approximation tolerance; for exact decimal quantities, state scale and rounding independently of display formatting.
 
 ## Primary references
 
-- [Polars documentation: Types, parsing failures and exact numeric values](https://docs.pola.rs/user-guide/expressions/casting/)
+- [Polars user guide: Casting](https://docs.pola.rs/user-guide/expressions/casting/)
 - [Polars Python API reference](https://docs.pola.rs/api/python/stable/reference/index.html)
 
 ## Tutor guidance
 
-Use the repository learning-companion skill for `polars-003`. Inspect the learner's own source and observations, ask for an explanation of the relevant data or state contract, and give a focused hint. Separate an assertion on this fixture from a claim about an external dataset or deployed service.
+Use the repository's `$guide-ds60sqlpy-learning` skill (`.agents/skills/guide-ds60sqlpy-learning/SKILL.md`) for `polars-003`. Inspect the learner's own source and printed output first. Ask for an explanation of strict casts, quarantine, integer bounds, Decimal and missingness in their own words, then give one focused hint at a time. Keep an assertion on this synthetic fixture separate from a claim about an external dataset or deployed service.

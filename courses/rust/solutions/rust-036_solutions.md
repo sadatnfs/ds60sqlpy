@@ -1,28 +1,50 @@
 # rust-036: explanation and comparison
 
-Attempt the six guide tasks before opening this comparison. The executable reference is [rust-036_solution.rs](rust-036_solution.rs). Its assertions are always active under the prepared classroom compile settings.
+Attempt the six guide tasks before opening this comparison. The executable reference is [rust-036_solution.rs](rust-036_solution.rs). It runs both worked examples, and its assertions are always active under the prepared classroom compile settings.
 
 ## Why the two examples differ
 
-**Keep build policy explicit:** This metadata kernel supports reasoning; the real Cargo fixture supplies build evidence. Edition and compiler version remain different policy fields.
+**Observe an edition 2024 scope rule:** Edition 2024 drops a temporary in a block's tail expression before the block's local variables, so the Ref returned by borrow() no longer outlives cell. The edition selects this rule; the compiler version only has to implement it. name_length compiles and returns 4 under edition 2024; edition 2021 rejects the same function with E0597.
 
-**Retain an error rather than hide a failed gate:** Release accounting should retain a failed check instead of substituting an older successful result. One failed gate prevents a claimed complete release.
+**Iterate a boxed slice by value:** Edition 2024 changes which IntoIterator implementation a method call on Box<[T]> selects. Code can change meaning or stop compiling across editions, which is why Cargo.toml records the edition explicitly and why an upgrade deserves review. into_iter on a Box<[String]> yields owned Strings under edition 2024; under edition 2021 the same call yields &String and the collect fails with E0277.
 
-## Reason through the six tasks
+## Task answers
 
-1. **Predict and explain.** Explain edition, compiler version and dependency version separately.
+### Task 1: Predict and explain
 
-2. **Guided modification.** Build InventoryLab with its checked-in lockfile.
+Explain edition, compiler version and dependency version separately.
 
-3. **Independent construction.** Run its tests and inspect a deliberately changed public contract.
+No separate reference answer has been written for this task. Example A is the evidence to compare with: Edition 2024 drops a temporary in a block's tail expression before the block's local variables, so the Ref returned by borrow() no longer outlives cell. The edition selects this rule; the compiler version only has to implement it. name_length compiles and returns 4 under edition 2024; edition 2021 rejects the same function with E0597.
 
-4. **Diagnose a defect.** Diagnose offline mode failing because a dependency was never prepared.
+### Task 2: Guided modification
 
-5. **Boundary evidence.** Remove only owned target output and perform a clean build.
+Build InventoryLab with its checked-in lockfile.
 
-6. **Transfer and justify.** Design a dependency upgrade review including lock diff, licenses, compile tests and runtime evidence.
+No separate reference answer has been written for this task. Start from Example B: Edition 2024 changes which IntoIterator implementation a method call on Box<[T]> selects. Code can change meaning or stop compiling across editions, which is why Cargo.toml records the edition explicitly and why an upgrade deserves review. into_iter on a Box<[String]> yields owned Strings under edition 2024; under edition 2021 the same call yields &String and the collect fails with E0277.
 
-For tasks 1 and 2, use the checked values and mechanism trace in the two examples. For task 3, choose names that expose the input and result contract and retain the same invariants. For task 4, the diagnosed mistakes below supply a concrete wrong assumption: preserve its counterexample before repairing it. Task 5 needs an explicit expected value or documented rejection at the boundary, not just successful execution. For task 6, explain what changes in the new context and which part of the original mechanism remains applicable. Several representations may satisfy this transfer task; justify the choice rather than treating this reference as the only architecture.
+### Task 3: Independent construction
+
+Run its tests and inspect a deliberately changed public contract.
+
+No reference answer has been written for this task yet. It needs a project or platform outside the single-file pad, so record your own build and run evidence and judge it against the vocabulary entry **Edition** and the lesson notes.
+
+### Task 4: Diagnose a defect
+
+Diagnose offline mode failing because a dependency was never prepared.
+
+No reference answer has been written for this task yet. The wrong assumptions to look for are this lesson's pitfalls: A successful dependency download is not successful compilation. Do not edit checksums manually to force a lockfile pass. A native binary is platform- and architecture-specific.
+
+### Task 5: Boundary evidence
+
+Remove only owned target output and perform a clean build.
+
+No reference answer has been written for this task yet. Write the expected value or documented rejection for each boundary before running it, and compare with the checks in Example A (Observe an edition 2024 scope rule) and Example B (Iterate a boxed slice by value).
+
+### Task 6: Transfer and justify
+
+Design a dependency upgrade review including lock diff, licenses, compile tests and runtime evidence.
+
+No single reference answer exists: several designs can satisfy this transfer task. Justify yours against the mechanism described below and the vocabulary entry **Edition**, and state one limitation of your choice.
 
 ## Mechanism and diagnostic reasoning
 
@@ -30,10 +52,12 @@ Cargo describes packages, targets, dependencies and build profiles. A Rust editi
 
 Cargo.lock records selected dependency versions for reproducible resolution under a project policy. Locked and offline modes answer different questions: locked rejects graph changes, while offline forbids network access and requires prepared assets. The classroom bypasses per-attempt Cargo resolution by linking a reviewed read-only Arrow library. External projects use their own explicit preparation and lock review.
 
-Cargo.toml declares package and dependency intent. Cargo.lock records a resolved graph. cargo build --locked checks lock consistency; --offline requires cached dependencies. cargo test and cargo clippy are distinct verification tools.
+The classroom compiles every pad with edition 2024, and editions change real language rules. Edition 2024 drops temporaries in a block's tail expression before the block's locals, iterates a Box<[T]> by value, reserves the gen keyword, requires unsafe extern blocks and treats std::env::set_var as unsafe. The two examples compile only under edition 2024; edition 2021 rejects them with E0597 and E0277.
+
+Cargo.toml declares package and dependency intent, including edition = "2024". Cargo.lock records a resolved graph. cargo build --locked checks lock consistency; --offline requires cached dependencies. cargo test and cargo clippy are distinct verification tools. cargo fix --edition migrates code mechanically, but the migrated code still needs review.
 
 A successful dependency download is not successful compilation. Do not edit checksums manually to force a lockfile pass. A native binary is platform- and architecture-specific.
 
 ## Review before continuing
 
-The reference checks the worked scenarios, including their boundary distinctions. Your independent and transfer artifacts may have additional checks. Compare observations rather than only source text. Preserve any new regression case you discover and explain why it would reject a plausible wrong implementation. External project steps require their own build and platform evidence and are not established by a portable reference passing.
+Run the reference and confirm that it prints `rust-036: passed`, then reconstruct one boundary case from memory and explain which check would reject a plausible wrong implementation. External project steps need their own build and platform evidence; a passing portable reference does not establish them.

@@ -1,4 +1,4 @@
-"""mle-006: worked starting point; complete the guide's six changes."""
+"""mle-006: both worked cases; complete the guide's six changes."""
 
 import os
 import tempfile
@@ -89,8 +89,44 @@ def example_one():
             store.teardown()
 
 
+def example_two():
+    with tempfile.TemporaryDirectory() as d:
+        store = make_store(Path(d) / "features")
+        try:
+            requests = pd.DataFrame(
+                {
+                    "request_id": [1, 2, 3],
+                    "customer_id": [1, 1, 1],
+                    "event_timestamp": pd.to_datetime(
+                        ["2024-01-02", "2023-12-01", "2024-03-01"], utc=True
+                    ),
+                }
+            )
+            retrieved = store.get_historical_features(
+                entity_df=requests, features=["customer_features:usage"]
+            ).to_df()
+            assert retrieved.request_id.is_unique
+            assert set(retrieved.request_id) <= set(requests.request_id)
+            # Restore the authoritative request population, including unmatched/expired rows.
+            result = requests.merge(
+                retrieved[["request_id", "usage"]], on="request_id", how="left", validate="1:1"
+            ).sort_values("request_id")
+            assert len(result) == len(requests) == 3
+            assert result.usage.iloc[0] == 10.0 and result.usage.iloc[1:].isna().all()
+            return {
+                "requested_rows": 3,
+                "retrieval_returned_rows": len(retrieved),
+                "normalized_rows": 3,
+                "nulls_for_unknown_or_expired": int(result.usage.isna().sum()),
+                "before_history_or_outside_ttl_missing": True,
+            }
+        finally:
+            store.teardown()
+
+
 if __name__ == "__main__":
     print(example_one())
+    print(example_two())
 
 # TODO 1: List the view's fields and entity key.
 # TODO 2: Retrieve customer 1 before and after its later feature version.

@@ -9,6 +9,25 @@ The executable reference contains the two complete worked cases with assertions.
 
 A result assertion is the first correctness check. The optimizer may choose a different physical strategy without changing this answer.
 
+```python
+import tempfile
+from pathlib import Path
+
+import polars as pl
+
+with tempfile.TemporaryDirectory() as d:
+    path = Path(d) / "events.parquet"
+    pl.DataFrame({"id": [1, 2, 3], "amount": [5, 12, 20], "unused": ["x", "y", "z"]}).write_parquet(
+        path
+    )
+    query = (
+        pl.scan_parquet(path)
+        .filter(pl.col("amount") >= 15)
+        .select("id", (pl.col("amount") * 2).alias("doubled"))
+    )
+    assert query.collect().to_dict(as_series=False) == {"id": [3], "doubled": [40]}
+```
+
 **Expected:** Only id 3 remains with doubled value 40.
 
 ## 2. Add an unused column
@@ -26,6 +45,15 @@ Use equivalent inputs and operations. Compare timing only after verifying equali
 ## 4. Test a group counterexample
 
 The before-filtered pipeline would still keep A because it observes only 11. The boundary case demonstrates why order is semantically important.
+
+```python
+import polars as pl
+
+frame = pl.DataFrame({"group": ["A", "A", "B"], "value": [1, 11, 8]})
+means = frame.group_by("group").agg(pl.col("value").mean().alias("mean")).sort("group")
+assert means["mean"].to_list() == [6.0, 8.0]
+assert means.filter(pl.col("mean") > 6)["group"].to_list() == ["B"]
+```
 
 **Expected:** Its group mean is 6 and the strict >6 filter still rejects it.
 
@@ -105,4 +133,4 @@ if __name__ == "__main__":
 
 ## Interpretation
 
-Explain a lazy query in terms of its requested result and observable execution plan. Produce an eager reference, a bounded lazy result and one deliberately non-equivalent rewrite. This prepares you to review performance changes without confusing optimization with a change in the analytical question.
+Produce an eager reference, a bounded lazy result and one deliberately non-equivalent rewrite. This prepares you to review performance changes without confusing optimization with a change in the analytical question.

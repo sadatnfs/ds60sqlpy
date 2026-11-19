@@ -14,6 +14,17 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         assert!(!seen.insert("pear"));
         assert!(!seen.contains("apple"));
     }
+
+    {
+        // Task 3: Independent construction
+        let words = ["pear", "fig", "pear", "apple"];
+        let mut counts = std::collections::BTreeMap::new();
+        for word in words {
+            *counts.entry(word).or_insert(0) += 1;
+        }
+        let report: Vec<String> = counts.iter().map(|(w, n)| format!("{w}={n}")).collect();
+        assert_eq!(report, ["apple=1", "fig=1", "pear=2"]);
+    }
     println!("rust-026: passed");
     Ok(())
 }

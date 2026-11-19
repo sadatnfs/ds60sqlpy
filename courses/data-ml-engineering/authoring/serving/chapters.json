@@ -2,7 +2,7 @@
   {
     "id": "dme-057",
     "title": "From an HTTP request to an admitted inference job",
-    "level": "intermediate",
+    "level": "advanced",
     "minutes": 90,
     "prerequisites": ["dme-056"],
     "runtime_profile": "python-core",
@@ -21,7 +21,7 @@
   {
     "id": "dme-058",
     "title": "Bytes, subwords and the tokenizer boundary",
-    "level": "intermediate",
+    "level": "advanced",
     "minutes": 90,
     "prerequisites": ["dme-057"],
     "runtime_profile": "python-core",
@@ -48,7 +48,7 @@
   {
     "id": "dme-059",
     "title": "Token embeddings, positions and retrieval representations",
-    "level": "intermediate",
+    "level": "advanced",
     "minutes": 90,
     "prerequisites": ["dme-058"],
     "runtime_profile": "python-core",
@@ -79,7 +79,7 @@
   {
     "id": "dme-060",
     "title": "Safe checkpoints, startup loading and readiness",
-    "level": "intermediate",
+    "level": "advanced",
     "minutes": 90,
     "prerequisites": ["dme-059"],
     "runtime_profile": "python-core",
@@ -102,7 +102,7 @@
   {
     "id": "dme-061",
     "title": "Device placement, transfers and precision budgets",
-    "level": "intermediate",
+    "level": "advanced",
     "minutes": 90,
     "prerequisites": ["dme-060"],
     "runtime_profile": "llm-torch-cpu",
@@ -125,7 +125,7 @@
   {
     "id": "dme-062",
     "title": "Bounded admission, queues and capacity ownership",
-    "level": "intermediate",
+    "level": "advanced",
     "minutes": 90,
     "prerequisites": ["dme-061"],
     "runtime_profile": "python-core",

@@ -1,6 +1,6 @@
 # swift-042: explanation and comparison
 
-Attempt the six guide tasks before opening this comparison. The executable reference is [swift-042_solution.swift](swift-042_solution.swift). Its assertions are always active under the prepared classroom compile settings.
+Attempt the six guide tasks before opening this comparison. The executable reference is [swift-042_solution.swift](swift-042_solution.swift). It runs both worked examples, and its assertions are always active under the prepared classroom compile settings.
 
 ## Why the two examples differ
 
@@ -8,21 +8,43 @@ Attempt the six guide tasks before opening this comparison. The executable refer
 
 **Refuse an unknown future schema:** Rejection should preserve recoverable source data rather than silently resetting it. The unsupported document is rejected without modifying its payload.
 
-## Reason through the six tasks
+## Task answers
 
-1. **Predict and explain.** Identify the schema and domain validation boundaries.
+### Task 1: Predict and explain
 
-2. **Guided modification.** Add a version-one optional field while preserving old decoding behavior.
+Identify the schema and domain validation boundaries.
 
-3. **Independent construction.** Inspect JourneyApp save and load errors with an owned test file.
+No separate reference answer has been written for this task. Example A is the evidence to compare with: Version and payload are inspected independently after decoding. The supported envelope round-trips with two titles.
 
-4. **Diagnose a defect.** Diagnose replacing an unreadable saved file with an empty default automatically.
+### Task 2: Guided modification
 
-5. **Boundary evidence.** Test empty data, malformed data and an unknown future version.
+Add a version-one optional field while preserving old decoding behavior.
 
-6. **Transfer and justify.** Design a version-one to version-two migration with backup, rollback and verification steps.
+No separate reference answer has been written for this task. Start from Example B: Rejection should preserve recoverable source data rather than silently resetting it. The unsupported document is rejected without modifying its payload.
 
-For tasks 1 and 2, use the checked values and mechanism trace in the two examples. For task 3, choose names that expose the input and result contract and retain the same invariants. For task 4, the diagnosed mistakes below supply a concrete wrong assumption: preserve its counterexample before repairing it. Task 5 needs an explicit expected value or documented rejection at the boundary, not just successful execution. For task 6, explain what changes in the new context and which part of the original mechanism remains applicable. Several representations may satisfy this transfer task; justify the choice rather than treating this reference as the only architecture.
+### Task 3: Independent construction
+
+Inspect JourneyApp save and load errors with an owned test file.
+
+No reference answer has been written for this task yet. It needs a project or platform outside the single-file pad, so record your own build and run evidence and judge it against the vocabulary entry **Schema version** and the lesson notes.
+
+### Task 4: Diagnose a defect
+
+Diagnose replacing an unreadable saved file with an empty default automatically.
+
+No reference answer has been written for this task yet. The wrong assumptions to look for are this lesson's pitfalls: Atomic replacement is not a universal durability or backup guarantee. Do not store secrets in ordinary preferences or unencrypted example files. A migration must preserve meaning, not only produce parseable JSON.
+
+### Task 5: Boundary evidence
+
+Test empty data, malformed data and an unknown future version.
+
+No reference answer has been written for this task yet. Write the expected value or documented rejection for each boundary before running it, and compare with the checks in Example A (Read the supported version) and Example B (Refuse an unknown future schema).
+
+### Task 6: Transfer and justify
+
+Design a version-one to version-two migration with backup, rollback and verification steps.
+
+No single reference answer exists: several designs can satisfy this transfer task. Justify yours against the mechanism described below and the vocabulary entry **Schema version**, and state one limitation of your choice.
 
 ## Mechanism and diagnostic reasoning
 
@@ -36,4 +58,4 @@ Atomic replacement is not a universal durability or backup guarantee. Do not sto
 
 ## Review before continuing
 
-The reference checks the worked scenarios, including their boundary distinctions. Your independent and transfer artifacts may have additional checks. Compare observations rather than only source text. Preserve any new regression case you discover and explain why it would reject a plausible wrong implementation. External project steps require their own build and platform evidence and are not established by a portable reference passing.
+Run the reference and confirm that it prints `swift-042: passed`, then reconstruct one boundary case from memory and explain which check would reject a plausible wrong implementation. External project steps need their own build and platform evidence; a passing portable reference does not establish them.

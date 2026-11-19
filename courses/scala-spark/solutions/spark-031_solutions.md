@@ -8,7 +8,7 @@ Read the [guide](../guides/spark-031.md) and attempt one language first. The [Sc
 
 Write each declared file in the owned staging directory, then atomically move it into input under a new batch-N.json name. Reject invalid names or an existing destination.
 
-**Expected:** Three input files, each with 3 completeJSON records; no staging temporary file remains. Reusing batch-0.json is rejected.
+**Expected:** Three input files, each with 3 complete JSON records; no staging temporary file remains. Reusing batch-0.json is rejected.
 
 ```scala
 def publishFile(root: Path, name: String, lines: Seq[String]): Unit = {
@@ -50,7 +50,7 @@ The source sees complete new files rather than an in-progress write. Staging and
 
 ### Exercise 2: Construct an explicit streaming relation without starting it
 
-Read the owned JSON input through readStream with the declared schema and maxFilesPerTrigger 1. Return the streamingDataFrame; do not call an ordinary batch collect on it.
+Read the owned JSON input through readStream with the declared schema and maxFilesPerTrigger 1. Return the streaming DataFrame; do not call an ordinary batch collect on it.
 
 **Expected:** isStreaming is true, columns are id, team, amount and their types are bigint, string, bigint. No query is started by construction alone.
 
@@ -80,7 +80,7 @@ The explicit schema makes parsing independent of whichever file happens to be di
 
 Group by team and compute row_count, known_amounts and total_amount. Use the same expression for streaming and batch relations without filling unknown amounts.
 
-**Expected:** The streaming result remains streaming and has one state/result row per team. Its eventual literal result isA(4,3,15), B(3,2,35), C(2,2,30).
+**Expected:** The streaming result remains streaming and has one state/result row per team. Its eventual literal result is A(4,3,15), B(3,2,35), C(2,2,30).
 
 ```scala
 def teamSummary(frame: DataFrame): DataFrame = {
@@ -177,9 +177,9 @@ The progress ledger measures what this query consumed, not just what the fixture
 
 ### Exercise 6: Compare final streaming output with batch and literal oracles
 
-Read the final memory table, compare its ordered summary tuples with a batch read of the same nine source records, and compare both with the literalA/B/C oracle.
+Read the final memory table, compare its ordered summary tuples with a batch read of the same nine source records, and compare both with the literal A/B/C oracle.
 
-**Expected:** ExactlyA(4,3,15), B(3,2,35), C(2,2,30), whose record counts sum 9, known counts 7 and amounts 80.
+**Expected:** Exactly A(4,3,15), B(3,2,35), C(2,2,30), whose record counts sum 9, known counts 7 and amounts 80.
 
 ```scala
 def summaryRows(frame: DataFrame): Seq[(String, Long, Long, Long)] = {
@@ -202,4 +202,4 @@ The final table is checked against an independent value contract as well as the 
 
 ## Execution and interpretation
 
-Run the complete reference in its prepared fixed worker. The small fixture is constructed inside the program,so opening a lesson does not fetch data. A final success line is printed only after the reference assertions complete. Plan observations,partition evidence and resource measurements apply to the actual local configuration; they do not establish cluster-scale performance. Session cleanup is explicit,and any additional owned file/query lifecycle is described in the lesson.
+Run the complete reference in its prepared fixed worker. The small fixture is constructed inside the program, so opening a lesson does not fetch data. A final success line is printed only after the reference assertions complete. Plan observations, partition evidence and resource measurements apply to the actual local configuration; they do not establish cluster-scale performance. Session cleanup is explicit, and any additional owned file/query lifecycle is described in the lesson.

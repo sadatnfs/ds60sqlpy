@@ -20,6 +20,8 @@ The generated predictive observation includes observation variation around mu. T
 
 The analytic posterior mean and variance are constants across draws. Their between- and within-chain variation is zero, so R-hat or effective-size diagnostics for those generated constants can be undefined. That is different from an unexpectedly constant chain for the sampled mu parameter.
 
+The classroom pad runs two chains with 100 warmup and 100 retained draws each. For sampled parameters such as `mu`, apply the screen from the Markov chain unit: `R_hat` below 1.01, `ESS_bulk` and `ESS_tail` of at least about 100 per chain and no divergent transitions. Two chains of 100 draws can fail it even for this conjugate model, so the run demonstrates the workflow rather than a reportable fit.
+
 Very fast chains can also have elapsed times rounded to zero in a summary. An infinite ESS-per-second entry then reflects timing resolution, not infinite computational efficiency. Inspect retained counts, time precision and parameter diagnostics rather than treating every numeric summary as a scientifically meaningful ratio.
 
 The runner displays actual summaries and trace artifacts when available. Those are records of the execution, not a convergence certificate. The 100-draw demonstration can expose diagnostic limitations and should not be relabeled as a fully qualified production posterior simply because compilation and sampling returned successfully.
@@ -40,7 +42,7 @@ Compilation success establishes syntactic and type validity. Sampling success es
 
 ## Complete reproducible program
 
-The prepared Stan pad compiles and samples `main.stan` with fixed bounded settings. Its tiny data are declared in `transformed data`; this pad has no separate JSON editor. The linked project explains standard data-block workflows. Runtime: `stan-cpu`.
+The prepared Stan pad compiles `main.stan` and samples two chains with 100 warmup and 100 retained draws each. Its tiny data are declared in `transformed data`; this pad has no separate JSON editor. The linked project explains standard data-block workflows. These teaching-sized chains can fail the convergence screen from `bayes-006` (R-hat below 1.01, at least 100 bulk and tail effective draws per chain, no divergences); read the printed diagnostics against it before interpreting any estimate. Runtime: `stan-cpu`.
 
 ```stan
 // A self-contained classroom model. External project uses a separate data block.

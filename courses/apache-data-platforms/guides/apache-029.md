@@ -10,6 +10,11 @@ operation explicitly requests a historical range under its own run controls.
 Neither automatically guarantees that a data source was complete, that a sink
 was idempotent or that a correction reached every downstream consumer.
 
+Airflow 3 changed the default: `[scheduler] catchup_by_default` is now False, so a
+DAG that omits `catchup` creates no historical runs when it is unpaused. The
+workshop's daily DAG therefore sets `catchup=True` explicitly, and the chapter's
+two historical runs come from that setting rather than from a default.
+
 The workshop's daily DAG has only two historical intervals, starts paused and
 uses bounded concurrency. This finite design prevents a learner from accidentally
 creating months of catchup work. The resulting metadata still shows real scheduled
@@ -50,10 +55,25 @@ requires the selected partition to show the corrected value and new identity,
 and requires the second day's bytes to remain unchanged.
 
 This is a bounded historical correction, not a claim that the public backfill CLI
-or every possible timetable was exercised. The source explains how a general
-backfill plan would select a range, choose reprocessing behavior and control
-concurrency. The implemented case is intentionally one day so its effects can
-be independently reconciled.
+or every possible timetable was exercised. The implemented case is intentionally
+one day so its effects can be independently reconciled. A general backfill uses
+Airflow 3's `backfill create` command, which the workshop does not run. Shown for
+reading, a request for the same two days would be:
+
+```bash
+airflow backfill create --dag-id classroom_orders \
+  --from-date 2026-01-01 --to-date 2026-01-02 \
+  --reprocess-behavior failed --max-active-runs 1
+```
+
+`--from-date` is inclusive. `--reprocess-behavior` decides what happens when a run
+already exists for a logical date: `none`, the default, never creates another run,
+`failed` creates a new run only when the existing one failed, and `completed`
+creates a new run when the existing one completed or failed. No new run is created
+while an existing run for that date is still queued or running. `--max-active-runs`
+bounds the backfill's own concurrency, independently of the DAG's setting, and
+`--dry-run` prints the dates the backfill would consider. Run the dry run first and
+compare its dates with the plan.
 
 A downstream aggregate may now be stale even though the corrected partition is
 right. Asset signals or an explicit dependency can request refresh, but the

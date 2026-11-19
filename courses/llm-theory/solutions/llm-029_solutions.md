@@ -14,59 +14,62 @@ A scaling law is an empirical relationship measured under a specified family of 
 
 ## Reading the implementation
 
-Read each row as one experiment with parametersP,tokensD,stepsS,computeC and held-out lossL. Compare rows only after marking which columns differ. A ratio compares multiplicative change. A log-log slope is \(\frac{\log(\frac{L_{2}}{L_{1}})}{\log(\frac{C_{2}}{C_{1}})}\), meaningful only for the specified quantities and regime. Do not hide a changed tokenizer or test distribution inside a loss column.
+Read each row as one experiment with parameters P, tokens D, steps S, compute C and held-out loss L. Compare rows only after marking which columns differ. A ratio compares multiplicative change. A log-log slope is \(\frac{\log(\frac{L_{2}}{L_{1}})}{\log(\frac{C_{2}}{C_{1}})}\), meaningful only for the specified quantities and regime. Do not hide a changed tokenizer or test distribution inside a loss column.
 
-## Exercise 1: Read a controlled comparison
+## Exercise 1: Read a longer training run
 
-The question is: Inspect rowsA(P1000,D10000,S100,C1,L2.0) and B(P1000,D10000,S200,C2,L1.8). Identify what changed.
+The question is: Compare row A with row F (P 1000, D 10000, S 400, C 4, L 1.7). Identify what changed and calculate the F/A loss ratio.
 
-The comparison is evidence about additional optimization under this setup. It is not a direct experiment on model size because parameter count stayed fixed.
+Only the number of updates and the compute it consumes differ, so the comparison is controlled for parameters and data. The decrease is measured relative to A, the baseline row.
 
 ```text
 Run P     D     S   C L
 A   1000  10000 100 1 2.0
-B   1000  10000 200 2 1.8
-Controlled: P,D,evaluation protocol. Changed: S,C.
+F   1000  10000 400 4 1.7
+Controlled: P, D, evaluation protocol. Changed: S, C.
+1.7 / 2.0 = 0.85; (2.0 - 1.7) / 2.0 = 0.15
 ```
 
-**Expected:** steps and compute doubled; parameters and data fixed; loss fell.2.
+**Expected:** steps and compute quadrupled; parameters and data fixed; ratio 0.85, a 15 percent decrease.
 
-**Verify:** Compare the computed values or written argument with steps and compute doubled; parameters and data fixed; loss fell.2.
+**Verify:** Check that both rows keep P 1000 and D 10000, that only S and C are marked as changed, and that 1.7/2.0 reproduces the ratio 0.85.
 
-## Exercise 2: Find a confounded row
+## Exercise 2: Isolate a data change
 
-The question is: CompareA withC(P2000,D20000,S200,C8,L1.5). Can the gain be assigned only to parameters?
+The question is: Row H uses P 1000, D 20000, S 100 with measured C 2 and L 1.95. State which factors changed relative to A and the percent decrease.
 
-Several plausible mechanisms explain the difference. A larger model, more data and more updates each change the experiment, so the table does not isolate one effect.
+Compute is a measured consequence of the run, not an independent knob, so it changes with D here. The comparison isolates the data-size choice only because P, S and the evaluation protocol are held fixed.
 
 ```text
-A -> C:
-P x2; D x2; S x2; C x8; L 2.0 -> 1.5
-Attribution to P alone is unsupported.
+Run P     D     S   C L
+A   1000  10000 100 1 2.0
+H   1000  20000 100 2 1.95
+Controlled: P, S, evaluation protocol. Changed: D, C.
+1.95 / 2.0 = 0.975; (2.0 - 1.95) / 2.0 = 0.025
 ```
 
-**Expected:** No;P,D,S,C all changed.
+**Expected:** data and compute changed; parameters and steps fixed; ratio 0.975, a 2.5 percent decrease.
 
-**Verify:** Compare the computed values or written argument with No;P,D,S,C all changed.
+**Verify:** Check that the comparison holds P 1000 and S 100 fixed, lists D and C as the changed columns, and that 1.95/2.0 reproduces 0.975.
 
 ## Exercise 3: Calculate a local ratio
 
-The question is: CalculateB/A loss ratio and percent decrease relative toA.
+The question is: Calculate the B/A loss ratio and the percent decrease relative to A.
 
-A ten-percent relative decrease is different from an absolute decrease of0.2 loss units. Keep the denominator and units explicit.
+A ten-percent relative decrease is different from an absolute decrease of 0.2 loss units. Keep the denominator and units explicit.
 
 ```text
 1.8 / 2.0 = 0.9
 (2.0 - 1.8) / 2.0 = 0.10
 ```
 
-**Expected:** ratio.9; decrease 10 percent.
+**Expected:** ratio 0.9; decrease 10 percent.
 
-**Verify:** Compare the computed values or written argument with ratio.9; decrease 10 percent.
+**Verify:** Recompute 1.8/2.0 and (2.0 - 1.8)/2.0 from the table: the worksheet shows 0.9 and 0.10, with the decrease measured relative to A rather than B.
 
 ## Exercise 4: Reject an unsupported forecast
 
-The question is: A reviewer predicts loss.1 at compute1000000 from rowsA,B. Evaluate the claim.
+The question is: A reviewer predicts loss 0.1 at compute 1000000 from rows A, B. Evaluate the claim.
 
 Two nearby measurements do not establish the relationship over six orders of magnitude. A fitted equation can produce a number without making that number evidence-backed.
 
@@ -76,9 +79,9 @@ Claimed compute: 1000000
 Missing: regime checks, more runs, uncertainty, data/optimization policy.
 ```
 
-**Expected:** unsupported extrapolation far outside compute1..2.
+**Expected:** unsupported extrapolation far outside compute 1..2.
 
-**Verify:** Compare the computed values or written argument with unsupported extrapolation far outside compute1..2.
+**Verify:** Check that the answer states the observed compute range 1 to 2 and names at least two missing kinds of evidence before rejecting the forecast at compute 1000000.
 
 ## Exercise 5: Design a discriminating next run
 
@@ -87,30 +90,30 @@ The question is: Propose a run testing parameter count while holding training da
 Holding steps fixed does not hold compute fixed when the model grows. The design should state which budget is controlled and measure the resulting other quantity.
 
 ```text
-Next run: P2000,D10000,S100
-Keep tokenizer,split,optimizer policy fixed.
+Next run: P 2000, D 10000, S 100
+Keep the tokenizer, split and optimizer policy fixed.
 Measure actual C and held-out L; repeat seeds if studying variation.
 ```
 
-**Expected:** D10000,S100,declared largerP; compute measured separately.
+**Expected:** D 10000, S 100, a declared larger P; compute measured separately.
 
-**Verify:** Compare the computed values or written argument with D10000,S100,declared largerP; compute measured separately.
+**Verify:** Check the proposed row against row A: only P differs (D 10000 and S 100 unchanged), and C and L are listed as quantities to measure rather than assumed values.
 
 ## Exercise 6: Write a bounded conclusion
 
-The question is: SummarizeA/B/C without calling a toy trend a frontier scaling law.
+The question is: Summarize A, B and C without calling a toy trend a frontier scaling law.
 
 A precise limited conclusion is more useful than a sweeping claim. It identifies both the observation and the experiment still needed to answer the next question.
 
 ```text
-Within this toy setup, doubling updates from A to B reduced loss from2.0 to1.8.
+Within this toy setup, doubling updates from A to B reduced loss from 2.0 to 1.8.
 C has lower loss but changes several factors.
 No frontier-performance prediction is supported.
 ```
 
-**Expected:** conclusion names local fixture and confoundedC.
+**Expected:** conclusion names local fixture and confounded C.
 
-**Verify:** Compare the computed values or written argument with conclusion names local fixture and confoundedC.
+**Verify:** Check that the conclusion cites the A-to-B decrease from 2.0 to 1.8, marks row C as confounded and contains no prediction outside the observed rows.
 
 ## Review after comparison
 

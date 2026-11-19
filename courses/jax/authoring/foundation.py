@@ -16,7 +16,7 @@ Suppose the observed inputs are 1, 2 and 3 and the targets are twice those value
 
 Arrays organize these observations. Shape (3,) means a vector with three entries. Shape (3,1) means three rows and one column. These representations can interact differently with a target vector even when printing makes them appear similar. A shape assertion is therefore part of the mathematical specification. Later JAX transformations preserve the computation we write, including an unintended broadcast if it is otherwise legal.
 
-The classroom runs a complete source submission in a fresh process. An import makes a library available; a function definition creates a callable object; calling the function performs the described computation. An assertion asks whether the observed value satisfies a contract. A successful assertion is evidence for that case. Keep the source, predicted result and actual receipt together, and change one meaningful assumption at a time when investigating a failure.
+The classroom runs a complete source submission in a fresh process. An import makes a library available; a function definition creates a callable object; calling the function performs the described computation. An assertion asks whether the observed value satisfies a contract. A successful assertion is evidence for that case. Keep the source, predicted result and actual saved output together, and change one meaningful assumption at a time when investigating a failure.
 
 This first unit intentionally uses tiny data and no fitted neural network. The purpose is to learn the evidence discipline that makes a larger calculation interpretable: identify the input unit, state the operation, calculate an independent expected answer, and explain which claim remains outside the experiment.""",
         r"""For inputs \(x_i\), targets \(y_i\) and scalar weight \(w\), define \(\widehat y_i=wx_i\) and \(L(w)=N^{-1}\sum_i(\widehat y_i-y_i)^2\). The denominator counts observations because each observation has one output here. With several output coordinates, a mean over every array entry would answer a different weighting question. At \(w=0\), the three residual squares sum to 56 and the loss is \(56/3\). At \(w=2\), every residual is zero. Neither calculation uses a gradient or updates a parameter.""",
@@ -193,7 +193,7 @@ def replace_at(values, index, value):
                 "Express the operation using axis meaning, not a literal shape.",
             ),
         ),
-        "A shape-correct result may still reduce the wrong population. Check a row-specific invariant and use nonsquare fixtures. Keep index admission outside transformed numerical code until the tracing rules have been taught.",
+        "A shape-correct result may still reduce the wrong population. Check a row-specific invariant and use nonsquare fixtures. Keep index validation outside transformed numerical code until the tracing rules have been taught.",
         "Compare this value-oriented update with NumPy mutation in python-numpy-01. Explain why an implementation's possible in-place optimization does not make arbitrary Python mutation part of JAX's public array contract.",
         (("JAX NumPy", "https://docs.jax.dev/en/latest/jax.numpy.html"),),
     ),
@@ -314,7 +314,7 @@ The representation should contain what the next step needs. A mean alone is insu
 
 Immutability does not mean that nothing changes. It means a change is represented by a new value with an explicit relationship to the old one. Keeping both values enables a useful test: apply the same transition twice to the same old state and verify equal results. Applying the transition to its own returned state is a different experiment because the input state has changed.
 
-External effects belong at a boundary. Printing, writing a receipt and reading a data source are useful program activities, but they should not be confused with the pure numerical transition. A small functional core can be tested with literal inputs while the outer program manages effects and ownership. This unit deliberately does not claim durable file storage or a persistent process between classroom Runs.""",
+External effects belong at a boundary. Printing, writing a run record and reading a data source are useful program activities, but they should not be confused with the pure numerical transition. A small functional core can be tested with literal inputs while the outer program manages effects and ownership. This unit deliberately does not claim durable file storage or a persistent process between classroom Runs.""",
             r"""Let state be \(s=(a,n)\), with accumulated total \(a\) and nonnegative count \(n\). One observation \(x\) gives \(T(s,x)=(a+x,n+1)\). The mean is \(a/n\) only for \(n>0\). Combining states uses \((a_1+a_2,n_1+n_2)\), so grouping observations does not change the mathematical mean. Averaging two means without their counts generally defines a different weighting rule.""",
             """def transition(state, value):
     total, count = state

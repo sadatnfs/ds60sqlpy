@@ -24,6 +24,19 @@ struct LessonMain {
       for await value in stream { values.append(value) }
       precondition(values == [2])
     }
+
+    do {
+      // Task 3: Independent construction
+      let (events, continuation) = AsyncStream<String>.makeStream()
+      let producer = Task {
+        for name in ["start", "progress", "done"] { continuation.yield(name) }
+        continuation.finish()
+      }
+      var received: [String] = []
+      for await event in events { received.append(event) }
+      await producer.value
+      precondition(received == ["start", "progress", "done"])
+    }
     print("swift-034: passed")
   }
 }

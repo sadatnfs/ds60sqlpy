@@ -53,7 +53,7 @@ assert gradient.item() == -4 and loss.item() == 4
 
 **Expected:** derivative -4; loss 4.
 
-**Verify:** Compare the computed values or written argument with derivative -4; loss 4.
+**Verify:** In a fresh process, the exercise checks confirm `gradient.item() == -4` and `loss.item() == 4`.
 
 ## Exercise 2: Check three finite differences
 
@@ -69,7 +69,7 @@ for h in [0.1, 0.01, 0.001]:
 
 **Expected:** all agree within 1e-10.
 
-**Verify:** Compare the computed values or written argument with all agree within 1e-10.
+**Verify:** In a fresh process, the exercise checks confirm for every `h` in `[0.1, 0.01, 0.001]`, `slope` matches `-4` within 1e-10.
 
 ## Exercise 3: Separate gradient from update
 
@@ -85,7 +85,7 @@ assert updated != gradient.item()
 
 **Expected:** new parameter \(w=0.4\); the supplied gradient is \(-4\).
 
-**Verify:** Compare the computed values or written argument with new parameter \(w=0.4\); the supplied gradient is \(-4\).
+**Verify:** In a fresh process, the exercise checks confirm `updated` matches `0.4` within 1e-12 and `updated != gradient.item()`.
 
 ## Exercise 4: Inspect a stationary point
 
@@ -102,7 +102,7 @@ assert value.item() == 0 and derivative.item() == 0
 
 **Expected:** gradient 0 and loss 0.
 
-**Verify:** Compare the computed values or written argument with gradient 0 and loss 0.
+**Verify:** In a fresh process, the exercise checks confirm `value.item() == 0` and `derivative.item() == 0`.
 
 ## Exercise 5: Observe grad-return behavior
 
@@ -116,7 +116,7 @@ assert w.grad is None and gradient.item() == -4
 
 **Expected:** `w.grad` is None despite a returned derivative.
 
-**Verify:** Compare the computed values or written argument with `w.grad` is None despite a returned derivative.
+**Verify:** In a fresh process, the exercise checks confirm `w.grad is None` and `gradient.item() == -4`.
 
 ## Exercise 6: Reject invalid probes
 
@@ -142,7 +142,7 @@ else:
 
 **Expected:** all raise ValueError.
 
-**Verify:** Compare the computed values or written argument with all raise ValueError.
+**Verify:** In a fresh process, the exercise checks confirm for every looped case, `central(function, 0.0, h)` raises `ValueError` and `central(lambda value: 0.0, float('nan'), 0.1)` raises `ValueError`.
 
 ## Review after comparison
 

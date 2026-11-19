@@ -1,6 +1,6 @@
 # pyweb-047: Django templates, inheritance and static assets
 
-Tutorial mode. Stage: beginner. Direct prerequisites: `pyweb-046`.
+Tutorial mode. Stage: intermediate. Direct prerequisites: `pyweb-046`.
 
 ## Starting point and result
 

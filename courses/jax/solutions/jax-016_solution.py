@@ -73,7 +73,7 @@ def main():
     assert 0.0 <= mean <= 2.0
     assert bool(jnp.all((result == 0.0) | (result == 2.0)))
 
-    print("jax-016" + ": 8 asserted cases passed")
+    print("jax-016: 8 asserted cases passed")
 
 
 if __name__ == "__main__":

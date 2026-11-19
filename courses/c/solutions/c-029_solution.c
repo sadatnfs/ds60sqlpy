@@ -32,8 +32,7 @@ int main(void) {
     unsigned int sum = 0;
     for (size_t i = 0; i < sizeof value; i++)
       sum += bytes[i];
-    CHECK(sizeof value >= 1);
-    (void)sum;
+    CHECK(sum == 7u);
   }
 
   /* Handle overlapping moves */

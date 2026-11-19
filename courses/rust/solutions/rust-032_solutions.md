@@ -1,6 +1,6 @@
 # rust-032: explanation and comparison
 
-Attempt the six guide tasks before opening this comparison. The executable reference is [rust-032_solution.rs](rust-032_solution.rs). Its assertions are always active under the prepared classroom compile settings.
+Attempt the six guide tasks before opening this comparison. The executable reference is [rust-032_solution.rs](rust-032_solution.rs). It runs both worked examples, and its assertions are always active under the prepared classroom compile settings.
 
 ## Why the two examples differ
 
@@ -8,21 +8,43 @@ Attempt the six guide tasks before opening this comparison. The executable refer
 
 **Retain rejected input evidence:** The library contract preserves information needed by every future adapter. Two invalid rows are counted and a valid zero remains present.
 
-## Reason through the six tasks
+## Task answers
 
-1. **Predict and explain.** Trace validation and accumulation as separate responsibilities.
+### Task 1: Predict and explain
 
-2. **Guided modification.** Add a report-rendering function without changing the core representation.
+Trace validation and accumulation as separate responsibilities.
 
-3. **Independent construction.** Build and test InventoryLab through its documented Cargo commands.
+No separate reference answer has been written for this task. Example A is the evidence to compare with: The core chooses data semantics while presentation can remain a separate adapter. The report accumulates duplicates and orders keys.
 
-4. **Diagnose a defect.** Diagnose moving console output into a reusable domain method.
+### Task 2: Guided modification
 
-5. **Boundary evidence.** Test empty, duplicate, invalid and overflow cases.
+Add a report-rendering function without changing the core representation.
 
-6. **Transfer and justify.** Design a second adapter that reuses the same validated library without copying its implementation.
+No separate reference answer has been written for this task. Start from Example B: The library contract preserves information needed by every future adapter. Two invalid rows are counted and a valid zero remains present.
 
-For tasks 1 and 2, use the checked values and mechanism trace in the two examples. For task 3, choose names that expose the input and result contract and retain the same invariants. For task 4, the diagnosed mistakes below supply a concrete wrong assumption: preserve its counterexample before repairing it. Task 5 needs an explicit expected value or documented rejection at the boundary, not just successful execution. For task 6, explain what changes in the new context and which part of the original mechanism remains applicable. Several representations may satisfy this transfer task; justify the choice rather than treating this reference as the only architecture.
+### Task 3: Independent construction
+
+Build and test InventoryLab through its documented Cargo commands.
+
+No reference answer has been written for this task yet. It needs a project or platform outside the single-file pad, so record your own build and run evidence and judge it against the vocabulary entry **Library crate** and the lesson notes.
+
+### Task 4: Diagnose a defect
+
+Diagnose moving console output into a reusable domain method.
+
+No reference answer has been written for this task yet. The wrong assumptions to look for are this lesson's pitfalls: A multi-file Cargo project is not accepted by the single-file pad. Keep generated target output out of source packaging. A dependency-free project still needs the prepared compiler and standard library.
+
+### Task 5: Boundary evidence
+
+Test empty, duplicate, invalid and overflow cases.
+
+No reference answer has been written for this task yet. Write the expected value or documented rejection for each boundary before running it, and compare with the checks in Example A (Create a stable report) and Example B (Retain rejected input evidence).
+
+### Task 6: Transfer and justify
+
+Design a second adapter that reuses the same validated library without copying its implementation.
+
+No single reference answer exists: several designs can satisfy this transfer task. Justify yours against the mechanism described below and the vocabulary entry **Library crate**, and state one limitation of your choice.
 
 ## Mechanism and diagnostic reasoning
 
@@ -36,4 +58,4 @@ A multi-file Cargo project is not accepted by the single-file pad. Keep generate
 
 ## Review before continuing
 
-The reference checks the worked scenarios, including their boundary distinctions. Your independent and transfer artifacts may have additional checks. Compare observations rather than only source text. Preserve any new regression case you discover and explain why it would reject a plausible wrong implementation. External project steps require their own build and platform evidence and are not established by a portable reference passing.
+Run the reference and confirm that it prints `rust-032: passed`, then reconstruct one boundary case from memory and explain which check would reject a plausible wrong implementation. External project steps need their own build and platform evidence; a passing portable reference does not establish them.

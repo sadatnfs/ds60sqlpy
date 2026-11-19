@@ -30,6 +30,52 @@ action inspects real consumer Dag Runs and their completed outputs. A source-fil
 change made outside the producer task would not automatically create the same
 asset event in this fixture.
 
+The consumer DAG is scheduled by the asset rather than by a clock, and its summary
+task is mapped over the two regions:
+
+From [`projects/airflow/dags/classroom_workflows.py`](../projects/airflow/dags/classroom_workflows.py):
+
+```python
+@dag(
+    dag_id="classroom_asset_consumer",
+    schedule=[ORDERS],
+    start_date=pendulum.datetime(2026, 1, 1, tz="UTC"),
+    catchup=False,
+    max_active_runs=1,
+    is_paused_upon_creation=True,
+    tags=["classroom", "asset-mapping"],
+)
+def asset_workflow():
+    @task(execution_timeout=timedelta(seconds=30))
+    def select_source():
+        return capture_source(get_current_context()["run_id"])
+
+    @task(pool="classroom_io", execution_timeout=timedelta(seconds=30))
+    def summarize(region: str, snapshot: dict[str, str]):
+        if region not in ("east", "west"):
+            raise ValueError("Unknown mapped region")
+        context = get_current_context()
+        captured = read_snapshot(snapshot)
+        rows = [row for row in captured["rows"] if row["region"] == region]
+        observation = {
+            "run_id": context["run_id"],
+            "region": region,
+            "source_versions": captured["source_versions"],
+            "rows": len(rows),
+            "amount_total": sum(row["amount"] for row in rows),
+        }
+        identity = hashlib.sha256(context["run_id"].encode()).hexdigest()
+        atomic(ROOT / "summaries" / (identity + "-" + region + ".json"), observation)
+        return {"region": region, "rows": len(rows)}
+
+    summarize.partial(snapshot=select_source()).expand(region=["east", "west"])
+```
+
+`schedule=[ORDERS]` creates a consumer run after the producer's `write` task, which
+lists `ORDERS` in its `outlets`, succeeds. `.partial(...)` fixes the arguments shared
+by every mapped instance, and `.expand(region=[...])` creates one instance per
+region. `pool="classroom_io"` makes every instance take a slot from that pool.
+
 The consumer first captures one bounded immutable source manifest and passes its
 reference to both mapped tasks. A retry reuses that run manifest rather than
 recapturing newer data. Each region therefore uses the same source population,

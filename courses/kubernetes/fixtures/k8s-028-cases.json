@@ -6,18 +6,18 @@
   "cases": [
     {
       "exercise": 1,
-      "task": "List storage,CNI,renderer,image and owned-target requirements.",
+      "task": "List storage, CNI, renderer, image and owned-target requirements.",
       "expected": "Each capability has a qualified host receipt or is marked unavailable."
     },
     {
       "exercise": 2,
-      "task": "Record application response,marker hash and both client paths before change.",
+      "task": "Record application response, marker hash and both client paths before change.",
       "expected": "A source-identified baseline exists for every acceptance gate."
     },
     {
       "exercise": 3,
       "task": "Compare the full chart/overlay output with the approved object set.",
-      "expected": "No unexpected kind,namespace,image,hook or security change."
+      "expected": "No unexpected kind, namespace, image, hook or security change."
     },
     {
       "exercise": 4,
@@ -26,8 +26,8 @@
     },
     {
       "exercise": 5,
-      "task": "Restore reviewed intent,then read the marker and retest policy/client behavior.",
-      "expected": "Application recovers,hash remains h1,and allowed/denied paths retain their intended outcomes."
+      "task": "Restore reviewed intent, then read the marker and retest policy/client behavior.",
+      "expected": "Application recovers, hash remains h1, and allowed/denied paths retain their intended outcomes."
     },
     {
       "exercise": 6,

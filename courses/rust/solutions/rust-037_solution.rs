@@ -14,6 +14,16 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         assert_eq!(labels.value(1), "longer");
         assert_eq!(labels.value(2), "é");
     }
+
+    {
+        // Task 3: Independent construction
+        use arrow::array::{Array, Int32Array, StringArray};
+        let names = StringArray::from(vec!["pear", "apple", "fig"]);
+        let quantities = Int32Array::from(vec![2, 5, 1]);
+        assert_eq!(names.len(), quantities.len());
+        assert_eq!(names.value(1), "apple");
+        assert_eq!(quantities.value(1), 5);
+    }
     println!("rust-037: passed");
     Ok(())
 }

@@ -24,6 +24,32 @@ struct LessonMain {
       case .failure(let error): precondition(error is QuantityError)
       }
     }
+
+    do {
+      // Task 3: Independent construction
+      struct Record {
+        let name: String
+        let quantity: Int
+      }
+      enum RecordError: Error, Equatable {
+        case emptyName
+        case negativeQuantity
+      }
+      func validate(_ record: Record) throws -> Record {
+        guard !record.name.isEmpty else { throw RecordError.emptyName }
+        guard record.quantity >= 0 else { throw RecordError.negativeQuantity }
+        return record
+      }
+      let valid = try validate(Record(name: "pear", quantity: 2))
+      precondition(valid.quantity == 2)
+      var caught: RecordError? = nil
+      do {
+        _ = try validate(Record(name: "", quantity: 1))
+      } catch let error as RecordError {
+        caught = error
+      }
+      precondition(caught == .emptyName)
+    }
     print("swift-021: passed")
   }
 }

@@ -9,7 +9,7 @@ function worked_b()
     @test mean(distribution) == 2
     @test var(distribution) ≈ 1.6
     @test pdf(distribution, 0) ≈ 0.8^10
-    sample = rand(MersenneTwister(7), distribution, 2000)
+    sample = rand(Xoshiro(7), distribution, 2000)
     values = collect(0:10)
     exact = pdf.(distribution, values)
     empirical = [count(==(value), sample) / length(sample) for value in values]

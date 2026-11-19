@@ -30,6 +30,44 @@ with the fixture oracle. Repeating the same logical work must leave one current
 partition with the same semantics. The checker does not accept an increased row
 count as a normal consequence of retry.
 
+The write task delegates to this helper from the project's `project_data.py`. It
+derives the rows from the day and revision alone. A repeat that would produce
+identical content returns without writing, a lower or equal revision with different
+content is refused, and a real replacement goes through an atomic file swap:
+
+From [`projects/airflow/project_data.py`](../projects/airflow/project_data.py):
+
+```python
+def write_partition(day: str, revision: int, run_id: str) -> dict[str, object]:
+    rows = rows_for(day, revision)
+    content = {
+        "schema_version": 1,
+        "day": day,
+        "revision": revision,
+        "source_sha256": hashlib.sha256(canonical(rows)).hexdigest(),
+        "rows": rows,
+        "amount_total": sum(row["amount"] for row in rows),
+    }
+    path = ROOT / "outputs" / (day + ".json")
+    if path.exists():
+        old = read_partition(day)
+        if old == content:
+            return {"day": day, "path": str(path), "source_sha256": content["source_sha256"]}
+        if old["revision"] >= revision:
+            raise ValueError("Refusing an unexpected replacement or revision downgrade")
+    atomic(path, content)
+    atomic(
+        ROOT / "write-receipts" / (uuid.uuid4().hex + ".json"),
+        {
+            "day": day,
+            "revision": revision,
+            "run_id": run_id,
+            "source_sha256": content["source_sha256"],
+        },
+    )
+    return {"day": day, "path": str(path), "source_sha256": content["source_sha256"]}
+```
+
 The output path is derived only from a validated day in the finite fixture.
 A run identifier or caller text is never used as an arbitrary filesystem path.
 Temporary names are created inside the owned output directory and only their
@@ -48,6 +86,17 @@ run after recording a small attempt marker. It has one configured retry and a
 short delay. On the second attempt it proceeds, and the downstream write completes.
 The checker inspects actual Airflow task-instance attempt counts and final states,
 not a Python loop that merely prints retry labels.
+
+The retry settings live on the task decorator in the DAG shown in apache-027:
+
+From [`projects/airflow/dags/classroom_workflows.py`](../projects/airflow/dags/classroom_workflows.py):
+
+```python
+@task(retries=1, retry_delay=timedelta(seconds=1), execution_timeout=timedelta(seconds=30))
+```
+
+`retries=1` allows one more attempt, `retry_delay` waits one second before it, and
+`execution_timeout` fails an attempt that runs longer than 30 seconds.
 
 The marker is a controlled fixture mechanism to make a transient failure
 reproducible. It is not a general distributed lock or a substitute for Airflow's

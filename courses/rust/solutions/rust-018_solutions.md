@@ -1,6 +1,6 @@
 # rust-018: explanation and comparison
 
-Attempt the six guide tasks before opening this comparison. The executable reference is [rust-018_solution.rs](rust-018_solution.rs). Its assertions are always active under the prepared classroom compile settings.
+Attempt the six guide tasks before opening this comparison. The executable reference is [rust-018_solution.rs](rust-018_solution.rs). It runs both worked examples and the reference answers below, and its assertions are always active under the prepared classroom compile settings.
 
 ## Why the two examples differ
 
@@ -8,21 +8,72 @@ Attempt the six guide tasks before opening this comparison. The executable refer
 
 **Use an associated iterator item:** The consumer knows which values the iterator yields and chooses a compatible aggregation. The iterator's item relationship supports a typed sum.
 
-## Reason through the six tasks
+## Task answers
 
-1. **Predict and explain.** Identify each inferred type and required bound.
+### Task 1: Predict and explain
 
-2. **Guided modification.** Use larger with a custom ordered value type.
+Identify each inferred type and required bound.
 
-3. **Independent construction.** Create a generic pair that swaps owned elements.
+No separate reference answer has been written for this task. Example A is the evidence to compare with: The function moves its chosen result, preserving the concrete type rather than returning an untyped object. The same function returns an integer or owned String.
 
-4. **Diagnose a defect.** Diagnose calling an unavailable method on an unconstrained T.
+### Task 2: Guided modification
 
-5. **Boundary evidence.** State tie behavior and test equal values.
+Use larger with a custom ordered value type.
 
-6. **Transfer and justify.** Choose a generic parameter or associated type for a producer relationship and explain who selects it.
+No separate reference answer has been written for this task. Start from Example B: The consumer knows which values the iterator yields and chooses a compatible aggregation. The iterator's item relationship supports a typed sum.
 
-For tasks 1 and 2, use the checked values and mechanism trace in the two examples. For task 3, choose names that expose the input and result contract and retain the same invariants. For task 4, the diagnosed mistakes below supply a concrete wrong assumption: preserve its counterexample before repairing it. Task 5 needs an explicit expected value or documented rejection at the boundary, not just successful execution. For task 6, explain what changes in the new context and which part of the original mechanism remains applicable. Several representations may satisfy this transfer task; justify the choice rather than treating this reference as the only architecture.
+### Task 3: Independent construction
+
+Create a generic pair that swaps owned elements.
+
+**Reference answer.** The same statements run as the `Task 3` block of the reference program; here they are wrapped in `main` as a complete file.
+
+```rust
+fn main() -> Result<(), Box<dyn std::error::Error>> {
+    struct Pair<T> {
+        first: T,
+        second: T,
+    }
+    impl<T> Pair<T> {
+        fn swap(self) -> Pair<T> {
+            Pair {
+                first: self.second,
+                second: self.first,
+            }
+        }
+    }
+    let pair = Pair {
+        first: String::from("left"),
+        second: String::from("right"),
+    };
+    let swapped = pair.swap();
+    assert_eq!(swapped.first, "right");
+    assert_eq!(swapped.second, "left");
+    Ok(())
+}
+```
+
+**Observe:** Swapping (left, right) gives (right, left) without cloning either String.
+
+swap takes self by value, so it can move both owned elements into the new pair.
+
+### Task 4: Diagnose a defect
+
+Diagnose calling an unavailable method on an unconstrained T.
+
+No reference answer has been written for this task yet. The wrong assumptions to look for are this lesson's pitfalls: Generic code still has ownership and failure contracts. Deriving Ord chooses a field-order policy that may not match domain meaning. A broad bound should not replace an explicit comparator when multiple orderings are useful.
+
+### Task 5: Boundary evidence
+
+State tie behavior and test equal values.
+
+No reference answer has been written for this task yet. Write the expected value or documented rejection for each boundary before running it, and compare with the checks in Example A (Retain the result type) and Example B (Use an associated iterator item).
+
+### Task 6: Transfer and justify
+
+Choose a generic parameter or associated type for a producer relationship and explain who selects it.
+
+No single reference answer exists: several designs can satisfy this transfer task. Justify yours against the mechanism described below and the vocabulary entry **Generic parameter**, and state one limitation of your choice.
 
 ## Mechanism and diagnostic reasoning
 
@@ -36,4 +87,4 @@ Generic code still has ownership and failure contracts. Deriving Ord chooses a f
 
 ## Review before continuing
 
-The reference checks the worked scenarios, including their boundary distinctions. Your independent and transfer artifacts may have additional checks. Compare observations rather than only source text. Preserve any new regression case you discover and explain why it would reject a plausible wrong implementation. External project steps require their own build and platform evidence and are not established by a portable reference passing.
+Run the reference and confirm that it prints `rust-018: passed`, then reconstruct one boundary case from memory and explain which check would reject a plausible wrong implementation. External project steps need their own build and platform evidence; a passing portable reference does not establish them.

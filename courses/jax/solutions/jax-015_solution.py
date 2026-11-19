@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import math
 import numpy as np
 import jax
 import jax.numpy as jnp
@@ -106,7 +105,7 @@ def main():
     count = lambda width: width + width + width + 1
     assert count(4) == 13 and count(5) == 16
 
-    print("jax-015" + ": 8 asserted cases passed")
+    print("jax-015: 8 asserted cases passed")
 
 
 if __name__ == "__main__":

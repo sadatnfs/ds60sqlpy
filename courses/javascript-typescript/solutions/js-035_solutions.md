@@ -24,11 +24,13 @@ Intl formats values according to an explicit locale and timezone. Prefer formatT
 
 Date.parse on an ISO string with Z or an explicit offset produces an instant. toISOString produces UTC text. Number.isFinite(date.getTime()) checks timestamp validity. Intl.DateTimeFormat accepts timeZone and hourCycle explicitly; formatToParts returns named fields. Intl.NumberFormat separates display conventions from numeric storage. Integer cents should remain integer cents while formatting a display value under a declared currency and rounding policy.
 
-## Exercise 1: Compare offset spellings of one instant
+## Exercise 1: Compare offset spellings of one instant: change one input
 
-Task: Parse UTC midnight and the equivalent previous-day offset representation.
+Task: Copy Example A into a scratch `main.mjs` and change `const utc = new Date('2024-01-01T00:00:00Z');` to `const utc = new Date('2025-01-01T00:00:00Z');`. Before running it, predict which check fails and which value it now sees; then run it and restore the original line.
 
 The offset changes the written clock reading, not the represented instant. Date does not preserve the original -05:00 label as part of its identity.
+
+The unchanged code is the exercise block of Example A:
 
 ```javascript
 const utc = new Date('2024-01-01T00:00:00Z');
@@ -37,15 +39,17 @@ assert.equal(utc.getTime(), offset.getTime());
 assert.equal(offset.toISOString(), '2024-01-01T00:00:00.000Z');
 ```
 
-**Expected:** equal timestamps and UTC ISO output.
+**Expected:** The changed run fails with an `AssertionError` at the check `assert.equal(utc.getTime(), offset.getTime())`. Restoring the original line brings back the worked observation: equal timestamps and UTC ISO output.
 
-**Verify:** Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.
+**Verify:** Compare your written prediction with the reported `AssertionError`, including its actual and expected values, and name the value that made `assert.equal(utc.getTime(), offset.getTime())` fail. After restoring the line, the program prints its `{"checks":1,"status":"passed"}` receipt again.
 
-## Exercise 2: Observe a spring-forward clock gap
+## Exercise 2: Observe a spring-forward clock gap: diagnose an edited check
 
-Task: Format two instants one hour apart across the New York spring transition.
+Task: A careless edit changed a check in Example B so that it reads `assert.equal(after.getTime() + before.getTime(), 60 * 60 * 1000);`. Run Example B with that line, explain why the edited check now fails for the same program state, and restore it.
 
 The timeline remains continuous while local civil labels skip an hour. A local scheduling problem must account for this mapping rather than assuming every day contains every clock reading.
+
+The unchanged code is the exercise block of Example B:
 
 ```javascript
 const before = new Date('2024-03-10T06:30:00Z');
@@ -55,9 +59,9 @@ assert.equal(parts(after).hour, '03');
 assert.equal(after.getTime() - before.getTime(), 60 * 60 * 1000);
 ```
 
-**Expected:** local hour changes from 01 to 03 while elapsed time is one hour.
+**Expected:** Before the repair the run fails with an `AssertionError` at the check `assert.equal(after.getTime() - before.getTime(), 60 * 60 * 1000)`; after it the line reads `assert.equal(after.getTime() - before.getTime(), 60 * 60 * 1000);` again and local hour changes from 01 to 03 while elapsed time is one hour.
 
-**Verify:** Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.
+**Verify:** Keep the failing and the repaired runs. Explain why the edited check rejects the same program state that `assert.equal(after.getTime() - before.getTime(), 60 * 60 * 1000)` accepts.
 
 ## Exercise 3: Reject impossible or ambiguous calendar text
 
@@ -73,7 +77,7 @@ for (const text of ['2023-02-29', '01/02/2024', '2024-13-01'])
 
 **Expected:** only the valid strict date is accepted.
 
-**Verify:** Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.
+**Verify:** Keep a check equivalent to `assert.throws(() => calendarDate(text), RangeError)`. As a control, change `for (const text of ['2023-02-29', '01/02/2024', '2024-13-01'])` to `for (const text of ['2024-02-29', '01/02/2024', '2024-13-01'])`: the run must fail with an `AssertionError` at that check. Restore the line before continuing.
 
 ## Exercise 4: Distinguish repeated fall-back clock readings
 
@@ -93,7 +97,7 @@ assert.equal(second.getTime() - first.getTime(), 3600000);
 
 **Expected:** both read 01:30 locally but offsets differ and timestamps are one hour apart.
 
-**Verify:** Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.
+**Verify:** Keep a check equivalent to `assert.equal(second.getTime() - first.getTime(), 3600000)`. As a control, change `assert.equal(second.getTime() - first.getTime(), 3600000);` to `assert.equal(second.getTime() + first.getTime(), 3600000);` inside it: the run must fail with an `AssertionError`, which shows the check can fail. Restore it.
 
 ## Exercise 5: Inspect locale number parts without parsing display text
 
@@ -112,7 +116,7 @@ assert.equal(value, 1234.5);
 
 **Expected:** decimal dot versus comma; numeric value remains unchanged.
 
-**Verify:** Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.
+**Verify:** Keep a check equivalent to `assert.equal(us.find((part) => part.type === 'decimal').value, '.')`. As a control, change `assert.equal(us.find(part => part.type === 'decimal').value, '.');` to `assert.equal(us.find(part => part.type !== 'decimal').value, '.');` inside it: the run must fail with an `AssertionError`, which shows the check can fail. Restore it.
 
 ## Exercise 6: Reject invalid timestamp and timezone assumptions
 
@@ -129,7 +133,7 @@ assert.throws(() => new Intl.DateTimeFormat('en-US', { timeZone: 'Invalid/Nowher
 
 **Expected:** NaN timestamp; toISOString and invalid timezone construction throw RangeError.
 
-**Verify:** Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.
+**Verify:** Keep a check equivalent to `assert.equal(Number.isNaN(invalid.getTime()), true)`. As a control, change `assert.equal(Number.isNaN(invalid.getTime()), true);` to `assert.equal(Number.isNaN(invalid.getTime()), false);` inside it: the run must fail with an `AssertionError`, which shows the check can fail. Restore it.
 
 ## After comparison
 

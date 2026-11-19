@@ -1,51 +1,43 @@
 # web-009: explanatory solutions
 
-Compare after your own attempt or an explicit solution reveal. This file explains the supplied deterministic fixtures. It does not claim that a learner or a production deployment passed.
-
-## Why the mechanism works
-
-Validation checks whether input satisfies a contract. Browser constraint validation gives immediate feedback through attributes such as required, type, min and maxlength. It improves the interaction but is not a security boundary because a client can bypass it or send a request without using the form at all. A server must repeat the relevant validation and authorization decisions.
-
-An error message should identify the field, explain the problem and offer a useful correction without losing the user's work. Color alone is insufficient. Connect instructions and errors with aria-describedby, and use aria-invalid when an actual invalid state has been identified. Do not mark every untouched field invalid when the page first opens.
-
-`checkValidity()` reports whether a control meets its constraints. `reportValidity()` also requests the browser's feedback interface. An empty required field is invalid, while a non-required empty email field may be valid. Email type checks syntax, not whether the mailbox exists or belongs to the user. This lesson uses native constraints and explicit explanatory text; it does not send data.
+Open this after your own attempt. Each answer explains the lesson's synthetic fixtures; it does not show that your work or a deployment passed. The mechanism is explained in `courses/web-development/guides/web-009.md`.
 
 ## Exercise 1: Predict required, minimum and maximum outcomes for empty, 4, 30 and 121.
 
-Empty, 4 and 121 fail; 30 satisfies the numeric bounds.
+**Expected answer:** Empty, 4 and 121 fail; 30 satisfies the numeric bounds.
 
-Trace the smallest example before editing. Name which values are source and which are observations.
+**Why:** An empty value fails required, 4 is below min and 121 is above max, while 30 satisfies every constraint.
 
 ## Exercise 2: Add a clear unit and range to a control's label.
 
-The rule is understandable before an error occurs.
+**Expected evidence:** The rule is understandable before an error occurs.
 
-Change only the named feature. Compare with the unchanged example and explain any unaffected behavior.
+**Why:** Stating the rule up front prevents errors instead of explaining them after a failed attempt.
 
 ## Exercise 3: Build a bounded study-time form with linked help.
 
-The user can identify the rule, enter a valid value and retain it after a failed attempt.
+**Expected evidence:** The user can identify the rule, enter a valid value and retain it after a failed attempt.
 
-Sketch the structure or data contract first. Reuse the mechanism from the examples without copying the reference.
+**Why:** aria-describedby makes the rule part of the field's announcement, and preserving the value lets the user correct it instead of retyping.
 
 ## Exercise 4: Explain why type=email does not prove mailbox ownership.
 
-It checks a syntactic format, not identity or delivery.
+**Expected answer:** It checks a syntactic format, not identity or delivery.
 
-Keep the failing input. Identify the first layer where the observed result differs from the intended contract.
+**Why:** The browser checks only the address syntax; proving ownership requires sending a message and confirming the response.
 
 ## Exercise 5: Test validation with keyboard and an empty field.
 
-The error is discoverable and the entered values are preserved.
+**Expected evidence:** The error is discoverable and the entered values are preserved.
 
-Predict the boundary before running it. Add an explicit check or manual observation that would detect a regression.
+**Why:** Errors must be perceivable and reachable by keyboard, otherwise a keyboard user may not learn that the submission failed.
 
 ## Exercise 6: Separate client feedback from server-side acceptance.
 
-The backend repeats contract checks and authorization regardless of browser validation.
+**Expected evidence:** The backend repeats contract checks and authorization regardless of browser validation.
 
-Explain your choice to someone who has not seen the code. Include one limitation and the evidence needed to remove it.
+**Why:** Client constraints improve feedback but can be bypassed, so the server repeats validation and authorization before accepting data.
 
-## Reference comparison and limits
+## Reference comparison
 
-Read the separate executable reference, where supplied, only after retaining your attempt. Compare structure and decisions rather than matching every identifier. A different implementation is acceptable when it satisfies the same behavior, preserves accessibility and rejects the same invalid cases. The checked reference uses tiny synthetic inputs so that each transformation can be inspected. It is not a ready-to-deploy authenticated application. Server lifecycle, persistence, concurrency and security require their own integration evidence.
+Open `courses/web-development/solutions/web-009_solution.html` only after saving your attempt, and compare decisions rather than identifiers. A different implementation is acceptable when it shows the same behavior and rejects the same invalid cases. The reference checks only its named synthetic cases; its success message is not an accessibility audit or proof of responsive behavior at every size.

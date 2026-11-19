@@ -8,6 +8,8 @@ Django's cache API provides get, set and delete over a configured backend. A key
 
 The locmem email backend appends messages to an in-process outbox. Send_mail can therefore succeed without sending anything to an external address. This is desirable in a classroom fixture, but it proves message construction and backend acceptance rather than actual SMTP delivery.
 
+Django 6.0 added a built-in Tasks framework in `django.tasks`. The `TASKS` setting names a backend, `task()` turns a module-level function into a `Task`, and `enqueue()` returns a `TaskResult` whose `status` and `return_value` you can inspect. Django ships only development backends: `ImmediateBackend`, the default, runs the task synchronously in the calling process, and `DummyBackend` stores results without running anything. Durable background execution needs a third-party backend and its own worker process. The framework still enforces two worker-facing rules: the task function must be defined at module level so a worker can import it by path, and arguments must be JSON-compatible values.
+
 Celery eager mode runs a registered task synchronously in the local process. Its task API remains real, yet no independent worker or durable broker is involved. The program prints those limitations directly to prevent a successful method call from being mistaken for service qualification.
 
 ## Worked case: cache a value and invalidate it
@@ -20,7 +22,7 @@ The fixture does not claim a distributed cache. If several server processes use 
 
 ## Worked case: inspect email and execute an eager task
 
-Send_mail builds one synthetic message and the test inspects the in-memory outbox's subject and count. The address uses an invalid example domain, and no network mail is sent. A Celery task computes a deterministic summary and its eager result is checked against an independent expected dictionary.
+Send_mail builds one synthetic message and the test inspects the in-memory outbox's subject and count. The address uses an invalid example domain, and no network mail is sent. The same summary function then runs twice. As a Django task under `ImmediateBackend`, `enqueue([2, 4])` returns a result whose status is `SUCCESSFUL` and whose return value matches the expected dictionary; enqueueing a Python set fails with `TypeError` because a set is not JSON-compatible, and wrapping a function nested inside `run_cases` raises `InvalidTask`. As a Celery task in eager mode, its result is checked against the same independent expected dictionary.
 
 These tests are valuable because message content and task logic can be wrong before any network integration is involved. They are incomplete for delivery and recovery. Actual email acceptance would require a controlled mail service, while durable task acceptance would require broker/worker lifecycle and duplicate-effect checks.
 

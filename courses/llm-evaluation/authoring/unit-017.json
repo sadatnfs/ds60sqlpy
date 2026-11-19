@@ -9,6 +9,7 @@
     "preference heterogeneity"
   ],
   "outcome": "Derive a pairwise reward likelihood, test its invariances and identify what comparison data cannot determine.",
+  "verification": "Equal scores give preference probability 0.5 and loss log 2, shifting both rewards changes neither loss nor gradient, reversed counts fit probability 0.25, all-win data has no finite estimate, the loss stays finite at 2000, and a preference cycle has no scalar ordering.",
   "level": "advanced",
   "runtime": "python-core",
   "minutes": 120,
@@ -32,7 +33,7 @@
       "title": "Reverse empirical counts",
       "task": "Use one win and three losses.",
       "expected": "The fitted preference probability is 0.25.",
-      "hint": "The MLE difference is log(wins/losses).",
+      "hint": "The MLE difference is \\(\\log(\\mathrm{wins}/\\mathrm{losses})\\).",
       "answer": "Reversing labels changes the sign of the fitted log odds, while finite counts still imply uncertainty."
     },
     {
@@ -46,7 +47,7 @@
       "title": "Test numerical stability",
       "task": "Use scores-1000 and 1000 for the preferred/rejected pair.",
       "expected": "Loss remains finite at 2000.",
-      "hint": "Avoid log(sigmoid(delta)) computed naively.",
+      "hint": "Avoid computing \\(\\log\\sigma(\\delta)\\) naively.",
       "answer": "Stable softplus arithmetic preserves the large finite loss without underflowing a probability to zero first."
     },
     {

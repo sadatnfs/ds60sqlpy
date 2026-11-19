@@ -1,28 +1,63 @@
 # csharp-044: explanation and comparison
 
-Attempt the six guide tasks before opening this comparison. The executable reference is [csharp-044_solution.cs](csharp-044_solution.cs). Its assertions are always active under the prepared classroom compile settings.
+Attempt the six guide tasks before opening this comparison. The executable reference is [csharp-044_solution.cs](csharp-044_solution.cs). It runs both worked examples and the reference answers below, and its assertions are always active under the prepared classroom compile settings.
 
 ## Why the two examples differ
 
 **Emit a safe result record:** Named fields retain meaning without depending on a fragile formatted sentence. The serialized event contains an explicit rejected outcome.
 
-**Keep outcome counts consistent:** The denominator is stated explicitly; changing it changes the metric meaning. Five submitted records are fully accounted for and rejection rate is 0.4.
+**Keep outcome counts consistent:** The counts come from the emitted events, so a record that was never classified would make the first check fail. The denominator is stated explicitly; changing it changes the metric meaning. The accepted and rejected events account for all five submitted records, and the rejection rate is 0.4.
 
-## Reason through the six tasks
+## Task answers
 
-1. **Predict and explain.** Identify safe fields and the event population.
+### Task 1: Predict and explain
 
-2. **Guided modification.** Add a stage value without adding raw input content.
+Identify safe fields and the event population.
 
-3. **Independent construction.** Instrument your import project with submitted, accepted and rejected counts.
+No separate reference answer has been written for this task. Example A is the evidence to compare with: Named fields retain meaning without depending on a fragile formatted sentence. The serialized event contains an explicit rejected outcome.
 
-4. **Diagnose a defect.** Diagnose a success metric incremented before persistence completes.
+### Task 2: Guided modification
 
-5. **Boundary evidence.** Test zero submitted records and choose a no-data rate representation.
+Add a stage value without adding raw input content.
 
-6. **Transfer and justify.** Design a latency report that includes percentiles, sample count and measurement boundaries.
+No separate reference answer has been written for this task. Start from Example B: The counts come from the emitted events, so a record that was never classified would make the first check fail. The denominator is stated explicitly; changing it changes the metric meaning. The accepted and rejected events account for all five submitted records, and the rejection rate is 0.4.
 
-For tasks 1 and 2, use the checked values and mechanism trace in the two examples. For task 3, choose names that expose the input and result contract and retain the same invariants. For task 4, the diagnosed mistakes below supply a concrete wrong assumption: preserve its counterexample before repairing it. Task 5 needs an explicit expected value or documented rejection at the boundary, not just successful execution. For task 6, explain what changes in the new context and which part of the original mechanism remains applicable. Several representations may satisfy this transfer task; justify the choice rather than treating this reference as the only architecture.
+### Task 3: Independent construction
+
+Instrument your import project with submitted, accepted and rejected counts.
+
+**Reference answer.** It runs as the `Task 3` block of the reference program.
+
+```csharp
+int[] quantities = { 3, -1, 4, -2, 5 };
+int submitted = quantities.Length;
+int accepted = quantities.Count(quantity => quantity >= 0);
+int rejected = quantities.Count(quantity => quantity < 0);
+Check(submitted == 5 && accepted == 3 && rejected == 2, "counts");
+Check(accepted + rejected == submitted, "every record accounted for");
+```
+
+**Observe:** 5 submitted records split into 3 accepted and 2 rejected.
+
+All three counts come from the same input, so the accounting check would fail if a record were dropped or counted twice.
+
+### Task 4: Diagnose a defect
+
+Diagnose a success metric incremented before persistence completes.
+
+No reference answer has been written for this task yet. The wrong assumptions to look for are this lesson's pitfalls: Correlation identifiers should not contain credentials or private payloads. High-cardinality dimensions can overwhelm metric systems. Missing observations must not be silently counted as successful operations.
+
+### Task 5: Boundary evidence
+
+Test zero submitted records and choose a no-data rate representation.
+
+No reference answer has been written for this task yet. Write the expected value or documented rejection for each boundary before running it, and compare with the checks in Example A (Emit a safe result record) and Example B (Keep outcome counts consistent).
+
+### Task 6: Transfer and justify
+
+Design a latency report that includes percentiles, sample count and measurement boundaries.
+
+No single reference answer exists: several designs can satisfy this transfer task. Justify yours against the mechanism described below and the vocabulary entry **Structured event**, and state one limitation of your choice.
 
 ## Mechanism and diagnostic reasoning
 
@@ -36,4 +71,4 @@ Correlation identifiers should not contain credentials or private payloads. High
 
 ## Review before continuing
 
-The reference checks the worked scenarios, including their boundary distinctions. Your independent and transfer artifacts may have additional checks. Compare observations rather than only source text. Preserve any new regression case you discover and explain why it would reject a plausible wrong implementation. External project steps require their own build and platform evidence and are not established by a portable reference passing.
+Run the reference and confirm that it prints `csharp-044: passed`, then reconstruct one boundary case from memory and explain which check would reject a plausible wrong implementation. External project steps need their own build and platform evidence; a passing portable reference does not establish them.

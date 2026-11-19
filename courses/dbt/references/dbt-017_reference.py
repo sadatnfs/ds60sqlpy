@@ -82,17 +82,46 @@ def rows(root, sql):
 
 def temporal_case(available):
     with tempfile.TemporaryDirectory() as d:
-        clause = "and f.known_at <= r.cutoff" if available else ""
+        # Only the point-in-time version also requires f.known_at <= r.cutoff.
         sql = (
             (
-                "select request_id, value from (select "
-                "r.request_id,f.value,row_number() over(partition by "
-                "r.request_id order by f.event_at desc,f.known_at desc) as "
-                "rank from {{ ref('requests') }} r join {{ ref('features') "
-                "}} f on r.customer=f.customer and f.event_at<=r.cutoff "
+                "select request_id, value\n"
+                "from\n"
+                "    (\n"
+                "        select\n"
+                "            r.request_id,\n"
+                "            f.value,\n"
+                "            row_number() over (\n"
+                "                partition by r.request_id order by f.event_at desc, f.known_at "
+                "desc\n"
+                "            ) as rank\n"
+                "        from {{ ref('requests') }} r\n"
+                "        join\n"
+                "            {{ ref('features') }} f\n"
+                "            on r.customer = f.customer\n"
+                "            and f.event_at <= r.cutoff\n"
+                "            and f.known_at <= r.cutoff\n"
+                "    )\n"
+                "where rank = 1"
             )
-            + clause
-            + ") where rank=1"
+            if available
+            else (
+                "select request_id, value\n"
+                "from\n"
+                "    (\n"
+                "        select\n"
+                "            r.request_id,\n"
+                "            f.value,\n"
+                "            row_number() over (\n"
+                "                partition by r.request_id order by f.event_at desc, f.known_at "
+                "desc\n"
+                "            ) as rank\n"
+                "        from {{ ref('requests') }} r\n"
+                "        join {{ ref('features') }} f on r.customer = f.customer and f.event_at <= "
+                "r.cutoff\n"
+                "    )\n"
+                "where rank = 1"
+            )
         )
         p = project(
             d,

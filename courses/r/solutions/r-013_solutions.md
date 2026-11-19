@@ -16,15 +16,11 @@ Predict make_multiplier(4)(2).
 
 The result is eight.
 
-**Expected evidence:** The result is eight.
-
 ### Exercise 2
 
 Create two factories with different factors.
 
 Their outputs remain independently configured.
-
-**Expected evidence:** Their outputs remain independently configured.
 
 ### Exercise 3
 
@@ -32,15 +28,11 @@ Capture a threshold at construction time.
 
 Later caller rebinding does not change the captured threshold.
 
-**Expected evidence:** Later caller rebinding does not change the captured threshold.
-
 ### Exercise 4
 
 Diagnose a lazy factory changing after caller configuration changes.
 
 Force the argument when fixed configuration is intended.
-
-**Expected evidence:** Force the argument when fixed configuration is intended.
 
 ### Exercise 5
 
@@ -48,16 +40,12 @@ Reject an invalid scalar configuration before returning a closure.
 
 No partially configured function is returned for missing or nonfinite input.
 
-**Expected evidence:** No partially configured function is returned for missing or nonfinite input.
-
 ### Exercise 6
 
 Explain why hidden global mutation complicates a model pipeline.
 
 Prefer explicit inputs or documented captured state with reset and reproducibility rules.
 
-**Expected evidence:** Prefer explicit inputs or documented captured state with reset and reproducibility rules.
-
 ## What the checks establish
 
-The reference contains explicit behavioral assertions for its small synthetic inputs. A passing run establishes those assertions in the reported environment. It does not prove correctness for every input, statistical validity for an unrelated population, or compatibility with untested package versions.
+The reference makes 6 `stopifnot()` checks on its small synthetic inputs. A passing run establishes those assertions in the reported environment. It does not prove correctness for every input, statistical validity for an unrelated population, or compatibility with untested package versions.

@@ -8,9 +8,11 @@ Atomic types make individual accesses participate in a defined concurrency model
 
 atomic_int declares an atomic integer and atomic_init initializes it before sharing. atomic_fetch_add returns the previous value. atomic_compare_exchange_strong updates only when the current value matches expected and writes the observed value back to expected on failure. memory_order_release and memory_order_acquire form a publication relationship when the acquire observes the release. Avoid hand-built lock-free containers until ownership, reclamation and ABA hazards are understood.
 
-## Exercise 1: Inspect fetch-add semantics
+## Exercise 1: Inspect fetch-add semantics: change one input
 
-Add 3 to an atomic integer initially 2.
+Copy worked example 1 into a scratch pad and change `atomic_init(&value, 2);` to `atomic_init(&value, 3);`. Before running, predict which CHECK fails and which value it now sees; then run it and restore the original line.
+
+The unchanged code is worked example 1:
 
 ```c
 atomic_int value;
@@ -19,13 +21,15 @@ int old = atomic_fetch_add(&value, 3);
 CHECK(old == 2 && atomic_load(&value) == 5);
 ```
 
-**Expected:** The returned old value is 2 and current value is 5.
+**Expected:** The changed run stops with `Check failed` at the CHECK on `old == 2 && atomic_load(&value) == 5`. Restoring the original line brings back the worked observation: the returned old value is 2 and current value is 5.
 
 The return value is the prior state. Confusing it with the new value can create off-by-one ticketing logic.
 
-## Exercise 2: Compare and exchange successfully
+## Exercise 2: Compare and exchange successfully: diagnose an edited check
 
-Replace expected value 2 with 7.
+A careless edit changed the CHECK in worked example 2 so that it reads `CHECK(atomic_compare_exchange_strong(&value, &expected, 8));`. Run worked example 2 with that line, explain why the edited CHECK now fails for the same program state, and restore it.
+
+The unchanged code is worked example 2:
 
 ```c
 atomic_int value;
@@ -35,7 +39,7 @@ CHECK(atomic_compare_exchange_strong(&value, &expected, 7));
 CHECK(atomic_load(&value) == 7);
 ```
 
-**Expected:** The operation succeeds and stores 7.
+**Expected:** Before the repair the run stops with `Check failed` at the CHECK on `atomic_load(&value) == 7`; after it the line reads `CHECK(atomic_compare_exchange_strong(&value, &expected, 7));` again and the operation succeeds and stores 7.
 
 The update is conditional on the observed state, not an unconditional assignment.
 

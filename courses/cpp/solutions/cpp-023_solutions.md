@@ -15,7 +15,7 @@ The caller and library must agree on the function symbol and how its arguments/r
 
 A C-compatible function boundary is useful when code crosses a language or binary interface. extern "C" changes language linkage conventions for the named function; it does not automatically make every C++ parameter, exception or object layout safe for a C caller. The public signature should use a deliberately constrained representation and a documented ownership/error policy.
 
-add_checked takes two integers and an output pointer, returning a status code. Status0 means the output was written successfully; status 1 denotes a null output pointer; status 2 denotes signed-int overflow. Both failure paths return before assigning the output, so its previous value is preserved. The interface uses this platform's int representation, not a fixed-width wire format. A caller must check status before consuming the output. Returning an integer sum alone would leave no distinct channel for a failure if every integer value could also be legitimate data.
+add_checked takes two integers and an output pointer, returning a status code. Status 0 means the output was written successfully; status 1 denotes a null output pointer; status 2 denotes signed-int overflow. Both failure paths return before assigning the output, so its previous value is preserved. The interface uses this platform's int representation, not a fixed-width wire format. A caller must check status before consuming the output. Returning an integer sum alone would leave no distinct channel for a failure if every integer value could also be legitimate data.
 
 A null check can reject a missing pointer, but it cannot prove that an arbitrary nonnull pointer points to writable live storage. The caller still has a precondition to supply a valid output object. After an object is destroyed, a dangling address may remain nonnull. C-style interfaces therefore need precise lifetime and buffer-size contracts in addition to defensive null checks.
 
@@ -53,7 +53,7 @@ List the add_checked source contract and binary assumptions.
 
 **Reasoning:** An ABI includes details the header alone cannot prove.
 
-**Verify:** Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.
+**Verify:** Check that your list puts the `int` parameters, the `out` pointer and statuses 0, 1 and 2 under the source contract, and `extern "C"` linkage, compiler and platform under binary assumptions.
 
 ## Exercise 2: Call a valid boundary
 
@@ -63,7 +63,7 @@ Pass 2, 3 and a writable output integer.
 
 **Reasoning:** Caller owns the destination storage.
 
-**Verify:** Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.
+**Verify:** Initialize `out` to another value first, then assert `add_checked(2, 3, &out) == 0 && out == 5`, as Worked example 1 does.
 
 ## Exercise 3: Reject null output
 
@@ -73,7 +73,7 @@ Pass nullptr for out.
 
 **Reasoning:** Validate pointers before dereference.
 
-**Verify:** Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.
+**Verify:** Assert `add_checked(2, 3, nullptr) == 1`, as Worked example 2 does; the null check must come before any write through `out`.
 
 ## Exercise 4: Repair exception leakage
 
@@ -83,7 +83,7 @@ Review a C wrapper that lets std::runtime_error escape.
 
 **Reasoning:** Foreign callers cannot assume a compatible exception runtime.
 
-**Verify:** Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.
+**Verify:** Confirm the repaired wrapper catches inside the `extern "C"` function and returns a documented status; `noexcept` alone would call `std::terminate` instead.
 
 ## Exercise 5: Check overflow
 
@@ -93,7 +93,7 @@ Call INT_MAX plus 1.
 
 **Reasoning:** Check arithmetic before evaluating it.
 
-**Verify:** Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.
+**Verify:** Assert `add_checked(std::numeric_limits<int>::max(), 1, &out) == 2` and that `out` still holds its previous value.
 
 ## Exercise 6: Transfer a shared library
 
@@ -103,4 +103,4 @@ Build the wrapper separately in an owned host project and record compiler/archit
 
 **Reasoning:** The browser single-file run does not exercise a shared-library ABI.
 
-**Verify:** Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.
+**Verify:** Record `g++ --version` and `uname -m` next to the successful link and test run, and confirm the header declaration matches the definition's `extern "C"` signature.

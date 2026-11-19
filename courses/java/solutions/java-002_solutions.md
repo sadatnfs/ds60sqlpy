@@ -6,7 +6,7 @@ Open after an attempt or an explicit solution reveal. The executable reference r
 
 A numeric type defines both a range and a set of operations. Java int arithmetic uses fixed-width signed integers and can wrap on overflow. Integer division discards the fractional part toward zero, while a floating-point operand changes the operation to approximate real-number arithmetic. A cast can narrow a value and lose information; it does not prove the value fits. BigDecimal represents decimal arithmetic with explicit precision and rounding choices, useful when exact decimal meaning matters. Construct it from text when the source is decimal text, because constructing from a binary floating-point value preserves that prior approximation. Choose types from the domain contract rather than from the apparent size of one example.
 
-**Primitive:** A built-in value type such asint or boolean.
+**Primitive:** A built-in value type such as int or boolean.
 
 **Overflow:** A result outside the range of its chosen representation.
 
@@ -14,13 +14,15 @@ A numeric type defines both a range and a set of operations. Java int arithmetic
 
 ## Reading the reference
 
-L suffix creates a long literal. A widening conversion fromint to long preserves the integer value, but the multiplication must occur after widening if it would overflowint. Math.addExact throws on overflow rather than wrapping. BigDecimal.add returns a new value because BigDecimal is immutable. compareTo compares numeric value, while equals also considers scale, so1.0 and 1.00 need a declared equality policy.
+L suffix creates a long literal. A widening conversion from int to long preserves the integer value, but the multiplication must occur after widening if it would overflow int. Math.addExact throws on overflow rather than wrapping. BigDecimal.add returns a new value because BigDecimal is immutable. compareTo compares numeric value, while equals also considers scale, so 1.0 and 1.00 need a declared equality policy.
 
-## Exercise 1: Compare integer and decimal division
+## Exercise 1: Compare integer and decimal division: change one input
 
-Task: Calculate integer division `7 / 2` and floating-point division `7 / 2.0`.
+Task: Copy Example A into a scratch `Main.java` and change `int whole = 7 / 2;` to `int whole = 8 / 2;`. Before running it with `java -ea Main`, predict which assertion fails and which value it now sees; then run it and restore the original line.
 
-The operand types select the operation. Assigning7/2 to a double afterward would preserve the already-truncated value3.0.
+The operand types select the operation. Assigning 7/2 to a double afterward would preserve the already-truncated value 3.0.
+
+The unchanged code is the part that Example A adds:
 
 ```java
 int whole = 7 / 2;
@@ -28,15 +30,17 @@ double fractional = 7 / 2.0;
 assert whole == 3 && fractional == 3.5;
 ```
 
-**Expected:** integer 3 and double 3.5.
+**Expected:** The changed run fails with an `AssertionError` from the assertion on `whole == 3 && fractional == 3.5`. Restoring the original line brings back the worked observation: integer 3 and double 3.5.
 
-**Verify:** Compare the program values or named exception with integer 3 and double 3.5. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.
+**Verify:** Compare your written prediction with the reported `AssertionError` and its stack-trace line, and name the value that made `whole == 3 && fractional == 3.5` false. After restoring the line, the program completes without an `AssertionError` again.
 
-## Exercise 2: Widen before multiplication
+## Exercise 2: Widen before multiplication: debug a regression
 
-Task: Compute50000 squared with an explicitly widened left operand.
+Task: A regression changed one token in the code that Example B adds after Example A, so one line now reads `long safe = (long) 50_000 + 50_000;`. Run Example B with that line, use the failing assertion to locate the defect and repair it without changing the assertion.
 
-The cast affects the multiplication itself. Casting the wrappedint result to long afterward cannot recover lost information.
+The cast affects the multiplication itself. Casting the wrapped int result to long afterward cannot recover lost information.
+
+The unchanged code is the part that Example B adds:
 
 ```java
 long safe = (long) 50_000 * 50_000;
@@ -45,13 +49,13 @@ assert safe == 2_500_000_000L;
 assert wrapped != safe;
 ```
 
-**Expected:** 2500000000L;int product differs.
+**Expected:** Before the repair the run fails with an `AssertionError` from the assertion on `safe == 2_500_000_000L`; after it the line reads `long safe = (long) 50_000 * 50_000;` again and 2500000000L; int product differs.
 
-**Verify:** Compare the program values or named exception with 2500000000L;int product differs. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.
+**Verify:** Keep the failing and the repaired runs. Explain why the changed token alters the value tested by `safe == 2_500_000_000L` for this input.
 
 ## Exercise 3: Detect overflow explicitly
 
-Task: Add1 to Integer.MAX_VALUE withMath.addExact.
+Task: Add 1 to Integer.MAX_VALUE with Math.addExact.
 
 Exact arithmetic helpers turn silent wraparound into a named boundary failure. Use them when overflow violates the domain contract.
 
@@ -67,11 +71,11 @@ assert rejected;
 
 **Expected:** ArithmeticException.
 
-**Verify:** Compare the program values or named exception with ArithmeticException. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.
+**Verify:** Keep an assertion equivalent to `rejected`. As a control, change `rejected = true;` to `rejected = false;`: the run must fail with an `AssertionError` from the assertion on `rejected`. Restore the line before continuing.
 
 ## Exercise 4: Preserve decimal source meaning
 
-Task: Add BigDecimal values constructed from strings0.10 and 0.20.
+Task: Add BigDecimal values constructed from strings 0.10 and 0.20.
 
 Text construction preserves the supplied decimal digits. A binary floating-point constructor can introduce a long decimal expansion before the addition begins.
 
@@ -80,13 +84,13 @@ var amount = new java.math.BigDecimal("0.10").add(new java.math.BigDecimal("0.20
 assert amount.equals(new java.math.BigDecimal("0.30"));
 ```
 
-**Expected:** exact decimal0.30.
+**Expected:** exact decimal 0.30.
 
-**Verify:** Compare the program values or named exception with exact decimal0.30. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.
+**Verify:** Keep an assertion equivalent to `amount.equals(new java.math.BigDecimal("0.30"))`. As a control, change `var amount = new java.math.BigDecimal("0.10").add(new java.math.BigDecimal("0.20"));` to `var amount = new java.math.BigDecimal("1.10").add(new java.math.BigDecimal("0.20"));`: the run must fail with an `AssertionError` from the assertion on `amount.equals(new java.math.BigDecimal("0.30"))`. Restore the line before continuing.
 
 ## Exercise 5: Distinguish value from scale
 
-Task: Compare BigDecimal1.0 and 1.00 withcompareTo and equals.
+Task: Compare BigDecimal 1.0 and 1.00 with compareTo and equals.
 
 The two objects have the same numeric value but different scale. Collection keys and domain equality need an explicit policy rather than a casual interchange of the two methods.
 
@@ -96,13 +100,13 @@ var scaled = new java.math.BigDecimal("1.00");
 assert one.compareTo(scaled) == 0 && !one.equals(scaled);
 ```
 
-**Expected:** compareTo0;equals false.
+**Expected:** compareTo 0; equals false.
 
-**Verify:** Compare the program values or named exception with compareTo0;equals false. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.
+**Verify:** Keep an assertion equivalent to `one.compareTo(scaled) == 0 && !one.equals(scaled)`. As a control, change `var one = new java.math.BigDecimal("1.0");` to `var one = new java.math.BigDecimal("2.0");`: the run must fail with an `AssertionError` from the assertion on `one.compareTo(scaled) == 0 && !one.equals(scaled)`. Restore the line before continuing.
 
 ## Exercise 6: Reject an unsupported exact division
 
-Task: Divide decimal1 by3 without a rounding policy, then supply scale2 and HALF_UP.
+Task: Divide decimal 1 by 3 without a rounding policy, then supply scale 2 and HALF_UP.
 
 One third has no finite decimal expansion. A rounding policy is part of the calculation definition, not merely a display setting.
 
@@ -125,7 +129,7 @@ assert java.math.BigDecimal.ONE.divide(
 
 **Expected:** exact division throws; rounded result 0.33.
 
-**Verify:** Compare the program values or named exception with exact division throws; rounded result 0.33. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.
+**Verify:** Keep an assertion equivalent to `java.math.BigDecimal.ONE.divide(new java.math.BigDecimal("3"), 2, java.math.RoundingMode.HALF_UP).toPlainString().equals("0.33")`. As a control, change `2,` to `3,` inside it: the run must fail with an `AssertionError`, which shows the assertion can fail. Restore it.
 
 ## After comparing the answer
 

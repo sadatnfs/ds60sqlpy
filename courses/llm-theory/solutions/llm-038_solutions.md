@@ -14,42 +14,42 @@ A tool proposal is untrusted structured data until a trusted dispatcher validate
 
 ## Reading the implementation
 
-Require an object with exactly the keys tool anddocument_id. Compare tool to the literal read_fixture. Validate IDs against an explicit local dictionary rather than turning them into paths. Return a typed accepted proposal or raise a named ValueError/TypeError. Do not coerce a list or number into a string to make it pass. The downstream demonstration only reads the in-memory fixture after successful validation.
+Require an object with exactly the keys tool and document_id. Compare tool to the literal read_fixture. Validate IDs against an explicit local dictionary rather than turning them into paths. Return a typed accepted proposal or raise a named ValueError/TypeError. Do not coerce a list or number into a string to make it pass. The downstream demonstration only reads the in-memory fixture after successful validation.
 
-## Exercise 1: Accept one bounded proposal
+## Exercise 1: Accept the second allowed document
 
-The question is: Validate toolread_fixture and document_idd1.
+The question is: Validate tool read_fixture with document_id d2 and check whether the returned proposal is a separate object.
 
-Acceptance follows exact structure and identity checks. It does not infer authority from explanatory prose or from the model confidence.
+Returning a copy means later mutation of the model's original object cannot change the proposal that passed validation.
 
 ```python
-proposal = {"tool": "read_fixture", "document_id": "d1"}
-accepted = validate(proposal)
-assert accepted == proposal
+second = {"tool": "read_fixture", "document_id": "d2"}
+copy2 = validate(second)
+assert copy2 == second and copy2 is not second
 ```
 
-**Expected:** accepted proposal identifiesd1.
+**Expected:** accepted; the returned proposal equals the input but is a separate copy.
 
-**Verify:** Compare the computed values or written argument with accepted proposal identifiesd1.
+**Verify:** In a fresh process, the exercise checks confirm `copy2 == second` and `copy2 is not second`.
 
-## Exercise 2: Reject an unknown operation
+## Exercise 2: Predict a case-changed tool name
 
-The question is: Submit toolrun_shell with document_idd1.
+The question is: Submit tool READ_FIXTURE with document_id d1 and predict which check rejects it.
 
-A dispatcher should never reinterpret an unknown name as a shell command or dynamically import a matching function. The available operation set is fixed in trusted code.
+The allowlist compares exact strings. Silently normalizing case would widen the set of accepted inputs beyond what was reviewed.
 
 ```python
 try:
-    validate({"tool": "run_shell", "document_id": "d1"})
-except ValueError:
-    pass
+    validate({"tool": "READ_FIXTURE", "document_id": "d1"})
+except ValueError as error:
+    assert str(error) == "unknown tool"
 else:
-    raise AssertionError("unknown tool accepted")
+    raise AssertionError("case-changed tool accepted")
 ```
 
-**Expected:** ValueError;no execution.
+**Expected:** ValueError 'unknown tool'; names are matched exactly, without case folding.
 
-**Verify:** Compare the computed values or written argument with ValueError;no execution.
+**Verify:** In a fresh process, the exercise checks confirm `validate({'tool': 'READ_FIXTURE', 'document_id': 'd1'})` raises `ValueError` and the raised error satisfies `str(error) == 'unknown tool'`.
 
 ## Exercise 3: Reject extra fields
 
@@ -68,7 +68,7 @@ else:
 
 **Expected:** extra fields rejected.
 
-**Verify:** Compare the computed values or written argument with extra fields rejected.
+**Verify:** In a fresh process, the exercise checks confirm `validate({'tool': 'read_fixture', 'document_id': 'd1', 'command': 'anything'})` raises `ValueError`.
 
 ## Exercise 4: Reject traversal-like identifiers
 
@@ -87,11 +87,11 @@ else:
 
 **Expected:** ValueError because the ID is outside the fixture allowlist.
 
-**Verify:** Compare the computed values or written argument with ValueError because the ID is outside the fixture allowlist.
+**Verify:** In a fresh process, the exercise checks confirm `validate({'tool': 'read_fixture', 'document_id': '../secret'})` raises `ValueError`.
 
 ## Exercise 5: Enforce types
 
-The question is: Submit document_id1 and a list instead of an object.
+The question is: Submit the integer document_id 1, then a list instead of an object.
 
 Type coercion could turn unexpected model output into an unintended valid identifier. Rejecting it preserves a clear contract for the caller to repair.
 
@@ -107,7 +107,7 @@ for bad in [{"tool": "read_fixture", "document_id": 1}, ["read_fixture", "d1"]]:
 
 **Expected:** TypeError for both malformed structures.
 
-**Verify:** Compare the computed values or written argument with TypeError for both malformed structures.
+**Verify:** In a fresh process, the exercise checks confirm for every `bad` in `[{'tool': 'read_fixture', 'document_id': 1}, ['read_fixture', 'd1']]`, `validate(bad)` raises `TypeError`.
 
 ## Exercise 6: Keep retrieved instructions inert
 
@@ -124,9 +124,9 @@ result = fixture[checked["document_id"]]
 assert isinstance(result, str) and calls == ["read_fixture"]
 ```
 
-**Expected:** returned value is text;dispatch count1.
+**Expected:** returned value is text; dispatch count 1.
 
-**Verify:** Compare the computed values or written argument with returned value is text;dispatch count1.
+**Verify:** In a fresh process, the exercise checks confirm `isinstance(result, str)` and `calls == ['read_fixture']`.
 
 ## Review after comparison
 

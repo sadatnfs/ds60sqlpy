@@ -10,6 +10,31 @@ Read this tutorial in the classroom. Its commands run only in the separately pre
 
 Compose supplies service-name DNS within its network. Use `driver` or `notebook` there. A host-published port is for a connection originating outside that network. The workshop never publishes master RPC or worker data ports to the host. A multi-host deployment needs actual routes and firewall rules for its advertised addresses, not a larger set of random public port mappings.
 
+In this project the name `driver` comes from the Compose service's `hostname`. Its `SPARK_LOCAL_IP` sets the default bind address for Spark processes in that container; the submit call's `spark.driver.bindAddress=0.0.0.0` overrides it for the driver's listening sockets, as the Spark configuration reference states:
+
+From [`projects/cluster-lab/compose.yaml`](../projects/cluster-lab/compose.yaml):
+
+```yaml
+driver:
+  <<: *runtime
+  hostname: driver
+  environment:
+    <<: *spark-environment
+    SPARK_LOCAL_IP: driver
+  command: [idle]
+  mem_limit: 1536m
+  cpus: 1
+  pids_limit: 512
+  volumes:
+    - ./entrypoint.py:/lab/entrypoint.py:ro
+    - ./jupyter_config.py:/lab/jupyter_config.py:ro
+    - ./app:/lab/app:ro
+    - ./conf:/lab/conf:ro
+    - ${DS60_SPARK_STATE:?Missing workshop state}/events:/events
+    - ${DS60_SPARK_STATE}/results:/results
+  depends_on: [master, worker-a, worker-b]
+```
+
 ## Worked case A: trace the working two-way path
 
 ```text

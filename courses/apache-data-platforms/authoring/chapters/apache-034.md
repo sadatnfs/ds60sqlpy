@@ -27,6 +27,14 @@ committing, so a Java asynchronous call returning is not mistaken for durable
 application completion. Errors remain errors and do not become a success message
 merely because the producer object was created.
 
+The probe's producer configuration states the delivery contract explicitly:
+
+<!-- include: projects/streaming/TransactionProbe.java from="private static Properties producerProperties()" until="private static KafkaConsumer" java -->
+
+`acks=all` waits until every in-sync replica has the write; `enable.idempotence`
+lets the broker discard a retried duplicate of the same producer sequence number;
+and a `transactional.id` is required before the producer can use transactions.
+
 The workshop has one broker and replication factor one. Therefore the observed
 write and restart retention establish a local log boundary only. They do not
 show that another broker can serve the data when this broker is unavailable.

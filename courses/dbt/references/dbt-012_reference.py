@@ -121,7 +121,7 @@ def example_two():
             d,
             models={
                 "base": "select 100 as gross, 20 as returns",
-                "net": "select gross-returns as net from {{ ref('base') }}",
+                "net": "select gross - returns as net from {{ ref('base') }}",
             },
         )
         invoke(p, "build")

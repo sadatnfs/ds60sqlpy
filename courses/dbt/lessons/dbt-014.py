@@ -1,4 +1,4 @@
-"""dbt-014: worked starting point; complete the guide's six changes."""
+"""dbt-014: both worked cases; complete the guide's six changes."""
 
 import json
 import os
@@ -115,8 +115,24 @@ def example_one():
         return {"catalog_column": "total", "exposure_dependency": "mart"}
 
 
+def example_two():
+    with tempfile.TemporaryDirectory() as d:
+        p = project(d, models={"answer": "select 42::integer as answer"})
+        invoke(p, "build")
+        invoke(p, "docs", "generate")
+        manifest = artifact(p, "manifest.json")
+        catalog = artifact(p, "catalog.json")
+        assert manifest["nodes"]["model.classroom.answer"]["description"] == ""
+        assert (
+            catalog["nodes"]["model.classroom.answer"]["columns"]["answer"]["type"].upper()
+            == "INTEGER"
+        )
+        return {"physical_type_known": True, "business_description_missing": True}
+
+
 if __name__ == "__main__":
     print(example_one())
+    print(example_two())
 
 # TODO 1: Describe total with its grain, units and inclusion rule.
 # TODO 2: Declare a second exposure with its owner and dependency.

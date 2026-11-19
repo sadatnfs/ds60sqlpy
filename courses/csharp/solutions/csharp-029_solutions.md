@@ -1,6 +1,6 @@
 # csharp-029: explanation and comparison
 
-Attempt the six guide tasks before opening this comparison. The executable reference is [csharp-029_solution.cs](csharp-029_solution.cs). Its assertions are always active under the prepared classroom compile settings.
+Attempt the six guide tasks before opening this comparison. The executable reference is [csharp-029_solution.cs](csharp-029_solution.cs). It runs both worked examples and the reference answers below, and its assertions are always active under the prepared classroom compile settings.
 
 ## Why the two examples differ
 
@@ -8,21 +8,59 @@ Attempt the six guide tasks before opening this comparison. The executable refer
 
 **Compose and observe failure:** Awaiting establishes ownership of both success and failure instead of losing an unobserved background result. WhenAll retains input order and await exposes the task exception.
 
-## Reason through the six tasks
+## Task answers
 
-1. **Predict and explain.** Distinguish the Task<int> handle from its awaited integer.
+### Task 1: Predict and explain
 
-2. **Guided modification.** Combine three completed tasks and predict output ordering.
+Distinguish the Task<int> handle from its awaited integer.
 
-3. **Independent construction.** Write an async method returning a validated total.
+No separate reference answer has been written for this task. Example A is the evidence to compare with: The task handle and the eventual integer are distinct values even when this fixture completes immediately. Await yields 7 and confirms successful completion.
 
-4. **Diagnose a defect.** Diagnose forgetting to await an operation whose failure matters.
+### Task 2: Guided modification
 
-5. **Boundary evidence.** Test successful, failed and empty WhenAll inputs.
+Combine three completed tasks and predict output ordering.
 
-6. **Transfer and justify.** Explain when CPU work might need scheduling separately from an asynchronous I/O API.
+No separate reference answer has been written for this task. Start from Example B: Awaiting establishes ownership of both success and failure instead of losing an unobserved background result. WhenAll retains input order and await exposes the task exception.
 
-For tasks 1 and 2, use the checked values and mechanism trace in the two examples. For task 3, choose names that expose the input and result contract and retain the same invariants. For task 4, the diagnosed mistakes below supply a concrete wrong assumption: preserve its counterexample before repairing it. Task 5 needs an explicit expected value or documented rejection at the boundary, not just successful execution. For task 6, explain what changes in the new context and which part of the original mechanism remains applicable. Several representations may satisfy this transfer task; justify the choice rather than treating this reference as the only architecture.
+### Task 3: Independent construction
+
+Write an async method returning a validated total.
+
+**Reference answer.** It runs as the `Task 3` block of the reference program.
+
+```csharp
+async Task<int> TotalAsync(IEnumerable<Task<int>> parts) {
+  int[] values = await Task.WhenAll(parts);
+  if (values.Any(value => value < 0)) {
+    throw new ArgumentException("negative part");
+  }
+  return values.Sum();
+}
+var parts = new[] { Task.FromResult(2), Task.FromResult(5) };
+Check(await TotalAsync(parts) == 7, "validated total");
+```
+
+**Observe:** Parts 2 and 5 produce the validated total 7.
+
+The method awaits every part before validating, so it never sums a partially known or negative input.
+
+### Task 4: Diagnose a defect
+
+Diagnose forgetting to await an operation whose failure matters.
+
+No reference answer has been written for this task yet. The wrong assumptions to look for are this lesson's pitfalls: Async void is mainly for required event-handler signatures, not general composable methods. Blocking with Result can deadlock in synchronization contexts. Task.Run does not make a blocking external API inherently scalable.
+
+### Task 5: Boundary evidence
+
+Test successful, failed and empty WhenAll inputs.
+
+No reference answer has been written for this task yet. Write the expected value or documented rejection for each boundary before running it, and compare with the checks in Example A (Await values explicitly) and Example B (Compose and observe failure).
+
+### Task 6: Transfer and justify
+
+Explain when CPU work might need scheduling separately from an asynchronous I/O API.
+
+No single reference answer exists: several designs can satisfy this transfer task. Justify yours against the mechanism described below and the vocabulary entry **Task**, and state one limitation of your choice.
 
 ## Mechanism and diagnostic reasoning
 
@@ -36,4 +74,4 @@ Async void is mainly for required event-handler signatures, not general composab
 
 ## Review before continuing
 
-The reference checks the worked scenarios, including their boundary distinctions. Your independent and transfer artifacts may have additional checks. Compare observations rather than only source text. Preserve any new regression case you discover and explain why it would reject a plausible wrong implementation. External project steps require their own build and platform evidence and are not established by a portable reference passing.
+Run the reference and confirm that it prints `csharp-029: passed`, then reconstruct one boundary case from memory and explain which check would reject a plausible wrong implementation. External project steps need their own build and platform evidence; a passing portable reference does not establish them.

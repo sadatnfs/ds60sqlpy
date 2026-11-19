@@ -1,51 +1,43 @@
 # web-055: explanatory solutions
 
-Compare after your own attempt or an explicit solution reveal. This file explains the supplied deterministic fixtures. It does not claim that a learner or a production deployment passed.
-
-## Why the mechanism works
-
-An endpoint should not assume its dataset will remain small. Bound the amount of work and the response size. Pagination returns a portion of a collection under a documented order. Offset pagination is simple but can shift as records are inserted or removed. Cursor pagination identifies a position in a stable ordering and needs a tie-breaker when the primary sort value is not unique.
-
-Caching reuses a previous result, but the cache key and invalidation policy are part of correctness. A key that omits user identity or authorization scope can expose another user's data. A stale result may be acceptable for one display and harmful for another. Define freshness, ownership and failure behavior before using a cache to hide an expensive query.
-
-The reference demonstrates a bounded in-memory cursor over unique increasing ids. It validates the page size, selects ids greater than the cursor and takes only the requested count. This is an algorithm model, not a database query plan or distributed cache. A production query needs a matching index and engine-specific measurement.
+Open this after your own attempt. Each answer explains the lesson's synthetic fixtures; it does not show that your work or a deployment passed. The mechanism is explained in `courses/web-development/guides/web-055.md`.
 
 ## Exercise 1: Explain why pagination needs an explicit stable order.
 
-Without it, page boundaries can duplicate or omit records unpredictably.
+**Expected answer:** Without it, page boundaries can duplicate or omit records unpredictably.
 
-Trace the smallest example before editing. Name which values are source and which are observations.
+**Why:** Without an explicit order the database may return rows in any order, so pages can overlap or skip rows.
 
 ## Exercise 2: Add a maximum page-size rule.
 
-A caller cannot request an unbounded result.
+**Expected evidence:** A caller cannot request an unbounded result.
 
-Change only the named feature. Compare with the unchanged example and explain any unaffected behavior.
+**Why:** A maximum page size bounds memory, time and response size per request.
 
 ## Exercise 3: Implement a cursor-based slice over synthetic records.
 
-The second page continues after the last id and the final page can be shorter.
+**Expected evidence:** The second page continues after the last id and the final page can be shorter.
 
-Sketch the structure or data contract first. Reuse the mechanism from the examples without copying the reference.
+**Why:** A keyset cursor resumes exactly after the last seen row, and the final page may hold fewer rows than the limit.
 
 ## Exercise 4: Diagnose a cache key shared by all authenticated users.
 
-The key omits an authorization-dependent dimension and risks data leakage.
+**Expected answer:** The key omits an authorization-dependent dimension and risks data leakage.
 
-Keep the failing input. Identify the first layer where the observed result differs from the intended contract.
+**Why:** A cache key must include every authorization dimension, such as the user id, or one user may receive another's data.
 
 ## Exercise 5: Test an empty page and an invalid page size.
 
-Empty results are represented normally while invalid budgets are rejected.
+**Expected evidence:** Empty results are represented normally while invalid budgets are rejected.
 
-Predict the boundary before running it. Add an explicit check or manual observation that would detect a regression.
+**Why:** An empty page is a normal result, while a page size outside the allowed range is an invalid request.
 
 ## Exercise 6: Explain what must be measured before claiming a faster database endpoint.
 
-Inspect the actual query plan, index, workload, latency distribution and correctness under the target engine.
+**Expected answer:** Inspect the actual query plan, index, workload, latency distribution and correctness under the target engine.
 
-Explain your choice to someone who has not seen the code. Include one limitation and the evidence needed to remove it.
+**Why:** Query plans, index use, workload mix, latency percentiles and correct results on the target engine show whether a change helps.
 
-## Reference comparison and limits
+## Reference comparison
 
-Read the separate executable reference, where supplied, only after retaining your attempt. Compare structure and decisions rather than matching every identifier. A different implementation is acceptable when it satisfies the same behavior, preserves accessibility and rejects the same invalid cases. The checked reference uses tiny synthetic inputs so that each transformation can be inspected. It is not a ready-to-deploy authenticated application. Server lifecycle, persistence, concurrency and security require their own integration evidence.
+Open `courses/web-development/solutions/web-055_solution.php` only after saving your attempt, and compare decisions rather than identifiers. A different implementation is acceptable when it shows the same behavior and rejects the same invalid cases. The reference checks only its named synthetic cases; server lifecycle, persistence, concurrency and security need their own integration evidence.

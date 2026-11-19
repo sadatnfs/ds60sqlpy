@@ -85,7 +85,8 @@ public class Main {
         interrupted.set(Thread.currentThread().isInterrupted());
       }
     });
-    assert started.await(2, java.util.concurrent.TimeUnit.SECONDS);
+    boolean blockedStarted = started.await(2, java.util.concurrent.TimeUnit.SECONDS);
+    assert blockedStarted;
     blocked.interrupt();
     joinBounded(blocked);
     assert interrupted.get();

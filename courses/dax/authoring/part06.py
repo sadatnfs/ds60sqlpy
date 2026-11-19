@@ -21,7 +21,7 @@ LESSONS = [
             "nonblank date for every day of 2024 and 2025. The model "
             "contract marks that Date column for classic time "
             "intelligence. January 2025 therefore has 31 calendar rows "
-            "even though sales occur on only January 2,3 and 5. A "
+            "even though sales occur on only January 2, 3 and 5. A "
             "zero-sales day remains a date that can belong in an "
             "average or rolling interval.\n\nCalendar extent is not the "
             "same as observation completeness. This fixture declares "
@@ -55,7 +55,7 @@ LESSONS = [
                 ),
                 [
                     "The complete Date table contains January 1 through 31.",
-                    "Sales occur on January 2,3 and 5.",
+                    "Sales occur on January 2, 3 and 5.",
                     "The calendar count is 31 while observed event-date count is 3.",
                 ],
                 (
@@ -94,7 +94,7 @@ LESSONS = [
                 "There are 29 unique calendar dates.",
             ),
             t(
-                "Change case B to January 2,2025.",
+                "Change case B to January 2, 2025.",
                 "One sale was ordered that day.",
                 "CalendarDates is 1, SalesRows is 1 and Revenue is 27.",
             ),
@@ -191,7 +191,7 @@ LESSONS = [
                 [
                     "The current date contains S5 and revenue 20.",
                     "The YTD set begins January 1 and ends January 3.",
-                    "S4 and S 5 contribute 27 +20 =47.",
+                    "S4 and S5 contribute 27 + 20 = 47.",
                 ],
                 (
                     "An empty January 1 date does not disappear from the "
@@ -211,7 +211,7 @@ LESSONS = [
                 [
                     "S8 contributes 36 on the current day.",
                     "The YTD set includes January plus February 1 through 3.",
-                    "S4..S8 sum 27 +20 +20 +20 +36 =123.",
+                    "S4..S8 sum 27 + 20 + 20 + 20 + 36 = 123.",
                 ],
                 (
                     "The measure reevaluates over an expanded set, not over "
@@ -221,7 +221,7 @@ LESSONS = [
         ],
         [
             t(
-                "Predict YTD at January 2,2025.",
+                "Predict YTD at January 2, 2025.",
                 "Only the first 2025 sale is within the period.",
                 "YTD is 27.",
             ),
@@ -285,11 +285,19 @@ LESSONS = [
             "January 2024 is 64, giving growth 3/64. Through "
             "January 3, 2025 the current amount is 47, while the "
             "corresponding prior-year dates contain 64, "
-            "giving-17/64. These signs differ because the included "
+            "giving -17/64. These signs differ because the included "
             "current facts differ. The prior fixture happens to "
             "have no later January sales, so its partial and full "
             "totals coincide; that coincidence must not become a "
-            "rule in the model.\n\nSAMEPERIODLASTYEAR shifts a date "
+            "rule in the model.\n\nIn case A the prior value is 64, not "
+            "BLANK, because SAMEPERIODLASTYEAR filters 'Date'[Date]. A "
+            "new filter on that column, the marked date column and the "
+            "Date-typed key of the active relationship, removes every "
+            "other filter on 'Date', including the outer Year = 2025 "
+            "and MonthNumber = 1 filters, so the shifted January 2024 "
+            "dates are not intersected with 2025. A filter on another "
+            "Date column, such as 'Date'[Year] = 2024, replaces only "
+            "the Year filter and keeps MonthNumber.\n\nSAMEPERIODLASTYEAR shifts a date "
             "set, not a business guarantee about equivalent working "
             "days or leap-day treatment. Other comparisons may "
             "require fiscal periods, week definitions or a "
@@ -325,8 +333,8 @@ LESSONS = [
                     "set; both periods are within available data."
                 ),
                 [
-                    "Current January contains S4,S5,S6, totaling 67.",
-                    "Prior January contains S1,S2,S3, totaling 64.",
+                    "Current January contains S4, S5, S6, totaling 67.",
+                    "Prior January contains S1, S2, S3, totaling 64.",
                     "The difference 3 divided by prior 64 is 0.046875.",
                 ],
                 (
@@ -349,7 +357,7 @@ LESSONS = [
                 [("Current", "number"), ("Prior", "number"), ("Growth", "number")],
                 [[47, 64, -17 / 64]],
                 (
-                    "January 1..3,2025 compared with January 1..3,2024; "
+                    "January 1 to 3, 2025 compared with January 1 to 3, 2024; "
                     "explicitly as-of rather than full-month."
                 ),
                 [
@@ -358,7 +366,7 @@ LESSONS = [
                         "The prior interval still contains all three prior-year "
                         "fixture lines, totaling 64."
                     ),
-                    "The difference-17 divided by 64 is-0.265625.",
+                    "The difference -17 divided by 64 is -0.265625.",
                 ],
                 (
                     "The changed result is explained by the period definition. "
@@ -369,7 +377,7 @@ LESSONS = [
         ],
         [
             t(
-                "Predict current revenue through January 5,2025.",
+                "Predict current revenue through January 5, 2025.",
                 "Include S6 on the fifth day.",
                 ("It is 67; the selected current interval now contains all January fixture sales."),
             ),
@@ -421,6 +429,7 @@ LESSONS = [
         sources=[
             "https://learn.microsoft.com/en-us/dax/sameperiodlastyear-function-dax",
             "https://learn.microsoft.com/en-us/dax/datesbetween-function-dax",
+            "https://www.sqlbi.com/articles/mark-as-date-table/",
         ],
     ),
     lesson(
@@ -434,8 +443,8 @@ LESSONS = [
         (
             "A rolling window requires an anchor, direction, interval "
             "size and boundary convention. For the three-day window "
-            "ending February 3,2025, the included dates are February "
-            "1,2 and 3. DATESINPERIOD with a negative day count "
+            "ending February 3, 2025, the included dates are February "
+            "1, 2 and 3. DATESINPERIOD with a negative day count "
             "describes that backward interval. The interval token DAY "
             "is an enumeration, not a quoted text value.\n\nThe window "
             "contains revenue 56 on two sale dates, but three eligible "
@@ -472,7 +481,10 @@ LESSONS = [
                 ),
                 [("Days", "integer"), ("Revenue", "number"), ("RevenuePerCalendarDay", "number")],
                 [[3, 56, 56 / 3]],
-                "AnchorFebruary 3,2025; included calendar days February 1,2,3; all observed.",
+                (
+                    "Anchor February 3, 2025; included calendar days "
+                    "February 1, 2 and 3; all observed."
+                ),
                 [
                     (
                         "February 1 has no order, February 2 contributes 20 and "
@@ -504,9 +516,9 @@ LESSONS = [
                     "BLANK with an explicit zero policy."
                 ),
                 [
-                    "The unfilled values are BLANK,20,36.",
-                    "The blank-excluding average is 56/2 =28.",
-                    "The zero-filled observed-calendar values 0,20,36 average 56/3.",
+                    "The unfilled values are BLANK, 20, 36.",
+                    "The blank-excluding average is 56/2 = 28.",
+                    "The zero-filled observed-calendar values 0, 20, 36 average 56/3.",
                 ],
                 (
                     "Neither name should be shortened to average daily revenue "
@@ -525,8 +537,8 @@ LESSONS = [
                 ),
             ),
             t(
-                "Move the three-day anchor to January 4,2025.",
-                "The dates are January 2,3,4.",
+                "Move the three-day anchor to January 4, 2025.",
+                "The dates are January 2, 3, 4.",
                 (
                     "Revenue is 47; the calendar-day average is 47/3, while "
                     "the sale-day average is 47/2."
@@ -586,13 +598,13 @@ LESSONS = [
         (
             "A fiscal-year label is a convention over dates, not an "
             "intrinsic property of an integer called Year. Our "
-            "ordinary FiscalYear ends in June: July 1,2024 begins FY "
-            "2025, while June 30,2024 ends FY 2024. Labeling a fiscal "
+            "ordinary FiscalYear ends in June: July 1, 2024 begins FY "
+            "2025, while June 30, 2024 ends FY 2024. Labeling a fiscal "
             "year by its ending year is a deliberate rule that should "
             "be written in the date dictionary.\n\nA fiscal-year-to-date "
             "question also needs an as-of date. FY 2025 spans July "
             "2024 through June 2025, but this fixture's sales "
-            "observation ends February 28,2025. Summing available FY "
+            "observation ends February 28, 2025. Summing available FY "
             "2025 facts gives 123; calling that a completed-year total "
             "would overstate the temporal coverage. A complete "
             "calendar table can represent future fiscal dates without "
@@ -652,8 +664,8 @@ LESSONS = [
                     "through 2025-02-28; active OrderDate."
                 ),
                 [
-                    "The fiscal interval starts July 1,2024.",
-                    "The as-of boundary stops at February 28,2025, not June 30.",
+                    "The fiscal interval starts July 1, 2024.",
+                    "The as-of boundary stops at February 28, 2025, not June 30.",
                     "The available matching sales are S4..S8, totaling 123.",
                 ],
                 (
@@ -673,7 +685,7 @@ LESSONS = [
                 "Change the naming convention to the starting year.",
                 "The included dates can stay the same while their label changes.",
                 (
-                    "July 1,2024 would be labeled FY 2024. Update labels and "
+                    "July 1, 2024 would be labeled FY 2024. Update labels and "
                     "documentation without pretending the population changed."
                 ),
             ),
@@ -682,7 +694,7 @@ LESSONS = [
                 "Include the fiscal convention and observation date.",
                 (
                     "For example: FY 2025 order revenue through February "
-                    "28,2025, fiscal year ending June 30."
+                    "28, 2025, fiscal year ending June 30."
                 ),
             ),
             t(
@@ -746,7 +758,7 @@ LESSONS = [
             "conceptual continuation, the model specification declares "
             "RetailCalendar over Date with RetailYear beginning "
             "February 1 and named by its ending year. At February "
-            "3,2025 its year-to-date set contains February 1..3 and "
+            "3, 2025 its year-to-date set contains February 1..3 and "
             "revenue 56. Classic Gregorian YTD at the same date "
             "contains January 1..February 3 and revenue 123. The "
             "difference comes from year membership, not a faster or "
@@ -805,8 +817,8 @@ LESSONS = [
                 ),
                 [
                     "The anchor belongs to RetailYear 2026 under the ending-year naming rule.",
-                    "Its year-to-date date set begins February 1,2025.",
-                    "S7 and S 8 contribute 20 +36 =56; January belongs to the prior retail year.",
+                    "Its year-to-date date set begins February 1, 2025.",
+                    "S7 and S8 contribute 20 + 36 = 56; January belongs to the prior retail year.",
                 ],
                 (
                     "This is a reference derivation under a declared metadata "
@@ -823,7 +835,7 @@ LESSONS = [
         ],
         [
             t(
-                "Predict the retail-year label for January 31,2025.",
+                "Predict the retail-year label for January 31, 2025.",
                 "The February-start year has not rolled over yet.",
                 "It is RetailYear 2025; February 1 begins RetailYear 2026.",
             ),

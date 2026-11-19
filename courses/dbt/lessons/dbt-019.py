@@ -1,4 +1,4 @@
-"""dbt-019: worked starting point; complete the guide's six changes."""
+"""dbt-019: both worked cases; complete the guide's six changes."""
 
 import os
 import tempfile
@@ -102,8 +102,18 @@ def example_one():
         return {"same_file_owned_test_database": True, "separate_schemas": ["dev", "prod"]}
 
 
+def example_two():
+    with tempfile.TemporaryDirectory() as d:
+        p = project(d)
+        targets(p)
+        invoke(p, "run", "--target", "missing", succeeds=False)
+        assert not (p / "target/run_results.json").exists()
+        return {"unknown_target_rejected": True, "no_ambient_warehouse_selected": True}
+
+
 if __name__ == "__main__":
     print(example_one())
+    print(example_two())
 
 # TODO 1: Identify the exact file and schema selected for each target.
 # TODO 2: Return the same numeric result in both targets.

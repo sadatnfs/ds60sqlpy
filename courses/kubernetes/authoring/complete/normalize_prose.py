@@ -8,7 +8,9 @@ def prose(text):
     protected = re.compile(r"(`[^`]*`|\[[^\]]*\]\([^)]*\)|https?://\S+)")
 
     def clean(part):
-        part = re.sub(r"([,;])(?=\S)", r"\1 ", part)
+        # Only separate punctuation from a following word; digit groups such as
+        # 67,108,864 and host:port forms must survive unchanged.
+        part = re.sub(r"([,;])(?=[A-Za-z])", r"\1 ", part)
         part = re.sub(
             r"\b(all|All|through|replicas|minimum|maximum|integer|string|generation|Generation|observedGeneration|schema|fixture|contract|second|at|target|current|observed|usage|requests|Start|start|finish|source|Source|after|before|count|healthy|window|the)(?=\d)",
             r"\1 ",

@@ -8,9 +8,11 @@ Control flow determines which statements execute. A condition is a boolean expre
 
 if condition { ... } selects a branch. && skips the right operand when the left is false. for i := 0; i < len(items); i++ visits a half-open index interval. break leaves the innermost loop; continue skips to its next iteration. switch compares one expression against alternatives and does not fall through by default. A boundary using <= instead of < often attempts one extra iteration.
 
-## 1. Trace a prefix sum
+## 1. Trace a prefix sum: change one input
 
-Sum 2, 4 and 6 while checking every visited prefix.
+Copy worked example 1 into a scratch pad and change `items := []int{2, 4, 6}` to `items := []int{3, 4, 6}`. Before running, predict which check fails and which value it now sees; then run it and restore the original line.
+
+The unchanged code is worked example 1:
 
 ```go
 items := []int{2, 4, 6}
@@ -21,13 +23,15 @@ for _, x := range items {
 check(sum == 12 && len(items) == 3, "sum")
 ```
 
-**Expected:** The final sum is 12 and three elements were visited.
+**Expected:** The changed run panics with `sum` because `sum == 12 && len(items) == 3` no longer holds. Restoring the original line brings back the worked observation: the final sum is 12 and three elements were visited.
 
 The accumulator starts at the additive identity. Each iteration includes exactly one new value; double addition or a skipped element breaks the independently known total.
 
-## 2. Handle empty data
+## 2. Handle empty data: debug a regression
 
-Apply the same summation to an empty slice.
+A regression changed one token in worked example 2, so one line now reads `sum := 1`. Run worked example 2 with that line, use the failure to locate the defect and repair it without changing the check.
+
+The unchanged code is worked example 2:
 
 ```go
 sum := 0
@@ -37,7 +41,7 @@ for _, x := range []int{} {
 check(sum == 0, "empty sum")
 ```
 
-**Expected:** The result is 0 with no special invented element.
+**Expected:** Before the repair the program panics with `empty sum`; after it the line reads `sum := 0` again and the result is 0 with no special invented element.
 
 The loop body never runs. A correct initial state makes the empty case follow from the same algorithm rather than a separate patch.
 

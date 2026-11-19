@@ -26,21 +26,21 @@ The next decoder chapter combines these operations with learned embeddings, posi
 
 ### Trace the split and inverse
 
-For X:[T,D] with T=2,D=4,H=2, the head width is \(d=\frac{D}{H}=2\). Reshape [2,4] to [2,2,2] interpreted as [token,head,head_feature], then transpose to [head,token,head_feature]. These dimensions happen to have the same sizes, making axis names more informative than the printed shape alone.
+For X:[T, D] with T=2, D=4, H=2, the head width is \(d=\frac{D}{H}=2\). Reshape [2, 4] to [2, 2, 2] interpreted as [token, head, head_feature], then transpose to [head, token, head_feature]. These dimensions happen to have the same sizes, making axis names more informative than the printed shape alone.
 
-With rows [0,1,2,3] and [4,5,6,7], head zero contains [[0,1],[4,5]], while head one contains [[2,3],[6,7]]. The inverse must first transpose [head,token,feature] back to [token,head,feature], then merge the last two axes. Flattening the head-major tensor directly instead creates rows [0,1,4,5] and [2,3,6,7]. Both arrays have shape [2,4], but the wrong version mixes features from different tokens.
+With rows [0, 1, 2, 3] and [4, 5, 6, 7], head zero contains [[0, 1], [4, 5]], while head one contains [[2, 3], [6, 7]]. The inverse must first transpose [head, token, feature] back to [token, head, feature], then merge the last two axes. Flattening the head-major tensor directly instead creates rows [0, 1, 4, 5] and [2, 3, 6, 7]. Both arrays have shape [2, 4], but the wrong version mixes features from different tokens.
 
 ### Compute attention within each head
 
-The batched multiplication Q_h \({K_{h}}^{T}\) produces [H,T,T], one query-by-key matrix for each head. The normalization axis is the final key axis. For a width-two head the scale is \(\sqrt{2}\), and a causal Boolean triangle [T,T] broadcasts across the head axis. Multiplying weights [H,T,T] by V [H,T,2] returns [H,T,2]. Rejoining produces [T,4], preserving the width needed by a residual path.
+The batched multiplication Q_h \({K_{h}}^{T}\) produces [H, T, T], one query-by-key matrix for each head. The normalization axis is the final key axis. For a width-two head the scale is \(\sqrt{2}\), and a causal Boolean triangle [T, T] broadcasts across the head axis. Multiplying weights [H, T, T] by V [H, T, 2] returns [H, T, 2]. Rejoining produces [T, 4], preserving the width needed by a residual path.
 
-For the three-token identity-projection fixture, head zero contains [1,0],[0,1],[1,1], while head one contains [1,1],[1,0],[0,1]. At query row one, the causal mask permits keys zero and one. Head zero has scores \([0,\frac{1}{\sqrt{2}}]\) and weights \([\frac{1}{1+a},\frac{a}{1+a}]\) with \(a=\exp(\frac{1}{\sqrt{2}})\). Head one has equal allowed scores \([\frac{1}{\sqrt{2}},\frac{1}{\sqrt{2}}]\) and weights \([\frac{1}{2},\frac{1}{2}]\). Their mixtures are therefore approximately [0.33023845,0.66976155] and exactly [1,0.5]. Concatenation gives [0.33023845,0.66976155,1,0.5] before any learned output projection.
+For the three-token identity-projection fixture, head zero contains [1, 0], [0, 1], [1, 1], while head one contains [1, 1], [1, 0], [0, 1]. At query row one, the causal mask permits keys zero and one. Head zero has scores \([0,\frac{1}{\sqrt{2}}]\) and weights \([\frac{1}{1+a},\frac{a}{1+a}]\) with \(a=\exp(\frac{1}{\sqrt{2}})\). Head one has equal allowed scores \([\frac{1}{\sqrt{2}},\frac{1}{\sqrt{2}}]\) and weights \([\frac{1}{2},\frac{1}{2}]\). Their mixtures are therefore approximately [0.33023845, 0.66976155] and exactly [1, 0.5]. Concatenation gives [0.33023845, 0.66976155, 1, 0.5] before any learned output projection.
 
 ### Residual and feed-forward equations
 
 A residual computes R(x)=x+F(x). If F(x)=2x, R(x)=3x and its Jacobian is 3I. If F(x)=0, the residual is the identity. If F(x)=-x, the sum is zero and the Jacobian is zero. Thus the identity contribution can improve the available path, but a residual connection is not a universal proof against vanishing, exploding or cancelled gradients.
 
-A usual feed-forward branch has F(x_t)=activation(x_t W1+b1) W2+b2, using the same weights at every token t. W1 can expand the hidden feature width and W2 return it to D for residual addition. The teaching fixture chooses identity weights and \(b_{1}=-2\) so the first row [0,1,2,3] becomes [0,0,0,1]. This isolates nonlinearity and tokenwise independence. A pair of affine maps without a nonlinearity collapses to one affine map; adding width alone would not create that nonlinear behavior.
+A usual feed-forward branch has F(x_t)=activation(x_t W1+b1) W2+b2, using the same weights at every token t. W1 can expand the hidden feature width and W2 return it to D for residual addition. The teaching fixture chooses identity weights and \(b_{1}=-2\) so the first row [0, 1, 2, 3] becomes [0, 0, 0, 1]. This isolates nonlinearity and tokenwise independence. A pair of affine maps without a nonlinearity collapses to one affine map; adding width alone would not create that nonlinear behavior.
 
 ## Exercise 1: Split and rejoin
 
@@ -57,9 +57,9 @@ np.testing.assert_array_equal(join_heads(heads), values)
 assert heads.shape == (2, 2, 2)
 ```
 
-**Expected:** head zero is [[0,1],[4,5]], head one is [[2,3],[6,7]], and rejoining restores X exactly.
+**Expected:** head zero is [[0, 1], [4, 5]], head one is [[2, 3], [6, 7]], and rejoining restores X exactly.
 
-**Verify:** Compare the computed values or written argument with head zero is [[0,1],[4,5]], head one is [[2,3],[6,7]], and rejoining restores X exactly.
+**Verify:** In a fresh process, the exercise checks confirm `heads[0]` equals `[[0, 1], [4, 5]]`; `heads[1]` equals `[[2, 3], [6, 7]]`; `join_heads(heads)` equals `values` and `heads.shape == (2, 2, 2)`.
 
 ## Exercise 2: Calculate a residual
 
@@ -79,7 +79,7 @@ assert residual.shape == values.shape
 
 **Expected:** 2X gives 3X, zero branch gives X, and branch -X gives zero; all retain the same shape.
 
-**Verify:** Compare the computed values or written argument with 2X gives 3X, zero branch gives X, and branch -X gives zero; all retain the same shape.
+**Verify:** In a fresh process, the exercise checks confirm `residual` equals `3 * values`, `values + np.zeros_like(values)` equals `values`, `values + -values` equals `np.zeros_like(values)` and `residual.shape == values.shape`.
 
 ## Exercise 3: Use a tokenwise nonlinear block
 
@@ -96,9 +96,9 @@ changed[1] = [100, 200, 300, 400]
 np.testing.assert_array_equal(tokenwise_feed_forward(changed)[0], output[0])
 ```
 
-**Expected:** first output [0,0,0,1]; changing the second token does not change the first output.
+**Expected:** first output [0, 0, 0, 1]; changing the second token does not change the first output.
 
-**Verify:** Compare the computed values or written argument with first output [0,0,0,1]; changing the second token does not change the first output.
+**Verify:** In a fresh process, the exercise checks confirm `output[0]` equals `[0, 0, 0, 1]` and `tokenwise_feed_forward(changed)[0]` equals `output[0]`.
 
 ## Exercise 4: Test actual head mixtures and causal prefixes
 
@@ -121,7 +121,7 @@ for length in [1, 2, 3]:
 
 **Expected:** head distributions differ as derived, row-one output is \([\frac{1}{1+a},\frac{a}{1+a},1,0.5]\), and every prefix matches.
 
-**Verify:** Compare the computed values or written argument with head distributions differ as derived, row-one output is \([\frac{1}{1+a},\frac{a}{1+a},1,0.5]\), and every prefix matches.
+**Verify:** In a fresh process, the exercise checks confirm `weights[0, 1, :2]` matches `[1 / (1 + a), a / (1 + a)]` within 1e-12; `weights[1, 1, :2]` matches `[0.5, 0.5]` within 1e-12; `weights[:, 1, 2]` equals `[0, 0]`; `output[1]` matches `[1 / (1 + a), a / (1 + a), 1, 0.5]` within 1e-12 and 1 further check.
 
 ## Exercise 5: Reject an indivisible width
 
@@ -141,7 +141,7 @@ for values, count in [(np.zeros((2, 5)), 2), (np.zeros((2, 4)), 0), (np.zeros((0
 
 **Expected:** each invalid layout raises ValueError before reshape.
 
-**Verify:** Compare the computed values or written argument with each invalid layout raises ValueError before reshape.
+**Verify:** In a fresh process, the exercise checks confirm for every `(values, count)` in `[(np.zeros((2, 5)), 2), (np.zeros((2, 4)), 0), (np.zeros((0, 4)), 2)]`, `split_heads(values, count)` raises `ValueError`.
 
 ## Exercise 6: Detect a wrong rejoin
 
@@ -159,9 +159,9 @@ assert not np.array_equal(wrong, values)
 np.testing.assert_array_equal(join_heads(heads), values)
 ```
 
-**Expected:** the wrong [2,4] result differs despite matching shape; the inverse operation restores X.
+**Expected:** the wrong [2, 4] result differs despite matching shape; the inverse operation restores X.
 
-**Verify:** Compare the computed values or written argument with the wrong [2,4] result differs despite matching shape; the inverse operation restores X.
+**Verify:** In a fresh process, the exercise checks confirm `wrong` equals `[[0, 1, 4, 5], [2, 3, 6, 7]]`; `wrong.shape == values.shape`; `not np.array_equal(wrong, values)` and `join_heads(heads)` equals `values`.
 
 ## Review after comparison
 

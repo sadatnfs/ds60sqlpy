@@ -56,9 +56,9 @@ public class Main {
 
     // Exercise 3: Inspect compare-and-set
     var state = new java.util.concurrent.atomic.AtomicInteger();
-    assert state.compareAndSet(0, 1);
-    assert !state.compareAndSet(0, 2);
-    assert state.get() == 1;
+    boolean firstSwap = state.compareAndSet(0, 1);
+    boolean staleSwap = state.compareAndSet(0, 2);
+    assert firstSwap && !staleSwap && state.get() == 1;
 
     // Exercise 4: Combine map updates atomically
     var counts = new java.util.concurrent.ConcurrentHashMap<String, Integer>();

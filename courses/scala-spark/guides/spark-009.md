@@ -4,7 +4,7 @@ Authored tutorial and practice content. The prepared Scala/JVM worker executes a
 
 ## Level and prerequisites
 
-Beginner; approximately 105 minutes. Direct design prerequisites: `spark-008`. The lesson uses Scala 2.13 syntax and the prepared JDK 17 worker. The older design document proposed a different Spark/JDK tuple; use the current [execution baseline](../execution-baseline.md) for this authored material.
+Beginner; approximately 75 minutes. Direct prerequisites: `spark-008`. The lesson uses Scala 2.13 syntax and the prepared JDK 17 worker. The [execution baseline](../execution-baseline.md) lists the exact Scala, JDK and Spark versions.
 
 ## How to run this lesson
 
@@ -90,7 +90,7 @@ Accept exactly local[2] as the course master and reject remote addresses, local[
 
 Return a multiplier closure that copies only owner.factor into a local immutable value. Require factor and input magnitude at most 1000000 so multiplication is within Long range. Do not retain owner or its nonserializable resource.
 
-**Expected result/shape:** Owner factor 3 produces 7->21 and-2->-6. An input outside the bounded domain is rejected. The function is suitable for the later serialization check.
+**Expected result/shape:** Owner factor 3 produces 7->21 and -2->-6. An input outside the bounded domain is rejected. The function is suitable for the later serialization check.
 
 **Verify:** Assert both signed results and the domain rejection, then compare serializability with owner.bad in Exercise 4.
 
@@ -144,7 +144,7 @@ Continue to the next lesson only after you can explain the boundary behavior. Th
 
 - [Spark 4.0.1 deployment overview](https://spark.apache.org/docs/4.0.1/cluster-overview.html).
 
-- [Java17 ObjectOutputStream](https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/io/ObjectOutputStream.html).
+- [Java 17 ObjectOutputStream](https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/io/ObjectOutputStream.html).
 
 ## Ask an AI tutor about this lesson
 

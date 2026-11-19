@@ -1,6 +1,6 @@
 # Boosting: follow the objective across stages
 
-Tutorial ID: `statistics-learning-005`. Prerequisites: `statistics-learning-003`, `statistics-learning-004`. Complete program: [learning_04.py](examples/learning_04.py).
+Tutorial ID: `statistics-learning-005`. Prerequisites: `statistics-learning-003`, `statistics-learning-004`. Complete program: [learning_05.py](examples/learning_05.py).
 
 ## Fit the correction rather than the labels again
 

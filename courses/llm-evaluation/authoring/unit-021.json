@@ -10,6 +10,7 @@
     "reference policy"
   ],
   "outcome": "Compute temporal advantages with correct episode boundaries and inspect PPO clipping for both positive and negative advantages.",
+  "verification": "Without the trace the advantages are the residuals 0.86 and 1.6, termination leaves the first step at 0.5, clipping gives 1.2 in the positive case and -1.5 in the negative case, and stored rollout quantities stay frozen.",
   "level": "advanced",
   "runtime": "python-core",
   "minutes": 120,

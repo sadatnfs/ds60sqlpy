@@ -12,8 +12,8 @@ Assemble source/config hashes, actual image/platform identities, positive/negati
 - Cleanup/evidence-storage result and any separate prepared or unavailable feature.
 
 For the common three-order fixture, require IDs 1/2/3 with amounts 4/9/7, total 20,
-east 11 and west 9. A later fourth west order of2changes current total to22 and west
-to11while an earlier pinned snapshot remains unchanged. Do not use this simple
+east 11 and west 9. A later fourth west order of 2 changes the current total to 22 and west
+to 11 while an earlier pinned snapshot remains unchanged. Do not use this simple
 oracle to claim correctness for a different pipeline without defining its
 deduplication, correction and visibility semantics.
 

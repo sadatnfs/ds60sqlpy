@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import math
 import numpy as np
 import jax
 import jax.numpy as jnp
@@ -80,7 +79,7 @@ def main():
     groups = [(6.0, 2), (9.0, 3), (5.0, 1)]
     close(sum(a for a, n in groups) / sum(n for a, n in groups), 10 / 3)
 
-    print("jax-004" + ": 8 asserted cases passed")
+    print("jax-004: 8 asserted cases passed")
 
 
 if __name__ == "__main__":

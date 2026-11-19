@@ -4,7 +4,7 @@ This architecture lesson uses fixed, sanitized reasoning fixtures. It does not c
 
 ## Level and prerequisites
 
-Advanced; approximately 120 minutes. Direct prerequisite: `spark-029`. The prepared execution baseline elsewhere in this course is classic Spark 4.0.1, Scala binary2.13 and JDK 17. This reading lesson distinguishes that actual local boundary from proposed remote designs.
+Advanced; approximately 90 minutes. Direct prerequisite: `spark-029`. The prepared execution baseline elsewhere in this course is classic Spark 4.0.1, Scala binary 2.13 and JDK 17. This reading lesson distinguishes that actual local boundary from proposed remote designs.
 
 ## How to use this lesson
 
@@ -145,7 +145,7 @@ Review the proposed/driver-local/input.parquet path. State the visibility proble
 
 ### Exercise 3: Map dependencies to driver and executor environments
 
-Produce a dependency matrix for the Scala jar, purePythonrules.zip, a hypothetical native-extension wheel and JDK/Spark runtime. State which proposed substitution is unsupported.
+Produce a dependency matrix for the Scala jar, pure Python rules.zip, a hypothetical native-extension wheel and JDK/Spark runtime. State which proposed substitution is unsupported.
 
 **Inputs/evidence:** For spark-030 Exercise 3, Spark 4.0.1, Scala binary 2.13, JDK 17, course_2.13.jar, rules.zip and an unqualified native-extension wheel.
 
@@ -161,7 +161,7 @@ Reject a task closure that captures an open driver database connection and write
 
 **Inputs/evidence:** For spark-030 Exercise 4, An open driver connection captured by a task function and evidence that a failed task can be retried.
 
-**Expected result/shape:** For spark-030 Exercise 4, No connection object serialized from the driver; a defined task-side resource lifecycle if externalIO is later authorized, and a stable operation identity preventing duplicate external effects.
+**Expected result/shape:** For spark-030 Exercise 4, No connection object serialized from the driver; a defined task-side resource lifecycle if external IO is later authorized, and a stable operation identity preventing duplicate external effects.
 
 **Verify:** Explain why serializability alone would not guarantee exactly-once writes and name the cleanup and deduplication evidence needed.
 
@@ -169,7 +169,7 @@ Reject a task closure that captures an open driver database connection and write
 
 ### Exercise 5: Define the Connect adapter boundary honestly
 
-Classify which existing classic capabilities can be assumed in a proposedConnect profile, and list the compatibility and lifecycle tests required before exposing it as ready.
+Classify which existing classic capabilities can be assumed in a proposed Connect profile, and list the compatibility and lifecycle tests required before exposing it as ready.
 
 **Inputs/evidence:** For spark-030 Exercise 5, The existing _jdf/queryExecution and RDD-based diagnostic helpers, plus the proposed remote logical-plan client.
 
@@ -193,7 +193,7 @@ Turn the sanitized proposal into a go/no-go review record with explicit evidence
 
 ## Common pitfalls
 
-Do not equate local[2] with a two-executor cluster. Do not assume driver files, imports or environment variables are executor-visible. Do not distribute secrets in source archives or captured closures. Do not assume a Scala binary suffix can be changed independently of the selectedSpark artifacts. Do not callConnect supported because a classic local transformation worked. Keep proposed architecture, artifact inspection, execution receipts and production acceptance as separate evidence.
+Do not equate local[2] with a two-executor cluster. Do not assume driver files, imports or environment variables are executor-visible. Do not distribute secrets in source archives or captured closures. Do not assume a Scala binary suffix can be changed independently of the selected Spark artifacts. Do not call Connect supported because a classic local transformation worked. Keep proposed architecture, artifact inspection, execution receipts and production acceptance as separate evidence.
 
 ## Self-check
 

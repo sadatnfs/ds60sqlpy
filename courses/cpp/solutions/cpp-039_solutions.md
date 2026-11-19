@@ -13,7 +13,7 @@ The opaque handle keeps C++ layout private, but its lifetime is still a public r
 <!-- depth:start -->
 ## Opaque handles and ownership across an ABI
 
-An opaque handle hides a C++ implementation behind a pointer-shaped public interface. A consumer can pass the handle back to the provider without knowing the class layout. This reduces coupling to implementation details, but the handle still has a lifecycle:creation succeeds or fails, use requires a live valid handle, and destruction ends that lifetime.
+An opaque handle hides a C++ implementation behind a pointer-shaped public interface. A consumer can pass the handle back to the provider without knowing the class layout. This reduces coupling to implementation details, but the handle still has a lifecycle: creation succeeds or fails, use requires a live valid handle, and destruction ends that lifetime.
 
 The create function catches allocation failure and returns null under its no-throw boundary. The caller checks that result before use. The read function returns a status code and writes through an output pointer only on success. The destroy function belongs to the provider, which keeps allocation and release responsibilities paired. A foreign consumer should not guess that its own delete or allocator is interchangeable.
 
@@ -55,7 +55,7 @@ Name who destroys a successfully created handle.
 
 **Reasoning:** The provider controls allocation and deallocation pairing.
 
-**Verify:** Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.
+**Verify:** Check your answer against Worked example 1: the `unique_ptr` owner calls `analyzer_destroy` once at scope exit, and no other line deletes `raw`.
 
 ## Exercise 2: Wrap safely
 
@@ -65,7 +65,7 @@ Use unique_ptr with analyzer_destroy as deleter.
 
 **Reasoning:** RAII can manage a C boundary through a custom deleter.
 
-**Verify:** Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.
+**Verify:** Use a scratch deleter that increments a counter and then calls `analyzer_destroy`, and assert the counter is 0 inside the scope and 1 after it ends.
 
 ## Exercise 3: Reject null arguments
 
@@ -75,7 +75,7 @@ Test null handle and null output independently.
 
 **Reasoning:** Both borrowed pointers require validation.
 
-**Verify:** Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.
+**Verify:** Assert `analyzer_read(nullptr, &out) == 1` and `analyzer_read(handle, nullptr) == 1` as two separate assertions, and that `out` keeps its old value -1.
 
 ## Exercise 4: Repair cross-boundary throw
 
@@ -85,7 +85,7 @@ Review a create function that throws bad_alloc across C.
 
 **Reasoning:** The foreign caller may not support C++ unwinding.
 
-**Verify:** Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.
+**Verify:** Confirm the repaired function wraps `new` in `try`/`catch` inside its `extern "C"` body, as `analyzer_create` does, and that callers check for `nullptr` before use.
 
 ## Exercise 5: Version the interface
 
@@ -95,7 +95,7 @@ Add a provider ABI-version query returning 1.
 
 **Reasoning:** A version check supplements, rather than proves, actual binary compatibility.
 
-**Verify:** Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.
+**Verify:** Assert the query returns 1, then make the caller accept only version 2 in a scratch copy and confirm it stops before calling `analyzer_create`.
 
 ## Exercise 6: Transfer real loading
 
@@ -105,4 +105,4 @@ Build and load a shared provider in a separate owned host project.
 
 **Reasoning:** The browser source is not a dynamic-loader acceptance receipt.
 
-**Verify:** Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.
+**Verify:** Run `nm -D` on the shared library and confirm `analyzer_create`, `analyzer_destroy` and `analyzer_read` appear unmangled, then keep that list with `uname -m`, the compiler version and the create/destroy test result.

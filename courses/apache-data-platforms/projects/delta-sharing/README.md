@@ -17,14 +17,14 @@ Neither action contacts a sharing server. The portable client uses actual HTTP
 protocol operations and PyArrow Parquet decoding, not a mock sharing service.
 It is intentionally limited to basic unpartitioned Parquet/minReaderVersion 1; Delta response
 format, deletion vectors and CDF are rejected or left to separately supported
-clients. Current official Python 1.4.2depends on a Rust wrapper with no inspected
-LinuxARM64wheel, so no automatic emulation or incompatible install is attempted.
+clients. Current official Python 1.4.2 depends on a Rust wrapper with no inspected
+Linux ARM64 wheel, so no automatic emulation or incompatible install is attempted.
 
 For an explicitly prepared owned reference server, put the fixture recipient
 profile in untracked `.workshop/recipient.share` and set DS60_SHARING_DATA_HOSTS in an
 untracked `.workshop/sharing.env` to a comma-separated exact hostname allowlist for the
-expected object store. The profile uses shareCredentialsVersion1, endpoint and
-bearerToken. Never paste it into a notebook or commit it. Adjust the public
+expected object store. The profile uses `shareCredentialsVersion` 1, `endpoint` and
+`bearerToken`. Never paste it into a notebook or commit it. Adjust the public
 fixture-contract.json only to the actual owned share/schema/table/version.
 
 ```bash
@@ -32,7 +32,7 @@ bash run.sh check
 ```
 
 The client lists shares/schemas/tables, fetches metadata, requests the fixed
-version, validates supported protocol, then reads at most10 files/8 MB combined
+version, validates supported protocol, then reads at most 10 files and 8 MB combined
 and 1000 rows combined. Parquet footer row/column/group/schema and uncompressed-byte
 bounds are checked before materializing data. Nonempty partitionValues are rejected;
 this first portable route is explicitly unpartitioned. It requires exact order rows and actual 401/403 for an invalid

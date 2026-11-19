@@ -6,7 +6,13 @@ Beginner; approximately 120 minutes. Direct prerequisites: . The prerequisite se
 
 ## Learning objectives
 
-A deep-learning investigation asks a model to predict a defined target from available inputs, then tests what evidence supports using that prediction. The central investigation is concrete: Use three training points(1, 2), (2, 4), (3, 6) and four untouched points(4, 8)..(7, 14); name one row as the prediction unit. The finish condition is 3 training rows, 4 holdout rows, one prediction per row. report says arithmetic/software checked; population reliability unestablished. A useful explanation connects the calculation to the reason it is needed, rather than treating a function name as a definition.
+Write an experiment card that names the prediction unit, the training and holdout rows, a training-only baseline and the claims a tiny CPU fixture cannot support.
+
+Central investigation: Split seven points of y = 2x into three training and four untouched rows, score a constant training-mean baseline and audit a holdout that was reused for selection.
+
+Finish condition: The card records 3 training and 4 holdout rows, a baseline mean of 4 with holdout MSE 54, the hand rule labeled as an analytic oracle rather than a trained model, and the reused holdout reclassified as validation.
+
+The worked examples demonstrate the mechanism; exercises 1-3 transfer it to new inputs and exercises 4-6 extend it to failures and boundary cases. A useful explanation connects the calculation to the reason it is needed, rather than treating a function name as a definition.
 
 ## Purpose and mental model
 
@@ -113,33 +119,33 @@ Training execution evidence: absent unless an actual optimizer run is recorded
 
 ## Prediction before your attempt
 
-For the supplied fixture, name the input unit, the intermediate state and the final quantity that changes. Predict one normal result and one failure result before touching the code. In particular, explain this lesson's acceptance condition in your own words: 3 training rows, 4 holdout rows, one prediction per row. report says arithmetic/software checked; population reliability unestablished. Preserve the prediction beside your later observations so a correction is visible. A copied expected value is not a derivation.
+For the supplied fixture, name the input unit, the intermediate state and the final quantity that changes. Predict one normal result and one failure result before touching the code. In particular, explain this lesson's acceptance condition in your own words: The card records 3 training and 4 holdout rows, a baseline mean of 4 with holdout MSE 54, the hand rule labeled as an analytic oracle rather than a trained model, and the reused holdout reclassified as validation. Preserve the prediction beside your later observations so a correction is visible. A copied expected value is not a derivation.
 
 ## Exercises
 
-1. **Define a prediction unit.** Use three training points(1, 2), (2, 4), (3, 6) and four untouched points(4, 8)..(7, 14); name one row as the prediction unit.
-   **Expected:** 3 training rows, 4 holdout rows, one prediction per row.
-   **Verify:** Save the reasoning table for exercise 1, including 3 training rows, 4 holdout rows, one prediction per row.
+1. **Name the unit for grouped rows.** A table has six rows from three customers, two rows per customer, and the task predicts next month's spend for each customer. Name the prediction unit and the unit that must stay together in a split.
+   **Expected:** prediction unit: one customer for the next month; split unit: customer, so 3 independent units rather than 6 rows.
+   **Verify:** Your worksheet names the customer as both the prediction and split unit and states the count 3; a split that places c1 rows on both sides is marked invalid.
 
-2. **Calculate a mean baseline.** Use training targets 2, 4, 6 to predict the constant training mean on holdout 8, 10, 12, 14.
-   **Expected:** mean 4; holdout squared errors 16, 36, 64, 100; MSE 54.
-   **Verify:** Save the reasoning table for exercise 2, including mean 4; holdout squared errors 16, 36, 64, 100; MSE 54.
+2. **Recompute a training-only baseline.** Use training targets 1, 3, 5 to predict a constant on holdout targets 7 and 9. Report the constant, the holdout residuals and the holdout MSE.
+   **Expected:** constant 3; residuals 4 and 6; squared errors 16 and 36; MSE 26.
+   **Verify:** Your table shows the mean 3 computed from training targets only and the two squared errors summing to 52 over a denominator of 2; a version that uses the holdout mean 8 is labeled leaked.
 
-3. **Separate an exact relation from learned evidence.** Compare a hand-specified rule y=2x with a model trained on the three points.
-   **Expected:** the hand rule predicts the fixture exactly but was not learned by running an optimizer.
-   **Verify:** Save the reasoning table for exercise 3, including the hand rule predicts the fixture exactly but was not learned by running an optimizer.
+3. **Classify evidence for a generated fixture.** A notebook reports zero error for the rule y = 3x on points that were generated from y = 3x, and it contains no optimizer log. Classify what the zero error establishes.
+   **Expected:** an analytic oracle consistent with the generator; no training evidence; no evidence about unseen data.
+   **Verify:** Your answer separates the three evidence types and names the missing optimizer record and missing independent sample as the two absent items.
 
 4. **Audit selection leakage.** After looking at holdout errors, a researcher changes the learning rate and reports the better result as final.
    **Expected:** holdout was used for selection; new untouched assessment needed.
-   **Verify:** Save the reasoning table for exercise 4, including holdout was used for selection; new untouched assessment needed.
+   **Verify:** Your timeline shows the holdout score influencing the learning-rate change and relabels that data as validation; the report names a new untouched set as the only valid final assessment.
 
 5. **Align a framework comparison.** List the contracts that must match before comparing one PyTorch and one TensorFlow update.
    **Expected:** same data pairing, dtype, initial weight, loss reduction, rate and optimizer rule.
-   **Verify:** Save the reasoning table for exercise 5, including same data pairing, dtype, initial weight, loss reduction, rate and optimizer rule.
+   **Verify:** Your checklist names all six contracts (pairing, dtype, initial weight, reduction, rate and optimizer rule) and orders the comparisons forward loss, gradient, updated weight and new loss.
 
 6. **Bound the conclusion.** Write a report for a successful tiny CPU reference that avoids a production-quality claim.
    **Expected:** report says arithmetic/software checked; population reliability unestablished.
-   **Verify:** Save the reasoning table for exercise 6, including report says arithmetic/software checked; population reliability unestablished.
+   **Verify:** Your report contains one sentence on what the CPU run checked and one listing unestablished properties, and contains no production-quality claim.
 
 ## Common pitfalls and diagnosis
 
@@ -153,7 +159,7 @@ First draw the state described in the vocabulary section. Next use the smallest 
 
 ## Self-check and retrieval
 
-Close both worked examples. Explain Prediction unit, Training, Holdout using the lesson fixture. Reconstruct one computation from its inputs. Then change one input while retaining the mechanism and predict whether the conclusion survives. Write which part is guaranteed by the code and which part would need new observations. This last distinction prevents a tiny deterministic teaching example from being presented as evidence about an unseen population or a production model.
+Close all three worked examples. Explain Prediction unit, Training, Holdout using the lesson fixture. Reconstruct one computation from its inputs. Then change one input while retaining the mechanism and predict whether the conclusion survives. Write which part is guaranteed by the code and which part would need new observations. This last distinction prevents a tiny deterministic teaching example from being presented as evidence about an unseen population or a production model.
 
 ## Next step
 
@@ -161,7 +167,7 @@ Revisit the direct prerequisite  if the calculation cannot be reconstructed with
 
 ## Sources and verification status
 
-API and mechanism reference: [PyTorch2.9 reference](https://docs.pytorch.org/docs/2.9/index.html), reviewed 2026-10-22. The fixture, examples, counterexamples and exercise design are original course material. See [validation](../../../docs/validation.md) for execution gates. Check CI artifacts for the exact revision and platform to determine which runtime checks actually ran; authored content alone does not establish runtime execution.
+API and mechanism reference: [PyTorch 2.9 reference](https://docs.pytorch.org/docs/2.9/index.html), reviewed 2026-10-22. The fixture, examples, counterexamples and exercise design are original course material. See [validation](../../../docs/validation.md) for execution gates. Check CI artifacts for the exact revision and platform to determine which runtime checks actually ran; authored content alone does not establish runtime execution.
 
 ## Interview reasoning with worked answers
 

@@ -26,6 +26,16 @@ action inspects real consumer Dag Runs and their completed outputs. A source-fil
 change made outside the producer task would not automatically create the same
 asset event in this fixture.
 
+The consumer DAG is scheduled by the asset rather than by a clock, and its summary
+task is mapped over the two regions:
+
+<!-- include: projects/airflow/dags/classroom_workflows.py #asset_workflow python -->
+
+`schedule=[ORDERS]` creates a consumer run after the producer's `write` task, which
+lists `ORDERS` in its `outlets`, succeeds. `.partial(...)` fixes the arguments shared
+by every mapped instance, and `.expand(region=[...])` creates one instance per
+region. `pool="classroom_io"` makes every instance take a slot from that pool.
+
 The consumer first captures one bounded immutable source manifest and passes its
 reference to both mapped tasks. A retry reuses that run manifest rather than
 recapturing newer data. Each region therefore uses the same source population,

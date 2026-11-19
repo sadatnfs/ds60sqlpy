@@ -138,7 +138,7 @@
       "id": "julia-020",
       "profile": "julia",
       "reference": "courses/julia/solutions/julia-020_reference.jl",
-      "source_sha256": "55d72dfa044a40098c377b1e9a9178bf585e3d06cfe13b80d0cec74cca356427",
+      "source_sha256": "2d41b276b8c6a57a9acb10ffb00d847bd7015bc8e89baf750bb1d3d68f9e5952",
       "expected_output": "julia-020: all reference checks passed"
     },
     {
@@ -194,7 +194,7 @@
       "id": "julia-028",
       "profile": "julia",
       "reference": "courses/julia/solutions/julia-028_reference.jl",
-      "source_sha256": "a1efbed560ab5e6551dd271985eb1cffe8dd2475be79f0cf992a324d046234f4",
+      "source_sha256": "a953b75899e484e2e7261c45e6168f80cba26dc4218ef79f9307eb2490593c75",
       "expected_output": "julia-028: all reference checks passed"
     },
     {

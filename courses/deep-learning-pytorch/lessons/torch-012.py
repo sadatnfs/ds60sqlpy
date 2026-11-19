@@ -10,19 +10,20 @@ Copy to .learning before editing. Six independent attempts belong below.
 
 # Exercise 2: Measure the training-mean baseline
 # Fit the constant from training targets and score the two holdout rows.
-# Expected: mean.5; holdout MSE 7.25.
+# Expected: mean 0.5; holdout MSE 7.25.
 
 # Exercise 3: Train a bounded linear model
-# Initialize a bias-free 3-to-1Linear layer at zero and run 100 SGD.1 updates.
+# Initialize a bias-free 3-to-1 Linear layer at zero and run 100 SGD updates with learning
+# rate 0.1.
 # Expected: 100 finite updates; training loss decreases.
 
 # Exercise 4: Open the holdout after fitting
 # Calculate final training and holdout MSE without updates.
-# Expected: finite errors; holdout error below 7.25on this fixture.
+# Expected: finite errors; holdout error below 7.25 on this fixture.
 
 # Exercise 5: Retain an independent pilot oracle
 # Calculate the scalar first update directly from NumPy without using the module.
-# Expected: w28/15and loss 56/675.
+# Expected: w = 28/15 and loss 56/675.
 
 # Exercise 6: Write the bounded evidence report
 # Record split IDs, 100 steps, errors and the two-row limitation.

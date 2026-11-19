@@ -44,6 +44,37 @@ source literals, child-JVM environment and separate diagnostic output remain
 unchanged. A generation or formatter pass is not compiler, runtime or learner
 mastery evidence.
 
+## Outcomes and derived practice
+
+`outcomes.py` holds one specific, observable outcome per lesson ID; the renderer
+refuses a missing outcome or one that merely repeats the mental model. The
+published `lab` and `verification` fields both come from exercise 3, the first
+authored investigation. Required work never runs inside an `assert` statement:
+store the result first and assert on the stored value, so a launch without `-ea`
+still performs every operation.
+
+Exercises 1 and 2 are derived from Examples A and B instead of repeating them:
+exercise 1 changes one input of Example A and asks for a prediction, exercise 2
+presents a one-token regression (or an edited assertion) in the code that
+Example B adds. Every `Verify` line and progressive hint names that exercise's
+own assertion and a one-token edit that was executed and observed to make that
+assertion fail. The renderer locates the edit in the formatted snippet that
+learners see, so it calls the same `canonical_markdown` adapter on the six
+exercise fences. The observations live in `variants.json` and are refreshed
+after any exercise change:
+
+```sh
+python courses/java/authoring/qualify_variants.py
+```
+
+It needs a local Docker engine and the prepared `ds60sqlpy-worker-java21` image.
+Each mutant is compiled with the classroom `javac` flags and run with `-ea`,
+offline and without a repository mount. Unmodified references must pass first,
+and a mutant counts only when the targeted exercise's own assertion fails; a
+timeout, compile error or other exception is not counted. Edits outside an
+assertion are preferred. Rendering never executes code and stops with a clear
+message if an exercise changed after its record was made.
+
 Use [CONTRIBUTING](../../../CONTRIBUTING.md) and the
 [validation guide](../../../docs/validation.md) for shared checks. Refresh shared
 readers only after the owner-generated content passes its checks; never edit

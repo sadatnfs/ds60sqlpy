@@ -8,7 +8,7 @@ Execute a complete synthetic modeling workflow from typed CSV to a source-identi
 
 ## Classroom execution
 
-Choose **Julia language and scientific computing** in `/classroom`, open this unit, and select its prepared `julia` runtime. The worker starts a fresh `main.jl` process with two Julia threads, a fixed package environment, no startup file and offline package settings. Both worked examples are complete under that environment. Save your current pad before replacing it. No package, model or dataset is fetched by a lesson.
+Open `julia-032` in `/classroom` with its prepared `julia` runtime. Worked case A (carry one contract through the analysis) and worked case B (a figure and its exact underlying table) are complete programs: save your current pad, paste one of them and press Run. The learner file contains the six investigations below; the explained reference ends by printing `julia-032: all reference checks passed`. One program in this unit publishes a bounded Plotly figure with its description and exact table. The [course overview](../README.md) describes the shared runtime: a fresh offline `main.jl` process with two threads and a fixed package environment.
 
 ## A decision record is more than a fitted model
 
@@ -277,7 +277,7 @@ worked_b()
 
 The reference injects a duplicate ID, a late feature, a late final label and a nonfinite predictor. Each is rejected. This is stronger than merely checking that a normal CSV file can be parsed. Keep these failures visible in the learner's own extension. A transformation that silently removes difficult rows should be treated as a protocol change with explicit denominators.
 
-The Plotly helper is classroom infrastructure, not a general Julia plotting package. It captures a bounded data artifact for the browser. Source execution, figure capture, browser rendering and saved receipts remain distinct acceptance layers. Outside the classroom, choose and prepare a plotting library explicitly rather than assuming this helper exists.
+The Plotly helper is classroom infrastructure, not a general Julia plotting package. It captures a bounded data artifact for the browser. Source execution, figure capture, browser rendering and saved run output remain distinct acceptance layers. Outside the classroom, choose and prepare a plotting library explicitly rather than assuming this helper exists.
 
 ## The final memo and next steps
 
@@ -345,4 +345,4 @@ State what passes and what evidence is still missing.
 
 ## Study companion
 
-Use the repository learning-companion skill with this lesson ID, your prediction and your actual source/output. Ask for a diagnosis of the first incorrect type, shape, state transition or assumption. Keep observed execution distinct from a timing claim, inferred mathematical result or external deployment.
+A repository-aware assistant with the learning-companion skill can review `julia-032` with you. Give it your prediction for one investigation, your source and the actual output, and ask it to find the first incorrect assumption about data contracts, availability time, validation selection, holdout, provenance or Plotly.

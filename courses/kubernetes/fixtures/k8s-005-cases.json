@@ -6,13 +6,13 @@
   "cases": [
     {
       "exercise": 1,
-      "task": "Read the source image,pull policy,command and named port.",
-      "expected": "Image0.2.0,Never,fixed fixture server,port8080 named http."
+      "task": "Read the source image, pull policy, command and named port.",
+      "expected": "Image 0.2.0, Never, fixed fixture server, port 8080 named http."
     },
     {
       "exercise": 2,
-      "task": "Classify the synthetic Running/Ready=False record.",
-      "expected": "Process running,readiness unproved,no ready-routing claim."
+      "task": "Run the starter unchanged: its readinessProbe requests /missing. Classify the resulting state, then restore /ready and Run again.",
+      "expected": "The first Run fails its bounded readiness check without an application crash: the process can be Running while Ready stays False. After /ready is restored, a fresh Run can establish Ready."
     },
     {
       "exercise": 3,
@@ -21,12 +21,12 @@
     },
     {
       "exercise": 4,
-      "task": "Record a bounded synthetic log excerpt with Pod UID,container name and restart count.",
+      "task": "Record a bounded synthetic log excerpt with Pod UID, container name and restart count.",
       "expected": "An evidence record ties the line to the exact observed process instance."
     },
     {
       "exercise": 5,
-      "task": "Compare same Pod UID with restartCount1 against a new Pod UID with restartCount0.",
+      "task": "Compare same Pod UID with restartCount 1 against a new Pod UID with restartCount 0.",
       "expected": "First is a container restart; second is a different Pod instance."
     },
     {

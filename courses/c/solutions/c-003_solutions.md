@@ -4,26 +4,30 @@ Compare after an attempt or explicit reveal. The complete executable reference i
 
 ## Mechanism and assumptions
 
-An expression can compute a value and sometimes change state. C does not guarantee one universal evaluation order for every operator or function argument. Modifying one scalar more than once without the required sequencing can be undefined behavior. Keep complex updates in separate statements until the ordering is clear. The usual arithmetic conversions also affect comparisons: mixing a negative signed integer with an unsigned value can convert the negative operand into a large unsigned value. Parentheses clarify grouping but do not create sequencing where the language supplies none. Distinguish precedence, associativity and evaluation order.
+An expression can compute a value and sometimes change state. C does not guarantee one universal evaluation order for every operator or function argument. Modifying one scalar more than once without the required sequencing can be undefined behavior. Keep complex updates in separate statements until the ordering is clear. Before any arithmetic, operands narrower than int, such as char, unsigned char and short, are converted to int when int can represent all their values (the integer promotions); the usual arithmetic conversions then bring both operands to a common type. Those conversions also affect comparisons: mixing a negative signed integer with an unsigned value can convert the negative operand into a large unsigned value. Parentheses clarify grouping but do not create sequencing where the language supplies none. Distinguish precedence, associativity and evaluation order.
 
 && and || short-circuit and sequence their left operand before a needed right operand. The conditional operator evaluates only its selected second or third operand. Assignment returns the assigned value, so accidental assignment inside a condition can be legal but wrong. ++ changes a value; using it in a larger expression requires careful reasoning. Prefer explicit temporary variables for updates with several observable effects.
 
-## Exercise 1: Group before calculating
+## Exercise 1: Group before calculating: predict an edited check
 
-Compare 2+3*4 with (2+3)*4.
+Copy worked example 1 into a scratch pad and change `CHECK((2 + 3) * 4 == 20);` to `CHECK((3 + 3) * 4 == 20);` inside its CHECK. Before running, predict whether the CHECK still holds and explain why; then restore it.
+
+The unchanged code is worked example 1:
 
 ```c
 CHECK(2 + 3 * 4 == 14);
 CHECK((2 + 3) * 4 == 20);
 ```
 
-**Expected:** The values are 14 and 20.
+**Expected:** The changed run stops with `Check failed` at the CHECK on `(2 + 3) * 4 == 20`. Restoring the original line brings back the worked observation: the values are 14 and 20.
 
 Parentheses alter grouping. This example has no side effects, so it does not depend on evaluation order.
 
-## Exercise 2: Use a short-circuit guard
+## Exercise 2: Use a short-circuit guard: debug a regression
 
-Guard an array access with a false length test.
+A regression changed one token in worked example 2, so one line now reads `bool found = length >= 0 && values[0] == 7;`. Run worked example 2 with that line, use the failing CHECK to locate the defect and repair it without changing the CHECK.
+
+The unchanged code is worked example 2:
 
 ```c
 int values[1] = {7};
@@ -32,7 +36,7 @@ bool found = length > 0 && values[0] == 7;
 CHECK(!found);
 ```
 
-**Expected:** The access is skipped and the condition is false.
+**Expected:** Before the repair the run stops with `Check failed` at the CHECK on `!found`; after it the line reads `bool found = length > 0 && values[0] == 7;` again and the access is skipped and the condition is false.
 
 The right operand is evaluated only when the left is true. A guard must precede the operation it protects.
 
@@ -79,20 +83,20 @@ CHECK(value == 7);
 
 The unchosen operand of ?: is not evaluated. This safe fixture demonstrates the rule without executing the invalid division.
 
-## Exercise 6: Transfer assignment diagnosis
+## Exercise 6: Transfer integer promotion
 
-Assign 3 to a variable, then separately compare it with 3.
+Add two unsigned char values 200 and 100, then store the sum back into an unsigned char.
 
 ```c
-int x = 0;
-x = 3;
-bool same = (x == 3);
-CHECK(same &&x == 3);
+unsigned char a = 200, b = 100;
+int sum = a + b;
+unsigned char stored = (unsigned char)(a + b);
+CHECK(sum == 300 && stored == 44);
 ```
 
-**Expected:** The assignment changes the variable and equality tests it.
+**Expected:** The promoted int sum is 300; the stored unsigned char is 44.
 
-Using = where == was intended may compile because assignment is an expression. Warnings and clear statement boundaries help expose that defect.
+Operands narrower than int, such as unsigned char, are promoted to int before arithmetic, so a + b is the int 300 rather than a value that wraps at 256. Converting the result back to unsigned char reduces it modulo 256, giving 44. The same rule turns a uint16_t product such as 65535 * 65535 into a signed int multiplication that overflows on common 32-bit int targets; widen first with (uint32_t)x * x.
 
 ## After comparison
 

@@ -155,7 +155,7 @@ rewritten = rewrite(original, {"buy": "purchase"})
 assert rewritten == "purchase rate" and original == "buy rate"
 ```
 
-**Expected:** rewrittenpurchase rate; original unchanged.
+**Expected:** rewritten query purchase rate; original question unchanged.
 
 ### Example B: Retain a rewrite trace
 
@@ -181,13 +181,13 @@ assert walk("metric", graph, 2) == ["metric", "exclusions", "test_accounts"]
 
 ## Prediction before your attempt
 
-For the supplied fixture, name the input unit, the intermediate state and the final quantity that changes. Predict one normal result and one failure result before touching the code. In particular, explain this lesson's acceptance condition in your own words: rewrittenpurchase rate; original unchanged. restricted document never appears. Preserve the prediction beside your later observations so a correction is visible. A copied expected value is not a derivation.
+For the supplied fixture, name the input unit, the intermediate state and the final quantity that changes. Predict one normal result and one failure result before touching the code. In particular, explain this lesson's acceptance condition in your own words: rewritten query purchase rate; original question unchanged. restricted document never appears. Preserve the prediction beside your later observations so a correction is visible. A copied expected value is not a derivation.
 
 ## Exercises
 
-1. **Apply a controlled synonym rewrite.** Rewritebuy rate usingbuy->purchase while preserving the original question.
-   **Expected:** rewrittenpurchase rate; original unchanged.
-   **Verify:** Save the assertion results for exercise 1, including rewrittenpurchase rate; original unchanged.
+1. **Apply a controlled synonym rewrite.** Rewrite buy rate using the rule buy -> purchase while preserving the original question.
+   **Expected:** rewritten query purchase rate; original question unchanged.
+   **Verify:** Save the assertion results for exercise 1, including rewritten query purchase rate; original question unchanged.
 
 2. **Retain a rewrite trace.** Record the original, rewritten query and policy version.
    **Expected:** trace includes all three fields.

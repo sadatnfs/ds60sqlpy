@@ -56,7 +56,7 @@ else:
 
 ## Exercise 5: Check transformation parity
 
-The compiled function receives the numerical representation after host admission.
+The compiled function receives the numerical representation after host-side validation.
 
 **Expected:** Matching coefficients.
 
@@ -76,6 +76,6 @@ close(solve(design, jnp.array([2.0, 5.0, 8.0]), mask, 0.0), [2.0, 3.0])
 
 ## Scope of this evidence
 
-A zero gradient can belong to the wrong objective. A low residual can belong to an ill-conditioned problem. A JIT pass can preserve the wrong mask. Retain separate evidence for admission, mathematical correctness, transformation behavior and the intended interpretation.
+A zero gradient can belong to the wrong objective. A low residual can belong to an ill-conditioned problem. A JIT pass can preserve the wrong mask. Retain separate evidence for input validation, mathematical correctness, transformation behavior and the intended interpretation.
 
 Deliver your own implementation with a short contract, shape ledger, independent oracle and a failure case absent from the worked examples. Explain when a QR/SVD-based fit or a different regularization policy would be preferable to this tiny normal-equation teaching component.

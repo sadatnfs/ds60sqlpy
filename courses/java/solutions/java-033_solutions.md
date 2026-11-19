@@ -4,9 +4,9 @@ Open after an attempt or an explicit solution reveal. The executable reference r
 
 ## Mechanism review
 
-An application boundary converts untrusted input into a limited set of permitted operations. Type and syntax checks are necessary but not sufficient:an identifier can be avalidString while naming an unauthorized file,and an accepted operation can still consume unbounded resources. Prefer explicit operation and identifier allowlists when the task is small. Keep validation close to the resource use and report a named failure instead of silently choosing a broader fallback.
+An application boundary converts untrusted input into a limited set of permitted operations. Type and syntax checks are necessary but not sufficient:an identifier can be a valid String while naming an unauthorized file, and an accepted operation can still consume unbounded resources. Prefer explicit operation and identifier allowlists when the task is small. Keep validation close to the resource use and report a named failure instead of silently choosing a broader fallback.
 
-Filesystem containment has both lexical andreal-path concerns. Normalizing awaydot segments can detect a simple parent traversal,but a symbolic link can redirect a seemingly contained path. This lesson uses an owned temporary directory and known fixtures,checks both forms of containment,and bounds reads with limit+1 bytes. It does not claim to be a race-proof sandbox against a concurrent adversary changing the filesystem. Logs retain selected metadata rather than copying secrets orrawsource bodies.
+Filesystem containment has both lexical and real-path concerns. Normalizing away dot segments can detect a simple parent traversal, but a symbolic link can redirect a seemingly contained path. This lesson uses an owned temporary directory and known fixtures, checks both forms of containment, and bounds reads with limit+1 bytes. It does not claim to be a race-proof sandbox against a concurrent adversary changing the filesystem. Logs retain selected metadata rather than copying secrets or raw source bodies.
 
 **Allowlist:** An explicit set of admitted operations or identifiers.
 
@@ -18,13 +18,15 @@ Filesystem containment has both lexical andreal-path concerns. Normalizing awayd
 
 ## Reading the reference
 
-Resolve a relative path under a real root,normalize it,and reject absolute orescaping paths. Reject symbolic-linkcomponents under this simple policy,then check the existing realpath remains inside the root. Read atmostlimit+1bytes and reject an oversized payload. A fixed dispatcher maps admitted operation names to known functions;it never passes input to a shell or reflection loader. Build logs from allowlisted metadata schema.
+Resolve a relative path under a real root, normalize it, and reject absolute or escaping paths. Reject symbolic-link components under this simple policy, then check the existing real path remains inside the root. Read at most limit+1 bytes and reject an oversized payload. A fixed dispatcher maps admitted operation names to known functions; it never passes input to a shell or reflection loader. Build logs from allowlisted metadata schema.
 
-## Exercise 1: Read an admitted owned file
+## Exercise 1: Read an admitted owned file: change one input
 
-Task: Create `input.txt` inside an owned root and read at most 10 bytes.
+Task: Copy Example A into a scratch `Main.java` and change `java.nio.file.Files.writeString(root.resolve("input.txt"), "hello");` to `java.nio.file.Files.writeString(root.resolve("input.txt"), "hello!");`. Before running it with `java -ea Main`, predict which assertion fails and which value it now sees; then run it and restore the original line.
 
 The helper reads actual local bytes under a bounded contract. The fixture root is owned by the lesson and contains no user data.
+
+The unchanged code is the part that Example A adds:
 
 ```java
 withRoot(root -> {
@@ -36,15 +38,17 @@ withRoot(root -> {
 });
 ```
 
-**Expected:** content hello.
+**Expected:** The changed run fails with an `AssertionError` from the assertion on `new String(readBounded(root, "input.txt", 10), java.nio.charset.StandardCharsets.UTF_8).equals("hello")`. Restoring the original line brings back the worked observation: content hello.
 
-**Verify:** Compare the program values or named exception with content hello. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.
+**Verify:** Compare your written prediction with the reported `AssertionError` and its stack-trace line, and name the value that made `new String(readBounded(root, "input.txt", 10), java.nio.charset.StandardCharsets.UTF_8).equals("hello")` false. After restoring the line, the program completes without an `AssertionError` again.
 
-## Exercise 2: Reject lexical traversal and absolute paths
+## Exercise 2: Reject lexical traversal and absolute paths: debug a regression
 
-Task: Attempt../outside.txt andanabsolutechildpath.
+Task: A regression changed `rejected = true;` to `rejected = false;` in the code that Example B adds after Example A. Run Example B with that change, use the failing assertion to explain the defect and repair it without changing the assertion.
 
-A path's string appearance is not a permission decision. Normalization andrelative-path validation make the simple boundary explicit.
+A path's string appearance is not a permission decision. Normalization and relative-path validation make the simple boundary explicit.
+
+The unchanged code is the part that Example B adds:
 
 ```java
 withRoot(root -> {
@@ -60,15 +64,15 @@ withRoot(root -> {
 });
 ```
 
-**Expected:** SecurityException for both.
+**Expected:** Before the repair the run fails with an `AssertionError` from the assertion on `rejected`; after it the line reads `rejected = true;` again and securityException for both.
 
-**Verify:** Compare the program values or named exception with SecurityException for both. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.
+**Verify:** Keep the failing and the repaired runs. Explain why the changed token alters the value tested by `rejected` for this input.
 
 ## Exercise 3: Enforce the byte limit after reading a bounded amount
 
-Task: Writefivebytes and request a four-byte maximum.
+Task: Write five bytes and request a four-byte maximum.
 
-A preflightFiles.size check alone can race with file growth. Readingonlylimit+1bytes keeps allocation bounded and detects an oversized result.
+A preflight Files.size check alone can race with file growth. Reading only limit+1 bytes keeps allocation bounded and detects an oversized result.
 
 ```java
 withRoot(root -> {
@@ -85,13 +89,13 @@ withRoot(root -> {
 
 **Expected:** IOException for oversized content.
 
-**Verify:** Compare the program values or named exception with IOException for oversized content. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.
+**Verify:** Keep an assertion equivalent to `rejected`. As a control, change `readBounded(root, "large.txt", 4);` to `readBounded(root, "large.txt", 5);`: the run must fail with an `AssertionError` from the assertion on `rejected`. Restore the line before continuing.
 
 ## Exercise 4: Reject symbolic-link access under the declared policy
 
-Task: Create a link inside the owned root to another owned file and attempt to read throughit.
+Task: Create a link inside the owned root to another owned file and attempt to read through it.
 
-The default policy rejects allsymlink components,even anin-root target. A more permissive policy needs additional ownership and race analysis rather than simply skipping the check.
+The default policy rejects all symlink components, even an in-root target. A more permissive policy needs additional ownership and race analysis rather than simply skipping the check.
 
 ```java
 withRoot(root -> {
@@ -118,15 +122,15 @@ withRoot(root -> {
 });
 ```
 
-**Expected:** link rejected when platform supports creation;unsupported capability recorded explicitly.
+**Expected:** link rejected when platform supports creation; unsupported capability recorded explicitly.
 
-**Verify:** Compare the program values or named exception with link rejected when platform supports creation;unsupported capability recorded explicitly. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.
+**Verify:** Keep an assertion equivalent to `rejected`. As a control, change `rejected = true;` to `rejected = false;`: the run must fail with an `AssertionError` from the assertion on `rejected`. Restore the line before continuing.
 
 ## Exercise 5: Keep operation names out of code execution
 
-Task: Admitonlyread_fixture andrejectrun_shell.
+Task: Admit only read_fixture and reject run_shell.
 
-The input selects among fixed behavior;it does not become executable text. A model proposal or retrieved instruction cannot expand thiscatalog.
+The input selects among fixed behavior; it does not become executable text. A model proposal or retrieved instruction cannot expand this catalog.
 
 ```java
 Map<String, String> operations = Map.of("read_fixture", "fixed local reader");
@@ -142,15 +146,15 @@ try {
 assert rejected;
 ```
 
-**Expected:** unknownoperationIllegalArgumentException.
+**Expected:** unknown operation IllegalArgumentException.
 
-**Verify:** Compare the program values or named exception with unknownoperationIllegalArgumentException. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.
+**Verify:** Keep an assertion equivalent to `rejected`. As a control, change `if (!operations.containsKey("run_shell")) throw new IllegalArgumentException(` to `if (operations.containsKey("run_shell")) throw new IllegalArgumentException(`: the run must fail with an `AssertionError` from the assertion on `rejected`. Restore the line before continuing.
 
 ## Exercise 6: Build a restricted diagnostic record
 
-Task: Copy onlyrequest_id,operation and status from a map containing token andsource_text.
+Task: Copy only request_id, operation and status from a map containing token and source_text.
 
-Logs are another data surface. Selecting metadata deliberately is more reliable than assuming everyrawinput is safe to print.
+Logs are another data surface. Selecting metadata deliberately is more reliable than assuming every raw input is safe to print.
 
 ```java
 Map<String, String> raw = Map.of(
@@ -178,7 +182,7 @@ assert !safe.containsKey("token") && !safe.containsKey("source_text") && safe.si
 
 **Expected:** diagnostic excludes both sensitive fields.
 
-**Verify:** Compare the program values or named exception with diagnostic excludes both sensitive fields. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.
+**Verify:** Keep an assertion equivalent to `!safe.containsKey("token") && !safe.containsKey("source_text") && safe.size() == 3` and confirm that `java -ea Main` completes. Then name an input that would make it fail and explain which value changes.
 
 ## After comparing the answer
 

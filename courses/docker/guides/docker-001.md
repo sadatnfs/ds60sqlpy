@@ -6,7 +6,7 @@ Beginner; about 100 minutes, with additional time for the optional host experime
 
 ## Learning objectives
 
-Classify source code, image tag, container and volume. Explain what evidence proves a web application is serving. Explain the difference between a configuration, an observed process and evidence of the application's behavior.
+Classify source code, image tag, container and volume. Explain what evidence proves a web application is serving. Use process, image and container accurately when you explain what you observed.
 
 ## Purpose, vocabulary and mental model
 
@@ -24,23 +24,24 @@ Use the maintained fixture image after its explicit build. The examples use `ds6
 
 ## How to use this lesson
 
-The classroom displays this guide and saves your worksheet. Its Run button does not control your Docker engine. Docker engine access is powerful host access, so the classroom deliberately receives no engine socket. Work through the supplied examples without starting anything, then use the optional host lab only in your own disposable project. Reading a command, parsing YAML and actually running the project are different forms of evidence.
+The classroom displays this guide and saves your worksheet, `courses/docker/lessons/docker-001.md`. Its Run button does not control your Docker engine. Docker engine access is powerful host access, so the classroom deliberately receives no engine socket. Work through the supplied examples without starting anything, then use the optional host lab only in your own disposable project. Reading a command, parsing YAML and actually running the project are different forms of evidence.
 
 Use Bash in Linux, macOS Terminal, or Ubuntu under WSL 2 on Windows. The supported engine runs Linux containers. The maintained fixture is `courses/docker/fixtures/compose-lab/`; its README explains copying it into a new ignored learner directory, checking the engine, building locally with visible logs, and using the fixed project name `ds60-docker-study`. The fixture uses port 18080 on host loopback. Stop if that project name or port belongs to unrelated work; choose a new project name consistently in your own copy. Never paste a command against a remote Docker context simply because it is currently selected.
 
-For Dockerfile examples, create a file named `Dockerfile` in a scratch project. YAML snippets describe a fragment unless explicitly called a complete file. Text transcripts are synthetic illustrations, not claims about your machine. Do not substitute a real password, token or private registry into a checked-in example.
+For Dockerfile examples, create a file named `Dockerfile` in a scratch project. YAML snippets describe a fragment unless explicitly called a complete file. Text transcripts are synthetic illustrations, not claims about your machine. Do not substitute a real password, token or private registry into a checked-in example. **How to use the lessons** in the [subject README](../README.md) collects these rules in one place.
 
 ## Worked example / walkthrough
 
 ### Worked example 1: Run one short process
 
-After building the fixture image, this creates a disposable Python process with no published port.
+From your copy of the compose-lab directory, build the image once, then create a disposable Python process with no published port.
 
 ```sh
+docker build -t ds60-docker-study:local .
 docker run --rm --pull never ds60-docker-study:local python -c "print(2 + 3)"
 ```
 
-**Expected observation:** One line containing 5, followed by process exit; no long-running web service is implied.
+**Expected observation:** The build reports its steps and tags the image; the run prints one line containing 5 and then exits, so no long-running web service is implied.
 
 ### Worked example 2: Compare image and process inventories
 
@@ -48,65 +49,55 @@ Listing images and listing containers answer different questions.
 
 ```sh
 docker image ls ds60-docker-study
-docker ps -a --filter label=com.docker.compose.project=ds60-docker-study
+docker ps -a --filter ancestor=ds60-docker-study:local
 ```
 
-**Expected observation:** The first lists packaged images; the second lists only containers owned by the named Compose project, including stopped ones.
+**Expected observation:** The first lists packaged images; the second lists containers created from that image, including stopped ones, and is empty after the --rm run.
 
 ## Six progressive exercises
 
+For each exercise, name the object involved and the phase of its lifetime before changing anything, then vary only the condition the task names. Exercises that ask you to predict, explain, compare or diagnose keep their answers in the solutions file; the others show the evidence to look for.
+
 ### Exercise 1: Predict what remains after the short process exits.
 
-**Expected evidence:** The local image remains; the --rm container is removed.
-
-**Hint:** Identify the object and the phase of its lifetime before changing it. Use the relevant worked example, then vary only the condition named in this task.
+**Hint:** List the objects the run command touched, then ask which one the --rm flag names.
 
 ### Exercise 2: Draw two containers created from one image.
 
-**Expected evidence:** One shared image description, two process groups and two writable layers.
-
-**Hint:** Identify the object and the phase of its lifetime before changing it. Use the relevant worked example, then vary only the condition named in this task.
+**Hint:** Draw the image once, then give each container its own box for processes and changed files.
 
 ### Exercise 3: Classify source code, image tag, container and volume.
 
-**Expected evidence:** Four objects with separate creation and deletion events.
-
-**Hint:** Identify the object and the phase of its lifetime before changing it. Use the relevant worked example, then vary only the condition named in this task.
+**Hint:** For each object, name the command that creates it and the command that deletes it.
 
 ### Exercise 4: Explain why an exited container can still appear in docker ps -a.
 
-**Expected evidence:** Stopped state is distinct from object removal.
-
-**Hint:** Identify the object and the phase of its lifetime before changing it. Use the relevant worked example, then vary only the condition named in this task.
+**Hint:** Compare what docker ps shows with and without -a, and ask what removes a container.
 
 ### Exercise 5: Compare a Linux container on macOS with a native macOS process.
 
-**Expected evidence:** The container calls a Linux kernel in the engine environment.
-
-**Hint:** Identify the object and the phase of its lifetime before changing it. Use the relevant worked example, then vary only the condition named in this task.
+**Hint:** Ask which kernel answers the container's system calls on a Mac.
 
 ### Exercise 6: Explain what evidence proves a web application is serving.
 
-**Expected evidence:** A running process plus a bounded HTTP request and expected response.
-
-**Hint:** Identify the object and the phase of its lifetime before changing it. Use the relevant worked example, then vary only the condition named in this task.
+**Hint:** Separate what docker image ls, docker ps and an HTTP request each show.
 
 ## Common mistakes and diagnosis
 
-Start with the smallest observation that separates two plausible causes. An image inspection answers questions about the packaged filesystem and configuration; container inspection adds runtime mounts, network attachment and exit status. An application request adds another layer of evidence. A healthy container can still serve the wrong application result. Preserve the original failure and the exact changed field before retrying.
+Treating the image as the running program, so removing an image looks like a way to delete data. Expecting `--rm` to remove the image as well as the container. Assuming a container on macOS or Windows runs on the host's own kernel.
 
-The boundary case in this chapter is: Explain why an exited container can still appear in docker ps -a. Use its expected observation, Stopped state is distinct from object removal., to avoid treating a successful command as proof of the wrong claim. Keep source edits in your own copy. Do not make a container privileged, mount the engine socket, disable all checks or delete every volume to make an example succeed.
+Exercise 4 is this chapter's boundary case: Explain why an exited container can still appear in docker ps -a. Start with the smallest observation that separates two plausible causes. An image inspection answers questions about the packaged filesystem and configuration; container inspection adds runtime mounts, network attachment and exit status; an application request adds another layer, and a healthy container can still serve the wrong result. Preserve the original failure and the exact changed field before retrying. Keep source edits in your own copy. Do not make a container privileged, mount the engine socket, disable all checks or delete every volume to make an example succeed.
 
 ## Retrieval, transfer and next steps
 
-Close the explanations and draw the path from source files to image to container to the observation relevant here. Reconstruct the second worked example with one different value and predict what changes. Explain which state survives process restart, container recreation and image rebuild. If none of those operations applies to this mechanism, explain why.
+Close the explanations and draw the path from source files to image to container to the observation relevant here, using process, image, container, writable layer and shared kernel. Reconstruct worked example 2 (Compare image and process inventories) with one different value and predict what changes. Explain which state survives process restart, container recreation and image rebuild, or why none of those operations applies to this mechanism.
 
-Before proceeding, retain six evidence records. For the optional host project, use `docker compose -p ds60-docker-study down` from the fixture copy to stop its containers and remove its ordinary network. This command preserves named volumes. Volume deletion is a separate deliberate reset of that disposable lab after a backup or export, never a general cleanup step. The fixture README describes its exact scoped reset.
+When a host session ends, run `docker compose -p ds60-docker-study down` from your fixture copy. It removes the project's containers and network but keeps named volumes; deleting a volume is a separate, deliberate reset described in the fixture README.
 
 ## Primary references
 
-- [Official reference 1](https://docs.docker.com/get-started/docker-concepts/the-basics/what-is-a-container/)
-- [Official reference 2](https://docs.docker.com/get-started/docker-concepts/the-basics/what-is-an-image/)
+- [What is a container?](https://docs.docker.com/get-started/docker-concepts/the-basics/what-is-a-container/)
+- [What is an image?](https://docs.docker.com/get-started/docker-concepts/the-basics/what-is-an-image/)
 
 ## Ask an AI tutor about this lesson
 

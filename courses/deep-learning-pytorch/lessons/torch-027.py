@@ -4,17 +4,19 @@ Answer-free learner worksheet. See the companion guide for worked examples.
 Copy to .learning before editing. Six independent attempts belong below.
 """
 
-# Exercise 1: Freeze a known base
-# Create a bias-free 2-to-2identity Linear base and disable its parameter gradients.
-# Expected: base output equals input; all base parameters frozen.
+# Exercise 1: Freeze a scaling base
+# Create a bias-free 2-to-2 base whose weight is 2 times the identity, freeze it and
+# evaluate the row [1, 2].
+# Expected: output [[2, 4]]; the base weight does not require gradients.
 
-# Exercise 2: Train a new head
-# Attach a zero-initialized 2-to-1head and take one SGD.1step toward targets 1, 2, 3.
-# Expected: head changes; base remains exact identity.
+# Exercise 2: Predict the head update
+# Attach a zero-initialized bias-free 2-to-1 head, take one SGD step with learning rate
+# 0.1 toward target 1 using mean squared error.
+# Expected: head weight [0.4, 0.8]; the base receives no gradient.
 
-# Exercise 3: Inspect absent base gradients
-# Check the frozen base after head backward.
-# Expected: base gradient None; head gradient present.
+# Exercise 3: Count trainable parameters
+# Count the scalars that still require gradients across the frozen base and the new head.
+# Expected: 2 trainable scalars, all in the head.
 
 # Exercise 4: Expose buffer updates despite freezing
 # Freeze BatchNorm affine parameters but call it in train mode on a nonzero batch.

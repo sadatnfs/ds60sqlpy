@@ -8,7 +8,7 @@ Solve small linear systems, inspect residuals and distinguish a fitted predictio
 
 ## Classroom execution
 
-Choose **Julia language and scientific computing** in `/classroom`, open this unit, and select its prepared `julia` runtime. The worker starts a fresh `main.jl` process with two Julia threads, a fixed package environment, no startup file and offline package settings. Both worked examples are complete under that environment. Save your current pad before replacing it. No package, model or dataset is fetched by a lesson.
+Open `julia-019` in `/classroom` with its prepared `julia` runtime. Worked case A (solve and check the residual) and worked case B (identical predictions from different coefficients) are complete programs: save your current pad, paste one of them and press Run. The learner file contains the six investigations below; the explained reference ends by printing `julia-019: all reference checks passed`. The [course overview](../README.md) describes the shared runtime: a fresh offline `main.jl` process with two threads and a fixed package environment.
 
 ## A matrix calculation needs named axes
 
@@ -20,7 +20,7 @@ Rank and conditioning answer different questions. A rank-deficient system has no
 
 ## Worked case A: solve and check the residual
 
-The first example solves a2-by -2 system using a reusable LU factorization. Its known solution is[2,3]. The program checks both that value and the residual. This provides an independent expected result instead of treating a successful library call as its own proof.
+The first example solves a 2-by-2 system using a reusable LU factorization. Its known solution is `[2, 3]`. The program checks both that value and the residual. This provides an independent expected result instead of treating a successful library call as its own proof.
 
 ```julia
 using Test
@@ -101,7 +101,7 @@ Double the right-hand side without refactorizing.
 
 ### 3. Expose nonidentification
 
-Move the repeated-column coefficients along[0,1,-1].
+Move the repeated-column coefficients along `[0, 1, -1]`.
 
 **Expected:** Predictions on the design remain unchanged.
 
@@ -138,4 +138,4 @@ Perturb an ill-conditioned problem before trusting its coefficients.
 
 ## Study companion
 
-Use the repository learning-companion skill with this lesson ID, your prediction and your actual source/output. Ask for a diagnosis of the first incorrect type, shape, state transition or assumption. Keep observed execution distinct from a timing claim, inferred mathematical result or external deployment.
+A repository-aware assistant with the learning-companion skill can review `julia-019` with you. Give it your prediction for one investigation, your source and the actual output, and ask it to find the first incorrect assumption about linear solve, factorization, rank, pseudoinverse or adjoint.

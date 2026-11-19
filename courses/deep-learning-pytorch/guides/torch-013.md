@@ -6,13 +6,19 @@ Intermediate; approximately 120 minutes. Direct prerequisites: `torch-012`. The 
 
 ## Learning objectives
 
-A binary logit is an unrestricted score. The central investigation is concrete: Apply sigmoid to-2, 0, 2. The finish condition is middle probability 0.5 and strictly increasing values. 0 errors at.5 and 1 at.8. A useful explanation connects the calculation to the reason it is needed, rather than treating a function name as a definition.
+Train binary classifiers on logits with BCEWithLogitsLoss and choose a decision threshold as a separate, explicit policy.
+
+Central investigation: Convert the logits -2, 0 and 2 to probabilities, evaluate the zero-logit loss, compare thresholds 0.5 and 0.8 and feed a probability into a logits loss by mistake.
+
+Finish condition: The middle probability is 0.5, the zero-logit loss is log 2, threshold 0.5 gives 0 errors and 0.8 gives 1 on truth 0, 1, 1, the double-sigmoid loss differs by more than 0.1, and logits of magnitude 1000 stay finite.
+
+The worked examples demonstrate the mechanism; exercises 1-3 transfer it to new inputs and exercises 4-6 extend it to failures and boundary cases. A useful explanation connects the calculation to the reason it is needed, rather than treating a function name as a definition.
 
 ## Purpose and mental model
 
 A binary logit is an unrestricted score. Its sigmoid maps that score to a number between zero and one under the model's probability convention. BCEWithLogitsLoss combines the sigmoid and binary cross-entropy algebra in a numerically stable form, so its input should be logits rather than already-sigmoid-transformed probabilities. Applying sigmoid twice changes the objective while often producing finite values that look plausible.
 
-A classification threshold is a separate decision policy. Changing it alters predicted labels without changing fitted logits. The threshold can reflect costs or coverage, but must be chosen on validation evidence rather than after viewing final-test results. The tiny scores-2, 0, 2 make the midpoint and boundary policy inspectable. Their probabilities are not automatically calibrated merely because sigmoid produced them.
+A classification threshold is a separate decision policy. Changing it alters predicted labels without changing fitted logits. The threshold can reflect costs or coverage, but must be chosen on validation evidence rather than after viewing final-test results. The tiny scores -2, 0, 2 make the midpoint and boundary policy inspectable. Their probabilities are not automatically calibrated merely because sigmoid produced them.
 
 ## Design decisions and when to use this method
 
@@ -50,11 +56,11 @@ The binary logit z is unrestricted. Its sigmoid is \(p=\frac{1}{1+\exp(-z)}\), a
 
 `loss = max(z,0) - z*y + log1p(exp(-abs(z)))`.
 
-The exponent is never applied to a large positive magnitude in the final term. This avoids first rounding a probability to zero or one and then taking its logarithm. The derivative with respect to z is p-y before any mean-reduction factor. At \(z=0\), \(y=1\), the loss is log 2 and the derivative is-0.5. A mean across N equally weighted binary entries divides that derivative contribution by N. [PyTorch 2.9 BCEWithLogitsLoss](https://docs.pytorch.org/docs/2.9/generated/torch.nn.BCEWithLogitsLoss.html).
+The exponent is never applied to a large positive magnitude in the final term. This avoids first rounding a probability to zero or one and then taking its logarithm. The derivative with respect to z is p-y before any mean-reduction factor. At \(z=0\), \(y=1\), the loss is log 2 and the derivative is -0.5. A mean across N equally weighted binary entries divides that derivative contribution by N. [PyTorch 2.9 BCEWithLogitsLoss](https://docs.pytorch.org/docs/2.9/generated/torch.nn.BCEWithLogitsLoss.html).
 
-For logits[-2, 0, 2], the reported probabilities are approximately[0.1192, 0.5, 0.8808]. They preserve ranking. A threshold 0.5 with a greater-than-or-equal tie rule classifies the zero logit as positive. Threshold 0.8 corresponds to a logit boundary \(\log\!\left(\frac{0.8}{0.2}\right)=\log4\), about 1.3863. Moving that boundary changes decisions without changing any fitted parameter or score.
+For logits [-2, 0, 2], the reported probabilities are approximately [0.1192, 0.5, 0.8808]. They preserve ranking. A threshold 0.5 with a greater-than-or-equal tie rule classifies the zero logit as positive. Threshold 0.8 corresponds to a logit boundary \(\log\!\left(\frac{0.8}{0.2}\right)=\log4\), about 1.3863. Moving that boundary changes decisions without changing any fitted parameter or score.
 
-The double-sigmoid error changes more than a label convention. At original \(z=0\), the first sigmoid gives 0.5. Passing that value as a logit asks the loss to interpret probability \(\sigma(0.5)\), about 0.6225. The positive-label loss becomes \(\log(1+\exp(-0.5))\), about 0.4741, instead of log 2. If the first sigmoid remains in the graph, the derivative with respect to the original z gains another factor p(1-p): at zero it is about-0.0944 rather than-0.5. Finite outputs therefore do not prove the intended objective or gradient.
+The double-sigmoid error changes more than a label convention. At original \(z=0\), the first sigmoid gives 0.5. Passing that value as a logit asks the loss to interpret probability \(\sigma(0.5)\), about 0.6225. The positive-label loss becomes \(\log(1+\exp(-0.5))\), about 0.4741, instead of log 2. If the first sigmoid remains in the graph, the derivative with respect to the original z gains another factor p(1-p): at zero it is about -0.0944 rather than -0.5. Finite outputs therefore do not prove the intended objective or gradient.
 
 Stable arithmetic also does not imply a good prediction. A logit 1000 with label 1 has a loss near zero; the same logit with label 0 has loss near 1000. Both are valid finite outputs of the stable formulation. The extreme-score fixture checks numerical behavior, not whether the labels are correct or the model generalizes.
 
@@ -109,33 +115,33 @@ assert (probabilities >= 0.8).tolist() == [False, False, True]
 
 ## Prediction before your attempt
 
-For the supplied fixture, name the input unit, the intermediate state and the final quantity that changes. Predict one normal result and one failure result before touching the code. In particular, explain this lesson's acceptance condition in your own words: middle probability 0.5 and strictly increasing values. 0 errors at.5 and 1 at.8. Preserve the prediction beside your later observations so a correction is visible. A copied expected value is not a derivation.
+For the supplied fixture, name the input unit, the intermediate state and the final quantity that changes. Predict one normal result and one failure result before touching the code. In particular, explain this lesson's acceptance condition in your own words: The middle probability is 0.5, the zero-logit loss is log 2, threshold 0.5 gives 0 errors and 0.8 gives 1 on truth 0, 1, 1, the double-sigmoid loss differs by more than 0.1, and logits of magnitude 1000 stay finite. Preserve the prediction beside your later observations so a correction is visible. A copied expected value is not a derivation.
 
 ## Exercises
 
-1. **Convert fixed logits.** Apply sigmoid to-2, 0, 2.
-   **Expected:** middle probability 0.5 and strictly increasing values.
-   **Verify:** Save the assertion results for exercise 1, including middle probability 0.5 and strictly increasing values.
+1. **Convert new logits.** Apply sigmoid to the float64 logits -1, 1 and 3.
+   **Expected:** probabilities about 0.2689, 0.7311 and 0.9526; the first two sum to 1.
+   **Verify:** In a fresh process, the exercise checks confirm `converted.tolist()` matches `[1 / (1 + np.exp(1)), 1 / (1 + np.exp(-1)), 1 / (1 + np.exp(-3))]` within 1e-12 and `(converted[0] + converted[1]).item()` matches `1` within 1e-12.
 
-2. **Check the midpoint objective.** Compute positive-label BCE at zero logit.
-   **Expected:** loss log 2 within 1e-12.
-   **Verify:** Save the assertion results for exercise 2, including loss log 2 within 1e-12.
+2. **Compute a negative-label loss.** Compute BCEWithLogitsLoss for logit 2 with label 0.
+   **Expected:** loss \(\log(1+e^{2})\), about 2.1269, within 1e-12.
+   **Verify:** In a fresh process, the exercise checks confirm `negative.item()` matches `np.log1p(np.exp(2))` within 1e-12.
 
-3. **Move the decision threshold.** Compare thresholds.5 and.8 with>=ties.
+3. **Threshold the new probabilities.** Classify the new probabilities at thresholds 0.5 and 0.75, counting a probability equal to the threshold as positive.
    **Expected:** labels False, True, True versus False, False, True.
-   **Verify:** Save the assertion results for exercise 3, including labels False, True, True versus False, False, True.
+   **Verify:** In a fresh process, the exercise checks confirm `(converted >= 0.5).tolist() == [False, True, True]` and `(converted >= 0.75).tolist() == [False, False, True]`.
 
 4. **Expose a double-sigmoid mistake.** Feed probability 0.5 as though it were a logit and compare with log 2.
-   **Expected:** incorrect loss differs by more than.1.
-   **Verify:** Save the assertion results for exercise 4, including incorrect loss differs by more than.1.
+   **Expected:** incorrect loss differs by more than 0.1.
+   **Verify:** In a fresh process, the exercise checks confirm `abs(wrong.item() - np.log(2)) > 0.1`.
 
 5. **Test extreme finite scores.** Use logits 1000, -1000 with labels 1, 0.
    **Expected:** finite losses approximately 0.
-   **Verify:** Save the assertion results for exercise 5, including finite losses approximately 0.
+   **Verify:** In a fresh process, the exercise checks confirm `torch.isfinite(extreme).all()` and `extreme` matches `torch.zeros(2)` within 1e-06.
 
 6. **Count threshold errors.** Use truth 0, 1, 1 and compare the two decision policies.
-   **Expected:** 0 errors at.5 and 1 at.8.
-   **Verify:** Save the assertion results for exercise 6, including 0 errors at.5 and 1 at.8.
+   **Expected:** 0 errors at 0.5 and 1 at 0.8.
+   **Verify:** In a fresh process, the exercise checks confirm `int(((probabilities >= 0.5) != truth).sum()) == 0` and `int(((probabilities >= 0.8) != truth).sum()) == 1`.
 
 ## Common pitfalls and diagnosis
 
@@ -149,7 +155,7 @@ First draw the state described in the vocabulary section. Next use the smallest 
 
 ## Self-check and retrieval
 
-Close both worked examples. Explain Logit, BCEWithLogitsLoss, Decision threshold using the lesson fixture. Reconstruct one computation from its inputs. Then change one input while retaining the mechanism and predict whether the conclusion survives. Write which part is guaranteed by the code and which part would need new observations. This last distinction prevents a tiny deterministic teaching example from being presented as evidence about an unseen population or a production model.
+Close all three worked examples. Explain Logit, BCEWithLogitsLoss, Decision threshold using the lesson fixture. Reconstruct one computation from its inputs. Then change one input while retaining the mechanism and predict whether the conclusion survives. Write which part is guaranteed by the code and which part would need new observations. This last distinction prevents a tiny deterministic teaching example from being presented as evidence about an unseen population or a production model.
 
 ## Next step
 
@@ -157,7 +163,7 @@ Revisit the direct prerequisite `torch-012` if the calculation cannot be reconst
 
 ## Sources and verification status
 
-API and mechanism reference: [PyTorch2.9 reference](https://docs.pytorch.org/docs/2.9/index.html), reviewed 2026-10-22. The fixture, examples, counterexamples and exercise design are original course material. See [validation](../../../docs/validation.md) for execution gates. Check CI artifacts for the exact revision and platform to determine which runtime checks actually ran; authored content alone does not establish runtime execution.
+API and mechanism reference: [PyTorch 2.9 reference](https://docs.pytorch.org/docs/2.9/index.html), reviewed 2026-10-22. The fixture, examples, counterexamples and exercise design are original course material. See [validation](../../../docs/validation.md) for execution gates. Check CI artifacts for the exact revision and platform to determine which runtime checks actually ran; authored content alone does not establish runtime execution.
 
 ## Interview reasoning with worked answers
 
@@ -165,7 +171,7 @@ API and mechanism reference: [PyTorch2.9 reference](https://docs.pytorch.org/doc
 
 The combined implementation can rearrange the algebra to avoid overflow and loss of precision at extreme scores. Manual probability conversion can round to zero or one first.
 
-**Does a probability.9 mean 90 percent of such predictions are correct?**
+**Does a probability 0.9 mean 90 percent of such predictions are correct?**
 
 Only if calibration evidence supports that interpretation for the relevant population. Sigmoid alone defines a model output, not an empirical reliability guarantee.
 

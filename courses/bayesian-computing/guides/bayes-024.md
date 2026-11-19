@@ -34,7 +34,7 @@ A prediction for an already observed entrant can require conditioning on surviva
 
 The log-likelihood vector records each row's actual event/censoring/entry contribution. Any predictive evaluation must respect the observation unit and the conditioning scheme. Comparing latent replicated event times directly with censored observed endpoints would mix different quantities. A full posterior predictive simulation should also reproduce the relevant censoring and entry mechanisms when those are known.
 
-Review shape, regression and derived-quantity diagnostics separately. Short chains can be particularly unreliable for tail survival or a hazard ratio combining several parameters. Undefined diagnostics for constants are expected, but poor diagnostics for sampled quantities need investigation. Compilation and a zero execution status are distinct from adequate inference.
+Review shape, regression and derived-quantity diagnostics separately. Short chains can be particularly unreliable for tail survival or a hazard ratio combining several parameters. Undefined diagnostics for constants are expected, but poor diagnostics for sampled quantities need investigation: an R-hat at or above 1.01, bulk or tail effective sizes below about 100 per chain or any divergence means the classroom run cannot support the dossier's numbers. Compilation and a zero execution status are distinct from adequate inference.
 
 Retain model source, data definition, compiler/runtime version, sampling settings, actual diagnostics and the decision target. The optional standard data-block project demonstrates how to separate data from code and preserve output files in a deliberately prepared environment. The classroom pad remains a bounded single-source workflow with fixed sampler settings.
 
@@ -46,7 +46,7 @@ Retain model source, data definition, compiler/runtime version, sampling setting
 
 ## Complete reproducible program
 
-The prepared Stan pad compiles and samples `main.stan` with fixed bounded settings. Its tiny data are declared in `transformed data`; this pad has no separate JSON editor. The linked project explains standard data-block workflows. Runtime: `stan-cpu`.
+The prepared Stan pad compiles `main.stan` and samples two chains with 100 warmup and 100 retained draws each. Its tiny data are declared in `transformed data`; this pad has no separate JSON editor. The linked project explains standard data-block workflows. These teaching-sized chains can fail the convergence screen from `bayes-006` (R-hat below 1.01, at least 100 bulk and tail effective draws per chain, no divergences); read the printed diagnostics against it before interpreting any estimate. Runtime: `stan-cpu`.
 
 ```stan
 transformed data {

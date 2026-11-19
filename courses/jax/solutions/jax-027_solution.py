@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import math
 import numpy as np
 import jax
 import jax.numpy as jnp
@@ -65,7 +64,7 @@ def main():
     placed = jax.device_put(host, row_layout)
     assert len(placed.devices()) == 1
 
-    print("jax-027" + ": 8 asserted cases passed")
+    print("jax-027: 8 asserted cases passed")
 
 
 if __name__ == "__main__":

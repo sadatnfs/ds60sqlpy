@@ -14,28 +14,32 @@ A method packages a computation behind a contract: which inputs it accepts, what
 
 ## Reading the reference
 
-A method declaration includes return type,name and parameter list. return sends one value to the caller and ends that invocation. Validate a domain precondition before calculating. Overloaded methods need different parameter signatures, not merely different return types. A defensive copy can prevent a helper from changing caller-owned mutable data. Use named exceptions when an argument violates the contract.
+A method declaration includes return type, name and parameter list. return sends one value to the caller and ends that invocation. Validate a domain precondition before calculating. Overloaded methods need different parameter signatures, not merely different return types. A defensive copy can prevent a helper from changing caller-owned mutable data. Use named exceptions when an argument violates the contract.
 
-## Exercise 1: Call a pure calculation
+## Exercise 1: Call a pure calculation: predict an edited check
 
-Task: Implement doubleValue(int x) and evaluate 7 and 0.
+Task: Copy Example A into a scratch `Main.java` and change `assert doubleValue(0) == 0;` to `assert doubleValue(1) == 0;` inside its assertion. Before running it with `java -ea Main`, predict whether the assertion still holds and explain why; then restore it.
 
 The result depends only on the argument and the method changes no external state. That makes normal and boundary cases easy to test independently.
+
+The unchanged code is the part that Example A adds:
 
 ```java
 assert doubleValue(7) == 14;
 assert doubleValue(0) == 0;
 ```
 
-**Expected:** 14 and 0.
+**Expected:** The changed run fails with an `AssertionError` from the assertion on `doubleValue(0) == 0`. Restoring the original line brings back the worked observation: 14 and 0.
 
-**Verify:** Compare the program values or named exception with 14 and 0. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.
+**Verify:** Compare your written prediction with the reported `AssertionError` and its stack-trace line, and explain why the edited condition is false for the values that satisfy `doubleValue(0) == 0`. After restoring the line, the program completes without an `AssertionError` again.
 
-## Exercise 2: Validate a precondition
+## Exercise 2: Validate a precondition: debug a regression
 
-Task: Implement positiveArea(width,height) rejecting nonpositive dimensions.
+Task: A regression changed one token in the code that Example B adds after Example A, so one line now reads `positiveArea(1, 4);`. Run Example B with that line, use the failing assertion to locate the defect and repair it without changing the assertion.
 
 A zero dimension is rejected because this method models a strictly positive rectangle. Another domain could allow zero, but its contract must say so.
+
+The unchanged code is the part that Example B adds:
 
 ```java
 assert positiveArea(3, 4) == 12;
@@ -48,13 +52,13 @@ try {
 assert badArea;
 ```
 
-**Expected:** 3by4 gives12;zero width throwsIllegalArgumentException.
+**Expected:** Before the repair the run fails with an `AssertionError` from the assertion on `badArea`; after it the line reads `positiveArea(0, 4);` again and 3 by 4 gives 12; zero width throws IllegalArgumentException.
 
-**Verify:** Compare the program values or named exception with 3by4 gives12;zero width throwsIllegalArgumentException. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.
+**Verify:** Keep the failing and the repaired runs. Explain why the changed token alters the value tested by `badArea` for this input.
 
 ## Exercise 3: Observe copied primitive values
 
-Task: Passint5 to a helper that reassigns its local parameter to99.
+Task: Pass int 5 to a helper that reassigns its local parameter to 99.
 
 The callee receives a copy of the integer. Reassigning its parameter does not create a link back to the caller variable.
 
@@ -64,13 +68,13 @@ reassignInt(original);
 assert original == 5;
 ```
 
-**Expected:** caller value remains5.
+**Expected:** caller value remains 5.
 
-**Verify:** Compare the program values or named exception with caller value remains5. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.
+**Verify:** Keep an assertion equivalent to `original == 5`. As a control, change `int original = 5;` to `int original = 6;`: the run must fail with an `AssertionError` from the assertion on `original == 5`. Restore the line before continuing.
 
 ## Exercise 4: Observe shared object mutation
 
-Task: Pass a list containing1 to a helper that appends2.
+Task: Pass a list containing 1 to a helper that appends 2.
 
 The reference value is copied, and both references identify the same list. Mutating that object is visible through either reference.
 
@@ -80,9 +84,9 @@ append(list);
 assert list.equals(List.of(1, 2));
 ```
 
-**Expected:** caller list becomes1,2.
+**Expected:** caller list becomes 1, 2.
 
-**Verify:** Compare the program values or named exception with caller list becomes1,2. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.
+**Verify:** Keep an assertion equivalent to `list.equals(List.of(1, 2))`. As a control, change `List<Integer> list = new ArrayList<>(List.of(1));` to `List<Integer> list = new ArrayList<>(List.of(2));`: the run must fail with an `AssertionError` from the assertion on `list.equals(List.of(1, 2))`. Restore the line before continuing.
 
 ## Exercise 5: Distinguish reference reassignment
 
@@ -95,13 +99,13 @@ replace(list);
 assert list.equals(List.of(1, 2));
 ```
 
-**Expected:** caller list remains1,2.
+**Expected:** caller list remains 1, 2.
 
-**Verify:** Compare the program values or named exception with caller list remains1,2. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.
+**Verify:** Keep an assertion equivalent to `list.equals(List.of(1, 2))`. As a control, change `assert list.equals(List.of(1, 2));` to `assert list.equals(List.of(2, 2));` inside it: the run must fail with an `AssertionError`, which shows the assertion can fail. Restore it.
 
 ## Exercise 6: Inspect overload selection
 
-Task: Call describe withint1 andlong1L using two overloads.
+Task: Call describe with int 1 and long 1L using two overloads.
 
 The literal type selects the overload. This compile-time selection is distinct from polymorphic dispatch on an object receiver.
 
@@ -112,7 +116,7 @@ assert describe(1L).equals("long");
 
 **Expected:** int and long respectively.
 
-**Verify:** Compare the program values or named exception with int and long respectively. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.
+**Verify:** Keep an assertion equivalent to `describe(1L).equals("long")`. As a control, change `assert describe(1L).equals("long");` to `assert describe(1L).equals("long!");` inside it: the run must fail with an `AssertionError`, which shows the assertion can fail. Restore it.
 
 ## After comparing the answer
 

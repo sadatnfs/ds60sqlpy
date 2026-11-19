@@ -57,7 +57,7 @@ def main():
     # Case 8: Recognize invalid data
     assert not bool(jnp.isfinite(jnp.array([jnp.nan, jnp.inf])).all())
 
-    print("jax-003" + ": 8 asserted cases passed")
+    print("jax-003: 8 asserted cases passed")
 
 
 if __name__ == "__main__":

@@ -109,7 +109,7 @@ The NULL-extended row preserves an unmatched fact but does not represent a real 
 
 Return a pair of DataFrames containing matched and unmatched facts under ordinary equality, using left_semi and left_anti. Preserve fact rows without right-side fanout.
 
-**Expected:** Semi IDs are[1,2,3], anti IDs[4,5,6]. Key A contributes two semi rows despite three dimension matches. Their bags reconcile to all six facts.
+**Expected:** Semi IDs are [1, 2, 3], anti IDs [4, 5, 6]. Key A contributes two semi rows despite three dimension matches. Their bags reconcile to all six facts.
 
 ```scala
 def membership(facts: DataFrame, dimension: DataFrame): (DataFrame, DataFrame) = {
@@ -188,4 +188,4 @@ COUNT DISTINCT ignores NULL and collapses duplicates, so equality with total row
 
 ## Execution and interpretation
 
-Run the complete reference in its prepared fixed worker. The small fixture is constructed inside the program,so opening a lesson does not fetch data. A final success line is printed only after the reference assertions complete. Plan observations,partition evidence and resource measurements apply to the actual local configuration; they do not establish cluster-scale performance. Session cleanup is explicit,and any additional owned file/query lifecycle is described in the lesson.
+Run the complete reference in its prepared fixed worker. The small fixture is constructed inside the program, so opening a lesson does not fetch data. A final success line is printed only after the reference assertions complete. Plan observations, partition evidence and resource measurements apply to the actual local configuration; they do not establish cluster-scale performance. Session cleanup is explicit, and any additional owned file/query lifecycle is described in the lesson.

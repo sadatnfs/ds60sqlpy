@@ -87,11 +87,11 @@ A declaration tells the compiler a signature; the linker still needs a matching 
 
 ### Exercise 5: Read a runtime failure
 
-**Inputs/evidence:** For cpp-001 Exercise 5, program prints started then exits2.
+**Inputs/evidence:** For cpp-001 Exercise 5, program prints started then exits 2.
 
 **Expected result/shape:** For cpp-001 Exercise 5, the process ran and failed its declared contract despite producing text.
 
-**Verify:** For cpp-001 Exercise 5, record both started and exit2; do not call output alone success.
+**Verify:** For cpp-001 Exercise 5, record both started and exit 2; do not call output alone success.
 
 Diagnostic text can precede a failure. A verifier must inspect the status as well as expected values, and a partial output stream cannot make a failing process green.
 

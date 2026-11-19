@@ -14,6 +14,29 @@ ROOT = Path(__file__).resolve().parents[3]
 BASE = Path("courses/julia")
 HERE = ROOT / BASE / "authoring"
 
+# Literal values and calls belong in inline code; these shapes are what remains
+# when a code span is stripped together with its leading space ("is[2,3]",
+# "a2-by -3", "UTF -8").
+GLUED_PROSE = re.compile(
+    r"[A-Za-z]\[|UTF -\d|\ba\d-by|\d-by -\d"
+    r"|\b(?:is|are|at|on|for|along|becomes|gives|plus|and|to)[\[(:]"
+)
+
+
+def prose_defects(text: str) -> list[str]:
+    """Return glued code fragments outside fences, inline code and TeX math."""
+    prose = re.sub(r"```.*?```", " ", text, flags=re.S)
+    prose = re.sub(r"`[^`\n]*`", " ", prose)
+    prose = re.sub(r"\\\(.*?\\\)|\\\[.*?\\\]", " ", prose, flags=re.S)
+    return [match.group(0) for match in GLUED_PROSE.finditer(prose)]
+
+
+def unit_prose(row: dict[str, Any]) -> list[str]:
+    fields = [row["title"], row["outcome"]]
+    for item in row["exercises"]:
+        fields += [item[key] for key in ("title", "task", "expected", "hint", "answer")]
+    return fields
+
 
 def units() -> list[dict[str, Any]]:
     rows = [json.loads(p.read_text("utf-8")) for p in sorted(HERE.glob("unit-*.json"))]
@@ -31,6 +54,14 @@ def units() -> list[dict[str, Any]]:
         for marker in ("{{WORKED_A}}", "{{WORKED_B}}"):
             if body.count(marker) != 1:
                 raise ValueError("Two complete worked programs are required")
+        defects = prose_defects(body) + [
+            fragment for text in unit_prose(row) for fragment in prose_defects(text)
+        ]
+        if defects:
+            raise ValueError(
+                f"julia-{row['number']:03} has code glued into prose; use inline code: "
+                + ", ".join(sorted(set(defects)))
+            )
     return rows
 
 
@@ -52,10 +83,11 @@ def artifacts() -> dict[str, str]:
         (
             "Start with the [main classroom "
             "instructions](../../README.md). Julia source is staged as "
-            "`main.jl` in a fresh process. Code, notes and receipts are "
-            "saved by the classroom; scratch files disappear after the "
-            "run. Optional projects and unfamiliar external ecosystems "
-            "need their own preparation.\n"
+            "`main.jl` in a fresh process with two Julia threads, a fixed "
+            "read-only package environment, no startup file and offline "
+            "package settings. The classroom saves your code, notes and run "
+            "output; scratch files disappear after the run. Optional projects "
+            "and unfamiliar external ecosystems need their own preparation.\n"
         ),
         "| Unit | Stage | Topic |\n| --- | --- | --- |",
     ]
@@ -78,17 +110,28 @@ def artifacts() -> dict[str, str]:
         prereqs = (
             ", ".join("`" + p + "`" for p in row["prerequisites"]) or "No previous Julia experience"
         )
+        body = (HERE / "chapters" / f"{key}.md").read_text("utf-8")
+        cases = dict(re.findall(r"^#{2,3} Worked case ([AB]): (.+)$", body, re.M))
+        if set(cases) != {"A", "B"}:
+            raise ValueError(f"{key} needs titled worked cases A and B")
+        figure_note = (
+            " One program in this unit publishes a bounded Plotly figure with its "
+            "description and exact table."
+            if row.get("figure")
+            else ""
+        )
         intro = (
             f"# {key}: {row['title']}\n\n## Starting point and outcome\n\n"
             f"{row['level'].title()}; approximately {row['minutes']} minutes. "
             f"Direct prerequisites: {prereqs}.\n\n{row['outcome']}\n\n"
-            "## Classroom execution\n\nChoose **Julia language and scientific computing** "
-            "in `/classroom`, open this unit, and select its prepared `julia` runtime. "
-            "The worker starts a fresh `main.jl` process with two Julia threads, "
-            "a fixed package environment, no startup file and offline package settings. "
-            "Both worked examples are complete under that environment. "
-            "Save your current pad before replacing it. "
-            "No package, model or dataset is fetched by a lesson.\n\n"
+            f"## Classroom execution\n\nOpen `{key}` in `/classroom` with its prepared "
+            f"`julia` runtime. Worked case A ({cases['A']}) and worked case B "
+            f"({cases['B']}) are complete programs: save your current pad, paste one of "
+            "them and press Run. The learner file contains the six investigations below; "
+            f"the explained reference ends by printing `{key}: all reference checks passed`."
+            f"{figure_note} The [course overview](../README.md) describes the shared "
+            "runtime: a fresh offline `main.jl` process with two threads and a fixed "
+            "package environment.\n\n"
         )
         guide = intro + guide + "\n\n## Six investigations\n\n"
         explanation = [
@@ -106,22 +149,29 @@ def artifacts() -> dict[str, str]:
                 f"## {index}. {item['title']}\n\n{item['answer']}\n\n"
                 f"**Expected observation:** {item['expected']}\n"
             )
+        concepts = row["concepts"]
+        concept_phrase = (
+            ", ".join(concepts[:-1]) + " or " + concepts[-1] if len(concepts) > 1 else concepts[0]
+        )
         guide += (
             "## Primary references\n\n"
             + "\n".join(f"- [{title}]({url})" for title, url in row["sources"])
             + (
-                "\n\n## Study companion\n\nUse the repository learning-companion "
-                "skill with this lesson ID, your prediction and your actual "
-                "source/output. Ask for a diagnosis of the first incorrect "
-                "type, shape, state transition or assumption. Keep observed "
-                "execution distinct from a timing claim, inferred "
-                "mathematical result or external deployment.\n"
+                "\n\n## Study companion\n\nA repository-aware assistant with the "
+                f"learning-companion skill can review `{key}` with you. Give it your "
+                "prediction for one investigation, your source and the actual output, "
+                "and ask it to find the first incorrect assumption about "
+                f"{concept_phrase}.\n"
             )
         )
         output[f"{prefix}/guides/{key}.md"] = guide
         output[f"{prefix}/lessons/{key}.jl"] = code["learner"]
         output[f"{prefix}/solutions/{key}_reference.jl"] = code["reference"]
         output[f"{prefix}/solutions/{key}_solutions.md"] = "\n".join(explanation)
+        # Plain-text metadata: show concrete expected observations without Markdown.
+        concrete = [
+            item["expected"] for item in row["exercises"] if re.search(r"[0-9`]", item["expected"])
+        ] or [row["exercises"][0]["expected"]]
         plans.append(
             {
                 k: row[k]
@@ -130,10 +180,10 @@ def artifacts() -> dict[str, str]:
             | {
                 "id": key,
                 "runtime": "julia",
-                "lab": row["exercises"][0]["task"],
+                "lab": row["exercises"][0]["task"].replace("`", ""),
                 "verification": (
-                    f"The complete reference prints '{key}: all reference checks passed' "
-                    "after its numerical and failure-case checks."
+                    "Reproduce the stated observations, for example: "
+                    + " ".join(concrete[:2]).replace("`", "")
                 ),
             }
         )
@@ -210,7 +260,11 @@ def artifacts() -> dict[str, str]:
         "distributed clusters and external services are separate "
         "optional projects. A successful source run does not "
         "establish numerical conditioning, statistical validity or "
-        "universal performance. See [authoring](authoring/README.md) "
+        "universal performance; keep an observed run separate from a "
+        "timing claim, an inferred mathematical result or an external "
+        "deployment. Each guide ends with an optional study-companion "
+        "prompt for a repository-aware assistant; the guides are complete "
+        "without it. See [authoring](authoring/README.md) "
         "for maintained source and checks.\n"
     )
     for name, text in output.items():

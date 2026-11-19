@@ -1,51 +1,43 @@
 # web-001: explanatory solutions
 
-Compare after your own attempt or an explicit solution reveal. This file explains the supplied deterministic fixtures. It does not claim that a learner or a production deployment passed.
-
-## Why the mechanism works
-
-HTML is a markup language: it names the structure and meaning of a document. CSS is a style language that controls how that structure is presented. JavaScript is a programming language executed by the browser or another host. PHP is a programming language commonly executed by a server. A visitor receives the server's response, not the PHP source that generated it. These layers can cooperate without becoming interchangeable.
-
-A browser parses HTML into a document tree, applies style rules and paints pixels. A server accepts a request and returns a response. Opening a local preview exercises the browser portion; it does not demonstrate a network request, authentication or a server database. Our first document is deliberately small enough to inspect every character and every visible element.
-
-An element such as `<p>Hello</p>` has an opening tag, content and a closing tag. The tag names the kind of content. A document begins with `<!doctype html>` to request standards rendering, then an `html` root containing `head` metadata and `body` visible content. The `title` labels the browser document, while an `h1` labels the visible topic. Whitespace in ordinary text is generally collapsed, so source indentation helps humans without creating layout.
+Open this after your own attempt. Each answer explains the lesson's synthetic fixtures; it does not show that your work or a deployment passed. The mechanism is explained in `courses/web-development/guides/web-001.md`.
 
 ## Exercise 1: Predict which text from the first example is visible.
 
-Only Hello, web. appears as paragraph text.
+**Expected answer:** Only Hello, web. appears as paragraph text.
 
-Trace the smallest example before editing. Name which values are source and which are observations.
+**Why:** Tags are instructions to the parser, not visible text, and the title is metadata shown in the tab; only character data inside body elements is painted.
 
 ## Exercise 2: Change a paragraph without changing the document title.
 
-The visible body changes while the browser document title remains the same.
+**Expected evidence:** The visible body changes while the browser document title remains the same.
 
-Change only the named feature. Compare with the unchanged example and explain any unaffected behavior.
+**Why:** The title element and the body content are independent parts of the document tree, so editing a paragraph cannot change the tab text.
 
 ## Exercise 3: Build a complete document with a title, one heading and two paragraphs.
 
-The preview contains one main heading and two paragraphs in a main region.
+**Expected evidence:** The preview contains one main heading and two paragraphs inside the body.
 
-Sketch the structure or data contract first. Reuse the mechanism from the examples without copying the reference.
+**Why:** A complete document gives the parser an explicit standards mode, language, encoding and title, so the browser does not have to recover from missing structure.
 
 ## Exercise 4: Explain why PHP source pasted into an HTML page does not execute on a PHP server.
 
-A browser preview parses HTML; no PHP interpreter or server request was involved.
+**Expected answer:** A browser preview parses HTML; no PHP interpreter or server request was involved.
 
-Keep the failing input. Identify the first layer where the observed result differs from the intended contract.
+**Why:** PHP runs only when a PHP interpreter processes the file, normally through a server. The HTML parser treats `<?php ... ?>` as a bogus comment, so nothing executes and the code is not even displayed.
 
 ## Exercise 5: Remove the styling and inspect what remains useful.
 
-Document structure and readable text remain; meaning does not depend on CSS.
+**Expected evidence:** Document structure and readable text remain; meaning does not depend on CSS.
 
-Predict the boundary before running it. Add an explicit check or manual observation that would detect a regression.
+**Why:** HTML elements carry meaning and order independently of CSS, so headings, paragraphs and links stay understandable when presentation is removed.
 
 ## Exercise 6: Trace a requested page from source to visible output.
 
-Distinguish server response bytes, parsed document tree, applied style and painted output.
+**Expected answer:** Distinguish server response bytes, parsed document tree, applied style and painted output.
 
-Explain your choice to someone who has not seen the code. Include one limitation and the evidence needed to remove it.
+**Why:** Each stage can fail on its own: the server can send the wrong bytes, the parser can repair broken markup, CSS can hide content and painting can clip it, so naming the stage tells you where to look.
 
-## Reference comparison and limits
+## Reference comparison
 
-Read the separate executable reference, where supplied, only after retaining your attempt. Compare structure and decisions rather than matching every identifier. A different implementation is acceptable when it satisfies the same behavior, preserves accessibility and rejects the same invalid cases. The checked reference uses tiny synthetic inputs so that each transformation can be inspected. It is not a ready-to-deploy authenticated application. Server lifecycle, persistence, concurrency and security require their own integration evidence.
+Open `courses/web-development/solutions/web-001_solution.html` only after saving your attempt, and compare decisions rather than identifiers. A different implementation is acceptable when it shows the same behavior and rejects the same invalid cases. The reference checks only its named synthetic cases; its success message is not an accessibility audit or proof of responsive behavior at every size.

@@ -8,27 +8,31 @@ defer schedules a function call to execute when the surrounding function returns
 
 defer cleanup() registers a call. defer func(){ ... }() registers a closure. A helper function is useful when each loop iteration needs its own cleanup boundary; deferring inside a long loop otherwise accumulates cleanup until the whole function returns. recover returns the active panic value when called correctly from a deferred function. A named return variable can be changed by deferred code, which is powerful but can make flow harder to read.
 
-## 1. Trace cleanup order
+## 1. Trace cleanup order: predict an edited check
 
-Register first and second cleanup markers and return.
+Copy worked example 1 into a scratch pad and change `check(deferOrder() == "second,first", "defer order")` to `check(deferOrder() == "second,first!", "defer order")` inside its check. Before running, predict whether the check still passes and explain why; then restore it.
+
+The unchanged code is worked example 1:
 
 ```go
 check(deferOrder() == "second,first", "defer order")
 ```
 
-**Expected:** The observed order is second then first.
+**Expected:** The changed run panics with `defer order` because the edited check no longer holds. Restoring the original line brings back the worked observation: the observed order is second then first.
 
 The last registered cleanup runs first. This naturally unwinds nested acquisitions in the opposite order from acquisition.
 
-## 2. Compare captured arguments
+## 2. Compare captured arguments: diagnose an edited check
 
-Defer a call with x as an argument, then change x.
+A careless edit changed the check in worked example 2 so that it reads `check(deferArgument() != 1, "argument evaluation")`. Run worked example 2 with that line, explain why the edited check now fails for the same program state, and restore it.
+
+The unchanged code is worked example 2:
 
 ```go
 check(deferArgument() == 1, "argument evaluation")
 ```
 
-**Expected:** The deferred argument retains the earlier value 1.
+**Expected:** Before the repair the program panics with `argument evaluation`; after it the line reads `check(deferArgument() == 1, "argument evaluation")` again and the deferred argument retains the earlier value 1.
 
 Call arguments are evaluated at registration. This differs from a closure that refers to x and reads it when the closure later runs.
 

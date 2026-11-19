@@ -4,7 +4,7 @@ Authored tutorial and practice content. The prepared Scala/JVM worker executes a
 
 ## Level and prerequisites
 
-Beginner; approximately 105 minutes. Direct design prerequisites: `spark-004`. The lesson uses Scala 2.13 syntax and the prepared JDK 17 worker. The older design document proposed a different Spark/JDK tuple; use the current [execution baseline](../execution-baseline.md) for this authored material.
+Beginner; approximately 75 minutes. Direct prerequisites: `spark-004`. The lesson uses Scala 2.13 syntax and the prepared JDK 17 worker. The [execution baseline](../execution-baseline.md) lists the exact Scala, JDK and Spark versions.
 
 ## How to run this lesson
 
@@ -92,7 +92,7 @@ Return observed for a valid supplied amount, missing for None, and rejected for 
 
 Return valid parsed amounts in original order using flatMap. Preserve zero and duplicate amounts; do not substitute defaults for missing or rejected tokens.
 
-**Expected result/shape:** The five-token fixture yields Seq(0L,25L). Adding another Some("25") yields two 25-cent occurrences.
+**Expected result/shape:** The five-token fixture yields Seq(0L, 25L). Adding another Some("25") yields two 25-cent occurrences.
 
 **Verify:** Assert exact observed sequences and an all-missing/rejected fixture returning empty.
 

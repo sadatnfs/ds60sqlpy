@@ -1200,9 +1200,7 @@
       "prerequisites": [
         "cuda-051",
         "cuda-052",
-        "cuda-061",
-        "cuda-097",
-        "cuda-098"
+        "cuda-061"
       ],
       "runtime": "reading",
       "concepts": [

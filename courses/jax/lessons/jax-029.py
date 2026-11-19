@@ -45,10 +45,10 @@ def exercise_5():
     raise NotImplementedError("Count and bound the adapter")
 
 
-# Exercise 6: Compile the admitted operation
+# Exercise 6: Compile the validated operation
 # JIT the pure attention helper and compare the exact fixture.
 def exercise_6():
-    raise NotImplementedError("Compile the admitted operation")
+    raise NotImplementedError("Compile the validated operation")
 
 
 if __name__ == "__main__":

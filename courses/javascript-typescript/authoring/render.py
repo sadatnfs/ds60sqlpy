@@ -1,5 +1,6 @@
 from pathlib import Path
 import json
+import re
 import sys
 import textwrap
 
@@ -8,6 +9,13 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 from scripts.format_inline_code import canonical_markdown  # noqa: E402
+
+HERE = Path(__file__).resolve().parent
+if str(HERE) not in sys.path:
+    sys.path.insert(0, str(HERE))
+
+import variants  # noqa: E402
+from outcomes import OUTCOMES  # noqa: E402
 
 SPECS = {}
 
@@ -55,6 +63,207 @@ def program(spec, blocks, reference=True, typed=False):
     return result + "\nconsole.log(JSON.stringify(await verify()));\n"
 
 
+def _lower_first(text):
+    """Lower-case an ordinary leading word, leaving identifiers such as NaN intact."""
+    return text[:1].lower() + text[1:] if text[1:2].islower() else text
+
+
+def _occurs(excerpt, code):
+    """Whether an edited excerpt already appears verbatim, which would make it ambiguous."""
+    return " ".join(excerpt.split()) in " ".join(code.split())
+
+
+def formatted_codes(spec, path, language):
+    """The exercise snippets exactly as the canonical Markdown formatter prints them."""
+    document = "".join(f"```{language}\n{e['code']}\n```\n\n" for e in spec["exercises"])
+    text = canonical_markdown(document, root=ROOT, path=path)
+    shown = re.findall(rf"^```{language}\n(.*?)^```$", text, re.S | re.M)
+    if len(shown) != len(spec["exercises"]):
+        return [e["code"] for e in spec["exercises"]]
+    return [code.rstrip("\n") for code in shown]
+
+
+def reading_practice(spec):
+    """Browser reading lessons: no Node runtime, so practice is phrased as browser observations."""
+    rows = []
+    for index, e in enumerate(spec["exercises"]):
+        expected = _lower_first(e["expected"])
+        row = {"title": e["title"], "task": e["prompt"], "expected": e["expected"]}
+        if index == 0:
+            row["title"] = e["title"] + ": change one input"
+            row["task"] = (
+                "Rebuild Example A in your copy of the lesson's browser fixture without looking at it. Then change one "
+                "attribute, label or handler and write down the visible, focus or announcement change you expect "
+                "before reloading."
+            )
+            row["expected"] = (
+                f"Your rebuild reproduces the worked observation ({expected.rstrip('.')}), and the changed copy shows the "
+                "difference you predicted."
+            )
+            row["verify"] = (
+                "Record the browser observation before and after your change, including where focus lands and any "
+                "live-region text, and explain which line caused the difference."
+            )
+        elif index == 1:
+            row["title"] = e["title"] + ": debug a regression"
+            row["task"] = (
+                "Introduce one deliberate defect into a copy of Example B, such as a wrong selector, a missing attribute or a handler on the wrong element. Predict which browser behavior will expose it, confirm that prediction, then repair it."
+            )
+            row["expected"] = (
+                f"The defective copy no longer shows: {expected} The repaired copy shows it again."
+            )
+            row["verify"] = (
+                "Keep notes on the failing and the repaired behavior and name the first browser observation that "
+                "differed between them."
+            )
+        else:
+            row["verify"] = (
+                f"In the browser fixture, record the observation that shows: {expected} Then change one input and "
+                "record what changes, keeping keyboard and pointer results separate."
+            )
+        row["hints"] = (
+            f"First restate the expected observation: {expected} Then inspect the elements, attributes and listeners "
+            "involved in the browser's developer tools. Finally, change one thing at a time and reload before changing "
+            "another."
+        )
+        rows.append(row)
+    return rows
+
+
+def practice(ident, spec, typed, language, path):
+    """Six exercises: two derived from the worked examples, four authored investigations.
+
+    Every Verify line and hint names the exercise's own check and, where recorded, a
+    one-token edit that qualify_variants.py observed making that check fail.
+    """
+    span = variants.code_span
+    records = variants.load_records()
+    shown_codes = formatted_codes(spec, path, language)
+    pad = "`main.mts`" if typed else "`main.mjs`"
+    receipt = '`{"checks":1,"status":"passed"}`'
+    rows = []
+    for index, e in enumerate(spec["exercises"]):
+        shown = shown_codes[index]
+        if len(variants.checks(shown)) != len(variants.checks(e["code"])):
+            shown = e["code"]
+        v = variants.variant(records, ident, index, e["code"], shown)
+        spans = variants.checks(shown)
+        condition = v["condition"] if v and v.get("condition") else spans[-1][2] if spans else None
+        cond = span(condition) if condition else None
+        expected = _lower_first(e["expected"])
+        row = {"title": e["title"], "task": e["prompt"], "expected": e["expected"]}
+        if v:
+            original, edited = span(v["line"]), span(v["broken"])
+            fail = f"fails with an `AssertionError` at the check {cond}"
+        if index == 0:
+            row["title"] = e["title"] + (
+                ": predict an edited check" if v and v["in_check"] else ": change one input"
+            )
+            if v and v["in_check"]:
+                row["task"] = (
+                    f"Copy Example A into a scratch {pad} and change {original} to {edited} inside its check. "
+                    "Before running it, predict whether the check still passes and explain why; then restore it."
+                )
+            elif v:
+                row["task"] = (
+                    f"Copy Example A into a scratch {pad} and change {original} to {edited}. Before running it, "
+                    "predict which check fails and which value it now sees; then run it and restore the original line."
+                )
+            else:
+                row["task"] = (
+                    f"Close Example A and rebuild it in a fresh {pad}, keeping the check {cond}. Then propose one "
+                    "input change that would make that check fail and explain why before trying it."
+                )
+            if v:
+                row["expected"] = (
+                    f"The changed run {fail}. Restoring the original line brings back the worked observation: {expected}"
+                )
+                row["verify"] = (
+                    "Compare your written prediction with the reported `AssertionError`, including its actual and "
+                    "expected values, and "
+                    + (
+                        f"explain why the edited check rejects the values that {cond} accepts."
+                        if v["in_check"]
+                        else f"name the value that made {cond} fail."
+                    )
+                    + f" After restoring the line, the program prints its {receipt} receipt again."
+                )
+            else:
+                row["expected"] = (
+                    f"Your rebuild reproduces the worked observation ({expected.rstrip('.')}), and your proposed "
+                    f"change makes the check {cond} fail."
+                )
+                row["verify"] = (
+                    f"Run the rebuild first and confirm the {receipt} receipt, then the changed copy. Name the value "
+                    f"that makes {cond} fail in the changed copy."
+                )
+        elif index == 1:
+            row["title"] = e["title"] + (
+                ": diagnose an edited check" if v and v["in_check"] else ": debug a regression"
+            )
+            if v and v["in_check"]:
+                row["task"] = (
+                    f"A careless edit changed a check in Example B so that it reads {edited}. Run Example B with that "
+                    "line, explain why the edited check now fails for the same program state, and restore it."
+                )
+            elif v and _occurs(v["broken"], shown):
+                row["task"] = (
+                    f"A regression changed {original} to {edited} in Example B. Run Example B with that change, use the "
+                    "failing check to explain the defect and repair it without changing the check."
+                )
+            elif v:
+                row["task"] = (
+                    f"A regression changed one token in Example B, so one line now reads {edited}. Run Example B with "
+                    "that line, use the failing check to locate the defect and repair it without changing the check."
+                )
+            else:
+                row["task"] = (
+                    f"Introduce one deliberate defect into a copy of Example B that makes the check {cond} fail, then "
+                    "explain how the reported actual and expected values lead back to the faulty line."
+                )
+            row["expected"] = (
+                f"Before the repair the run {fail}; after it the line reads {original} again and {expected}"
+                if v
+                else f"The defective copy fails the check {cond}; the repaired copy reproduces the worked observation: {expected}"
+            )
+            row["verify"] = (
+                f"Keep the failing and the repaired runs. Explain why the edited check rejects the same program state that {cond} accepts."
+                if v and v["in_check"]
+                else f"Keep the failing and the repaired runs. Explain why the changed token alters the value tested by {cond} for this input."
+                if v
+                else "Keep the failing and the repaired runs and name the first value that differs between them."
+            )
+        elif v and not v["in_check"]:
+            row["verify"] = (
+                f"Keep a check equivalent to {cond}. As a control, change {original} to {edited}: the run must fail "
+                "with an `AssertionError` at that check. Restore the line before continuing."
+            )
+        elif v:
+            row["verify"] = (
+                f"Keep a check equivalent to {cond}. As a control, change {original} to {edited} inside it: the run "
+                "must fail with an `AssertionError`, which shows the check can fail. Restore it."
+            )
+        else:
+            row["verify"] = (
+                f"Keep a check equivalent to {cond} and confirm that the reference still passes. Then name an input "
+                "that would make it fail and explain which value changes."
+            )
+        if index == 0 and v:
+            third = f"compute the checked value with {edited} in place before running"
+        elif index == 1 and v:
+            third = f"compare {edited} with the same line in Example B and state the claim each version makes"
+        elif v and not v["in_check"]:
+            third = f"predict the effect of changing {original} to {edited} before running anything"
+        else:
+            third = f"name one input that would make {cond} fail"
+        row["hints"] = (
+            f"First restate the expected observation: {expected} Then list the values read by {cond} and trace each "
+            f"one from its declaration. Finally, {third}."
+        )
+        rows.append(row)
+    return rows
+
+
 def write_all():
     base = ROOT / "courses/javascript-typescript"
     plan = json.loads((base / "track.json").read_text())
@@ -80,10 +289,22 @@ def write_all():
             or "None. This lesson starts from the language and host distinction."
         )
         terms = "\n\n".join(f"**{name}:** {meaning}" for name, meaning in spec["terms"])
-        tasks = "\n\n".join(
-            f"{i}. **{e['title']}.** {e['prompt']}\n   **Expected:** {e['expected']}\n   **Verify:** Record the observed value, exception or browser state and compare it with that expectation."
-            for i, e in enumerate(spec["exercises"], 1)
+        rows = (
+            reading_practice(spec)
+            if reading
+            else practice(identity, spec, typed, language, explanation)
         )
+        tasks = "\n\n".join(
+            f"{i}. **{r['title']}.** {r['task']}\n   **Expected:** {r['expected']}\n   **Verify:** {r['verify']}"
+            for i, r in enumerate(rows, 1)
+        )
+        hints = "\n".join(f"- **Exercise {i}:** {r['hints']}" for i, r in enumerate(rows, 1))
+        outcome = OUTCOMES[identity]
+        if (
+            outcome.lower().startswith("explain and implement")
+            or outcome == spec["mental"].split(".")[0] + "."
+        ):
+            raise ValueError(identity + " needs a specific outcome")
         examples = []
         for i, e in enumerate(spec["exercises"][:2]):
             code = e["code"] if reading else program(spec, [e["code"]], False, typed)
@@ -93,9 +314,9 @@ def write_all():
         if reading:
             run = "This is a browser reading and practice lesson. Node has no document or window. Use the separate checked-in browser fixture described below and record its visible interaction, focus and state changes. The manifest deliberately supplies no Node execution claim for these DOM examples."
         elif typed:
-            run = "Use the prepared TypeScript 5.9.3 profile. The classroom saves main.mts, checks strict NodeNext resolution with noEmitOnError and an ES2022 target, then runs compiled/main.mjs on Node 24.22.1. Node typings 24.10.0 are prepared. Compilation and execution are separate stages. Types are erased and do not validate external JSON. No npm installation belongs inside the lesson."
+            run = "Use the prepared TypeScript 5.9.3 profile. The classroom saves main.mts, checks strict NodeNext resolution with noEmitOnError and an ES2022 target, then runs compiled/main.mjs on Node 24.22.3. Node typings 24.10.0 are prepared. Compilation and execution are separate stages. Types are erased and do not validate external JSON. No npm installation belongs inside the lesson."
         else:
-            run = "Use the prepared Node 24.22.1 profile. The classroom saves an ES module as main.mjs and executes it with Node. Only built-in Node or ECMAScript APIs are used. For a prepared native environment, node main.mjs is the same command on PowerShell and POSIX. Browser APIs have separate host requirements."
+            run = "Use the prepared Node 24.22.3 profile. The classroom saves an ES module as main.mjs and executes it with Node. Only built-in Node or ECMAScript APIs are used. For a prepared native environment, node main.mjs is the same command on PowerShell and POSIX. Browser APIs have separate host requirements."
         prompt = f"""Use $guide-ds60sqlpy-learning for {identity}: {row["title"]}.
 Read {guide} and {learner}. Direct prerequisites: {prerequisites}.
 Explain the mechanism, ask me to predict a value or failure, review my own attempt,
@@ -111,7 +332,7 @@ diagnose a controlled failure, and solve a new boundary case without copying the
 
 ## Learning objectives
 
-Explain {", ".join(name.lower() for name, _ in spec["terms"])} with a concrete program. Trace how the values change, identify the assumptions, and make a boundary or invalid case observable. The first investigation is: {spec["exercises"][0]["prompt"]} The final task tests {spec["exercises"][-1]["title"].lower()}.
+{outcome} Along the way, explain {", ".join(name.lower() for name, _ in spec["terms"])} with a concrete program. Trace how the values change, identify the assumptions, and make a boundary or invalid case observable. Exercises 1 and 2 start from the worked examples; the authored investigations begin with this task: {spec["exercises"][2]["prompt"]} The final task tests {spec["exercises"][-1]["title"].lower()}.
 
 ## Purpose and mental model
 
@@ -155,7 +376,9 @@ If a host API is absent, confirm the actual host and version before changing the
 
 ## Progressive hints
 
-Start by comparing the actual value with the literal expected result. Next, isolate the expression that transforms it or the boundary where its type or ownership changes. If the discrepancy involves scheduling, replace unrelated work with a small trace array and await the exact completion you intend to observe. Finally, ask for one hint about the first incorrect assumption before opening the reference. Keep one controlled failure that would catch the same mistake returning.
+Read one hint at a time and attempt the exercise again before reading the next. If a discrepancy involves scheduling, replace unrelated work with a small trace array and await the exact completion you intend to observe. Ask for one hint about the first incorrect assumption before opening the reference.
+
+{hints}
 
 ## Self-check and retrieval
 
@@ -163,7 +386,7 @@ Close the solution and explain {", ".join(name for name, _ in spec["terms"][:3])
 
 ## Sources and verification status
 
-[Official language or host reference]({spec["source"]}). Fixtures and exercises are original course material. The [validation guide](../../../docs/validation.md) describes runtime checks. Consult CI artifacts for the exact revision and platform to see which Node, TypeScript and browser checks actually ran. Manual-only steps remain unqualified until performed. No default lesson installs dependencies, downloads a model or contacts a shared service.
+[Official language or host reference]({spec["source"]}). Fixtures and exercises are original course material. The [validation guide](../../../docs/validation.md) describes how the references are run. No default lesson installs dependencies, downloads a model or contacts a shared service.
 
 ## Ask an AI tutor about this lesson
 
@@ -186,20 +409,25 @@ Use these answers after an attempt or an explicit reveal. The reference uses the
 {spec["anatomy"]}
 
 """
-        for i, e in enumerate(spec["exercises"], 1):
-            answer += f"""## Exercise {i}: {e["title"]}
+        for i, (e, r) in enumerate(zip(spec["exercises"], rows, strict=True), 1):
+            lead = (
+                f"The unchanged code is the exercise block of Example {chr(64 + i)}:\n\n"
+                if i <= 2
+                else ""
+            )
+            answer += f"""## Exercise {i}: {r["title"]}
 
-Task: {e["prompt"]}
+Task: {r["task"]}
 
 {e["why"]}
 
-```{"html" if reading else language}
+{lead}```{"html" if reading else language}
 {e["code"]}
 ```
 
-**Expected:** {e["expected"]}
+**Expected:** {r["expected"]}
 
-**Verify:** Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.
+**Verify:** {r["verify"]}
 
 """
         answer += """## After comparison
@@ -221,12 +449,13 @@ Return to your saved implementation and repeat a case with different values. Kee
                 program(spec, [e["code"] for e in spec["exercises"]], True, typed)
             )
             comments = []
-            for i, e in enumerate(spec["exercises"], 1):
+            for i, r in enumerate(rows, 1):
                 comments.append(
-                    f"// Exercise {i}: {e['title']}\n"
-                    + "\n".join("// " + line for line in textwrap.wrap(e["prompt"], 90))
-                    + "\n// Expected: "
-                    + e["expected"]
+                    f"// Exercise {i}: {r['title']}\n"
+                    + "\n".join("// " + line for line in textwrap.wrap(r["task"], 90))
+                    + "".join(
+                        "\n// " + line for line in textwrap.wrap("Expected: " + r["expected"], 90)
+                    )
                 )
             (ROOT / learner).write_text(
                 "// Answer-free learner source. Save your own copy before editing.\n"
@@ -247,11 +476,9 @@ Return to your saved implementation and repeat a case with different values. Kee
                     verification_id=None,
                 )
             )
-        row["outcome"] = spec["mental"].split(".")[0] + "."
-        row["lab"] = spec["exercises"][0]["prompt"]
-        row["verification"] = (
-            spec["exercises"][0]["expected"] + " " + spec["exercises"][-1]["expected"]
-        )
+        row["outcome"] = outcome
+        row["lab"] = spec["exercises"][2]["prompt"]
+        row["verification"] = spec["exercises"][2]["expected"]
         row["concepts"] = [name for name, _ in spec["terms"]]
     manifest["lessons"].sort(key=lambda e: e["id"])
     (base / "lessons.json").write_text(json.dumps(manifest, indent=2) + "\n")

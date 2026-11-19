@@ -93,7 +93,8 @@ def targets(p):
 def example_one():
     with tempfile.TemporaryDirectory() as d:
         p = project(
-            d, models={"base": "select 1 as x", "child": "select x+10 as x from {{ ref('base') }}"}
+            d,
+            models={"base": "select 1 as x", "child": "select x + 10 as x from {{ ref('base') }}"},
         )
         targets(p)
         invoke(p, "build", "--target", "prod")
@@ -117,7 +118,7 @@ def example_one():
 def example_two():
     with tempfile.TemporaryDirectory() as d:
         p = project(
-            d, models={"base": "select 1 as x", "child": "select x+1 as x from {{ ref('base') }}"}
+            d, models={"base": "select 1 as x", "child": "select x + 1 as x from {{ ref('base') }}"}
         )
         targets(p)
         invoke(p, "build", "--target", "prod")

@@ -14,11 +14,11 @@ Regularization changes the training objective or the training computation. An L1
 
 ## Reading the implementation
 
-reduce_sum(abs(w)) and reduce_sum(square(w)) implement the declared penalty conventions. Add lambda*penalty to data loss only when that is the intended objective. Dropout(rate=.5) with training=True maps each unit input to0 or2. training=False returns the input. Keras regularizer conventions and optimizer weight decay should be checked explicitly instead of being assumed interchangeable.
+reduce_sum(abs(w)) and reduce_sum(square(w)) implement the declared penalty conventions. Add lambda*penalty to data loss only when that is the intended objective. Dropout(rate=0.5) with training=True maps each unit input to 0 or 2. training=False returns the input. Keras regularizer conventions and optimizer weight decay should be checked explicitly instead of being assumed interchangeable.
 
 ## Exercise 1: Calculate penalties
 
-The question is: Compute L1 and squared L2 sums for weights[1,-2].
+The question is: Compute L1 and squared L2 sums for weights [1, -2].
 
 The name L2 can mean a norm or a squared penalty in different contexts. This exercise explicitly uses the sum of squares, avoiding an unexplained square root or half factor.
 
@@ -29,13 +29,13 @@ l2 = float(tf.reduce_sum(w * w))
 assert (l1, l2) == (3.0, 5.0)
 ```
 
-**Expected:** \(L_{1}=3\); squaredL2=5.
+**Expected:** \(L_{1}=3\); squared L2=5.
 
-**Verify:** Compare the computed values or written argument with \(L_{1}=3\); squaredL2=5.
+**Verify:** In a fresh process, the exercise checks confirm `(l1, l2) == (3.0, 5.0)`.
 
 ## Exercise 2: Switch dropout to evaluation
 
-The question is: Apply dropout.5 twice to ones with training=False.
+The question is: Apply dropout 0.5 twice to ones with training=False.
 
 Evaluation removes the random masking behavior. Testing repeated calls establishes this local contract without making claims about other random components in a full pipeline.
 
@@ -50,7 +50,7 @@ np.testing.assert_array_equal(b.numpy(), x.numpy())
 
 **Expected:** both outputs equal the input.
 
-**Verify:** Compare the computed values or written argument with both outputs equal the input.
+**Verify:** In a fresh process, the exercise checks confirm `a.numpy()` equals `x.numpy()` and `b.numpy()` equals `x.numpy()`.
 
 ## Exercise 3: Inspect training invariants
 
@@ -63,13 +63,13 @@ train = layer(x, training=True).numpy()
 assert train.shape == (4, 8) and set(np.unique(train)) <= {0.0, 2.0}
 ```
 
-**Expected:** shape(4,8), values only0 or2.
+**Expected:** shape (4, 8), values only 0 or 2.
 
-**Verify:** Compare the computed values or written argument with shape(4,8), values only0 or2.
+**Verify:** In a fresh process, the exercise checks confirm `train.shape == (4, 8)` and `set(np.unique(train)) <= {0.0, 2.0}`.
 
 ## Exercise 4: Separate objective terms
 
-The question is: Combine data loss2 with coefficient.1 times squaredL2 and report both components.
+The question is: Combine data loss 2 with coefficient 0.1 times squared L2 and report both components.
 
 Logging only the total makes it hard to distinguish predictive error from a changing regularization cost. The coefficient is part of the objective definition.
 
@@ -80,15 +80,15 @@ penalty = coefficient * l2
 assert penalty == 0.5 and data_loss + penalty == 2.5
 ```
 
-**Expected:** data2, penalty.5, total2.5.
+**Expected:** data 2, penalty 0.5, total 2.5.
 
-**Verify:** Compare the computed values or written argument with data2, penalty.5, total2.5.
+**Verify:** In a fresh process, the exercise checks confirm `penalty == 0.5` and `data_loss + penalty == 2.5`.
 
 ## Exercise 5: Differentiate the penalty
 
-The question is: Differentiate.1*sum(w²) at[1,-2].
+The question is: Differentiate 0.1*sum(w²) at [1, -2].
 
-The derivative is2*lambda*w under the stated convention. A half-scaled penalty would have a different gradient, so a coefficient cannot be copied blindly between definitions.
+The derivative is 2*lambda*w under the stated convention. A half-scaled penalty would have a different gradient, so a coefficient cannot be copied blindly between definitions.
 
 ```python
 v = tf.Variable([1.0, -2.0])
@@ -97,9 +97,9 @@ with tf.GradientTape() as tape:
 np.testing.assert_allclose(tape.gradient(penalty, v).numpy(), [0.2, -0.4], atol=1e-6, rtol=0)
 ```
 
-**Expected:** gradient[.2,-.4].
+**Expected:** gradient [0.2, -0.4].
 
-**Verify:** Compare the computed values or written argument with gradient[.2,-.4].
+**Verify:** In a fresh process, the exercise checks confirm `tape.gradient(penalty, v).numpy()` matches `[0.2, -0.4]` within 1e-6.
 
 ## Exercise 6: Scale weights deliberately
 
@@ -112,9 +112,9 @@ assert float(tf.reduce_sum(tf.abs(2 * w))) == 6
 assert float(tf.reduce_sum((2 * w) ** 2)) == 20
 ```
 
-**Expected:** L1 doubles to6; squaredL2 quadruples to20.
+**Expected:** L1 doubles to 6; squared L2 quadruples to 20.
 
-**Verify:** Compare the computed values or written argument with L1 doubles to6; squaredL2 quadruples to20.
+**Verify:** In a fresh process, the exercise checks confirm `float(tf.reduce_sum(tf.abs(2 * w))) == 6` and `float(tf.reduce_sum((2 * w) ** 2)) == 20`.
 
 ## Review after comparison
 

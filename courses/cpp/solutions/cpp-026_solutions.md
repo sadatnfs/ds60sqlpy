@@ -17,7 +17,7 @@ Debugging begins with a reproducible mismatch between expected and observed beha
 
 The total function provides a small deterministic target. For [2, 4, 6], the expected sum is 12. A breakpoint before the return can inspect the input size and accumulated value. The call stack distinguishes a defect inside total from a caller supplying a different vector. Preserve the smallest failing fixture and the first point where actual state diverges from the predicted trace.
 
-Timing asks a separate question. Repeating the computation1000 times yields a checksum of 12000, which prevents the benchmark from being judged only by an elapsed number. A benchmark must still consider optimization, allocation, setup work, warm caches and whether the work resembles the real workload. The compiler may simplify work whose result is predictable, so an apparently tiny duration can reflect optimization rather than useful throughput.
+Timing asks a separate question. Repeating the computation 1000 times yields a checksum of 12000, which prevents the benchmark from being judged only by an elapsed number. A benchmark must still consider optimization, allocation, setup work, warm caches and whether the work resembles the real workload. The compiler may simplify work whose result is predictable, so an apparently tiny duration can reflect optimization rather than useful throughput.
 
 Use a monotonic clock such as steady_clock for elapsed time. Wall-clock adjustments should not create negative benchmark durations. A single measurement is noisy because scheduling and other activity vary. Compare repeated samples and keep the correctness gate fixed. Never assert one exact nanosecond value as a portable expected result.
 
@@ -53,7 +53,7 @@ Write the expected sum of [2, 4, 6].
 
 **Reasoning:** A debugger needs a precise discrepancy.
 
-**Verify:** Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.
+**Verify:** Write 12 down before running anything, then compare it with Worked example 1's assertion `total({2, 4, 6}) == 12`.
 
 ## Exercise 2: Inspect a stack
 
@@ -63,7 +63,7 @@ Use an already available debugger on a -g host build and break in total.
 
 **Reasoning:** The browser does not provide an interactive debugger.
 
-**Verify:** Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.
+**Verify:** At the breakpoint, print the backtrace and confirm `total` appears above `main`, then print `xs.size()` and check that it is 3.
 
 ## Exercise 3: Measure a bounded workload
 
@@ -73,7 +73,7 @@ Run 1000 totals and record steady_clock duration.
 
 **Reasoning:** Output correctness prevents meaningless timing claims.
 
-**Verify:** Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.
+**Verify:** Assert `checksum == 12000`, as Worked example 2 does, and print the duration through `std::chrono::duration_cast<std::chrono::microseconds>` so the unit appears with the number.
 
 ## Exercise 4: Reject a false benchmark
 
@@ -83,7 +83,7 @@ Explain why one observed faster run proves little.
 
 **Reasoning:** Scheduler noise and optimizer behavior affect tiny measurements.
 
-**Verify:** Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.
+**Verify:** Check that your explanation names the build flags (`-O0` versus `-O2`), the fixed workload of 1000 totals, the number of repeated runs and the spread between them.
 
 ## Exercise 5: Test an empty case
 
@@ -93,7 +93,7 @@ Inspect total({}) with debugger or assertions.
 
 **Reasoning:** The accumulation identity handles emptiness.
 
-**Verify:** Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.
+**Verify:** Assert `total({}) == 0`, or step through it in the debugger and confirm `std::accumulate` returns its initial 0 without reading an element.
 
 ## Exercise 6: Transfer a hypothesis
 
@@ -103,4 +103,4 @@ Replace a linear scan with a map lookup and state a measurable hypothesis.
 
 **Reasoning:** Choose the evidence before declaring a winner.
 
-**Verify:** Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.
+**Verify:** First assert that both versions return the same answer for every query, then compare operation counts and repeated timings at the same input size and build flags.

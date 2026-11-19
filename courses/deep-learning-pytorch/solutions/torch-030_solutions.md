@@ -24,11 +24,11 @@ Use reduction='sum' for each microbatch, call backward without stepping, then di
 
 Let rank or shard r contain n_r participating examples, local gradient sum S_r and local mean \(g_{r}=\frac{S_{r}}{n_{r}}\) when \(n_{r}>0\). The global example-mean gradient is \(\frac{\sum_r S_r}{\sum_r n_r}\), equivalently \(\frac{\sum_r n_rg_r}{N}\). For means 2 and 6 with counts 1 and 3, the numerator is \(2+18=20\) and \(N=4\), giving five. Averaging the two means gives four and defines a different objective with equal shard weight.
 
-The vector[2, 4, 6, 8] is an independent four-example oracle. Splitting it 1:3 gives sums 2 and 18, which recombine to \(\frac{20}{4}=5\). An empty shard contributes sum zero and count zero; its local mean need not be evaluated at all. A globally empty collection has \(N=0\) and must not be divided by zero or described as a valid zero-gradient batch without an explicit skip policy.
+The vector [2, 4, 6, 8] is an independent four-example oracle. Splitting it 1:3 gives sums 2 and 18, which recombine to \(\frac{20}{4}=5\). An empty shard contributes sum zero and count zero; its local mean need not be evaluated at all. A globally empty collection has \(N=0\) and must not be divided by zero or described as a valid zero-gradient batch without an explicit skip policy.
 
-For the actual squared-loss fixture, x=[1, 2, 3, 4], y=2x and \(w=0\). The per-example derivatives are \(-4x^2\), or[-4, -16, -36, -64]. Their sum is-120 and global mean-30. The two backward calls in Example C accumulate the summed objectives at the same unchanged w, then divide once by four. One SGD update at 0.01 gives \(w=0.3\).
+For the actual squared-loss fixture, x=[1, 2, 3, 4], y=2x and \(w=0\). The per-example derivatives are \(-4x^2\), or [-4, -16, -36, -64]. Their sum is -120 and global mean -30. The two backward calls in Example C accumulate the summed objectives at the same unchanged w, then divide once by four. One SGD update at 0.01 gives \(w=0.3\).
 
-Stepping after each microbatch changes both normalization and evaluation state. The first one-row mean has gradient-4, so w becomes 0.04. The second three-row mean is then evaluated at that new value and has derivative(58/3)(0.04-2), approximately-37.893333. Its second update ends at approximately 0.418933, not 0.3. This discrepancy is expected because it is a different optimization trajectory, not an accumulation bug to hide with a tolerance.
+Stepping after each microbatch changes both normalization and evaluation state. The first one-row mean has gradient -4, so w becomes 0.04. The second three-row mean is then evaluated at that new value and has derivative (58/3)(0.04-2), approximately -37.893333. Its second update ends at approximately 0.418933, not 0.3. This discrepancy is expected because it is a different optimization trajectory, not an accumulation bug to hide with a tolerance.
 
 A distributed reducer introduces another factor. Under a fixed R-rank configuration that averages gradients across ranks, backpropagating a local summed loss divided by global N would produce only \(\frac{1}{R}\) of the intended global gradient after averaging. One appropriate local scaling for this stated convention is \(L_r=\frac{R}{N}\sum_i\ell_{ri}\). The reducer then returns \(\frac1R\sum_r\frac{RS_r}{N}=\frac{\sum_rS_r}{N}\). Equivalently, weight each nonempty local mean by R \(\frac{n_{r}}{N}\). When all n_r are equal, the ordinary mean of local means already has the intended weighting.
 
@@ -56,7 +56,7 @@ assert (means * counts).sum().div(counts.sum()).item() == 5 and means.mean().ite
 
 **Expected:** global mean 5; unweighted shard mean 4.
 
-**Verify:** Compare the computed values or written argument with global mean 5; unweighted shard mean 4.
+**Verify:** In a fresh process, the exercise checks confirm `(means * counts).sum().div(counts.sum()).item() == 5` and `means.mean().item() == 4`.
 
 ## Exercise 2: Reconstruct an example mean
 
@@ -76,7 +76,7 @@ assert (
 
 **Expected:** global mean 5.
 
-**Verify:** Compare the computed values or written argument with global mean 5.
+**Verify:** In a fresh process, the exercise checks confirm the combined assertion.
 
 ## Exercise 3: Accumulate one full-batch gradient
 
@@ -97,13 +97,13 @@ full = ((oracle * x - y) ** 2).mean()
 assert torch.autograd.grad(full, oracle)[0].item() == -30
 ```
 
-**Expected:** gradient-30, matching full-batch mean.
+**Expected:** gradient -30, matching full-batch mean.
 
-**Verify:** Compare the computed values or written argument with gradient-30, matching full-batch mean.
+**Verify:** In a fresh process, the exercise checks confirm `w.grad.item() == -30` and `torch.autograd.grad(full, oracle)[0].item() == -30`.
 
 ## Exercise 4: Apply one accumulated update
 
-The question is: Take SGD.01 after the global gradient is formed.
+The question is: Take one SGD step with learning rate 0.01 after the global gradient is formed.
 
 The effective batch produces one optimizer step. Learning-rate schedules and optimizer counters should follow that declared step unit.
 
@@ -112,13 +112,13 @@ torch.optim.SGD([w], lr=0.01).step()
 np.testing.assert_allclose(w.item(), 0.3, atol=1e-12, rtol=0)
 ```
 
-**Expected:** new weight.3.
+**Expected:** new weight 0.3.
 
-**Verify:** Compare the computed values or written argument with new weight.3.
+**Verify:** In a fresh process, the exercise checks confirm `w.item()` matches `0.3` within 1e-12.
 
 ## Exercise 5: Contrast separate microbatch updates
 
-The question is: Reset w0and step after each shard mean instead.
+The question is: Reset w to 0 and step after each shard mean instead.
 
 This is ordinary minibatch training. It is not an implementation of one full-batch update because the second derivative is evaluated at a new state.
 
@@ -132,9 +132,9 @@ for start, end in [(0, 1), (1, 4)]:
 assert abs(other.item() - 0.3) > 1e-6
 ```
 
-**Expected:** endpoint differs from.3.
+**Expected:** endpoint differs from 0.3.
 
-**Verify:** Compare the computed values or written argument with endpoint differs from.3.
+**Verify:** In a fresh process, the exercise checks confirm `abs(other.item() - 0.3) > 1e-06`.
 
 ## Exercise 6: Represent empty-shard contributions
 
@@ -151,7 +151,7 @@ assert denominator == 4 and numerator.div(denominator).item() == 5
 
 **Expected:** empty shard contributes 0; global mean 5.
 
-**Verify:** Compare the computed values or written argument with empty shard contributes 0; global mean 5.
+**Verify:** In a fresh process, the exercise checks confirm `denominator == 4` and `numerator.div(denominator).item() == 5`.
 
 ## Review after comparison
 

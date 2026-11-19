@@ -6,7 +6,7 @@
   "cases": [
     {
       "exercise": 1,
-      "task": "Explain the role of hello-config,u1 and rv-A.",
+      "task": "Explain the role of hello-config, u1 and rv-A.",
       "expected": "Name addresses an object; UID its lifetime; resourceVersion is an opaque API token."
     },
     {
@@ -26,7 +26,7 @@
     },
     {
       "exercise": 5,
-      "task": "Replace a stale cache with a supplied fresh list after410.",
+      "task": "Replace a stale cache with a supplied fresh list after 410.",
       "expected": "Current u2 snapshot retained; watcher restarts from the new list token."
     },
     {

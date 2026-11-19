@@ -27,6 +27,17 @@ function cancellableValue(value, signal, trace) {
     }, 1);
   });
 }
+function deadlineSignal(ms, trace) {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(new Error("deadline")), ms);
+  return {
+    signal: controller.signal,
+    [Symbol.dispose]() {
+      clearTimeout(timer);
+      trace.push("deadline cleared");
+    },
+  };
+}
 
 export async function verify() {
   // Exercise 1: Cancel a pending timer
@@ -87,13 +98,16 @@ export async function verify() {
   // Exercise 6: Combine caller and deadline signals
   {
     const caller = new AbortController();
-    const deadline = new AbortController();
-    const combined = AbortSignal.any([caller.signal, deadline.signal]);
-    const reason = new Error("deadline");
-    deadline.abort(reason);
-    assert.equal(combined.aborted, true);
-    assert.equal(combined.reason, reason);
-    assert.equal(caller.signal.aborted, false);
+    const trace = [];
+    const reason = new Error("caller stopped");
+    {
+      using deadline = deadlineSignal(1000, trace);
+      const combined = AbortSignal.any([caller.signal, deadline.signal]);
+      caller.abort(reason);
+      assert.equal(combined.reason, reason);
+      assert.equal(deadline.signal.aborted, false);
+    }
+    assert.deepEqual(trace, ["deadline cleared"]);
   }
 
   return { checks: 6, status: "passed" };

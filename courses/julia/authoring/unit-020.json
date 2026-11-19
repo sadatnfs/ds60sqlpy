@@ -14,7 +14,7 @@
   "exercises": [
     {
       "title": "State the parameterization",
-      "task": "Construct Normal(2,3).",
+      "task": "Construct `Normal(2, 3)`.",
       "expected": "The mean is 2 and variance 9.",
       "hint": "The second argument is standard deviation.",
       "answer": "A familiar parameter name should be checked against the actual distribution API."

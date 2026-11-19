@@ -1,6 +1,6 @@
 # swift-036: explanation and comparison
 
-Attempt the six guide tasks before opening this comparison. The executable reference is [swift-036_solution.swift](swift-036_solution.swift). Its assertions are always active under the prepared classroom compile settings.
+Attempt the six guide tasks before opening this comparison. The executable reference is [swift-036_solution.swift](swift-036_solution.swift). It runs both worked examples and the reference answers below, and its assertions are always active under the prepared classroom compile settings.
 
 ## Why the two examples differ
 
@@ -8,21 +8,56 @@ Attempt the six guide tasks before opening this comparison. The executable refer
 
 **Build a reusable membership index:** Index construction and storage are costs that should be justified by repeated queries. The index preserves four identities and answers membership.
 
-## Reason through the six tasks
+## Task answers
 
-1. **Predict and explain.** Count comparisons for first, last and absent targets.
+### Task 1: Predict and explain
 
-2. **Guided modification.** Double input size and predict worst-case work.
+Count comparisons for first, last and absent targets.
 
-3. **Independent construction.** Compare repeated array scans with one built Set under the same identity policy.
+No separate reference answer has been written for this task. Example A is the evidence to compare with: An exact operation count avoids fragile machine-speed assumptions. The last-element search performs four comparisons.
 
-4. **Diagnose a defect.** Diagnose a benchmark that excludes index construction for a one-shot query.
+### Task 2: Guided modification
 
-5. **Boundary evidence.** Test duplicate inputs and empty workloads.
+Double input size and predict worst-case work.
 
-6. **Transfer and justify.** Write a measurement plan covering workload, correctness, optimization mode and allocation evidence.
+No separate reference answer has been written for this task. Start from Example B: Index construction and storage are costs that should be justified by repeated queries. The index preserves four identities and answers membership.
 
-For tasks 1 and 2, use the checked values and mechanism trace in the two examples. For task 3, choose names that expose the input and result contract and retain the same invariants. For task 4, the diagnosed mistakes below supply a concrete wrong assumption: preserve its counterexample before repairing it. Task 5 needs an explicit expected value or documented rejection at the boundary, not just successful execution. For task 6, explain what changes in the new context and which part of the original mechanism remains applicable. Several representations may satisfy this transfer task; justify the choice rather than treating this reference as the only architecture.
+### Task 3: Independent construction
+
+Compare repeated array scans with one built Set under the same identity policy.
+
+**Reference answer.** It runs as the `Task 3` block of the reference program.
+
+```swift
+let names = ["pear", "apple", "fig"]
+let queries = ["fig", "kiwi", "pear"]
+let scanHits = queries.filter { names.contains($0) }.count
+let index = Set(names)
+let indexHits = queries.filter { index.contains($0) }.count
+precondition(scanHits == 2 && indexHits == scanHits)
+```
+
+**Observe:** Both approaches find 2 of the 3 queries.
+
+The Set uses the same String equality as the scans, so it answers identically while replacing a linear search per query with one hash lookup.
+
+### Task 4: Diagnose a defect
+
+Diagnose a benchmark that excludes index construction for a one-shot query.
+
+No reference answer has been written for this task yet. The wrong assumptions to look for are this lesson's pitfalls: Big-O is a growth model, not an elapsed-time promise. A single stopwatch observation is weak evidence. Avoid optimizing ownership complexity before measuring the real bottleneck.
+
+### Task 5: Boundary evidence
+
+Test duplicate inputs and empty workloads.
+
+No reference answer has been written for this task yet. Write the expected value or documented rejection for each boundary before running it, and compare with the checks in Example A (Count a linear search) and Example B (Build a reusable membership index).
+
+### Task 6: Transfer and justify
+
+Write a measurement plan covering workload, correctness, optimization mode and allocation evidence.
+
+No single reference answer exists: several designs can satisfy this transfer task. Justify yours against the mechanism described below and the vocabulary entry **Complexity**, and state one limitation of your choice.
 
 ## Mechanism and diagnostic reasoning
 
@@ -36,4 +71,4 @@ Big-O is a growth model, not an elapsed-time promise. A single stopwatch observa
 
 ## Review before continuing
 
-The reference checks the worked scenarios, including their boundary distinctions. Your independent and transfer artifacts may have additional checks. Compare observations rather than only source text. Preserve any new regression case you discover and explain why it would reject a plausible wrong implementation. External project steps require their own build and platform evidence and are not established by a portable reference passing.
+Run the reference and confirm that it prints `swift-036: passed`, then reconstruct one boundary case from memory and explain which check would reject a plausible wrong implementation. External project steps need their own build and platform evidence; a passing portable reference does not establish them.

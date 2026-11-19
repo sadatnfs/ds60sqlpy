@@ -1,6 +1,6 @@
 # swift-028: explanation and comparison
 
-Attempt the six guide tasks before opening this comparison. The executable reference is [swift-028_solution.swift](swift-028_solution.swift). Its assertions are always active under the prepared classroom compile settings.
+Attempt the six guide tasks before opening this comparison. The executable reference is [swift-028_solution.swift](swift-028_solution.swift). It runs both worked examples and the reference answers below, and its assertions are always active under the prepared classroom compile settings.
 
 ## Why the two examples differ
 
@@ -8,21 +8,61 @@ Attempt the six guide tasks before opening this comparison. The executable refer
 
 **Propagate async failure:** Suspension capability does not change the requirement to handle failure honestly. The async boundary preserves both the valid result and the domain error.
 
-## Reason through the six tasks
+## Task answers
 
-1. **Predict and explain.** Distinguish an async declaration from actual parallel execution.
+### Task 1: Predict and explain
 
-2. **Guided modification.** Await two dependent calculations in order.
+Distinguish an async declaration from actual parallel execution.
 
-3. **Independent construction.** Write an async adapter that returns a validated domain value.
+No separate reference answer has been written for this task. Example A is the evidence to compare with: The fixture introduces the call boundary without pretending a tiny calculation needs a separate thread. The awaited result is 8.
 
-4. **Diagnose a defect.** Diagnose blocking with a semaphore to wait for async code on a constrained executor.
+### Task 2: Guided modification
 
-5. **Boundary evidence.** Test a valid and throwing async outcome.
+Await two dependent calculations in order.
 
-6. **Transfer and justify.** Identify suspension points in an app load operation and explain what state may change around them.
+No separate reference answer has been written for this task. Start from Example B: Suspension capability does not change the requirement to handle failure honestly. The async boundary preserves both the valid result and the domain error.
 
-For tasks 1 and 2, use the checked values and mechanism trace in the two examples. For task 3, choose names that expose the input and result contract and retain the same invariants. For task 4, the diagnosed mistakes below supply a concrete wrong assumption: preserve its counterexample before repairing it. Task 5 needs an explicit expected value or documented rejection at the boundary, not just successful execution. For task 6, explain what changes in the new context and which part of the original mechanism remains applicable. Several representations may satisfy this transfer task; justify the choice rather than treating this reference as the only architecture.
+### Task 3: Independent construction
+
+Write an async adapter that returns a validated domain value.
+
+**Reference answer.** It runs as the `Task 3` block of the reference program.
+
+```swift
+struct Quantity {
+  let value: Int
+}
+func fetchRaw() async -> String { "12" }
+func loadQuantity() async throws -> Quantity {
+  let text = await fetchRaw()
+  guard let value = Int(text), value >= 0 else { throw AsyncError.invalid }
+  return Quantity(value: value)
+}
+let quantity = try await loadQuantity()
+precondition(quantity.value == 12)
+```
+
+**Observe:** The adapter awaits the raw text and returns Quantity(value: 12).
+
+The adapter is the only place raw text becomes a domain value, and it validates after the suspension point, before returning.
+
+### Task 4: Diagnose a defect
+
+Diagnose blocking with a semaphore to wait for async code on a constrained executor.
+
+No reference answer has been written for this task yet. The wrong assumptions to look for are this lesson's pitfalls: Async does not promise a background thread. Do not block an executor waiting for work that needs the same executor. Retain and await meaningful results.
+
+### Task 5: Boundary evidence
+
+Test a valid and throwing async outcome.
+
+No reference answer has been written for this task yet. Write the expected value or documented rejection for each boundary before running it, and compare with the checks in Example A (Await an asynchronous result) and Example B (Propagate async failure).
+
+### Task 6: Transfer and justify
+
+Identify suspension points in an app load operation and explain what state may change around them.
+
+No single reference answer exists: several designs can satisfy this transfer task. Justify yours against the mechanism described below and the vocabulary entry **Suspension point**, and state one limitation of your choice.
 
 ## Mechanism and diagnostic reasoning
 
@@ -36,4 +76,4 @@ Async does not promise a background thread. Do not block an executor waiting for
 
 ## Review before continuing
 
-The reference checks the worked scenarios, including their boundary distinctions. Your independent and transfer artifacts may have additional checks. Compare observations rather than only source text. Preserve any new regression case you discover and explain why it would reject a plausible wrong implementation. External project steps require their own build and platform evidence and are not established by a portable reference passing.
+Run the reference and confirm that it prints `swift-028: passed`, then reconstruct one boundary case from memory and explain which check would reject a plausible wrong implementation. External project steps need their own build and platform evidence; a passing portable reference does not establish them.

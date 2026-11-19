@@ -8,17 +8,17 @@ Stacking affine layers without an intervening nonlinearity still produces an aff
 
 **Nonlinearity:** A transformation that cannot be represented by a single affine map.
 
-**ReLU:** The rectified linear function max(z,0).
+**ReLU:** The rectified linear function max(z, 0).
 
 **Capacity:** The set of functions a model architecture can represent.
 
 ## Reading the implementation
 
-A Dense transform computes X@W. The chosen columns of W form x1-x2 and x2-x1. ReLU applies max(z,0) independently, then reduce_sum combines the hidden units. Before fitting, evaluate all four binary inputs. The affine contradiction comes from summing inequalities at the two positive and two negative corners, so it does not depend on testing many random initializations.
+A Dense transform computes X@W. The chosen columns of W form x1-x2 and x2-x1. ReLU applies max(z, 0) independently, then reduce_sum combines the hidden units. Before fitting, evaluate all four binary inputs. The affine contradiction comes from summing inequalities at the two positive and two negative corners, so it does not depend on testing many random initializations.
 
 ## Exercise 1: Construct XOR
 
-The question is: Evaluate two rectified differences on inputs(0,0),(0,1),(1,0),(1,1).
+The question is: Evaluate two rectified differences on inputs (0, 0), (0, 1), (1, 0), (1, 1).
 
 The hidden features encode the two possible directions of disagreement. Their values are never simultaneously positive on the binary fixture, so their sum behaves like XOR.
 
@@ -30,9 +30,9 @@ output = tf.reduce_sum(h, axis=1)
 np.testing.assert_array_equal(output.numpy(), [0, 1, 1, 0])
 ```
 
-**Expected:** outputs[0,1,1,0].
+**Expected:** outputs [0, 1, 1, 0].
 
-**Verify:** Compare the computed values or written argument with outputs[0,1,1,0].
+**Verify:** In a fresh process, the exercise checks confirm `output.numpy()` equals `[0, 1, 1, 0]`.
 
 ## Exercise 2: Remove the nonlinearity
 
@@ -44,9 +44,9 @@ The columns cancel exactly. The ReLU was the step that prevented the positive an
 np.testing.assert_array_equal(tf.reduce_sum(x @ w, axis=1).numpy(), [0, 0, 0, 0])
 ```
 
-**Expected:** all four sums0.
+**Expected:** all four sums 0.
 
-**Verify:** Compare the computed values or written argument with all four sums0.
+**Verify:** In a fresh process, the exercise checks confirm `tf.reduce_sum(x @ w, axis=1).numpy()` equals `[0, 0, 0, 0]`.
 
 ## Exercise 3: Compose affine matrices
 
@@ -62,11 +62,11 @@ np.testing.assert_allclose(((x @ a) @ b).numpy(), (x @ (a @ b)).numpy(), atol=1e
 
 **Expected:** two paths agree within 1e-6.
 
-**Verify:** Compare the computed values or written argument with two paths agree within 1e-6.
+**Verify:** In a fresh process, the exercise checks confirm `(x @ a @ b).numpy()` matches `(x @ (a @ b)).numpy()` within 1e-6.
 
 ## Exercise 4: Inspect a dead region
 
-The question is: Evaluate ReLU and its tape gradient at-2 and+2.
+The question is: Evaluate ReLU and its tape gradient at -2 and+2.
 
 A negative preactivation has zero local derivative in this example. Units initialized or driven into inactive regions can receive no update from those observations, which is distinct from a missing gradient path.
 
@@ -78,9 +78,9 @@ np.testing.assert_array_equal(tf.nn.relu(z).numpy(), [0, 2])
 np.testing.assert_array_equal(tape.gradient(total, z).numpy(), [0, 1])
 ```
 
-**Expected:** values[0,2], gradients[0,1].
+**Expected:** values [0, 2], gradients [0, 1].
 
-**Verify:** Compare the computed values or written argument with values[0,2], gradients[0,1].
+**Verify:** In a fresh process, the exercise checks confirm `tf.nn.relu(z).numpy()` equals `[0, 2]` and `tape.gradient(total, z).numpy()` equals `[0, 1]`.
 
 ## Exercise 5: Show symmetry
 
@@ -96,11 +96,11 @@ np.testing.assert_array_equal(features[:, 0], features[:, 1])
 
 **Expected:** hidden columns match exactly.
 
-**Verify:** Compare the computed values or written argument with hidden columns match exactly.
+**Verify:** In a fresh process, the exercise checks confirm `features[:, 0]` equals `features[:, 1]`.
 
 ## Exercise 6: Transfer outside the corners
 
-The question is: Evaluate the fixed construction at(.2,.8) and(.8,.2), and state what it computes away from binary inputs.
+The question is: Evaluate the fixed construction at (0.2, 0.8) and (0.8, 0.2), and state what it computes away from binary inputs.
 
 The exact network computes absolute difference on continuous inputs. Calling it XOR outside the binary domain would conceal an assumption about the input space.
 
@@ -111,9 +111,9 @@ np.testing.assert_allclose(
 )
 ```
 
-**Expected:** both outputs.6; function is absolute difference.
+**Expected:** both outputs 0.6; function is absolute difference.
 
-**Verify:** Compare the computed values or written argument with both outputs.6; function is absolute difference.
+**Verify:** In a fresh process, the exercise checks confirm `tf.reduce_sum(tf.nn.relu(q @ w), axis=1).numpy()` matches `[0.6, 0.6]` within 1e-6.
 
 ## Review after comparison
 

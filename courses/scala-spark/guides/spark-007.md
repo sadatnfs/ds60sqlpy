@@ -4,7 +4,7 @@ Authored tutorial and practice content. The prepared Scala/JVM worker executes a
 
 ## Level and prerequisites
 
-Beginner; approximately 105 minutes. Direct design prerequisites: `spark-006`. The lesson uses Scala 2.13 syntax and the prepared JDK 17 worker. The older design document proposed a different Spark/JDK tuple; use the current [execution baseline](../execution-baseline.md) for this authored material.
+Beginner; approximately 75 minutes. Direct prerequisites: `spark-006`. The lesson uses Scala 2.13 syntax and the prepared JDK 17 worker. The [execution baseline](../execution-baseline.md) lists the exact Scala, JDK and Spark versions.
 
 ## How to run this lesson
 
@@ -26,7 +26,7 @@ Open `spark-007` in the classroom, select the Scala source, prepare the `scala-j
 
 - **Rejection ledger:** An explicit collection retaining source position, raw input and a reason for every rejected record.
 
-Parsing and validation are expected parts of data processing. A malformed user record should not disappear because a flatMap happened to return None, and it should not necessarily crash an entire batch through an exception. Either[String, Record] represents the two intended outcomes directly: Left(reason) for rejection or Right(record) for accepted data.
+Parsing and validation are expected parts of data processing. A malformed user record should not disappear because a flatMap happened to return None, and it should not necessarily crash an entire batch through an exception. Either [String, Record] represents the two intended outcomes directly: Left(reason) for rejection or Right(record) for accepted data.
 
 The miniature input format is exactly three pipe-separated fields: id, status, amount. It is not a complete CSV parser and does not support quoted delimiters or embedded pipes. split("\\|",-1) preserves an empty trailing field, which is important for distinguishing missing amount text from a shorter line. A field-count check happens before indexing the array.
 
@@ -120,7 +120,7 @@ Parse every input line and return accepted records plus rejected(position, raw, 
 
 **Expected result/shape:** The six-line fixture has three accepted records and rejections at positions 3,4,5 with missing_id, invalid_amount, unknown_status. Accepted plus rejected equals six.
 
-**Verify:** Assert accepted IDs[a1, a2, a3], the exact rejected positions/reasons and count conservation.
+**Verify:** Assert accepted IDs [a1, a2, a3], the exact rejected positions/reasons and count conservation.
 
 **Progressive hint:** Use zipWithIndex and pattern-match each Either inside a fold.
 

@@ -5,23 +5,23 @@ Copy to .learning before editing. Six independent attempts belong below.
 """
 
 # Exercise 1: Expose naive overflow
-# Exponentiate NumPy logits[1000,999] directly under an explicit error-state context.
+# Exponentiate NumPy logits [1000,999] directly under an explicit error-state context.
 # Expected: both exponentials are infinite.
 
 # Exercise 2: Calculate stable loss
-# Use a logits-aware TensorFlow loss for target0.
-# Expected: losslog(1+exp(-1)) within1e-6.
+# Use a logits-aware TensorFlow loss for target 0.
+# Expected: loss \(\log(1+e^{-1})\) within 1e-6.
 
 # Exercise 3: Check shift invariance
-# Compare softmax[1000,999] with softmax[0,-1].
-# Expected: probabilities agree within1e-6.
+# Compare softmax[1000,999] with softmax[0, -1].
+# Expected: probabilities agree within 1e-6.
 
 # Exercise 4: Inspect gradients
-# Differentiate the stable target0 loss with respect to both logits.
-# Expected: finite gradients summing approximately0.
+# Differentiate the stable target 0 loss with respect to both logits.
+# Expected: finite gradients summing approximately 0.
 
 # Exercise 5: Separate precision policies
-# Compare float16 and float64 exponentiation of20.
+# Compare float16 and float64 exponentiation of 20.
 # Expected: float16 overflows; float64 remains finite.
 
 # Exercise 6: Validate input finiteness

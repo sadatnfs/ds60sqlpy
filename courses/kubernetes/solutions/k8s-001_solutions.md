@@ -30,7 +30,7 @@ expires_at=2026-10-22T12:30:00Z
 inspection_time=2026-10-22T12:20:00Z
 ```
 
-**Expected:** The illustrative times have10 minutes remaining, subject to identity checks.
+**Expected:** The illustrative times have 10 minutes remaining, subject to identity checks.
 
 ### Worked example 2: Detect a replaced namespace
 
@@ -68,9 +68,9 @@ Connection names can be reused or redirected. The host receipt and observed name
 
 ### Exercise 3: Reject expiry
 
-**Inputs/evidence:** For k8s-001 Exercise 3, expires12:30Z; inspection12:31Z on the same date.
+**Inputs/evidence:** For k8s-001 Exercise 3, expires 12:30Z; inspection 12:31Z on the same date.
 
-**Expected result/shape:** For k8s-001 Exercise 3, expired by1 minute; no mutation proceeds.
+**Expected result/shape:** For k8s-001 Exercise 3, expired by 1 minute; no mutation proceeds.
 
 **Verify:** For k8s-001 Exercise 3, perform the explicit timestamp comparison and retain the refusal reason.
 

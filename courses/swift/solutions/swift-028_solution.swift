@@ -22,6 +22,21 @@ struct LessonMain {
       do { _ = try await validated(-1) } catch AsyncError.invalid { rejected = true }
       precondition(rejected)
     }
+
+    do {
+      // Task 3: Independent construction
+      struct Quantity {
+        let value: Int
+      }
+      func fetchRaw() async -> String { "12" }
+      func loadQuantity() async throws -> Quantity {
+        let text = await fetchRaw()
+        guard let value = Int(text), value >= 0 else { throw AsyncError.invalid }
+        return Quantity(value: value)
+      }
+      let quantity = try await loadQuantity()
+      precondition(quantity.value == 12)
+    }
     print("swift-028: passed")
   }
 }

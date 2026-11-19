@@ -52,7 +52,7 @@ List compiler, C++ level, dependency source and build generator.
 
 **Reasoning:** A package name without a version is not a reproducible input.
 
-**Verify:** Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.
+**Verify:** Check that each of the four entries is a value you can re-read later, such as the `g++ --version` output, `-std=c++20`, a `sha256sum` of the dependency archive and Ninja.
 
 ## Exercise 2: Build offline
 
@@ -62,7 +62,7 @@ Build the supplied local target in a fresh owned directory without network.
 
 **Reasoning:** Every required dependency must already be present.
 
-**Verify:** Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.
+**Verify:** Run configure, build and ctest with networking disabled, for example inside `docker run --network none`, and confirm all three steps succeed.
 
 ## Exercise 3: Expose target requirements
 
@@ -72,7 +72,7 @@ Create a CMake interface target with cxx_std_20.
 
 **Reasoning:** Target properties propagate intentional usage requirements.
 
-**Verify:** Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.
+**Verify:** Link a consumer target to the interface target without setting its own standard, then confirm its compile command, shown by `ninja -v`, contains `-std=c++20` or `-std=gnu++20`.
 
 ## Exercise 4: Repair hidden fetch
 
@@ -82,7 +82,7 @@ Review a configure script that downloads latest.zip.
 
 **Reasoning:** Latest changes over time and violates offline default.
 
-**Verify:** Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.
+**Verify:** Confirm the repaired script uses a local archive or directory and checks a recorded hash, and that configure still succeeds with networking disabled.
 
 ## Exercise 5: Check licensing
 
@@ -92,7 +92,7 @@ Package the dependency license with the source inventory.
 
 **Reasoning:** Technical reproducibility does not erase distribution obligations.
 
-**Verify:** Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.
+**Verify:** List the delivery tree and confirm the license file exists at exactly the path your inventory names.
 
 ## Exercise 6: Transfer another platform
 
@@ -102,4 +102,4 @@ Record an untested architecture as unqualified.
 
 **Reasoning:** Configuration files are not execution evidence.
 
-**Verify:** Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.
+**Verify:** Check that your record lists the architecture you actually built and ran, from `uname -m`, separately from planned ones marked unqualified until executed.

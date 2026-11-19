@@ -35,7 +35,8 @@ public class Main {
 
     // Exercise 4: Reject stream reuse
     var once = List.of(1, 2).stream();
-    assert once.count() == 2;
+    long counted = once.count();
+    assert counted == 2;
     boolean reused = false;
     try {
       once.toList();

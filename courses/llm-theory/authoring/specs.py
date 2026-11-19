@@ -51,14 +51,14 @@ This lesson implements the three attention information patterns on literal vecto
         ),
         (
             "Objective mask",
-            "The target positions included in the loss,distinct from the attention access mask.",
+            "The target positions included in the loss, distinct from the attention access mask.",
         ),
     ],
     [
         ex(
             "Compare bidirectional and causal mixtures",
-            "Use zero queries/keys and values[[2,0],[0,2],[6,6]] under all-allowed and causal masks.",
-            "encoder rows all[8/3,8/3];decoder rows[2,0],[1,1],[8/3,8/3].",
+            "Use zero queries and keys with values [[2, 0], [0, 2], [6, 6]] under all-allowed and causal masks.",
+            "encoder rows all [8/3, 8/3]; decoder rows [2, 0], [1, 1], [8/3, 8/3].",
             """q=np.zeros((3,2)); values=np.array([[2.,0.],[0.,2.],[6.,6.]])
 encoder,_=attention(q,q,values,np.ones((3,3),dtype=bool))
 decoder,_=attention(q,q,values,np.tri(3,dtype=bool))
@@ -68,8 +68,8 @@ np.testing.assert_allclose(decoder,[[2,0],[1,1],[8/3,8/3]],atol=1e-12,rtol=0)"""
         ),
         ex(
             "Trace rectangular cross-attention",
-            "Use two zero target queries,three zero source keys and the same source values.",
-            "score/weight shape(2,3);output shape(2,2);both outputs[8/3,8/3].",
+            "Use two zero target queries, three zero source keys and the same source values.",
+            "score and weight shape (2, 3); output shape (2, 2); both outputs [8/3, 8/3].",
             """target_queries=np.zeros((2,2)); source_keys=np.zeros((3,2))
 cross,weights=attention(target_queries,source_keys,values,np.ones((2,3),dtype=bool))
 assert weights.shape==(2,3) and cross.shape==(2,2)
@@ -78,8 +78,8 @@ np.testing.assert_allclose(cross,np.tile([8/3,8/3],(2,1)),atol=1e-12,rtol=0)""",
         ),
         ex(
             "Build shifted decoder targets",
-            "For target IDs[5,7,3],prepend BOS 1 and form input/label pairs.",
-            "inputs[1,5,7];labels[5,7,3];diagonal allowed without seeing the target itself.",
+            "For target IDs [5, 7, 3], prepend BOS 1 and form input/label pairs.",
+            "inputs [1, 5, 7]; labels [5, 7, 3]; the diagonal is allowed without seeing the target itself.",
             """target=np.array([5,7,3]); inputs=np.concatenate([[1],target[:-1]]); labels=target.copy(); mask=np.tri(3,dtype=bool)
 np.testing.assert_array_equal(inputs,[1,5,7]); np.testing.assert_array_equal(labels,[5,7,3])
 assert mask[0,0] and not mask[0,1]""",
@@ -87,8 +87,8 @@ assert mask[0,0] and not mask[0,1]""",
         ),
         ex(
             "Separate masked-token supervision",
-            "Corrupt source[2,5,7] at the middle position with MASK 0 and supervise only that original token.",
-            "input[2,0,7];one active label 5;bidirectional context remains allowed.",
+            "Corrupt source [2, 5, 7] at the middle position with MASK 0 and supervise only that original token.",
+            "input [2, 0, 7]; one active label 5; bidirectional context remains allowed.",
             """original=np.array([2,5,7]); corrupted=original.copy(); corrupted[1]=0; active=np.array([False,True,False])
 np.testing.assert_array_equal(corrupted,[2,0,7]); assert original[active].tolist()==[5]
 assert np.ones((3,3),dtype=bool)[1].all()""",
@@ -97,7 +97,7 @@ assert np.ones((3,3),dtype=bool)[1].all()""",
         ex(
             "Perturb future target values",
             "Change only the third value vector and compare the first two encoder/decoder outputs.",
-            "encoder prefix changes;causal decoder prefix stays fixed.",
+            "encoder prefix changes; causal decoder prefix stays fixed.",
             """changed=values.copy(); changed[2]=[100,200]
 new_encoder,_=attention(q,q,changed,np.ones((3,3),dtype=bool)); new_decoder,_=attention(q,q,changed,np.tri(3,dtype=bool))
 assert not np.allclose(new_encoder[:2],encoder[:2])
@@ -107,7 +107,7 @@ np.testing.assert_allclose(new_decoder[:2],decoder[:2],atol=1e-12,rtol=0)""",
         ex(
             "Combine source padding with cross-attention",
             "Mark the third source position as padding for both target queries.",
-            "both cross outputs[1,1];padded source weight 0.",
+            "both cross outputs [1, 1]; padded source weight 0.",
             """allowed=np.array([[True,True,False],[True,True,False]])
 masked,weights=attention(target_queries,source_keys,values,allowed)
 np.testing.assert_allclose(masked,[[1,1],[1,1]],atol=1e-12,rtol=0)
@@ -167,8 +167,8 @@ A formula accepting a large position index does not prove that a trained model w
     [
         ex(
             "Rotate a two-dimensional vector",
-            "Rotate[1,0] bypi/2 and check length preservation.",
-            "approximately[0,1];norm 1.",
+            "Rotate [1, 0] by pi/2 and check length preservation.",
+            "approximately [0, 1]; norm 1.",
             """vector=np.array([1.,0.]); rotated=rotate(vector,np.pi/2)
 np.testing.assert_allclose(rotated,[0,1],atol=1e-12,rtol=0)
 np.testing.assert_allclose(np.linalg.norm(rotated),1,atol=1e-12,rtol=0)""",
@@ -176,7 +176,7 @@ np.testing.assert_allclose(np.linalg.norm(rotated),1,atol=1e-12,rtol=0)""",
         ),
         ex(
             "Verify the relative dot-product identity",
-            "Useq[1,2],k[3,-1],angles m=.3,n=1.1.",
+            "Use q = [1, 2], k = [3, -1] and angles m = 0.3, n = 1.1.",
             "dot(Rm q,Rn k)=dot(q,R(n-m)k) within1e-12.",
             """q=np.array([1.,2.]); k=np.array([3.,-1.]); m=.3; n=1.1
 left=rotate(q,m)@rotate(k,n); right=q@rotate(k,n-m)
@@ -185,16 +185,16 @@ np.testing.assert_allclose(left,right,atol=1e-12,rtol=0)""",
         ),
         ex(
             "Inspect an ALiBi causal row",
-            "Use zero content scores for query position 2,keys 0,1,2 and slope log2.",
-            "normalized weights[1/7,2/7,4/7].",
+            "Use zero content scores for query position 2, keys 0, 1, 2 and slope \\(\\log 2\\).",
+            "normalized weights [1/7, 2/7, 4/7].",
             """positions=np.arange(3); score=-np.log(2)*(2-positions); mass=np.exp(score-score.max()); weights=mass/mass.sum()
 np.testing.assert_allclose(weights,[1/7,2/7,4/7],atol=1e-12,rtol=0)""",
-            "The distance penalties produce exponentials1/4,1/2,1 before normalization. The current key receives the largest weight under this illustrative slope.",
+            "The distance penalties produce exponentials 1/4, 1/2, 1 before normalization. The current key receives the largest weight under this illustrative slope.",
         ),
         ex(
             "Apply multi-frequency RoPE",
-            "Use width 4,base10000 and positions0,1 on two fixed vectors;inspect pair norms.",
-            "frequencies1,.01;each pair norm preserved.",
+            "Use width 4, base 10000 and positions 0, 1 on two fixed vectors; inspect pair norms.",
+            "frequencies 1 and 0.01; each pair norm preserved.",
             """values=np.array([[1.,0.,3.,4.],[2.,1.,0.,2.]])
 encoded=rope(values,np.array([0,1]),base=10000.)
 np.testing.assert_allclose(np.linalg.norm(encoded.reshape(2,2,2),axis=-1),np.linalg.norm(values.reshape(2,2,2),axis=-1),atol=1e-12,rtol=0)
@@ -203,8 +203,8 @@ np.testing.assert_allclose(10000.**(-2*np.arange(2)/4),[1,.01],atol=1e-12,rtol=0
         ),
         ex(
             "Catch a cache offset reset",
-            "Encode the third key at position2 and compare with mistakenly encoding it at position0.",
-            "correct incremental encoding matches full encoding;reset differs.",
+            "Encode the third key at position 2 and compare with mistakenly encoding it at position 0.",
+            "correct incremental encoding matches full encoding; the reset differs.",
             """keys=np.array([[1.,0.],[0.,1.],[1.,1.]])
 full=rope(keys,np.arange(3)); incremental=rope(keys[2:],np.array([2])); reset=rope(keys[2:],np.array([0]))
 np.testing.assert_allclose(incremental,full[2:],atol=1e-12,rtol=0)
@@ -213,8 +213,8 @@ assert not np.allclose(reset,full[2:])""",
         ),
         ex(
             "Separate computability from extrapolation evidence",
-            "Compute a finite encoding at position1000000,then record that no trained-model quality was measured.",
-            "finite vector;long_context_quality_verified=False;odd width rejected.",
+            "Compute a finite encoding at position 1000000, then record that no trained-model quality was measured.",
+            "finite vector; long_context_quality_verified=False; odd width rejected.",
             """far=rope(np.array([[1.,0.,1.,0.]]),np.array([1_000_000]))
 assert np.isfinite(far).all(); report={'formula_evaluated':True,'long_context_quality_verified':False}; assert not report['long_context_quality_verified']
 try: rope(np.ones((1,3)),np.array([0]))
@@ -262,14 +262,14 @@ A gated feed-forward network multiplies two projections. SwiGLU usesSiLU(xWg) el
         ("Pre-norm", "Normalization inside the transformed residual branch."),
         ("Post-norm", "Normalization applied after combining residual andbranch."),
         ("RMSNorm", "Normalization by root-mean-square magnitude without mean subtraction."),
-        ("SwiGLU", "A gated feed-forward transformation using aSiLU-activated gate."),
+        ("SwiGLU", "A gated feed-forward transformation using a SiLU-activated gate."),
         ("Jacobian", "The matrix of output sensitivities toinput coordinates."),
     ],
     [
         ex(
             "Compare RMSNorm and LayerNorm",
-            "Normalize vector [3,4] with unit gain and epsilon 1e-8.",
-            "RMSNorm mean nonzero;LayerNorm mean approximately 0.",
+            "Normalize the vector [3, 4] with unit gain and epsilon 1e-8.",
+            "RMSNorm mean nonzero; LayerNorm mean approximately 0.",
             """x=torch.tensor([3.,4.],dtype=torch.float64)
 rms=rms_norm(x); centered=layer_norm(x)
 assert abs(rms.mean().item())>.5
@@ -290,12 +290,12 @@ torch.testing.assert_close(post@torch.ones(3,dtype=torch.float64),torch.zeros(3,
         ),
         ex(
             "Calculate a SwiGLU gate derivative",
-            "Use scalar g0,u2 and output SiLU(g)*u.",
+            "Use scalar g=0, u=2 and output SiLU(g)*u.",
             "output0;gradient with respect to g is 1;with respect to u is 0.",
             """gate=torch.tensor(0.,dtype=torch.float64,requires_grad=True); up=torch.tensor(2.,dtype=torch.float64,requires_grad=True)
 output=F.silu(gate)*up; output.backward()
 assert output.item()==0 and gate.grad.item()==1 and up.grad.item()==0""",
-            "At zero,SiLU has derivative one-half. Multiplication by up2 givesgategradient1,while the up branch sees the zero gate value. A connected zero gradient is not a missing path.",
+            "At zero, SiLU has derivative one-half. Multiplication by up 2 gives gate gradient 1, while the up branch sees the zero gate value. A connected zero gradient is not a missing path.",
         ),
         ex(
             "Check the RMSNorm Jacobian formula",
@@ -316,12 +316,12 @@ assert 2*d*plain_hidden==3*d*gated_hidden==48
 inputs=torch.tensor([[1.,0.,-1.,2.],[0.,1.,2.,-1.]],dtype=torch.float64); wg=torch.eye(4,dtype=torch.float64); wu=2*wg; wd=.5*wg
 result=(F.silu(inputs@wg)*(inputs@wu))@wd
 assert tuple(result.shape)==(2,4) and torch.isfinite(result).all()""",
-            "Matching hidden widths would not match parameter counts. The2/3 width relation is a budget arithmetic rule here,not a universal model-quality prescription.",
+            "Matching hidden widths would not match parameter counts. The 2/3 width relation is a budget arithmetic rule here, not a universal model-quality prescription.",
         ),
         ex(
             "Test invariance and zero-vector boundaries",
-            "Shiftx1,2,3 by5,compare the two normalizers,and normalize zero.",
-            "LayerNorm shift invariant;RMSNorm changes;both zero cases finite.",
+            "Shift x = [1, 2, 3] by 5, compare the two normalizers, and normalize zero.",
+            "LayerNorm shift invariant; RMSNorm changes; both zero cases finite.",
             """base=torch.tensor([1.,2.,3.],dtype=torch.float64)
 torch.testing.assert_close(layer_norm(base+5),layer_norm(base),atol=1e-12,rtol=0)
 assert not torch.allclose(rms_norm(base+5),rms_norm(base))
@@ -365,22 +365,22 @@ The reference here implements grouped head selection and blockwise stable attent
         ("MHA", "Attention with one key/value head per query head."),
         ("MQA", "Attention sharing one key/value head across all query heads."),
         ("GQA", "Attention sharing key/value heads within groups of query heads."),
-        ("Online softmax state", "A running maximum,normalizer andweighted-value numerator."),
+        ("Online softmax state", "A running maximum, normalizer and weighted-value numerator."),
         (
             "IO-aware kernel",
-            "An implementation designed around memory hierarchy andtraffic,not only arithmetic count.",
+            "An implementation designed around memory hierarchy and traffic, not only arithmetic count.",
         ),
     ],
     [
         ex(
             "Count cache and projection dimensions",
-            "Use batch 1,time 5,query heads 4,head width 2,float32,and compare KV heads 4,2,1.",
-            "raw KV bytes 320,160,80;projection weights 256,192,160 for model width 8 without biases.",
+            "Use batch 1, time 5, 4 query heads, head width 2 and float32, and compare 4, 2 and 1 KV heads.",
+            "raw KV bytes 320, 160, 80; projection weights 256, 192, 160 for model width 8 without biases.",
             """query_heads=4; head_width=2; width=8; time=5
 cache_bytes=[2*1*time*kv_heads*head_width*4 for kv_heads in [4,2,1]]
 parameters=[width*(query_heads*head_width)+2*width*(kv_heads*head_width)+(query_heads*head_width)*width for kv_heads in [4,2,1]]
 assert cache_bytes==[320,160,80] and parameters==[256,192,160]""",
-            "The cache factor2 counts keys and values. These are raw tensor/weight counts excluding allocator,activation,quantization-metadata and communication overhead.",
+            "The cache factor 2 counts keys and values. These are raw tensor/weight counts excluding allocator,activation,quantization-metadata and communication overhead.",
         ),
         ex(
             "Verify grouped heads against an equivalent repeated-head oracle",
@@ -397,7 +397,7 @@ assert grouped.shape==(4,3,2); np.testing.assert_allclose(grouped,oracle,atol=1e
         ),
         ex(
             "Trace online softmax at extreme scores",
-            "Combine scores1000,999,998 and values1,3,5 in blocks of2.",
+            "Combine scores 1000, 999, 998 and values 1, 3, 5 in blocks of 2.",
             "finite output equals a maximum-shifted dense calculation.",
             """scores=np.array([1000.,999.,998.]); values=np.array([[1.],[3.],[5.]])
 online,peak=online_row(scores,values,2)
@@ -419,7 +419,7 @@ for block in [1,2,3,5]:
         ),
         ex(
             "Preserve a causal prefix under future changes",
-            "Change only value rows 3 and 4 and comparethefirstthree online outputs.",
+            "Change only value rows 3 and 4 and compare the first three online outputs.",
             "first three rows unchanged.",
             """changed=values.copy(); changed[3:]+=100
 altered,_=online_attention(queries,keys,changed,allowed,2)
@@ -428,8 +428,8 @@ np.testing.assert_allclose(altered[:3],expected[:3],atol=1e-12,rtol=0)""",
         ),
         ex(
             "Reject invalid grouping and empty support",
-            "Try 4 query heads with3KVheads,and an all-false attention row.",
-            "both raise ValueError;no output NaNs are accepted.",
+            "Try 4 query heads with 3 KV heads, and an all-false attention row.",
+            "both raise ValueError; no output NaNs are accepted.",
             """try: gqa(np.zeros((4,2,2)),np.zeros((3,2,2)),np.zeros((3,2,2)))
 except ValueError: pass
 else: raise AssertionError('indivisible head grouping accepted')
@@ -540,9 +540,9 @@ Capacity bounds how many tokens anexpert accepts inonebatch. Overflow needs a vi
     ],
     [
         ex(
-            "Calculate a top2 expert mixture",
+            "Calculate a top-2 expert mixture",
             "Use experts I,2I,-I and three token/router rows with selected probabilities 3/4 and 1/4.",
-            "outputs[1.25,0],[0,1.75],[-.25,-.25].",
+            "outputs [1.25, 0], [0, 1.75], [-0.25, -0.25].",
             """x=np.array([[1.,0.],[0.,1.],[1.,1.]])
 experts=np.stack([np.eye(2),2*np.eye(2),-np.eye(2)])
 logits=np.array([[np.log(3),0.,-100.],[0.,np.log(3),-100.],[-100.,0.,np.log(3)]])
@@ -553,7 +553,7 @@ np.testing.assert_allclose(gates.sum(1),1,atol=1e-12,rtol=0)""",
         ),
         ex(
             "Enforce expert capacity with residual fallback",
-            "Route four tokens to experts0,0,1,0 with capacity2 and unit top1 gates.",
+            "Route four tokens to experts 0, 0, 1, 0 with capacity 2 and unit top-1 gates.",
             "assigned counts 3,1;accepted2,1;last token drops its expert delta and keeps its input.",
             """tokens=np.array([[1.,0.],[0.,1.],[1.,1.],[2.,1.]])
 route_logits=np.array([[5.,0.],[4.,0.],[0.,4.],[3.,0.]])
@@ -564,7 +564,7 @@ np.testing.assert_allclose(residual,[[2,0],[0,2],[3,3],[2,1]],atol=1e-12,rtol=0)
         ),
         ex(
             "Compute a load-balancing term",
-            "Use hard fractions f[.75,.25],mean routerprobabilitiesP[.7,.3],expert count 2 and coefficient .01.",
+            "Use hard fractions f = [0.75, 0.25], mean router probabilities P = [0.7, 0.3], expert count 2 and coefficient 0.01.",
             "auxiliary loss .012;balanced fixture .01.",
             """fractions=np.array([.75,.25]); mean_probability=np.array([.7,.3]); coefficient=.01
 loss=coefficient*2*np.dot(fractions,mean_probability)
@@ -583,7 +583,7 @@ np.testing.assert_allclose(numeric,-3/16,atol=1e-8,rtol=0)""",
         ),
         ex(
             "Separate total and active parameter counts",
-            "Use 8 two-layer experts with width64,hidden128 and top-2 activation,excluding router and biases.",
+            "Use 8 two-layer experts with width 64, hidden width 128 and top-2 activation, excluding router and biases.",
             "total 131072 expert weights;32768selectedexpertweights per token.",
             """expert_count,width,hidden,active=8,64,128,2
 assert expert_count*2*width*hidden==131072
@@ -592,7 +592,7 @@ assert active*2*width*hidden==32768""",
         ),
         ex(
             "Validate routing policy and ties",
-            "Reject top-k 0 and capacity0;check equal router logits choose lower indices deterministically.",
+            "Reject top-k 0 and capacity 0; check that equal router logits choose lower indices deterministically.",
             "invalid policies raise ValueError;top-2 tie indices 0,1.",
             """_,tied,_=mixture(np.ones((1,2)),np.zeros((1,3)),experts,2); assert tied.tolist()==[[0,1]]
 for action in [lambda:mixture(x,logits,experts,0),lambda:capacity_route(tokens,route_logits,experts[:2],0)]:
@@ -610,10 +610,10 @@ For a fixedselectedset,the derivative of aweightedscalar expertoutputy withrespe
 A Switch-style auxiliary term isL_aux=alpha*N*sum_i f_i P_i,wheref_i isthefractionofhardassignments toexperti andP_i isthemeanrouterprobability. Thehardfraction vector isnotdifferentiable;theprobability vector is. ForTtokens andfixedf,thelocal derivative isalpha*N/T * p_tj * (f_j-sum_i f_i p_ti). Theexamplecoefficient.01 is a declaredfixture choice,not a universal setting.
 
 ForEexperts eachwithtwo bias-freelinear matricesD-by-H andH-by-D,totalexpertweightsare2EDH. Top-k activatesk experts pertoken,butstorageandcommunicationdependonhowallEexperts areplacedandserved.""",
-    """A batch routes75percent ofits tokens tooneoftwoexperts. Capacityallows onlyhalfthebatch perexpert,so someexpert deltas aredropped despite lowaverage deviceutilization. Reporting only “two active experts pertoken” hides thebottleneck. A useful trace records pre-capacity assignments,acceptedcounts,drops andtaskerrors foraffectedtokens. Increasingcapacitymayreduce dropswhileincreasingactivationmemory. Changingrouterregularizationmayimprovebalancewhilealteringtaskquality. Those are measurable tradeoffs,not consequencesofparametercountalone.""",
-    """Use sparse experts when thearchitecture,training andserving stack can supportconditional computation anditsrouting overhead. Measure tokenload distributions andtail behavior,not justmeanexpert utilization. Keep capacity,tie handling,gate normalization andoverflowpolicy in theartifact contract.
+    """A batch routes 75 percent of its tokens to one of two experts. Capacity allows only half the batch per expert, so some expert deltas are dropped despite low average device utilization. Reporting only “two active experts per token” hides the bottleneck. A useful trace records pre-capacity assignments, accepted counts, drops and task errors for affected tokens. Increasing capacity may reduce drops while increasing activation memory. Changing router regularization may improve balance while altering task quality. Those are measurable tradeoffs, not consequences of parameter count alone.""",
+    """Use sparse experts when the architecture, training and serving stack can support conditional computation and its routing overhead. Measure token load distributions and tail behavior, not just mean expert utilization. Keep capacity, tie handling, gate normalization and overflow policy in the artifact contract.
 
-Do not claim that a model withmanytotalparameters has thecompute cost ofa small densemodel without accounting forrouter work,expert shapes,communication andbatching. ThisCPUreference executes small matrices locally anddoesnotverify distributed dispatch,network bandwidth orhardware throughput. A realexpert-parallel acceptance test needs those measurements andfailure/straggler behavior separately.""",
+Do not claim that a model with many total parameters has the compute cost of a small dense model without accounting for router work, expert shapes, communication and batching. This CPU reference executes small matrices locally and does not verify distributed dispatch, network bandwidth or hardware throughput. A real expert-parallel acceptance test needs those measurements and failure/straggler behavior separately.""",
     helper="""def softmax_rows(logits):
     logits=np.asarray(logits,dtype=float)
     if logits.ndim!=2 or not logits.shape[1] or not np.isfinite(logits).all(): raise ValueError('finite router matrix required')
@@ -661,7 +661,7 @@ A multi-token round accepts a contiguous prefix ofdraftproposals. At thefirstrej
     [
         ex(
             "Prove one-step distribution preservation",
-            "Use p[.5,.3,.2] and q[.2,.5,.3];calculate accepted mass,rejection mass and residual.",
+            "Use target p = [0.5, 0.3, 0.2] and draft q = [0.2, 0.5, 0.3]; calculate the accepted mass, rejection mass and residual.",
             "accepted mass[.2,.3,.2];rejection .3;residual[1,0,0];combined mass p.",
             """p=np.array([.5,.3,.2]); q=np.array([.2,.5,.3]); acceptance,residual,rejection=correction(p,q)
 accepted_mass=q*acceptance
@@ -680,7 +680,7 @@ assert rejected=={'token':0,'accepted':False} and accepted=={'token':2,'accepted
         ),
         ex(
             "Check an all-accepted round and bonus token",
-            "Set draft and target equal top;propose tokens0,1 with draws .1,.6,and use bonus draw .7.",
+            "Set draft and target both equal to p; propose tokens 0, 1 with draws 0.1, 0.6, and use bonus draw 0.7.",
             "emitted[0,1,1];accepted_count2;no rejection.",
             """same=lambda prefix:p
 all_accepted=speculative_round([],same,same,[.1,.6],[.9,.9],.7,budget=3)
@@ -689,15 +689,15 @@ assert all_accepted['tokens']==[0,1,1] and all_accepted['accepted_count']==2 and
         ),
         ex(
             "Stop at the first rejection",
-            "Use constant target p,draft q,proposal draws .1,.3 and acceptance draws .2,.9.",
+            "Use constant target p, draft q, proposal draws 0.1, 0.3 and acceptance draws 0.2, 0.9.",
             "draft[0,1];accepted prefix[0];correction 0;emitted[0,0].",
             """round_result=speculative_round([2],lambda prefix:p,lambda prefix:q,[.1,.3],[.2,.9],.4,budget=3)
 assert round_result['proposals']==[0,1] and round_result['tokens']==[0,0] and round_result['accepted_count']==1 and round_result['rejected']""",
-            "Theunacceptedtoken1andsuffixcannotremainin the output prefix. Any future target probability must condition on theacceptedtoken0 andcorrection0 instead.",
+            "The unaccepted token 1 and its suffix cannot remain in the output prefix. Any future target probability must condition on the accepted token 0 and the correction 0 instead.",
         ),
         ex(
             "Rollback actual K/V arrays",
-            "Start cache prefix[2],append the two proposals,then roll back and append the correction;compare with a fresh cache[2,0,0].",
+            "Start with cache prefix [2], append the two proposals, then roll back and append the correction; compare with a fresh cache [2, 0, 0].",
             "tokens,keys,values andattentionoutputmatch;keepingrejectedtokenbreaks parity.",
             """cache=TinyCache([2]); old_length=len(cache.tokens)
 for token in round_result['proposals']: cache.append(token)
@@ -709,7 +709,7 @@ broken.append(0); assert broken.tokens!=fresh.tokens and not np.allclose(broken.
         ),
         ex(
             "Handle equality, EOS, budgets and invalid support",
-            "Check p=q has no residual,stoponanacceptedEOS2,capoutputat2tokens,and reject a zero-probability draft proposal.",
+            "Check that p=q has no residual, stop on an accepted EOS 2, cap output at 2 tokens, and reject a zero-probability draft proposal.",
             "rejectionmass0,residualNone;EOS stops;cap respected;invalidproposalraisesValueError.",
             """alpha,none,mass=correction(p,p); assert mass==0 and none is None and np.all(alpha==1)
 eos=speculative_round([],same,same,[.95,.1],[.2,.2],.1,budget=3,eos=2); assert eos['tokens']==[2]
@@ -857,7 +857,7 @@ case_studies = {
     44: "An incremental decoder passes short-prefix tests but diverges after cache reuse. Its weights are unchanged. Each new key was rotated at position zero instead of at the accumulated cache offset. Encoding the key at the correct position restores parity. A second failure rotates already-rotated cached keys again. These are state and layout errors, not evidence about long-context model quality. Resolve them before attempting an extrapolation study.",
     45: "A refactor replaces a plain feed-forward block with SwiGLU while retaining the hidden width. The feed-forward parameter count rises by50percent, so a quality difference cannot be attributed only to gating. Another refactor moves normalization across the residual addition while keeping the optimizer unchanged. The zero-branch Jacobian and equal-budget calculation separate these changes before a larger training comparison.",
     46: "A serving team reduces KV heads from eight to two and observes a fourfold reduction in raw cache bytes. That does not imply a fourfold end-to-end speedup: weight reads, other layers, batching and communication remain. Separately, a blockwise implementation fails after a block with a much larger score because it rescales the denominator but not the numerator. The extreme-score fixture exposes that algebraic error before a GPU benchmark is meaningful.",
-    47: "A batch routes75percent of its tokens to one of two experts, but capacity allows only half the batch per expert. Some expert deltas are dropped despite low average device utilization. Record assigned counts, accepted counts, drops and task errors for affected tokens. Increasing capacity may reduce drops while increasing activation memory. Router regularization may improve balance while changing task quality. These are measured tradeoffs, not consequences of parameter counts alone.",
+    47: "A batch routes 75 percent of its tokens to one of two experts, but capacity allows only half the batch per expert. Some expert deltas are dropped despite low average device utilization. Record assigned counts, accepted counts, drops and task errors for affected tokens. Increasing capacity may reduce drops while increasing activation memory. Router regularization may improve balance while changing task quality. These are measured tradeoffs, not consequences of parameter counts alone.",
     48: "A decoder uses the correct acceptance formula but diverges after a rejection. Its target cache still contains the rejected proposal and a later draft token, so the next query sees the wrong prefix and position. Rebuilding a fresh cache from committed tokens exposes the error. Roll both model caches back to old_prefix_length+accepted_count, then process the correction token through each model independently. Raw K/V tensors from different models are not interchangeable.",
 }
 for number, text in case_studies.items():

@@ -1,51 +1,43 @@
 # web-002: explanatory solutions
 
-Compare after your own attempt or an explicit solution reveal. This file explains the supplied deterministic fixtures. It does not claim that a learner or a production deployment passed.
-
-## Why the mechanism works
-
-An attribute adds information to an opening tag. In `<html lang="en">`, the attribute name is lang and its value identifies the document language. Attribute values should be quoted consistently. Nesting means one element's content contains another element; the resulting parent-child relationship matters to styling, accessibility and scripts. A paragraph can contain emphasized text, but a list does not belong inside that paragraph.
-
-HTML has special syntax characters. A less-than sign begins markup, so literal comparison text may need `&lt;`. An ampersand begins a character reference and is commonly represented as `&amp;`. Escaping means representing text so a parser treats it as data. It is different from deleting characters and different from making an unsafe URL safe.
-
-Close nested elements in reverse order: open paragraph, open strong, close strong, close paragraph. Void elements such as `br` and `img` have no closing tag. A `data-*` attribute stores page-specific metadata; it does not create a visible label. `id` must uniquely identify an element in the document. Class names may repeat because they group related elements.
+Open this after your own attempt. Each answer explains the lesson's synthetic fixtures; it does not show that your work or a deployment passed. The mechanism is explained in `courses/web-development/guides/web-002.md`.
 
 ## Exercise 1: Predict the text content after character references are parsed.
 
-The browser displays comparison signs and an ampersand, not the entity source.
+**Expected answer:** The browser displays comparison signs and an ampersand, not the entity source.
 
-Trace the smallest example before editing. Name which values are source and which are observations.
+**Why:** Character references are decoded during parsing, so the text node holds the real < and & characters while the source keeps them escaped.
 
 ## Exercise 2: Add a language attribute and explain its role.
 
-The root lang attribute identifies the language for pronunciation and processing.
+**Expected evidence:** The root lang attribute identifies the language for pronunciation and processing.
 
-Change only the named feature. Compare with the unchanged example and explain any unaffected behavior.
+**Why:** lang tells assistive technology which pronunciation rules to apply and lets browsers use language-specific hyphenation and quotation marks.
 
 ## Exercise 3: Build a notes paragraph with nested importance and literal angle brackets.
 
-The structure remains a paragraph and the comparison is text rather than an element.
+**Expected evidence:** The structure remains a paragraph and the comparison is text rather than an element.
 
-Sketch the structure or data contract first. Reuse the mechanism from the examples without copying the reference.
+**Why:** Escaping keeps the comparison as text so the parser does not open a new element, while nested inline elements add importance without breaking the paragraph.
 
 ## Exercise 4: Repair overlapping emphasis tags by drawing their tree.
 
-Each opened element is closed before its parent closes.
+**Expected evidence:** Each opened element is closed before its parent closes.
 
-Keep the failing input. Identify the first layer where the observed result differs from the intended contract.
+**Why:** Elements form a tree, so a child must close before its parent closes. Crossing tags force the parser to repair the tree, which can split or extend the emphasis unexpectedly.
 
 ## Exercise 5: Add two related notes without duplicating an id.
 
-Shared class names group them while each id remains unique.
+**Expected evidence:** Shared class names group them while each id remains unique.
 
-Predict the boundary before running it. Add an explicit check or manual observation that would detect a regression.
+**Why:** An id names one element for fragments, labels and scripts, so it must be unique; a class can mark any number of elements.
 
 ## Exercise 6: Explain escaping versus validation with a text and URL example.
 
-Escaping preserves literal text; URL validation separately restricts allowed schemes and destinations.
+**Expected answer:** Escaping preserves literal text; URL validation separately restricts allowed schemes and destinations.
 
-Explain your choice to someone who has not seen the code. Include one limitation and the evidence needed to remove it.
+**Why:** Escaping changes how a value is written in one output context so it stays text; validation rejects values such as a javascript: URL that remain dangerous even when correctly escaped.
 
-## Reference comparison and limits
+## Reference comparison
 
-Read the separate executable reference, where supplied, only after retaining your attempt. Compare structure and decisions rather than matching every identifier. A different implementation is acceptable when it satisfies the same behavior, preserves accessibility and rejects the same invalid cases. The checked reference uses tiny synthetic inputs so that each transformation can be inspected. It is not a ready-to-deploy authenticated application. Server lifecycle, persistence, concurrency and security require their own integration evidence.
+Open `courses/web-development/solutions/web-002_solution.html` only after saving your attempt, and compare decisions rather than identifiers. A different implementation is acceptable when it shows the same behavior and rejects the same invalid cases. The reference checks only its named synthetic cases; its success message is not an accessibility audit or proof of responsive behavior at every size.

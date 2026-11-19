@@ -1,6 +1,6 @@
 # rust-038: explanation and comparison
 
-Attempt the six guide tasks before opening this comparison. The executable reference is [rust-038_solution.rs](rust-038_solution.rs). Its assertions are always active under the prepared classroom compile settings.
+Attempt the six guide tasks before opening this comparison. The executable reference is [rust-038_solution.rs](rust-038_solution.rs). It runs both worked examples and the reference answers below, and its assertions are always active under the prepared classroom compile settings.
 
 ## Why the two examples differ
 
@@ -8,21 +8,61 @@ Attempt the six guide tasks before opening this comparison. The executable refer
 
 **Keep NaN separate from null:** A finite-value policy is an additional analytical rule, not a synonym for Arrow validity. The column contains one null, one present NaN and one finite value.
 
-## Reason through the six tasks
+## Task answers
 
-1. **Predict and explain.** Classify zero, null and NaN separately.
+### Task 1: Predict and explain
 
-2. **Guided modification.** Add a present infinity and update finite-value accounting.
+Classify zero, null and NaN separately.
 
-3. **Independent construction.** Write a summary returning valid, null and finite counts.
+No separate reference answer has been written for this task. Example A is the evidence to compare with: Optional iteration respects validity rather than exposing meaningless physical contents at null positions. A valid zero and a null remain distinct positions.
 
-4. **Diagnose a defect.** Diagnose summing physical values without applying validity.
+### Task 2: Guided modification
 
-5. **Boundary evidence.** Test all-null, empty and no-null columns.
+Add a present infinity and update finite-value accounting.
 
-6. **Transfer and justify.** Define missingness and non-finite policies for a sensor dataset before calculating a mean.
+No separate reference answer has been written for this task. Start from Example B: A finite-value policy is an additional analytical rule, not a synonym for Arrow validity. The column contains one null, one present NaN and one finite value.
 
-For tasks 1 and 2, use the checked values and mechanism trace in the two examples. For task 3, choose names that expose the input and result contract and retain the same invariants. For task 4, the diagnosed mistakes below supply a concrete wrong assumption: preserve its counterexample before repairing it. Task 5 needs an explicit expected value or documented rejection at the boundary, not just successful execution. For task 6, explain what changes in the new context and which part of the original mechanism remains applicable. Several representations may satisfy this transfer task; justify the choice rather than treating this reference as the only architecture.
+### Task 3: Independent construction
+
+Write a summary returning valid, null and finite counts.
+
+**Reference answer.** The same statements run as the `Task 3` block of the reference program; here they are wrapped in `main` as a complete file.
+
+```rust
+fn main() -> Result<(), Box<dyn std::error::Error>> {
+    use arrow::array::{Array, Float64Array};
+    fn summary(values: &Float64Array) -> (usize, usize, usize) {
+        let valid = values.len() - values.null_count();
+        let finite = values.iter().flatten().filter(|v| v.is_finite()).count();
+        (valid, values.null_count(), finite)
+    }
+    let values = Float64Array::from(vec![Some(1.5), None, Some(f64::NAN), Some(2.0)]);
+    assert_eq!(summary(&values), (3, 1, 2));
+    Ok(())
+}
+```
+
+**Observe:** Four slots give 3 valid values, 1 null and 2 finite values.
+
+Validity and finiteness are different questions: NaN is a valid, non-null value that is not finite, while the null slot has no value at all.
+
+### Task 4: Diagnose a defect
+
+Diagnose summing physical values without applying validity.
+
+No reference answer has been written for this task yet. The wrong assumptions to look for are this lesson's pitfalls: Null positions can contain arbitrary physical values. NaN is not equal to itself under ordinary floating equality. Do not replace every null with zero without a domain justification.
+
+### Task 5: Boundary evidence
+
+Test all-null, empty and no-null columns.
+
+No reference answer has been written for this task yet. Write the expected value or documented rejection for each boundary before running it, and compare with the checks in Example A (Preserve null versus zero) and Example B (Keep NaN separate from null).
+
+### Task 6: Transfer and justify
+
+Define missingness and non-finite policies for a sensor dataset before calculating a mean.
+
+No single reference answer exists: several designs can satisfy this transfer task. Justify yours against the mechanism described below and the vocabulary entry **Null bitmap**, and state one limitation of your choice.
 
 ## Mechanism and diagnostic reasoning
 
@@ -36,4 +76,4 @@ Null positions can contain arbitrary physical values. NaN is not equal to itself
 
 ## Review before continuing
 
-The reference checks the worked scenarios, including their boundary distinctions. Your independent and transfer artifacts may have additional checks. Compare observations rather than only source text. Preserve any new regression case you discover and explain why it would reject a plausible wrong implementation. External project steps require their own build and platform evidence and are not established by a portable reference passing.
+Run the reference and confirm that it prints `rust-038: passed`, then reconstruct one boundary case from memory and explain which check would reject a plausible wrong implementation. External project steps need their own build and platform evidence; a passing portable reference does not establish them.

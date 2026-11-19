@@ -46,8 +46,13 @@ source advances watermark 2000, the real timers report west total 9 and east tot
 under their own deadlines. The operator clears their totals after emitting the
 inactivity observations.
 
+The keyed function keeps one total and one pending timer per key, replaces the
+timer on every event and emits the total when the watermark passes the deadline:
+
+<!-- include: projects/flink/src/WorkshopJobs.java from="public static final class Inactivity" until="public static final class ManagedTotal" java -->
+
 A subsequent east event at 2500 therefore starts a fresh total 3, with deadline 3000.
-Watermark4000 fires that timer. The checker expects the fresh total rather than 14,
+Watermark 4000 fires that timer. The checker expects the fresh total rather than 14,
 which would reveal that the prior inactive state was accidentally retained. It
 also ensures the obsolete east 1500 timer did not create an extra observation.
 

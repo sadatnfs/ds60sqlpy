@@ -21,6 +21,15 @@ struct LessonMain {
       let labels = makeLabels()
       precondition(Array(labels) == ["a", "b"])
     }
+
+    do {
+      // Task 3: Independent construction
+      func transformed<P: Producer>(_ producer: P, _ change: (P.Item) -> P.Item) -> P.Item {
+        change(producer.produce())
+      }
+      let value: Int = transformed(IntegerSource()) { $0 + 1 }
+      precondition(value == 8)
+    }
     print("swift-019: passed")
   }
 }

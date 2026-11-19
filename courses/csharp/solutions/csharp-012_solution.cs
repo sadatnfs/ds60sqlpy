@@ -34,6 +34,17 @@ internal static class Program {
       Check(first.Value == 1, "shared mutation");
       Check(ReferenceEquals(first, second), "same object");
     }
+    {
+      // Task 3: Independent construction
+      var coordinate = new Point(1, 2);
+      var moved = coordinate;
+      moved.X = 5;
+      var session = new Counter();
+      var sameSession = session;
+      sameSession.Value = 3;
+      Check(coordinate.X == 1 && moved.X == 5, "coordinate copied by value");
+      Check(session.Value == 3, "session shared by reference");
+    }
     Console.WriteLine("csharp-012: passed");
     await Task.CompletedTask;
   }

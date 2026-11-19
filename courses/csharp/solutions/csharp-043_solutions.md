@@ -1,28 +1,50 @@
 # csharp-043: explanation and comparison
 
-Attempt the six guide tasks before opening this comparison. The executable reference is [csharp-043_solution.cs](csharp-043_solution.cs). Its assertions are always active under the prepared classroom compile settings.
+Attempt the six guide tasks before opening this comparison. The executable reference is [csharp-043_solution.cs](csharp-043_solution.cs). It runs both worked examples, and its assertions are always active under the prepared classroom compile settings.
 
 ## Why the two examples differ
 
 **Expose environment facts without overclaiming:** Runtime facts are useful diagnostics but do not replace a source and project review. The running framework generation is compatible with the declared classroom target.
 
-**Keep configuration explicit:** A real project fixture, rather than this metadata demonstration, is required to qualify multi-file build behavior. The example preserves the intended target and nullable policy.
+**Read the compiled target framework:** Both values come from the build and the runtime rather than from a hand-written table, so the checks fail if the project targets another framework. A real multi-project fixture is still required to qualify restore and publish behavior. The compiled program reports .NETCoreApp,Version=v10.0, the framework its project targeted, and runs on a .NET 10 runtime.
 
-## Reason through the six tasks
+## Task answers
 
-1. **Predict and explain.** Explain the distinct purpose of restore, build, run and publish.
+### Task 1: Predict and explain
 
-2. **Guided modification.** Build the checked-in DomainLab without adding a package.
+Explain the distinct purpose of restore, build, run and publish.
 
-3. **Independent construction.** Move a pure domain type into the supplied class-library project and run its executable checks.
+No separate reference answer has been written for this task. Example A is the evidence to compare with: Runtime facts are useful diagnostics but do not replace a source and project review. The running framework generation is compatible with the declared classroom target.
 
-4. **Diagnose a defect.** Diagnose an API unavailable under a different target framework.
+### Task 2: Guided modification
 
-5. **Boundary evidence.** Delete only the lab-owned output directories and verify a clean rebuild.
+Build the checked-in DomainLab without adding a package.
 
-6. **Transfer and justify.** Design a dependency update review including lock changes, license checks and runtime evidence.
+No separate reference answer has been written for this task. Start from Example B: Both values come from the build and the runtime rather than from a hand-written table, so the checks fail if the project targets another framework. A real multi-project fixture is still required to qualify restore and publish behavior. The compiled program reports .NETCoreApp,Version=v10.0, the framework its project targeted, and runs on a .NET 10 runtime.
 
-For tasks 1 and 2, use the checked values and mechanism trace in the two examples. For task 3, choose names that expose the input and result contract and retain the same invariants. For task 4, the diagnosed mistakes below supply a concrete wrong assumption: preserve its counterexample before repairing it. Task 5 needs an explicit expected value or documented rejection at the boundary, not just successful execution. For task 6, explain what changes in the new context and which part of the original mechanism remains applicable. Several representations may satisfy this transfer task; justify the choice rather than treating this reference as the only architecture.
+### Task 3: Independent construction
+
+Move a pure domain type into the supplied class-library project and run its executable checks.
+
+No reference answer has been written for this task yet. It needs a project or platform outside the single-file pad, so record your own build and run evidence and judge it against the vocabulary entry **Target framework** and the lesson notes.
+
+### Task 4: Diagnose a defect
+
+Diagnose an API unavailable under a different target framework.
+
+No reference answer has been written for this task yet. The wrong assumptions to look for are this lesson's pitfalls: An SDK version and target framework are related but different. A successful restore is not a successful build. Do not present self-contained deployment as architecture-independent.
+
+### Task 5: Boundary evidence
+
+Delete only the lab-owned output directories and verify a clean rebuild.
+
+No reference answer has been written for this task yet. Write the expected value or documented rejection for each boundary before running it, and compare with the checks in Example A (Expose environment facts without overclaiming) and Example B (Read the compiled target framework).
+
+### Task 6: Transfer and justify
+
+Design a dependency update review including lock changes, license checks and runtime evidence.
+
+No single reference answer exists: several designs can satisfy this transfer task. Justify yours against the mechanism described below and the vocabulary entry **Target framework**, and state one limitation of your choice.
 
 ## Mechanism and diagnostic reasoning
 
@@ -36,4 +58,4 @@ An SDK version and target framework are related but different. A successful rest
 
 ## Review before continuing
 
-The reference checks the worked scenarios, including their boundary distinctions. Your independent and transfer artifacts may have additional checks. Compare observations rather than only source text. Preserve any new regression case you discover and explain why it would reject a plausible wrong implementation. External project steps require their own build and platform evidence and are not established by a portable reference passing.
+Run the reference and confirm that it prints `csharp-043: passed`, then reconstruct one boundary case from memory and explain which check would reject a plausible wrong implementation. External project steps need their own build and platform evidence; a passing portable reference does not establish them.

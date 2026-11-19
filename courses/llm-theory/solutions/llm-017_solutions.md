@@ -14,11 +14,11 @@ Training predicts the next token at each active position. A four-token sequence 
 
 ## Reading the implementation
 
-ids[:,:-1] and ids[:,1:] produce shifted input and target tensors. F.cross_entropy expects classes on dimension1, so flatten(batch,time,vocabulary) logits to(-1,vocabulary) and labels to(-1). With ignore_index=-100, ignored targets contribute no loss. reduction='sum' followed by an explicit active count makes the denominator auditable.
+ids[:, :-1] and ids[:, 1:] produce shifted input and target tensors. F.cross_entropy expects classes on dimension 1, so flatten(batch, time, vocabulary) logits to (-1, vocabulary) and labels to (-1). With ignore_index=-100, ignored targets contribute no loss. reduction='sum' followed by an explicit active count makes the denominator auditable.
 
 ## Exercise 1: Shift the sequence
 
-The question is: Use IDs[2,5,7,3] and create three input-target pairs.
+The question is: Use IDs [2, 5, 7, 3] and create three input-target pairs.
 
 The model may see the current input token but not its target at the next position. The diagonal causal mask is consistent with this shifted objective.
 
@@ -29,13 +29,13 @@ targets = ids[:, 1:]
 assert inputs.tolist() == [[2, 5, 7]] and targets.tolist() == [[5, 7, 3]]
 ```
 
-**Expected:** inputs2,5,7 and targets5,7,3.
+**Expected:** inputs 2, 5, 7 and targets 5, 7, 3.
 
-**Verify:** Compare the computed values or written argument with inputs2,5,7 and targets5,7,3.
+**Verify:** In a fresh process, the exercise checks confirm `inputs.tolist() == [[2, 5, 7]]` and `targets.tolist() == [[5, 7, 3]]`.
 
 ## Exercise 2: Score uniform logits
 
-The question is: Use zero logits with vocabulary8 for the three targets.
+The question is: Use zero logits with vocabulary 8 for the three targets.
 
 Each target has probability one eighth. Target identity does not change the loss under this uniform distribution, which isolates the denominator calculation.
 
@@ -45,13 +45,13 @@ loss = F.cross_entropy(logits.reshape(-1, 8), targets.reshape(-1))
 np.testing.assert_allclose(loss.item(), np.log(8), atol=1e-6, rtol=0)
 ```
 
-**Expected:** mean losslog8 and count3.
+**Expected:** mean loss \(\log 8\) and count 3.
 
-**Verify:** Compare the computed values or written argument with mean losslog8 and count3.
+**Verify:** In a fresh process, the exercise checks confirm `loss.item()` matches `np.log(8)` within 1e-6.
 
 ## Exercise 3: Append ignored targets
 
-The question is: Add two labels-100 and corresponding zero-logit positions.
+The question is: Add two labels of -100 and corresponding zero-logit positions.
 
 Additional storage positions do not add evidence. This invariance is a strong test for a masked language-model objective.
 
@@ -63,13 +63,13 @@ assert int((padded != -100).sum()) == 3
 torch.testing.assert_close(new, loss, atol=1e-6, rtol=0)
 ```
 
-**Expected:** mean loss unchanged; active count3.
+**Expected:** mean loss unchanged; active count 3.
 
-**Verify:** Compare the computed values or written argument with mean loss unchanged; active count3.
+**Verify:** In a fresh process, the exercise checks confirm `int((padded != -100).sum()) == 3` and `new` matches `loss` within 1e-6.
 
 ## Exercise 4: Expose the wrong denominator
 
-The question is: Compute summed active loss and divide by padded length5 instead of active count3.
+The question is: Compute summed active loss and divide by padded length 5 instead of active count 3.
 
 The wrong score appears better merely because more padding was added. It is not a model improvement.
 
@@ -82,9 +82,9 @@ np.testing.assert_allclose(wrong.item(), 3 * np.log(8) / 5, atol=1e-6, rtol=0)
 assert wrong < loss
 ```
 
-**Expected:** wrong loss3log8/5, below correct loss.
+**Expected:** wrong loss \(3\log 8/5\), below the correct loss.
 
-**Verify:** Compare the computed values or written argument with wrong loss3log8/5, below correct loss.
+**Verify:** In a fresh process, the exercise checks confirm `wrong.item()` matches `3 * np.log(8) / 5` within 1e-6 and `wrong < loss`.
 
 ## Exercise 5: Check gradient masking
 
@@ -103,11 +103,11 @@ assert torch.count_nonzero(v.grad[:, 3:]).item() == 0
 
 **Expected:** ignored-position gradients exactly zero.
 
-**Verify:** Compare the computed values or written argument with ignored-position gradients exactly zero.
+**Verify:** In a fresh process, the exercise checks confirm `torch.count_nonzero(v.grad[:, 3:]).item() == 0`.
 
 ## Exercise 6: Reject all-padding batches
 
-The question is: Check active count before a mean loss on targets[-100,-100].
+The question is: Check active count before a mean loss on targets [-100, -100].
 
 A mean over no observations is undefined. Returning a perfect zero loss would let a broken batching pipeline masquerade as successful learning.
 
@@ -124,7 +124,7 @@ except ValueError:
 
 **Expected:** zero active count triggers an explicit failure policy.
 
-**Verify:** Compare the computed values or written argument with zero active count triggers an explicit failure policy.
+**Verify:** In a fresh process, the exercise checks confirm `active == 0` and `active != 0`.
 
 ## Review after comparison
 

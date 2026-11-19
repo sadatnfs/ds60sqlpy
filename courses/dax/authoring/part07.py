@@ -24,8 +24,8 @@ LESSONS = [
             "rank, while skip ranking leaves a gap corresponding to "
             "tied positions. Choose the policy before interpreting a "
             "leaderboard.\n\nOur literal candidate table contains "
-            "100,80,80 and 50. Dense ranks are 1,2,2,3; skip ranks are "
-            "1,2,2,4. A Top 2 selection based only on score can "
+            "100, 80, 80 and 50. Dense ranks are 1, 2, 2, 3; skip ranks are "
+            "1, 2, 2, 4. A Top 2 selection based only on score can "
             "include all three rows at or above the tied cutoff. That "
             "behavior differs from selecting exactly two rows with an "
             "additional unique ordering key.\n\nA tie-breaker is a "
@@ -110,7 +110,7 @@ LESSONS = [
             t(
                 "Predict both ranks if Gamma's score becomes 79.",
                 "There is no longer a tie at 80.",
-                "Alpha,Beta,Gamma,Delta rank 1,2,3,4 under both policies.",
+                "Alpha, Beta, Gamma, Delta rank 1, 2, 3, 4 under both policies.",
             ),
             t(
                 "Change the cutoff from 2 to 1.",
@@ -215,7 +215,7 @@ LESSONS = [
                     "SaleID; absolute positions 1 through 2."
                 ),
                 [
-                    "The first two keys are S1 and S 2.",
+                    "The first two keys are S1 and S2.",
                     "Both rows belong to order 101 and date 2024-01-02.",
                     "The window contains two lines, not two distinct dates; amounts are 20 and 4.",
                 ],
@@ -236,7 +236,7 @@ LESSONS = [
                 [["S7", 20], ["S8", 36]],
                 "Same explicit relation and ordering; last two absolute positions.",
                 [
-                    "Position-1 identifies S8; position-2 identifies S7.",
+                    "Position -1 identifies S8; position -2 identifies S7.",
                     "The inclusive window includes both rows.",
                     "Their amounts total 56, but the relation contract remains line-based.",
                 ],
@@ -255,7 +255,7 @@ LESSONS = [
             ),
             t(
                 "Describe OFFSET(-1,...) from a current row matched to S4.",
-                "The preceding SaleID in this declared order is S 3.",
+                "The preceding SaleID in this declared order is S3.",
                 (
                     "It would refer to S3 with amount 40, provided the "
                     "current-row matching contract is explicit and valid."
@@ -355,8 +355,8 @@ LESSONS = [
                     "complete snapshots on January 31 and February 28."
                 ),
                 [
-                    "January 31 has 10 +20 +5 =35 units.",
-                    "February 28 has 8 +15 +7 =30 units.",
+                    "January 31 has 10 + 20 + 5 = 35 units.",
+                    "February 28 has 8 + 15 + 7 = 30 units.",
                     "All snapshot rows sum to 65; the closing selected-date balance is 30.",
                 ],
                 (
@@ -403,7 +403,7 @@ LESSONS = [
                 "Predict the closing balance for Notebook and Mug at February 28.",
                 "Use their latest observed snapshot values.",
                 (
-                    "It is 8 +7 =15, coincidentally equal to the earlier "
+                    "It is 8 + 7 = 15, coincidentally equal to the earlier "
                     "carried subset for different reasons."
                 ),
             ),
@@ -614,7 +614,7 @@ LESSONS = [
                 "It would turn 1/2 into 1/1 and conceal inactive eligible members.",
             ),
             t(
-                "Explain why 202512 +1 is not a valid next-month calculation.",
+                "Explain why 202512 + 1 is not a valid next-month calculation.",
                 "YYYYMM is a label, not a continuous month counter.",
                 (
                     "It gives 202513. Use a date-aware calendar mapping or "
@@ -651,7 +651,7 @@ LESSONS = [
             "mapping.\n\nThe analytical fixture leaves Budget "
             "disconnected and transfers selected MonthKey and Category "
             "values explicitly with TREATAS. For January Paper, actual "
-            "revenue is 47 and budget is 60, so the variance is-13. "
+            "revenue is 47 and budget is 60, so the variance is -13. "
             "The reference permits that comparison only when the "
             "selected Date population is the complete single calendar "
             "month.\n\nOn January 2 alone, actual Paper revenue is 27. "
@@ -695,8 +695,8 @@ LESSONS = [
                 ),
                 [
                     "January has 31 selected dates, satisfying the complete single-month guard.",
-                    "Paper actuals are S 4 and S 5:27 +20 =47.",
-                    "The mapped budget is 60, so actual minus budget is-13.",
+                    "Paper actuals are S4 and S5: 27 + 20 = 47.",
+                    "The mapped budget is 60, so actual minus budget is -13.",
                 ],
                 (
                     "The sign convention is part of the metric: here negative "
@@ -745,12 +745,12 @@ LESSONS = [
             t(
                 "Predict February Home actual and budget.",
                 "Use S8 and the matching monthly budget row.",
-                "Actual 36, budget 50 and variance-14.",
+                "Actual 36, budget 50 and variance -14.",
             ),
             t(
                 "Combine both January categories.",
                 "Add compatible monthly targets and actuals once each.",
-                "Actual 67, budget 90 and variance-23.",
+                "Actual 67, budget 90 and variance -23.",
             ),
             t(
                 "Specify a uniform daily allocation for January Paper.",
@@ -884,7 +884,7 @@ LESSONS = [
                 ),
                 [
                     "The local EUR amounts sum to 150.",
-                    "Transaction-date conversion gives 110 +60 =170 USD.",
+                    "Transaction-date conversion gives 110 + 60 = 170 USD.",
                     "Multiplying 150 by 1.2 gives 180 USD, ten more than the stated policy.",
                 ],
                 (
@@ -909,7 +909,7 @@ LESSONS = [
                 "Change the FebruaryEUR rate to 1.0.",
                 "The maximum rate would no longer be the latest rate.",
                 (
-                    "Correct EUR conversion becomes 110 +50 =160 USD. A "
+                    "Correct EUR conversion becomes 110 + 50 = 160 USD. A "
                     "MAX-rate shortcut would use 1.1 and still be wrong."
                 ),
             ),

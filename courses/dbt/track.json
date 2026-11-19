@@ -22,8 +22,8 @@
         "build"
       ],
       "outcome": "Build and inspect a local dbt project through its real adapter.",
-      "lab": "Inspect the generated project files, run the actual dbt commands against the owned DuckDB database, and complete the six specified changes with artifact and row checks.",
-      "verification": "Run the assertions and inspect dbt-001 reference checks passed. Interpret the counterexample in the guide."
+      "lab": "Parse, build and query a one-model project to confirm the value 42 in DuckDB, then compile a second model and show that its relation exists only after dbt run.",
+      "verification": "Run the starter and compare both printed results with the guide. Worked case 1: A manifest node exists, the database returns 42, and the run result reports success. Worked case 2: Compiled SQL contains 6*7; the answer relation appears only after run."
     },
     {
       "id": "dbt-002",
@@ -42,8 +42,8 @@
         "quarantine"
       ],
       "outcome": "Create a staging boundary with complete record accounting.",
-      "lab": "Inspect the generated project files, run the actual dbt commands against the owned DuckDB database, and complete the six specified changes with artifact and row checks.",
-      "verification": "Run the assertions and inspect dbt-002 reference checks passed. Interpret the counterexample in the guide."
+      "lab": "Seed raw orders, stage them with explicit casts, and show that try_cast accepts two of three rows while the malformed record stays visible in the raw seed.",
+      "verification": "Run the starter and compare both printed results with the guide. Worked case 1: Three rows materialize and amount totals 21. Worked case 2: Two rows are accepted, one is rejected, and all three remain in raw input."
     },
     {
       "id": "dbt-003",
@@ -64,8 +64,8 @@
         "dependency"
       ],
       "outcome": "Choose a materialization using observed database behavior and a stated workload.",
-      "lab": "Inspect the generated project files, run the actual dbt commands against the owned DuckDB database, and complete the six specified changes with artifact and row checks.",
-      "verification": "Run the assertions and inspect dbt-003 reference checks passed. Interpret the counterexample in the guide."
+      "lab": "Build a view and a table that depends on it, read the manifest dependency and the DuckDB object types, then inline an ephemeral model and confirm that no relation is created for it.",
+      "verification": "Run the starter and compare both printed results with the guide. Worked case 1: staging is a view, customer_total is a table, and its dependency names staging. Worked case 2: The final answer is 42 and no base relation is created."
     },
     {
       "id": "dbt-004",
@@ -85,8 +85,8 @@
         "failure recovery"
       ],
       "outcome": "Use data tests as explicit evidence for a declared contract.",
-      "lab": "Inspect the generated project files, run the actual dbt commands against the owned DuckDB database, and complete the six specified changes with artifact and row checks.",
-      "verification": "Run the assertions and inspect dbt-004 reference checks passed. Interpret the counterexample in the guide."
+      "lab": "Declare not_null and unique tests on an order key, build a passing and a duplicated fixture, and repair the duplicate so a full-refresh build passes.",
+      "verification": "Run the starter and compare both printed results with the guide. Worked case 1: Two test results pass and the table contains two rows. Worked case 2: Duplicate data is rejected by the test; the corrected rebuild passes."
     },
     {
       "id": "dbt-005",
@@ -106,8 +106,8 @@
         "SLA"
       ],
       "outcome": "Define and test a source freshness policy with an explicit clock and response.",
-      "lab": "Inspect the generated project files, run the actual dbt commands against the owned DuckDB database, and complete the six specified changes with artifact and row checks.",
-      "verification": "Run the assertions and inspect dbt-005 reference checks passed. Interpret the counterexample in the guide."
+      "lab": "Configure a source with a one-hour error_after freshness policy and run dbt source freshness against a current and a two-day-old loaded_at timestamp.",
+      "verification": "Run the starter and compare both printed results with the guide. Worked case 1: The source freshness status is pass. Worked case 2: The stale source reports error."
     },
     {
       "id": "dbt-006",
@@ -127,8 +127,8 @@
         "boundary case"
       ],
       "outcome": "Use controlled fixtures to test transformation logic and real-data checks to test integration.",
-      "lab": "Inspect the generated project files, run the actual dbt commands against the owned DuckDB database, and complete the six specified changes with artifact and row checks.",
-      "verification": "Run the assertions and inspect dbt-006 reference checks passed. Interpret the counterexample in the guide."
+      "lab": "Run a YAML unit test with its own two-row input, confirm that the production seed is unchanged, and make a deliberately wrong expected row fail.",
+      "verification": "Run the starter and compare both printed results with the guide. Worked case 1: The unit test passes with total 5 and the source seed is unchanged. Worked case 2: The unit result is fail under the incorrect expected row."
     },
     {
       "id": "dbt-007",
@@ -148,8 +148,8 @@
         "safe ratio"
       ],
       "outcome": "Review a macro through its source, emitted SQL and actual result.",
-      "lab": "Inspect the generated project files, run the actual dbt commands against the owned DuckDB database, and complete the six specified changes with artifact and row checks.",
-      "verification": "Run the assertions and inspect dbt-007 reference checks passed. Interpret the counterexample in the guide."
+      "lab": "Write a safe_ratio macro, compare its compiled CASE expression with the materialized rates 0.25 and null, and confirm that an undefined macro fails at compilation.",
+      "verification": "Run the starter and compare both printed results with the guide. Worked case 1: The rates are 0.25 and null; compiled SQL contains CASE logic rather than the macro call. Worked case 2: Compilation fails before model execution."
     },
     {
       "id": "dbt-008",
@@ -170,8 +170,8 @@
         "full refresh"
       ],
       "outcome": "State the assumptions under which an incremental result equals a full recomputation.",
-      "lab": "Inspect the generated project files, run the actual dbt commands against the owned DuckDB database, and complete the six specified changes with artifact and row checks.",
-      "verification": "Run the assertions and inspect dbt-008 reference checks passed. Interpret the counterexample in the guide."
+      "lab": "Run a max-watermark incremental model through an append and a repeat run, then add a late record behind the watermark and compare the incremental result with a full refresh.",
+      "verification": "Run the starter and compare both printed results with the guide. Worked case 1: Two records remain after the append and repeat run. Worked case 2: The incremental relation has 2 rows; full refresh has 3."
     },
     {
       "id": "dbt-009",
@@ -191,8 +191,8 @@
         "backfill"
       ],
       "outcome": "Implement a keyed incremental contract with tested boundary and repeat-run behavior.",
-      "lab": "Inspect the generated project files, run the actual dbt commands against the owned DuckDB database, and complete the six specified changes with artifact and row checks.",
-      "verification": "Run the assertions and inspect dbt-009 reference checks passed. Interpret the counterexample in the guide."
+      "lab": "Apply a delete+insert model with a ten-unit lookback to a correction and a late insert, rerun it without duplicates, and show that a record outside the window needs a full refresh.",
+      "verification": "Run the starter and compare both printed results with the guide. Worked case 1: Final amounts are id 1=6, id 2=7 and id 3=9, with three rows after rerun. Worked case 2: Normal output has 1 row; a declared full refresh produces 2."
     },
     {
       "id": "dbt-010",
@@ -213,8 +213,8 @@
         "deletion"
       ],
       "outcome": "Explain what a snapshot actually observed and what it cannot reconstruct.",
-      "lab": "Inspect the generated project files, run the actual dbt commands against the owned DuckDB database, and complete the six specified changes with artifact and row checks.",
-      "verification": "Run the assertions and inspect dbt-010 reference checks passed. Interpret the counterexample in the guide."
+      "lab": "Snapshot a customer seed with the check strategy and hard_deletes set to invalidate, change one region, and compare history rows with current rows after a deletion.",
+      "verification": "Run the starter and compare both printed results with the guide. Worked case 1: There are 3 history rows; current regions are west and south. Worked case 2: History still has 3 rows, but only customer 1/west is current."
     },
     {
       "id": "dbt-011",
@@ -234,8 +234,8 @@
         "failure timing"
       ],
       "outcome": "Define a model schema contract and verify both accepted and rejected changes.",
-      "lab": "Inspect the generated project files, run the actual dbt commands against the owned DuckDB database, and complete the six specified changes with artifact and row checks.",
-      "verification": "Run the assertions and inspect dbt-011 reference checks passed. Interpret the counterexample in the guide."
+      "lab": "Enforce a model contract with declared column types, build a compatible model, then change its output type and confirm that the run fails while the earlier relation keeps 42.",
+      "verification": "Run the starter and compare both printed results with the guide. Worked case 1: The model returns id 1 and amount 42 under the declared types. Worked case 2: The incompatible run fails and the previous valid amount remains 42."
     },
     {
       "id": "dbt-012",
@@ -255,8 +255,8 @@
         "migration"
       ],
       "outcome": "Manage a semantic model change with explicit consumer versioning.",
-      "lab": "Inspect the generated project files, run the actual dbt commands against the owned DuckDB database, and complete the six specified changes with artifact and row checks.",
-      "verification": "Run the assertions and inspect dbt-012 reference checks passed. Interpret the counterexample in the guide."
+      "lab": "Publish two versions of a model, query a consumer pinned to version 1 and one that follows the latest version, and name the gross-to-net change that separates 100 from 80.",
+      "verification": "Run the starter and compare both printed results with the guide. Worked case 1: The explicit v1 consumer returns 100; the latest v2 consumer returns 80. Worked case 2: Net is 80, derived from gross 100 and returns 20."
     },
     {
       "id": "dbt-013",
@@ -276,8 +276,8 @@
         "manifest"
       ],
       "outcome": "Construct and inspect a reproducible selection against an explicit baseline.",
-      "lab": "Inspect the generated project files, run the actual dbt commands against the owned DuckDB database, and complete the six specified changes with artifact and row checks.",
-      "verification": "Run the assertions and inspect dbt-013 reference checks passed. Interpret the counterexample in the guide."
+      "lab": "List the models selected by tag:feature+, then save a manifest, change one model and select state:modified+ against that saved baseline.",
+      "verification": "Run the starter and compare both printed results with the guide. Worked case 1: The selected model names are base and child. Worked case 2: Changed and downstream selection contains both models."
     },
     {
       "id": "dbt-014",
@@ -298,8 +298,8 @@
         "ownership"
       ],
       "outcome": "Build documentation that joins observed structure with authored meaning and ownership.",
-      "lab": "Inspect the generated project files, run the actual dbt commands against the owned DuckDB database, and complete the six specified changes with artifact and row checks.",
-      "verification": "Run the assertions and inspect dbt-014 reference checks passed. Interpret the counterexample in the guide."
+      "lab": "Generate documentation for a described mart with an exposure, read the catalog and manifest, and detect a model whose type is known but whose description is missing.",
+      "verification": "Run the starter and compare both printed results with the guide. Worked case 1: The catalog contains total and the decision-report exposure depends on mart. Worked case 2: The type is available, but the business description is missing."
     },
     {
       "id": "dbt-015",
@@ -319,8 +319,8 @@
         "consumer boundary"
       ],
       "outcome": "Separate candidate computation from accepted publication.",
-      "lab": "Inspect the generated project files, run the actual dbt commands against the owned DuckDB database, and complete the six specified changes with artifact and row checks.",
-      "verification": "Run the assertions and inspect dbt-015 reference checks passed. Interpret the counterexample in the guide."
+      "lab": "Build a candidate relation and record publication only when every test passes, then show that a failed uniqueness test leaves the candidate built but unpublished.",
+      "verification": "Run the starter and compare both printed results with the guide. Worked case 1: Two candidate rows are present and publication is true. Worked case 2: Two candidate rows exist, but publication is false."
     },
     {
       "id": "dbt-016",
@@ -340,8 +340,8 @@
         "reconciliation"
       ],
       "outcome": "Publish a metric with a complete numerator/denominator contract and an independent check.",
-      "lab": "Inspect the generated project files, run the actual dbt commands against the owned DuckDB database, and complete the six specified changes with artifact and row checks.",
-      "verification": "Run the assertions and inspect dbt-016 reference checks passed. Interpret the counterexample in the guide."
+      "lab": "Compute pooled cohort rates in SQL from success and trial counts, check them against independent arithmetic, and compare an equal-row average that differs by more than 0.4.",
+      "verification": "Run the starter and compare both printed results with the guide. Worked case 1: Cohort A is 0.1 from 100 trials; cohort B is 0.5 from 2 trials. Worked case 2: Equal-row averaging differs by more than 0.4 from the pooled rate."
     },
     {
       "id": "dbt-017",
@@ -362,8 +362,8 @@
         "feature leakage"
       ],
       "outcome": "Produce a historical feature relation with explicit entity, time and version semantics.",
-      "lab": "Inspect the generated project files, run the actual dbt commands against the owned DuckDB database, and complete the six specified changes with artifact and row checks.",
-      "verification": "Run the assertions and inspect dbt-017 reference checks passed. Interpret the counterexample in the guide."
+      "lab": "Build a point-in-time feature model that requires event and known times to precede each request cutoff, and compare it with an event-time-only model that returns 999.",
+      "verification": "Run the starter and compare both printed results with the guide. Worked case 1: The available feature values are [10, 30]. Worked case 2: The event-only model returns [999, 30]."
     },
     {
       "id": "dbt-018",
@@ -382,8 +382,8 @@
         "offline"
       ],
       "outcome": "Prepare and inspect a real reusable dbt dependency with an explicit source boundary.",
-      "lab": "Inspect the generated project files, run the actual dbt commands against the owned DuckDB database, and complete the six specified changes with artifact and row checks.",
-      "verification": "Run the assertions and inspect dbt-018 reference checks passed. Interpret the counterexample in the guide."
+      "lab": "Prepare a local package with dbt deps, use its add_one macro in a model that returns 42, and show that compiling before the package is prepared fails.",
+      "verification": "Run the starter and compare both printed results with the guide. Worked case 1: The macro is registered, the lockfile is written and the model returns 42. Worked case 2: Missing dependency preparation fails; local deps followed by compile succeeds."
     },
     {
       "id": "dbt-019",
@@ -403,8 +403,8 @@
         "routing"
       ],
       "outcome": "Run a project against an explicitly identified owned target and verify its actual destination.",
-      "lab": "Inspect the generated project files, run the actual dbt commands against the owned DuckDB database, and complete the six specified changes with artifact and row checks.",
-      "verification": "Run the assertions and inspect dbt-019 reference checks passed. Interpret the counterexample in the guide."
+      "lab": "Add dev and prod outputs to the profile, build one model into both schemas with its target name, and confirm that an unknown target is rejected before any model runs.",
+      "verification": "Run the starter and compare both printed results with the guide. Worked case 1: dev.answer and prod.answer contain the corresponding target label and 42. Worked case 2: The unknown target is rejected before a successful model run."
     },
     {
       "id": "dbt-020",
@@ -424,8 +424,8 @@
         "baseline"
       ],
       "outcome": "Use deferral with an explicit upstream-state contract.",
-      "lab": "Inspect the generated project files, run the actual dbt commands against the owned DuckDB database, and complete the six specified changes with artifact and row checks.",
-      "verification": "Run the assertions and inspect dbt-020 reference checks passed. Interpret the counterexample in the guide."
+      "lab": "Build a prod baseline, save its manifest and run a dev child with --defer and --state, then add a stale dev parent and compare the default result with --favor-state.",
+      "verification": "Run the starter and compare both printed results with the guide. Worked case 1: The child returns 11 and its parent is resolved from prod. Worked case 2: The default result is 101; favor-state produces 2."
     },
     {
       "id": "dbt-021",
@@ -447,8 +447,8 @@
         "isolated target"
       ],
       "outcome": "Implement a reproducible reduced CI workflow with explicit selection, baseline and ownership.",
-      "lab": "Inspect the generated project files, run the actual dbt commands against the owned DuckDB database, and complete the six specified changes with artifact and row checks.",
-      "verification": "Run the assertions and inspect dbt-021 reference checks passed. Interpret the counterexample in the guide."
+      "lab": "Build a prod baseline, save its manifest, change the child model and run a state:modified+ build in dev for a compatible change and for a change that duplicates rows.",
+      "verification": "Run the starter and compare both printed results with the guide. Worked case 1: The changed candidate passes and the accepted baseline is unchanged. Worked case 2: The candidate contains a failed test and the baseline still has one row."
     },
     {
       "id": "dbt-022",
@@ -469,8 +469,8 @@
         "evidence"
       ],
       "outcome": "Diagnose failures using the layer that actually rejected the work.",
-      "lab": "Inspect the generated project files, run the actual dbt commands against the owned DuckDB database, and complete the six specified changes with artifact and row checks.",
-      "verification": "Run the assertions and inspect dbt-022 reference checks passed. Interpret the counterexample in the guide."
+      "lab": "Compile a model whose SQL the database rejects and read its error status, then build a model with a wrong factor of 2 and catch it with a singular reconciliation test.",
+      "verification": "Run the starter and compare both printed results with the guide. Worked case 1: Compiled SQL exists, but the model result status is error. Worked case 2: The relation contains 24 and the independent reconciliation test fails."
     },
     {
       "id": "dbt-023",
@@ -491,8 +491,8 @@
         "benchmark"
       ],
       "outcome": "Measure database work with a correctness oracle and a clearly defined interval.",
-      "lab": "Inspect the generated project files, run the actual dbt commands against the owned DuckDB database, and complete the six specified changes with artifact and row checks.",
-      "verification": "Run the assertions and inspect dbt-023 reference checks passed. Interpret the counterexample in the guide."
+      "lab": "Time a grouped query whose five totals are checked against Python arithmetic, then show that a select distinct rewrite changes the total from 17 to 12.",
+      "verification": "Run the starter and compare both printed results with the guide. Worked case 1: The five group totals match Python arithmetic and a nonnegative timing summary is reported. Worked case 2: The multiset total is 17; the changed result totals 12."
     },
     {
       "id": "dbt-024",
@@ -513,8 +513,8 @@
         "database permissions"
       ],
       "outcome": "Use groups and model access to define supported project interfaces, while keeping database authorization claims separate.",
-      "lab": "Inspect the generated project files, run the actual dbt commands against the owned DuckDB database, and complete the six specified changes with artifact and row checks.",
-      "verification": "Run the assertions and inspect dbt-024 reference checks passed. Interpret the counterexample in the guide."
+      "lab": "Declare two groups and a private model, build a consumer in the same group, and confirm that dbt rejects a consumer in another group that references the private model.",
+      "verification": "Run the starter and compare both printed results with the guide. Worked case 1: The build succeeds, while direct SQL visibility remains a separate fact. Worked case 2: The cross-group private-model reference is rejected."
     },
     {
       "id": "dbt-025",
@@ -535,8 +535,8 @@
         "recovery"
       ],
       "outcome": "Recover a data product through explicit accepted versions and a tested pointer mechanism.",
-      "lab": "Inspect the generated project files, run the actual dbt commands against the owned DuckDB database, and complete the six specified changes with artifact and row checks.",
-      "verification": "Run the assertions and inspect dbt-025 reference checks passed. Interpret the counterexample in the guide."
+      "lab": "Change an accepted-version pointer inside a DuckDB transaction and roll it back, then reject a candidate that fails a value test while the accepted value stays 42.",
+      "verification": "Run the starter and compare both printed results with the guide. Worked case 1: The temporary 99 is visible inside the transaction; rollback restores version 1/value 42. Worked case 2: The candidate is rejected and the accepted value remains 42."
     },
     {
       "id": "dbt-026",
@@ -565,8 +565,8 @@
         "decision receipt"
       ],
       "outcome": "Deliver a complete local analytics product with a reviewable acceptance decision.",
-      "lab": "Inspect the generated project files, run the actual dbt commands against the owned DuckDB database, and complete the six specified changes with artifact and row checks.",
-      "verification": "Run the assertions and inspect dbt-026 reference checks passed. Interpret the counterexample in the guide."
+      "lab": "Build staging and mart models with key tests, write a publication receipt for customer totals 12 and 9, and block publication when the customer dimension has a duplicate key.",
+      "verification": "Run the starter and compare both printed results with the guide. Worked case 1: Customer totals are 12 and 9, overall 21; one raw order is quarantined and a receipt is written. Worked case 2: The invalid candidate is not published."
     }
   ]
 }

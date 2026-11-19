@@ -1,4 +1,4 @@
-"""mle-013: worked starting point; complete the guide's six changes."""
+"""mle-013: both worked cases; complete the guide's six changes."""
 
 import contextlib
 import hashlib
@@ -38,8 +38,18 @@ def example_one():
     return {"checkpoint_retained": True, "idempotent_publication": first, "mean": 4}
 
 
+def example_two():
+    ledger = {}
+    old = execute_pipeline(ledger, [1, 2, 3])
+    new = execute_pipeline(ledger, [1, 2, 4])
+    assert old != new and ledger["model"]["mean"] == 14 / 3
+    assert ledger["features"] == [2, 4, 8]
+    return {"changed_input_invalidates_reuse": True, "new_mean": ledger["model"]["mean"]}
+
+
 if __name__ == "__main__":
     print(example_one())
+    print(example_two())
 
 # TODO 1: Identify which stage creates the consumer-facing result.
 # TODO 2: Describe a timeout after publication may already have occurred.

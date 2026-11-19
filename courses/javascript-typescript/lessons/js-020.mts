@@ -1,13 +1,23 @@
 // Answer-free learner source. Save your own copy before editing.
 
 export {};
-// Exercise 1: Handle a result union
-// Format both successful value 7 and a failure message.
-// Expected: value:7 and error:offline.
+// Exercise 1: Handle a result union: predict an edited check
+// Copy Example A into a scratch `main.mts` and change `assert.equal(formatResult({ kind:
+// 'failure', message: 'offline' }), 'error:offline');` to `assert.equal(formatResult({ kind:
+// 'failure', message: 'offline!' }), 'error:offline');` inside its check. Before running it,
+// predict whether the check still passes and explain why; then restore it.
+// Expected: The changed run fails with an `AssertionError` at the check
+// `assert.equal(formatResult({ kind: 'failure', message: 'offline' }), 'error:offline')`.
+// Restoring the original line brings back the worked observation: value:7 and error:offline.
 
-// Exercise 2: Preserve an empty string during narrowing
-// Handle string or undefined using an explicit undefined comparison.
-// Expected: empty string has length 0; absent value returns missing.
+// Exercise 2: Preserve an empty string during narrowing: diagnose an edited check
+// A careless edit changed a check in Example B so that it reads
+// `assert.equal(describe(undefined), 'missing!');`. Run Example B with that line, explain
+// why the edited check now fails for the same program state, and restore it.
+// Expected: Before the repair the run fails with an `AssertionError` at the check
+// `assert.equal(describe(undefined), 'missing')`; after it the line reads
+// `assert.equal(describe(undefined), 'missing');` again and empty string has length 0;
+// absent value returns missing.
 
 // Exercise 3: Reject access to another variant payload
 // Demonstrate that a failure branch cannot read value.

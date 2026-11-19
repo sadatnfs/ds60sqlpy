@@ -1,6 +1,6 @@
 # rust-001: explanation and comparison
 
-Attempt the six guide tasks before opening this comparison. The executable reference is [rust-001_solution.rs](rust-001_solution.rs). Its assertions are always active under the prepared classroom compile settings.
+Attempt the six guide tasks before opening this comparison. The executable reference is [rust-001_solution.rs](rust-001_solution.rs). It runs both worked examples and the reference answers below, and its assertions are always active under the prepared classroom compile settings.
 
 ## Why the two examples differ
 
@@ -8,21 +8,57 @@ Attempt the six guide tasks before opening this comparison. The executable refer
 
 **Calculate instead of copying output:** A second check rejects a plausible wrong operator rather than merely confirming that printing works. The calculated capacity is 24, while addition would give 10.
 
-## Reason through the six tasks
+## Task answers
 
-1. **Predict and explain.** Predict the greeting and final marker order.
+### Task 1: Predict and explain
 
-2. **Guided modification.** Change the greeting and keep its expected value independent.
+Predict the greeting and final marker order.
 
-3. **Independent construction.** Compute the capacity of three shelves with eight books each.
+No separate reference answer has been written for this task. Example A is the evidence to compare with: The explicit check connects a value to its expected observation. Hello, Rust appears before the lesson marker.
 
-4. **Diagnose a defect.** Remove a closing brace temporarily and classify the compiler diagnostic.
+### Task 2: Guided modification
 
-5. **Boundary evidence.** Check zero shelves and one shelf.
+Change the greeting and keep its expected value independent.
 
-6. **Transfer and justify.** Model a three-level capacity calculation and explain every intermediate value.
+No separate reference answer has been written for this task. Start from Example B: A second check rejects a plausible wrong operator rather than merely confirming that printing works. The calculated capacity is 24, while addition would give 10.
 
-For tasks 1 and 2, use the checked values and mechanism trace in the two examples. For task 3, choose names that expose the input and result contract and retain the same invariants. For task 4, the diagnosed mistakes below supply a concrete wrong assumption: preserve its counterexample before repairing it. Task 5 needs an explicit expected value or documented rejection at the boundary, not just successful execution. For task 6, explain what changes in the new context and which part of the original mechanism remains applicable. Several representations may satisfy this transfer task; justify the choice rather than treating this reference as the only architecture.
+### Task 3: Independent construction
+
+Compute the capacity of three shelves with eight books each.
+
+**Reference answer.** The same statements run as the `Task 3` block of the reference program; here they are wrapped in `main` as a complete file.
+
+```rust
+fn main() -> Result<(), Box<dyn std::error::Error>> {
+    let shelves = 3;
+    let books_per_shelf = 8;
+    let capacity = shelves * books_per_shelf;
+    assert_eq!(capacity, 24);
+    Ok(())
+}
+```
+
+**Observe:** Three shelves of eight books hold 24 books.
+
+The product is written as a calculation, and assert_eq! compares it with 24, a value worked out independently.
+
+### Task 4: Diagnose a defect
+
+Remove a closing brace temporarily and classify the compiler diagnostic.
+
+No reference answer has been written for this task yet. The wrong assumptions to look for are this lesson's pitfalls: A compiler success does not establish business correctness. Do not replace a failing assertion with a success print. The Result-returning main wrapper is scaffolding for later error propagation; its full meaning is taught in the error chapters.
+
+### Task 5: Boundary evidence
+
+Check zero shelves and one shelf.
+
+No reference answer has been written for this task yet. Write the expected value or documented rejection for each boundary before running it, and compare with the checks in Example A (Check a greeting) and Example B (Calculate instead of copying output).
+
+### Task 6: Transfer and justify
+
+Model a three-level capacity calculation and explain every intermediate value.
+
+No single reference answer exists: several designs can satisfy this transfer task. Justify yours against the mechanism described below and the vocabulary entry **Compiler**, and state one limitation of your choice.
 
 ## Mechanism and diagnostic reasoning
 
@@ -36,4 +72,4 @@ A compiler success does not establish business correctness. Do not replace a fai
 
 ## Review before continuing
 
-The reference checks the worked scenarios, including their boundary distinctions. Your independent and transfer artifacts may have additional checks. Compare observations rather than only source text. Preserve any new regression case you discover and explain why it would reject a plausible wrong implementation. External project steps require their own build and platform evidence and are not established by a portable reference passing.
+Run the reference and confirm that it prints `rust-001: passed`, then reconstruct one boundary case from memory and explain which check would reject a plausible wrong implementation. External project steps need their own build and platform evidence; a passing portable reference does not establish them.

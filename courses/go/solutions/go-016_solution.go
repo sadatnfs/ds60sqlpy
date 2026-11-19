@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"iter"
 )
 
 func check(ok bool, message string) {
@@ -22,6 +23,16 @@ func visit(limit int, f func(int) bool) {
 	for i := 1; i <= limit; i++ {
 		if !f(i) {
 			return
+		}
+	}
+}
+func countTo(limit int, produced *int) iter.Seq[int] {
+	return func(yield func(int) bool) {
+		for i := 1; i <= limit; i++ {
+			*produced++
+			if !yield(i) {
+				return
+			}
 		}
 	}
 }
@@ -61,16 +72,17 @@ func main() {
 		check(count == 0, "empty callback")
 	}
 
-	// Transfer explicit state
+	// Transfer the visitor to a range-over-func iterator
 	{
-		out := []int{}
-		visit(4, func(x int) bool {
-			if x%2 == 0 {
-				out = append(out, x)
+		produced := 0
+		got := []int{}
+		for x := range countTo(5, &produced) {
+			got = append(got, x)
+			if x == 2 {
+				break
 			}
-			return true
-		})
-		check(len(out) == 2 && out[0] == 2 && out[1] == 4, "collector")
+		}
+		check(len(got) == 2 && got[0] == 1 && got[1] == 2 && produced == 2, "range over func")
 	}
 	fmt.Println("All lesson checks passed.")
 }

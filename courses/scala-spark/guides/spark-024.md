@@ -1,22 +1,22 @@
 # spark-024: AQE, skew and bounded salting experiments
 
-Authored paired Scala/PySpark teaching content. The default fixtures are tiny,local and deterministic. Runtime acceptance,logical correctness and learner understanding remain separate evidence.
+Authored paired Scala/PySpark teaching content. The default fixtures are tiny, local and deterministic. Runtime acceptance, logical correctness and learner understanding remain separate evidence.
 
 ## Level and prerequisites
 
-Intermediate; approximately 120 minutes. Direct design prerequisites: `spark-023`. The prepared baseline is Spark 4.0.1,Scala binary2.13,JDK 17 and Python 3.12. Read the [execution baseline](../execution-baseline.md); a proposed future tuple is not a runtime receipt.
+Intermediate; approximately 120 minutes. Direct prerequisites: `spark-023`. The prepared baseline is Spark 4.0.1, Scala binary 2.13, JDK 17 and Python 3.12. Read the [execution baseline](../execution-baseline.md).
 
 ## How to run this lesson
 
-Open `spark-024` in the classroom and choose the Scala or PySpark implementation you understand. Prepare only its fixed `spark-local-scala` or `spark-local-python` profile,save your pad and run the complete source. Scala stages as `Main.scala` with `object Main`; Python stages as `main.py` with a main guard. Each program creates its own local[2] session,disables the UI,binds the driver to loopback and stops the session in finally. No external dataset,package download,JDBC connection or cloud service is requested.
+Open `spark-024` in the classroom and choose the Scala or PySpark implementation you understand. Prepare only its fixed `spark-local-scala` or `spark-local-python` profile, save your pad and run the complete source. Scala stages as `Main.scala` with `object Main`; Python stages as `main.py` with a main guard. Each program creates its own local[2] session, disables the UI, binds the driver to loopback and stops the session in finally. No external dataset, package download, JDBC connection or cloud service is requested.
 
 The [Scala learner](../lessons/spark-024.scala) and [PySpark learner](../lessons/spark-024.py) run two complete demonstrations and retain six explicit task stubs. Use the [explained solutions](../solutions/spark-024_solutions.md) only after an attempt or an explicit worked comparison; the [Scala reference](../solutions/spark-024_solution.scala) and [PySpark reference](../solutions/spark-024_solution.py) contain complete assertions. A bounded collect is used only for the declared tiny fixture; do not copy it onto an unbounded or large production table.
 
 ## Learning objectives
 
 - Diagnose a skewed key and compare adaptive execution with an explicit, reversible skew strategy.
-- State the input and output grain,schema,NULL policy and ordering before executing a transformation.
-- Compare each language implementation with independent literal expectations,not only with the other implementation.
+- State the input and output grain, schema, NULL policy and ordering before executing a transformation.
+- Compare each language implementation with independent literal expectations, not only with the other implementation.
 
 ## Vocabulary and concepts
 
@@ -38,7 +38,7 @@ The dimension contains one row per key with factor=key+1. Every fact has exactly
 
 The baseline disables automatic and adaptive broadcasting and runs with AQE disabled. This isolates an ordinary shuffle join rather than allowing a tiny dimension broadcast to bypass the skew mechanism. The choice is intentional for teaching; with this tiny bounded dimension, a broadcast may be a practical alternative. A real investigation should consider that alternative before introducing a more complex salting design.
 
-The adaptive case enablesAQE and skew-join handling, keeps automatic broadcasting disabled, and records initial and final plans around materialization of the same DataFrame. Small demonstration thresholds are explicitly set for this bounded fixture. They are not recommended production defaults. The final plan must be observed rather than assumed to split skew: actual decisions depend on bytes, map-output blocks, partition statistics and eligibility, not only a logical 90-percent hot-key fraction.
+The adaptive case enables AQE and skew-join handling, keeps automatic broadcasting disabled, and records initial and final plans around materialization of the same DataFrame. Small demonstration thresholds are explicitly set for this bounded fixture. They are not recommended production defaults. The final plan must be observed rather than assumed to split skew: actual decisions depend on bytes, map-output blocks, partition statistics and eligibility, not only a logical 90-percent hot-key fraction.
 
 A successful adaptive execution can leave the relevant join arrangement unchanged. That outcome is evidence, not a reason to alter the test until a desired operator appears. The reference requires an adaptive plan to reach its final state and the full logical result to match. It prints the plan text so any coalescing or skew-related changes can be inspected. It does not claim that a configuration flag proves a split occurred or that a local elapsed-time difference proves a cluster speedup.
 
@@ -168,7 +168,7 @@ Build an inner join with AQE disabled and broadcasting thresholds disabled, retu
 
 ### Exercise 3: Observe an adaptive plan before and after execution
 
-Build a freshAQE-enabled join with skew handling enabled, coalescing disabled, skew factor 2, threshold 1024 bytes and advisory size 16384 bytes. Capture the initial plan, materialize the same DataFrame and capture the final plan.
+Build a fresh AQE-enabled join with skew handling enabled, coalescing disabled, skew factor 2, threshold 1024 bytes and advisory size 16384 bytes. Capture the initial plan, materialize the same DataFrame and capture the final plan.
 
 **Expected result/shape:** Initial/final text identifies AdaptiveSparkPlan; after materialization isFinalPlan=true. Every result tuple matches the baseline. Actual skew splitting is reported only if visible.
 
@@ -178,7 +178,7 @@ Build a freshAQE-enabled join with skew handling enabled, coalescing disabled, s
 
 ### Exercise 4: Split the hot logical key with a deterministic helper
 
-Add salt=fact_id modulo 4 only for key 0 and salt 0 otherwise. WithAQE disabled, compare eight-partition row-load ledgers by key and by(key, salt).
+Add salt=fact_id modulo 4 only for key 0 and salt 0 otherwise. With AQE disabled, compare eight-partition row-load ledgers by key and by(key, salt).
 
 **Expected result/shape:** Hot salt buckets 0..3 each have 2250 rows; cold facts all have salt 0. Both physical ledgers reconcile to 10000, and the unsalted maximum is at least 9000.
 
@@ -212,11 +212,11 @@ Do not infer actual skew splitting from spark.sql.adaptive.skewJoin.enabled alon
 
 ## Self-check
 
-Explain the contract of `keyFrequencies` / `key_frequencies` without reading its solution. Trace the specified boundary case,then explain the final exercise's evidence and limitation. Identify where a transformation builds a plan and where an action requests execution. Retain exact values or operator evidence rather than treating a successful process exit as proof of the whole learning objective.
+Explain the contract of `keyFrequencies` / `key_frequencies` without reading its solution. Trace the specified boundary case, then explain the final exercise's evidence and limitation. Identify where a transformation builds a plan and where an action requests execution. Retain exact values or operator evidence rather than treating a successful process exit as proof of the whole learning objective.
 
 ## Next step
 
-Use the [course route](../README.md) to continue. Paired-language agreement is useful only when both outputs also satisfy the independent fixture contract. Keep runtime/profile receipts separate from any cluster-performance or production-recovery claim.
+Use the [course route](../README.md) to continue. Paired-language agreement is useful only when both outputs also satisfy the independent fixture contract. A successful local run is not evidence of cluster performance or production recovery.
 
 ## Primary sources and official APIs
 
@@ -228,8 +228,8 @@ Use the [course route](../README.md) to continue. Paired-language agreement is u
 
 ```text
 Use $guide-ds60sqlpy-learning to coach me through spark-024: AQE, skew and bounded salting experiments.
-Read courses/scala-spark/guides/spark-024.md and courses/scala-spark/lessons/spark-024.scala;the paired sources are courses/scala-spark/lessons/spark-024.scala and courses/scala-spark/lessons/spark-024.py.
-Direct prerequisites: spark-023. Explain the schema,row grain and new Scala/Python/Spark syntax,ask me to predict a concrete result,then inspect my attempt. Give one hint at a time,review exact result and boundary evidence,and ask retrieval questions in my own words. Do not read solutions/ until I ask or have made an honest attempt.
-Use only the prepared local[2] worker profile and owned job scratch. Do not download dependencies,start a remote service,reset existing checkpoints or alter unrelated learner work.
+Read courses/scala-spark/guides/spark-024.md and courses/scala-spark/lessons/spark-024.scala; the paired sources are courses/scala-spark/lessons/spark-024.scala and courses/scala-spark/lessons/spark-024.py.
+Direct prerequisites: spark-023. Explain the schema, row grain and new Scala/Python/Spark syntax, ask me to predict a concrete result, then inspect my attempt. Give one hint at a time, review exact result and boundary evidence, and ask retrieval questions in my own words. Do not read solutions/ until I ask or have made an honest attempt.
+Use only the prepared local[2] worker profile and owned job scratch. Do not download dependencies, start a remote service, reset existing checkpoints or alter unrelated learner work.
 Done when all six contracts have inspected evidence and I can explain the stated assumptions and a meaningful failure case.
 ```

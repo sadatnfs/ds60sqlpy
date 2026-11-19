@@ -6,7 +6,8 @@ public class Main {
     // Exercise 1: Retrieve a bounded result
     try (var executor = java.util.concurrent.Executors.newFixedThreadPool(2)) {
       var future = executor.submit(() -> 42);
-      assert future.get(2, java.util.concurrent.TimeUnit.SECONDS) == 42;
+      int value = future.get(2, java.util.concurrent.TimeUnit.SECONDS);
+      assert value == 42;
     }
 
     // Exercise 2: Preserve task failure identity
@@ -38,7 +39,8 @@ public class Main {
       } finally {
         gate.countDown();
       }
-      assert timedOut && future.get(2, java.util.concurrent.TimeUnit.SECONDS) == 7;
+      int value = future.get(2, java.util.concurrent.TimeUnit.SECONDS);
+      assert timedOut && value == 7;
     }
 
     // Exercise 4: Cancel cooperatively
@@ -55,9 +57,12 @@ public class Main {
           exited.countDown();
         }
       });
-      assert started.await(2, java.util.concurrent.TimeUnit.SECONDS);
-      assert future.cancel(true);
-      assert exited.await(2, java.util.concurrent.TimeUnit.SECONDS) && future.isCancelled();
+      boolean began = started.await(2, java.util.concurrent.TimeUnit.SECONDS);
+      assert began;
+      boolean cancelled = future.cancel(true);
+      assert cancelled;
+      boolean finished = exited.await(2, java.util.concurrent.TimeUnit.SECONDS);
+      assert finished && future.isCancelled();
     }
 
     // Exercise 5: Reject work after shutdown
@@ -69,7 +74,8 @@ public class Main {
     } catch (java.util.concurrent.RejectedExecutionException expected) {
       rejected = true;
     }
-    assert rejected && closed.awaitTermination(2, java.util.concurrent.TimeUnit.SECONDS);
+    boolean terminated = closed.awaitTermination(2, java.util.concurrent.TimeUnit.SECONDS);
+    assert rejected && terminated;
 
     // Exercise 6: Enforce a bounded queue
     var hold = new java.util.concurrent.CountDownLatch(1);
@@ -89,7 +95,8 @@ public class Main {
         hold.await();
         return 1;
       });
-      assert running.await(2, java.util.concurrent.TimeUnit.SECONDS);
+      boolean firstRunning = running.await(2, java.util.concurrent.TimeUnit.SECONDS);
+      assert firstRunning;
       var second = bounded.submit(() -> 2);
       boolean overloaded = false;
       try {

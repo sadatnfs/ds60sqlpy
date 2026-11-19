@@ -6,7 +6,7 @@ Advanced, approximately 120 minutes. Prerequisites: `swift-044`
 
 ## Learning objectives
 
-Inspect and build SelectableText.swift in the Apple project. Then document coordinator ownership, delegate cleanup and platform-specific API availability.
+Wrap UIKit and AppKit views at clear integration boundaries. The central exercise is task 3: Inspect and build SelectableText.swift in the Apple project.
 
 ## Purpose and mental model
 
@@ -118,7 +118,7 @@ struct LessonMain {
 
 6. **Transfer and justify.** Document coordinator ownership, delegate cleanup and platform-specific API availability.
 
-For each task, keep a short evidence table: input or initial state, prediction, observed value or diagnostic, and the rule that explains it. The guided examples establish mechanisms; the independent and transfer tasks require your own representation and explanation. Use the separate solution after attempting the task, then close it and reconstruct one boundary case.
+For each task, keep a short evidence table: input or initial state, prediction, observed value or diagnostic, and the rule that explains it. The guided examples establish mechanisms; the independent and transfer tasks require your own representation and explanation. The separate explanation gives an executed reference answer where one has been written and says plainly where none exists yet. Open it only after your own attempt, then close it and reconstruct one boundary case.
 
 ## Common pitfalls and diagnosis
 
@@ -128,9 +128,9 @@ A useful regression case distinguishes the intended rule from the tempting wrong
 
 ## Progressive hints
 
-1. Name the input, output and invariant using the vocabulary above. Reproduce Example A before changing two things at once.
-2. Compare the changed condition in Example B. Identify the first line whose behavior differs and state why.
-3. Reduce your independent task to a normal case, an empty or boundary case, and an invalid case. Write expected observations before inspecting the reference.
+1. Reproduce Example A (Avoid redundant imperative updates) before changing anything, and confirm its observation: The same value is not assigned twice.
+2. Compare Example B (Retain user changes as actions) with Example A and name the first line whose behavior differs. Its observation is: The portable kernel exposes a deliberate state transition.
+3. Before opening the explanation, test your task 3 attempt against this lesson's main pitfall: A canImport branch is not evidence that both platforms were tested.
 
 ## Self-check and next step
 
@@ -138,7 +138,7 @@ Explain Representable adapter, Coordinator, Feedback loop without reading the de
 
 ## Sources and execution boundary
 
-[Official language or framework documentation](https://developer.apple.com/documentation/swiftui/uiviewrepresentable). The prose, small fixtures and task designs in this chapter are original. Documentation links provide additional API detail, not a dependency fetched by the classroom. Runtime qualification is recorded separately by the repository validation workflow. Reading a guide, compiling a reference, running its assertions and completing an external project are distinct achievements.
+[Official language or framework documentation](https://developer.apple.com/documentation/swiftui/uiviewrepresentable). The prose, small fixtures and task designs in this chapter are original. Documentation links provide additional API detail, not a dependency fetched by the classroom. Reading a guide, compiling a reference, running its assertions and completing an external project are distinct achievements.
 
 ## Ask an AI tutor about this lesson
 

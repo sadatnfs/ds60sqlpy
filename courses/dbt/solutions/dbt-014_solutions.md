@@ -188,4 +188,4 @@ if __name__ == "__main__":
 
 ## Interpretation
 
-Build documentation that joins observed structure with authored meaning and ownership. Review a consumer's dependency and record which claims are declarations versus runtime evidence. This creates a useful handoff for analysts, data scientists and operators.
+Review a consumer's dependency and record which claims are declarations versus runtime evidence. This creates a useful handoff for analysts, data scientists and operators.

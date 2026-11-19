@@ -8,29 +8,33 @@ Authentication establishes who is calling; authorization determines which operat
 
 Rules name API resource plurals such as pods, and subresources such as deployments/status. get, list and watch are different verbs. A controller updating status needs the appropriate subresource permission rather than unrestricted object replacement. The fixture checks an explicitly limited rule model; Kubernetes authorization has richer semantics and additive bindings. Validate actual access using the owned cluster and intended identity rather than a privileged developer context.
 
-## 1. Admit a required read
+## 1. Admit a required read: change one input
 
-Allow get on pods in the lesson namespace.
+Copy worked example 1 into a scratch pad and change `rule := Rule{Namespace: "lesson", Resource: "pods", Verbs: []string{"get", "list", "watch"}}` to `rule := Rule{Namespace: "lesson!", Resource: "pods", Verbs: []string{"get", "list", "watch"}}`. Before running, predict which check fails and which value it now sees; then run it and restore the original line.
+
+The unchanged code is worked example 1:
 
 ```go
 rule := Rule{Namespace: "lesson", Resource: "pods", Verbs: []string{"get", "list", "watch"}}
 check(allowed(rule, "lesson", "pods", "get"), "read")
 ```
 
-**Expected:** The request is admitted by the local rule model.
+**Expected:** The changed run panics with `read` because `allowed(rule, "lesson", "pods", "get")` no longer holds. Restoring the original line brings back the worked observation: the request is admitted by the local rule model.
 
 The rule expresses resource and namespace scope in addition to the verb. Matching only one component would overgrant access.
 
-## 2. Reject an unneeded mutation
+## 2. Reject an unneeded mutation: diagnose an edited check
 
-Try delete against the read-only rule.
+A careless edit changed the check in worked example 2 so that it reads `check(allowed(rule, "lesson", "pods", "delete"), "mutation")`. Run worked example 2 with that line, explain why the edited check now fails for the same program state, and restore it.
+
+The unchanged code is worked example 2:
 
 ```go
 rule := Rule{Namespace: "lesson", Resource: "pods", Verbs: []string{"get"}}
 check(!allowed(rule, "lesson", "pods", "delete"), "mutation")
 ```
 
-**Expected:** The request is rejected.
+**Expected:** Before the repair the program panics with `mutation`; after it the line reads `check(!allowed(rule, "lesson", "pods", "delete"), "mutation")` again and the request is rejected.
 
 A read-oriented controller should not inherit deletion authority merely for convenience.
 

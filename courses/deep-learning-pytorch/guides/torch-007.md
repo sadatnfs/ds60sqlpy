@@ -6,7 +6,13 @@ Beginner; approximately 120 minutes. Direct prerequisites: `torch-006`. The prer
 
 ## Learning objectives
 
-PyTorch distinguishes graph tracking from gradient storage. The central investigation is concrete: Create a leaf tensor \(w=0\) and intermediate tensor \(u=2w\), retain the intermediate gradient and backpropagate its sum. The finish condition is `w.is_leaf` is `True`; `u.is_leaf` is `False`; the gradients with respect to \(w\) and \(u\) are 2 and 1. the output still has `requires_grad=True`. A useful explanation connects the calculation to the reason it is needed, rather than treating a function name as a definition.
+Explain when PyTorch stores, accumulates, detaches or skips gradients, and clear accumulated gradients before an independent step.
+
+Central investigation: Backpropagate twice into the same leaf at w = 0, detach a shared view, and compare no_grad with eval mode.
+
+Finish condition: The leaf gradient becomes -4 then -8 without clearing and returns to -4 after reset, the detached view shares storage while a detached clone does not, no_grad output has `requires_grad` False, and eval output still requires grad.
+
+The worked examples demonstrate the mechanism; exercises 1-3 transfer it to new inputs and exercises 4-6 extend it to failures and boundary cases. A useful explanation connects the calculation to the reason it is needed, rather than treating a function name as a definition.
 
 ## Purpose and mental model
 
@@ -64,7 +70,7 @@ For tensors requiring gradients, a leaf is not the result of a tracked different
 
 The first fixture has \(w=0\) and intermediate=2w. Backpropagating that scalar gives incoming sensitivity one at the intermediate and sensitivity two at w. The intermediate's gradient is visible only because retain_grad was requested. Its absence by default would be a storage-policy observation, not evidence that the chain rule failed.
 
-Now reset `w.grad` to None and compute(w-2)². The new contribution is -4. Building the same expression again creates a fresh graph, but backward adds another -4 into the existing gradient buffer, leaving -8. A fresh graph does not clear a previous buffer. Resetting to None before the third computation gives -4 again without changing w itself.
+Now reset `w.grad` to None and compute (w-2)². The new contribution is -4. Building the same expression again creates a fresh graph, but backward adds another -4 into the existing gradient buffer, leaving -8. A fresh graph does not clear a previous buffer. Resetting to None before the third computation gives -4 again without changing w itself.
 
 None and numeric zero have different meanings. None may indicate that no gradient has been stored, that a reset occurred, that the tensor was unused, or that an intermediate was not retained. A numeric zero can be the correct derivative of a connected path. Optimizers can also treat them differently: parameters with None gradients are commonly skipped, whereas zero gradients may still interact with momentum or weight decay. This distinction is documented for zero_grad rather than being merely a display detail. [PyTorch 2.9 zero_grad](https://docs.pytorch.org/docs/2.9/generated/torch.optim.Optimizer.zero_grad.html).
 
@@ -119,37 +125,37 @@ w.grad = None
 assert w.grad.item() == -4
 ```
 
-**Expected:** grad returns to-4.
+**Expected:** grad returns to -4.
 
 ## Prediction before your attempt
 
-For the supplied fixture, name the input unit, the intermediate state and the final quantity that changes. Predict one normal result and one failure result before touching the code. In particular, explain this lesson's acceptance condition in your own words: `w.is_leaf` is `True`; `u.is_leaf` is `False`; the gradients with respect to \(w\) and \(u\) are 2 and 1. the output still has `requires_grad=True`. Preserve the prediction beside your later observations so a correction is visible. A copied expected value is not a derivation.
+For the supplied fixture, name the input unit, the intermediate state and the final quantity that changes. Predict one normal result and one failure result before touching the code. In particular, explain this lesson's acceptance condition in your own words: The leaf gradient becomes -4 then -8 without clearing and returns to -4 after reset, the detached view shares storage while a detached clone does not, no_grad output has `requires_grad` False, and eval output still requires grad. Preserve the prediction beside your later observations so a correction is visible. A copied expected value is not a derivation.
 
 ## Exercises
 
-1. **Inspect leaf and nonleaf state.** Create a leaf tensor \(w=0\) and intermediate tensor \(u=2w\), retain the intermediate gradient and backpropagate its sum.
-   **Expected:** `w.is_leaf` is `True`; `u.is_leaf` is `False`; the gradients with respect to \(w\) and \(u\) are 2 and 1.
-   **Verify:** Save the assertion results for exercise 1, including `w.is_leaf` is `True`; `u.is_leaf` is `False`; the gradients with respect to \(w\) and \(u\) are 2 and 1.
+1. **Predict a nonleaf gradient.** Create leaf v=1.0 and intermediate u=3v, retain u's gradient and backpropagate u*u.
+   **Expected:** u.grad is 6 and v.grad is 18; u is not a leaf.
+   **Verify:** In a fresh process, the exercise checks confirm `v.grad.item() == 18`, `u.grad.item() == 6` and `not u.is_leaf`.
 
-2. **Observe accumulation across fresh graphs.** Compute \({\left(w-2\right)}^{2}\) twice at \(w=0\) without clearing grad.
-   **Expected:** after resetting first, grad -4 then -8.
-   **Verify:** Save the assertion results for exercise 2, including after resetting first, grad -4 then -8.
+2. **Accumulate three backward calls.** At w=1, backpropagate \({\left(w-2\right)}^{2}\) three times without clearing the gradient.
+   **Expected:** each call contributes -2, so the stored gradient is -6.
+   **Verify:** In a fresh process, the exercise checks confirm `p.grad.item() == -6`.
 
-3. **Clear before an independent step.** Set grad None and backpropagate once more.
-   **Expected:** grad returns to-4.
-   **Verify:** Save the assertion results for exercise 3, including grad returns to-4.
+3. **Clear with zero_ and with None.** Clear the accumulated gradient with p.grad.zero_() and backpropagate once, then set it to None and backpropagate once more.
+   **Expected:** both routes end at -2; after the None assignment the gradient is absent until the next backward.
+   **Verify:** In a fresh process, the exercise checks confirm `p.grad.item() == -2`, `p.grad is None` and `p.grad.item() == -2`.
 
 4. **Separate detach from ownership.** Detach a tensor, mutate the detached view, and compare with a detached clone.
    **Expected:** shared original changes; owned clone stays unchanged.
-   **Verify:** Save the assertion results for exercise 4, including shared original changes; owned clone stays unchanged.
+   **Verify:** In a fresh process, the exercise checks confirm `source[0].item() == 9`, `owned[0].item() == 1` and `not detached.requires_grad`.
 
 5. **Use no_grad for an observation.** Multiply a `requires_grad` tensor inside and outside no_grad.
    **Expected:** tracked result `requires_grad` True; observed result False.
-   **Verify:** Save the assertion results for exercise 5, including tracked result `requires_grad` True; observed result False.
+   **Verify:** In a fresh process, the exercise checks confirm `tracked.requires_grad` and `not observed.requires_grad`.
 
 6. **Show eval is separate.** Put a Linear module in eval mode, run a differentiable input, and inspect output tracking.
    **Expected:** the output still has `requires_grad=True`.
-   **Verify:** Save the assertion results for exercise 6, including the output still has `requires_grad=True`.
+   **Verify:** In a fresh process, the exercise checks confirm `result.requires_grad` and `model.training is False`.
 
 ## Common pitfalls and diagnosis
 
@@ -163,7 +169,7 @@ First draw the state described in the vocabulary section. Next use the smallest 
 
 ## Self-check and retrieval
 
-Close both worked examples. Explain Leaf tensor, Detach, Gradient accumulation using the lesson fixture. Reconstruct one computation from its inputs. Then change one input while retaining the mechanism and predict whether the conclusion survives. Write which part is guaranteed by the code and which part would need new observations. This last distinction prevents a tiny deterministic teaching example from being presented as evidence about an unseen population or a production model.
+Close all three worked examples. Explain Leaf tensor, Detach, Gradient accumulation using the lesson fixture. Reconstruct one computation from its inputs. Then change one input while retaining the mechanism and predict whether the conclusion survives. Write which part is guaranteed by the code and which part would need new observations. This last distinction prevents a tiny deterministic teaching example from being presented as evidence about an unseen population or a production model.
 
 ## Next step
 
@@ -171,7 +177,7 @@ Revisit the direct prerequisite `torch-006` if the calculation cannot be reconst
 
 ## Sources and verification status
 
-API and mechanism reference: [PyTorch2.9 autograd](https://docs.pytorch.org/docs/2.9/autograd.html), reviewed 2026-10-22. The fixture, examples, counterexamples and exercise design are original course material. See [validation](../../../docs/validation.md) for execution gates. Check CI artifacts for the exact revision and platform to determine which runtime checks actually ran; authored content alone does not establish runtime execution.
+API and mechanism reference: [PyTorch 2.9 autograd](https://docs.pytorch.org/docs/2.9/autograd.html), reviewed 2026-10-22. The fixture, examples, counterexamples and exercise design are original course material. See [validation](../../../docs/validation.md) for execution gates. Check CI artifacts for the exact revision and platform to determine which runtime checks actually ran; authored content alone does not establish runtime execution.
 
 ## Interview reasoning with worked answers
 

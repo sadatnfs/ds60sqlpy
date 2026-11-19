@@ -38,6 +38,17 @@ internal static class Program {
           sum += grid[row, col];
       Check(sum == 21, "all six cells");
     }
+    {
+      // Task 3: Independent construction
+      int[,] grid = { { 1, 2, 3 }, { 4, 5, 6 } };
+      int[] rowSums = new int[grid.GetLength(0)];
+      for (int row = 0; row < grid.GetLength(0); row++) {
+        for (int col = 0; col < grid.GetLength(1); col++) {
+          rowSums[row] += grid[row, col];
+        }
+      }
+      Check(rowSums.SequenceEqual(new[] { 6, 15 }), "one sum per row");
+    }
     Console.WriteLine("csharp-008: passed");
     await Task.CompletedTask;
   }

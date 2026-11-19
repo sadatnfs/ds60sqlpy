@@ -15,7 +15,7 @@ Template deduction happens before any generated function runs. Equal int argumen
 
 A function template describes a family of functions parameterized by types or values. The compiler instantiates the needed specialization from a call. Generic syntax alone does not explain what operations are valid for a type, so constraints can make the intended domain visible before a deeply nested implementation error appears.
 
-The integral constraint says that the type belongs to the language/library concept for integral types. The complete program instantiates identity_sum for integers and checks2+3=5. The second program uses static_assert to establish that double is not integral. That assertion is checked during compilation and produces no runtime branch. The actual negative exercise attempts a constrained call with double and retains the compiler diagnostic.
+The integral constraint says that the type belongs to the language/library concept for integral types. The complete program instantiates identity_sum for integers and checks 2 + 3 = 5. The second program uses static_assert to establish that double is not integral. That assertion is checked during compilation and produces no runtime branch. The actual negative exercise attempts a constrained call with double and retains the compiler diagnostic.
 
 A syntactic constraint is not the whole semantic contract. Integral addition can still overflow for signed types, and mixing signed and unsigned arguments can affect deduction or conversions. A template constrained to integral types must still state supported value ranges and any overflow policy. Concepts should not be advertised as automatic arithmetic safety or proof of all algorithm assumptions.
 
@@ -52,7 +52,7 @@ Call identity_sum with int values and long long values.
 
 **Reasoning:** The argument types choose template instantiations.
 
-**Verify:** Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.
+**Verify:** Add `static_assert(std::is_same_v<decltype(identity_sum(2, 3)), int>)` and the same check with `2LL` and `3LL` against `long long`.
 
 ## Exercise 2: Reject a category
 
@@ -62,7 +62,7 @@ Try identity_sum with two strings in a scratch file.
 
 **Reasoning:** Strings do not satisfy integral.
 
-**Verify:** Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.
+**Verify:** Compile the call with two `std::string` arguments and confirm the error names the unsatisfied `std::integral` constraint rather than a failure inside the function body.
 
 ## Exercise 3: Add a concept
 
@@ -72,7 +72,7 @@ Constrain a function to signed_integral.
 
 **Reasoning:** A narrower category documents intent.
 
-**Verify:** Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.
+**Verify:** Add `static_assert(std::signed_integral<int>)` and `static_assert(!std::signed_integral<unsigned>)`, then confirm a call with `3u` fails to compile.
 
 ## Exercise 4: Repair mixed deduction
 
@@ -82,7 +82,7 @@ Call identity_sum(2, 3LL), then choose a deliberate common type.
 
 **Reasoning:** Conflicting deductions need a policy, not an accidental conversion.
 
-**Verify:** Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.
+**Verify:** Keep the deduction error for `identity_sum(2, 3LL)`, where `T` would be both `int` and `long long`, then assert `identity_sum(2LL, 3LL) == 5LL`.
 
 ## Exercise 5: Inspect numeric boundary
 
@@ -92,7 +92,7 @@ Explain why INT_MAX+1 is still unsafe for integral T=int.
 
 **Reasoning:** Type eligibility is distinct from value validity.
 
-**Verify:** Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.
+**Verify:** Show that `identity_sum(std::numeric_limits<int>::max(), 1)` compiles because `int` satisfies `std::integral`; with `-fsanitize=undefined`, running it reports the signed overflow.
 
 ## Exercise 6: Transfer a generic test
 
@@ -102,4 +102,4 @@ Run zero-identity tests for int and long long.
 
 **Reasoning:** A reusable law should be checked across admitted types.
 
-**Verify:** Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.
+**Verify:** Assert `identity_sum(7, 0) == 7` and `identity_sum(7LL, 0LL) == 7LL`; both arguments must have the same type for deduction to succeed.

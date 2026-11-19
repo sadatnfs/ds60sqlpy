@@ -1,6 +1,6 @@
 # rust-007: explanation and comparison
 
-Attempt the six guide tasks before opening this comparison. The executable reference is [rust-007_solution.rs](rust-007_solution.rs). Its assertions are always active under the prepared classroom compile settings.
+Attempt the six guide tasks before opening this comparison. The executable reference is [rust-007_solution.rs](rust-007_solution.rs). It runs both worked examples and the reference answers below, and its assertions are always active under the prepared classroom compile settings.
 
 ## Why the two examples differ
 
@@ -8,21 +8,61 @@ Attempt the six guide tasks before opening this comparison. The executable refer
 
 **Accept different text owners:** The function needs only a read-only text view, so taking String would impose unnecessary ownership transfer. One borrowed interface accepts owned text and a literal.
 
-## Reason through the six tasks
+## Task answers
 
-1. **Predict and explain.** Identify which arguments are copied and which are borrowed.
+### Task 1: Predict and explain
 
-2. **Guided modification.** Add a function computing a labeled length from &str.
+Identify which arguments are copied and which are borrowed.
 
-3. **Independent construction.** Write a pure rectangle-area function with a documented valid range.
+No separate reference answer has been written for this task. Example A is the evidence to compare with: The Copy semantics of this small value permit reuse without transferring an owned allocation. The integer remains available after the call.
 
-4. **Diagnose a defect.** Diagnose an accidental semicolon on the final return expression.
+### Task 2: Guided modification
 
-5. **Boundary evidence.** Test empty text and zero dimensions.
+Add a function computing a labeled length from &str.
 
-6. **Transfer and justify.** Choose owned or borrowed inputs for an API that stores data after the call.
+No separate reference answer has been written for this task. Start from Example B: The function needs only a read-only text view, so taking String would impose unnecessary ownership transfer. One borrowed interface accepts owned text and a literal.
 
-For tasks 1 and 2, use the checked values and mechanism trace in the two examples. For task 3, choose names that expose the input and result contract and retain the same invariants. For task 4, the diagnosed mistakes below supply a concrete wrong assumption: preserve its counterexample before repairing it. Task 5 needs an explicit expected value or documented rejection at the boundary, not just successful execution. For task 6, explain what changes in the new context and which part of the original mechanism remains applicable. Several representations may satisfy this transfer task; justify the choice rather than treating this reference as the only architecture.
+### Task 3: Independent construction
+
+Write a pure rectangle-area function with a documented valid range.
+
+**Reference answer.** The same statements run as the `Task 3` block of the reference program; here they are wrapped in `main` as a complete file.
+
+```rust
+fn main() -> Result<(), Box<dyn std::error::Error>> {
+    /// Area of a rectangle; both sides must be at most 65_535.
+    fn area(width: u32, height: u32) -> u32 {
+        assert!(width <= 65_535 && height <= 65_535);
+        width * height
+    }
+    assert_eq!(area(3, 4), 12);
+    assert_eq!(area(0, 9), 0);
+    assert_eq!(area(65_535, 65_535), 4_294_836_225);
+    Ok(())
+}
+```
+
+**Observe:** 3 by 4 gives 12, a zero side gives 0, and the documented maximum still fits in u32.
+
+The documented range is exactly the one whose product fits in u32, and the function checks it, so callers cannot reach an overflow.
+
+### Task 4: Diagnose a defect
+
+Diagnose an accidental semicolon on the final return expression.
+
+No reference answer has been written for this task yet. The wrong assumptions to look for are this lesson's pitfalls: A reference is not permission to retain data beyond its lifetime. Pure-looking names can hide side effects. Do not clone an entire buffer when a borrow expresses the actual requirement.
+
+### Task 5: Boundary evidence
+
+Test empty text and zero dimensions.
+
+No reference answer has been written for this task yet. Write the expected value or documented rejection for each boundary before running it, and compare with the checks in Example A (Return a derived integer) and Example B (Accept different text owners).
+
+### Task 6: Transfer and justify
+
+Choose owned or borrowed inputs for an API that stores data after the call.
+
+No single reference answer exists: several designs can satisfy this transfer task. Justify yours against the mechanism described below and the vocabulary entry **Parameter**, and state one limitation of your choice.
 
 ## Mechanism and diagnostic reasoning
 
@@ -36,4 +76,4 @@ A reference is not permission to retain data beyond its lifetime. Pure-looking n
 
 ## Review before continuing
 
-The reference checks the worked scenarios, including their boundary distinctions. Your independent and transfer artifacts may have additional checks. Compare observations rather than only source text. Preserve any new regression case you discover and explain why it would reject a plausible wrong implementation. External project steps require their own build and platform evidence and are not established by a portable reference passing.
+Run the reference and confirm that it prints `rust-007: passed`, then reconstruct one boundary case from memory and explain which check would reject a plausible wrong implementation. External project steps need their own build and platform evidence; a passing portable reference does not establish them.

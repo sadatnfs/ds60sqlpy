@@ -33,6 +33,15 @@ internal static class Program {
       Check(ClampNonnegative(ClampNonnegative(-4)) == ClampNonnegative(-4),
             "idempotence");
     }
+    {
+      // Task 3: Independent construction
+      bool ValidQuantity(int value) => value >= 0 && value <= 1000;
+      int[] inputs = { -1, 0, 1000, 1001 };
+      bool[] expected = { false, true, true, false };
+      for (int i = 0; i < inputs.Length; i++) {
+        Check(ValidQuantity(inputs[i]) == expected[i], $"case {inputs[i]}");
+      }
+    }
     Console.WriteLine("csharp-028: passed");
     await Task.CompletedTask;
   }

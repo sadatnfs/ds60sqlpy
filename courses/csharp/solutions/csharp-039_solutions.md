@@ -1,6 +1,6 @@
 # csharp-039: explanation and comparison
 
-Attempt the six guide tasks before opening this comparison. The executable reference is [csharp-039_solution.cs](csharp-039_solution.cs). Its assertions are always active under the prepared classroom compile settings.
+Attempt the six guide tasks before opening this comparison. The executable reference is [csharp-039_solution.cs](csharp-039_solution.cs). It runs both worked examples and the reference answers below, and its assertions are always active under the prepared classroom compile settings.
 
 ## Why the two examples differ
 
@@ -8,21 +8,61 @@ Attempt the six guide tasks before opening this comparison. The executable refer
 
 **Preserve unsuccessful status:** Response arrival and application success are separate facts. 503 remains an observable failure rather than a default successful count.
 
-## Reason through the six tasks
+## Task answers
 
-1. **Predict and explain.** Trace transport, status, decoding and schema validation boundaries.
+### Task 1: Predict and explain
 
-2. **Guided modification.** Return valid JSON with a missing count property and classify the failure.
+Trace transport, status, decoding and schema validation boundaries.
 
-3. **Independent construction.** Write a client method accepting a supplied HttpClient and CancellationToken.
+No separate reference answer has been written for this task. Example A is the evidence to compare with: A reserved invalid domain makes the fixture identity clear, while the custom handler prevents any actual connection. The handler supplies count 3 without network access.
 
-4. **Diagnose a defect.** Diagnose converting every non-2xx response into an empty success result.
+### Task 2: Guided modification
 
-5. **Boundary evidence.** Test malformed JSON and an unexpected count type.
+Return valid JSON with a missing count property and classify the failure.
 
-6. **Transfer and justify.** Design a retry policy that distinguishes safe reads from writes with unknown outcomes.
+No separate reference answer has been written for this task. Start from Example B: Response arrival and application success are separate facts. 503 remains an observable failure rather than a default successful count.
 
-For tasks 1 and 2, use the checked values and mechanism trace in the two examples. For task 3, choose names that expose the input and result contract and retain the same invariants. For task 4, the diagnosed mistakes below supply a concrete wrong assumption: preserve its counterexample before repairing it. Task 5 needs an explicit expected value or documented rejection at the boundary, not just successful execution. For task 6, explain what changes in the new context and which part of the original mechanism remains applicable. Several representations may satisfy this transfer task; justify the choice rather than treating this reference as the only architecture.
+### Task 3: Independent construction
+
+Write a client method accepting a supplied HttpClient and CancellationToken.
+
+**Reference answer.** It runs as the `Task 3` block of the reference program.
+
+```csharp
+async Task<int> GetCountAsync(HttpClient client, CancellationToken ct) {
+  var address = "https://example.invalid/count";
+  using var response = await client.GetAsync(address, ct);
+  response.EnsureSuccessStatusCode();
+  string body = await response.Content.ReadAsStringAsync(ct);
+  using var json = JsonDocument.Parse(body);
+  return json.RootElement.GetProperty("count").GetInt32();
+}
+var handler = new FixtureHandler(HttpStatusCode.OK, "{\"count\":4}");
+using var client = new HttpClient(handler);
+Check(await GetCountAsync(client, CancellationToken.None) == 4, "count");
+```
+
+**Observe:** The method returns 4 from the fixture handler without any network access.
+
+The caller supplies both the HttpClient and the token, so tests can pass an offline handler and callers control cancellation.
+
+### Task 4: Diagnose a defect
+
+Diagnose converting every non-2xx response into an empty success result.
+
+No reference answer has been written for this task yet. The wrong assumptions to look for are this lesson's pitfalls: A fake transport does not validate certificates or server availability. Do not retry all status codes blindly. Bound request and response lifetimes and redact credentials from diagnostic logs.
+
+### Task 5: Boundary evidence
+
+Test malformed JSON and an unexpected count type.
+
+No reference answer has been written for this task yet. Write the expected value or documented rejection for each boundary before running it, and compare with the checks in Example A (Decode a successful offline response) and Example B (Preserve unsuccessful status).
+
+### Task 6: Transfer and justify
+
+Design a retry policy that distinguishes safe reads from writes with unknown outcomes.
+
+No single reference answer exists: several designs can satisfy this transfer task. Justify yours against the mechanism described below and the vocabulary entry **Transport**, and state one limitation of your choice.
 
 ## Mechanism and diagnostic reasoning
 
@@ -36,4 +76,4 @@ A fake transport does not validate certificates or server availability. Do not r
 
 ## Review before continuing
 
-The reference checks the worked scenarios, including their boundary distinctions. Your independent and transfer artifacts may have additional checks. Compare observations rather than only source text. Preserve any new regression case you discover and explain why it would reject a plausible wrong implementation. External project steps require their own build and platform evidence and are not established by a portable reference passing.
+Run the reference and confirm that it prints `csharp-039: passed`, then reconstruct one boundary case from memory and explain which check would reject a plausible wrong implementation. External project steps need their own build and platform evidence; a passing portable reference does not establish them.

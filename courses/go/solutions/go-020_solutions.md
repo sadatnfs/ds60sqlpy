@@ -8,9 +8,11 @@ A CSV record is a sequence of fields with quoting rules. Splitting text on comma
 
 csv.NewReader accepts an io.Reader. Read returns one record or an error; ReadAll is convenient only for explicitly bounded fixtures. FieldsPerRecord enforces shape, and a value of zero lets the first record establish the expected width. csv.Writer buffers output, so call Flush and inspect Error. Quoted commas remain part of one field rather than creating extra columns.
 
-## 1. Parse a quoted comma
+## 1. Parse a quoted comma: predict an edited check
 
-Read name and city where the city is Springfield, West.
+Copy worked example 1 into a scratch pad and change `check(err == nil && len(v) == 2 && v[1] == "Springfield, West", "quoted comma")` to `check(err == nil && len(v) == 3 && v[1] == "Springfield, West", "quoted comma")` inside its check. Before running, predict whether the check still passes and explain why; then restore it.
+
+The unchanged code is worked example 1:
 
 ```go
 r := csv.NewReader(strings.NewReader("Ada,\"Springfield, West\"\n"))
@@ -18,13 +20,15 @@ v, err := r.Read()
 check(err == nil && len(v) == 2 && v[1] == "Springfield, West", "quoted comma")
 ```
 
-**Expected:** The record contains two fields.
+**Expected:** The changed run panics with `quoted comma` because the edited check no longer holds. Restoring the original line brings back the worked observation: the record contains two fields.
 
 A comma inside quotes belongs to the field. strings.Split would incorrectly create three fields.
 
-## 2. Reject a ragged row
+## 2. Reject a ragged row: debug a regression
 
-Require two fields and read a three-field row.
+A regression changed one token in worked example 2, so one line now reads `r.FieldsPerRecord = 3`. Run worked example 2 with that line, use the failure to locate the defect and repair it without changing the check.
+
+The unchanged code is worked example 2:
 
 ```go
 r := csv.NewReader(strings.NewReader("a,b,c\n"))
@@ -33,7 +37,7 @@ _, err := r.Read()
 check(err != nil, "ragged row")
 ```
 
-**Expected:** The reader reports a field-count error.
+**Expected:** Before the repair the program panics with `ragged row`; after it the line reads `r.FieldsPerRecord = 2` again and the reader reports a field-count error.
 
 Rejecting inconsistent shape prevents silent column shifts that can corrupt downstream type interpretation.
 

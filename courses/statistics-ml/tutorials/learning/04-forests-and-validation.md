@@ -1,6 +1,6 @@
 # Random forests: diversity is a mechanism to measure
 
-Tutorial ID: `statistics-learning-004`. Prerequisites: `statistics-learning-001`, `statistics-019`, `statistics-022`. Complete program: [learning_03.py](examples/learning_03.py).
+Tutorial ID: `statistics-learning-004`. Prerequisites: `statistics-learning-001`, `statistics-019`, `statistics-022`. Complete program: [learning_04.py](examples/learning_04.py).
 
 ## Start with a tree's prediction rule
 

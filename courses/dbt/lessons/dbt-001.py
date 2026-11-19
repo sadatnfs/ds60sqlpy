@@ -1,4 +1,4 @@
-"""dbt-001: worked starting point; complete the guide's six changes."""
+"""dbt-001: both worked cases; complete the guide's six changes."""
 
 import json
 import os
@@ -97,8 +97,27 @@ def example_one():
         return {"parsed_model": "answer", "actual_database_value": 42}
 
 
+def example_two():
+    with tempfile.TemporaryDirectory() as d:
+        p = project(d, models={"answer": "select 6 * 7 as answer"})
+        invoke(p, "compile")
+        compiled = (p / "target/compiled/classroom/models/answer.sql").read_text()
+        assert "6 * 7" in compiled
+        assert (
+            not (p / "warehouse.duckdb").exists()
+            or rows(p, "select count(*) from information_schema.tables where table_name='answer'")[
+                0
+            ][0]
+            == 0
+        )
+        invoke(p, "run")
+        assert rows(p, "select answer from answer") == [(42,)]
+        return {"compiled_sql": compiled.strip(), "run_created_relation": True}
+
+
 if __name__ == "__main__":
     print(example_one())
+    print(example_two())
 
 # TODO 1: Identify the model, project and profile files created by the wrapper.
 # TODO 2: Return 21*2 from the model and run it.

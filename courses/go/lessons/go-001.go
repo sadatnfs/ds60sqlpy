@@ -3,11 +3,11 @@ package main
 import "fmt"
 
 func main() {
-	// Exercise 1: Predict a first value: Bind greeting to Hello, Go and check its exact text.
-	// Expected: greeting equals Hello, Go.
+	// Exercise 1: Predict a first value: change one input: Copy worked example 1 into a scratch pad and change `greeting := "Hello, Go"` to `greeting := "Hello, Go!"`. Before running, predict which check fails and which value it now sees; then run it and restore the original line.
+	// Expected: The changed run panics with `greeting` because `greeting == "Hello, Go"` no longer holds. Restoring the original line brings back the worked observation: greeting equals Hello, Go.
 
-	// Exercise 2: Compute before formatting: Add 2 and 3, then format total=5.
-	// Expected: The integer is 5 and the text is total=5.
+	// Exercise 2: Compute before formatting: debug a regression: A regression changed one token in worked example 2, so one line now reads `total := 2 - 3`. Run worked example 2 with that line, use the failure to locate the defect and repair it without changing the check.
+	// Expected: Before the repair the program panics with `format`; after it the line reads `total := 2 + 3` again and the integer is 5 and the text is total=5.
 
 	// Exercise 3: Trace statement order: Start count at 1, add 1, then multiply by 3.
 	// Expected: The final count is 6.

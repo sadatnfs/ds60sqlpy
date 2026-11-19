@@ -1,51 +1,43 @@
 # web-046: explanatory solutions
 
-Compare after your own attempt or an explicit solution reveal. This file explains the supplied deterministic fixtures. It does not claim that a learner or a production deployment passed.
-
-## Why the mechanism works
-
-HTTP separates a request from its response. A request includes a method, target and headers, and may contain a body. A response includes a status code, headers and body. The method expresses intended semantics: GET should retrieve a representation without requesting a state change, while POST commonly submits data for processing. The server must still enforce its own rules regardless of a client-supplied method or path.
-
-Routing selects application behavior from the request method and path. Keep routing separate from the domain calculation so logic can be tested without a live server. A 404 means the requested resource or route is not found; a 405 means the resource exists but the method is unsupported. The application should not return 200 for every failure merely because it produced a page.
-
-The CLI reference receives a synthetic request array and returns a response array. This is a model of an HTTP boundary, not an actual network exchange. A real adapter would read the server-provided environment, validate it, set status and headers before body output, and send the body. Content-Type should describe the response representation, and error bodies should match the declared format.
+Open this after your own attempt. Each answer explains the lesson's synthetic fixtures; it does not show that your work or a deployment passed. The mechanism is explained in `courses/web-development/guides/web-046.md`.
 
 ## Exercise 1: Identify status, headers and body in the response model.
 
-They are separate fields with different protocol responsibilities.
+**Expected answer:** They are separate fields with different protocol responsibilities.
 
-Trace the smallest example before editing. Name which values are source and which are observations.
+**Why:** The status tells the client what happened, headers describe the representation and caching, and the body carries the content.
 
 ## Exercise 2: Add a not-found response for an unknown path.
 
-The unknown route returns 404 instead of pretending to be a successful page.
+**Expected evidence:** The unknown route returns 404 instead of pretending to be a successful page.
 
-Change only the named feature. Compare with the unchanged example and explain any unaffected behavior.
+**Why:** A 404 tells clients that the resource does not exist, while a 200 page saying not found misleads caches and tools.
 
 ## Exercise 3: Build a pure router for health and lesson-summary requests.
 
-Known GET routes return their declared representations and unsupported requests are rejected.
+**Expected evidence:** Known GET routes return their declared representations and unsupported requests are rejected.
 
-Sketch the structure or data contract first. Reuse the mechanism from the examples without copying the reference.
+**Why:** A pure router is easy to test because each request array maps to exactly one response array.
 
 ## Exercise 4: Diagnose headers sent after body output in a real adapter.
 
-Response metadata must be established before output begins, subject to the runtime's buffering behavior.
+**Expected answer:** Response metadata must be established before output begins, subject to the runtime's buffering behavior.
 
-Keep the failing input. Identify the first layer where the observed result differs from the intended contract.
+**Why:** Once body output is flushed, PHP can no longer send headers, unless output buffering delays the flush.
 
 ## Exercise 5: Test a known path with the wrong method.
 
-The route returns 405 and identifies allowed methods where appropriate.
+**Expected evidence:** The route returns 405 with Allow: GET, HEAD, while HEAD itself succeeds with an empty body.
 
-Predict the boundary before running it. Add an explicit check or manual observation that would detect a regression.
+**Why:** RFC 9110 requires general-purpose servers to support GET and HEAD; other methods get 405 with an Allow header listing what is supported.
 
 ## Exercise 6: Explain what a CLI response model does not prove.
 
-It does not qualify actual networking, server configuration, cookie handling or browser behavior.
+**Expected answer:** It does not qualify actual networking, server configuration, cookie handling or browser behavior.
 
-Explain your choice to someone who has not seen the code. Include one limitation and the evidence needed to remove it.
+**Why:** Sockets, TLS, server configuration, cookies and browser behavior are absent, so the model proves only routing logic.
 
-## Reference comparison and limits
+## Reference comparison
 
-Read the separate executable reference, where supplied, only after retaining your attempt. Compare structure and decisions rather than matching every identifier. A different implementation is acceptable when it satisfies the same behavior, preserves accessibility and rejects the same invalid cases. The checked reference uses tiny synthetic inputs so that each transformation can be inspected. It is not a ready-to-deploy authenticated application. Server lifecycle, persistence, concurrency and security require their own integration evidence.
+Open `courses/web-development/solutions/web-046_solution.php` only after saving your attempt, and compare decisions rather than identifiers. A different implementation is acceptable when it shows the same behavior and rejects the same invalid cases. The reference checks only its named synthetic cases; server lifecycle, persistence, concurrency and security need their own integration evidence.

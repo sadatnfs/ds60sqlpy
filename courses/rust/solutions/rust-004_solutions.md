@@ -1,6 +1,6 @@
 # rust-004: explanation and comparison
 
-Attempt the six guide tasks before opening this comparison. The executable reference is [rust-004_solution.rs](rust-004_solution.rs). Its assertions are always active under the prepared classroom compile settings.
+Attempt the six guide tasks before opening this comparison. The executable reference is [rust-004_solution.rs](rust-004_solution.rs). It runs both worked examples and the reference answers below, and its assertions are always active under the prepared classroom compile settings.
 
 ## Why the two examples differ
 
@@ -8,21 +8,59 @@ Attempt the six guide tasks before opening this comparison. The executable refer
 
 **Respect byte boundaries:** The optional slicing API makes invalid boundaries observable without panicking. The scalar uses two bytes, and its first byte alone is not a valid string slice.
 
-## Reason through the six tasks
+## Task answers
 
-1. **Predict and explain.** Predict byte and scalar counts for the accented character.
+### Task 1: Predict and explain
 
-2. **Guided modification.** Compare an emoji and a combining-mark sequence.
+Predict byte and scalar counts for the accented character.
 
-3. **Independent construction.** Write a function accepting &str and returning its byte length.
+No separate reference answer has been written for this task. Example A is the evidence to compare with: Borrowing reads the existing storage without transferring its lifetime responsibility. Both views observe pear while the owner remains usable.
 
-4. **Diagnose a defect.** Diagnose indexing a string as if every character were one byte.
+### Task 2: Guided modification
 
-5. **Boundary evidence.** Test empty text and an invalid byte boundary through get.
+Compare an emoji and a combining-mark sequence.
 
-6. **Transfer and justify.** Design a text limit and state whether it counts bytes, scalars or graphemes requiring an external library.
+No separate reference answer has been written for this task. Start from Example B: The optional slicing API makes invalid boundaries observable without panicking. The scalar uses two bytes, and its first byte alone is not a valid string slice.
 
-For tasks 1 and 2, use the checked values and mechanism trace in the two examples. For task 3, choose names that expose the input and result contract and retain the same invariants. For task 4, the diagnosed mistakes below supply a concrete wrong assumption: preserve its counterexample before repairing it. Task 5 needs an explicit expected value or documented rejection at the boundary, not just successful execution. For task 6, explain what changes in the new context and which part of the original mechanism remains applicable. Several representations may satisfy this transfer task; justify the choice rather than treating this reference as the only architecture.
+### Task 3: Independent construction
+
+Write a function accepting &str and returning its byte length.
+
+**Reference answer.** The same statements run as the `Task 3` block of the reference program; here they are wrapped in `main` as a complete file.
+
+```rust
+fn main() -> Result<(), Box<dyn std::error::Error>> {
+    fn byte_length(text: &str) -> usize {
+        text.len()
+    }
+    assert_eq!(byte_length("pear"), 4);
+    assert_eq!(byte_length("é"), 2);
+    assert_eq!(byte_length(&String::from("café")), 5);
+    Ok(())
+}
+```
+
+**Observe:** pear has 4 bytes, é has 2 and café has 5.
+
+&str accepts both literals and borrowed Strings, and len counts UTF-8 bytes rather than characters.
+
+### Task 4: Diagnose a defect
+
+Diagnose indexing a string as if every character were one byte.
+
+No reference answer has been written for this task yet. The wrong assumptions to look for are this lesson's pitfalls: Chars are not always user-visible characters. A borrowed slice cannot outlive its owner. Use a Unicode segmentation crate only in a separately prepared project, not an undeclared pad dependency.
+
+### Task 5: Boundary evidence
+
+Test empty text and an invalid byte boundary through get.
+
+No reference answer has been written for this task yet. Write the expected value or documented rejection for each boundary before running it, and compare with the checks in Example A (Borrow without consuming ownership) and Example B (Respect byte boundaries).
+
+### Task 6: Transfer and justify
+
+Design a text limit and state whether it counts bytes, scalars or graphemes requiring an external library.
+
+No single reference answer exists: several designs can satisfy this transfer task. Justify yours against the mechanism described below and the vocabulary entry **String**, and state one limitation of your choice.
 
 ## Mechanism and diagnostic reasoning
 
@@ -36,4 +74,4 @@ Chars are not always user-visible characters. A borrowed slice cannot outlive it
 
 ## Review before continuing
 
-The reference checks the worked scenarios, including their boundary distinctions. Your independent and transfer artifacts may have additional checks. Compare observations rather than only source text. Preserve any new regression case you discover and explain why it would reject a plausible wrong implementation. External project steps require their own build and platform evidence and are not established by a portable reference passing.
+Run the reference and confirm that it prints `rust-004: passed`, then reconstruct one boundary case from memory and explain which check would reject a plausible wrong implementation. External project steps need their own build and platform evidence; a passing portable reference does not establish them.

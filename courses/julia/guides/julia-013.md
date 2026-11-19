@@ -8,7 +8,7 @@ Use broadcasting with explicit axes and distinguish an elementwise formula from 
 
 ## Classroom execution
 
-Choose **Julia language and scientific computing** in `/classroom`, open this unit, and select its prepared `julia` runtime. The worker starts a fresh `main.jl` process with two Julia threads, a fixed package environment, no startup file and offline package settings. Both worked examples are complete under that environment. Save your current pad before replacing it. No package, model or dataset is fetched by a lesson.
+Open `julia-013` in `/classroom` with its prepared `julia` runtime. Worked case A (row and column contributions) and worked case B (an in-place update and a snapshot) are complete programs: save your current pad, paste one of them and press Run. The learner file contains the six investigations below; the explained reference ends by printing `julia-013: all reference checks passed`. The [course overview](../README.md) describes the shared runtime: a fresh offline `main.jl` process with two threads and a fixed package environment.
 
 ## Dots request elementwise application
 
@@ -20,7 +20,7 @@ Dotted expressions can fuse, and dotted assignment can update existing storage. 
 
 ## Worked case A: row and column contributions
 
-The first example adds row-specific offsets and column-specific offsets to a2-by -3 matrix. Reshaping the column offsets to a one-row matrix makes the intended axes explicit. The checked result corresponds to \(B_{ij}=A_{ij}+u_i+v_j\). An incompatible vector length produces a dimension error instead of a plausible but unintended result.
+The first example adds row-specific offsets and column-specific offsets to a 2-by-3 matrix. Reshaping the column offsets to a one-row matrix makes the intended axes explicit. The checked result corresponds to \(B_{ij}=A_{ij}+u_i+v_j\). An incompatible vector length produces a dimension error instead of a plausible but unintended result.
 
 ```julia
 using Test
@@ -93,7 +93,7 @@ Add one offset per column to a matrix.
 
 ### 2. Reject incompatible axes
 
-Broadcast a length 4 vector with the 2-by -3 fixture.
+Broadcast a length 4 vector with the 2-by-3 fixture.
 
 **Expected:** A DimensionMismatch occurs.
 
@@ -111,7 +111,7 @@ Apply 2x+1 elementwise to a floating vector using dotted assignment.
 
 Shift a vector left-to-right by reading the preceding updated element.
 
-**Expected:** The example becomes[1,1,1,1].
+**Expected:** The example becomes `[1, 1, 1, 1]`.
 
 **Hint:** A later read sees an earlier write.
 
@@ -119,7 +119,7 @@ Shift a vector left-to-right by reading the preceding updated element.
 
 Read the shift input from an explicit copy.
 
-**Expected:** The example becomes[1,1,2,3].
+**Expected:** The example becomes `[1, 1, 2, 3]`.
 
 **Hint:** Separate source and destination storage.
 
@@ -138,4 +138,4 @@ Write 0.5 into an integer element through dotted assignment.
 
 ## Study companion
 
-Use the repository learning-companion skill with this lesson ID, your prediction and your actual source/output. Ask for a diagnosis of the first incorrect type, shape, state transition or assumption. Keep observed execution distinct from a timing claim, inferred mathematical result or external deployment.
+A repository-aware assistant with the learning-companion skill can review `julia-013` with you. Give it your prediction for one investigation, your source and the actual output, and ask it to find the first incorrect assumption about broadcast, dot syntax, fusion, shape or aliasing.

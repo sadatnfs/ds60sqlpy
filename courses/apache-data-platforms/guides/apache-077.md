@@ -22,16 +22,20 @@ need separate actual server/client acceptance. Configuration showing
 historyShared does not prove every version remains readable after retention or
 that every client supports the same request fields.
 
+**Execution boundary.** Both comparisons need a prepared reference server and a table
+writer, which the repository does not provide. The row oracles below are written
+answers derived from the fixture, not observed responses.
+
 ## Worked case A: compare a pinned and current read
 
 Prepare the three-order version 0 table and record its exact result. Append a
-fourth west order with amount2using the actual compatible table writer, creating
+fourth west order with amount 2 using the actual compatible table writer, creating
 a new committed version. Query the old version through a supported historical
 request and separately query current state. The old oracle remains three orders
 and total 20; the new oracle contains the fourth ID and total 22.
 
 Both results can be correct because they answer against different states. A
-recipient cache that keeps version 0does not automatically follow the provider's
+recipient cache that keeps version 0 does not automatically follow the provider's
 newest commit. Conversely, a client that refreshes current state during a retry
 can change the data underlying a supposedly reproducible report. Make that
 refresh policy visible rather than hiding it behind the same table name.
@@ -45,7 +49,7 @@ and fail explicitly if the requested historical boundary is unsupported or absen
 
 Request only east orders through a supported predicate-hint path on the real
 server, then apply the intended row predicate in a compatible recipient reader.
-The independent expected IDs are1and3 with total 11. Compare this with a no-hint
+The independent expected IDs are 1 and 3 with total 11. Compare this with a no-hint
 request over the same version. Correctness must match even if the hint changes
 which files are returned or how much data is transferred.
 

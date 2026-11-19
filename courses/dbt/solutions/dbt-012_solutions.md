@@ -9,6 +9,34 @@ The executable reference contains the two complete worked cases with assertions.
 
 Pinning defines the chosen contract. It also creates a responsibility to review and migrate deliberately when the old version is retired.
 
+```python
+# Uses the tempfile import and the project(), invoke() and rows() helpers in main.py.
+with tempfile.TemporaryDirectory() as d:
+    schema = {
+        "models": [
+            {
+                "name": "customer_value",
+                "latest_version": 2,
+                "versions": [
+                    {"v": 1, "defined_in": "customer_value_v1"},
+                    {"v": 2, "defined_in": "customer_value_v2"},
+                ],
+            }
+        ]
+    }
+    p = project(
+        d,
+        models={
+            "customer_value_v1": "select 100 as value",
+            "customer_value_v2": "select 80 as value",
+            "latest_consumer": "select value from {{ ref('customer_value', version=1) }}",
+        },
+        schema=schema,
+    )
+    invoke(p, "build")
+    assert rows(p, "select value from latest_consumer") == [(100,)]
+```
+
 **Expected:** It returns 100.
 
 ## 2. Change latest selection
@@ -167,7 +195,7 @@ def example_two():
             d,
             models={
                 "base": "select 100 as gross, 20 as returns",
-                "net": "select gross-returns as net from {{ ref('base') }}",
+                "net": "select gross - returns as net from {{ ref('base') }}",
             },
         )
         invoke(p, "build")
@@ -191,4 +219,4 @@ if __name__ == "__main__":
 
 ## Interpretation
 
-Manage a semantic model change with explicit consumer versioning. Demonstrate the changed result, identify affected consumers and define validation and rollback requirements. Carry the same discipline into ML feature and model artifact versions.
+Demonstrate the changed result, identify affected consumers and define validation and rollback requirements. Carry the same discipline into ML feature and model artifact versions.

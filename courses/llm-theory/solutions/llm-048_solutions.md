@@ -28,7 +28,7 @@ Sampling builds the cumulative distribution on positive-support entries only, th
 
 ## Exercise 1: Prove one-step distribution preservation
 
-The question is: Use p[.5, .3, .2] and q[.2, .5, .3]; calculate accepted mass, rejection mass and residual.
+The question is: Use target p = [0.5, 0.3, 0.2] and draft q = [0.2, 0.5, 0.3]; calculate the accepted mass, rejection mass and residual.
 
 The equality is an exact probability decomposition up to floating-point arithmetic. It is stronger than observing approximate frequencies in a finite simulation.
 
@@ -45,7 +45,7 @@ np.testing.assert_allclose(accepted_mass + rejection * residual, p, atol=1e-12, 
 
 **Expected:** accepted mass[.2, .3, .2]; rejection .3; residual[1, 0, 0]; combined mass p.
 
-**Verify:** Compare the computed values or written argument with accepted mass[.2, .3, .2]; rejection .3; residual[1, 0, 0]; combined mass p.
+**Verify:** In a fresh process, the exercise checks confirm `accepted_mass` matches `[0.2, 0.3, 0.2]` within 1e-12; `rejection` matches `0.3` within 1e-12; `residual` matches `[1, 0, 0]` within 1e-12 and `accepted_mass + rejection * residual` matches `p` within 1e-12.
 
 ## Exercise 2: Exercise acceptance and correction paths
 
@@ -61,11 +61,11 @@ assert rejected == {"token": 0, "accepted": False} and accepted == {"token": 2, 
 
 **Expected:** token 1 rejected and corrected to 0; token 2 accepted.
 
-**Verify:** Compare the computed values or written argument with token 1 rejected and corrected to 0; token 2 accepted.
+**Verify:** In a fresh process, the exercise checks confirm `rejected == {'token': 0, 'accepted': False}` and `accepted == {'token': 2, 'accepted': True}`.
 
 ## Exercise 3: Check an all-accepted round and bonus token
 
-The question is: Set draft and target equal to p; propose tokens 0, 1 with draws .1, .6, and use bonus draw .7.
+The question is: Set draft and target both equal to p; propose tokens 0, 1 with draws 0.1, 0.6, and use bonus draw 0.7.
 
 When draft and target distributions agree, every proposal is accepted. The extra token comes from the target distribution after the accepted prefix, not from a residual whose mass is zero.
 
@@ -81,13 +81,13 @@ assert (
 
 **Expected:** emitted[0, 1, 1]; accepted_count 2; no rejection.
 
-**Verify:** Compare the computed values or written argument with emitted[0, 1, 1]; accepted_count 2; no rejection.
+**Verify:** In a fresh process, the exercise checks confirm `all_accepted['tokens'] == [0, 1, 1]`; `all_accepted['accepted_count'] == 2` and `not all_accepted['rejected']`.
 
 ## Exercise 4: Stop at the first rejection
 
-The question is: Use constant target p, draft q, proposal draws .1, .3 and acceptance draws .2, .9.
+The question is: Use constant target p, draft q, proposal draws 0.1, 0.3 and acceptance draws 0.2, 0.9.
 
-Theunacceptedtoken 1andsuffixcannotremainin the output prefix. Any future target probability must condition on theacceptedtoken0 and correction 0 instead.
+The unaccepted token 1 and its suffix cannot remain in the output prefix. Any future target probability must condition on the accepted token 0 and the correction 0 instead.
 
 ```python
 round_result = speculative_round(
@@ -103,11 +103,11 @@ assert (
 
 **Expected:** draft[0, 1]; accepted prefix[0]; correction 0; emitted[0, 0].
 
-**Verify:** Compare the computed values or written argument with draft[0, 1]; accepted prefix[0]; correction 0; emitted[0, 0].
+**Verify:** In a fresh process, the exercise checks confirm `round_result['proposals'] == [0, 1]`; `round_result['tokens'] == [0, 0]`; `round_result['accepted_count'] == 1` and `round_result['rejected']`.
 
 ## Exercise 5: Rollback actual K/V arrays
 
-The question is: Start cache prefix[2], append the two proposals, then roll back and append the correction; compare with a fresh cache[2, 0, 0].
+The question is: Start with cache prefix [2], append the two proposals, then roll back and append the correction; compare with a fresh cache [2, 0, 0].
 
 The cache stores numerical position-dependentkeys, not only a token list. Retaining a rejected suffix changes both context and position offsets even if the next sampled token is correct.
 
@@ -128,11 +128,11 @@ assert broken.tokens != fresh.tokens and not np.allclose(broken.output(), fresh.
 
 **Expected:** tokens, keys, values and attention output match a fresh cache; retaining a rejected token breaks parity.
 
-**Verify:** Compare the computed values or written argument with tokens, keys, values and attention output match a fresh cache; retaining a rejected token breaks parity.
+**Verify:** In a fresh process, the exercise checks confirm `cache.tokens == fresh.tokens`, `cache.keys` matches `fresh.keys` exactly, `cache.output()` matches `fresh.output()` within 1e-12, `broken.tokens != fresh.tokens` and 1 further check.
 
 ## Exercise 6: Handle equality, EOS, budgets and invalid support
 
-The question is: Check \(p=q\) has no residual, stop on an accepted EOS 2, cap output at 2 tokens, and reject a zero-probability draft proposal.
+The question is: Check that \(p=q\) has no residual, stop on an accepted EOS 2, cap output at 2 tokens, and reject a zero-probability draft proposal.
 
 An accepted EOS ends generation immediately, andabudget is not permission to append an extra bonus. Equal distributions must avoid dividingbyazero residual normalizer. Invalidsupport should fail clearly rather than fabricate a probability.
 
@@ -153,7 +153,7 @@ else:
 
 **Expected:** rejection mass is 0 and residual is None; accepted EOS stops generation; the token cap is respected; unsupported proposals raise ValueError.
 
-**Verify:** Compare the computed values or written argument with rejection mass is 0 and residual is None; accepted EOS stops generation; the token cap is respected; unsupported proposals raise ValueError.
+**Verify:** In a fresh process, the exercise checks confirm `mass == 0`, `none is None`, `np.all(alpha == 1)`, `eos['tokens'] == [2]` and 2 further checks.
 
 ## Review after comparison
 

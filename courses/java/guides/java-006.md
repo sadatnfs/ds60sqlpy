@@ -6,7 +6,7 @@ Beginner, approximately 90 minutes. Direct prerequisites: `java-005`
 
 ## Learning objectives
 
-Explain list, set, map using a concrete program. Trace the normal execution, identify its boundary assumptions and make a failure case observable. The first investigation is Create a mutable list red,blue,red and append green. The final exercise transfers the mechanism to respect unmodifiable fixtures.
+Choose a List, Set or Map for a counting task and produce deterministic output from unordered collections. Along the way, explain list, set, map using a concrete program. Trace the normal execution, identify its boundary assumptions and make a failure case observable. Exercises 1 and 2 start from the worked examples; the authored investigations begin with this task: Insert red twice into a HashSet and inspect return values. The final exercise transfers the mechanism to respect unmodifiable fixtures.
 
 ## Purpose and mental model
 
@@ -37,7 +37,7 @@ The public class name and source filename must agree. Each worked example below 
 
 ## Syntax anatomy and execution trace
 
-List.of creates a fixed unmodifiable list; newArrayList<>(...) creates a mutable copy. Map.merge combines an existing value with a new contribution and is convenient for counting. getOrDefault supplies a fallback without inserting it. Set.add returns whether membership changed. When comparing collection results, use equals for logical contents and sort keys explicitly before claiming a deterministic presentation order.
+List.of creates a fixed unmodifiable list; new ArrayList<>(...) creates a mutable copy. Map.merge combines an existing value with a new contribution and is convenient for counting. getOrDefault supplies a fallback without inserting it. Set.add returns whether membership changed. When comparing collection results, use equals for logical contents and sort keys explicitly before claiming a deterministic presentation order.
 
 ## Worked example / walkthrough
 
@@ -62,7 +62,7 @@ public class Main {
 
 ### Example B: Count with a map
 
-The merge function defines how repeated keys combine. Replacingput on every iteration would retain only the final contribution1.
+The merge function defines how repeated keys combine. Replacing put on every iteration would retain only the final contribution 1.
 
 ```java
 import java.util.*;
@@ -81,7 +81,7 @@ public class Main {
 }
 ```
 
-**Expected:** red2,blue1,green1.
+**Expected:** red 2, blue 1, green 1.
 
 ## Prediction before your attempt
 
@@ -89,29 +89,29 @@ Read the source from the entry point and name each value before executing it. Id
 
 ## Exercises
 
-1. **Retain sequence multiplicity.** Create a mutable list red,blue,red and append green.
-   **Expected:** size 4; red appears twice.
-   **Verify:** Compare your assertion values or captured diagnostic with size 4; red appears twice.
+1. **Retain sequence multiplicity: change one input.** Copy Example A into a scratch `Main.java` and change `List<String> colors = new ArrayList<>(List.of("red", "blue", "red"));` to `List<String> colors = new ArrayList<>(List.of("red!", "blue", "red"));`. Before running it with `java -ea Main`, predict which assertion fails and which value it now sees; then run it and restore the original line.
+   **Expected:** The changed run fails with an `AssertionError` from the assertion on `colors.size() == 4 && Collections.frequency(colors, "red") == 2`. Restoring the original line brings back the worked observation: size 4; red appears twice.
+   **Verify:** Compare your written prediction with the reported `AssertionError` and its stack-trace line, and name the value that made `colors.size() == 4 && Collections.frequency(colors, "red") == 2` false. After restoring the line, the program completes without an `AssertionError` again.
 
-2. **Count with a map.** Count each color withMap.merge.
-   **Expected:** red2,blue1,green1.
-   **Verify:** Compare your assertion values or captured diagnostic with red2,blue1,green1.
+2. **Count with a map: debug a regression.** A regression changed one token in the code that Example B adds after Example A, so one line now reads `for (String color : colors) counts.merge(color, 2, Integer::sum);`. Run Example B with that line, use the failing assertion to locate the defect and repair it without changing the assertion.
+   **Expected:** Before the repair the run fails with an `AssertionError` from the assertion on `counts.equals(Map.of("red", 2, "blue", 1, "green", 1))`; after it the line reads `for (String color : colors) counts.merge(color, 1, Integer::sum);` again and red 2, blue 1, green 1.
+   **Verify:** Keep the failing and the repaired runs. Explain why the changed token alters the value tested by `counts.equals(Map.of("red", 2, "blue", 1, "green", 1))` for this input.
 
-3. **Inspect set insertion.** Insertred twice into a HashSet and inspect return values.
-   **Expected:** first true,second false,size1.
-   **Verify:** Compare your assertion values or captured diagnostic with first true,second false,size1.
+3. **Inspect set insertion.** Insert red twice into a HashSet and inspect return values.
+   **Expected:** first true, second false, size 1.
+   **Verify:** Keep an assertion equivalent to `firstAdded && !secondAdded && unique.size() == 1`. As a control, change `boolean firstAdded = unique.add("red");` to `boolean firstAdded = unique.add("red!");`: the run must fail with an `AssertionError` from the assertion on `firstAdded && !secondAdded && unique.size() == 1`. Restore the line before continuing.
 
 4. **Create deterministic output order.** Sort the count-map keys before presenting them.
-   **Expected:** blue,green,red.
-   **Verify:** Compare your assertion values or captured diagnostic with blue,green,red.
+   **Expected:** blue, green, red.
+   **Verify:** Keep an assertion equivalent to `keys.equals(List.of("blue", "green", "red"))`. As a control, change `assert keys.equals(List.of("blue", "green", "red"));` to `assert keys.equals(List.of("blue!", "green", "red"));` inside it: the run must fail with an `AssertionError`, which shows the assertion can fail. Restore it.
 
-5. **Distinguish lookup from insertion.** Readmissing withgetOrDefault0 and compare map size.
-   **Expected:** value0;map stillsize3.
-   **Verify:** Compare your assertion values or captured diagnostic with value0;map stillsize3.
+5. **Distinguish lookup from insertion.** Read missing with getOrDefault 0 and compare map size.
+   **Expected:** value 0; map still size 3.
+   **Verify:** Keep an assertion equivalent to `absent == 0 && counts.size() == before && !counts.containsKey("missing")`. As a control, change `int absent = counts.getOrDefault("missing", 0);` to `int absent = counts.getOrDefault("missing", 1);`: the run must fail with an `AssertionError` from the assertion on `absent == 0 && counts.size() == before && !counts.containsKey("missing")`. Restore the line before continuing.
 
-6. **Respect unmodifiable fixtures.** Try adding toList.of(1,2) and catch the specific exception.
+6. **Respect unmodifiable fixtures.** Try adding to List.of(1, 2) and catch the specific exception.
    **Expected:** UnsupportedOperationException.
-   **Verify:** Compare your assertion values or captured diagnostic with UnsupportedOperationException.
+   **Verify:** Keep an assertion equivalent to `fixed`. As a control, change `fixed = true;` to `fixed = false;`: the run must fail with an `AssertionError` from the assertion on `fixed`. Restore the line before continuing.
 
 ## Common pitfalls and diagnosis
 
@@ -121,7 +121,14 @@ Do not replace a precise exception with a catch-all that returns a plausible def
 
 ## Progressive hints
 
-First reconstruct the values and identities in the worked example. Next isolate the line that changes the result when one input is altered. Finally compare the normal and failure paths with the stated contract. Use a small table of input, expected value, actual value and exception type. Ask for one hint about the first incorrect assumption before requesting the entire reference implementation.
+Read one hint at a time and attempt the exercise again before reading the next. Keep a small table of input, expected value, actual value and exception type. Ask for one hint about the first incorrect assumption before requesting the entire reference implementation.
+
+- **Exercise 1:** First restate the expected observation: size 4; red appears twice. Then list the values read by `colors.size() == 4 && Collections.frequency(colors, "red") == 2` and trace each one from its declaration. Finally, compute the asserted value with `List<String> colors = new ArrayList<>(List.of("red!", "blue", "red"));` in place before running.
+- **Exercise 2:** First restate the expected observation: red 2, blue 1, green 1. Then list the values read by `counts.equals(Map.of("red", 2, "blue", 1, "green", 1))` and trace each one from its declaration. Finally, compare `for (String color : colors) counts.merge(color, 2, Integer::sum);` with the same line in Example B and state the claim each version makes.
+- **Exercise 3:** First restate the expected observation: first true, second false, size 1. Then list the values read by `firstAdded && !secondAdded && unique.size() == 1` and trace each one from its declaration. Finally, predict the effect of changing `boolean firstAdded = unique.add("red");` to `boolean firstAdded = unique.add("red!");` before running anything.
+- **Exercise 4:** First restate the expected observation: blue, green, red. Then list the values read by `keys.equals(List.of("blue", "green", "red"))` and trace each one from its declaration. Finally, name one input that would make `keys.equals(List.of("blue", "green", "red"))` false.
+- **Exercise 5:** First restate the expected observation: value 0; map still size 3. Then list the values read by `absent == 0 && counts.size() == before && !counts.containsKey("missing")` and trace each one from its declaration. Finally, predict the effect of changing `int absent = counts.getOrDefault("missing", 0);` to `int absent = counts.getOrDefault("missing", 1);` before running anything.
+- **Exercise 6:** First restate the expected observation: unsupportedOperationException. Then list the values read by `fixed` and trace each one from its declaration. Finally, predict the effect of changing `fixed = true;` to `fixed = false;` before running anything.
 
 ## Self-check and retrieval
 
@@ -133,7 +140,7 @@ Preserve the saved pad and the six exercise observations. Continue to the next l
 
 ## Sources and verification status
 
-[Official Java21 API or language reference](https://docs.oracle.com/en/java/javase/21/docs/api/index.html), reviewed2026-10-22. Examples and exercise fixtures are original course material. Use the [validation guide](../../../docs/validation.md) and CI artifacts for the exact revision and platform to inspect actual compile/run results. Authoring, parsing, compilation, execution and learner mastery are separate forms of evidence.
+[Official Java 21 API or language reference](https://docs.oracle.com/en/java/javase/21/docs/api/index.html), reviewed 2026-10-22. Examples and exercise fixtures are original course material. Use the [validation guide](../../../docs/validation.md) and CI artifacts for the exact revision and platform to inspect actual compile/run results. Authoring, parsing, compilation, execution and learner mastery are separate forms of evidence.
 
 ## Ask an AI tutor about this lesson
 
@@ -143,7 +150,7 @@ Read courses/java/guides/java-006.md and courses/java/lessons/java-006.java. Dir
 Explain the mechanism, ask for a prediction, review my attempt, give one hint,
 request compiler/runtime evidence, and ask a fresh retrieval question.
 Keep courses/java/solutions/ closed until I request comparison or show an attempt.
-Use Java21 and the declared offline fixture. Done when I can explain the state
+Use Java 21 and the declared offline fixture. Done when I can explain the state
 transitions, pass all six exercise contracts, diagnose one failure and solve a
 new boundary case without copying the solution.
 ```

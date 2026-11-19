@@ -5,15 +5,44 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Typography, units and readable content: my attempt</title>
     <style>
-      /* Implement the lesson-specific CSS. Keep keyboard focus visible. */
+      /*
+        Worked example 1: A reading column
+        .prose {
+          max-inline-size: 65ch;
+          font-size: 1rem;
+          line-height: 1.6;
+        }
+      */
+
+      /*
+        Worked example 2: A bounded heading
+        h1 {
+          font-size: clamp(1.75rem, 1.25rem + 2vw, 3rem);
+        }
+      */
+
+      /* Write the CSS for the exercises here. Keep keyboard focus visible. */
     </style>
   </head>
   <body>
-    <!-- web-012: Build a reading page with bounded measure and scalable headings. -->
-    <!-- Save your prediction, then implement the six exercises from the guide. -->
-    <main>
-      <h1>Typography, units and readable content</h1>
-      <!-- Build your own document here. The reference is separate. -->
+    <!--
+      web-012 exercises. Hints are in the guide; answers are in the solutions folder.
+      1. Explain the reference for rem and a typical em use.
+      2. Apply a system font stack without network dependencies.
+      3. Build a reading page with bounded measure and scalable headings.
+      4. Diagnose text that overlaps after zooming.
+      5. Test at increased browser zoom with long content.
+      6. Explain why ch is a useful approximation rather than a word-count guarantee.
+    -->
+    <main class="prose">
+      <h1>Readable notes at your pace</h1>
+      <p>
+        A learning page should remain comfortable when the window narrows, the text grows or a
+        preferred font is unavailable. Start with the words and their relationships.
+      </p>
+      <p>
+        Choose a bounded line length, useful paragraph spacing and a font stack that works offline.
+      </p>
     </main>
   </body>
 </html>

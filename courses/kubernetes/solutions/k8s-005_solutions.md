@@ -14,13 +14,13 @@ The browser source creates the fixed hello Deployment so the controller produces
 
 The source describes the requested image and process. Actual preload and runtime behavior require a host/image receipt and observed Pod. The port declaration alone does not create routing or host exposure.
 
-**Expected:** Image0.2.0, Never, fixed fixture server, port8080 named http.
+**Expected:** Image 0.2.0, Never, fixed fixture server, port 8080 named http.
 
 ## Exercise 2: Trace broad and precise state
 
 Pod phase is intentionally broad. Readiness controls whether the application is considered eligible for normal Service traffic, while process liveness and client correctness are separate questions.
 
-**Expected:** Process running, readiness unproved, no ready-routing claim.
+**Expected:** The first Run fails its bounded readiness check without an application crash: the process can be Running while Ready stays False. After /ready is restored, a fresh Run can establish Ready.
 
 ## Exercise 3: Diagnose the image boundary
 
@@ -48,6 +48,6 @@ The evidence should match the operation that ran. Do not copy a Service success 
 
 ## Boundary and troubleshooting review
 
-Do not infer readiness from phase Running, infer a successful image pull from a tag name, or infer current process identity from a reused Pod name. An old saved image0.1 source receives an explicit broker version refusal; that is a source-admission result, not an observed node pull failure.
+Do not infer readiness from phase Running, infer a successful image pull from a tag name, or infer current process identity from a reused Pod name. An old saved image 0.1 source receives an explicit broker version refusal; that is a source-admission result, not an observed node pull failure.
 
 Use the narrowest discriminating field: Waiting.reason for image availability, container termination state for exit behavior, Ready condition for routing eligibility and a client response for the application. A source review or synthetic trace is labeled as such until an actual owned observation exists.

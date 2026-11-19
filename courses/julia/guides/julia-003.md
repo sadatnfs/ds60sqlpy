@@ -8,17 +8,17 @@ Process text without confusing byte positions, Unicode characters and visible gr
 
 ## Classroom execution
 
-Choose **Julia language and scientific computing** in `/classroom`, open this unit, and select its prepared `julia` runtime. The worker starts a fresh `main.jl` process with two Julia threads, a fixed package environment, no startup file and offline package settings. Both worked examples are complete under that environment. Save your current pad before replacing it. No package, model or dataset is fetched by a lesson.
+Open `julia-003` in `/classroom` with its prepared `julia` runtime. Worked case A (UTF-8 character starts) and worked case B (canonical normalization) are complete programs: save your current pad, paste one of them and press Run. The learner file contains the six investigations below; the explained reference ends by printing `julia-003: all reference checks passed`. The [course overview](../README.md) describes the shared runtime: a fresh offline `main.jl` process with two threads and a fixed package environment.
 
 ## Text has several useful lengths
 
-Julia strings use UTF -8. A byte is a storage unit, a Unicode scalar value is represented by a `Char`, and a visible grapheme may contain several scalar values. These notions coincide for simple ASCII text but diverge for accented characters and many other writing systems.
+Julia strings use UTF-8. A byte is a storage unit, a Unicode scalar value is represented by a `Char`, and a visible grapheme may contain several scalar values. These notions coincide for simple ASCII text but diverge for accented characters and many other writing systems.
 
 String indices identify valid character-start positions in the underlying code-unit sequence. They are not necessarily consecutive character counts. A generic loop should use `eachindex`, `nextind` or character iteration rather than incrementing a byte index and assuming that every position begins a valid character. `length` counts characters, while `ncodeunits` exposes the underlying code-unit count.
 
 A `Char` uses single quotes and a `String` uses double quotes. Interpolation inserts a value into a string, while concatenation combines string contents. Converting bytes or normalizing text requires an explicit policy. A program should not replace invalid or meaningful distinctions simply to make two strings compare equal.
 
-## Worked case A: UTF -8 character starts
+## Worked case A: UTF-8 character starts
 
 The two-character string containing an accented Latin character and a Greek character occupies four bytes. Its valid start indices are 1 and 3. Index 2 is inside the first character and raises `StringIndexError`. Iterating over valid indices or characters produces the expected two characters without assuming a one-byte representation.
 
@@ -79,7 +79,7 @@ The examples operate on authored literal strings and standard Unicode functions.
 
 ### 1. Advance safely
 
-Move from the first to the second character in the UTF -8 fixture.
+Move from the first to the second character in the UTF-8 fixture.
 
 **Expected:** nextind returns 3.
 
@@ -132,4 +132,4 @@ Test an ASCII indexing algorithm with multibyte text.
 
 ## Study companion
 
-Use the repository learning-companion skill with this lesson ID, your prediction and your actual source/output. Ask for a diagnosis of the first incorrect type, shape, state transition or assumption. Keep observed execution distinct from a timing claim, inferred mathematical result or external deployment.
+A repository-aware assistant with the learning-companion skill can review `julia-003` with you. Give it your prediction for one investigation, your source and the actual output, and ask it to find the first incorrect assumption about UTF-8, code unit, code point, grapheme or normalization.

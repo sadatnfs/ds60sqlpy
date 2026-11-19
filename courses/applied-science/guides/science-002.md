@@ -1,6 +1,6 @@
 # science-002: Overlap, weighting and the population a result describes
 
-Tutorial mode. Stage: beginner. Direct prerequisites: `science-001`, `statistics-science-001`.
+Tutorial mode. Stage: beginner. Direct prerequisites: `science-001`, `statistics-017`.
 
 ## Positivity determines what can be learned
 

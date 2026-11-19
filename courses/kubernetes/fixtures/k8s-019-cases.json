@@ -11,28 +11,28 @@
     },
     {
       "exercise": 2,
-      "task": "Separate encoding,RBAC,encryption at rest,transport and application handling.",
+      "task": "Separate encoding, RBAC, encryption at rest, transport and application handling.",
       "expected": "Five distinct mechanisms and their evidence are described."
     },
     {
       "exercise": 3,
       "task": "Review direct Secret access and arbitrary Secret mount attempts against the current worker contract.",
-      "expected": "Both are outside the normal operation;no privilege broadening or real-value collection occurs."
+      "expected": "Both are outside the normal operation; no privilege broadening or real-value collection occurs."
     },
     {
       "exercise": 4,
       "task": "Predict the update trace for an existing process.",
-      "expected": "Environment A persists;file may become B after observed projection;application use depends on reload."
+      "expected": "Environment A persists; file may become B after observed projection; application use depends on reload."
     },
     {
       "exercise": 5,
       "task": "Specify what to retain from a synthetic mount test without copying real credentials.",
-      "expected": "Source/Pod identity,access outcome,reload behavior and synthetic equality evidence."
+      "expected": "Source/Pod identity, access outcome, reload behavior and synthetic equality evidence."
     },
     {
       "exercise": 6,
       "task": "Describe exact owned Secret/workload cleanup under the host capability.",
-      "expected": "Only recorded synthetic object UIDs are removed;normal worker permissions remain unchanged."
+      "expected": "Only recorded synthetic object UIDs are removed; normal worker permissions remain unchanged."
     }
   ]
 }

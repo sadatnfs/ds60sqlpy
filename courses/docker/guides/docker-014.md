@@ -6,7 +6,7 @@ Beginner; about 100 minutes, with additional time for the optional host experime
 
 ## Learning objectives
 
-Produce the complete build-and-request evidence packet. Teach the project to a beginner without using hidden host state. Explain the difference between a configuration, an observed process and evidence of the application's behavior.
+Produce the complete build-and-request evidence packet. Teach the project to a beginner without using hidden host state. Use image rebuild, container replacement and persistent data accurately when you explain what you observed.
 
 ## Purpose, vocabulary and mental model
 
@@ -24,11 +24,11 @@ The request chain is host browser to published host loopback port to app listene
 
 ## How to use this lesson
 
-The classroom displays this guide and saves your worksheet. Its Run button does not control your Docker engine. Docker engine access is powerful host access, so the classroom deliberately receives no engine socket. Work through the supplied examples without starting anything, then use the optional host lab only in your own disposable project. Reading a command, parsing YAML and actually running the project are different forms of evidence.
+The classroom displays this guide and saves your worksheet, `courses/docker/lessons/docker-014.md`. Its Run button does not control your Docker engine. Docker engine access is powerful host access, so the classroom deliberately receives no engine socket. Work through the supplied examples without starting anything, then use the optional host lab only in your own disposable project. Reading a command, parsing YAML and actually running the project are different forms of evidence.
 
 Use Bash in Linux, macOS Terminal, or Ubuntu under WSL 2 on Windows. The supported engine runs Linux containers. The maintained fixture is `courses/docker/fixtures/compose-lab/`; its README explains copying it into a new ignored learner directory, checking the engine, building locally with visible logs, and using the fixed project name `ds60-docker-study`. The fixture uses port 18080 on host loopback. Stop if that project name or port belongs to unrelated work; choose a new project name consistently in your own copy. Never paste a command against a remote Docker context simply because it is currently selected.
 
-For Dockerfile examples, create a file named `Dockerfile` in a scratch project. YAML snippets describe a fragment unless explicitly called a complete file. Text transcripts are synthetic illustrations, not claims about your machine. Do not substitute a real password, token or private registry into a checked-in example.
+For Dockerfile examples, create a file named `Dockerfile` in a scratch project. YAML snippets describe a fragment unless explicitly called a complete file. Text transcripts are synthetic illustrations, not claims about your machine. Do not substitute a real password, token or private registry into a checked-in example. **How to use the lessons** in the [subject README](../README.md) collects these rules in one place.
 
 ## Worked example / walkthrough
 
@@ -59,58 +59,58 @@ docker compose -p ds60-docker-study down
 
 ## Six progressive exercises
 
+For each exercise, name the object involved and the phase of its lifetime before changing anything, then vary only the condition the task names. Exercises that ask you to predict, explain, compare or diagnose keep their answers in the solutions file; the others show the evidence to look for.
+
 ### Exercise 1: Predict every resource the project creates.
 
-**Expected evidence:** A local image, app container, project network and named data volume.
-
-**Hint:** Identify the object and the phase of its lifetime before changing it. Use the relevant worked example, then vary only the condition named in this task.
+**Hint:** Read compose.yaml for the image, services, networks and volumes.
 
 ### Exercise 2: Change the public message in the learner copy.
 
 **Expected evidence:** The observed response matches the deliberate runtime configuration.
 
-**Hint:** Identify the object and the phase of its lifetime before changing it. Use the relevant worked example, then vary only the condition named in this task.
+**Hint:** Change APP_MESSAGE, recreate the app and request /.
 
 ### Exercise 3: Produce the complete build-and-request evidence packet.
 
 **Expected evidence:** Build logs, model validation, health state and exact JSON response.
 
-**Hint:** Identify the object and the phase of its lifetime before changing it. Use the relevant worked example, then vary only the condition named in this task.
+**Hint:** Follow the order build, validate, start, wait for health, then request.
 
 ### Exercise 4: Introduce and repair one wrong host port in a scratch model.
 
 **Expected evidence:** Explain the first failing network hop and restore the original mapping.
 
-**Hint:** Identify the object and the phase of its lifetime before changing it. Use the relevant worked example, then vary only the condition named in this task.
+**Hint:** Change only the host side of the mapping and test each hop.
 
 ### Exercise 5: Verify replacement without resetting the counter.
 
 **Expected evidence:** Different container ID, same intended volume and nonreset counter.
 
-**Hint:** Identify the object and the phase of its lifetime before changing it. Use the relevant worked example, then vary only the condition named in this task.
+**Hint:** Record the container ID and counter before and after recreation.
 
 ### Exercise 6: Teach the project to a beginner without using hidden host state.
 
 **Expected evidence:** A fresh-copy procedure with prerequisites, expected outputs and scoped cleanup.
 
-**Hint:** Identify the object and the phase of its lifetime before changing it. Use the relevant worked example, then vary only the condition named in this task.
+**Hint:** Start from a fresh copy and write down every prerequisite you use.
 
 ## Common mistakes and diagnosis
 
-Start with the smallest observation that separates two plausible causes. An image inspection answers questions about the packaged filesystem and configuration; container inspection adds runtime mounts, network attachment and exit status. An application request adds another layer of evidence. A healthy container can still serve the wrong application result. Preserve the original failure and the exact changed field before retrying.
+Editing the maintained fixture instead of a learner copy. Treating a successful build as proof that the app serves the right response. Removing the volume when only the container needed replacing.
 
-The boundary case in this chapter is: Introduce and repair one wrong host port in a scratch model. Use its expected observation, Explain the first failing network hop and restore the original mapping., to avoid treating a successful command as proof of the wrong claim. Keep source edits in your own copy. Do not make a container privileged, mount the engine socket, disable all checks or delete every volume to make an example succeed.
+Exercise 4 is this chapter's boundary case: Introduce and repair one wrong host port in a scratch model. Its expected observation is: Explain the first failing network hop and restore the original mapping. Use it to avoid treating a successful command as proof of the wrong claim. Start with the smallest observation that separates two plausible causes. An image inspection answers questions about the packaged filesystem and configuration; container inspection adds runtime mounts, network attachment and exit status; an application request adds another layer, and a healthy container can still serve the wrong result. Preserve the original failure and the exact changed field before retrying. Keep source edits in your own copy. Do not make a container privileged, mount the engine socket, disable all checks or delete every volume to make an example succeed.
 
 ## Retrieval, transfer and next steps
 
-Close the explanations and draw the path from source files to image to container to the observation relevant here. Reconstruct the second worked example with one different value and predict what changes. Explain which state survives process restart, container recreation and image rebuild. If none of those operations applies to this mechanism, explain why.
+Close the explanations and draw the path from source files to image to container to the observation relevant here, using image rebuild, container replacement, persistent data and evidence record. Reconstruct worked example 2 (Prove replacement and stop cleanly) with one different value and predict what changes. Explain which state survives process restart, container recreation and image rebuild, or why none of those operations applies to this mechanism.
 
-Before proceeding, retain six evidence records. For the optional host project, use `docker compose -p ds60-docker-study down` from the fixture copy to stop its containers and remove its ordinary network. This command preserves named volumes. Volume deletion is a separate deliberate reset of that disposable lab after a backup or export, never a general cleanup step. The fixture README describes its exact scoped reset.
+When a host session ends, run `docker compose -p ds60-docker-study down` from your fixture copy. It removes the project's containers and network but keeps named volumes; deleting a volume is a separate, deliberate reset described in the fixture README.
 
 ## Primary references
 
-- [Official reference 1](https://docs.docker.com/compose/gettingstarted/)
-- [Official reference 2](https://docs.docker.com/reference/cli/docker/compose/)
+- [Docker Compose quickstart](https://docs.docker.com/compose/gettingstarted/)
+- [docker compose reference](https://docs.docker.com/reference/cli/docker/compose/)
 
 ## Ask an AI tutor about this lesson
 

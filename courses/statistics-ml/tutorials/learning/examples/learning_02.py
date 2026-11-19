@@ -1,68 +1,45 @@
 """Complete offline worked example. See the matching tutorial for assumptions."""
 
 import numpy as np
-from scipy import optimize, special
-from sklearn.metrics import brier_score_loss, log_loss
+from scipy import stats
 
 
-def logistic_objective(beta, design, outcome):
-    eta = design @ beta
-    return np.sum(np.logaddexp(0, eta) - outcome * eta)
+def wilson_interval(successes, n, alpha=0.05):
+    p = np.asarray(successes) / n
+    z = stats.norm.ppf(1 - alpha / 2)
+    center = (p + z * z / (2 * n)) / (1 + z * z / n)
+    half = z * np.sqrt(p * (1 - p) / n + z * z / (4 * n * n)) / (1 + z * z / n)
+    return center - half, center + half
 
 
 def case_02():
-    rng = np.random.default_rng(1102)
-    x = rng.normal(size=(500, 2))
-    design = np.column_stack([np.ones(len(x)), x])
-    y = rng.binomial(1, special.expit(design @ np.array([-0.4, 1.0, -0.7])))
-    train, test = np.arange(350), np.arange(350, 500)
-
-    def objective(b):
-        return logistic_objective(b, design[train], y[train])
-
-    def gradient(b):
-        return design[train].T @ (special.expit(design[train] @ b) - y[train])
-
-    fit = optimize.minimize(objective, np.zeros(3), jac=gradient, method="BFGS")
-    assert fit.success and np.linalg.norm(gradient(fit.x)) < 1e-4
-    p = special.expit(design[train] @ fit.x)
-    hessian = design[train].T @ ((p * (1 - p))[:, None] * design[train])
-    covariance = np.linalg.solve(hessian, np.eye(3))
-    se = np.sqrt(np.diag(covariance))
-    test_p = special.expit(design[test] @ fit.x)
-    threshold = 2 / (2 + 8)
-    decisions = test_p > threshold
-    cost = np.mean(2 * (decisions & (y[test] == 0)) + 8 * (~decisions & (y[test] == 1)))
-    bins = np.digitize(test_p, [0.2, 0.4, 0.6, 0.8])
-    calibration = [
-        (
-            int(b),
-            int((bins == b).sum()),
-            float(test_p[bins == b].mean()),
-            float(y[test][bins == b].mean()),
-        )
-        for b in np.unique(bins)
-    ]
-    # Equal baseline strata in both arms: marginal and conditional OR can still differ.
-    baseline = np.array([-2.0, 2.0])
-    p0, p1 = special.expit(baseline).mean(), special.expit(baseline + np.log(2)).mean()
-    marginal_or = p1 / (1 - p1) / (p0 / (1 - p0))
-    assert 1 < marginal_or < 2
-    separated = np.array([-2.0, -1.0, 1.0, 2.0])[:, None]
-    labels = np.array([0, 0, 1, 1])
-    assert logistic_objective([8], separated, labels) < logistic_objective([4], separated, labels)
+    n, successes = 12, 1
+    estimate = successes / n
+    score = successes / estimate - (n - successes) / (1 - estimate)
+    information = n / (estimate * (1 - estimate))
+    wald = estimate + np.array([-1, 1]) * stats.norm.ppf(0.975) / np.sqrt(information)
+    wilson = wilson_interval(successes, n)
+    assert abs(score) < 1e-10 and wald[0] < 0 and wilson[0] > 0
+    # Exact enumeration of the sampling distribution, not a Monte Carlo claim.
+    s = np.arange(n + 1)
+    true_p = 0.05
+    probability = stats.binom.pmf(s, n, true_p)
+    phat = s / n
+    half = stats.norm.ppf(0.975) * np.sqrt(phat * (1 - phat) / n)
+    wl, wu = wilson_interval(s, n)
+    wald_coverage = probability @ ((phat - half <= true_p) & (true_p <= phat + half))
+    wilson_coverage = probability @ ((wl <= true_p) & (true_p <= wu))
+    assert wilson_coverage > wald_coverage + 0.3
     result = {
-        "coefficients": fit.x.tolist(),
-        "model_se": se.tolist(),
-        "slope1_or_ci95": np.exp(fit.x[1] + np.array([-1, 1]) * 1.96 * se[1]).tolist(),
-        "test_log_loss": log_loss(y[test], test_p),
-        "test_brier": brier_score_loss(y[test], test_p),
-        "cost_at_02": cost,
-        "calibration_bins": calibration,
-        "conditional_or": 2.0,
-        "marginal_or": marginal_or,
+        "mle": estimate,
+        "score_at_mle": score,
+        "information": information,
+        "wald": wald.tolist(),
+        "wilson": list(wilson),
+        "exact_wald_coverage_at_005": wald_coverage,
+        "exact_wilson_coverage_at_005": wilson_coverage,
     }
-    print("02 logistic model to decision:", result)
+    print("02 likelihood to coverage:", result)
     return result
 
 

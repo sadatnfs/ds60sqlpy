@@ -14,17 +14,20 @@ function route(string $method, string $path): array
   if ($path !== "/health") {
     return ["status" => 404, "body" => "Not found"];
   }
-  if ($method !== "GET") {
-    return ["status" => 405, "headers" => ["Allow" => "GET"], "body" => "Method not allowed"];
+  if ($method !== "GET" && $method !== "HEAD") {
+    return ["status" => 405, "headers" => ["Allow" => "GET, HEAD"], "body" => "Method not allowed"];
   }
   return [
     "status" => 200,
     "headers" => ["Content-Type" => "text/plain; charset=utf-8"],
-    "body" => "ok",
+    "body" => $method === "HEAD" ? "" : "ok",
   ];
 }
 check(route("GET", "/health")["status"] === 200, "Health failed");
 check(route("POST", "/health")["status"] === 405, "Wrong method accepted");
+check(route("POST", "/health")["headers"]["Allow"] === "GET, HEAD", "Allow header incomplete");
+$head = route("HEAD", "/health");
+check($head["status"] === 200 && $head["body"] === "", "HEAD must succeed without a body");
 check(route("GET", "/missing")["status"] === 404, "Unknown path accepted");
 echo json_encode(route("GET", "/health"), JSON_THROW_ON_ERROR) . "\n";
 

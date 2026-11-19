@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import math
 import numpy as np
 import jax
 import jax.numpy as jnp
@@ -68,7 +67,7 @@ def main():
     # Case 8: Transfer to new inputs
     close(predict(2.0, jnp.array([4.0, 5.0])), [8.0, 10.0])
 
-    print("jax-001" + ": 8 asserted cases passed")
+    print("jax-001: 8 asserted cases passed")
 
 
 if __name__ == "__main__":

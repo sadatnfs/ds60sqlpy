@@ -8,7 +8,7 @@ Trace finite iteration and scope rules while using explicit empty-input and inde
 
 ## Classroom execution
 
-Choose **Julia language and scientific computing** in `/classroom`, open this unit, and select its prepared `julia` runtime. The worker starts a fresh `main.jl` process with two Julia threads, a fixed package environment, no startup file and offline package settings. Both worked examples are complete under that environment. Save your current pad before replacing it. No package, model or dataset is fetched by a lesson.
+Open `julia-005` in `/classroom` with its prepared `julia` runtime. Worked case A (accumulate inside a function) and worked case B (transform and filter explicitly) are complete programs: save your current pad, paste one of them and press Run. The learner file contains the six investigations below; the explained reference ends by printing `julia-005: all reference checks passed`. The [course overview](../README.md) describes the shared runtime: a fresh offline `main.jl` process with two threads and a fixed package environment.
 
 ## Iteration follows a collection contract
 
@@ -92,7 +92,7 @@ The examples use tiny deterministic inputs so iteration can be checked by hand. 
 
 List values from 1:3.
 
-**Expected:** The range contains 1,2,3.
+**Expected:** The range contains 1, 2 and 3.
 
 **Hint:** Check both endpoints.
 
@@ -106,7 +106,7 @@ Run the accumulator over 1:0.
 
 ### 3. Descend explicitly
 
-Construct 3,2,1 as a range.
+Construct the descending sequence 3, 2, 1 as a range.
 
 **Expected:** Use 3:-1:1.
 
@@ -143,4 +143,4 @@ Move a reusable accumulation into a function with explicit input.
 
 ## Study companion
 
-Use the repository learning-companion skill with this lesson ID, your prediction and your actual source/output. Ask for a diagnosis of the first incorrect type, shape, state transition or assumption. Keep observed execution distinct from a timing claim, inferred mathematical result or external deployment.
+A repository-aware assistant with the learning-companion skill can review `julia-005` with you. Give it your prediction for one investigation, your source and the actual output, and ask it to find the first incorrect assumption about iteration, range, comprehension, generator or function scope.

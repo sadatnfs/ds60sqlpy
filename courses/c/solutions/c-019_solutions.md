@@ -6,11 +6,13 @@ Compare after an attempt or explicit reveal. The complete executable reference i
 
 A portable binary format specifies bytes, widths and byte order rather than dumping an in-memory struct. Host representation can differ in endianness, padding, alignment and type sizes. Explicit encoding makes the wire contract inspectable and avoids leaking padding bytes. A decoder must validate the available length before reading fields and reject unsupported versions or values. Use unsigned types for shifts and masks, with shift counts inside the type width. memcpy can safely copy object representation bytes when the destination object and sizes are valid, but interpreting arbitrary bytes as a typed object still requires a representation contract.
 
-A big-endian 32-bit encoding stores the most significant byte first. Cast each input byte to uint32_t before shifting so integer promotion does not produce a problematic signed operation. Read four bytes only after checking length. Bitwise OR combines disjoint fields. The format here assumes eight-bit bytes and requires that with _Static_assert because its external definition uses octets.
+A big-endian 32-bit encoding stores the most significant byte first. Cast each input byte to uint32_t before shifting. Without the cast, integer promotion (introduced in c-003) turns the unsigned char into an int, and shifting a byte value of 128 or more left by 24 overflows int, which is undefined behavior. Read four bytes only after checking length. Bitwise OR combines disjoint fields. The format here assumes eight-bit bytes and requires that with _Static_assert because its external definition uses octets.
 
-## Exercise 1: Encode a known word
+## Exercise 1: Encode a known word: predict an edited check
 
-Encode 0x12345678 in big-endian order.
+Copy worked example 1 into a scratch pad and change `CHECK(out[0] == 0x12 && out[1] == 0x34 && out[2] == 0x56 && out[3] == 0x78);` to `CHECK(out[1] == 0x12 && out[1] == 0x34 && out[2] == 0x56 && out[3] == 0x78);` inside its CHECK. Before running, predict whether the CHECK still holds and explain why; then restore it.
+
+The unchanged code is worked example 1:
 
 ```c
 unsigned char out[4];
@@ -18,13 +20,15 @@ encode_u32(UINT32_C(0x12345678), out);
 CHECK(out[0] == 0x12 && out[1] == 0x34 && out[2] == 0x56 && out[3] == 0x78);
 ```
 
-**Expected:** The bytes are 12, 34, 56, 78 in hexadecimal.
+**Expected:** The changed run stops with `Check failed` at the CHECK on `out[0] == 0x12 && out[1] == 0x34 && out[2] == 0x56 && out[3] == 0x78`. Restoring the original line brings back the worked observation: the bytes are 12, 34, 56, 78 in hexadecimal.
 
 The explicit byte contract does not depend on host endianness.
 
-## Exercise 2: Decode a known word
+## Exercise 2: Decode a known word: debug a regression
 
-Decode bytes 00, 00, 01, 00.
+A regression changed one token in worked example 2, so one line now reads `unsigned char data[] = {1, 0, 1, 0};`. Run worked example 2 with that line, use the failing CHECK to locate the defect and repair it without changing the CHECK.
+
+The unchanged code is worked example 2:
 
 ```c
 unsigned char data[] = {0, 0, 1, 0};
@@ -32,7 +36,7 @@ uint32_t value = 0;
 CHECK(decode_u32(data, 4, &value) && value == 256);
 ```
 
-**Expected:** The numeric value is 256.
+**Expected:** Before the repair the run stops with `Check failed` at the CHECK on `decode_u32(data, 4, &value) && value == 256`; after it the line reads `unsigned char data[] = {0, 0, 1, 0};` again and the numeric value is 256.
 
 Each byte is promoted to the intended unsigned width before shifting.
 

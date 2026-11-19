@@ -112,8 +112,10 @@ def ci_case(bad):
         state = p / "state"
         state.mkdir()
         shutil.copyfile(p / "target/manifest.json", state / "manifest.json")
-        sql = "select id from {{ ref('base') }}" + (
-            " union all select id from {{ ref('base') }}" if bad else " where id > 0"
+        sql = (
+            "select id\nfrom {{ ref('base') }}\nunion all\nselect id\nfrom {{ ref('base') }}"
+            if bad
+            else "select id from {{ ref('base') }} where id > 0"
         )
         (p / "models/child.sql").write_text(sql)
         invoke(

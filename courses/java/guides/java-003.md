@@ -6,11 +6,11 @@ Beginner, approximately 90 minutes. Direct prerequisites: `java-002`
 
 ## Learning objectives
 
-Explain short circuit, loop invariant, boundary case using a concrete program. Trace the normal execution, identify its boundary assumptions and make a failure case observable. The first investigation is Use text null and test text!=null before calling isEmpty. The final exercise transfers the mechanism to expose a wrong boundary.
+Write guarded conditions, loops with explicit invariants and an exhaustive switch expression, and expose an off-by-one boundary. Along the way, explain short circuit, loop invariant, boundary case, switch expression using a concrete program. Trace the normal execution, identify its boundary assumptions and make a failure case observable. Exercises 1 and 2 start from the worked examples; the authored investigations begin with this task: Run the same sum pattern over an empty int array. The final exercise transfers the mechanism to expose a wrong boundary.
 
 ## Purpose and mental model
 
-Control flow chooses which statements run and how often. A boolean expression has a truth value, while short-circuit operators can skip an operand entirely. That behavior lets a null check guard a later method call. A loop invariant is a statement that remains true before and after each iteration; it connects a repeated computation to its intended result. For a prefix sum, the accumulator equals the sum of elements already visited. Boundary cases such as an empty array or a limit of zero test whether the initial state and termination condition are correct. A loop that works for one nonempty example can still have an off-by-one error.
+Control flow chooses which statements run and how often. A boolean expression has a truth value, while short-circuit operators can skip an operand entirely. That behavior lets a null check guard a later method call. A loop invariant is a statement that remains true before and after each iteration; it connects a repeated computation to its intended result. For a prefix sum, the accumulator equals the sum of elements already visited. Boundary cases such as an empty array or a limit of zero test whether the initial state and termination condition are correct. A loop that works for one nonempty example can still have an off-by-one error. A switch expression chooses one value from several labeled cases, and the compiler can check that every possible input has a case.
 
 ## Vocabulary and concepts
 
@@ -19,6 +19,8 @@ Control flow chooses which statements run and how often. A boolean expression ha
 **Loop invariant:** A property preserved at every iteration boundary.
 
 **Boundary case:** An input at an edge of the accepted domain.
+
+**Switch expression:** A switch that evaluates to one value and must cover every possible input.
 
 ## How to run this lesson
 
@@ -37,7 +39,7 @@ The public class name and source filename must agree. Each worked example below 
 
 ## Syntax anatomy and execution trace
 
-if selects a branch. && evaluates the right operand only when the left is true;|| evaluates it only when needed. A for loop has initialization,condition and update. Use index<length for zero-based arrays. The prefix-sum invariant starts with index0,sum0, then adds exactly the element at the current index before advancing. Break exits the loop;continue skips to the next iteration and can accidentally bypass an update in a while loop.
+if selects a branch. && evaluates the right operand only when the left is true; || evaluates it only when needed. A for loop has initialization, condition and update. Use index < length for zero-based arrays. The prefix-sum invariant starts with index 0, sum 0, then adds exactly the element at the current index before advancing. Break exits the loop; continue skips to the next iteration and can accidentally bypass an update in a while loop. In a switch expression, each case label is followed by -> and one result; labels never fall through, and an expression switch must cover every value of its input type.
 
 ## Worked example / walkthrough
 
@@ -62,7 +64,7 @@ public class Main {
 
 ### Example B: Trace a prefix sum
 
-The accumulator begins at the additive identity0. Each iteration adds one new element, so no record is skipped or counted twice.
+The accumulator begins at the additive identity 0. Each iteration adds one new element, so no record is skipped or counted twice.
 
 ```java
 import java.util.*;
@@ -86,7 +88,7 @@ public class Main {
 }
 ```
 
-**Expected:** prefix sums2,6,12;final12.
+**Expected:** prefix sums 2, 6, 12; final 12.
 
 ## Prediction before your attempt
 
@@ -94,29 +96,29 @@ Read the source from the entry point and name each value before executing it. Id
 
 ## Exercises
 
-1. **Guard a nullable value.** Use text null and test text!=null before calling isEmpty.
-   **Expected:** condition false with no NullPointerException.
-   **Verify:** Compare your assertion values or captured diagnostic with condition false with no NullPointerException.
+1. **Guard a nullable value: predict an edited check.** Copy Example A into a scratch `Main.java` and change `assert !nonempty;` to `assert nonempty;` inside its assertion. Before running it with `java -ea Main`, predict whether the assertion still holds and explain why; then restore it.
+   **Expected:** The changed run fails with an `AssertionError` from the assertion on `!nonempty`. Restoring the original line brings back the worked observation: condition false with no NullPointerException.
+   **Verify:** Compare your written prediction with the reported `AssertionError` and its stack-trace line, and explain why the edited condition is false for the values that satisfy `!nonempty`. After restoring the line, the program completes without an `AssertionError` again.
 
-2. **Trace a prefix sum.** Sum array2,4,6 while retaining the invariant that sum covers indices belowi.
-   **Expected:** prefix sums2,6,12;final12.
-   **Verify:** Compare your assertion values or captured diagnostic with prefix sums2,6,12;final12.
+2. **Trace a prefix sum: debug a regression.** A regression changed one token in the code that Example B adds after Example A, so one line now reads `sum -= values[i];`. Run Example B with that line, use the failing assertion to locate the defect and repair it without changing the assertion.
+   **Expected:** Before the repair the run fails with an `AssertionError` from the assertion on `prefixes.equals(List.of(2, 6, 12)) && sum == 12`; after it the line reads `sum += values[i];` again and prefix sums 2, 6, 12; final 12.
+   **Verify:** Keep the failing and the repaired runs. Explain why the changed token alters the value tested by `prefixes.equals(List.of(2, 6, 12)) && sum == 12` for this input.
 
-3. **Handle an empty loop.** Run the same sum pattern over an emptyint array.
-   **Expected:** sum0 and zero iterations.
-   **Verify:** Compare your assertion values or captured diagnostic with sum0 and zero iterations.
+3. **Handle an empty loop.** Run the same sum pattern over an empty int array.
+   **Expected:** sum 0 and zero iterations.
+   **Verify:** Keep an assertion equivalent to `emptySum == 0 && iterations == 0`. As a control, change `int emptySum = 0;` to `int emptySum = 1;`: the run must fail with an `AssertionError` from the assertion on `emptySum == 0 && iterations == 0`. Restore the line before continuing.
 
-4. **Count a half-open interval.** Count integers starting0 whilei<5.
-   **Expected:** visited0,1,2,3,4;count5.
-   **Verify:** Compare your assertion values or captured diagnostic with visited0,1,2,3,4;count5.
+4. **Choose a value with a switch expression.** Classify Saturday and Wednesday with one exhaustive switch expression over java.time.DayOfWeek.
+   **Expected:** weekend, then weekday.
+   **Verify:** Keep an assertion equivalent to `kinds.equals(List.of("weekend", "weekday"))`. As a control, change `case SATURDAY, SUNDAY -> "weekend";` to `case SATURDAY, SUNDAY -> "weekend!";`: the run must fail with an `AssertionError` from the assertion on `kinds.equals(List.of("weekend", "weekday"))`. Restore the line before continuing.
 
-5. **Stop at the first match.** Search3,8,8 for the first8 and stop immediately.
-   **Expected:** index1.
-   **Verify:** Compare your assertion values or captured diagnostic with index1.
+5. **Stop at the first match.** Search 3, 8, 8 for the first 8 and stop immediately.
+   **Expected:** index 1.
+   **Verify:** Keep an assertion equivalent to `found == 1`. As a control, change `if (items[i] == 8) {` to `if (items[i] != 8) {`: the run must fail with an `AssertionError` from the assertion on `found == 1`. Restore the line before continuing.
 
-6. **Expose a wrong boundary.** Compare a loop usingi<=length with the validi<length contract on a one-element array.
+6. **Expose a wrong boundary.** Compare a loop using i <= length with the valid i < length contract on a one-element array.
    **Expected:** wrong loop raises ArrayIndexOutOfBoundsException.
-   **Verify:** Compare your assertion values or captured diagnostic with wrong loop raises ArrayIndexOutOfBoundsException.
+   **Verify:** Keep an assertion equivalent to `failed`. As a control, change `for (int i = 0; i <= single.length; i++) {` to `for (int i = 0; i < single.length; i++) {`: the run must fail with an `AssertionError` from the assertion on `failed`. Restore the line before continuing.
 
 ## Common pitfalls and diagnosis
 
@@ -126,7 +128,14 @@ Do not replace a precise exception with a catch-all that returns a plausible def
 
 ## Progressive hints
 
-First reconstruct the values and identities in the worked example. Next isolate the line that changes the result when one input is altered. Finally compare the normal and failure paths with the stated contract. Use a small table of input, expected value, actual value and exception type. Ask for one hint about the first incorrect assumption before requesting the entire reference implementation.
+Read one hint at a time and attempt the exercise again before reading the next. Keep a small table of input, expected value, actual value and exception type. Ask for one hint about the first incorrect assumption before requesting the entire reference implementation.
+
+- **Exercise 1:** First restate the expected observation: condition false with no NullPointerException. Then list the values read by `!nonempty` and trace each one from its declaration. Finally, compute the asserted value with `assert nonempty;` in place before running.
+- **Exercise 2:** First restate the expected observation: prefix sums 2, 6, 12; final 12. Then list the values read by `prefixes.equals(List.of(2, 6, 12)) && sum == 12` and trace each one from its declaration. Finally, compare `sum -= values[i];` with the same line in Example B and state the claim each version makes.
+- **Exercise 3:** First restate the expected observation: sum 0 and zero iterations. Then list the values read by `emptySum == 0 && iterations == 0` and trace each one from its declaration. Finally, predict the effect of changing `int emptySum = 0;` to `int emptySum = 1;` before running anything.
+- **Exercise 4:** First restate the expected observation: weekend, then weekday. Then list the values read by `kinds.equals(List.of("weekend", "weekday"))` and trace each one from its declaration. Finally, predict the effect of changing `case SATURDAY, SUNDAY -> "weekend";` to `case SATURDAY, SUNDAY -> "weekend!";` before running anything.
+- **Exercise 5:** First restate the expected observation: index 1. Then list the values read by `found == 1` and trace each one from its declaration. Finally, predict the effect of changing `if (items[i] == 8) {` to `if (items[i] != 8) {` before running anything.
+- **Exercise 6:** First restate the expected observation: wrong loop raises ArrayIndexOutOfBoundsException. Then list the values read by `failed` and trace each one from its declaration. Finally, predict the effect of changing `for (int i = 0; i <= single.length; i++) {` to `for (int i = 0; i < single.length; i++) {` before running anything.
 
 ## Self-check and retrieval
 
@@ -138,7 +147,7 @@ Preserve the saved pad and the six exercise observations. Continue to the next l
 
 ## Sources and verification status
 
-[Official Java21 API or language reference](https://docs.oracle.com/en/java/javase/21/docs/api/index.html), reviewed2026-10-22. Examples and exercise fixtures are original course material. Use the [validation guide](../../../docs/validation.md) and CI artifacts for the exact revision and platform to inspect actual compile/run results. Authoring, parsing, compilation, execution and learner mastery are separate forms of evidence.
+[Official Java 21 API or language reference](https://docs.oracle.com/en/java/javase/21/docs/api/index.html), reviewed 2026-10-22. Examples and exercise fixtures are original course material. Use the [validation guide](../../../docs/validation.md) and CI artifacts for the exact revision and platform to inspect actual compile/run results. Authoring, parsing, compilation, execution and learner mastery are separate forms of evidence.
 
 ## Ask an AI tutor about this lesson
 
@@ -148,7 +157,7 @@ Read courses/java/guides/java-003.md and courses/java/lessons/java-003.java. Dir
 Explain the mechanism, ask for a prediction, review my attempt, give one hint,
 request compiler/runtime evidence, and ask a fresh retrieval question.
 Keep courses/java/solutions/ closed until I request comparison or show an attempt.
-Use Java21 and the declared offline fixture. Done when I can explain the state
+Use Java 21 and the declared offline fixture. Done when I can explain the state
 transitions, pass all six exercise contracts, diagnose one failure and solve a
 new boundary case without copying the solution.
 ```

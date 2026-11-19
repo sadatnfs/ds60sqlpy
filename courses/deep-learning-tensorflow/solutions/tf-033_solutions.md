@@ -14,11 +14,11 @@ Inference is a function with a data contract, not just a call to model.predict. 
 
 ## Reading the implementation
 
-np.asarray inspects the incoming data without automatically changing its dtype. Check rank, feature width, batch limit and finiteness before converting to a tensor. A fixed coefficient vector[2,-1] gives an independent expected output. Returning a new array prevents a caller from mutating stored input through a shared view. Validation order should make errors predictable enough to diagnose.
+np.asarray inspects the incoming data without automatically changing its dtype. Check rank, feature width, batch limit and finiteness before converting to a tensor. A fixed coefficient vector [2, -1] gives an independent expected output. Returning a new array prevents a caller from mutating stored input through a shared view. Validation order should make errors predictable enough to diagnose.
 
 ## Exercise 1: Predict a valid batch
 
-The question is: Predict for float32 rows[1,2],[3,4].
+The question is: Predict for float32 rows [1, 2], [3, 4].
 
 The reference coefficient vector makes output arithmetic transparent. Shape validation ensures the result is one scalar per input record.
 
@@ -29,9 +29,9 @@ np.testing.assert_array_equal(result, [0, 2])
 assert result.shape == (2,)
 ```
 
-**Expected:** outputs 0,2 with shape(2,).
+**Expected:** outputs 0, 2 with shape (2,).
 
-**Verify:** Compare the computed values or written argument with outputs 0,2 with shape(2,).
+**Verify:** In a fresh process, the exercise checks confirm `result` equals `[0, 2]` and `result.shape == (2,)`.
 
 ## Exercise 2: Compare batch independence
 
@@ -46,11 +46,11 @@ np.testing.assert_array_equal(single, result)
 
 **Expected:** exact equality for this fixed linear fixture.
 
-**Verify:** Compare the computed values or written argument with exact equality for this fixed linear fixture.
+**Verify:** In a fresh process, the exercise checks confirm `single` equals `result`.
 
 ## Exercise 3: Reject empty and oversized batches
 
-The question is: Pass shapes(0,2) and(5,2).
+The question is: Pass shapes (0, 2) and (5, 2).
 
 An empty batch provides no predictions, and an oversized batch violates the declared resource budget. Both failures occur before the model computation.
 
@@ -66,11 +66,11 @@ for bad in [np.empty((0, 2), dtype="float32"), np.zeros((5, 2), dtype="float32")
 
 **Expected:** ValueError with batch in the message.
 
-**Verify:** Compare the computed values or written argument with ValueError with batch in the message.
+**Verify:** In a fresh process, the exercise checks confirm for every `bad` in `[np.empty((0, 2), dtype='float32'), np.zeros((5, 2), dtype='float32')]`, `predict(bad)` raises `ValueError` and for every `bad` in `[np.empty((0, 2), dtype='float32'), np.zeros((5, 2), dtype='float32')]`, the raised error satisfies `'batch' in str(error)`.
 
 ## Exercise 4: Reject wrong feature structure
 
-The question is: Pass a vector[1,2] and a matrix with three columns.
+The question is: Pass a vector [1, 2] and a matrix with three columns.
 
 A single record still needs a batch axis. Guessing whether a vector represents one record or many one-feature records can silently change the meaning of data.
 
@@ -86,7 +86,7 @@ for bad in [np.array([1, 2], dtype="float32"), np.zeros((2, 3), dtype="float32")
 
 **Expected:** ValueError with shape in the message.
 
-**Verify:** Compare the computed values or written argument with ValueError with shape in the message.
+**Verify:** In a fresh process, the exercise checks confirm for every `bad` in `[np.array([1, 2], dtype='float32'), np.zeros((2, 3), dtype='float32')]`, `predict(bad)` raises `ValueError` and for every `bad` in `[np.array([1, 2], dtype='float32'), np.zeros((2, 3), dtype='float32')]`, the raised error satisfies `'shape' in str(error)`.
 
 ## Exercise 5: Reject nonfinite values and wrong dtype
 
@@ -111,7 +111,7 @@ else:
 
 **Expected:** ValueError for nonfinite; TypeError for dtype.
 
-**Verify:** Compare the computed values or written argument with ValueError for nonfinite; TypeError for dtype.
+**Verify:** In a fresh process, the exercise checks confirm `predict(np.array([[np.nan, 1]], dtype='float32'))` raises `ValueError` and `predict(np.array([[1, 2]], dtype='int64'))` raises `TypeError`.
 
 ## Exercise 6: Preserve the input
 
@@ -128,7 +128,7 @@ np.testing.assert_array_equal(x, before)
 
 **Expected:** input remains byte-identical.
 
-**Verify:** Compare the computed values or written argument with input remains byte-identical.
+**Verify:** In a fresh process, the exercise checks confirm `x` equals `before`.
 
 ## Review after comparison
 

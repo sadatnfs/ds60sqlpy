@@ -1,5 +1,5 @@
 from pathlib import Path
-import json, textwrap
+import copy, json, textwrap
 import yaml
 import sys
 
@@ -22,6 +22,16 @@ def hello(service=False):
     return docs if service else docs[:1]
 
 
+def variant(docs, path, value):
+    """Return an admitted starter that differs from a reference at one field path."""
+    docs = copy.deepcopy(docs)
+    target = docs
+    for key in path[:-1]:
+        target = target[key]
+    target[path[-1]] = value
+    return docs
+
+
 def author(
     n,
     overview,
@@ -34,10 +44,15 @@ def author(
     browser=False,
     capability="owned-namespace observation",
     refs=(),
+    starter=None,
+    starter_note="",
 ):
     key = f"k8s-{n:03d}"
     plan = next(p for p in PLAN if p["id"] == key)
     assert len(tasks) == 6 and len(examples) >= 2
+    # Each task: title, prompt, expected, hints, answer, answer-free verification.
+    assert all(len(task) == 6 for task in tasks), key
+    assert all(task[5] and task[5] != task[2] for task in tasks), key
     prereq = ", ".join(f"`{p}`" for p in plan["prerequisites"]) or "None"
     guide = f"courses/kubernetes/guides/{key}.md"
     source = (
@@ -60,7 +75,7 @@ def author(
     for i, (title, body, expected) in enumerate(examples, 1):
         lines += [f"### Worked example {i}: {title}", body, f"**Expected:** {expected}"]
     if browser:
-        run = f"This lesson supplies an allowlisted `k8s-kind` source. Use `{source}` in the prepared module pad and inspect the current fixture-0.2 qualification receipt before Run. The app binds the owned namespace, creates fixed resources, observes its bounded checks and performs UID-aware cleanup. A one-shot Run does not execute the separate stateful host exercises or automatically grade explanations. [The run/host-lab guide](../host-labs.md) explains the precise boundary and POSIX/PowerShell targeting."
+        run = f"This lesson supplies an allowlisted `k8s-kind` source. Use `{source}` in the prepared module pad and inspect the current fixture-0.2 qualification receipt before Run. {starter_note}The app binds the owned namespace, creates fixed resources, observes its bounded checks and performs UID-aware cleanup. A one-shot Run does not execute the separate stateful host exercises or automatically grade explanations. [The run/host-lab guide](../host-labs.md) explains the precise boundary and explicit targeting with Bash on Linux, macOS or WSL 2."
     else:
         run = f"The app artifact is a reading worksheet, `{source}`. The current browser adapter does not provide the full **{capability}** operation. Use the synthetic fixture and offline check first. Live work follows [the scoped host-lab guide](../host-labs.md) only when the named capability and owned target have been provisioned. A worksheet or static check is never a cluster execution receipt."
     lines += [
@@ -69,12 +84,12 @@ def author(
         f"The [manifest example](../solutions/{key}_solution.{'yaml' if browser else 'json'}) is separate from the learner artifact. The [offline reference check](../solutions/{key}_checks.py) evaluates explicitly synthetic facts and makes no API calls. Run it locally with `python courses/kubernetes/solutions/{key}_checks.py` after comparing your attempt. The [case ledger](../fixtures/{key}-cases.json) is immutable teaching input.",
         "## Exercises",
     ]
-    for i, (title, prompt, expected, hints, answer) in enumerate(tasks, 1):
+    for i, (title, prompt, expected, hints, answer, verify) in enumerate(tasks, 1):
         lines += [
             f"### Exercise {i}: {title}",
             prompt,
             f"**Expected result/shape:** {expected}",
-            f"**Verify:** Retain the named field values, identities, counts, diagnostic or written comparison: {expected}",
+            f"**Verify:** {verify}",
             f"**Progressive hints:** {hints}",
         ]
     lines += [
@@ -83,7 +98,7 @@ def author(
         "## Common pitfalls",
         sections[-1][1],
         "## Retrieval and transfer",
-        f"Close the answer and reconstruct the reasoning for Exercise6, {tasks[-1][0]}. Name the exact source and observed identity you would require before claiming the changed case succeeded.",
+        f"Close the answer and reconstruct the reasoning for Exercise 6 ({tasks[-1][0]}). Name the exact source and observed identity you would require before claiming the changed case succeeded.",
         "## Next step",
         f"Continue to `k8s-{n + 1:03d}` after preserving the six evidence records."
         if n < 42
@@ -97,19 +112,22 @@ def author(
     ]
     guide_text = "\n\n".join(lines) + "\n"
     prompts = "\n".join(
-        f"# Exercise {i}: {title}. {prompt} Expected: {expected}"
-        for i, (title, prompt, expected, _, _) in enumerate(tasks, 1)
+        f"# Exercise {i}: {title}. {prompt}\n# My prediction and evidence:"
+        for i, (title, prompt, *_) in enumerate(tasks, 1)
     )
     if browser:
-        learner = yaml.safe_dump_all(manifests, sort_keys=False) + "\n" + prompts + "\n"
+        header = f"# {key} starter. {starter_note}Compare with the separate reference in courses/kubernetes/solutions/ only after your attempt.\n"
+        learner = (
+            header + yaml.safe_dump_all(starter or manifests, sort_keys=False) + prompts + "\n"
+        )
         manifest_path = f"courses/kubernetes/solutions/{key}_solution.yaml"
         manifest_text = yaml.safe_dump_all(manifests, sort_keys=False)
         language = "yaml"
         profile = "k8s-kind"
     else:
         learner = f"# {key} learner evidence worksheet\n\nUse the guide and synthetic case ledger. A prediction or copied fixture is not a live runtime observation.\n"
-        for i, (title, prompt, expected, _, _) in enumerate(tasks, 1):
-            learner += f"\n## Exercise {i}: {title}\n\n{prompt}\n\nExpected: {expected}\n\nMy prediction:\n\nMy evidence and interpretation:\n"
+        for i, (title, prompt, *_) in enumerate(tasks, 1):
+            learner += f"\n## Exercise {i}: {title}\n\n{prompt}\n\nMy prediction:\n\nMy evidence and interpretation:\n"
         manifest_path = f"courses/kubernetes/solutions/{key}_solution.json"
         manifest_text = (
             json.dumps({"apiVersion": "v1", "kind": "List", "items": manifests}, indent=2) + "\n"
@@ -119,7 +137,7 @@ def author(
     code = textwrap.dedent(check_code).strip() + "\n"
     assert 'if __name__ == "__main__":' in code
     explanation = f"# {key}: Explanatory solutions\n\nThese answers explain the stated synthetic and scoped runtime contracts. Static checks do not prove cluster acceptance.\n\n## Mechanism\n\n{overview}\n"
-    for i, (title, prompt, expected, hints, answer) in enumerate(tasks, 1):
+    for i, (title, prompt, expected, hints, answer, verify) in enumerate(tasks, 1):
         explanation += f"\n## Exercise {i}: {title}\n\n{answer}\n\n**Expected:** {expected}\n"
     explanation += "\n## Boundary and troubleshooting review\n\n" + sections[-1][1] + "\n"
     ledger = (
@@ -131,7 +149,7 @@ def author(
                 "browser_source": browser,
                 "cases": [
                     {"exercise": i, "task": prompt, "expected": expected}
-                    for i, (_, prompt, expected, _, _) in enumerate(tasks, 1)
+                    for i, (_, prompt, expected, *_) in enumerate(tasks, 1)
                 ],
             },
             indent=2,

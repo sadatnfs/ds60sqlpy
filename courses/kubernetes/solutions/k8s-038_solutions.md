@@ -26,7 +26,7 @@ The digest comparison must use an independent expected value. Computing a fresh 
 
 This is the cryptographic positive control. The standard-library chapter checker cannot replace it because it only computes hashes. Keep the tool version and trust input fingerprint with the receipt for reproducibility.
 
-**Expected:** Exit0 plus successful verification output, with tool identity recorded.
+**Expected:** Exit 0 plus successful verification output, with tool identity recorded.
 
 ## Exercise 4: Verify the tamper negative
 
@@ -48,6 +48,6 @@ The report should state exactly which algorithm, key and payload were tested. It
 
 ## Boundary and troubleshooting review
 
-An OCI image digest identifies a registry manifest or index under the image-distribution contract, not the arbitrary synthetic string used here. Multi-platform indices and platform-specific manifests also need explicit interpretation. The current course image tag0.2.0 remains a runtime allowlist identity, not a signature-based admission policy.
+An OCI image digest identifies a registry manifest or index under the image-distribution contract, not the arbitrary synthetic string used here. Multi-platform indices and platform-specific manifests also need explicit interpretation. The current course image tag 0.2.0 remains a runtime allowlist identity, not a signature-based admission policy.
 
 A full image-provenance lab requires prewarmed real image digest and signature/bundle material, an offline-qualified verification tool and a host policy that binds the verified subject to the submitted image. Those capabilities are not supplied by this synthetic signature exercise. Never fetch new trust data silently or replace a failed trusted key with one found in the rejected artifact.

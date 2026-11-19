@@ -1,6 +1,6 @@
 # PCA can reconstruct almost everything and lose the answer
 
-Tutorial ID: `statistics-learning-006`. Prerequisites: `statistics-learning-001`, `statistics-learning-003`, `statistics-020`. Complete example: [learning_05.py](examples/learning_05.py).
+Tutorial ID: `statistics-learning-006`. Prerequisites: `statistics-learning-001`, `statistics-learning-003`, `statistics-020`. Complete example: [learning_06.py](examples/learning_06.py).
 
 ## Write the reconstruction problem
 

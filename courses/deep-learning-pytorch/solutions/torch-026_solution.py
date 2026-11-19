@@ -32,7 +32,7 @@ class Cube(torch.autograd.Function):
 
 
 def verify():
-    # Exercise 1: Build an identity residual
+    # Worked example A: Build an identity residual
     module = Residual(2)
     x = torch.tensor([[1.0, 2.0], [3.0, 4.0]], dtype=torch.float64)
     assert torch.equal(module(x), x)
@@ -40,12 +40,12 @@ def verify():
         dict(module.named_buffers())
     ) == {"scale"}
 
-    # Exercise 2: Keep state stable across calls
+    # Worked example B: Keep state stable across calls
     identity = id(module.kernel)
     module(torch.ones((1, 2), dtype=torch.float64))
     assert id(module.kernel) == identity and sum(p.numel() for p in module.parameters()) == 4
 
-    # Exercise 3: Check a known residual transform
+    # Worked example C: Check a known residual transform
     with torch.no_grad():
         module.kernel.copy_(torch.eye(2, dtype=torch.float64))
         module.scale.fill_(0.5)
@@ -67,6 +67,26 @@ def verify():
     value = torch.tensor([2.0], dtype=torch.float64, requires_grad=True)
     (2 * Cube.apply(value)).sum().backward()
     assert value.grad.item() == 24
+
+    # Exercise 1: Apply a swapping kernel
+    swap = Residual(2)
+    xs = torch.tensor([[1.0, 2.0]], dtype=torch.float64)
+    with torch.no_grad():
+        swap.kernel.copy_(torch.tensor([[0.0, 1.0], [1.0, 0.0]], dtype=torch.float64))
+        swap.scale.fill_(2.0)
+    assert swap(xs).tolist() == [[5.0, 4.0]]
+
+    # Exercise 2: Predict state for a wider module
+    wide_residual = Residual(3)
+    assert (
+        sum(p.numel() for p in wide_residual.parameters()) == 9
+        and len(list(wide_residual.buffers())) == 1
+    )
+
+    # Exercise 3: Differentiate Cube at a new point
+    point = torch.tensor([-1.0], dtype=torch.float64, requires_grad=True)
+    (3 * Cube.apply(point)).sum().backward()
+    assert point.grad.item() == 9
     return {"checks": 6, "status": "passed"}
 
 

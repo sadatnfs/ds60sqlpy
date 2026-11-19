@@ -17,6 +17,15 @@ struct LessonMain {
       precondition(whole == 3)
       precondition(fractional == 3.5)
     }
+
+    do {
+      // Task 3: Independent construction
+      let total = 7
+      let count = 2
+      let mean = Double(total) / Double(count)
+      precondition(mean == 3.5)
+      precondition(total / count == 3)
+    }
     print("swift-002: passed")
   }
 }

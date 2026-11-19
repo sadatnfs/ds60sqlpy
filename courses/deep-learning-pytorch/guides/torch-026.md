@@ -6,13 +6,19 @@ Advanced; approximately 120 minutes. Direct prerequisites: `torch-025`. The prer
 
 ## Learning objectives
 
-Custom modules should make state ownership and differentiation explicit. The central investigation is concrete: Create a width 2 residual with zero kernel and scale buffer 1. The finish condition is output equals input; one parameter and one buffer. gradient 24. A useful explanation connects the calculation to the reason it is needed, rather than treating a function name as a definition.
+Write a custom module and a custom autograd Function whose state, shape checks and backward rule are verified explicitly.
+
+Central investigation: Build a width-2 residual module with a scale buffer, apply known kernels and validate a custom cube derivative with gradcheck.
+
+Finish condition: The zero-kernel residual returns its input with one parameter and one buffer, the identity kernel with scale 0.5 returns 1.5x, a width-3 input raises ValueError, gradcheck passes for Cube, and the incoming factor 2 gives gradient 24 at x = 2.
+
+The worked examples demonstrate the mechanism; exercises 1-3 transfer it to new inputs and exercises 4-6 extend it to failures and boundary cases. A useful explanation connects the calculation to the reason it is needed, rather than treating a function name as a definition.
 
 ## Purpose and mental model
 
 Custom modules should make state ownership and differentiation explicit. Parameters are optimized; buffers are tracked but normally fixed; temporary activations are rebuilt during forward. A residual branch adds a transformed input to the original, so feature dimensions must match or an explicit projection must reconcile them. Creating new parameters in forward would change model identity and invalidate optimizer membership.
 
-A custom differentiable function should be checked against independent derivatives before being trusted in a large network. PyTorch grad check uses finite differences, usually with float64 inputs, to compare a backward formula with the numerical behavior of forward. Passing a few checks is useful evidence under those inputs, not a proof for every branch or nondifferentiable point. This lesson combines a simple residual module with a tiny custom cube function so both registration and derivative contracts remain inspectable.
+A custom differentiable function should be checked against independent derivatives before being trusted in a large network. PyTorch gradcheck uses finite differences, usually with float64 inputs, to compare a backward formula with the numerical behavior of forward. Passing a few checks is useful evidence under those inputs, not a proof for every branch or nondifferentiable point. This lesson combines a simple residual module with a tiny custom cube function so both registration and derivative contracts remain inspectable.
 
 ## Design decisions and when to use this method
 
@@ -44,11 +50,11 @@ Run the three worked blocks in order in one scratch file; later blocks reuse the
 
 ## Syntax anatomy and reasoning sequence
 
-Assign nn.Parameter in __init__, register a scale buffer, and implement forward without allocating new trainable state. Use named_parameters and named_buffers to inspect ownership. A torch.autograd.Function defines static forward and backward methods; save_for_backward stores inputs needed later. grad check perturbs double-precision inputs and should avoid kinks. The cube derivative is \(3\cdot {x}^{2}\) times the incoming gradient.
+Assign nn.Parameter in __init__, register a scale buffer, and implement forward without allocating new trainable state. Use named_parameters and named_buffers to inspect ownership. A torch.autograd.Function defines static forward and backward methods; save_for_backward stores inputs needed later. gradcheck perturbs double-precision inputs and should avoid kinks. The cube derivative is \(3\cdot {x}^{2}\) times the incoming gradient.
 
 ## Derive residual gradients and stable module identity
 
-For X shaped(B, D), a square kernel K shaped(D, D) and scalar scale s, the module computes \(Y=X+sXK\). Both terms have shape(B, D). A different branch width requires an explicit projection or a different architecture. Broadcasting an unrelated tensor into the residual sum may be legal arithmetic but would not satisfy this feature contract.
+For X shaped (B, D), a square kernel K shaped (D, D) and scalar scale s, the module computes \(Y=X+sXK\). Both terms have shape (B, D). A different branch width requires an explicit projection or a different architecture. Broadcasting an unrelated tensor into the residual sum may be legal arithmetic but would not satisfy this feature contract.
 
 At \(K=0\) and \(s=1\), the forward map is exactly Y=X. That does not make the branch untrainable. For upstream \(G=\frac{\partial L}{\partial Y}\), the matrix derivatives are \(\frac{\partial L}{\partial X}=G+sGK^{\mathsf T}\) and \(\frac{\partial L}{\partial K}=sX^{\mathsf T}G\). With the fixture X=[[1, 2], [3, 4]] and L equal to the sum of output entries, G is all ones, so dL/dK=[[4, 4], [6, 6]] even at \(K=0\). The input derivative is G because the zero branch adds no additional input sensitivity. The skip path preserves a direct derivative route while the branch can begin learning.
 
@@ -66,7 +72,7 @@ For \(f(x)=x^3\), the local derivative is 3 \({x}^{2}\). backward receives the d
 
 save_for_backward preserves the tensor values required by the rule and lets autograd enforce relevant lifetime/version checks. Do not mutate saved input storage between forward and backward or detach a value that must support a higher-order derivative. A function with several inputs returns a corresponding derivative entry for each differentiable input, and None where that input has no requested derivative under the declared contract. [Extending PyTorch 2.9 autograd](https://docs.pytorch.org/docs/2.9/notes/extending.html).
 
-gradcheck perturbs real-valued inputs and compares numerical sensitivities with the backward rule. The supplied float64 points 0.2 and-0.7 avoid a nondifferentiable branch, and the analytic derivatives are 0.12 and 1.47. Finite precision, probe size and conditioning still matter. A forward implementation that changes branches at the probe point may not have the derivative the numerical test assumes. Overlapping storage can also invalidate an interpretation that perturbations affect one independent coordinate.
+gradcheck perturbs real-valued inputs and compares numerical sensitivities with the backward rule. The supplied float64 points 0.2 and -0.7 avoid a nondifferentiable branch, and the analytic derivatives are 0.12 and 1.47. Finite precision, probe size and conditioning still matter. A forward implementation that changes branches at the probe point may not have the derivative the numerical test assumes. Overlapping storage can also invalidate an interpretation that perturbations affect one independent coordinate.
 
 A first-derivative check does not establish double backward, forward-mode support, arbitrary broadcasting or performance. Add the relevant contract tests when those features are actually required. The fixture's cube is small enough to inspect symbolically, and the upstream-factor test catches a distinct error from the basic numerical comparison. None of these checks requires a compiled extension or an external package.
 
@@ -145,33 +151,33 @@ torch.testing.assert_close(module(x), 1.5 * x, atol=1e-12, rtol=0)
 
 ## Prediction before your attempt
 
-For the supplied fixture, name the input unit, the intermediate state and the final quantity that changes. Predict one normal result and one failure result before touching the code. In particular, explain this lesson's acceptance condition in your own words: output equals input; one parameter and one buffer. gradient 24. Preserve the prediction beside your later observations so a correction is visible. A copied expected value is not a derivation.
+For the supplied fixture, name the input unit, the intermediate state and the final quantity that changes. Predict one normal result and one failure result before touching the code. In particular, explain this lesson's acceptance condition in your own words: The zero-kernel residual returns its input with one parameter and one buffer, the identity kernel with scale 0.5 returns 1.5x, a width-3 input raises ValueError, gradcheck passes for Cube, and the incoming factor 2 gives gradient 24 at x = 2. Preserve the prediction beside your later observations so a correction is visible. A copied expected value is not a derivation.
 
 ## Exercises
 
-1. **Build an identity residual.** Create a width 2 residual with zero kernel and scale buffer 1.
-   **Expected:** output equals input; one parameter and one buffer.
-   **Verify:** Save the assertion results for exercise 1, including output equals input; one parameter and one buffer.
+1. **Apply a swapping kernel.** Create Residual(2), set its kernel to [[0, 1], [1, 0]] and its scale buffer to 2, and evaluate the row [1, 2].
+   **Expected:** output [[5, 4]].
+   **Verify:** In a fresh process, the exercise checks confirm `swap(xs).tolist() == [[5.0, 4.0]]`.
 
-2. **Keep state stable across calls.** Call the same module on a second batch with the same width.
-   **Expected:** same kernel object and parameter count 4.
-   **Verify:** Save the assertion results for exercise 2, including same kernel object and parameter count 4.
+2. **Predict state for a wider module.** Create Residual(3) and count its parameter scalars and buffers.
+   **Expected:** 9 kernel scalars and 1 buffer.
+   **Verify:** In a fresh process, the exercise checks confirm `sum((p.numel() for p in wide_residual.parameters())) == 9` and `len(list(wide_residual.buffers())) == 1`.
 
-3. **Check a known residual transform.** Assign an identity kernel and scale.5.
-   **Expected:** output \(1.5\cdot x\).
-   **Verify:** Save the assertion results for exercise 3, including output \(1.5\cdot x\).
+3. **Differentiate Cube at a new point.** Backpropagate the sum of 3*Cube(x) at x = -1.
+   **Expected:** gradient 9.
+   **Verify:** In a fresh process, the exercise checks confirm `point.grad.item() == 9`.
 
 4. **Reject incompatible feature width.** Pass a width 3 row to the width 2 module.
    **Expected:** ValueError naming feature width.
-   **Verify:** Save the assertion results for exercise 4, including ValueError naming feature width.
+   **Verify:** In a fresh process, the exercise checks confirm `module(torch.ones((1, 3), dtype=torch.float64))` raises `ValueError`.
 
-5. **Validate a custom cube derivative.** Run grad check on Cube.apply at float64 values.2, -.7.
-   **Expected:** grad check True.
-   **Verify:** Save the assertion results for exercise 5, including grad check True.
+5. **Validate a custom cube derivative.** Run gradcheck on Cube.apply at float64 values 0.2, -0.7.
+   **Expected:** gradcheck returns True.
+   **Verify:** In a fresh process, the exercise checks confirm `torch.autograd.gradcheck(Cube.apply, (probe,), eps=1e-06, atol=1e-05, rtol=0.001)`.
 
-6. **Inspect the incoming-gradient factor.** Differentiate the sum of 2*Cube(x) atx 2.
+6. **Inspect the incoming-gradient factor.** Differentiate the sum of 2*Cube(x) at x = 2.
    **Expected:** gradient 24.
-   **Verify:** Save the assertion results for exercise 6, including gradient 24.
+   **Verify:** In a fresh process, the exercise checks confirm `value.grad.item() == 24`.
 
 ## Common pitfalls and diagnosis
 
@@ -185,7 +191,7 @@ First draw the state described in the vocabulary section. Next use the smallest 
 
 ## Self-check and retrieval
 
-Close both worked examples. Explain Custom module, Buffer, Grad check using the lesson fixture. Reconstruct one computation from its inputs. Then change one input while retaining the mechanism and predict whether the conclusion survives. Write which part is guaranteed by the code and which part would need new observations. This last distinction prevents a tiny deterministic teaching example from being presented as evidence about an unseen population or a production model.
+Close all three worked examples. Explain Custom module, Buffer, Grad check using the lesson fixture. Reconstruct one computation from its inputs. Then change one input while retaining the mechanism and predict whether the conclusion survives. Write which part is guaranteed by the code and which part would need new observations. This last distinction prevents a tiny deterministic teaching example from being presented as evidence about an unseen population or a production model.
 
 ## Next step
 
@@ -193,7 +199,7 @@ Revisit the direct prerequisite `torch-025` if the calculation cannot be reconst
 
 ## Sources and verification status
 
-API and mechanism reference: [PyTorch2.9 autograd](https://docs.pytorch.org/docs/2.9/autograd.html), reviewed 2026-10-22. The fixture, examples, counterexamples and exercise design are original course material. See [validation](../../../docs/validation.md) for execution gates. Check CI artifacts for the exact revision and platform to determine which runtime checks actually ran; authored content alone does not establish runtime execution.
+API and mechanism reference: [PyTorch 2.9 autograd](https://docs.pytorch.org/docs/2.9/autograd.html), reviewed 2026-10-22. The fixture, examples, counterexamples and exercise design are original course material. See [validation](../../../docs/validation.md) for execution gates. Check CI artifacts for the exact revision and platform to determine which runtime checks actually ran; authored content alone does not establish runtime execution.
 
 ## Interview reasoning with worked answers
 
@@ -201,7 +207,7 @@ API and mechanism reference: [PyTorch2.9 autograd](https://docs.pytorch.org/docs
 
 Buffers participate in state_dict and module device/dtype movement. An ordinary attribute can be omitted from those operations and cause inconsistent reconstruction.
 
-**What does grad check not establish?**
+**What does gradcheck not establish?**
 
 It does not prove behavior on every branch, shape or nondifferentiable point. Add domain, boundary and composition tests alongside numerical derivative checks.
 

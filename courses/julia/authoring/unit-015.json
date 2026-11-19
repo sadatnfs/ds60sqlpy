@@ -18,13 +18,13 @@
     {
       "title": "Name the derived field",
       "task": "Scale the score column by 10 using ByRow.",
-      "expected": "The output column contains 1,2,3 under the explicit name scaled.",
+      "expected": "The output column contains 1, 2 and 3 under the explicit name `scaled`.",
       "hint": "Choose row-wise application deliberately.",
       "answer": "Names and shape are part of the resulting schema."
     },
     {
       "title": "Observe a shared column",
-      "task": "Mutate input[!, :score].",
+      "task": "Mutate `input[!, :score]`.",
       "expected": "The source DataFrame changes.",
       "hint": "The indexing operation can return the stored column.",
       "answer": "A caller must request a copy when independent storage is required."
@@ -39,7 +39,7 @@
     {
       "title": "Report group coverage",
       "task": "Summarize the group containing one missing score.",
-      "expected": "It reports 2 rows,1 observed score and mean 1.",
+      "expected": "It reports 2 rows, 1 observed score and mean 1.",
       "hint": "A mean alone hides the denominator.",
       "answer": "Row accounting remains necessary after grouping."
     },

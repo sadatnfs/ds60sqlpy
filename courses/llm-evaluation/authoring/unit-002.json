@@ -9,6 +9,7 @@
     "artifact identity"
   ],
   "outcome": "Build a reproducible family/time split and detect identifier, near-duplicate and availability-time leakage before scoring.",
+  "verification": "Paraphrases split across partitions fail family validation, a row at the cutoff is eligible under the inclusive policy while a delayed label is excluded, normalization changes the fingerprint, and historical evaluation uses the earlier corpus version.",
   "level": "beginner",
   "runtime": "python-core",
   "minutes": 120,

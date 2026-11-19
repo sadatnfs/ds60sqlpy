@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import math
 import numpy as np
 import jax
 import jax.numpy as jnp
@@ -75,7 +74,7 @@ def main():
         raise AssertionError("vector objective accepted")
     close(jax.grad(lambda w: vector_loss(w).mean())(0.0), -56 / 3)
 
-    print("jax-007" + ": 8 asserted cases passed")
+    print("jax-007: 8 asserted cases passed")
 
 
 if __name__ == "__main__":

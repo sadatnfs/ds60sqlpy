@@ -19,7 +19,26 @@ Add an appropriate uncertainty analysis for a real claim and consider subgroup/t
 
 ## 3. Change utility values
 
-State the new values and compare the resulting actions. The model's ranking can remain unchanged while the useful policy changes.
+State the new values and compare the resulting actions. The model's ranking can remain unchanged while the useful policy changes. On this four-row fixture 0.5 admits no false positives, so it stays preferred at cost 6, while the utility of 0.3 falls from 8 to 4.
+
+```python
+# Uses np from main.py.
+y = np.array([0, 0, 1, 1])
+prob = np.array([0.1, 0.4, 0.6, 0.9])
+
+
+def utility(threshold, false_positive_cost):
+    chosen = prob >= threshold
+    true_positives = np.sum(chosen & (y == 1))
+    false_positives = np.sum(chosen & (y == 0))
+    return int(5 * true_positives - false_positive_cost * false_positives)
+
+
+table = {cost: {t: utility(t, cost) for t in (0.3, 0.5, 0.8)} for cost in (2, 6)}
+assert table[2] == {0.3: 8, 0.5: 10, 0.8: 5}
+assert table[6] == {0.3: 4, 0.5: 10, 0.8: 5}
+# 0.5 has no false positives here, so it stays best; only thresholds that admit them lose.
+```
 
 **Expected:** The preferred action policy can change.
 
@@ -211,4 +230,4 @@ if __name__ == "__main__":
 
 ## Interpretation
 
-Evaluate probabilities, ranking and actions with separately interpreted evidence. Retain the cohort, maturity cutoff, selected procedure and decision costs, and make figures auditable through their exact values. Use a broader design before making an external deployment claim.
+Retain the cohort, maturity cutoff, selected procedure and decision costs, and make figures auditable through their exact values. Use a broader design before making an external deployment claim.

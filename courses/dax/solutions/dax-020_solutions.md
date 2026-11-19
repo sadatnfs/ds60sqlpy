@@ -31,7 +31,7 @@ Paper, Blue and North selected; remove Product filters only in the denominator.
 An 'all products' denominator can still be regional and temporal. The model does not interpret the word all as an instruction to remove every other dimension.
 
 - North Notebook sales are S1 and S4: 47.
-- Removing Product restrictions admits North Pen 24? In North Pen contributes S2 4 plus S5 20, totaling 24, and Mug contributes 36.
+- Removing Product restrictions admits the other North products: Pen contributes S2 4 plus S5 20, totaling 24, and Mug contributes S8 36.
 - The retained North population totals 47 + 24 + 36 = 107; share is 47/107.
 
 ## Explained practice answers

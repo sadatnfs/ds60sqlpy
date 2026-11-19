@@ -1,38 +1,57 @@
 """Complete offline worked example. See the matching tutorial for assumptions."""
 
 import numpy as np
-from sklearn.decomposition import PCA
-from sklearn.linear_model import LogisticRegression
-from sklearn.pipeline import make_pipeline
-from sklearn.preprocessing import StandardScaler
+from scipy import special
+from sklearn.ensemble import GradientBoostingRegressor
+from sklearn.metrics import log_loss, mean_squared_error
+from sklearn.tree import DecisionTreeRegressor
+
+
+def tree_fixture():
+    rng = np.random.default_rng(1903)
+    x = rng.normal(size=(360, 6))
+    y = 3 * x[:, 0] + 2 * x[:, 1] ** 2 + rng.normal(scale=0.5, size=len(x))
+    return x, y
 
 
 def case_05():
-    # Balanced sign pairs make signal exactly orthogonal to the large nuisance.
-    nuisance = np.linspace(-100, 100, 100)
-    x = np.column_stack([np.repeat(nuisance, 2), np.tile([-0.1, 0.1], 100)])
-    y = np.tile([0, 1], 100)
-    test_x = np.column_stack([np.repeat(np.linspace(-95, 95, 40), 2), np.tile([-0.1, 0.1], 40)])
-    test_y = np.tile([0, 1], 40)
-    pca = PCA(n_components=1).fit(x)
-    reconstruction = pca.inverse_transform(pca.transform(x))
-    pca_model = make_pipeline(PCA(n_components=1), LogisticRegression()).fit(x, y)
-    full_model = make_pipeline(StandardScaler(), LogisticRegression()).fit(x, y)
-    assert pca.explained_variance_ratio_[0] > 0.9999
-    assert pca_model.score(test_x, test_y) == 0.5 and full_model.score(test_x, test_y) == 1
-    assert np.isclose(np.mean((x - reconstruction) ** 2), 0.005)
-    centered = x - x.mean(axis=0)
-    singular = np.linalg.svd(centered, compute_uv=False)
-    assert np.isclose(np.sum((x - reconstruction) ** 2), singular[1] ** 2)
-    scaled = PCA().fit(StandardScaler().fit_transform(x))
+    x = np.arange(6, dtype=float)[:, None]
+    y = np.array([0.0, 0.0, 0.0, 6.0, 6.0, 6.0])
+    current = np.full(6, 3.0)
+    losses = [mean_squared_error(y, current)]
+    for _ in range(4):
+        tree = DecisionTreeRegressor(max_depth=1, random_state=4).fit(x, y - current)
+        current += 0.5 * tree.predict(x)
+        losses.append(mean_squared_error(y, current))
+    assert np.allclose(losses, 9 * 0.25 ** np.arange(5))
+    labels = np.array([0, 0, 0, 1, 1, 1])
+    score = np.zeros(6)
+    p = special.expit(score)
+    gradient, curvature = p - labels, p * (1 - p)
+    left, right = x[:, 0] < 2.5, x[:, 0] >= 2.5
+    weights = [-gradient[mask].sum() / (curvature[mask].sum() + 1) for mask in (left, right)]
+    updated = np.where(left, weights[0], weights[1]) * 0.5
+    assert log_loss(labels, special.expit(updated)) < log_loss(labels, p)
+    features, target = tree_fixture()
+    model = GradientBoostingRegressor(
+        n_estimators=100, learning_rate=0.08, max_depth=2, random_state=4
+    ).fit(features[:180], target[:180])
+    validation = [
+        mean_squared_error(target[180:270], prediction)
+        for prediction in model.staged_predict(features[180:270])
+    ]
+    best = int(np.argmin(validation)) + 1
+    frozen = GradientBoostingRegressor(
+        n_estimators=best, learning_rate=0.08, max_depth=2, random_state=4
+    ).fit(features[:180], target[:180])
     result = {
-        "raw_retained_variance": pca.explained_variance_ratio_[0],
-        "reconstruction_mse": np.mean((x - reconstruction) ** 2),
-        "pca_test_accuracy": pca_model.score(test_x, test_y),
-        "full_test_accuracy": full_model.score(test_x, test_y),
-        "scaled_variance_ratios": scaled.explained_variance_ratio_.tolist(),
+        "squared_loss_trace": losses,
+        "logistic_leaf_weights": weights,
+        "selected_stage": best,
+        "validation_mse": validation[best - 1],
+        "test_mse": mean_squared_error(target[270:], frozen.predict(features[270:])),
     }
-    print("05 compression versus prediction:", result)
+    print("05 boosting trajectory:", result)
     return result
 
 

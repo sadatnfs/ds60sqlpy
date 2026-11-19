@@ -1,6 +1,6 @@
 # apache-021: From an engine to a distributed scheduler
 
-Tutorial mode. Stage: intermediate. Direct prerequisites: `apache-020`, `apache-014`.
+Tutorial mode. Stage: advanced. Direct prerequisites: `apache-020`, `apache-014`.
 
 ## A distributed engine adds placement and coordination
 
@@ -31,6 +31,39 @@ its image, start it and run check. The fixture contains 200 orders across east
 and west regions, with a deterministic amount formula. The client registers the
 shared Parquet path, constructs an ordered grouped SQL query, and collects a
 bounded result from the actual scheduler/executor path.
+
+The Python client connects to the scheduler, registers the shared Parquet file and
+runs the grouped query, then repeats the query in an embedded DataFusion session:
+
+From [`projects/ballista/client.py`](../projects/ballista/client.py):
+
+```python
+def context() -> BallistaSessionContext:
+    return BallistaSessionContext(
+        "df://localhost:50050", cluster_config={"datafusion.execution.target_partitions": "2"}
+    )
+```
+
+From [`projects/ballista/client.py`](../projects/ballista/client.py):
+
+```python
+def execute(mode: str) -> dict[str, object]:
+    read()
+    ctx = context()
+    ctx.register_parquet("orders", str(ROOT / "orders.parquet"))
+    distributed = ctx.sql(QUERY).to_arrow_table().to_pylist()
+    oracle = expected(ROWS)
+    if distributed != oracle:
+        raise AssertionError("Actual Ballista result differs from fixture oracle")
+    local = SessionContext()
+    local.register_parquet("orders", str(ROOT / "orders.parquet"))
+    if local.sql(QUERY).to_arrow_table().to_pylist() != oracle:
+        raise AssertionError("Embedded control differs")
+```
+
+`df://localhost:50050` is the scheduler's address. The Ballista context plans the
+SQL and submits it to the scheduler; the plain `SessionContext` runs the same SQL in
+the client process.
 
 The result oracle is calculated independently from the synthetic input records.
 It checks region identities, row counts and amount totals. Query success alone

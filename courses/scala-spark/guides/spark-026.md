@@ -1,22 +1,22 @@
 # spark-026: Built-ins, UDFs and Python-JVM columnar boundaries
 
-Authored paired Scala/PySpark teaching content. The default fixtures are tiny,local and deterministic. Runtime acceptance,logical correctness and learner understanding remain separate evidence.
+Authored paired Scala/PySpark teaching content. The default fixtures are tiny, local and deterministic. Runtime acceptance, logical correctness and learner understanding remain separate evidence.
 
 ## Level and prerequisites
 
-Intermediate; approximately 120 minutes. Direct design prerequisites: `spark-025`. The prepared baseline is Spark 4.0.1,Scala binary2.13,JDK 17 and Python 3.12. Read the [execution baseline](../execution-baseline.md); a proposed future tuple is not a runtime receipt.
+Intermediate; approximately 105 minutes. Direct prerequisites: `spark-025`. The prepared baseline is Spark 4.0.1, Scala binary 2.13, JDK 17 and Python 3.12. Read the [execution baseline](../execution-baseline.md).
 
 ## How to run this lesson
 
-Open `spark-026` in the classroom and choose the Scala or PySpark implementation you understand. Prepare only its fixed `spark-local-scala` or `spark-local-python` profile,save your pad and run the complete source. Scala stages as `Main.scala` with `object Main`; Python stages as `main.py` with a main guard. Each program creates its own local[2] session,disables the UI,binds the driver to loopback and stops the session in finally. No external dataset,package download,JDBC connection or cloud service is requested.
+Open `spark-026` in the classroom and choose the Scala or PySpark implementation you understand. Prepare only its fixed `spark-local-scala` or `spark-local-python` profile, save your pad and run the complete source. Scala stages as `Main.scala` with `object Main`; Python stages as `main.py` with a main guard. Each program creates its own local[2] session, disables the UI, binds the driver to loopback and stops the session in finally. No external dataset, package download, JDBC connection or cloud service is requested.
 
 The [Scala learner](../lessons/spark-026.scala) and [PySpark learner](../lessons/spark-026.py) run two complete demonstrations and retain six explicit task stubs. Use the [explained solutions](../solutions/spark-026_solutions.md) only after an attempt or an explicit worked comparison; the [Scala reference](../solutions/spark-026_solution.scala) and [PySpark reference](../solutions/spark-026_solution.py) contain complete assertions. A bounded collect is used only for the declared tiny fixture; do not copy it onto an unbounded or large production table.
 
 ## Learning objectives
 
 - Prefer engine expressions when possible and make Python/JVM conversion and NULL behavior measurable.
-- State the input and output grain,schema,NULL policy and ordering before executing a transformation.
-- Compare each language implementation with independent literal expectations,not only with the other implementation.
+- State the input and output grain, schema, NULL policy and ordering before executing a transformation.
+- Compare each language implementation with independent literal expectations, not only with the other implementation.
 
 ## Vocabulary and concepts
 
@@ -32,13 +32,13 @@ The [Scala learner](../lessons/spark-026.scala) and [PySpark learner](../lessons
 
 - **Golden fixture:** A reviewed list of exact expected outputs that checks every implementation independently of agreement among implementations.
 
-This lesson compares implementations of one precisely defined label rule. Unknown input staysNULL. Runs of exactly four ASCII whitespace characters, space, tab, line feed and carriage return, collapse to one ordinary space. Leading and trailing ordinary spaces are removed. OnlyASCII uppercaseA throughZ map to lowercase. Other Unicode characters, including nonbreaking space,É,İ,ß, emoji and combining marks, remain otherwise unchanged.
+This lesson compares implementations of one precisely defined label rule. Unknown input stays NULL. Runs of exactly four ASCII whitespace characters, space, tab, line feed and carriage return, collapse to one ordinary space. Leading and trailing ordinary spaces are removed. Only ASCII uppercaseA through Z map to lowercase. Other Unicode characters, including nonbreaking space,É,İ,ß, emoji and combining marks, remain otherwise unchanged.
 
 The narrow rule is intentional. General lowercasing, case folding, Unicode normalization and whitespace trimming are different operations with language and Unicode-version details. A business product may need one of them, but it must name that requirement explicitly. Here an ASCII mapping makes the cross-language contract concrete enough to explain and test without claiming that a generic lower().strip() call means the same policy everywhere.
 
-The twelve-row fixture coversNULL, empty text, space-only text, multiple interior spaces, tab/newline/carriage-return combinations, non-ASCII capitals, nonbreaking spaces, a Turkish dotted capitalI, emoji, a decomposed accented character and the literal stringNULL. The golden output preserves the distinction between missing, empty and the ordinary text null. It also preserves the decomposed accent rather than silently normalizing it to a different code-point sequence.
+The twelve-row fixture covers NULL, empty text, space-only text, multiple interior spaces, tab/newline/carriage-return combinations, non-ASCII capitals, nonbreaking spaces, a Turkish dotted capital I, emoji, a decomposed accented character and the literal string NULL. The golden output preserves the distinction between missing, empty and the ordinary text null. It also preserves the decomposed accent rather than silently normalizing it to a different code-point sequence.
 
-The built-in path composes translate, regexp_replace and trim. Its operations remain Spark expressions, so the engine can reason about their result types and integrate them into the query plan. A built-in is not automatically the right choice merely because it is built in: it still must express the exact rule. The explicitASCII character class prevents Java and Python regular-expression whitespace defaults from quietly broadening the accepted normalization policy.
+The built-in path composes translate, regexp_replace and trim. Its operations remain Spark expressions, so the engine can reason about their result types and integrate them into the query plan. A built-in is not automatically the right choice merely because it is built in: it still must express the exact rule. The explicit ASCII character class prevents Java and Python regular-expression whitespace defaults from quietly broadening the accepted normalization policy.
 
 The Scala path wraps a pure String function in a Scala UDF. It executes inside the JVM and does not introduce a Python worker boundary. The Python path wraps an equivalent pure function in a scalar Python UDF with StringType and useArrow=False. That explicit flag keeps the default demonstration independent of pandas and PyArrow. Both language-specific UDFs and both built-in implementations compare with the same twelve golden values.
 
@@ -201,7 +201,7 @@ NULL is absence of a known value, not a special spelling stored in every string 
 
 ### Exercise 1: Implement the pure scalar rule precisely
 
-ReturnNULL/None unchanged; collapse only space, tab, newline and carriage return runs, trim ordinary spaces, and translateASCII A-Z to a-z. Preserve otherUnicode code points.
+Return NULL/None unchanged; collapse only space, tab, newline and carriage return runs, trim ordinary spaces, and translate ASCII A-Z to a-z. Preserve other Unicode code points.
 
 **Expected result/shape:** All 12 golden outputs, includingcafÉ,İi, nonbreaking-space-wrapped a and unchanged decomposed e-plus-accent.
 
@@ -211,7 +211,7 @@ ReturnNULL/None unchanged; collapse only space, tab, newline and carriage return
 
 ### Exercise 2: Express the same rule with native Spark functions
 
-Produce id, normalized using translate, regexp_replace and trim on the label column. PreserveNULL propagation and the exact golden values.
+Produce id, normalized using translate, regexp_replace and trim on the label column. Preserve NULL propagation and the exact golden values.
 
 **Expected result/shape:** The twelve ordered output pairs equal the golden fixture and normalized has string type.
 
@@ -227,7 +227,7 @@ Create a Scala String UDF or a Python StringType scalar UDF with useArrow=False,
 
 **Verify:** Assert all golden pairs and string result type for the enabled language-specific UDF.
 
-**Progressive hint:** HandleNULL inside the scalar function and declare the result type; do not callSpark APIs inside the UDF.
+**Progressive hint:** Handle NULL inside the scalar function and declare the result type; do not call Spark APIs inside the UDF.
 
 ### Exercise 4: Locate the execution boundary in physical evidence
 
@@ -253,7 +253,7 @@ Classify normalized values as missing, empty or text and count each category. Se
 
 Validate a result against the full golden sequence. Deliberately apply general lowercasing and default trimming without interior-whitespace collapse, and require rejection.
 
-**Expected result/shape:** The wrong implementation disagrees at least on IDs 4,5,6,9. Python additionally removes the preserved nonbreaking spaces atID 8.
+**Expected result/shape:** The wrong implementation disagrees at least on IDs 4,5,6,9. Python additionally removes the preserved nonbreaking spaces at ID 8.
 
 **Verify:** Assert named mismatch identities and that the golden validator raises rather than accepting a visually plausible normalization.
 
@@ -261,15 +261,15 @@ Validate a result against the full golden sequence. Deliberately apply general l
 
 ## Common pitfalls
 
-Do not claim that all whitespace classes or lowercasing functions have identicalUnicode behavior. Do not confuseNULL, empty and literal null text. Do not put side effects in a UDF or assume task retries imply exactly-once invocation. A declared return type does not validate the business rule. Arrow/pandas is optional until an exact provisioned profile exists and passes the same golden fixture; it changes the boundary but does not eliminate serialization or guarantee a faster implementation.
+Do not claim that all whitespace classes or lowercasing functions have identical Unicode behavior. Do not confuse NULL, empty and literal null text. Do not put side effects in a UDF or assume task retries imply exactly-once invocation. A declared return type does not validate the business rule. Arrow/pandas is optional until an exact provisioned profile exists and passes the same golden fixture; it changes the boundary but does not eliminate serialization or guarantee a faster implementation.
 
 ## Self-check
 
-Explain the contract of `normalizeLabel` / `normalize_label` without reading its solution. Trace the specified boundary case,then explain the final exercise's evidence and limitation. Identify where a transformation builds a plan and where an action requests execution. Retain exact values or operator evidence rather than treating a successful process exit as proof of the whole learning objective.
+Explain the contract of `normalizeLabel` / `normalize_label` without reading its solution. Trace the specified boundary case, then explain the final exercise's evidence and limitation. Identify where a transformation builds a plan and where an action requests execution. Retain exact values or operator evidence rather than treating a successful process exit as proof of the whole learning objective.
 
 ## Next step
 
-Use the [course route](../README.md) to continue. Paired-language agreement is useful only when both outputs also satisfy the independent fixture contract. Keep runtime/profile receipts separate from any cluster-performance or production-recovery claim.
+Use the [course route](../README.md) to continue. Paired-language agreement is useful only when both outputs also satisfy the independent fixture contract. A successful local run is not evidence of cluster performance or production recovery.
 
 ## Primary sources and official APIs
 
@@ -281,8 +281,8 @@ Use the [course route](../README.md) to continue. Paired-language agreement is u
 
 ```text
 Use $guide-ds60sqlpy-learning to coach me through spark-026: Built-ins, UDFs and Python-JVM columnar boundaries.
-Read courses/scala-spark/guides/spark-026.md and courses/scala-spark/lessons/spark-026.py;the paired sources are courses/scala-spark/lessons/spark-026.scala and courses/scala-spark/lessons/spark-026.py.
-Direct prerequisites: spark-025. Explain the schema,row grain and new Scala/Python/Spark syntax,ask me to predict a concrete result,then inspect my attempt. Give one hint at a time,review exact result and boundary evidence,and ask retrieval questions in my own words. Do not read solutions/ until I ask or have made an honest attempt.
-Use only the prepared local[2] worker profile and owned job scratch. Do not download dependencies,start a remote service,reset existing checkpoints or alter unrelated learner work.
+Read courses/scala-spark/guides/spark-026.md and courses/scala-spark/lessons/spark-026.py; the paired sources are courses/scala-spark/lessons/spark-026.scala and courses/scala-spark/lessons/spark-026.py.
+Direct prerequisites: spark-025. Explain the schema, row grain and new Scala/Python/Spark syntax, ask me to predict a concrete result, then inspect my attempt. Give one hint at a time, review exact result and boundary evidence, and ask retrieval questions in my own words. Do not read solutions/ until I ask or have made an honest attempt.
+Use only the prepared local[2] worker profile and owned job scratch. Do not download dependencies, start a remote service, reset existing checkpoints or alter unrelated learner work.
 Done when all six contracts have inspected evidence and I can explain the stated assumptions and a meaningful failure case.
 ```

@@ -178,4 +178,4 @@ if __name__ == "__main__":
 
 ## Interpretation
 
-Separate candidate computation from accepted publication. Demonstrate both paths and retain a source-bound decision record. Extend the mechanism to an atomic version pointer and a tested recovery plan in a durable owned environment.
+Demonstrate both paths and retain a source-bound decision record. Extend the mechanism to an atomic version pointer and a tested recovery plan in a durable owned environment.

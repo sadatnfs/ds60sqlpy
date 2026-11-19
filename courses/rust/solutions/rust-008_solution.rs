@@ -13,6 +13,17 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         assert_eq!(first, "pear");
         assert_eq!(second, "pears");
     }
+
+    {
+        // Task 3: Independent construction
+        fn shout(mut text: String) -> String {
+            text.push('!');
+            text
+        }
+        let original = String::from("ready");
+        let louder = shout(original);
+        assert_eq!(louder, "ready!");
+    }
     println!("rust-008: passed");
     Ok(())
 }

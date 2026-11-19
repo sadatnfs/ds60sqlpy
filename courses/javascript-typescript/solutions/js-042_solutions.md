@@ -24,11 +24,13 @@ Maintenance means keeping source, docs, tests, packaged bytes and runtime assump
 
 The manifest uses an explicit filename allowlist and SHA-256 digests. Paths are rejected before joining them to the bundle directory. The hash list excludes the manifest itself to avoid a self-reference. spawnSync runs the current Node executable with a fixed source path and argument list, bounded timeout and output size. stdout and stderr remain separate. Runtime qualification compares a reported actual major version with a caller-supplied policy rather than trusting package metadata alone.
 
-## Exercise 1: Build, verify and execute a fresh bundle
+## Exercise 1: Build, verify and execute a fresh bundle: change one input
 
-Task: Create the authored bundle, verify hashes and run its self-test in a child.
+Task: Copy Example A into a scratch `main.mjs` and change `const result = runBundle(directory, ['--self-test']);` to `const result = runBundle(directory, ['--self-test!']);`. Before running it, predict which check fails and which value it now sees; then run it and restore the original line.
 
 The child executes the packaged bytes rather than an already imported development function. The receipt records the runtime that actually ran.
+
+The unchanged code is the exercise block of Example A:
 
 ```javascript
 await withBundle(async (directory) => {
@@ -42,15 +44,17 @@ await withBundle(async (directory) => {
 });
 ```
 
-**Expected:** three checks passed; actual Node version reported.
+**Expected:** The changed run fails with an `AssertionError` at the check `assert.equal(result.status, 0, result.stderr)`. Restoring the original line brings back the worked observation: three checks passed; actual Node version reported.
 
-**Verify:** Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.
+**Verify:** Compare your written prediction with the reported `AssertionError`, including its actual and expected values, and name the value that made `assert.equal(result.status, 0, result.stderr)` fail. After restoring the line, the program prints its `{"checks":1,"status":"passed"}` receipt again.
 
-## Exercise 2: Reject altered application bytes before execution
+## Exercise 2: Reject altered application bytes before execution: debug a regression
 
-Task: Append a harmless comment to the owned application after manifest creation.
+Task: A regression changed one token in Example B, so one line now reads `await appendFile(join(directory, 'app.mjs!'), '\n// controlled tamper fixture\n');`. Run Example B with that line, use the failing check to locate the defect and repair it without changing the check.
 
 Even a behavior-preserving edit changes artifact identity. The correct repair is to create a new reviewed manifest and rerun evidence, not ignore the mismatch.
+
+The unchanged code is the exercise block of Example B:
 
 ```javascript
 await withBundle(async (directory) => {
@@ -59,9 +63,9 @@ await withBundle(async (directory) => {
 });
 ```
 
-**Expected:** digest verification fails.
+**Expected:** Before the repair the run fails with an `AssertionError` at the check `assert.rejects(verifyBundle(directory), /digest mismatch/u)`; after it the line reads `await appendFile(join(directory, 'app.mjs'), '\n// controlled tamper fixture\n');` again and digest verification fails.
 
-**Verify:** Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.
+**Verify:** Keep the failing and the repaired runs. Explain why the changed token alters the value tested by `assert.rejects(verifyBundle(directory), /digest mismatch/u)` for this input.
 
 ## Exercise 3: Reject a manifest path outside the allowlist
 
@@ -81,7 +85,7 @@ await withBundle(async (directory) => {
 
 **Expected:** path is rejected before any outside file is read.
 
-**Verify:** Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.
+**Verify:** Keep a check equivalent to `assert.rejects(verifyBundle(directory), /unapproved artifact path/u)` and confirm that the reference still passes. Then name an input that would make it fail and explain which value changes.
 
 ## Exercise 4: Preserve result and diagnostic channels on failure
 
@@ -102,7 +106,7 @@ await withBundle(async (directory) => {
 
 **Expected:** nonzero child exit; stdout empty; generic stderr without the value.
 
-**Verify:** Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.
+**Verify:** Keep a check equivalent to `assert.equal(diagnostic.event, 'usage_error')`. As a control, change `assert.equal(diagnostic.event, 'usage_error');` to `assert.equal(diagnostic.event, 'usage_error!');` inside it: the run must fail with an `AssertionError`, which shows the check can fail. Restore it.
 
 ## Exercise 5: Derive stable content identity from unchanged files
 
@@ -123,7 +127,7 @@ await withBundle(async (directory) => {
 
 **Expected:** equal digests and an unchanged manifest match.
 
-**Verify:** Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.
+**Verify:** Keep a check equivalent to `assert.equal(manifest.files.find((file) => file.path === 'app.mjs').sha256, first)`. As a control, change `assert.equal(manifest.files.find(file => file.path === 'app.mjs').sha256, first);` to `assert.equal(manifest.files.find(file => file.path !== 'app.mjs').sha256, first);` inside it: the run must fail with an `AssertionError`, which shows the check can fail. Restore it.
 
 ## Exercise 6: Gate an observed runtime against explicit policy
 
@@ -142,7 +146,7 @@ await withBundle(async (directory) => {
 
 **Expected:** matching policy passes; mismatched policy throws.
 
-**Verify:** Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.
+**Verify:** Keep a check equivalent to `assert.equal(qualifyRuntime(receipt, actual), true)`. As a control, change `assert.equal(qualifyRuntime(receipt, actual), true);` to `assert.equal(qualifyRuntime(receipt, actual), false);` inside it: the run must fail with an `AssertionError`, which shows the check can fail. Restore it.
 
 ## After comparison
 

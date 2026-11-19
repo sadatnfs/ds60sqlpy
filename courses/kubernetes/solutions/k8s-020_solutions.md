@@ -4,15 +4,15 @@ These answers explain the stated synthetic and scoped runtime contracts. Static 
 
 ## Mechanism
 
-Network diagnosis should proceed through distinct layers:the client's namespace/DNS context, name resolution, Service selection and port mapping, transport connection, and application response. A failure at one layer can produce a similar user-visible symptom to another, but the evidence needed to distinguish them differs.
+Network diagnosis should proceed through distinct layers: the client's namespace/DNS context, name resolution, Service selection and port mapping, transport connection, and application response. A failure at one layer can produce a similar user-visible symptom to another, but the evidence needed to distinguish them differs.
 
-The browser's positive fixture uses an in-cluster client to reach hello on port8080 and request /version. It does not publish a host port or depend on an external network service. Wrong-port, DNS and arbitrary-route experiments are separate scoped host fixtures because the browser client command and Service port are fixed.
+The browser's positive fixture uses an in-cluster client to reach hello on port 8080 and request /version. It does not publish a host port or depend on an external network service. Wrong-port, DNS and arbitrary-route experiments are separate scoped host fixtures because the browser client command and Service port are fixed.
 
-A successful HTTP404 already shows that some HTTP server answered; it is not a DNS failure. A timeout after name resolution leaves several transport/backend possibilities and should not be labeled NetworkPolicy denial without enforcement evidence. Use the most specific observation available and retain uncertainty where the evidence does not identify a unique cause.
+A successful HTTP 404 already shows that some HTTP server answered; it is not a DNS failure. A timeout after name resolution leaves several transport/backend possibilities and should not be labeled NetworkPolicy denial without enforcement evidence. Use the most specific observation available and retain uncertainty where the evidence does not identify a unique cause.
 
 ## Exercise 1: Name the layers
 
-The layered model prevents changing application code for a name-resolution failure or blaming DNS for a returned404. It also identifies which evidence is still missing when a timeout is ambiguous.
+The layered model prevents changing application code for a name-resolution failure or blaming DNS for a returned 404. It also identifies which evidence is still missing when a timeout is ambiguous.
 
 **Expected:** Each layer has a distinct observation and possible failure.
 

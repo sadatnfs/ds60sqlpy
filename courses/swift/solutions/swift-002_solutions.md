@@ -1,6 +1,6 @@
 # swift-002: explanation and comparison
 
-Attempt the six guide tasks before opening this comparison. The executable reference is [swift-002_solution.swift](swift-002_solution.swift). Its assertions are always active under the prepared classroom compile settings.
+Attempt the six guide tasks before opening this comparison. The executable reference is [swift-002_solution.swift](swift-002_solution.swift). It runs both worked examples and the reference answers below, and its assertions are always active under the prepared classroom compile settings.
 
 ## Why the two examples differ
 
@@ -8,21 +8,55 @@ Attempt the six guide tasks before opening this comparison. The executable refer
 
 **Convert before division:** Converting after integer division would preserve the already truncated result. Integer division yields 3; floating division yields 3.5.
 
-## Reason through the six tasks
+## Task answers
 
-1. **Predict and explain.** Identify the inferred type of every binding.
+### Task 1: Predict and explain
 
-2. **Guided modification.** Replace an unnecessary var with let and explain why it still compiles.
+Identify the inferred type of every binding.
 
-3. **Independent construction.** Compute a mean from an integer total and count using a deliberate conversion.
+No separate reference answer has been written for this task. Example A is the evidence to compare with: The code exposes which part is state and which part is a stable input. The accumulator becomes 8 while the fixed amount remains 4.
 
-4. **Diagnose a defect.** Diagnose conversion performed after integer division.
+### Task 2: Guided modification
 
-5. **Boundary evidence.** Test an exactly divisible and a non-divisible pair.
+Replace an unnecessary var with let and explain why it still compiles.
 
-6. **Transfer and justify.** Choose units and types for a small measurement model.
+No separate reference answer has been written for this task. Start from Example B: Converting after integer division would preserve the already truncated result. Integer division yields 3; floating division yields 3.5.
 
-For tasks 1 and 2, use the checked values and mechanism trace in the two examples. For task 3, choose names that expose the input and result contract and retain the same invariants. For task 4, the diagnosed mistakes below supply a concrete wrong assumption: preserve its counterexample before repairing it. Task 5 needs an explicit expected value or documented rejection at the boundary, not just successful execution. For task 6, explain what changes in the new context and which part of the original mechanism remains applicable. Several representations may satisfy this transfer task; justify the choice rather than treating this reference as the only architecture.
+### Task 3: Independent construction
+
+Compute a mean from an integer total and count using a deliberate conversion.
+
+**Reference answer.** It runs as the `Task 3` block of the reference program.
+
+```swift
+let total = 7
+let count = 2
+let mean = Double(total) / Double(count)
+precondition(mean == 3.5)
+precondition(total / count == 3)
+```
+
+**Observe:** The mean is 3.5, while integer division of the same values would give 3.
+
+Converting both operands to Double before dividing is the deliberate step; dividing the Ints first would truncate the result.
+
+### Task 4: Diagnose a defect
+
+Diagnose conversion performed after integer division.
+
+No reference answer has been written for this task yet. The wrong assumptions to look for are this lesson's pitfalls: Let protects the binding, not necessarily every object reachable from it. Avoid forced conversions at a boundary without validating range. A floating type is not automatically more appropriate for a count.
+
+### Task 5: Boundary evidence
+
+Test an exactly divisible and a non-divisible pair.
+
+No reference answer has been written for this task yet. Write the expected value or documented rejection for each boundary before running it, and compare with the checks in Example A (Reassign only mutable state) and Example B (Convert before division).
+
+### Task 6: Transfer and justify
+
+Choose units and types for a small measurement model.
+
+No single reference answer exists: several designs can satisfy this transfer task. Justify yours against the mechanism described below and the vocabulary entry **Binding**, and state one limitation of your choice.
 
 ## Mechanism and diagnostic reasoning
 
@@ -36,4 +70,4 @@ Let protects the binding, not necessarily every object reachable from it. Avoid 
 
 ## Review before continuing
 
-The reference checks the worked scenarios, including their boundary distinctions. Your independent and transfer artifacts may have additional checks. Compare observations rather than only source text. Preserve any new regression case you discover and explain why it would reject a plausible wrong implementation. External project steps require their own build and platform evidence and are not established by a portable reference passing.
+Run the reference and confirm that it prints `swift-002: passed`, then reconstruct one boundary case from memory and explain which check would reject a plausible wrong implementation. External project steps need their own build and platform evidence; a passing portable reference does not establish them.

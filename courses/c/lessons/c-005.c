@@ -1,13 +1,21 @@
 #include <stdio.h>
 
 int main(void) {
-  /* Exercise 1: Call a pure calculation
-     Evaluate twice for 7 and 0.
-     Expected: The results are 14 and 0. */
+  /* Exercise 1: Call a pure calculation: predict an edited check
+     Copy worked example 1 into a scratch pad and change `CHECK(twice(0) == 0);`
+     to `CHECK(twice(1) == 0);` inside its CHECK. Before running, predict
+     whether the CHECK still holds and explain why; then restore it. Expected:
+     The changed run stops with `Check failed` at the CHECK on `twice(0) == 0`.
+     Restoring the original line brings back the worked observation: the results
+     are 14 and 0. */
 
-  /* Exercise 2: Return an output on success
-     Calculate area for width 3 and height 4.
-     Expected: Success is true and output becomes 12. */
+  /* Exercise 2: Return an output on success: diagnose an edited check
+     A careless edit changed the CHECK in worked example 2 so that it reads
+     `CHECK(try_area(4, 4, &out));`. Run worked example 2 with that line,
+     explain why the edited CHECK now fails for the same program state, and
+     restore it. Expected: Before the repair the run stops with `Check failed`
+     at the CHECK on `out == 12`; after it the line reads `CHECK(try_area(3, 4,
+     &out));` again and success is true and output becomes 12. */
 
   /* Exercise 3: Preserve output on rejection
      Request area with width zero.

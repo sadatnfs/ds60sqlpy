@@ -132,12 +132,12 @@ and architecture/hardware qualification remain separate evidence.
 | [dme-054: Operational drill: detection, rollback and learning](guides/dme-054.md) | advanced | `data-engineering` |
 | [dme-055: System-design interviews grounded in constraints](guides/dme-055.md) | advanced | `python-core` |
 | [dme-056: An evidence-backed engineering portfolio](guides/dme-056.md) | advanced | `python-core` |
-| [dme-057: From an HTTP request to an admitted inference job](guides/dme-057.md) | intermediate | `python-core` |
-| [dme-058: Bytes, subwords and the tokenizer boundary](guides/dme-058.md) | intermediate | `python-core` |
-| [dme-059: Token embeddings, positions and retrieval representations](guides/dme-059.md) | intermediate | `python-core` |
-| [dme-060: Safe checkpoints, startup loading and readiness](guides/dme-060.md) | intermediate | `python-core` |
-| [dme-061: Device placement, transfers and precision budgets](guides/dme-061.md) | intermediate | `llm-torch-cpu` |
-| [dme-062: Bounded admission, queues and capacity ownership](guides/dme-062.md) | intermediate | `python-core` |
+| [dme-057: From an HTTP request to an admitted inference job](guides/dme-057.md) | advanced | `python-core` |
+| [dme-058: Bytes, subwords and the tokenizer boundary](guides/dme-058.md) | advanced | `python-core` |
+| [dme-059: Token embeddings, positions and retrieval representations](guides/dme-059.md) | advanced | `python-core` |
+| [dme-060: Safe checkpoints, startup loading and readiness](guides/dme-060.md) | advanced | `python-core` |
+| [dme-061: Device placement, transfers and precision budgets](guides/dme-061.md) | advanced | `llm-torch-cpu` |
+| [dme-062: Bounded admission, queues and capacity ownership](guides/dme-062.md) | advanced | `python-core` |
 | [dme-063: Prefill, causal attention and a correct KV cache](guides/dme-063.md) | advanced | `llm-torch-cpu` |
 | [dme-064: Autoregressive decoding, sampling and stopping rules](guides/dme-064.md) | advanced | `python-core` |
 | [dme-065: Batching, continuous scheduling and fairness](guides/dme-065.md) | advanced | `python-core` |

@@ -6,7 +6,7 @@ These answers explain the stated synthetic and scoped runtime contracts. Static 
 
 The intermediate capstone combines a stateless application response, a synthetic persistent marker store, reviewed configuration rendering and measured traffic policy. It is a host-lab integration exercise because the normal browser adapter does not provide the storage, CNI and stateful-update capabilities needed for the whole scenario.
 
-The supplied manifests keep the components explicit:configured hello Deployment/Service, one StatefulSet claim template and two ingress policies. The persistent marker is a file-based synthetic datastore, not a real database service. Its writer and reader operations must be separately bounded and reviewed by the host. A correct frontend response is not evidence that the marker survived, and an unchanged marker is not evidence that network isolation works.
+The supplied manifests keep the components explicit: configured hello Deployment/Service, one StatefulSet claim template and two ingress policies. The persistent marker is a file-based synthetic datastore, not a real database service. Its writer and reader operations must be separately bounded and reviewed by the host. A correct frontend response is not evidence that the marker survived, and an unchanged marker is not evidence that network isolation works.
 
 The capstone's acceptance packet connects those independent observations and includes a failed-change recovery. Cleanup respects the declared synthetic-data retention choice and exact resource identities. Releasing the disposable cluster is a separate lifecycle boundary that can remove node-local retained data.
 

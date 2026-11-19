@@ -4,7 +4,7 @@ Authored tutorial and practice content. The prepared Scala/JVM worker executes a
 
 ## Level and prerequisites
 
-Beginner; approximately 105 minutes. Direct design prerequisites: `spark-007`. The lesson uses Scala 2.13 syntax and the prepared JDK 17 worker. The older design document proposed a different Spark/JDK tuple; use the current [execution baseline](../execution-baseline.md) for this authored material.
+Beginner; approximately 75 minutes. Direct prerequisites: `spark-007`. The lesson uses Scala 2.13 syntax and the prepared JDK 17 worker. The [execution baseline](../execution-baseline.md) lists the exact Scala, JDK and Spark versions.
 
 ## How to run this lesson
 
@@ -143,7 +143,7 @@ Continue to the next lesson only after you can explain the boundary behavior. Th
 
 - [Scala 2.13 collections operations](https://docs.scala-lang.org/overviews/collections-2.13/operations.html).
 
-- [Java17 Math.addExact](https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/Math.html#addExact(long,long)).
+- [Java 17 Math.addExact](https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/Math.html#addExact(long,long)).
 
 ## Ask an AI tutor about this lesson
 

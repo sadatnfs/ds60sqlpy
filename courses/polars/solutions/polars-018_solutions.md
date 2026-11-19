@@ -15,6 +15,19 @@ Compare content per event_id before selecting a record. A version timestamp or a
 
 Apply classification in a documented order and verify identifiers in each outcome. Ambiguous overlap makes reported quality counts unreliable.
 
+```python
+import polars as pl
+
+raw = pl.DataFrame({"event_id": [1, 2, 2, 3, 4], "amount_text": ["5", "7", "7", "bad", "9"]})
+parsed = raw.with_columns(pl.col("amount_text").cast(pl.Int64, strict=False).alias("amount"))
+invalid = parsed.filter(pl.col("amount").is_null()).height
+valid = parsed.filter(pl.col("amount").is_not_null())
+accepted = valid.unique(subset="event_id").height
+duplicates = valid.height - accepted
+assert (raw.height, accepted, invalid, duplicates) == (5, 3, 1, 1)
+assert raw.height == accepted + invalid + duplicates
+```
+
 **Expected:** 5 source rows = 3 accepted unique + 1 invalid + 1 duplicate.
 
 ## 3. Check final grain
@@ -26,6 +39,21 @@ Validate the final key and compare additive totals with accepted events. This ch
 ## 4. Tamper with an artifact
 
 Recompute and compare before consuming the artifact. A new matching hash written by the same attacker would need an authenticity boundary that this local example does not provide.
+
+```python
+import hashlib
+import tempfile
+from pathlib import Path
+
+import polars as pl
+
+with tempfile.TemporaryDirectory() as d:
+    path = Path(d) / "features.parquet"
+    pl.DataFrame({"customer": [10, 20], "total": [12, 9]}).write_parquet(path)
+    recorded = hashlib.sha256(path.read_bytes()).hexdigest()
+    pl.DataFrame({"customer": [10, 20], "total": [12, 10]}).write_parquet(path)
+    assert hashlib.sha256(path.read_bytes()).hexdigest() != recorded
+```
 
 **Expected:** The hash check detects the difference.
 
@@ -112,4 +140,4 @@ if __name__ == "__main__":
 
 ## Interpretation
 
-Publish a feature artifact with explicit derivation and consumption contracts. Extend the case with a conflicting duplicate and a late-known event, then document why publication is accepted or blocked. Use this result as a foundation for the analytics-engineering and ML-engineering paths rather than assuming a clean-looking table is a complete data product.
+Extend the case with a conflicting duplicate and a late-known event, then document why publication is accepted or blocked. Use this result as a foundation for the analytics-engineering and ML-engineering paths rather than assuming a clean-looking table is a complete data product.

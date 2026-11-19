@@ -11,28 +11,28 @@
     },
     {
       "exercise": 2,
-      "task": "Match volume name work across Pod,init and application mounts.",
+      "task": "Match volume name work across Pod, init and application mounts.",
       "expected": "Both containers access the same /work emptyDir within one Pod."
     },
     {
       "exercise": 3,
-      "task": "Use the exact teacher-provided finite fixture and retain UID,marker and restart count.",
+      "task": "Use the exact teacher-provided finite fixture and retain UID, marker and restart count.",
       "expected": "Same Pod UID/marker across the failed first and successful next application attempt."
     },
     {
       "exercise": 4,
       "task": "Replace only the recorded owned Pod under the host capability.",
-      "expected": "New Pod UID,new marker and fresh attempt sequence."
+      "expected": "New Pod UID, new marker and fresh attempt sequence."
     },
     {
       "exercise": 5,
       "task": "Review a missing mount or denied write in prepare.",
-      "expected": "Application absence is explained by init failure;the smallest mount/permission repair is identified."
+      "expected": "Application absence is explained by init failure; the smallest mount/permission repair is identified."
     },
     {
       "exercise": 6,
       "task": "Explain why this marker is neither persistent storage nor a backup.",
-      "expected": "emptyDir lifetime is tied to the Pod;durability and independent recovery require later storage/backup contracts."
+      "expected": "emptyDir lifetime is tied to the Pod; durability and independent recovery require later storage/backup contracts."
     }
   ]
 }

@@ -8,29 +8,33 @@ External text must be parsed under an explicit grammar and range policy. atoi ca
 
 strtol(text,&end,10) parses base-ten text and stores where parsing stopped. end==text means no digits were consumed. errno==ERANGE reports range failure for long. Require *end=='\0' for this lesson's whole-string contract, then compare against INT_MIN and INT_MAX before converting. This helper accepts strtol leading whitespace and signs, but rejects trailing whitespace or other trailing text; a different user-facing policy should normalize explicitly before parsing.
 
-## Exercise 1: Parse a complete integer
+## Exercise 1: Parse a complete integer: predict an edited check
 
-Parse 42 into an output integer.
+Copy worked example 1 into a scratch pad and change `CHECK(parse_int("42", &out) && out == 42);` to `CHECK(parse_int("43", &out) && out == 42);` inside its CHECK. Before running, predict whether the CHECK still holds and explain why; then restore it.
+
+The unchanged code is worked example 1:
 
 ```c
 int out = 0;
 CHECK(parse_int("42", &out) && out == 42);
 ```
 
-**Expected:** Success is true and output is 42.
+**Expected:** The changed run stops with `Check failed` at the CHECK on `parse_int("42", &out) && out == 42`. Restoring the original line brings back the worked observation: success is true and output is 42.
 
 The parser validates complete consumption and final target range before assignment.
 
-## Exercise 2: Reject trailing garbage
+## Exercise 2: Reject trailing garbage: debug a regression
 
-Parse 42x with an existing output of 7.
+A regression changed one token in worked example 2, so one line now reads `int out = 8;`. Run worked example 2 with that line, use the failing CHECK to locate the defect and repair it without changing the CHECK.
+
+The unchanged code is worked example 2:
 
 ```c
 int out = 7;
 CHECK(!parse_int("42x", &out) && out == 7);
 ```
 
-**Expected:** The call fails and output remains 7.
+**Expected:** Before the repair the run stops with `Check failed` at the CHECK on `!parse_int("42x", &out) && out == 7`; after it the line reads `int out = 7;` again and the call fails and output remains 7.
 
 A valid prefix is not a valid complete input under this contract.
 

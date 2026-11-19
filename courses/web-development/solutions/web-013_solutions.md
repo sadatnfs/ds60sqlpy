@@ -1,51 +1,43 @@
 # web-013: explanatory solutions
 
-Compare after your own attempt or an explicit solution reveal. This file explains the supplied deterministic fixtures. It does not claim that a learner or a production deployment passed.
-
-## Why the mechanism works
-
-Color can group information, but it cannot be the only carrier of an essential distinction. A failed status should have words or an icon with an accessible name as well as a color. Contrast is the difference in luminance that makes foreground content distinguishable from its background. A pleasing palette does not automatically provide readable text or usable controls. Test the actual foreground-background pair in each state, including hover, focus, disabled and error.
-
-Focus identifies the element receiving keyboard input. Removing the browser's outline without a replacement makes navigation difficult or impossible for many users. The focus-visible pseudo-class lets the browser apply its heuristics for when focus needs a visible indicator. A control can also require an adequately sized target and enough spacing from neighboring controls.
-
-Define a small set of tokens for text, background, accent and borders, then inspect their combinations. Use an outline with an offset so it is not hidden by the border. A status element can contain the word Ready or Needs attention; color reinforces that label. Prefer explicit text to a legend that a reader must memorize.
+Open this after your own attempt. Each answer explains the lesson's synthetic fixtures; it does not show that your work or a deployment passed. The mechanism is explained in `courses/web-development/guides/web-013.md`.
 
 ## Exercise 1: Identify the missing information in a red-only error dot.
 
-The user needs a textual error meaning and a useful recovery action.
+**Expected answer:** The user needs a textual error meaning and a useful recovery action.
 
-Trace the smallest example before editing. Name which values are source and which are observations.
+**Why:** Color alone fails people with color-vision differences and screen-reader users, so the error needs words and a recovery instruction.
 
 ## Exercise 2: Add a focus-visible style without removing focus support.
 
-Keyboard focus is visibly distinguishable from hover.
+**Expected evidence:** Keyboard focus is visibly distinguishable from hover.
 
-Change only the named feature. Compare with the unchanged example and explain any unaffected behavior.
+**Why:** :focus-visible matches when the browser decides a focus indicator is needed, such as keyboard navigation, so keyboard users get a clear ring.
 
 ## Exercise 3: Build status cards whose meaning does not depend on color.
 
-Each card contains a clear label, readable text and visible interactive focus.
+**Expected evidence:** Each card contains a clear label, readable text and visible interactive focus.
 
-Sketch the structure or data contract first. Reuse the mechanism from the examples without copying the reference.
+**Why:** Text carries the meaning, so color only reinforces it and the cards remain understandable in monochrome or forced colors.
 
 ## Exercise 4: Diagnose a focus ring clipped by overflow.
 
-Inspect the ancestor clipping boundary and provide space or a different visible indicator.
+**Expected answer:** Inspect the ancestor clipping boundary and provide space or a different visible indicator.
 
-Keep the failing input. Identify the first layer where the observed result differs from the intended contract.
+**Why:** An overflow boundary clips anything drawn outside it, including an outline, so the fix is space inside the boundary or an inset indicator.
 
 ## Exercise 5: Inspect the page in a forced-colors or high-contrast setting.
 
-Native boundaries and meaningful labels remain available; document actual browser behavior.
+**Expected evidence:** Native boundaries and meaningful labels remain available; document actual browser behavior.
 
-Predict the boundary before running it. Add an explicit check or manual observation that would detect a regression.
+**Why:** Forced colors replace author colors with system colors, so information carried only by a background color disappears while borders and text remain.
 
-## Exercise 6: Explain why one palette check does not qualify every interaction state.
+## Exercise 6: Compute the contrast of #94a3b8 text on #ffffff and explain why one palette check does not qualify every interaction state.
 
-Backgrounds and foregrounds can change per state, so each important combination needs review.
+**Expected answer:** About 2.56:1, below the 4.5:1 minimum for normal text, so it fails; hover, focus, disabled and error states change the foreground or background, so each important pair needs its own check.
 
-Explain your choice to someone who has not seen the code. Include one limitation and the evidence needed to remove it.
+**Why:** Relative luminance is about 0.36 for #94a3b8 and 1.0 for white, so the ratio is (1.0 + 0.05) / (0.36 + 0.05), about 2.56:1. That fails both the 4.5:1 normal-text and the 3:1 large-text minimums, and because hover, focus, disabled and error states each change a color pair, each pair needs its own measurement.
 
-## Reference comparison and limits
+## Reference comparison
 
-Read the separate executable reference, where supplied, only after retaining your attempt. Compare structure and decisions rather than matching every identifier. A different implementation is acceptable when it satisfies the same behavior, preserves accessibility and rejects the same invalid cases. The checked reference uses tiny synthetic inputs so that each transformation can be inspected. It is not a ready-to-deploy authenticated application. Server lifecycle, persistence, concurrency and security require their own integration evidence.
+Open `courses/web-development/solutions/web-013_solution.html` only after saving your attempt, and compare decisions rather than identifiers. A different implementation is acceptable when it shows the same behavior and rejects the same invalid cases. The reference checks only its named synthetic cases; its success message is not an accessibility audit or proof of responsive behavior at every size.

@@ -16,6 +16,7 @@ var ErrConflict = errors.New("conflict")
 type Versioned struct {
 	Value   int
 	Version string
+	Labels  map[string]string
 }
 
 func versionUpdate(s *Versioned, observed string, value int, next string) error {
@@ -57,9 +58,8 @@ func main() {
 
 	// Retain another field
 	{
-		labels := map[string]string{"owner": "other"}
-		s := Versioned{Value: 1, Version: "x"}
-		check(versionUpdate(&s, "x", 2, "y") == nil && labels["owner"] == "other", "field scope")
+		s := Versioned{Value: 1, Version: "x", Labels: map[string]string{"owner": "other"}}
+		check(versionUpdate(&s, "x", 2, "y") == nil && s.Value == 2 && s.Version == "y" && s.Labels["owner"] == "other", "field scope")
 	}
 
 	// Transfer bounded conflict handling

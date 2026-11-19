@@ -6,11 +6,11 @@ Beginner, approximately 90 minutes. Direct prerequisites: `java-011`
 
 ## Learning objectives
 
-Explain type parameter, invariance, wildcard bound using a concrete program. Trace the normal execution, identify its boundary assumptions and make a failure case observable. The first investigation is Sum `List.of(1, 2, 3)` and `List.of(1.5, 2.5)` through List<?extends Number>. The final exercise transfers the mechanism to observe erasure carefully.
+Use generic types and bounded wildcards so producers, consumers and return types stay type-safe. Along the way, explain type parameter, invariance, wildcard bound using a concrete program. Trace the normal execution, identify its boundary assumptions and make a failure case observable. Exercises 1 and 2 start from the worked examples; the authored investigations begin with this task: Copy List<Integer> into List<Number> with a bounded generic method. The final exercise transfers the mechanism to observe erasure carefully.
 
 ## Purpose and mental model
 
-Generics express type relationships so many errors can be detected before execution. List<Integer> is not a subtype of List<Number>, because a caller holdingList<Number> could insert a Double and violate the original integer list. A producer wildcard?extends Number permits reading numbers but generally forbids adding a specific numeric subtype. A consumer wildcard?superInteger permits adding integers, while reads are only known asObject. A generic method can connect input and output types through a type parameter. Java implements most generics through erasure, so runtime class identity does not distinguish ArrayList<String> from ArrayList<Integer>. Avoid raw types that bypass these checks.
+Generics express type relationships so many errors can be detected before execution. List<Integer> is not a subtype of List<Number>, because a caller holding List<Number> could insert a Double and violate the original integer list. A producer wildcard?extends Number permits reading numbers but generally forbids adding a specific numeric subtype. A consumer wildcard ? super Integer permits adding integers, while reads are only known as Object. A generic method can connect input and output types through a type parameter. Java implements most generics through erasure, so runtime class identity does not distinguish ArrayList<String> from ArrayList<Integer>. Avoid raw types that bypass these checks.
 
 ## Vocabulary and concepts
 
@@ -37,13 +37,13 @@ The public class name and source filename must agree. Each worked example below 
 
 ## Syntax anatomy and execution trace
 
-The<T> before a method return type declares a method type parameter. List<?extends Number> can be iterated asNumber for summation. List<?superInteger> can acceptInteger values. Use<T>void copy(List<?extendsT>source,List<?superT>target) to connect a producer and consumer. Wildcards describe allowed operations through a reference; they do not freeze the underlying object or create a runtime conversion.
+The<T> before a method return type declares a method type parameter. List<?extends Number> can be iterated as Number for summation. List<? super Integer> can accept Integer values. Use <T> void copy(List<? extends T> source, List<? super T> target) to connect a producer and consumer. Wildcards describe allowed operations through a reference; they do not freeze the underlying object or create a runtime conversion.
 
 ## Worked example / walkthrough
 
 ### Example A: Read from a producer
 
-The method needs only to readNumber values, so an extends bound accepts both integer and double lists without permitting unsafe insertion.
+The method needs only to read Number values, so an extends bound accepts both integer and double lists without permitting unsafe insertion.
 
 ```java
 import java.util.*;
@@ -81,7 +81,7 @@ public class Main {
 
 ### Example B: Write to a consumer
 
-A Number list can safely receiveInteger values. Reading through thesuper-bounded reference offers less precise type information because the actual list may contain other supertypes.
+A Number list can safely receive Integer values. Reading through the super-bounded reference offers less precise type information because the actual list may contain other supertypes.
 
 ```java
 import java.util.*;
@@ -119,7 +119,7 @@ public class Main {
 }
 ```
 
-**Expected:** listcontains1,2.
+**Expected:** list contains 1, 2.
 
 ## Prediction before your attempt
 
@@ -127,29 +127,29 @@ Read the source from the entry point and name each value before executing it. Id
 
 ## Exercises
 
-1. **Read from a producer.** Sum `List.of(1, 2, 3)` and `List.of(1.5, 2.5)` through List<?extends Number>.
-   **Expected:** sums 6.0 and 4.0.
-   **Verify:** Compare your assertion values or captured diagnostic with sums 6.0 and 4.0.
+1. **Read from a producer: predict an edited check.** Copy Example A into a scratch `Main.java` and change `assert sum(List.of(1, 2, 3)) == 6.0;` to `assert sum(List.of(2, 2, 3)) == 6.0;` inside its assertion. Before running it with `java -ea Main`, predict whether the assertion still holds and explain why; then restore it.
+   **Expected:** The changed run fails with an `AssertionError` from the assertion on `sum(List.of(1, 2, 3)) == 6.0`. Restoring the original line brings back the worked observation: sums 6.0 and 4.0.
+   **Verify:** Compare your written prediction with the reported `AssertionError` and its stack-trace line, and explain why the edited condition is false for the values that satisfy `sum(List.of(1, 2, 3)) == 6.0`. After restoring the line, the program completes without an `AssertionError` again.
 
-2. **Write to a consumer.** Append integers1,2 to a List<Number> through List<?superInteger>.
-   **Expected:** listcontains1,2.
-   **Verify:** Compare your assertion values or captured diagnostic with listcontains1,2.
+2. **Write to a consumer: diagnose an edited check.** A careless edit changed the assertion that Example B adds after Example A so that it reads `assert numbers.equals(List.of(2, 2));`. Run Example B with that line, explain why the edited assertion now fails for the same program state, and restore it.
+   **Expected:** Before the repair the run fails with an `AssertionError` from the assertion on `numbers.equals(List.of(1, 2))`; after it the line reads `assert numbers.equals(List.of(1, 2));` again and list contains 1, 2.
+   **Verify:** Keep the failing and the repaired runs. Explain why the edited assertion rejects the same program state that `numbers.equals(List.of(1, 2))` accepts.
 
-3. **Connect source and destination types.** CopyList<Integer> intoList<Number> with a bounded generic method.
-   **Expected:** destinationcontains3,4.
-   **Verify:** Compare your assertion values or captured diagnostic with destinationcontains3,4.
+3. **Connect source and destination types.** Copy List<Integer> into List<Number> with a bounded generic method.
+   **Expected:** destination contains 3, 4.
+   **Verify:** Keep an assertion equivalent to `destination.equals(List.of(3, 4))`. As a control, change `copy(List.of(3, 4), destination);` to `copy(List.of(4, 4), destination);`: the run must fail with an `AssertionError` from the assertion on `destination.equals(List.of(3, 4))`. Restore the line before continuing.
 
-4. **Preserve generic return type.** Callfirst on a String list and assign directly toString.
+4. **Preserve generic return type.** Call first on a String list and assign it directly to a String.
    **Expected:** result alpha.
-   **Verify:** Compare your assertion values or captured diagnostic with result alpha.
+   **Verify:** Keep an assertion equivalent to `value.equals("alpha")`. As a control, change `String value = first(List.of("alpha", "beta"));` to `String value = first(List.of("alpha!", "beta"));`: the run must fail with an `AssertionError` from the assertion on `value.equals("alpha")`. Restore the line before continuing.
 
-5. **Handle an empty input contract.** Callfirst on an empty list and require a named failure.
+5. **Handle an empty input contract.** Call first on an empty list and require a named failure.
    **Expected:** NoSuchElementException.
-   **Verify:** Compare your assertion values or captured diagnostic with NoSuchElementException.
+   **Verify:** Keep an assertion equivalent to `empty`. As a control, change `empty = true;` to `empty = false;`: the run must fail with an `AssertionError` from the assertion on `empty`. Restore the line before continuing.
 
 6. **Observe erasure carefully.** Compare runtime classes of ArrayList<String> and ArrayList<Integer>;explain why this does not permit unsafe assignments.
    **Expected:** runtime classes equal; compile-time contracts remain distinct.
-   **Verify:** Compare your assertion values or captured diagnostic with runtime classes equal; compile-time contracts remain distinct.
+   **Verify:** Keep an assertion equivalent to `strings.isEmpty() && integers.isEmpty()` and confirm that `java -ea Main` completes. Then name an input that would make it fail and explain which value changes.
 
 ## Common pitfalls and diagnosis
 
@@ -159,7 +159,14 @@ Do not replace a precise exception with a catch-all that returns a plausible def
 
 ## Progressive hints
 
-First reconstruct the values and identities in the worked example. Next isolate the line that changes the result when one input is altered. Finally compare the normal and failure paths with the stated contract. Use a small table of input, expected value, actual value and exception type. Ask for one hint about the first incorrect assumption before requesting the entire reference implementation.
+Read one hint at a time and attempt the exercise again before reading the next. Keep a small table of input, expected value, actual value and exception type. Ask for one hint about the first incorrect assumption before requesting the entire reference implementation.
+
+- **Exercise 1:** First restate the expected observation: sums 6.0 and 4.0. Then list the values read by `sum(List.of(1, 2, 3)) == 6.0` and trace each one from its declaration. Finally, compute the asserted value with `assert sum(List.of(2, 2, 3)) == 6.0;` in place before running.
+- **Exercise 2:** First restate the expected observation: list contains 1, 2. Then list the values read by `numbers.equals(List.of(1, 2))` and trace each one from its declaration. Finally, compare `assert numbers.equals(List.of(2, 2));` with the same line in Example B and state the claim each version makes.
+- **Exercise 3:** First restate the expected observation: destination contains 3, 4. Then list the values read by `destination.equals(List.of(3, 4))` and trace each one from its declaration. Finally, predict the effect of changing `copy(List.of(3, 4), destination);` to `copy(List.of(4, 4), destination);` before running anything.
+- **Exercise 4:** First restate the expected observation: result alpha. Then list the values read by `value.equals("alpha")` and trace each one from its declaration. Finally, predict the effect of changing `String value = first(List.of("alpha", "beta"));` to `String value = first(List.of("alpha!", "beta"));` before running anything.
+- **Exercise 5:** First restate the expected observation: noSuchElementException. Then list the values read by `empty` and trace each one from its declaration. Finally, predict the effect of changing `empty = true;` to `empty = false;` before running anything.
+- **Exercise 6:** First restate the expected observation: runtime classes equal; compile-time contracts remain distinct. Then list the values read by `strings.isEmpty() && integers.isEmpty()` and trace each one from its declaration. Finally, name one input that would make `strings.isEmpty() && integers.isEmpty()` false.
 
 ## Self-check and retrieval
 
@@ -171,7 +178,7 @@ Preserve the saved pad and the six exercise observations. Continue to the next l
 
 ## Sources and verification status
 
-[Official Java21 API or language reference](https://docs.oracle.com/en/java/javase/21/docs/api/index.html), reviewed2026-10-22. Examples and exercise fixtures are original course material. Use the [validation guide](../../../docs/validation.md) and CI artifacts for the exact revision and platform to inspect actual compile/run results. Authoring, parsing, compilation, execution and learner mastery are separate forms of evidence.
+[Official Java 21 API or language reference](https://docs.oracle.com/en/java/javase/21/docs/api/index.html), reviewed 2026-10-22. Examples and exercise fixtures are original course material. Use the [validation guide](../../../docs/validation.md) and CI artifacts for the exact revision and platform to inspect actual compile/run results. Authoring, parsing, compilation, execution and learner mastery are separate forms of evidence.
 
 ## Ask an AI tutor about this lesson
 
@@ -181,7 +188,7 @@ Read courses/java/guides/java-012.md and courses/java/lessons/java-012.java. Dir
 Explain the mechanism, ask for a prediction, review my attempt, give one hint,
 request compiler/runtime evidence, and ask a fresh retrieval question.
 Keep courses/java/solutions/ closed until I request comparison or show an attempt.
-Use Java21 and the declared offline fixture. Done when I can explain the state
+Use Java 21 and the declared offline fixture. Done when I can explain the state
 transitions, pass all six exercise contracts, diagnose one failure and solve a
 new boundary case without copying the solution.
 ```

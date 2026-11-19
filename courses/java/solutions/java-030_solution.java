@@ -72,7 +72,7 @@ public class Main {
     byte[] encoded = encode(record, 2);
     assert decode(encoded).equals(record);
 
-    // Exercise 2: Apply a version1 default
+    // Exercise 2: Apply a version 1 default
     Account legacy = decode(encode(new Account("a1", 125, "ignored by v1"), 1));
     assert legacy.id().equals("a1") && legacy.cents() == 125 && legacy.note().equals("unlabelled");
 

@@ -1,22 +1,22 @@
 # spark-034: Stream-stream joins and bounded state
 
-Authored paired Scala/PySpark teaching content. The default fixtures are tiny,local and deterministic. Runtime acceptance,logical correctness and learner understanding remain separate evidence.
+Authored paired Scala/PySpark teaching content. The default fixtures are tiny, local and deterministic. Runtime acceptance, logical correctness and learner understanding remain separate evidence.
 
 ## Level and prerequisites
 
-Advanced; approximately 120 minutes. Direct design prerequisites: `spark-033`. The prepared baseline is Spark 4.0.1,Scala binary2.13,JDK 17 and Python 3.12. Read the [execution baseline](../execution-baseline.md); a proposed future tuple is not a runtime receipt.
+Advanced; approximately 120 minutes. Direct prerequisites: `spark-033`. The prepared baseline is Spark 4.0.1, Scala binary 2.13, JDK 17 and Python 3.12. Read the [execution baseline](../execution-baseline.md).
 
 ## How to run this lesson
 
-Open `spark-034` in the classroom and choose the Scala or PySpark implementation you understand. Prepare only its fixed `spark-local-scala` or `spark-local-python` profile,save your pad and run the complete source. Scala stages as `Main.scala` with `object Main`; Python stages as `main.py` with a main guard. Each program creates its own local[2] session,disables the UI,binds the driver to loopback and stops the session in finally. No external dataset,package download,JDBC connection or cloud service is requested.
+Open `spark-034` in the classroom and choose the Scala or PySpark implementation you understand. Prepare only its fixed `spark-local-scala` or `spark-local-python` profile, save your pad and run the complete source. Scala stages as `Main.scala` with `object Main`; Python stages as `main.py` with a main guard. Each program creates its own local[2] session, disables the UI, binds the driver to loopback and stops the session in finally. No external dataset, package download, JDBC connection or cloud service is requested.
 
 The [Scala learner](../lessons/spark-034.scala) and [PySpark learner](../lessons/spark-034.py) run two complete demonstrations and retain six explicit task stubs. Use the [explained solutions](../solutions/spark-034_solutions.md) only after an attempt or an explicit worked comparison; the [Scala reference](../solutions/spark-034_solution.scala) and [PySpark reference](../solutions/spark-034_solution.py) contain complete assertions. A bounded collect is used only for the declared tiny fixture; do not copy it onto an unbounded or large production table.
 
 ## Learning objectives
 
 - Express a time-bounded streaming join and explain which unmatched rows can be finalized.
-- State the input and output grain,schema,NULL policy and ordering before executing a transformation.
-- Compare each language implementation with independent literal expectations,not only with the other implementation.
+- State the input and output grain, schema, NULL policy and ordering before executing a transformation.
+- Compare each language implementation with independent literal expectations, not only with the other implementation.
 
 ## Vocabulary and concepts
 
@@ -34,13 +34,13 @@ The [Scala learner](../lessons/spark-034.scala) and [PySpark learner](../lessons
 
 A stream-stream join cannot decide every match when the first row arrives. It retains records that might match data arriving later on the other side. This lesson joins impression and click streams using both key equality and an explicit interval: click_time is at or after impression_time and strictly before impression_time plus ten minutes. Watermarks on both event-time columns constrain the retained history under the stated late-data policy.
 
-The first impression file has i1/A at 00:00, i2/B at 00:00 and i3/C at 00:05. The click file has c1/A at 00:03, c2/C at 00:10, c3/A at 00:10 and c4/Z at 00:04. The valid pairs are(i1, c1) and (i3, c2). Clickc 3 is exactly at i1's exclusive upper boundary and must not match. Clickc 4 has no matching identity key. Impressioni 2 is unmatched, but a streaming left outer join cannot immediately conclude that noB click will arrive within its ten-minute interval.
+The first impression file has i1/A at 00:00, i2/B at 00:00 and i3/C at 00:05. The click file has c1/A at 00:03, c2/C at 00:10, c3/A at 00:10 and c4/Z at 00:04. The valid pairs are (i1, c1) and (i3, c2). Click c3 is exactly at i1's exclusive upper boundary and must not match. Click c4 has no matching identity key. Impression i2 is unmatched, but a streaming left outer join cannot immediately conclude that no B click will arrive within its ten-minute interval.
 
 Both streams use a five-minute watermark. The application explicitly keeps the conservative minimum multiple-watermark policy. At the end of the first finite run, matched pairs can be emitted, but the unmatched i2 result is not yet final. Finishing the currently available files is not evidence that all future event-time possibilities have been ruled out. This is why AvailableNow termination and outer-result finalization are different concepts.
 
 The second phase publishes one 00:30 administrative record on each side, using different keys so the advancers cannot match each other. Advancing both sides matters: under the minimum policy, a stalled input can hold back global progress even if the other side races ahead. After the second finite run and its no-data state-cleanup batch, the actual watermark reaches the required boundary and i2 can be emitted with a NULL click ID. The advancer impression itself is still too recent to be finalized as unmatched.
 
-The final inner sink contains the same two matched pairs. The final left outer sink contains those pairs plus(i2, NULL). The reference inspects actual progress watermarks and state-removal metrics alongside the output. It does not infer an outerNULL row from the mere absence of a click in one input file or from a wall-clock sleep. The two queries use separate checkpoints and sinks so their source progress and state cannot interfere.
+The final inner sink contains the same two matched pairs. The final left outer sink contains those pairs plus(i2, NULL). The reference inspects actual progress watermarks and state-removal metrics alongside the output. It does not infer an outer NULL row from the mere absence of a click in one input file or from a wall-clock sleep. The two queries use separate checkpoints and sinks so their source progress and state cannot interfere.
 
 The join condition remains part of the business contract. Inclusive BETWEEN would incorrectly include c3 at the ten-minute boundary. Removing the key equality would create unrelated pairs. Removing the temporal bound would leave a left row eligible for an arbitrarily late right match and prevent the same finite outer-finalization reasoning. The final negative control requests a stream-stream left outer join with key equality alone and requires an analysis rejection under this setup.
 
@@ -144,7 +144,7 @@ assert not (10 >= impression_minute and 10 < impression_minute + 10)
 print("Minute3 matches;minute10 is outside the half-open window")
 ```
 
-This independent boundary calculation distinguishes the required interval from an inclusiveBETWEEN. The actual join must reproduce the same rule for timestamps rather than relying on coincidental fixture counts.
+This independent boundary calculation distinguishes the required interval from an inclusive BETWEEN. The actual join must reproduce the same rule for timestamps rather than relying on coincidental fixture counts.
 
 ### Worked example 2
 
@@ -206,7 +206,7 @@ Execute a named join kind with AvailableNow, Parquet append and its own checkpoi
 
 Read either owned output as ordered(impression_id, click_id) pairs. After phase 1, compare inner and outer sinks with the two-pair literal oracle.
 
-**Expected result/shape:** Both sinks contain(i1, c1),(i3, c2). i2/NULL is absent because its possible match interval is not yet finalized. c3 and c4 produce no pair.
+**Expected result/shape:** Both sinks contain(i1, c1), (i3, c2). i2/NULL is absent because its possible match interval is not yet finalized. c3 and c4 produce no pair.
 
 **Verify:** Assert exact pair lists and absence of prematurei 2/NULL; do not rely only on output count 2.
 
@@ -216,7 +216,7 @@ Read either owned output as ordered(impression_id, click_id) pairs. After phase 
 
 Publish distinct-key 00:30 advancers to both sources, rerun both compatible queries and extract actual watermark/state-removal evidence.
 
-**Expected result/shape:** Inner remains two pairs. Outer becomes(i1, c1),(i2, NULL),(i3, c2). Actual watermark reaches at least 00:25 and state removal is positive; the new advancer impression remains pending.
+**Expected result/shape:** Inner remains two pairs. Outer becomes(i1, c1), (i2, NULL), (i3, c2). Actual watermark reaches at least 00:25 and state removal is positive; the new advancer impression remains pending.
 
 **Verify:** Assert the complete outer ledger, input 2 for each new run, observed progress boundary and removed-state count.
 
@@ -238,15 +238,15 @@ Do not infer unmatched outer output from temporary source silence. Keep key equa
 
 ## Self-check
 
-Explain the contract of `inputs` / `inputs` without reading its solution. Trace the specified boundary case,then explain the final exercise's evidence and limitation. Identify where a transformation builds a plan and where an action requests execution. Retain exact values or operator evidence rather than treating a successful process exit as proof of the whole learning objective.
+Explain the contract of `inputs` / `inputs` without reading its solution. Trace the specified boundary case, then explain the final exercise's evidence and limitation. Identify where a transformation builds a plan and where an action requests execution. Retain exact values or operator evidence rather than treating a successful process exit as proof of the whole learning objective.
 
 ## Next step
 
-Use the [course route](../README.md) to continue. Paired-language agreement is useful only when both outputs also satisfy the independent fixture contract. Keep runtime/profile receipts separate from any cluster-performance or production-recovery claim.
+Use the [course route](../README.md) to continue. Paired-language agreement is useful only when both outputs also satisfy the independent fixture contract. A successful local run is not evidence of cluster performance or production recovery.
 
 ## Primary sources and official APIs
 
-- [Spark 4.0.1 stream-stream joins,watermarks and outer semantics](https://spark.apache.org/docs/4.0.1/streaming/apis-on-dataframes-and-datasets.html)
+- [Spark 4.0.1 stream-stream joins, watermarks and outer semantics](https://spark.apache.org/docs/4.0.1/streaming/apis-on-dataframes-and-datasets.html)
 
 - [Spark 4.0.1 stateful checkpoint configuration limits](https://spark.apache.org/docs/4.0.1/streaming/additional-information.html)
 
@@ -254,8 +254,8 @@ Use the [course route](../README.md) to continue. Paired-language agreement is u
 
 ```text
 Use $guide-ds60sqlpy-learning to coach me through spark-034: Stream-stream joins and bounded state.
-Read courses/scala-spark/guides/spark-034.md and courses/scala-spark/lessons/spark-034.scala;the paired sources are courses/scala-spark/lessons/spark-034.scala and courses/scala-spark/lessons/spark-034.py.
-Direct prerequisites: spark-033. Explain the schema,row grain and new Scala/Python/Spark syntax,ask me to predict a concrete result,then inspect my attempt. Give one hint at a time,review exact result and boundary evidence,and ask retrieval questions in my own words. Do not read solutions/ until I ask or have made an honest attempt.
-Use only the prepared local[2] worker profile and owned job scratch. Do not download dependencies,start a remote service,reset existing checkpoints or alter unrelated learner work.
+Read courses/scala-spark/guides/spark-034.md and courses/scala-spark/lessons/spark-034.scala; the paired sources are courses/scala-spark/lessons/spark-034.scala and courses/scala-spark/lessons/spark-034.py.
+Direct prerequisites: spark-033. Explain the schema, row grain and new Scala/Python/Spark syntax, ask me to predict a concrete result, then inspect my attempt. Give one hint at a time, review exact result and boundary evidence, and ask retrieval questions in my own words. Do not read solutions/ until I ask or have made an honest attempt.
+Use only the prepared local[2] worker profile and owned job scratch. Do not download dependencies, start a remote service, reset existing checkpoints or alter unrelated learner work.
 Done when all six contracts have inspected evidence and I can explain the stated assumptions and a meaningful failure case.
 ```

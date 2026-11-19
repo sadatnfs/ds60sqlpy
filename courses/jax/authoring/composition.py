@@ -414,7 +414,7 @@ UNITS.extend(
             "Express dynamic decisions and repeated state transitions in forms compatible with the intended JAX transformations.",
             r"""Python control flow and numerical control flow answer different questions during tracing. A Python branch can choose a static configuration before compilation. A runtime array value needs a representation whose decision remains part of the numerical computation. lax.cond supplies that representation for a scalar predicate, with branches that agree on output structure and shape.
 
-A loop also has a state contract. lax.scan applies one transition repeatedly over a sequence and can return both the final carry and a history of outputs. The carry must retain its shape, dtype and tree structure at each step. A changing-length Python list is not a valid replacement for a fixed numerical carry. If the task needs variable-length records, padding, masks or a separate admission policy can provide a fixed storage representation without pretending padding is an observation.
+A loop also has a state contract. lax.scan applies one transition repeatedly over a sequence and can return both the final carry and a history of outputs. The carry must retain its shape, dtype and tree structure at each step. A changing-length Python list is not a valid replacement for a fixed numerical carry. If the task needs variable-length records, padding, masks or a separate input-validation policy can provide a fixed storage representation without pretending padding is an observation.
 
 Scan is especially useful for training and simulation because it makes the transition explicit. The mathematical recurrence should be derived before the code. A hidden dependency on a later input, an incorrect initial value or a different recurrence coefficient changes the function even if every output shape remains legal.
 
@@ -619,7 +619,7 @@ A mask selects which target events contribute to the objective. Its denominator 
 
 Ignoring a label does not erase its input representation from a complete model. An attention mask controls information access; a loss mask controls direct supervision. This unit supplies literal logits, so it isolates the loss and direct logit derivatives without claiming to test a whole decoder's attention or embedding paths.
 
-Admission is deliberately separate from the transformed numerical function. Host-side checks confirm shape, at least one active target and legal active class indices. The pure loss then replaces ignored sentinel indices with a safe gather index before selecting log probabilities. A masked invalid index should not be used in a gather and only discarded afterward.
+Input validation is deliberately separate from the transformed numerical function. Host-side checks confirm shape, at least one active target and legal active class indices. The pure loss then replaces ignored sentinel indices with a safe gather index before selecting log probabilities. A masked invalid index should not be used in a gather and only discarded afterward.
 
 Uniform logits make an exact baseline: every class has equal probability. That is useful for checking the active count, but it can hide target permutations because every target has the same loss. Also retain a nonuniform example whose correct class identity matters. The combination of value, active count and per-row gradients supplies stronger evidence than a single mean.""",
             r"""With C classes and active indicators \(m_i\), define \(L=-\frac{\sum_i m_i\log p_i(y_i)}{\sum_i m_i}\). For N active targets, the derivative of an active logit is \((p_{ij}-\mathbf1_{\{j=y_i\}})/N\). At uniform three-class probabilities and three active targets, true-class coordinates have derivative \(-2/9\), other coordinates \(1/9\), and ignored rows zero. An all-ignored batch has no defined empirical mean.""",
@@ -644,7 +644,7 @@ active = jnp.array([True, True, True, False])""",
             (
                 case(
                     "Uniform active-target accounting",
-                    "Admit the fixture and compute its mean loss.",
+                    "Validate the fixture with `admit`, then compute its mean loss.",
                     "log(3), with three active targets.",
                     "The ignored row contributes neither negative log probability nor denominator count.",
                     "admit(logits, targets, active)\nassert int(active.sum()) == 3\nclose(token_mean(logits, targets, active), math.log(3.))",
@@ -670,7 +670,7 @@ active = jnp.array([True, True, True, False])""",
                 ),
                 case(
                     "Reject an empty objective",
-                    "Admit a mask with no active targets.",
+                    "Pass a mask with no active targets to `admit`.",
                     "ValueError before loss reduction.",
                     "A zero denominator cannot be reinterpreted as perfect prediction.",
                     "try:\n    admit(logits, targets, jnp.zeros(4, dtype=bool))\nexcept ValueError:\n    pass\nelse:\n    raise AssertionError('empty supervision accepted')",
@@ -694,22 +694,22 @@ active = jnp.array([True, True, True, False])""",
                 ),
                 case(
                     "Reject an active sentinel",
-                    "Mark the -100 target active and apply admission.",
+                    "Mark the -100 target active and apply `admit`.",
                     "ValueError.",
                     "The sentinel is only permitted outside the supervised target set.",
                     "try:\n    admit(logits, targets, jnp.ones(4, dtype=bool))\nexcept ValueError:\n    pass\nelse:\n    raise AssertionError('active sentinel accepted')",
                     "Validate only the selected target domain, but validate it strictly.",
                 ),
                 case(
-                    "Compile the admitted calculation",
-                    "JIT token_mean on the admitted fixture and compare with the eager objective.",
+                    "Compile the validated calculation",
+                    "JIT token_mean on the validated fixture and compare with the eager objective.",
                     "Same log(3) value.",
-                    "The host admission check and pure numerical loss have distinct execution roles.",
+                    "The host-side validation check and pure numerical loss have distinct execution roles.",
                     "admit(logits, targets, active)\nclose(jax.jit(token_mean)(logits, targets, active), math.log(3.))",
                     "Do not move NumPy host validation blindly inside JIT.",
                 ),
             ),
-            "A suspiciously small loss can come from a wrong denominator, wrong class axis or masking after an invalid operation. Inspect active target identities and direct gradients. The host admission function is intentionally not a transformed numerical kernel.",
+            "A suspiciously small loss can come from a wrong denominator, wrong class axis or masking after an invalid operation. Inspect active target identities and direct gradients. The host-side validation function is intentionally not a transformed numerical kernel.",
             "Map this objective to shifted next-token labels in llm-017 and llm-031. Explain why excluding prompt targets does not imply zero gradient through all prompt representations in a full causal model.",
             (("JAX neural-network functions", "https://docs.jax.dev/en/latest/jax.nn.html"),),
         ),
@@ -1082,7 +1082,7 @@ This lesson uses a scalar momentum update with a small random perturbation of it
 
 Serialization is a boundary between numerical objects and durable representation. NumPy arrays in an npz file store the scalar values and key data without requiring object pickles. The key algorithm is explicitly fixed for this fixture, so reconstruction does not silently reinterpret raw key words under a different algorithm. A real artifact also needs versions, shapes, dtype, model construction and the relevant data contract.
 
-The ordinary classroom worker owns a temporary directory that is removed after each Run. Saving a small file within one Run demonstrates a local save/read transition; it does not create a durable learner checkpoint available to a later Run. Source, notes and result receipts have their own supported persistence channels. A production checkpoint workflow needs an explicitly prepared artifact location and lifecycle.
+The ordinary classroom worker owns a temporary directory that is removed after each Run. Saving a small file within one Run demonstrates a local save/read transition; it does not create a durable learner checkpoint available to a later Run. Source, notes and saved run output have their own supported persistence channels. A production checkpoint workflow needs an explicitly prepared artifact location and lifecycle.
 
 Compare an uninterrupted next state with one computed after reconstruction. Then deliberately omit velocity while keeping the same key, so the negative control isolates optimizer history rather than changing several causes at once. This evidence establishes the stated scalar continuation, not a distributed data loader, cross-version bitwise portability or a large-model storage system.""",
             r"""The transition draws noise \(\xi_t\) from its current key, forms \(g_t=2(w_t-2)+0.01\xi_t\), updates \(v_{t+1}=0.9v_t+g_t\) and \(w_{t+1}=w_t-0.1v_{t+1}\), and returns the next key and count. Reconstructing only w generally changes the next result because v and the next draw also appear in these equations. Equal keys isolate the missing-velocity comparison.""",

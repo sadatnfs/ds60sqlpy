@@ -1,11 +1,20 @@
 // Answer-free learner source. Save your own copy before editing.
-// Exercise 1: Distinguish own and inherited properties
-// Create a child inheriting kind and owning name.
-// Expected: kind found by in but not hasOwn; name is own.
+// Exercise 1: Distinguish own and inherited properties: predict an edited check
+// Copy Example A into a scratch `main.mjs` and change `assert.equal(Object.hasOwn(child,
+// 'name'), true);` to `assert.equal(Object.hasOwn(child, 'name!'), true);` inside its check.
+// Before running it, predict whether the check still passes and explain why; then restore
+// it.
+// Expected: The changed run fails with an `AssertionError` at the check
+// `assert.equal(Object.hasOwn(child, 'name'), true)`. Restoring the original line brings
+// back the worked observation: kind found by in but not hasOwn; name is own.
 
-// Exercise 2: Copy only own enumerable fields
-// Spread the child into a plain record and inspect keys.
-// Expected: only name copied.
+// Exercise 2: Copy only own enumerable fields: diagnose an edited check
+// A careless edit changed a check in Example B so that it reads
+// `assert.deepEqual(Object.keys(copy), ['name!']);`. Run Example B with that line, explain
+// why the edited check now fails for the same program state, and restore it.
+// Expected: Before the repair the run fails with an `AssertionError` at the check
+// `assert.deepEqual(Object.keys(copy), ['name'])`; after it the line reads
+// `assert.deepEqual(Object.keys(copy), ['name']);` again and only name copied.
 
 // Exercise 3: Use destructuring defaults carefully
 // Read missing count and explicit null count with default 0.

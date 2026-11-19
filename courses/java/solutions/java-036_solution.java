@@ -104,9 +104,10 @@ public class Main {
           java.nio.file.Files.newInputStream(fixture.classes.resolve("App.class"))
         )
       ) {
-        assert input.readInt() == 0xCAFEBABE;
+        int magic = input.readInt();
         input.readUnsignedShort();
-        assert input.readUnsignedShort() == 65;
+        int major = input.readUnsignedShort();
+        assert magic == 0xCAFEBABE && major == 65;
       }
     }
 

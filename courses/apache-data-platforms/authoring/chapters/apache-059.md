@@ -22,6 +22,15 @@ from the presence of an index field in configuration.
 
 ## Worked case A: equality filtering with and without an index
 
+The workshop executes the indexed half of this case. Its offline table declares the
+two indexes below, and `bash run.sh check` queries that table:
+
+<!-- include: projects/pinot/table.json json -->
+
+The unindexed copy and the plan comparison described next are not part of the
+checker; they are a design exercise whose result equality you can predict but the
+workshop does not demonstrate.
+
 The fixture contains east orders 1 and 3, and west order 2. Query east and require
 IDs 1 and 3 before comparing work. Build a second owned table from the same exact
 source with the inverted index omitted. Use a different logical table name and

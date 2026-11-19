@@ -1,4 +1,4 @@
-"""mle-010: worked starting point; complete the guide's six changes."""
+"""mle-010: both worked cases; complete the guide's six changes."""
 
 import hashlib
 import json
@@ -66,8 +66,23 @@ def example_one():
         }
 
 
+def example_two():
+    with tempfile.TemporaryDirectory() as d:
+        client, experiment = tracker(Path(d) / "tracking")
+        run = client.create_run(experiment)
+        client.log_metric(run.info.run_id, "training_loss", 0.1)
+        client.set_terminated(run.info.run_id, status="FAILED")
+        loaded = client.get_run(run.info.run_id)
+        assert loaded.info.status == "FAILED" and loaded.data.metrics["training_loss"] == 0.1
+        return {
+            "failed_run_retains_observations": True,
+            "successful_metric_is_not_successful_workflow": True,
+        }
+
+
 if __name__ == "__main__":
     print(example_one())
+    print(example_two())
 
 # TODO 1: Add a source revision or digest tag to a run.
 # TODO 2: Explain where a metric and a model file are stored conceptually.

@@ -1,6 +1,6 @@
 # swift-023: explanation and comparison
 
-Attempt the six guide tasks before opening this comparison. The executable reference is [swift-023_solution.swift](swift-023_solution.swift). Its assertions are always active under the prepared classroom compile settings.
+Attempt the six guide tasks before opening this comparison. The executable reference is [swift-023_solution.swift](swift-023_solution.swift). It runs both worked examples and the reference answers below, and its assertions are always active under the prepared classroom compile settings.
 
 ## Why the two examples differ
 
@@ -8,21 +8,67 @@ Attempt the six guide tasks before opening this comparison. The executable refer
 
 **Reject a decoded domain violation:** Structural decoding and domain admission are separate responsibilities. Valid JSON can still describe an invalid item.
 
-## Reason through the six tasks
+## Task answers
 
-1. **Predict and explain.** State what the round-trip check proves.
+### Task 1: Predict and explain
 
-2. **Guided modification.** Add an optional description field and test missing versus present data.
+State what the round-trip check proves.
 
-3. **Independent construction.** Write a decoder that validates before returning a trusted item.
+No separate reference answer has been written for this task. Example A is the evidence to compare with: Value equality checks the data meaning rather than incidental JSON property ordering. The modeled fields round-trip through JSON.
 
-4. **Diagnose a defect.** Diagnose assuming synthesized Codable enforces business invariants.
+### Task 2: Guided modification
 
-5. **Boundary evidence.** Test malformed JSON, missing required fields and unknown fields.
+Add an optional description field and test missing versus present data.
 
-6. **Transfer and justify.** Plan migration of a renamed field without discarding existing saved records.
+No separate reference answer has been written for this task. Start from Example B: Structural decoding and domain admission are separate responsibilities. Valid JSON can still describe an invalid item.
 
-For tasks 1 and 2, use the checked values and mechanism trace in the two examples. For task 3, choose names that expose the input and result contract and retain the same invariants. For task 4, the diagnosed mistakes below supply a concrete wrong assumption: preserve its counterexample before repairing it. Task 5 needs an explicit expected value or documented rejection at the boundary, not just successful execution. For task 6, explain what changes in the new context and which part of the original mechanism remains applicable. Several representations may satisfy this transfer task; justify the choice rather than treating this reference as the only architecture.
+### Task 3: Independent construction
+
+Write a decoder that validates before returning a trusted item.
+
+**Reference answer.** It runs as the `Task 3` block of the reference program.
+
+```swift
+enum DecodeError: Error {
+  case invalid
+}
+func trustedItem(from data: Data) throws -> Item {
+  let item = try JSONDecoder().decode(Item.self, from: data)
+  guard item.isValid else { throw DecodeError.invalid }
+  return item
+}
+let good = try trustedItem(from: Data(#"{"name":"pear","quantity":2}"#.utf8))
+precondition(good.quantity == 2)
+var rejected = false
+do {
+  _ = try trustedItem(from: Data(#"{"name":"pear","quantity":-1}"#.utf8))
+} catch DecodeError.invalid {
+  rejected = true
+}
+precondition(rejected)
+```
+
+**Observe:** The valid item is returned; quantity -1 decodes but is rejected before it is trusted.
+
+Decoding proves only the shape; the validation step runs before the function returns, so callers never receive an invalid Item.
+
+### Task 4: Diagnose a defect
+
+Diagnose assuming synthesized Codable enforces business invariants.
+
+No reference answer has been written for this task yet. The wrong assumptions to look for are this lesson's pitfalls: JSON key order is not a semantic equality rule. Defaults can hide missing required information. Do not decode directly into a complex object with side effects.
+
+### Task 5: Boundary evidence
+
+Test malformed JSON, missing required fields and unknown fields.
+
+No reference answer has been written for this task yet. Write the expected value or documented rejection for each boundary before running it, and compare with the checks in Example A (Round-trip a value model) and Example B (Reject a decoded domain violation).
+
+### Task 6: Transfer and justify
+
+Plan migration of a renamed field without discarding existing saved records.
+
+No single reference answer exists: several designs can satisfy this transfer task. Justify yours against the mechanism described below and the vocabulary entry **Codable**, and state one limitation of your choice.
 
 ## Mechanism and diagnostic reasoning
 
@@ -36,4 +82,4 @@ JSON key order is not a semantic equality rule. Defaults can hide missing requir
 
 ## Review before continuing
 
-The reference checks the worked scenarios, including their boundary distinctions. Your independent and transfer artifacts may have additional checks. Compare observations rather than only source text. Preserve any new regression case you discover and explain why it would reject a plausible wrong implementation. External project steps require their own build and platform evidence and are not established by a portable reference passing.
+Run the reference and confirm that it prints `swift-023: passed`, then reconstruct one boundary case from memory and explain which check would reject a plausible wrong implementation. External project steps need their own build and platform evidence; a passing portable reference does not establish them.

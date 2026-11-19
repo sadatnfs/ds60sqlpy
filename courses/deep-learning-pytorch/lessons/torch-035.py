@@ -4,17 +4,19 @@ Answer-free learner worksheet. See the companion guide for worked examples.
 Copy to .learning before editing. Six independent attempts belong below.
 """
 
-# Exercise 1: Align predictions by ID
-# Use truth a0, b1, c2 with A0, 2, 2 and B 1, 2, 3 in different dictionary order.
-# Expected: paired squared-loss differences-1, 0, -1.
+# Exercise 1: Align a new pair of models
+# Use truth x=1, y=2 with model A predictions x=1, y=4 and model B predictions y=2, x=0 in
+# different dictionary order.
+# Expected: paired squared-loss differences A minus B: [-1, 4].
 
-# Exercise 2: Interpret the average contrast
-# Average the three paired differences.
-# Expected: mean-2/3, favoring A on this loss fixture.
+# Exercise 2: Interpret the new mean contrast
+# Average the two paired differences and state which model the fixture favors.
+# Expected: mean 1.5, favoring model B on this loss.
 
-# Exercise 3: Resample pairs reproducibly
-# Draw 1000 three-index bootstrap samples with local Generator seed 7.
-# Expected: 1000finite estimates within-1..0.
+# Exercise 3: Bound the new bootstrap means
+# Draw 500 two-index bootstrap samples with Generator seed 11 and inspect the possible
+# means.
+# Expected: every mean is -1, 1.5 or 4.
 
 # Exercise 4: Replay the local random stream
 # Create a new Generator with seed 7 and compare the index matrix.

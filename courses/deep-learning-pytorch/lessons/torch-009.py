@@ -4,18 +4,19 @@ Answer-free learner worksheet. See the companion guide for worked examples.
 Copy to .learning before editing. Six independent attempts belong below.
 """
 
-# Exercise 1: Count batches and updates
-# Partition IDs 1..6 into batches of 2.
-# Expected: three batches[[1, 2], [3, 4], [5, 6]].
+# Exercise 1: Partition with batch size 4
+# Partition IDs 1..10 into batches of 4 without dropping the tail.
+# Expected: batch sizes 4, 4, 2; the last batch is [9, 10].
 
-# Exercise 2: Retain a short tail
-# Partition five IDs with batch size 2.
-# Expected: batch sizes 2, 2, 1.
+# Exercise 2: Count updates with a dropped tail
+# With 10 records, batch size 4 and the short tail dropped, count optimizer steps per
+# epoch and over 3 epochs.
+# Expected: 2 steps per epoch and 6 in total; records 9 and 10 never contribute in unshuffled order.
 
-# Exercise 3: Run three independent updates
-# Train x = 1..6, y = 2x, w = 0 with batch size 2, rate 0.01, clearing gradients each
-# batch.
-# Expected: three finite distinct weights.
+# Exercise 3: Trace two single-record updates
+# Train w from 0 on x = 1, 2 with y = 2x, batch size 1 and learning rate 0.1, clearing
+# gradients before each step.
+# Expected: weights 0.4 then 1.68.
 
 # Exercise 4: Expose accidental accumulation
 # Repeat the loop without zero_grad and compare its final weight with the correct run.

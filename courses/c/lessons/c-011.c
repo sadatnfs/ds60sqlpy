@@ -1,13 +1,21 @@
 #include <stdio.h>
 
 int main(void) {
-  /* Exercise 1: Trace block shadowing
-     Declare an outer value 3 and a separate inner value 7.
-     Expected: After the inner block, the outer remains 3. */
+  /* Exercise 1: Trace block shadowing: change one input
+     Copy worked example 1 into a scratch pad and change `int value = 3;` to
+     `int value = 4;`. Before running, predict which CHECK fails and which value
+     it now sees; then run it and restore the original line. Expected: The
+     changed run stops with `Check failed` at the CHECK on `value == 3`.
+     Restoring the original line brings back the worked observation: after the
+     inner block, the outer remains 3. */
 
-  /* Exercise 2: Retain static state
-     Call a function with one static counter twice.
-     Expected: It returns 1 and then 2. */
+  /* Exercise 2: Retain static state: diagnose an edited check
+     A careless edit changed the CHECK in worked example 2 so that it reads
+     `CHECK(next_count() != 2);`. Run worked example 2 with that line, explain
+     why the edited CHECK now fails for the same program state, and restore it.
+     Expected: Before the repair the run stops with `Check failed` at the CHECK
+     on `next_count() == 2`; after it the line reads `CHECK(next_count() == 2);`
+     again and it returns 1 and then 2. */
 
   /* Exercise 3: Return a static address
      Get a pointer to a static read-only value.

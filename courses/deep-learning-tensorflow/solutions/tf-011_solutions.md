@@ -14,51 +14,58 @@ Keras packages the same computation that the earlier tape lesson exposed. Dense 
 
 ## Reading the implementation
 
-Input(shape=(1,)) excludes the batch dimension. Dense(1,use_bias=False) creates a single trainable scalar kernel. Reshape the three observations to (3,1), matching targets exactly. Compile uses SGD(.1) with loss='mse'. train_on_batch executes one full-batch step without a data-shuffle dependency. get_weights returns NumPy copies useful for comparison. A new model is required for each independent control.
+Input(shape=(1,)) excludes the batch dimension. Dense(1, use_bias=False) creates a single trainable scalar kernel. Reshape the three observations to (3, 1), matching targets exactly. Compile uses SGD(0.1) with loss='mse'. train_on_batch executes one full-batch step without a data-shuffle dependency. get_weights returns NumPy copies useful for comparison. A new model is required for each independent control. fit(x, y, epochs=1, batch_size=3, shuffle=False, verbose=0) runs the same full-batch step through the standard training loop and returns a History object whose loss entry is the mean loss computed during the epoch, before that epoch's update.
 
-## Exercise 1: Construct a scalar model
+## Exercise 1: Fit one epoch with the standard loop
 
-The question is: Create a zero-initialized single-unit model without bias and inspect its parameter count.
+The question is: Build a fresh zero-initialized model, compile it with SGD(0.1) and loss='mse', then call fit(x, y, epochs=1, batch_size=3, shuffle=False, verbose=0).
 
-Excluding a bias preserves the exact scalar model yhat=w*x. A Dense layer with its default bias would introduce a second parameter and a second gradient, invalidating the direct comparison.
+With batch_size equal to the three observations and shuffle=False, one epoch is exactly one full-batch step, so fit must reproduce the hand-derived kernel. The History entry is the mean loss computed during the epoch, before the step changed the weight, which is why it reports 56/3 rather than the post-update loss 56/675. The relative tolerance reflects float32 rounding of a value near 18.7.
 
 ```python
-model = tf.keras.Sequential(
+fitted = tf.keras.Sequential(
     [
         tf.keras.Input(shape=(1,)),
         tf.keras.layers.Dense(1, use_bias=False, kernel_initializer="zeros"),
     ]
 )
-x = np.array([[1.0], [2.0], [3.0]], dtype="float32")
-y = 2 * x
-assert model.count_params() == 1
-np.testing.assert_array_equal(model(x).numpy(), np.zeros((3, 1)))
+fitted.compile(optimizer=tf.keras.optimizers.SGD(0.1), loss="mse")
+history = fitted.fit(x, y, epochs=1, batch_size=3, shuffle=False, verbose=0)
+assert len(history.history["loss"]) == 1
+np.testing.assert_allclose(history.history["loss"][0], 56 / 3, rtol=1e-6)
+np.testing.assert_allclose(fitted.get_weights()[0], [[28 / 15]], atol=1e-6, rtol=0)
 ```
 
-**Expected:** one parameter and all initial predictions0.
+**Expected:** History loss 56/3 (the loss before the update); kernel 28/15, the same as train_on_batch.
 
-**Verify:** Compare the computed values or written argument with one parameter and all initial predictions0.
+**Verify:** In a fresh process, the exercise checks confirm `len(history.history['loss']) == 1`, `history.history['loss'][0]` matches `56 / 3` within relative tolerance 1e-6 and `fitted.get_weights()[0]` matches `[[28 / 15]]` within 1e-6.
 
-## Exercise 2: Audit the first update
+## Exercise 2: Predict a halved learning rate
 
-The question is: Compile with mean squared error and SGD(.1), then call train_on_batch once.
+The question is: Before running it, predict the kernel and post-update loss for a fresh model trained once with SGD(0.05); then check the prediction.
 
-The API may report the loss used for the update, rather than the loss at the updated weight. Recompute predictions after the step to distinguish before from after.
+The gradient at zero is still -56/3, so half the rate moves the kernel half as far, to 14/15. The loss is \((14/3)(w-2)^2\); with \(w-2=-16/15\) it equals 3584/675. A loss near 5.3 has larger float32 rounding than 56/675, so the check uses 1e-5.
 
 ```python
-model.compile(optimizer=tf.keras.optimizers.SGD(0.1), loss="mse")
-model.train_on_batch(x, y)
-np.testing.assert_allclose(model.get_weights()[0], [[28 / 15]], atol=1e-6, rtol=0)
-np.testing.assert_allclose(np.mean((model(x).numpy() - y) ** 2), 56 / 675, atol=1e-6, rtol=0)
+half = tf.keras.Sequential(
+    [
+        tf.keras.Input(shape=(1,)),
+        tf.keras.layers.Dense(1, use_bias=False, kernel_initializer="zeros"),
+    ]
+)
+half.compile(optimizer=tf.keras.optimizers.SGD(0.05), loss="mse")
+half.train_on_batch(x, y)
+np.testing.assert_allclose(half.get_weights()[0], [[14 / 15]], atol=1e-6, rtol=0)
+np.testing.assert_allclose(np.mean((half(x).numpy() - y) ** 2), 3584 / 675, atol=1e-5, rtol=0)
 ```
 
-**Expected:** kernel28/15 and post-update loss56/675 within 1e-6.
+**Expected:** kernel 14/15; post-update loss 3584/675, about 5.31.
 
-**Verify:** Compare the computed values or written argument with kernel28/15 and post-update loss56/675 within 1e-6.
+**Verify:** In a fresh process, the exercise checks confirm `half.get_weights()[0]` matches `[[14 / 15]]` within 1e-6 and `np.mean((half(x).numpy() - y) ** 2)` matches `3584 / 675` within 1e-5.
 
 ## Exercise 3: Inspect forward shape
 
-The question is: Pass two observations [[4],[5]] through the trained model and inspect output axes.
+The question is: Pass two observations [[4], [5]] through the trained model and inspect output axes.
 
 The leading dimension counts observations. Keeping the output column avoids broadcasting a vector target across a batch into a pairwise error matrix.
 
@@ -68,9 +75,9 @@ assert pred.shape == (2, 1)
 np.testing.assert_allclose(pred[:, 0], [112 / 15, 28 / 3], atol=1e-6, rtol=0)
 ```
 
-**Expected:** shape(2,1), predictions112/15 and28/3.
+**Expected:** shape (2, 1), predictions 112/15 and 28/3.
 
-**Verify:** Compare the computed values or written argument with shape(2,1), predictions112/15 and28/3.
+**Verify:** In a fresh process, the exercise checks confirm `pred.shape == (2, 1)` and `pred[:, 0]` matches `[112 / 15, 28 / 3]` within 1e-6.
 
 ## Exercise 4: Evaluation leaves weights alone
 
@@ -86,7 +93,7 @@ np.testing.assert_array_equal(before, model.get_weights()[0])
 
 **Expected:** kernel is exactly unchanged.
 
-**Verify:** Compare the computed values or written argument with kernel is exactly unchanged.
+**Verify:** In a fresh process, the exercise checks confirm `before` equals `model.get_weights()[0]`.
 
 ## Exercise 5: Show the extra intercept
 
@@ -105,9 +112,9 @@ assert with_bias.count_params() == 2
 np.testing.assert_array_equal(with_bias.get_weights()[1], [0])
 ```
 
-**Expected:** 2 parameters; bias starts0.
+**Expected:** 2 parameters; bias starts 0.
 
-**Verify:** Compare the computed values or written argument with 2 parameters; bias starts0.
+**Verify:** In a fresh process, the exercise checks confirm `with_bias.count_params() == 2` and `with_bias.get_weights()[1]` equals `[0]`.
 
 ## Exercise 6: Compare the scalar oracle
 
@@ -121,9 +128,9 @@ np.testing.assert_allclose(grad, -56 / 3, atol=1e-6, rtol=0)
 np.testing.assert_allclose(-0.1 * grad, 28 / 15, atol=1e-6, rtol=0)
 ```
 
-**Expected:** gradient-56/3 and update28/15.
+**Expected:** gradient -56/3 and update 28/15.
 
-**Verify:** Compare the computed values or written argument with gradient-56/3 and update28/15.
+**Verify:** In a fresh process, the exercise checks confirm `grad` matches `-56 / 3` within 1e-6 and `-0.1 * grad` matches `28 / 15` within 1e-6.
 
 ## Review after comparison
 

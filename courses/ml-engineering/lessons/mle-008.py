@@ -1,4 +1,4 @@
-"""mle-008: worked starting point; complete the guide's six changes."""
+"""mle-008: both worked cases; complete the guide's six changes."""
 
 import numpy as np
 import pandas as pd
@@ -67,8 +67,25 @@ def example_one():
     return {"batch_probabilities": batch.tolist(), "single_request_parity": True}
 
 
+def example_two():
+    from sklearn.preprocessing import StandardScaler
+
+    training = np.array([[0.0], [2.0]])
+    heldout = np.array([[100.0]])
+    fitted = StandardScaler().fit(training)
+    correct = fitted.transform(heldout).item()
+    leaking = StandardScaler().fit(np.vstack([training, heldout])).transform(heldout).item()
+    assert correct == 99.0 and abs(leaking - correct) > 90
+    return {
+        "training_mean": 1.0,
+        "proper_transformed_value": correct,
+        "leaking_transformed_value": leaking,
+    }
+
+
 if __name__ == "__main__":
     print(example_one())
+    print(example_two())
 
 # TODO 1: Construct a request with fields in a different dictionary order.
 # TODO 2: Observe the fitted imputation behavior.

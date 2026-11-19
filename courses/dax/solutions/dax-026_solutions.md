@@ -19,7 +19,7 @@ All four clean-model Product keys; retain every input row while adding revenue.
 
 An extension column is addressed by its name in the virtual table expression. It is not automatically installed as a persistent Product column.
 
-- VALUES supplies keys 1,2,3,4.
+- VALUES supplies keys 1, 2, 3, 4.
 - ADDCOLUMNS computes one revenue result per input key.
 - Bag's blank measure does not remove key 4 from this projected table.
 
@@ -37,7 +37,7 @@ Adding a nonblank expression or deliberately coalescing revenue can alter which 
 
 - The four candidate keys form groups.
 - Key 4 has BLANK for every supplied expression.
-- That all-blank group is omitted; keys 1,2,3 remain.
+- That all-blank group is omitted; keys 1, 2, 3 remain.
 
 ## Explained practice answers
 

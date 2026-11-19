@@ -64,7 +64,7 @@ def main():
     weights = jnp.array([1.0, 2.0, 3.0])
     close(jax.grad(lambda z: jnp.vdot(weights, function(z)))(point), [4.0, 7.0])
 
-    print("jax-008" + ": 8 asserted cases passed")
+    print("jax-008: 8 asserted cases passed")
 
 
 if __name__ == "__main__":

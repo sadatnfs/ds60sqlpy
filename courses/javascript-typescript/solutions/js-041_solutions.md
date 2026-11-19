@@ -24,11 +24,13 @@ Streaming does not automatically mean bounded memory. The fixture caps total inp
 
 The byte source is an AsyncIterable<Uint8Array>. StringDecoder.write handles split characters, while end flushes remaining decoder state. A pending text buffer is split at newline characters and strips an optional preceding carriage return. Each physical line receives a one-based number. JSON.parse returns unknown at the boundary, and the validator checks its shape before constructing a fresh Row. Map aggregation updates only accepted rows and returns a separate diagnostics list.
 
-## Exercise 1: Aggregate valid split-byte input
+## Exercise 1: Aggregate valid split-byte input: change one input
 
-Task: Decode rows for groups A and B from three-byte chunks and aggregate their values.
+Task: Copy Example A into a scratch `main.mts` and change `{ group: 'A', value: 2 },` to `{ group: 'A', value: 3 },`. Before running it, predict which check fails and which value it now sees; then run it and restore the original line.
 
 Chunk boundaries are independent of JSON record boundaries. The pipeline carries partial decoder and line state instead of parsing each chunk as a complete row.
+
+The unchanged code is the exercise block of Example A:
 
 ```typescript
 const text = [
@@ -50,15 +52,17 @@ assert.equal(result.accepted, 3);
 assert.deepEqual(result.rejected, []);
 ```
 
-**Expected:** A count 2 sum 5; B count 1 sum 4; zero rejected.
+**Expected:** The changed run fails with an `AssertionError` at the check `assert.deepEqual([...result.groups], [['A', { count: 2, sum: 5 }], ['B', { count: 1, sum: 4 }]])`. Restoring the original line brings back the worked observation: A count 2 sum 5; B count 1 sum 4; zero rejected.
 
-**Verify:** Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.
+**Verify:** Compare your written prediction with the reported `AssertionError`, including its actual and expected values, and name the value that made `assert.deepEqual([...result.groups], [['A', { count: 2, sum: 5 }], ['B', { count: 1, sum: 4 }]])` fail. After restoring the line, the program prints its `{"checks":1,"status":"passed"}` receipt again.
 
-## Exercise 2: Quarantine syntax and domain failures with physical line numbers
+## Exercise 2: Quarantine syntax and domain failures with physical line numbers: debug a regression
 
-Task: Place malformed JSON and a string-valued amount after a valid row.
+Task: A regression changed one token in Example B, so one line now reads `"value":3`. Run Example B with that line, use the failing check to locate the defect and repair it without changing the check.
 
 Rejected values never enter the aggregate. The diagnostic identifies where and why the row failed without reproducing the entire source payload.
+
+The unchanged code is the exercise block of Example B:
 
 ```typescript
 const text = '{"group":"A","value":2}\n{broken\n{"group":"A","value":"wrong"}\n';
@@ -71,9 +75,9 @@ assert.deepEqual(result.rejected, [
 assert.deepEqual(result.groups.get('A'), { count: 1, sum: 2 });
 ```
 
-**Expected:** one accepted row; diagnostics at lines 2 and 3 with json/schema categories.
+**Expected:** Before the repair the run fails with an `AssertionError` at the check `assert.deepEqual(result.groups.get('A'), { count: 1, sum: 2 })`; after it the line reads `"value":2` again and one accepted row; diagnostics at lines 2 and 3 with json/schema categories.
 
-**Verify:** Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.
+**Verify:** Keep the failing and the repaired runs. Explain why the changed token alters the value tested by `assert.deepEqual(result.groups.get('A'), { count: 1, sum: 2 })` for this input.
 
 ## Exercise 3: Preserve a multi-byte group name across single-byte chunks
 
@@ -89,7 +93,7 @@ assert.equal(result.rejected.length, 0);
 
 **Expected:** group name remains intact with sum 7.
 
-**Verify:** Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.
+**Verify:** Keep a check equivalent to `assert.deepEqual(result.groups.get('😀'), { count: 1, sum: 7 })`. As a control, change `const result = await analyze(chunks(JSON.stringify({ group: '😀', value: 7 }), 1));` to `const result = await analyze(chunks(JSON.stringify({ group: '😀', value: 8 }), 1));`: the run must fail with an `AssertionError` at that check. Restore the line before continuing.
 
 ## Exercise 4: Handle blank lines and a final line without newline
 
@@ -107,7 +111,7 @@ assert.deepEqual(result.rejected, []);
 
 **Expected:** two accepted rows; no fabricated empty records.
 
-**Verify:** Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.
+**Verify:** Keep a check equivalent to `assert.deepEqual(result.groups.get('A'), { count: 2, sum: 3 })`. As a control, change `"value":1` to `"value":2`: the run must fail with an `AssertionError` at that check. Restore the line before continuing.
 
 ## Exercise 5: Enforce input and record budgets
 
@@ -122,7 +126,7 @@ await assert.rejects(analyze(chunks('\n'.repeat(16385), 1000)), RangeError);
 
 **Expected:** RangeError for each resource-limit violation.
 
-**Verify:** Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.
+**Verify:** Keep a check equivalent to `assert.rejects(analyze(chunks('\n'.repeat(16385), 1000)), RangeError)` and confirm that the reference still passes. Then name an input that would make it fail and explain which value changes.
 
 ## Exercise 6: Expose incomplete-data counts and empty input
 
@@ -142,7 +146,7 @@ assert.equal(empty.groups.size, 0);
 
 **Expected:** zero accepted with one rejected versus zero accepted with zero rejected.
 
-**Verify:** Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.
+**Verify:** Keep a check equivalent to `assert.equal(empty.groups.size, 0)`. As a control, change `assert.equal(empty.groups.size, 0);` to `assert.equal(empty.groups.size, 1);` inside it: the run must fail with an `AssertionError`, which shows the check can fail. Restore it.
 
 ## After comparison
 

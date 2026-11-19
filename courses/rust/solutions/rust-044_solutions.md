@@ -1,6 +1,6 @@
 # rust-044: explanation and comparison
 
-Attempt the six guide tasks before opening this comparison. The executable reference is [rust-044_solution.rs](rust-044_solution.rs). Its assertions are always active under the prepared classroom compile settings.
+Attempt the six guide tasks before opening this comparison. The executable reference is [rust-044_solution.rs](rust-044_solution.rs). It runs both worked examples and the reference answers below, and its assertions are always active under the prepared classroom compile settings.
 
 ## Why the two examples differ
 
@@ -8,21 +8,64 @@ Attempt the six guide tasks before opening this comparison. The executable refer
 
 **Keep timestamp units explicit:** The logical type prevents a consumer from legitimately treating the same coefficient as seconds without conversion. The second value is one thousand milliseconds after the epoch.
 
-## Reason through the six tasks
+## Task answers
 
-1. **Predict and explain.** Explain coefficient, scale and represented amount separately.
+### Task 1: Predict and explain
 
-2. **Guided modification.** Add a negative decimal coefficient and retain its scale.
+Explain coefficient, scale and represented amount separately.
 
-3. **Independent construction.** Create a schema documenting measurement units and timestamp precision.
+No separate reference answer has been written for this task. Example A is the evidence to compare with: The raw coefficient alone does not state the decimal amount. Coefficient 125 with scale two represents 1.25 under the declared contract.
 
-4. **Diagnose a defect.** Diagnose reading milliseconds as seconds or losing decimal scale.
+### Task 2: Guided modification
 
-5. **Boundary evidence.** Test null decimal/timestamp values and a schema mismatch.
+Add a negative decimal coefficient and retain its scale.
 
-6. **Transfer and justify.** Plan a separately prepared Rust-to-PyArrow IPC round trip that checks schema, nulls, decimal scale and timestamp units in both languages.
+No separate reference answer has been written for this task. Start from Example B: The logical type prevents a consumer from legitimately treating the same coefficient as seconds without conversion. The second value is one thousand milliseconds after the epoch.
 
-For tasks 1 and 2, use the checked values and mechanism trace in the two examples. For task 3, choose names that expose the input and result contract and retain the same invariants. For task 4, the diagnosed mistakes below supply a concrete wrong assumption: preserve its counterexample before repairing it. Task 5 needs an explicit expected value or documented rejection at the boundary, not just successful execution. For task 6, explain what changes in the new context and which part of the original mechanism remains applicable. Several representations may satisfy this transfer task; justify the choice rather than treating this reference as the only architecture.
+### Task 3: Independent construction
+
+Create a schema documenting measurement units and timestamp precision.
+
+**Reference answer.** The same statements run as the `Task 3` block of the reference program; here they are wrapped in `main` as a complete file.
+
+```rust
+fn main() -> Result<(), Box<dyn std::error::Error>> {
+    use arrow::datatypes::{DataType, Field, Schema, TimeUnit};
+    use std::collections::HashMap;
+    let unit = HashMap::from([("unit".to_string(), "kg".to_string())]);
+    let mass = Field::new("mass", DataType::Float64, false);
+    let mass = mass.with_metadata(unit);
+    let precision = DataType::Timestamp(TimeUnit::Millisecond, Some("UTC".into()));
+    let time = Field::new("measured_at", precision.clone(), false);
+    let schema = Schema::new(vec![mass, time]);
+    let recorded = schema.field(0).metadata().get("unit");
+    assert_eq!(recorded.map(String::as_str), Some("kg"));
+    assert_eq!(schema.field(1).data_type(), &precision);
+    Ok(())
+}
+```
+
+**Observe:** The mass field records unit kg and the timestamp field records millisecond UTC precision.
+
+Units live in field metadata and time precision in the data type, so both travel with the schema to every consumer.
+
+### Task 4: Diagnose a defect
+
+Diagnose reading milliseconds as seconds or losing decimal scale.
+
+No reference answer has been written for this task yet. The wrong assumptions to look for are this lesson's pitfalls: An integer cast is not a timestamp-unit conversion. Time-zone metadata is not a complete application scheduling policy. C Data Interface release callbacks and lifetime ownership require a reviewed FFI implementation.
+
+### Task 5: Boundary evidence
+
+Test null decimal/timestamp values and a schema mismatch.
+
+No reference answer has been written for this task yet. Write the expected value or documented rejection for each boundary before running it, and compare with the checks in Example A (Preserve decimal interpretation) and Example B (Keep timestamp units explicit).
+
+### Task 6: Transfer and justify
+
+Plan a separately prepared Rust-to-PyArrow IPC round trip that checks schema, nulls, decimal scale and timestamp units in both languages.
+
+No single reference answer exists: several designs can satisfy this transfer task. Justify yours against the mechanism described below and the vocabulary entry **Decimal scale**, and state one limitation of your choice.
 
 ## Mechanism and diagnostic reasoning
 
@@ -36,4 +79,4 @@ An integer cast is not a timestamp-unit conversion. Time-zone metadata is not a 
 
 ## Review before continuing
 
-The reference checks the worked scenarios, including their boundary distinctions. Your independent and transfer artifacts may have additional checks. Compare observations rather than only source text. Preserve any new regression case you discover and explain why it would reject a plausible wrong implementation. External project steps require their own build and platform evidence and are not established by a portable reference passing.
+Run the reference and confirm that it prints `rust-044: passed`, then reconstruct one boundary case from memory and explain which check would reject a plausible wrong implementation. External project steps need their own build and platform evidence; a passing portable reference does not establish them.

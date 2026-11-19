@@ -5,15 +5,53 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Container queries and reusable responsive components: my attempt</title>
     <style>
-      /* Implement the lesson-specific CSS. Keep keyboard focus visible. */
+      /*
+        Worked example 1: Declare the query container
+        .slot {
+          container-type: inline-size;
+        }
+        .card {
+          display: grid;
+          gap: 1rem;
+        }
+      */
+
+      /*
+        Worked example 2: Respond to local room
+        @container (inline-size >= 28rem) {
+          .card {
+            grid-template-columns: 8rem minmax(0, 1fr);
+          }
+        }
+      */
+
+      /* Write the CSS for the exercises here. Keep keyboard focus visible. */
     </style>
   </head>
   <body>
-    <!-- web-021: Render the same component in wide and narrow slots. -->
-    <!-- Save your prediction, then implement the six exercises from the guide. -->
+    <!--
+      web-021 exercises. Hints are in the guide; answers are in the solutions folder.
+      1. Explain why two cards on the same viewport can use different layouts.
+      2. Add a container wrapper around a reusable card.
+      3. Render the same component in wide and narrow slots.
+      4. Diagnose a query that never matches because no ancestor is eligible.
+      5. Disable the query and inspect the fallback.
+      6. Choose between a viewport query and a container query for a sidebar card.
+    -->
     <main>
-      <h1>Container queries and reusable responsive components</h1>
-      <!-- Build your own document here. The reference is separate. -->
+      <h1>One component, different spaces</h1>
+      <div class="slot wide">
+        <article class="card">
+          <strong>HTML</strong>
+          <p>A reusable lesson summary in a wide slot.</p>
+        </article>
+      </div>
+      <div class="slot narrow">
+        <article class="card">
+          <strong>HTML</strong>
+          <p>The same structure in a narrow slot.</p>
+        </article>
+      </div>
     </main>
   </body>
 </html>

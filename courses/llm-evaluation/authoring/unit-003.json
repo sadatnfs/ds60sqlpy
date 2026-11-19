@@ -3,6 +3,7 @@
   "title": "Annotation rubrics and construct validity",
   "concepts": ["rubric", "construct validity", "adjudication", "denominator", "label version"],
   "outcome": "Turn an intended capability into auditable labels, distinguish disagreement from missing evidence, and preserve adjudication history.",
+  "verification": "A response with one applicable dimension scores 1.0, a critical failure blocks admission, malformed labels and mixed rubric versions are rejected, both disagreeing labels stay in the ledger, and the proxy counterexample formats correctly while failing evidence support.",
   "level": "beginner",
   "runtime": "python-core",
   "minutes": 120,

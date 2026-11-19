@@ -1,6 +1,6 @@
 # spark-001 learner worksheet
 
-Authored classroom lesson. Content availability and runtime readiness are separate checks. Read the current capability notice before running. No opening or saving this lesson installs tools, starts a cluster or proves mastery.
+Authored classroom lesson. Content availability and runtime readiness are separate checks. Read the current capability notice before running. Opening or saving this lesson does not install tools, start a cluster or prove mastery.
 
 Read the [guide](../guides/spark-001.md), predict first, and keep an independent response for each task. These are reasoning fixtures, not commands to execute.
 
@@ -51,7 +51,7 @@ Choose a route for two learners: no programming background, and tested Python sk
 
 **Inputs/evidence:** For spark-001 Exercise 2, Learner A has no prior language; B can write functions and pytest tests.
 
-**Expected result/shape:** For spark-001 Exercise 2, A takes spark002-010; B takes spark011 after a python-10 competency check; both enter spark012.
+**Expected result/shape:** For spark-001 Exercise 2, A takes spark-002 to spark-010; B takes spark-011 after a python-10 competency check; both enter spark-012.
 
 **Verify:** For spark-001 Exercise 2, name both routes and explain why Scala-first needs no Python.
 
@@ -59,15 +59,15 @@ Choose a route for two learners: no programming background, and tested Python sk
 
 1. Prior knowledge changes the entry point.
 2. Do not require both languages before beginning.
-3. Scala010 OR Python bridge011 establishes readiness for012.
+3. Scala spark-010 OR Python bridge spark-011 establishes readiness for spark-012.
 
 ### Exercise 3: Check the binary suffix
 
 Review dependency labels before any download.
 
-**Inputs/evidence:** For spark-001 Exercise 3, spark-sql_2.13 at4.2.0 versus a proposed spark-sql_3 substitution.
+**Inputs/evidence:** For spark-001 Exercise 3, spark-sql_2.13 at 4.2.0 versus a proposed spark-sql_3 substitution.
 
-**Expected result/shape:** For spark-001 Exercise 3, retain the documented Scala2.13 line; reject the unsupported Scala3 substitution for this profile.
+**Expected result/shape:** For spark-001 Exercise 3, retain the documented Scala 2.13 line; reject the unsupported Scala3 substitution for this profile.
 
 **Verify:** For spark-001 Exercise 3, cite the binary suffix and actual profile receipt separately.
 
@@ -113,7 +113,7 @@ Compare local mode with a remote master.
 
 Explain a report that has Python but no JVM.
 
-**Inputs/evidence:** For spark-001 Exercise 6, Python3.12 present; java unavailable; Spark profile absent.
+**Inputs/evidence:** For spark-001 Exercise 6, Python 3.12 present; java unavailable; Spark profile absent.
 
 **Expected result/shape:** For spark-001 Exercise 6, ordinary Python may run, but Scala/Spark is unavailable; no installation occurs on Run.
 

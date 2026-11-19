@@ -95,4 +95,4 @@ if __name__ == "__main__":
 
 ## Interpretation
 
-Design stable routing and shadow comparisons with bounded conclusions. Separate interface, operational and causal evidence, and retain a compatible rollback target before expanding exposure.
+Separate interface, operational and causal evidence, and retain a compatible rollback target before expanding exposure.

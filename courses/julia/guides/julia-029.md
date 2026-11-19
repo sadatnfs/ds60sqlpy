@@ -8,7 +8,7 @@ Build a bounded producer-consumer pipeline, join its work and explain how asynch
 
 ## Classroom execution
 
-Choose **Julia language and scientific computing** in `/classroom`, open this unit, and select its prepared `julia` runtime. The worker starts a fresh `main.jl` process with two Julia threads, a fixed package environment, no startup file and offline package settings. Both worked examples are complete under that environment. Save your current pad before replacing it. No package, model or dataset is fetched by a lesson.
+Open `julia-029` in `/classroom` with its prepared `julia` runtime. Worked case A (stream squares through a small buffer) and worked case B (make failure observable) are complete programs: save your current pad, paste one of them and press Run. The learner file contains the six investigations below; the explained reference ends by printing `julia-029: all reference checks passed`. The [course overview](../README.md) describes the shared runtime: a fresh offline `main.jl` process with two threads and a fixed package environment.
 
 ## Concurrency describes progress, not a speed guarantee
 
@@ -138,15 +138,15 @@ Describe what happens when a producer fills a capacity-two buffer.
 
 ### 2. Preserve output meaning
 
-Predict the output for[-2,0,3].
+Predict the output for `[-2, 0, 3]`.
 
-**Expected:** The result is[4,0,9].
+**Expected:** The result is `[4, 0, 9]`.
 
 **Hint:** One producer preserves this input order.
 
 ### 3. Inject a failure
 
-Set fail_after=0 on a nonempty list.
+Set `fail_after = 0` on a nonempty list.
 
 **Expected:** A CompositeException reaches the caller.
 
@@ -183,4 +183,4 @@ Specify identifiers and completion evidence for concurrent files.
 
 ## Study companion
 
-Use the repository learning-companion skill with this lesson ID, your prediction and your actual source/output. Ask for a diagnosis of the first incorrect type, shape, state transition or assumption. Keep observed execution distinct from a timing claim, inferred mathematical result or external deployment.
+A repository-aware assistant with the learning-companion skill can review `julia-029` with you. Give it your prediction for one investigation, your source and the actual output, and ask it to find the first incorrect assumption about Task, Channel, backpressure, closure or failure propagation.

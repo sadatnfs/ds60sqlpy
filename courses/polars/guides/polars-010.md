@@ -20,9 +20,7 @@ scan_parquet creates a lazy source. filter and select append operations to its p
 
 ## Run the lesson
 
-Open this subject in `/classroom`, then show its code and notes. The prepared `data-engineering` worker runs `main.py` in a fresh temporary directory. The examples use installed packages and synthetic local fixtures; no account, cloud service, network request or package download is required. Save source and notes before switching lessons. Temporary databases, project files and tracking artifacts are recreated by each complete program and removed after the job. The classroom retains the submitted source and bounded output, not an indefinitely running external service. The guide distinguishes this local execution from the deployment decisions that need an owned production environment.
-
-
+Open `polars-010` in `/classroom`. Its starter `main.py` contains both worked cases, "Inspect a pushed-down scan" and "Identify a non-equivalent rewrite", and prints the dictionary each case returns. The prepared `data-engineering` worker runs it in a fresh temporary directory. An `AssertionError` means that an observation differs from the case's stated contract. The inputs are small literal tables. Cases that demonstrate Parquet scans write their files into a temporary directory that is removed when the case returns. No account, network request or package download is involved. Save source and notes before switching lessons.
 
 ## Worked case 1: Inspect a pushed-down scan
 
@@ -60,7 +58,6 @@ if __name__ == "__main__":
     print(example_one())
 ```
 
-
 ## Worked case 2: Identify a non-equivalent rewrite
 
 The second case contrasts filtering group means with filtering individual values before averaging. Group A has values 1 and 9, so its mean is 5; dropping the low observation changes that mean and the selection decision.
@@ -97,11 +94,9 @@ if __name__ == "__main__":
     print(example_two())
 ```
 
-
 ## Practice
 
-Make each requested change in a saved copy. Compare both the expected result and the deliberately changed assumption. The separate reference explains the answers.
-
+The starter contains both worked cases, so a task can change either one. Make each change in a saved copy, run it, and compare the printed result with the task's check before opening the separate explained answers.
 
 ### 1. Change a threshold
 
@@ -111,7 +106,6 @@ Raise the amount threshold to 15.
 
 **Hint:** State the expected rows before inspecting a plan.
 
-
 ### 2. Add an unused column
 
 Add a large text field that the result does not need.
@@ -119,7 +113,6 @@ Add a large text field that the result does not need.
 **Check:** The selected result is unchanged.
 
 **Hint:** Inspect projection in the plan.
-
 
 ### 3. Compare eager and lazy results
 
@@ -129,7 +122,6 @@ Compute the same filter and projection eagerly.
 
 **Hint:** Separate correctness from speed.
 
-
 ### 4. Test a group counterexample
 
 Change group A to values 1 and 11.
@@ -137,7 +129,6 @@ Change group A to values 1 and 11.
 **Check:** Its group mean is 6 and the strict >6 filter still rejects it.
 
 **Hint:** The comparison is strict.
-
 
 ### 5. Locate execution
 
@@ -147,7 +138,6 @@ Identify which statement actually materializes the query.
 
 **Hint:** Planning is not result evidence.
 
-
 ### 6. Review a plan assertion
 
 Explain why asserting the entire explain string is brittle.
@@ -156,20 +146,19 @@ Explain why asserting the entire explain string is brittle.
 
 **Hint:** Plans can evolve across versions.
 
-
 ## Diagnose errors and misleading results
 
 If a lazy pipeline appears fast, confirm that it was actually collected. If it reads more than expected, inspect where the file scan becomes an eager object and which expressions require extra columns. If an optimization attempt changes results, return to the row and group semantics before tuning execution settings.
 
 ## Transfer to independent work
 
-Explain a lazy query in terms of its requested result and observable execution plan. Produce an eager reference, a bounded lazy result and one deliberately non-equivalent rewrite. This prepares you to review performance changes without confusing optimization with a change in the analytical question.
+Produce an eager reference, a bounded lazy result and one deliberately non-equivalent rewrite. This prepares you to review performance changes without confusing optimization with a change in the analytical question.
 
 ## Primary references
 
-- [Polars documentation: Lazy plans and optimizer reasoning](https://docs.pola.rs/user-guide/lazy/optimizations/)
+- [Polars user guide: Optimizations](https://docs.pola.rs/user-guide/lazy/optimizations/)
 - [Polars Python API reference](https://docs.pola.rs/api/python/stable/reference/index.html)
 
 ## Tutor guidance
 
-Use the repository learning-companion skill for `polars-010`. Inspect the learner's own source and observations, ask for an explanation of the relevant data or state contract, and give a focused hint. Separate an assertion on this fixture from a claim about an external dataset or deployed service.
+Use the repository's `$guide-ds60sqlpy-learning` skill (`.agents/skills/guide-ds60sqlpy-learning/SKILL.md`) for `polars-010`. Inspect the learner's own source and printed output first. Ask for an explanation of LazyFrame, logical plan, predicate pushdown, projection and equivalence in their own words, then give one focused hint at a time. Keep an assertion on this synthetic fixture separate from a claim about an external dataset or deployed service.

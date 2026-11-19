@@ -1,6 +1,6 @@
 # apache-014: Language boundaries and Flight
 
-Tutorial mode. Stage: intermediate. Direct prerequisites: `apache-012`, `apache-004`, `rust-042`.
+Tutorial mode. Stage: advanced. Direct prerequisites: `apache-012`, `apache-004`, `rust-042`.
 
 ## Interchange is a contract between independently owned processes
 
@@ -50,6 +50,44 @@ reads batches from the separate server. The server's dataset is immutable and
 owned by this project. The client validates three rows, total 11 for east and a
 logical source digest. It also sends three invalid tickets, including a path-like
 value, and an unknown descriptor; each must be rejected by the actual service.
+
+The server exposes one descriptor and one ticket and rejects every other value:
+
+From [`projects/arrow-flight/service.py`](../projects/arrow-flight/service.py):
+
+```python
+class FixtureServer(flight.FlightServerBase):  # type: ignore[misc]
+    def __init__(self, state: Path, host: str, port: int) -> None:
+        super().__init__((host, port))
+        self.table = read_fixture(state)
+
+    def information(self) -> flight.FlightInfo:
+        descriptor = flight.FlightDescriptor.for_path("events")
+        endpoint = flight.FlightEndpoint(flight.Ticket(b"events-v1"), [])
+        return flight.FlightInfo(
+            self.table.schema, descriptor, [endpoint], self.table.num_rows, self.table.nbytes
+        )
+
+    def list_flights(self, context: object, criteria: object) -> Iterator[flight.FlightInfo]:
+        yield self.information()
+
+    def get_flight_info(
+        self, context: object, descriptor: flight.FlightDescriptor
+    ) -> flight.FlightInfo:
+        if descriptor.path != [b"events"]:
+            raise pa.ArrowInvalid("Unknown fixture descriptor")
+        return self.information()
+
+    def do_get(self, context: object, ticket: flight.Ticket) -> flight.RecordBatchStream:
+        if ticket.ticket != b"events-v1":
+            raise pa.ArrowInvalid("Unknown fixture ticket")
+        return flight.RecordBatchStream(self.table)
+```
+
+`list_flights` and `get_flight_info` describe the dataset, and `do_get` streams it
+only for the ticket that `get_flight_info` returned. The client follows the same
+sequence: `list_flights`, then `get_flight_info(FlightDescriptor.for_path("events"))`,
+then `do_get` with the endpoint's ticket.
 
 A Flight ticket is an opaque server-defined selection token. It is not inherently
 a filesystem path, SQL statement or user identity. The fixture allowlists one

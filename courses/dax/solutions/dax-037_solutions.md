@@ -43,7 +43,7 @@ A user-facing Top N specification must say whether ties are all included or reso
 
 Predict both ranks if Gamma's score becomes 79.
 
-Alpha,Beta,Gamma,Delta rank 1,2,3,4 under both policies.
+Alpha, Beta, Gamma, Delta rank 1, 2, 3, 4 under both policies.
 
 ### Exercise 2
 

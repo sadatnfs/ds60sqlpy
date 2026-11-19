@@ -8,22 +8,26 @@ C source is text describing declarations and operations. The preprocessor handle
 
 #include makes header declarations available. int main(void) is an entrypoint with no parameters; returning zero signals successful termination. Braces form a block and semicolons finish most statements. printf formats values, while puts writes a string plus a newline. assert from assert.h checks a condition when NDEBUG is not defined. %d expects an int, and a mismatched format argument can be undefined behavior.
 
-## Exercise 1: Check a first value
+## Exercise 1: Check a first value: change one input
 
-Store 2 plus 3 in an int.
+Copy worked example 1 into a scratch pad and change `int total = 2 + 3;` to `int total = 3 + 3;`. Before running, predict which CHECK fails and which value it now sees; then run it and restore the original line.
+
+The unchanged code is worked example 1:
 
 ```c
 int total = 2 + 3;
 CHECK(total == 5);
 ```
 
-**Expected:** The stored value is 5.
+**Expected:** The changed run stops with `Check failed` at the CHECK on `total == 5`. Restoring the original line brings back the worked observation: the stored value is 5.
 
 The expectation is known independently of the program. A print statement alone would not reject a wrong calculation.
 
-## Exercise 2: Format a checked result
+## Exercise 2: Format a checked result: debug a regression
 
-Format total=5 into a bounded character buffer.
+A regression changed one token in worked example 2, so one line now reads `int n = snprintf(out, sizeof out, "total=%d", 6);`. Run worked example 2 with that line, use the failing CHECK to locate the defect and repair it without changing the CHECK.
+
+The unchanged code is worked example 2:
 
 ```c
 char out[16];
@@ -32,7 +36,7 @@ CHECK(n == 7);
 CHECK(strcmp(out, "total=5") == 0);
 ```
 
-**Expected:** The result length is 7 and text is total=5.
+**Expected:** Before the repair the run stops with `Check failed` at the CHECK on `strcmp(out, "total=5") == 0`; after it the line reads `int n = snprintf(out, sizeof out, "total=%d", 5);` again and the result length is 7 and text is total=5.
 
 snprintf returns the length that would be required, excluding the terminating null byte. A caller must compare it with capacity before treating output as complete.
 

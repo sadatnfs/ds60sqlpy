@@ -10,11 +10,11 @@ def softmax(x):
 
 
 def verify():
-    # Exercise 1: Calculate greedy choice
+    # Worked example A: Calculate greedy choice
     scores = np.array([2.0, 1.0, 0.0])
     assert int(np.argmax(scores)) == 0
 
-    # Exercise 2: Change temperature
+    # Worked example B: Change temperature
     p = softmax(scores)
     cool = softmax(scores / 0.5)
     assert cool[0] > p[0] and p.argmax() == cool.argmax() == 0
@@ -48,6 +48,19 @@ def verify():
             pass
         else:
             raise AssertionError("invalid draw")
+
+    # Exercise 1: Predict a hotter distribution
+    scores2 = np.array([0.5, 3.0, 3.5, -1.0])
+    base = softmax(scores2)
+    hot = softmax(scores2 / 2)
+    assert int(np.argmax(scores2)) == 2 and base.argmax() == hot.argmax() == 2
+    assert hot[2] < base[2] and hot[3] > base[3]
+
+    # Exercise 2: Compute an exact two-token probability
+    pair = softmax([1.0, 0.0])
+    sharp = softmax(np.array([1.0, 0.0]) / 0.5)
+    np.testing.assert_allclose(pair[0], 1 / (1 + np.exp(-1)), atol=1e-12, rtol=0)
+    np.testing.assert_allclose(sharp[0], 1 / (1 + np.exp(-2)), atol=1e-12, rtol=0)
     return {"checks": 6, "status": "passed"}
 
 

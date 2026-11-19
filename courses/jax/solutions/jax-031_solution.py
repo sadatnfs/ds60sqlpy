@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import math
 import numpy as np
 import jax
 import jax.numpy as jnp
@@ -96,7 +95,7 @@ def main():
     oracle = jnp.array([1.0, 2.0, -0.5])
     close(features(jnp.array([3.0])) @ oracle, [2.5])
 
-    print("jax-031" + ": 8 asserted cases passed")
+    print("jax-031: 8 asserted cases passed")
 
 
 if __name__ == "__main__":

@@ -1,13 +1,21 @@
 #include <stdio.h>
 
 int main(void) {
-  /* Exercise 1: Sum one field in records
-     Sum x fields from three Point records.
-     Expected: The result is 6. */
+  /* Exercise 1: Sum one field in records: change one input
+     Copy worked example 1 into a scratch pad and change `struct Point records[]
+     = {{1, 10}, {2, 20}, {3, 30}};` to `struct Point records[] = {{2, 10}, {2,
+     20}, {3, 30}};`. Before running, predict which CHECK fails and which value
+     it now sees; then run it and restore the original line. Expected: The
+     changed run stops with `Check failed` at the CHECK on `sum == 6`. Restoring
+     the original line brings back the worked observation: the result is 6. */
 
-  /* Exercise 2: Compute the same result by columns
-     Sum an x column containing 1, 2, 3.
-     Expected: The result is also 6. */
+  /* Exercise 2: Compute the same result by columns: debug a regression
+     A regression changed one token in worked example 2, so one line now reads
+     `sum -= x[i];`. Run worked example 2 with that line, use the failing CHECK
+     to locate the defect and repair it without changing the CHECK. Expected:
+     Before the repair the run stops with `Check failed` at the CHECK on `sum ==
+     6 && y[2] == 30`; after it the line reads `sum += x[i];` again and the
+     result is also 6. */
 
   /* Exercise 3: Inspect legal field offsets
      Inspect x and y offsets in Point.

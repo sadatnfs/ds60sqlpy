@@ -166,4 +166,4 @@ if __name__ == "__main__":
 
 ## Interpretation
 
-Define and test a serving contract with positive and negative requests. Verify model parity and version identity, then use the separate real Docker service project to qualify network and persistence behavior.
+Verify model parity and version identity, then use the separate real Docker service project to qualify network and persistence behavior.

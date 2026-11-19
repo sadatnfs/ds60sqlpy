@@ -12,6 +12,8 @@ Django's cache API provides get, set and delete over a configured backend. A key
 
 The locmem email backend appends messages to an in-process outbox. Send_mail can therefore succeed without sending anything to an external address. This is desirable in a classroom fixture, but it proves message construction and backend acceptance rather than actual SMTP delivery.
 
+Django 6.0 added a built-in Tasks framework in `django.tasks`. The `TASKS` setting names a backend, `task()` turns a module-level function into a `Task`, and `enqueue()` returns a `TaskResult` whose `status` and `return_value` you can inspect. Django ships only development backends: `ImmediateBackend`, the default, runs the task synchronously in the calling process, and `DummyBackend` stores results without running anything. Durable background execution needs a third-party backend and its own worker process. The framework still enforces two worker-facing rules: the task function must be defined at module level so a worker can import it by path, and arguments must be JSON-compatible values.
+
 Celery eager mode runs a registered task synchronously in the local process. Its task API remains real, yet no independent worker or durable broker is involved. The program prints those limitations directly to prevent a successful method call from being mistaken for service qualification.
 
 ## Worked case: cache a value and invalidate it
@@ -24,7 +26,7 @@ The fixture does not claim a distributed cache. If several server processes use 
 
 ## Worked case: inspect email and execute an eager task
 
-Send_mail builds one synthetic message and the test inspects the in-memory outbox's subject and count. The address uses an invalid example domain, and no network mail is sent. A Celery task computes a deterministic summary and its eager result is checked against an independent expected dictionary.
+Send_mail builds one synthetic message and the test inspects the in-memory outbox's subject and count. The address uses an invalid example domain, and no network mail is sent. The same summary function then runs twice. As a Django task under `ImmediateBackend`, `enqueue([2, 4])` returns a result whose status is `SUCCESSFUL` and whose return value matches the expected dictionary; enqueueing a Python set fails with `TypeError` because a set is not JSON-compatible, and wrapping a function nested inside `run_cases` raises `InvalidTask`. As a Celery task in eager mode, its result is checked against the same independent expected dictionary.
 
 These tests are valuable because message content and task logic can be wrong before any network integration is involved. They are incomplete for delivery and recovery. Actual email acceptance would require a controlled mail service, while durable task acceptance would require broker/worker lifecycle and duplicate-effect checks.
 
@@ -48,12 +50,18 @@ Run this complete finite program in the prepared Python web profile. It exercise
 import json
 
 
+def summarize_values(values):
+    """Task body; django.tasks accepts only module-level functions."""
+    return {"count": len(values), "total": sum(values)}
+
+
 def run_cases():
     from django.conf import settings
 
     settings.configure(
         SECRET_KEY="synthetic-local-fixture",
         EMAIL_BACKEND="django.core.mail.backends.locmem.EmailBackend",
+        TASKS={"default": {"BACKEND": "django.tasks.backends.immediate.ImmediateBackend"}},
         CACHES={
             "default": {
                 "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
@@ -82,6 +90,31 @@ def run_cases():
         == 1
     )
     assert len(mail.outbox) == 1 and mail.outbox[0].subject == "Review ready"
+    from django.tasks import TaskResultStatus, task
+    from django.tasks.exceptions import InvalidTask
+
+    summarize_task = task(summarize_values)
+    result = summarize_task.enqueue([2, 4])
+    assert result.status == TaskResultStatus.SUCCESSFUL
+    assert result.return_value == {"count": 2, "total": 6}
+    try:
+        summarize_task.enqueue({2, 4})
+    except TypeError:
+        rejected_set_argument = True
+    else:
+        rejected_set_argument = False
+    assert rejected_set_argument
+
+    def nested(values):
+        return values
+
+    try:
+        task(nested)
+    except InvalidTask:
+        rejected_nested_function = True
+    else:
+        rejected_nested_function = False
+    assert rejected_nested_function
     from celery import Celery
 
     queue = Celery("django-finite", broker="memory://", backend="cache+memory://", fixups=[])
@@ -96,6 +129,12 @@ def run_cases():
     return {
         "cache_invalidation": True,
         "email": "in-memory backend, no mail sent",
+        "django_task": {
+            "backend": "ImmediateBackend, runs in this process",
+            "status": str(result.status),
+            "rejected_set_argument": rejected_set_argument,
+            "rejected_nested_function": rejected_nested_function,
+        },
         "task": "eager test, no durable worker",
     }
 

@@ -17,7 +17,7 @@ From the repository root, after preparing the ordinary Spark image:
 docker run --rm --pull never --network none --memory 3g --cpus 2 \
   --read-only --tmpfs /tmp:rw,exec,size=536870912 \
   --mount "type=bind,src=$PWD/courses/advanced-spark-modeling/projects/catalyst,dst=/project,readonly" \
-  --entrypoint python ds60sqlpy-worker-spark-local-scala:1.1.0 /project/run.py
+  --entrypoint python ds60sqlpy-worker-spark-local-scala:1.4.0 /project/run.py
 ```
 
 Use the locally prepared version tag if different. No image is pulled by this

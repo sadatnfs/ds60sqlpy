@@ -15,7 +15,7 @@ The wrapper's job is to stop accidental unit mixing before runtime. A count and 
 
 Two integers can have incompatible meanings even when their machine representation is identical. A Cents type makes a monetary unit visible at function boundaries. It can prevent a caller from accidentally passing a raw row count where a price is expected, provided its constructors and conversions preserve that separation. This is a domain-model benefit rather than a different arithmetic engine.
 
-An overloaded operator should preserve a familiar, documented meaning. Adding two Cents values produces a Cents result; comparing two values compares their amounts. The complete examples check125=25+100 and the zero identity. They do not establish currency conversion, rounding policy or overflow handling. Those requirements would need distinct types or explicit functions and tests.
+An overloaded operator should preserve a familiar, documented meaning. Adding two Cents values produces a Cents result; comparing two values compares their amounts. The complete examples check 125 = 25 + 100 and the zero identity. They do not establish currency conversion, rounding policy or overflow handling. Those requirements would need distinct types or explicit functions and tests.
 
 The zero value is useful because it supplies an identity for accumulation. If price+zero changes price, either the operator or the type invariant is wrong. Equality should compare the semantic value represented by the type, not an incidental address. In a richer money type, currency would also matter: equal numeric amounts in different currencies should not be casually added.
 
@@ -54,7 +54,7 @@ Compare Cents{125} with item count 125.
 
 **Reasoning:** Names prevent treating every integer as interchangeable.
 
-**Verify:** Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.
+**Verify:** Confirm `Cents{125}.value == 125` compiles while `Cents{125} == 125` does not; equal numbers do not make the two domains comparable.
 
 ## Exercise 2: Test identity
 
@@ -64,7 +64,7 @@ Add zero to Cents{125}.
 
 **Reasoning:** The operation should preserve the value at the identity.
 
-**Verify:** Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.
+**Verify:** Assert `(Cents{125} + Cents{0}) == Cents{125}`, as Worked example 2 does, with the zero written as `Cents{0}` rather than a raw integer.
 
 ## Exercise 3: Construct a separate type
 
@@ -74,7 +74,7 @@ Add struct ItemCount and avoid mixed addition.
 
 **Reasoning:** Omitting meaningless operations is an interface feature.
 
-**Verify:** Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.
+**Verify:** Write `Cents{1} + ItemCount{1}` in a scratch file and confirm the compiler finds no matching `operator+`, while `Cents + Cents` still compiles.
 
 ## Exercise 4: Repair implicit conversion
 
@@ -84,7 +84,7 @@ Review a non-explicit raw integer constructor.
 
 **Reasoning:** Implicit conversion can silently cross units.
 
-**Verify:** Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.
+**Verify:** In a scratch copy, add a non-explicit `Cents(long long)` constructor and show that `Cents total = 125;` compiles; marking it `explicit` must make that line fail.
 
 ## Exercise 5: Check equality laws
 
@@ -94,7 +94,7 @@ Compare a=125, b=125, c=125.
 
 **Reasoning:** Default member equality implements the value contract.
 
-**Verify:** Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.
+**Verify:** Assert `a == a`, `a == b`, `b == a`, `b == c` and `a == c` for the three `Cents{125}` values, all through the defaulted `operator==`.
 
 ## Exercise 6: Transfer safety
 
@@ -104,4 +104,4 @@ Specify checked addition when values approach LLONG_MAX.
 
 **Reasoning:** Strong naming does not prevent representation overflow.
 
-**Verify:** Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.
+**Verify:** Test your guard with `LLONG_MAX` plus 1 and confirm it rejects before computing the sum, while `LLONG_MAX - 1` plus 1 is accepted.

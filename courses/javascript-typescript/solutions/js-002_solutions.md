@@ -20,11 +20,13 @@ Numbers use binary floating-point arithmetic and have a finite safe-integer rang
 
 typeof reports primitive categories but typeof null is the historical string object. Number.isNaN tests NaN without coercing its argument. Number.isFinite rejects non-number values and infinities. Object.is distinguishes +0 and -0 while treating NaN as equal to itself. BigInt literals end in n. JSON does not serialize BigInt by default, so an explicit wire-format policy is needed.
 
-## Exercise 1: Trace plus versus numeric conversion
+## Exercise 1: Trace plus versus numeric conversion: predict an edited check
 
-Task: Compare 2+3, 2+string 3, and Number(string 3)+2.
+Task: Copy Example A into a scratch `main.mjs` and change `assert.equal(Number('3') + 2, 5);` to `assert.equal(Number('3') + 3, 5);` inside its check. Before running it, predict whether the check still passes and explain why; then restore it.
 
 The same symbol has different behavior when a string participates. Explicit conversion makes the intended numeric operation visible.
+
+The unchanged code is the exercise block of Example A:
 
 ```javascript
 assert.equal(2 + 3, 5);
@@ -32,15 +34,17 @@ assert.equal(2 + '3', '23');
 assert.equal(Number('3') + 2, 5);
 ```
 
-**Expected:** 5, string 23, and 5.
+**Expected:** The changed run fails with an `AssertionError` at the check `assert.equal(Number('3') + 2, 5)`. Restoring the original line brings back the worked observation: 5, string 23, and 5.
 
-**Verify:** Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.
+**Verify:** Compare your written prediction with the reported `AssertionError`, including its actual and expected values, and explain why the edited check rejects the values that `assert.equal(Number('3') + 2, 5)` accepts. After restoring the line, the program prints its `{"checks":1,"status":"passed"}` receipt again.
 
-## Exercise 2: Inspect absence and NaN
+## Exercise 2: Inspect absence and NaN: diagnose an edited check
 
-Task: Compare typeof null, undefined and Number.isNaN results.
+Task: A careless edit changed a check in Example B so that it reads `assert.equal(Number.isNaN('not a number'), true);`. Run Example B with that line, explain why the edited check now fails for the same program state, and restore it.
 
 The typeof null result is a language legacy, not evidence that null has usable object properties. Number.isNaN avoids converting arbitrary text.
+
+The unchanged code is the exercise block of Example B:
 
 ```javascript
 assert.equal(typeof null, 'object');
@@ -49,9 +53,9 @@ assert.equal(Number.isNaN(NaN), true);
 assert.equal(Number.isNaN('not a number'), false);
 ```
 
-**Expected:** null reports object; undefined reports undefined; only numeric NaN passes isNaN.
+**Expected:** Before the repair the run fails with an `AssertionError` at the check `assert.equal(Number.isNaN('not a number'), false)`; after it the line reads `assert.equal(Number.isNaN('not a number'), false);` again and null reports object; undefined reports undefined; only numeric NaN passes isNaN.
 
-**Verify:** Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.
+**Verify:** Keep the failing and the repaired runs. Explain why the edited check rejects the same program state that `assert.equal(Number.isNaN('not a number'), false)` accepts.
 
 ## Exercise 3: Compare equality contracts
 
@@ -68,7 +72,7 @@ assert.equal(Object.is(0, -0), false);
 
 **Expected:** NaN!==NaN; Object.is(NaN, NaN) is true; +0===-0; Object.is distinguishes zeros.
 
-**Verify:** Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.
+**Verify:** Keep a check equivalent to `assert.equal(NaN === NaN, false)`. As a control, change `assert.equal(NaN === NaN, false);` to `assert.equal(NaN !== NaN, false);` inside it: the run must fail with an `AssertionError`, which shows the check can fail. Restore it.
 
 ## Exercise 4: Expose floating-point approximation
 
@@ -84,7 +88,7 @@ assert.ok(Math.abs(value - 0.3) < 1e-15);
 
 **Expected:** strict equality false; absolute error below 1e-15.
 
-**Verify:** Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.
+**Verify:** Keep a check equivalent to `assert.ok(Math.abs(value - 0.3) < 1e-15)`. As a control, change `const value = 0.1 + 0.2;` to `const value = 0.1 - 0.2;`: the run must fail with an `AssertionError` at that check. Restore the line before continuing.
 
 ## Exercise 5: Protect integer identity
 
@@ -101,7 +105,7 @@ assert.notEqual(exact + 1n, exact + 2n);
 
 **Expected:** Number collapses a difference; BigInt preserves it.
 
-**Verify:** Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.
+**Verify:** Keep a check equivalent to `assert.equal(max + 1, max + 2)`. As a control, change `assert.equal(max + 1, max + 2);` to `assert.equal(max - 1, max + 2);` inside it: the run must fail with an `AssertionError`, which shows the check can fail. Restore it.
 
 ## Exercise 6: Reject ambiguous numeric input
 
@@ -118,7 +122,7 @@ assert.throws(() => 1n + 1, TypeError);
 
 **Expected:** valid 12 accepted; invalid cases throw.
 
-**Verify:** Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.
+**Verify:** Keep a check equivalent to `assert.equal(parseFinite('12'), 12)`. As a control, change `assert.equal(parseFinite('12'), 12);` to `assert.equal(parseFinite('13'), 12);` inside it: the run must fail with an `AssertionError`, which shows the check can fail. Restore it.
 
 ## After comparison
 

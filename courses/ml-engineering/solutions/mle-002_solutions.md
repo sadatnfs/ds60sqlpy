@@ -9,17 +9,56 @@ The executable reference contains the two complete worked cases with assertions.
 
 Record the new source history and its identity. Retrospective conclusions depend on which version of history is being used.
 
+```python
+records = [
+    {"id": 1, "event_at": 2, "known_at": 3, "value": 10},
+    {"id": 2, "event_at": 4, "known_at": 4, "value": 999},
+    {"id": 3, "event_at": 8, "known_at": 8, "value": 30},
+]
+
+
+def select(cutoff):
+    valid = [r for r in records if r["event_at"] <= cutoff and r["known_at"] <= cutoff]
+    return max(valid, key=lambda r: (r["event_at"], r["known_at"]))["value"]
+
+
+assert [select(5), select(9)] == [999, 30]
+```
+
 **Expected:** It becomes eligible under the same rule.
 
 ## 2. Test an exact boundary
 
 A transaction or ingestion watermark may require a stricter operational rule. State and test that rule explicitly.
 
+```python
+records = [
+    {"id": 1, "event_at": 2, "known_at": 3, "value": 10},
+    {"id": 2, "event_at": 4, "known_at": 5, "value": 999},
+    {"id": 3, "event_at": 8, "known_at": 8, "value": 30},
+]
+cutoff = 5
+valid = [r for r in records if r["event_at"] <= cutoff and r["known_at"] <= cutoff]
+assert [r["id"] for r in valid] == [1, 2]
+```
+
 **Expected:** The example includes it under <=.
 
 ## 3. Change the training cutoff
 
 Recompute the eligible identifiers and report them. Training and evaluation should retain the cutoff that produced their cohorts.
+
+```python
+# Uses dataset() from main.py.
+frame = dataset()
+cohorts = {}
+for training_cutoff in (180, 181):
+    mature = frame[(frame.cutoff < training_cutoff) & (frame.label_available_at <= training_cutoff)]
+    cohorts[training_cutoff] = set(mature.id)
+assert len(cohorts[180]) == 77
+assert cohorts[180] <= cohorts[181]
+assert cohorts[181] - cohorts[180] == {77}
+```
 
 **Expected:** The label-maturity cohort changes predictably.
 
@@ -115,4 +154,4 @@ if __name__ == "__main__":
 
 ## Interpretation
 
-Construct an eligible training cohort from explicit feature and label clocks. Demonstrate a late-known counterexample and retain excluded identities. Apply these boundaries consistently to model selection, monitoring and feature-store retrieval.
+Demonstrate a late-known counterexample and retain excluded identities. Apply these boundaries consistently to model selection, monitoring and feature-store retrieval.

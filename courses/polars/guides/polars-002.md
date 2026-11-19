@@ -20,15 +20,13 @@ In pl.col("x")+1, x is selected from the current input. alias("x") asks the resu
 
 ## Run the lesson
 
-Open this subject in `/classroom`, then show its code and notes. The prepared `data-engineering` worker runs `main.py` in a fresh temporary directory. The examples use installed packages and synthetic local fixtures; no account, cloud service, network request or package download is required. Save source and notes before switching lessons. Temporary databases, project files and tracking artifacts are recreated by each complete program and removed after the job. The classroom retains the submitted source and bounded output, not an indefinitely running external service. The guide distinguishes this local execution from the deployment decisions that need an owned production environment.
-
-
+Open `polars-002` in `/classroom`. Its starter `main.py` contains both worked cases, "Parallel context versus sequential transformation" and "Condition on a value and diagnose a missing field", and prints the dictionary each case returns. The prepared `data-engineering` worker runs it in a fresh temporary directory. An `AssertionError` means that an observation differs from the case's stated contract. The inputs are small literal tables. Cases that demonstrate Parquet scans write their files into a temporary directory that is removed when the case returns. No account, network request or package download is involved. Save source and notes before switching lessons.
 
 ## Worked case 1: Parallel context versus sequential transformation
 
 The first case updates x and calculates old_x_times_ten in the same call. The deliberately named output makes its dependency visible. A second pipeline creates another with_columns context, so the multiplication uses the updated x values. This is a minimal example of why argument order is not a substitute for a dependency graph.
 
-**Expected evidence:** The same-call multiplication is[10,20,30]; the staged multiplication is[20,30,40].
+**Expected evidence:** The same-call multiplication is [10, 20, 30]; the staged multiplication is [20, 30, 40].
 
 ```python
 import polars as pl
@@ -51,12 +49,11 @@ if __name__ == "__main__":
     print(example_one())
 ```
 
-
 ## Worked case 2: Condition on a value and diagnose a missing field
 
 The second case recognizes revenue only for paid rows. The predicate uses a literal string and the else branch returns a numeric zero. It separately demonstrates that naming an absent column raises a real error rather than producing an implicit all-null column.
 
-**Expected evidence:** Recognized amounts are[5,0,11]; selecting a missing column is rejected.
+**Expected evidence:** Recognized amounts are [5, 0, 11]; selecting a missing column is rejected.
 
 ```python
 import polars as pl
@@ -86,20 +83,17 @@ if __name__ == "__main__":
     print(example_two())
 ```
 
-
 ## Practice
 
-Make each requested change in a saved copy. Compare both the expected result and the deliberately changed assumption. The separate reference explains the answers.
-
+The starter contains both worked cases, so a task can change either one. Make each change in a saved copy, run it, and compare the printed result with the task's check before opening the separate explained answers.
 
 ### 1. Change the increment
 
 Increment x by 2 before the dependent multiplication.
 
-**Check:** The staged values are[30,40,50].
+**Check:** The staged values are [30, 40, 50].
 
 **Hint:** The second context must see the new x.
-
 
 ### 2. Name the old value
 
@@ -109,7 +103,6 @@ Keep x unchanged and create incremented_x.
 
 **Hint:** Use a new alias.
 
-
 ### 3. Remove ambiguity
 
 Produce a column containing the word paid for every row.
@@ -117,7 +110,6 @@ Produce a column containing the word paid for every row.
 **Check:** Every returned value is the string paid.
 
 **Hint:** A literal is different from pl.col("paid").
-
 
 ### 4. Change a business condition
 
@@ -127,7 +119,6 @@ Recognize pending amounts at half value and paid amounts at full value.
 
 **Hint:** Use explicit ordered conditions and a numeric else.
 
-
 ### 5. Break a dependency
 
 Attempt to use a newly named alias in the same call before a second context exists.
@@ -135,7 +126,6 @@ Attempt to use a newly named alias in the same call before a second context exis
 **Check:** A missing-column error identifies the unavailable alias.
 
 **Hint:** Inspect the input schema of that operation.
-
 
 ### 6. Compare two implementations
 
@@ -145,20 +135,19 @@ Write the same recognized amounts with a filter plus an aggregate.
 
 **Hint:** Compare equivalent grains and denominators.
 
-
 ## Diagnose errors and misleading results
 
 If an expression unexpectedly uses old values, inspect its context before suspecting nondeterministic execution. If a string causes a missing-column error, decide whether it represents a name or a literal. A conditional expression may still evaluate branches as expressions, so do not rely on it to protect an otherwise invalid operation. Make casts and denominator policies valid independently, then select the appropriate result.
 
 ## Transfer to independent work
 
-Build a transformation whose dependency stages are explicit. Apply the same reasoning to feature pipelines: a normalized value should reference the intended cleaned field, and training and serving must agree on that order. Use intermediate schemas and a small hand-calculated fixture to review the pipeline before optimizing it.
+Apply the same reasoning to feature pipelines: a normalized value should reference the intended cleaned field, and training and serving must agree on that order. Use intermediate schemas and a small hand-calculated fixture to review the pipeline before optimizing it.
 
 ## Primary references
 
-- [Polars documentation: Expression contexts and explicit dependencies](https://docs.pola.rs/user-guide/concepts/expressions-and-contexts/)
+- [Polars user guide: Expressions and contexts](https://docs.pola.rs/user-guide/concepts/expressions-and-contexts/)
 - [Polars Python API reference](https://docs.pola.rs/api/python/stable/reference/index.html)
 
 ## Tutor guidance
 
-Use the repository learning-companion skill for `polars-002`. Inspect the learner's own source and observations, ask for an explanation of the relevant data or state contract, and give a focused hint. Separate an assertion on this fixture from a claim about an external dataset or deployed service.
+Use the repository's `$guide-ds60sqlpy-learning` skill (`.agents/skills/guide-ds60sqlpy-learning/SKILL.md`) for `polars-002`. Inspect the learner's own source and printed output first. Ask for an explanation of select, with_columns, alias, literal and dependency ordering in their own words, then give one focused hint at a time. Keep an assertion on this synthetic fixture separate from a claim about an external dataset or deployed service.

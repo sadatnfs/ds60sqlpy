@@ -9,6 +9,7 @@
     "replication"
   ],
   "outcome": "Analyze a crossed prompt/model/seed experiment and distinguish decoding variability from independent task evidence.",
+  "verification": "The per-prompt differences are -0.1 and +0.3, the additive reconstruction recovers every cell, equal selection budgets give development scores of 0.9, the seed variance is 0.01, and a malformed axis is rejected.",
   "level": "intermediate",
   "runtime": "python-core",
   "minutes": 120,

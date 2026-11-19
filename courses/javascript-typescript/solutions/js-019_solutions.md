@@ -10,6 +10,8 @@ Inference lets the checker learn types from initial values and expressions. An e
 
 The prepared route compiles main.mts with TypeScript 5.9.3 using NodeNext resolution and noEmitOnError, then runs the resulting ES module on Node 24. An incorrect typed program is a compiler failure before runtime. Each deliberate negative type example is placed in an uncalled function with @ts-expect-error. The directive requires the next line to produce a compiler diagnostic; if that error disappears, the compiler reports an unused directive. These functions are teaching checks, not code paths to execute or broad permission to suppress errors.
 
+Node 24 can also run main.mts directly: it strips erasable type syntax by default, so node main.mts starts without any compiler. Stripping is not checking. A file whose annotations are wrong still runs under node main.mts, while tsc --noEmit reports the same error without writing output. Only erasable syntax can be stripped: a parameter property or an enum stops node with ERR_UNSUPPORTED_TYPESCRIPT_SYNTAX, and the erasableSyntaxOnly compiler option reports such syntax while checking. This course keeps the compile-then-run route so every exercise is type-checked before it executes.
+
 **Static type:** A compile-time description of values and supported operations.
 
 **Inference:** Deriving a type from code without an explicit annotation.
@@ -22,11 +24,13 @@ The prepared route compiles main.mts with TypeScript 5.9.3 using NodeNext resolu
 
 A parameter annotation follows its name, and a return annotation follows the parameter list. const often preserves a literal primitive type, whereas let permits later assignment and commonly widens to the primitive category. A type alias names a compile-time description. unknown requires checking before use; any bypasses many checks and should not become the default for external input. The as syntax asserts what the author wants the checker to assume and performs no conversion.
 
-## Exercise 1: Annotate a numeric function
+## Exercise 1: Annotate a numeric function: change one input
 
-Task: Define a function accepting two numbers and returning their sum; inspect its runtime value.
+Task: Copy Example A into a scratch `main.mts` and change `const result = add(2, 3);` to `const result = add(3, 3);`. Before running it, predict which check fails and which value it now sees; then run it and restore the original line.
 
 The annotation describes accepted calls to checked TypeScript code. It is erased during compilation; the emitted function still performs JavaScript addition and would need validation at an untyped boundary.
+
+The unchanged code is the exercise block of Example A:
 
 ```typescript
 function add(left: number, right: number): number {
@@ -42,15 +46,17 @@ function negativeTypeCheck(): void {
 void negativeTypeCheck;
 ```
 
-**Expected:** sum 5 with runtime typeof number.
+**Expected:** The changed run fails with an `AssertionError` at the check `assert.equal(result, 5)`. Restoring the original line brings back the worked observation: sum 5 with runtime typeof number.
 
-**Verify:** Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.
+**Verify:** Compare your written prediction with the reported `AssertionError`, including its actual and expected values, and name the value that made `assert.equal(result, 5)` fail. After restoring the line, the program prints its `{"checks":1,"status":"passed"}` receipt again.
 
-## Exercise 2: Show that an assertion does not convert data
+## Exercise 2: Show that an assertion does not convert data: debug a regression
 
-Task: Assert that an unknown string is a number, then inspect the actual runtime type.
+Task: A regression changed one token in Example B, so one line now reads `const external: unknown = 'wrong!';`. Run Example B with that line, use the failing check to locate the defect and repair it without changing the check.
 
 This intentionally unsafe assertion demonstrates the escape hatch. The correct repair for external data is a runtime check or parser, not a stronger-looking cast.
+
+The unchanged code is the exercise block of Example B:
 
 ```typescript
 const external: unknown = 'wrong';
@@ -59,9 +65,9 @@ assert.equal(typeof claimed, 'string');
 assert.equal(String(claimed), 'wrong');
 ```
 
-**Expected:** the runtime value remains the string wrong.
+**Expected:** Before the repair the run fails with an `AssertionError` at the check `assert.equal(String(claimed), 'wrong')`; after it the line reads `const external: unknown = 'wrong';` again and the runtime value remains the string wrong.
 
-**Verify:** Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.
+**Verify:** Keep the failing and the repaired runs. Explain why the changed token alters the value tested by `assert.equal(String(claimed), 'wrong')` for this input.
 
 ## Exercise 3: Compare literal preservation and widening
 
@@ -87,7 +93,7 @@ void negativeTypeCheck;
 
 **Expected:** fixed tag remains ready; mutable text can change to done.
 
-**Verify:** Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.
+**Verify:** Keep a check equivalent to `assert.equal(mutable, 'done')`. As a control, change `mutable = 'done';` to `mutable = 'done!';`: the run must fail with an `AssertionError` at that check. Restore the line before continuing.
 
 ## Exercise 4: Handle null explicitly under strict checking
 
@@ -110,7 +116,7 @@ void negativeTypeCheck;
 
 **Expected:** length 3 for abc and 0 for null.
 
-**Verify:** Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.
+**Verify:** Keep a check equivalent to `assert.equal(lengthOrZero(null), 0)`. As a control, change `return value === null ? 0 : value.length;` to `return value === null ? 1 : value.length;`: the run must fail with an `AssertionError` at that check. Restore the line before continuing.
 
 ## Exercise 5: Observe type erasure through object keys
 
@@ -127,7 +133,7 @@ assert.equal('Item' in item, false);
 
 **Expected:** runtime keys contain only id and count, with no type alias metadata.
 
-**Verify:** Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.
+**Verify:** Keep a check equivalent to `assert.equal('Item' in item, false)`. As a control, change `assert.equal('Item' in item, false);` to `assert.equal('Item' in item, true);` inside it: the run must fail with an `AssertionError`, which shows the check can fail. Restore it.
 
 ## Exercise 6: Narrow unknown before numeric use
 
@@ -148,7 +154,7 @@ assert.throws(() => doubleFinite(Infinity), TypeError);
 
 **Expected:** 12 doubles to 24; string 12 and Infinity reject.
 
-**Verify:** Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.
+**Verify:** Keep a check equivalent to `assert.equal(doubleFinite(12), 24)`. As a control, change `return value * 2;` to `return value + 2;`: the run must fail with an `AssertionError` at that check. Restore the line before continuing.
 
 ## After comparison
 

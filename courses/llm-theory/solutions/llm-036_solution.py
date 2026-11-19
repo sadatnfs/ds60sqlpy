@@ -15,7 +15,7 @@ def rank(query, documents, k):
 
 
 def verify():
-    # Exercise 1: Rank a local corpus
+    # Worked example A: Rank a local corpus
     docs = {
         "d1": "red square has four sides",
         "d2": "a square may be red",
@@ -27,7 +27,7 @@ def verify():
     ranked = rank("red square", docs, 2)
     assert ranked == ["d1", "d2"]
 
-    # Exercise 2: Measure retrieval recall
+    # Worked example B: Measure retrieval recall
     relevant = {"d1", "d2"}
     assert len(set(rank("red square", docs, 1)) & relevant) / len(relevant) == 0.5
     assert len(set(ranked) & relevant) / len(relevant) == 1
@@ -53,6 +53,16 @@ def verify():
         "all_claims_supported": False,
     }
     assert record["retrieval_has_relevant"] and not record["all_claims_supported"]
+
+    # Exercise 1: Rank a different query
+    assert rank("has sides", docs, 3) == ["d1", "d4", "d5"]
+
+    # Exercise 2: Measure recall with a tie-filled slot
+    relevant2 = {"d3", "d4"}
+    top = rank("round circle", docs, 2)
+    assert top == ["d3", "d1"]
+    assert len(set(rank("round circle", docs, 1)) & relevant2) / len(relevant2) == 0.5
+    assert len(set(top) & relevant2) / len(relevant2) == 0.5
     return {"checks": 6, "status": "passed"}
 
 

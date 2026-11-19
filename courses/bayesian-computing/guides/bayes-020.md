@@ -30,7 +30,7 @@ A small tau creates strong dependence between group effects and their population
 
 Priors on scale parameters deserve scrutiny. A prior that concentrates near zero encourages similar groups; a heavy tail allows greater heterogeneity. Both choices affect prediction for new groups. Conduct prior predictive checks in meaningful outcome units before treating a scale prior as a harmless default.
 
-The two short classroom chains are enough to demonstrate actual compilation, sampling and summaries, not to certify all group-level tails. Undefined diagnostics on constants differ from concerning diagnostics on tau, mu or theta. Divergences, poor effective sizes or inconsistent chains should lead to investigation and an explicitly prepared longer analysis.
+The two short classroom chains are enough to demonstrate actual compilation, sampling and summaries, not to certify all group-level tails. Undefined diagnostics on constants differ from concerning diagnostics on tau, mu or theta. Any divergence, an R-hat at or above 1.01, bulk or tail effective sizes below about 100 per chain or inconsistent chains should lead to investigation and an explicitly prepared longer analysis.
 
 ## Answered scientific discussion
 
@@ -40,7 +40,7 @@ The two short classroom chains are enough to demonstrate actual compilation, sam
 
 ## Complete reproducible program
 
-The prepared Stan pad compiles and samples `main.stan` with fixed bounded settings. Its tiny data are declared in `transformed data`; this pad has no separate JSON editor. The linked project explains standard data-block workflows. Runtime: `stan-cpu`.
+The prepared Stan pad compiles `main.stan` and samples two chains with 100 warmup and 100 retained draws each. Its tiny data are declared in `transformed data`; this pad has no separate JSON editor. The linked project explains standard data-block workflows. These teaching-sized chains can fail the convergence screen from `bayes-006` (R-hat below 1.01, at least 100 bulk and tail effective draws per chain, no divergences); read the printed diagnostics against it before interpreting any estimate. Runtime: `stan-cpu`.
 
 ```stan
 transformed data {

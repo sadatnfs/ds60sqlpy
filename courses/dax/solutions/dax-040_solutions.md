@@ -62,7 +62,7 @@ It would turn 1/2 into 1/1 and conceal inactive eligible members.
 
 ### Exercise 5
 
-Explain why 202512 +1 is not a valid next-month calculation.
+Explain why 202512 + 1 is not a valid next-month calculation.
 
 It gives 202513. Use a date-aware calendar mapping or EDATE with explicit period membership.
 

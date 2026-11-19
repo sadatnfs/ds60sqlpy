@@ -37,6 +37,24 @@ internal static class Program {
       await channel.Reader.Completion;
       Check(sum == 5 && !channel.Writer.TryWrite(9), "drained and closed");
     }
+    {
+      // Task 3: Independent construction
+      var channel = Channel.CreateBounded<int>(2);
+      Task producer = Task.Run(async () => {
+        for (int i = 1; i <= 5; i++) {
+          await channel.Writer.WriteAsync(i);
+        }
+        channel.Writer.Complete();
+      });
+      int sum = 0;
+      int count = 0;
+      await foreach (int value in channel.Reader.ReadAllAsync()) {
+        sum += value;
+        count++;
+      }
+      await producer;
+      Check(sum == 15 && count == 5, "every item consumed once");
+    }
     Console.WriteLine("csharp-031: passed");
     await Task.CompletedTask;
   }

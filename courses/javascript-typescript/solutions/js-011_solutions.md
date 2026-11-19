@@ -22,11 +22,13 @@ Early termination is also a resource question. for...of invokes the iterator's r
 
 The star in function* declares a generator; yield produces a value and suspends the local execution state. A return ends iteration and may supply a final result, but that result is not another yielded item. yield* delegates to another iterable. Calling next(value) sends a value back into the suspended yield expression. The first next argument has no waiting yield to receive it. for...of reads yielded values and stops on done true.
 
-## Exercise 1: Trace lazy execution
+## Exercise 1: Trace lazy execution: change one input
 
-Task: Create a generator, inspect its trace, then request one value.
+Task: Copy Example A into a scratch `main.mjs` and change `trace.push('started');` to `trace.push('started!');`. Before running it, predict which check fails and which value it now sees; then run it and restore the original line.
 
 Creating the cursor and executing its body are separate events. The trace distinguishes laziness from eager construction of an array.
+
+The unchanged code is the exercise block of Example A:
 
 ```javascript
 const trace = [];
@@ -43,15 +45,17 @@ assert.deepEqual(trace, ['started']);
 cursor.return();
 ```
 
-**Expected:** trace is empty before next; then started, with value 2.
+**Expected:** The changed run fails with an `AssertionError` at the check `assert.deepEqual(trace, ['started'])`. Restoring the original line brings back the worked observation: trace is empty before next; then started, with value 2.
 
-**Verify:** Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.
+**Verify:** Compare your written prediction with the reported `AssertionError`, including its actual and expected values, and name the value that made `assert.deepEqual(trace, ['started'])` fail. After restoring the line, the program prints its `{"checks":1,"status":"passed"}` receipt again.
 
-## Exercise 2: Close on an early break
+## Exercise 2: Close on an early break: debug a regression
 
-Task: Iterate one value from a generator protected by finally, then break.
+Task: A regression changed `yield 1;` to `yield 2;` in Example B. Run Example B with that change, use the failing check to explain the defect and repair it without changing the check.
 
 The loop performs iterator closing when control exits through break. Resource-owning iterators should place cleanup in finally instead of assuming every consumer reaches the end.
+
+The unchanged code is the exercise block of Example B:
 
 ```javascript
 const trace = [];
@@ -71,9 +75,9 @@ for (const value of rows()) {
 assert.deepEqual(trace, ['opened', 1, 'closed']);
 ```
 
-**Expected:** trace records opened, value 1, closed.
+**Expected:** Before the repair the run fails with an `AssertionError` at the check `assert.deepEqual(trace, ['opened', 1, 'closed'])`; after it the line reads `yield 1;` again and trace records opened, value 1, closed.
 
-**Verify:** Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.
+**Verify:** Keep the failing and the repaired runs. Explain why the changed token alters the value tested by `assert.deepEqual(trace, ['opened', 1, 'closed'])` for this input.
 
 ## Exercise 3: Distinguish a cursor from a fresh iterable
 
@@ -90,7 +94,7 @@ assert.deepEqual([...range(3)], [0, 1, 2]);
 
 **Expected:** first pass is 0,1,2; second is empty; fresh pass repeats 0,1,2.
 
-**Verify:** Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.
+**Verify:** Keep a check equivalent to `assert.deepEqual([...range(3)], [0, 1, 2])`. As a control, change `assert.deepEqual([...range(3)], [0, 1, 2]);` to `assert.deepEqual([...range(4)], [0, 1, 2]);` inside it: the run must fail with an `AssertionError`, which shows the check can fail. Restore it.
 
 ## Exercise 4: Inspect the final return value
 
@@ -111,7 +115,7 @@ assert.deepEqual([...sample()], [1]);
 
 **Expected:** next records value 1/done false then 9/done true; spread contains only 1.
 
-**Verify:** Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.
+**Verify:** Keep a check equivalent to `assert.deepEqual(cursor.next(), { value: 1, done: false })`. As a control, change `yield 1;` to `yield 2;`: the run must fail with an `AssertionError` at that check. Restore the line before continuing.
 
 ## Exercise 5: Send a value into a suspended generator
 
@@ -132,7 +136,7 @@ cursor.return();
 
 **Expected:** request, then 8.
 
-**Verify:** Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.
+**Verify:** Keep a check equivalent to `assert.equal(cursor.next(4).value, 8)`. As a control, change `yield answer * 2;` to `yield answer + 2;`: the run must fail with an `AssertionError` at that check. Restore the line before continuing.
 
 ## Exercise 6: Bound the range and validate configuration
 
@@ -148,7 +152,7 @@ assert.throws(() => [...range(1.5)], RangeError);
 
 **Expected:** empty array for 0; RangeError for -1 and 1.5.
 
-**Verify:** Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.
+**Verify:** Keep a check equivalent to `assert.deepEqual([...range(0)], [])`. As a control, change `assert.deepEqual([...range(0)], []);` to `assert.deepEqual([...range(1)], []);` inside it: the run must fail with an `AssertionError`, which shows the check can fail. Restore it.
 
 ## After comparison
 

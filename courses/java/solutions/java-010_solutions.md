@@ -12,15 +12,19 @@ An interface describes behavior a caller can rely on without depending on one im
 
 **Composition:** Building behavior by delegating to contained collaborators.
 
+**Sealed interface:** An interface that names every permitted implementation, enabling exhaustive pattern switches.
+
 ## Reading the reference
 
-An interface declares a method; implementing classes or lambdas supply its body. A variable of interface type can hold different implementations. The receiver object selects the overridden method at runtime. A composed wrapper validates its own policy, delegates to the inner implementation and checks arithmetic withMath.addExact. Keep domain validation consistent across all implementations so callers do not need class-specific exceptions.
+An interface declares a method; implementing classes or lambdas supply its body. A variable of interface type can hold different implementations. The receiver object selects the overridden method at runtime. A composed wrapper validates its own policy, delegates to the inner implementation and checks arithmetic with Math.addExact. Keep domain validation consistent across all implementations so callers do not need class-specific exceptions. A sealed interface lists its permitted implementations, so a switch over it can be exhaustive without a default branch, and a record pattern such as Percent(int percent) tests the type and binds the record component in one case label (Java 21).
 
-## Exercise 1: Call through an interface
+## Exercise 1: Call through an interface: change one input
 
-Task: Use Pricing references to identity and half-price implementations on 100 cents.
+Task: Copy Example A into a scratch `Main.java` and change `return amount / 2;` to `return amount / 3;`. Before running it with `java -ea Main`, predict which assertion fails and which value it now sees; then run it and restore the original line.
 
 The caller invokes the same method name while the concrete behavior differs. The shared nonnegative-input contract keeps both implementations substitutable.
+
+The unchanged code is the part that Example A adds:
 
 ```java
 Pricing regular = amount -> {
@@ -34,42 +38,48 @@ Pricing half = amount -> {
 assert regular.price(100) == 100 && half.price(100) == 50;
 ```
 
-**Expected:** 100 and 50.
+**Expected:** The changed run fails with an `AssertionError` from the assertion on `regular.price(100) == 100 && half.price(100) == 50`. Restoring the original line brings back the worked observation: 100 and 50.
 
-**Verify:** Compare the program values or named exception with 100 and 50. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.
+**Verify:** Compare your written prediction with the reported `AssertionError` and its stack-trace line, and name the value that made `regular.price(100) == 100 && half.price(100) == 50` false. After restoring the line, the program completes without an `AssertionError` again.
 
-## Exercise 2: Compose a fee policy
+## Exercise 2: Compose a fee policy: debug a regression
 
-Task: Wrap the half-price policy with a10-cent fee.
+Task: A regression changed one token in the code that Example B adds after Example A, so one line now reads `Pricing withFee = new Fee(half, 11);`. Run Example B with that line, use the failing assertion to locate the defect and repair it without changing the assertion.
 
 The wrapper delegates first and then adds its policy. It does not duplicate the half-price calculation, so the two concerns can change independently.
+
+The unchanged code is the part that Example B adds:
 
 ```java
 Pricing withFee = new Fee(half, 10);
 assert withFee.price(100) == 60;
 ```
 
-**Expected:** price100 becomes60.
+**Expected:** Before the repair the run fails with an `AssertionError` from the assertion on `withFee.price(100) == 60`; after it the line reads `Pricing withFee = new Fee(half, 10);` again and price 100 becomes 60.
 
-**Verify:** Compare the program values or named exception with price100 becomes60. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.
+**Verify:** Keep the failing and the repaired runs. Explain why the changed token alters the value tested by `withFee.price(100) == 60` for this input.
 
-## Exercise 3: Inspect rounding semantics
+## Exercise 3: Switch exhaustively over a sealed type
 
-Task: Apply integer half-price to101 cents under truncation-toward-zero.
+Task: Price 200 cents with NoDiscount, Percent(25) and Fixed(250) through one pattern-matching switch over the sealed Discount interface.
 
-Rounding is part of the pricing contract. A different business rule could require rounding up or preserving fractional units, but should not be hidden behind the same informal name.
+Discount is sealed, so the compiler knows every implementation and the switch in discounted covers each permitted record without a default branch. Each record pattern, such as Percent(int percent), checks the type and binds its component in one step. Adding a fourth permitted record would make discounted fail to compile until the new case is handled, rather than silently using a fallback. The fixed discount is clamped at zero so a large discount cannot produce a negative price.
 
 ```java
-assert half.price(101) == 50;
+List<Integer> discountedPrices = new ArrayList<>();
+for (Discount discount : List.of(new NoDiscount(), new Percent(25), new Fixed(250))) {
+  discountedPrices.add(discounted(200, discount));
+}
+assert discountedPrices.equals(List.of(200, 150, 0));
 ```
 
-**Expected:** 50 cents before fee.
+**Expected:** 200, 150 and 0.
 
-**Verify:** Compare the program values or named exception with 50 cents before fee. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.
+**Verify:** Keep an assertion equivalent to `discountedPrices.equals(List.of(200, 150, 0))`. As a control, change `for (Discount discount : List.of(new NoDiscount(), new Percent(25), new Fixed(250))) {` to `for (Discount discount : List.of(new NoDiscount(), new Percent(26), new Fixed(250))) {`: the run must fail with an `AssertionError` from the assertion on `discountedPrices.equals(List.of(200, 150, 0))`. Restore the line before continuing.
 
 ## Exercise 4: Validate every implementation
 
-Task: Call regular,half and fee policy with-1.
+Task: Call regular, half and fee policy with -1.
 
 A caller should not need to know the concrete type to predict whether a domain input is accepted. Consistent validation supports substitution.
 
@@ -85,13 +95,13 @@ for (Pricing policy : List.of(regular, half, withFee)) {
 }
 ```
 
-**Expected:** all throwIllegalArgumentException.
+**Expected:** all throw IllegalArgumentException.
 
-**Verify:** Compare the program values or named exception with all throwIllegalArgumentException. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.
+**Verify:** Keep an assertion equivalent to `rejected`. As a control, change `rejected = true;` to `rejected = false;`: the run must fail with an `AssertionError` from the assertion on `rejected`. Restore the line before continuing.
 
 ## Exercise 5: Change a collaborator without changing caller code
 
-Task: Iterate over the three policies and collect prices for100.
+Task: Iterate over the three policies and collect prices for 100.
 
 The loop depends only on Pricing. Adding another valid implementation does not require a class-name conditional in the caller.
 
@@ -101,9 +111,9 @@ for (Pricing policy : List.of(regular, half, withFee)) prices.add(policy.price(1
 assert prices.equals(List.of(100, 50, 60));
 ```
 
-**Expected:** results100,50,60.
+**Expected:** results 100, 50, 60.
 
-**Verify:** Compare the program values or named exception with results100,50,60. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.
+**Verify:** Keep an assertion equivalent to `prices.equals(List.of(100, 50, 60))`. As a control, change `for (Pricing policy : List.of(regular, half, withFee)) prices.add(policy.price(100));` to `for (Pricing policy : List.of(regular, half, withFee)) prices.add(policy.price(101));`: the run must fail with an `AssertionError` from the assertion on `prices.equals(List.of(100, 50, 60))`. Restore the line before continuing.
 
 ## Exercise 6: Reject an invalid wrapper
 
@@ -127,9 +137,9 @@ try {
 assert feeRejected && delegateRejected;
 ```
 
-**Expected:** negative fee IllegalArgumentException;null delegate NullPointerException.
+**Expected:** negative fee IllegalArgumentException; null delegate NullPointerException.
 
-**Verify:** Compare the program values or named exception with negative fee IllegalArgumentException;null delegate NullPointerException. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.
+**Verify:** Keep an assertion equivalent to `feeRejected && delegateRejected`. As a control, change `feeRejected = true;` to `feeRejected = false;`: the run must fail with an `AssertionError` from the assertion on `feeRejected && delegateRejected`. Restore the line before continuing.
 
 ## After comparing the answer
 

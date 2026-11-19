@@ -13,9 +13,9 @@ Constant evaluation moves computation to a different phase rather than making it
 <!-- depth:start -->
 ## Constant evaluation is a different computation phase
 
-constexpr permits a function to participate in constant evaluation when the call satisfies the language rules. It does not require every call to run during compilation. A call using an ordinary runtime value can execute normally. consteval is stricter:an immediate function call must produce a constant-evaluated result under its contract.
+constexpr permits a function to participate in constant evaluation when the call satisfies the language rules. It does not require every call to run during compilation. A call using an ordinary runtime value can execute normally. consteval is stricter: an immediate function call must produce a constant-evaluated result under its contract.
 
-The first example uses static_assert(square(4)==16), so a wrong result prevents compilation. No runtime branch is needed to check that statement. The second uses runtime=5 and checks25 during program execution. The same constexpr function supports both uses. This distinction helps explain why compile-time and runtime tests can complement each other.
+The first example uses static_assert(square(4)==16), so a wrong result prevents compilation. No runtime branch is needed to check that statement. The second uses runtime=5 and checks 25 during program execution. The same constexpr function supports both uses. This distinction helps explain why compile-time and runtime tests can complement each other.
 
 Constant evaluation moves work into the build; it does not make work free. Large generated tables or complex compile-time recursion can increase compiler time, memory use and binary size. A lookup table may improve runtime behavior for a repeated operation, but the build and storage tradeoffs still need measurement. A tiny square example cannot establish a performance advantage.
 
@@ -53,7 +53,7 @@ Classify static_assert(square(4)==16) and square(runtime).
 
 **Reasoning:** constexpr permits rather than universally forces compile time.
 
-**Verify:** Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.
+**Verify:** Change 16 to 17 in a scratch copy and confirm the build fails at the `static_assert`, while `square(runtime) == 25` is only checked when the program runs.
 
 ## Exercise 2: Add a lookup table
 
@@ -63,7 +63,7 @@ Build squares for indices 0 through 4 with constexpr data.
 
 **Reasoning:** Small bounded tables can replace repeated work.
 
-**Verify:** Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.
+**Verify:** Fill a `constexpr std::array<int, 5>` with `square(i)` and add `static_assert(table[0] == 0 && table[4] == 16)` so the build itself checks the table.
 
 ## Exercise 3: Force constant evaluation
 
@@ -73,7 +73,7 @@ Create a consteval limit function and call with constant input.
 
 **Reasoning:** Immediate functions require compile-time evaluation.
 
-**Verify:** Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.
+**Verify:** Use your `consteval` function's result with a literal argument inside a `static_assert` and confirm the build succeeds; the call is evaluated during compilation.
 
 ## Exercise 4: Diagnose runtime argument
 
@@ -83,7 +83,7 @@ Pass an input read at runtime to a consteval function.
 
 **Reasoning:** The phase requirement is part of the interface.
 
-**Verify:** Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.
+**Verify:** Compile the scratch call and keep the error saying the argument is not a constant expression; changing `consteval` to `constexpr` must let it compile and run.
 
 ## Exercise 5: Check a numeric boundary
 
@@ -93,7 +93,7 @@ Limit table inputs so multiplication cannot overflow int.
 
 **Reasoning:** Compile-time evaluation still obeys arithmetic rules.
 
-**Verify:** Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.
+**Verify:** Check that your bound is at most 46340, the largest `int` whose square fits in 32 bits, and add `static_assert(square(bound) > 0)`, which fails to compile if the square overflows.
 
 ## Exercise 6: Transfer build budget
 
@@ -103,4 +103,4 @@ Compare bounded table sizes 16 and 256 in an owned host build.
 
 **Reasoning:** Build-time work is a resource that also needs a budget.
 
-**Verify:** Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.
+**Verify:** Time each build with the same flags, list the two object file sizes, and record both pairs of numbers without claiming they scale the same way elsewhere.

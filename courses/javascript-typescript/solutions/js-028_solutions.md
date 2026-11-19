@@ -22,11 +22,13 @@ Dynamic programming reuses overlapping subproblem results. For minimum coin coun
 
 ReadonlyMap<string, readonly string[]> states that search consumes the graph without modifying it. Runtime checks require every referenced neighbor to exist. A null parent marks the source; an absent Map entry means undiscovered. Reconstruction follows parent links until null. The DP table is filled in increasing amount order so every dependency is already available. Positive integer denominations and a target cap preserve this dependency order and bound resource use.
 
-## Exercise 1: Find a shortest unweighted path
+## Exercise 1: Find a shortest unweighted path: change one input
 
-Task: Search a graph with two equal-length routes from A to D.
+Task: Close Example A and rebuild it in a fresh `main.mts`, keeping the check `assert.deepEqual(shortestPath(graph, 'A', 'D'), ['A', 'B', 'D'])`. Then propose one input change that would make that check fail and explain why before trying it.
 
 Both two-edge routes are shortest. The implementation chooses the first discovered route rather than claiming the answer is mathematically unique.
+
+The unchanged code is the exercise block of Example A:
 
 ```typescript
 const graph: Graph = new Map([
@@ -38,24 +40,26 @@ const graph: Graph = new Map([
 assert.deepEqual(shortestPath(graph, 'A', 'D'), ['A', 'B', 'D']);
 ```
 
-**Expected:** A,B,D under the stated neighbor order.
+**Expected:** Your rebuild reproduces the worked observation (A,B,D under the stated neighbor order), and your proposed change makes the check `assert.deepEqual(shortestPath(graph, 'A', 'D'), ['A', 'B', 'D'])` fail.
 
-**Verify:** Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.
+**Verify:** Run the rebuild first and confirm the `{"checks":1,"status":"passed"}` receipt, then the changed copy. Name the value that makes `assert.deepEqual(shortestPath(graph, 'A', 'D'), ['A', 'B', 'D'])` fail in the changed copy.
 
-## Exercise 2: Beat greedy coin selection
+## Exercise 2: Beat greedy coin selection: diagnose an edited check
 
-Task: Use denominations 1,3,4 to make amount 6.
+Task: A careless edit changed a check in Example B so that it reads `assert.equal(minCoins([1, 3, 4], 1), 0);`. Run Example B with that line, explain why the edited check now fails for the same program state, and restore it.
 
 The recurrence evaluates every possible final coin. It avoids the attractive local choice of 4 that leads to a worse total count.
+
+The unchanged code is the exercise block of Example B:
 
 ```typescript
 assert.equal(minCoins([1, 3, 4], 6), 2);
 assert.equal(minCoins([1, 3, 4], 0), 0);
 ```
 
-**Expected:** two coins; amount zero needs zero coins.
+**Expected:** Before the repair the run fails with an `AssertionError` at the check `assert.equal(minCoins([1, 3, 4], 0), 0)`; after it the line reads `assert.equal(minCoins([1, 3, 4], 0), 0);` again and two coins; amount zero needs zero coins.
 
-**Verify:** Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.
+**Verify:** Keep the failing and the repaired runs. Explain why the edited check rejects the same program state that `assert.equal(minCoins([1, 3, 4], 0), 0)` accepts.
 
 ## Exercise 3: Terminate on a cyclic graph
 
@@ -75,7 +79,7 @@ assert.deepEqual(shortestPath(graph, 'A', 'A'), ['A']);
 
 **Expected:** A,B,C and A.
 
-**Verify:** Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.
+**Verify:** Keep a check equivalent to `assert.deepEqual(shortestPath(graph, 'A', 'A'), ['A'])` and confirm that the reference still passes. Then name an input that would make it fail and explain which value changes.
 
 ## Exercise 4: Separate disconnection from malformed input
 
@@ -100,7 +104,7 @@ assert.throws(() => shortestPath(new Map([['A', ['missing']]]), 'A', 'A'), Range
 
 **Expected:** undefined for no path; RangeError for invalid graph.
 
-**Verify:** Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.
+**Verify:** Keep a check equivalent to `assert.throws(() => shortestPath(new Map([['A', ['missing']]]), 'A', 'A'), RangeError)` and confirm that the reference still passes. Then name an input that would make it fail and explain which value changes.
 
 ## Exercise 5: Represent unreachable coin amounts
 
@@ -115,7 +119,7 @@ assert.equal(minCoins([2], 4), 2);
 
 **Expected:** undefined and 2.
 
-**Verify:** Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.
+**Verify:** Keep a check equivalent to `assert.equal(minCoins([2], 4), 2)`. As a control, change `assert.equal(minCoins([2], 4), 2);` to `assert.equal(minCoins([3], 4), 2);` inside it: the run must fail with an `AssertionError`, which shows the check can fail. Restore it.
 
 ## Exercise 6: Reject invalid recurrence configurations
 
@@ -131,7 +135,7 @@ assert.equal(minCoins([], 1), undefined);
 
 **Expected:** RangeError for all invalid configurations; empty denominations cannot make 1.
 
-**Verify:** Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.
+**Verify:** Keep a check equivalent to `assert.throws(() => minCoins(coins, 5), RangeError)`. As a control, change `for (const coins of [[0], [-1], [1.5]]) assert.throws(() => minCoins(coins, 5), RangeError);` to `for (const coins of [[1], [-1], [1.5]]) assert.throws(() => minCoins(coins, 5), RangeError);`: the run must fail with an `AssertionError` at that check. Restore the line before continuing.
 
 ## After comparison
 

@@ -8,7 +8,7 @@ Inspect syntax without evaluating untrusted text, implement a hygienic single-ev
 
 ## Classroom execution
 
-Choose **Julia language and scientific computing** in `/classroom`, open this unit, and select its prepared `julia` runtime. The worker starts a fresh `main.jl` process with two Julia threads, a fixed package environment, no startup file and offline package settings. Both worked examples are complete under that environment. Save your current pad before replacing it. No package, model or dataset is fetched by a lesson.
+Open `julia-031` in `/classroom` with its prepared `julia` runtime. Worked case A (inspect and expand a bounded expression) and worked case B (count bytes through the actual C library) are complete programs: save your current pad, paste one of them and press Run. The learner file contains the six investigations below; the explained reference ends by printing `julia-031: all reference checks passed`. The [course overview](../README.md) describes the shared runtime: a fresh offline `main.jl` process with two threads and a fixed package environment.
 
 ## Code can be represented as data
 
@@ -116,9 +116,9 @@ C++ APIs add name mangling, object layout and exception conventions; a reviewed 
 
 ### 1. Inspect syntax
 
-Identify the head and first argument of parsed 1+2.
+Identify the head and first argument of parsed `1 + 2`.
 
-**Expected:** The head is:call and the function symbol is:+.
+**Expected:** The head is `:call` and the function symbol is `:+`.
 
 **Hint:** Parsing constructs syntax.
 
@@ -169,4 +169,4 @@ List the extra facts needed before calling a function that stores a pointer.
 
 ## Study companion
 
-Use the repository learning-companion skill with this lesson ID, your prediction and your actual source/output. Ask for a diagnosis of the first incorrect type, shape, state transition or assumption. Keep observed execution distinct from a timing claim, inferred mathematical result or external deployment.
+A repository-aware assistant with the learning-companion skill can review `julia-031` with you. Give it your prediction for one investigation, your source and the actual output, and ask it to find the first incorrect assumption about Expr, macro hygiene, single evaluation, ccall, ABI or UTF8.

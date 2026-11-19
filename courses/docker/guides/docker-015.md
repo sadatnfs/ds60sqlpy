@@ -6,7 +6,7 @@ Intermediate; about 100 minutes, with additional time for the optional host expe
 
 ## Learning objectives
 
-Design a cold-build check. Describe a dependency acquisition policy. Explain the difference between a configuration, an observed process and evidence of the application's behavior.
+Design a cold-build check. Describe a dependency acquisition policy. Use BuildKit, cache mount and secret mount accurately when you explain what you observed.
 
 ## Purpose, vocabulary and mental model
 
@@ -18,30 +18,31 @@ Build-time network access is an external dependency. Prefer locked public inputs
 
 ## Anatomy and a trace you can follow
 
-A Dockerfile RUN mount exists only for that build operation. `type=cache` selects a persistent builder cache directory. `type=secret,id=demo` selects a separately supplied secret. Read a secret only at its declared path, and do not echo its bytes. `required=true` causes a missing input to fail clearly.
+A Dockerfile RUN mount exists only for that build operation. `type=cache` selects a persistent builder cache directory. `type=secret,id=demo` selects a separately supplied secret. Read a secret only at its declared path, and do not echo its bytes. `required=true` causes a missing input to fail clearly. Supply the value from the host with `docker build --secret id=demo,src=./demo-secret.txt .` or `--secret id=demo,env=DEMO_SECRET`; the step reads it at `/run/secrets/demo`.
 
 Cache entries can improve speed but should not be the only copy of a required source artifact. A cold build must still produce the same intended result from declared dependencies. Treat cache as discardable acceleration, not durable application data.
 
 ## How to use this lesson
 
-The classroom displays this guide and saves your worksheet. Its Run button does not control your Docker engine. Docker engine access is powerful host access, so the classroom deliberately receives no engine socket. Work through the supplied examples without starting anything, then use the optional host lab only in your own disposable project. Reading a command, parsing YAML and actually running the project are different forms of evidence.
+The classroom displays this guide and saves your worksheet, `courses/docker/lessons/docker-015.md`. Its Run button does not control your Docker engine. Docker engine access is powerful host access, so the classroom deliberately receives no engine socket. Work through the supplied examples without starting anything, then use the optional host lab only in your own disposable project. Reading a command, parsing YAML and actually running the project are different forms of evidence.
 
 Use Bash in Linux, macOS Terminal, or Ubuntu under WSL 2 on Windows. The supported engine runs Linux containers. The maintained fixture is `courses/docker/fixtures/compose-lab/`; its README explains copying it into a new ignored learner directory, checking the engine, building locally with visible logs, and using the fixed project name `ds60-docker-study`. The fixture uses port 18080 on host loopback. Stop if that project name or port belongs to unrelated work; choose a new project name consistently in your own copy. Never paste a command against a remote Docker context simply because it is currently selected.
 
-For Dockerfile examples, create a file named `Dockerfile` in a scratch project. YAML snippets describe a fragment unless explicitly called a complete file. Text transcripts are synthetic illustrations, not claims about your machine. Do not substitute a real password, token or private registry into a checked-in example.
+For Dockerfile examples, create a file named `Dockerfile` in a scratch project. YAML snippets describe a fragment unless explicitly called a complete file. Text transcripts are synthetic illustrations, not claims about your machine. Do not substitute a real password, token or private registry into a checked-in example. **How to use the lessons** in the [subject README](../README.md) collects these rules in one place.
 
 ## Worked example / walkthrough
 
-### Worked example 1: Inspect a cache mount
+### Worked example 1: Reuse downloads with a cache mount
 
-This pattern is illustrative for a Python project with an actual lock procedure.
+This pattern is illustrative for a Python project with a hash-locked requirements file.
 
 ```dockerfile
+COPY requirements.lock /tmp/requirements.lock
 RUN --mount=type=cache,target=/root/.cache/pip \
-    python -m pip --version
+    python -m pip install --require-hashes -r /tmp/requirements.lock
 ```
 
-**Expected observation:** The cache directory is available to this step; it is not copied as normal application data.
+**Expected observation:** A rebuild after a lock change reuses previously downloaded wheels from the cache mount; the cache directory is not part of any image layer.
 
 ### Worked example 2: Require a synthetic build secret without printing it
 
@@ -56,58 +57,50 @@ RUN --mount=type=secret,id=demo,required=true \
 
 ## Six progressive exercises
 
+For each exercise, name the object involved and the phase of its lifetime before changing anything, then vary only the condition the task names. Exercises that ask you to predict, explain, compare or diagnose keep their answers in the solutions file; the others show the evidence to look for.
+
 ### Exercise 1: Compare a cache mount and a secret mount.
 
-**Expected evidence:** Reusable acceleration versus sensitive transient input.
-
-**Hint:** Identify the object and the phase of its lifetime before changing it. Use the relevant worked example, then vary only the condition named in this task.
+**Hint:** Ask what each mount holds and how long it should live.
 
 ### Exercise 2: Predict a required secret missing from the build.
 
-**Expected evidence:** The step fails before pretending to authenticate.
-
-**Hint:** Identify the object and the phase of its lifetime before changing it. Use the relevant worked example, then vary only the condition named in this task.
+**Hint:** Read what required=true does when no --secret is supplied.
 
 ### Exercise 3: Design a cold-build check.
 
 **Expected evidence:** Remove reliance on cache while preserving declared public inputs.
 
-**Hint:** Identify the object and the phase of its lifetime before changing it. Use the relevant worked example, then vary only the condition named in this task.
+**Hint:** Build with the cache removed and compare the result with a warm build.
 
 ### Exercise 4: Diagnose a secret copied into an output file.
 
-**Expected evidence:** Mount isolation does not prevent the command from leaking bytes.
-
-**Hint:** Identify the object and the phase of its lifetime before changing it. Use the relevant worked example, then vary only the condition named in this task.
+**Hint:** Ask what the RUN command did with the bytes it read.
 
 ### Exercise 5: Explain why ARG is unsuitable for a password.
 
-**Expected evidence:** Build metadata and history can expose values.
-
-**Hint:** Identify the object and the phase of its lifetime before changing it. Use the relevant worked example, then vary only the condition named in this task.
+**Hint:** Check where build arguments appear, such as docker history and provenance.
 
 ### Exercise 6: Describe a dependency acquisition policy.
 
-**Expected evidence:** Locked inputs, deliberate network access and no default private credentials.
-
-**Hint:** Identify the object and the phase of its lifetime before changing it. Use the relevant worked example, then vary only the condition named in this task.
+**Hint:** List what the build downloads, from where and how its identity is checked.
 
 ## Common mistakes and diagnosis
 
-Start with the smallest observation that separates two plausible causes. An image inspection answers questions about the packaged filesystem and configuration; container inspection adds runtime mounts, network attachment and exit status. An application request adds another layer of evidence. A healthy container can still serve the wrong application result. Preserve the original failure and the exact changed field before retrying.
+Passing a password with `--build-arg` or `ENV`. Printing or copying a mounted secret into an image file. Treating the cache mount as the only copy of a dependency.
 
-The boundary case in this chapter is: Diagnose a secret copied into an output file. Use its expected observation, Mount isolation does not prevent the command from leaking bytes., to avoid treating a successful command as proof of the wrong claim. Keep source edits in your own copy. Do not make a container privileged, mount the engine socket, disable all checks or delete every volume to make an example succeed.
+Exercise 4 is this chapter's boundary case: Diagnose a secret copied into an output file. Start with the smallest observation that separates two plausible causes. An image inspection answers questions about the packaged filesystem and configuration; container inspection adds runtime mounts, network attachment and exit status; an application request adds another layer, and a healthy container can still serve the wrong result. Preserve the original failure and the exact changed field before retrying. Keep source edits in your own copy. Do not make a container privileged, mount the engine socket, disable all checks or delete every volume to make an example succeed.
 
 ## Retrieval, transfer and next steps
 
-Close the explanations and draw the path from source files to image to container to the observation relevant here. Reconstruct the second worked example with one different value and predict what changes. Explain which state survives process restart, container recreation and image rebuild. If none of those operations applies to this mechanism, explain why.
+Close the explanations and draw the path from source files to image to container to the observation relevant here, using BuildKit, cache mount, secret mount, --secret and cold build. Reconstruct worked example 2 (Require a synthetic build secret without printing it) with one different value and predict what changes. Explain which state survives process restart, container recreation and image rebuild, or why none of those operations applies to this mechanism.
 
-Before proceeding, retain six evidence records. For the optional host project, use `docker compose -p ds60-docker-study down` from the fixture copy to stop its containers and remove its ordinary network. This command preserves named volumes. Volume deletion is a separate deliberate reset of that disposable lab after a backup or export, never a general cleanup step. The fixture README describes its exact scoped reset.
+When a host session ends, run `docker compose -p ds60-docker-study down` from your fixture copy. It removes the project's containers and network but keeps named volumes; deleting a volume is a separate, deliberate reset described in the fixture README.
 
 ## Primary references
 
-- [Official reference 1](https://docs.docker.com/build/buildkit/)
-- [Official reference 2](https://docs.docker.com/build/building/secrets/)
+- [BuildKit](https://docs.docker.com/build/buildkit/)
+- [Build secrets](https://docs.docker.com/build/building/secrets/)
 
 ## Ask an AI tutor about this lesson
 

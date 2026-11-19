@@ -14,28 +14,32 @@ A lambda supplies the behavior of a functional interface, an interface with one 
 
 ## Reading the reference
 
-Predicate<T> returns boolean, Function<T,R> maps a value to another value, and Consumer<T> performs an action without returning a result. Method references such asString::strip are compact forms of compatible lambdas. Function.andThen applies the first function before the second;compose reverses that composition order. A captured primitive value is read from its stable local binding, while a captured mutable object can still change internally.
+Predicate<T> returns boolean, Function<T, R> maps a value to another value, and Consumer<T> performs an action without returning a result. Method references such as String::strip are compact forms of compatible lambdas. Function.andThen applies the first function before the second; compose reverses that composition order. A captured primitive value is read from its stable local binding, while a captured mutable object can still change internally.
 
-## Exercise 1: Use a predicate
+## Exercise 1: Use a predicate: predict an edited check
 
-Task: Create a Predicate<Integer> accepting positive values and test 3,0,-1.
+Task: Copy Example A into a scratch `Main.java` and change `assert positive.test(3) && !positive.test(0) && !positive.test(-1);` to `assert positive.test(3) && !positive.test(1) && !positive.test(-1);` inside its assertion. Before running it with `java -ea Main`, predict whether the assertion still holds and explain why; then restore it.
 
 The predicate has a single purpose and no side effects. Boundary zero is checked explicitly rather than inferred from a positive example.
+
+The unchanged code is the part that Example A adds:
 
 ```java
 java.util.function.Predicate<Integer> positive = value -> value > 0;
 assert positive.test(3) && !positive.test(0) && !positive.test(-1);
 ```
 
-**Expected:** true, false, false.
+**Expected:** The changed run fails with an `AssertionError` from the assertion on `positive.test(3) && !positive.test(0) && !positive.test(-1)`. Restoring the original line brings back the worked observation: true, false, false.
 
-**Verify:** Compare the program values or named exception with true, false, false. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.
+**Verify:** Compare your written prediction with the reported `AssertionError` and its stack-trace line, and explain why the edited condition is false for the values that satisfy `positive.test(3) && !positive.test(0) && !positive.test(-1)`. After restoring the line, the program completes without an `AssertionError` again.
 
-## Exercise 2: Compose transformations
+## Exercise 2: Compose transformations: diagnose an edited check
 
-Task: Strip a string,then uppercase it withLocale.ROOT.
+Task: A careless edit changed the assertion that Example B adds after Example A so that it reads `assert strip.andThen(upper).apply(" red !").equals("RED");`. Run Example B with that line, explain why the edited assertion now fails for the same program state, and restore it.
 
 The composition order is explicit. For transformations that do not commute, reversing the order changes the result.
+
+The unchanged code is the part that Example B adds:
 
 ```java
 java.util.function.Function<String, String> strip = String::strip;
@@ -43,15 +47,15 @@ java.util.function.Function<String, String> upper = value -> value.toUpperCase(L
 assert strip.andThen(upper).apply(" red ").equals("RED");
 ```
 
-**Expected:** input space red space becomesRED.
+**Expected:** Before the repair the run fails with an `AssertionError` from the assertion on `strip.andThen(upper).apply(" red ").equals("RED")`; after it the line reads `assert strip.andThen(upper).apply(" red ").equals("RED");` again and input space red space becomes RED.
 
-**Verify:** Compare the program values or named exception with input space red space becomesRED. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.
+**Verify:** Keep the failing and the repaired runs. Explain why the edited assertion rejects the same program state that `strip.andThen(upper).apply(" red ").equals("RED")` accepts.
 
 ## Exercise 3: Distinguish composition order
 
-Task: Compose add1 andmultiply2 usingandThen and compose on3.
+Task: Compose add 1 and multiply 2 using andThen and compose on 3.
 
-A small noncommuting example makes the API semantics visible. Readingcompose as if it wereandThen is a common source of subtle pipeline errors.
+A small noncommuting example makes the API semantics visible. Reading compose as if it were andThen is a common source of subtle pipeline errors.
 
 ```java
 java.util.function.Function<Integer, Integer> addOne = value -> value + 1;
@@ -60,13 +64,13 @@ assert addOne.andThen(twice).apply(3) == 8;
 assert addOne.compose(twice).apply(3) == 7;
 ```
 
-**Expected:** andThen gives 8;compose7.
+**Expected:** andThen gives 8; compose 7.
 
-**Verify:** Compare the program values or named exception with andThen gives 8;compose7. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.
+**Verify:** Keep an assertion equivalent to `addOne.compose(twice).apply(3) == 7`. As a control, change `assert addOne.compose(twice).apply(3) == 7;` to `assert addOne.compose(twice).apply(4) == 7;` inside it: the run must fail with an `AssertionError`, which shows the assertion can fail. Restore it.
 
 ## Exercise 4: Capture a stable threshold
 
-Task: Capture local threshold10 in a predicate and test9,10,11.
+Task: Capture local threshold 10 in a predicate and test 9, 10, 11.
 
 The local binding is effectively final because it is not reassigned. Changing the threshold later requires a different state design rather than silently mutating a captured primitive.
 
@@ -76,9 +80,9 @@ java.util.function.Predicate<Integer> enough = value -> value >= threshold;
 assert !enough.test(9) && enough.test(10) && enough.test(11);
 ```
 
-**Expected:** false,true,true under>=.
+**Expected:** false, true, true under>=.
 
-**Verify:** Compare the program values or named exception with false,true,true under>=. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.
+**Verify:** Keep an assertion equivalent to `!enough.test(9) && enough.test(10) && enough.test(11)`. As a control, change `java.util.function.Predicate<Integer> enough = value -> value >= threshold;` to `java.util.function.Predicate<Integer> enough = value -> value > threshold;`: the run must fail with an `AssertionError` from the assertion on `!enough.test(9) && enough.test(10) && enough.test(11)`. Restore the line before continuing.
 
 ## Exercise 5: Expose mutable captured state
 
@@ -94,9 +98,9 @@ append.accept("b");
 assert captured.equals(List.of("a", "b"));
 ```
 
-**Expected:** captured list becomesa,b.
+**Expected:** captured list becomes a, b.
 
-**Verify:** Compare the program values or named exception with captured list becomesa,b. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.
+**Verify:** Keep an assertion equivalent to `captured.equals(List.of("a", "b"))`. As a control, change `append.accept("a");` to `append.accept("a!");`: the run must fail with an `AssertionError` from the assertion on `captured.equals(List.of("a", "b"))`. Restore the line before continuing.
 
 ## Exercise 6: Use a named function for a contract
 
@@ -118,7 +122,7 @@ assert blank;
 
 **Expected:** 7 accepted; blank rejected.
 
-**Verify:** Compare the program values or named exception with 7 accepted; blank rejected. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.
+**Verify:** Keep an assertion equivalent to `blank`. As a control, change `blank = true;` to `blank = false;`: the run must fail with an `AssertionError` from the assertion on `blank`. Restore the line before continuing.
 
 ## After comparing the answer
 

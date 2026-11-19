@@ -38,6 +38,17 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         assert_eq!(rejected, 3);
         assert!(import_rows(&[]).0.is_empty());
     }
+
+    {
+        // Task 3: Independent construction
+        let (totals, rejected) = import_rows(&["pear,2", "apple,3", "bad"]);
+        let mut report = String::new();
+        for (name, total) in &totals {
+            report.push_str(&format!("{name}: {total}\n"));
+        }
+        report.push_str(&format!("rejected: {rejected}"));
+        assert_eq!(report, "apple: 3\npear: 2\nrejected: 1");
+    }
     println!("rust-016: passed");
     Ok(())
 }

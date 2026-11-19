@@ -14,44 +14,48 @@ Decoding converts a next-token probability distribution into a selected token. G
 
 ## Reading the implementation
 
-Subtract the maximum before exponentiation. Require positive temperature for stochastic sampling; handle zero-temperature greedy mode separately. np.argmax returns the first maximum, which implements the declared smallest-index tie rule. np.searchsorted(cumulative,draw,side='right') selects the interval containing a draw in[0,1). Filter candidates before the final normalization.
+Subtract the maximum before exponentiation. Require positive temperature for stochastic sampling; handle zero-temperature greedy mode separately. np.argmax returns the first maximum, which implements the declared smallest-index tie rule. np.searchsorted(cumulative, draw, side='right') selects the interval containing a draw in [0, 1). Filter candidates before the final normalization.
 
-## Exercise 1: Calculate greedy choice
+## Exercise 1: Predict a hotter distribution
 
-The question is: Use scores[2,1,0] and choose the maximum index.
+The question is: Use scores [0.5, 3, 3.5, -1]. Name the greedy token, then predict how temperature 2 changes the probabilities of the top and bottom tokens.
 
-Only ranking matters to greedy selection. A common shift or positive temperature preserves this particular decision.
-
-```python
-scores = np.array([2.0, 1.0, 0.0])
-assert int(np.argmax(scores)) == 0
-```
-
-**Expected:** token0.
-
-**Verify:** Compare the computed values or written argument with token0.
-
-## Exercise 2: Change temperature
-
-The question is: Compare probabilities at temperatures1 and.5 using stable softmax.
-
-Sharper probabilities make high-scoring tokens more likely without changing their order. They do not create new evidence that the selected token is correct.
+Dividing scores by a temperature above 1 shrinks their differences, which flattens the distribution without reordering it. Greedy decoding is therefore unaffected while sampling becomes more diverse.
 
 ```python
-p = softmax(scores)
-cool = softmax(scores / 0.5)
-assert cool[0] > p[0] and p.argmax() == cool.argmax() == 0
+scores2 = np.array([0.5, 3.0, 3.5, -1.0])
+base = softmax(scores2)
+hot = softmax(scores2 / 2)
+assert int(np.argmax(scores2)) == 2 and base.argmax() == hot.argmax() == 2
+assert hot[2] < base[2] and hot[3] > base[3]
 ```
 
-**Expected:** token0 probability increases; argmax stays0.
+**Expected:** greedy token 2; at temperature 2 its probability falls, token 3 gains mass and the argmax stays 2.
 
-**Verify:** Compare the computed values or written argument with token0 probability increases; argmax stays0.
+**Verify:** In a fresh process, the exercise checks confirm `int(np.argmax(scores2)) == 2`, `base.argmax() == hot.argmax() == 2`, `hot[2] < base[2]` and `hot[3] > base[3]`.
+
+## Exercise 2: Compute an exact two-token probability
+
+The question is: For scores [1, 0], compute the probability of token 0 at temperatures 1 and 0.5 and compare it with the logistic function.
+
+With two tokens, softmax reduces to the logistic function of the score difference divided by the temperature. Halving the temperature doubles the effective difference from 1 to 2.
+
+```python
+pair = softmax([1.0, 0.0])
+sharp = softmax(np.array([1.0, 0.0]) / 0.5)
+np.testing.assert_allclose(pair[0], 1 / (1 + np.exp(-1)), atol=1e-12, rtol=0)
+np.testing.assert_allclose(sharp[0], 1 / (1 + np.exp(-2)), atol=1e-12, rtol=0)
+```
+
+**Expected:** token 0 probability \(1/(1+e^{-1})\approx 0.731\) at temperature 1 and \(1/(1+e^{-2})\approx 0.881\) at temperature 0.5.
+
+**Verify:** In a fresh process, the exercise checks confirm `pair[0]` matches `1 / (1 + np.exp(-1))` within 1e-12 and `sharp[0]` matches `1 / (1 + np.exp(-2))` within 1e-12.
 
 ## Exercise 3: Use fixed draws
 
-The question is: Sample from probabilities[.5,.3,.2] with draws .1,.6,.9.
+The question is: Sample from probabilities [0.5, 0.3, 0.2] with draws 0.1, 0.6, 0.9.
 
-The intervals are[0,.5),[.5,.8),[.8,1). Supplying draws directly makes the sampling mechanism testable without relying on a platform random bit pattern.
+The intervals are [0, 0.5), [0.5, 0.8), [0.8, 1). Supplying draws directly makes the sampling mechanism testable without relying on a platform random bit pattern.
 
 ```python
 mass = np.array([0.5, 0.3, 0.2])
@@ -59,13 +63,13 @@ cumulative = np.cumsum(mass)
 assert [int(np.searchsorted(cumulative, d, side="right")) for d in [0.1, 0.6, 0.9]] == [0, 1, 2]
 ```
 
-**Expected:** tokens0,1,2.
+**Expected:** tokens 0, 1, 2.
 
-**Verify:** Compare the computed values or written argument with tokens0,1,2.
+**Verify:** In a fresh process, the exercise checks confirm `[int(np.searchsorted(cumulative, d, side='right')) for d in [0.1, 0.6, 0.9]] == [0, 1, 2]`.
 
 ## Exercise 4: Retain two candidates
 
-The question is: Apply top-k2 to scores[2,1,0] and normalize only retained candidates.
+The question is: Apply top-k2 to scores [2, 1, 0] and normalize only retained candidates.
 
 Zeroing a probability after softmax without renormalizing would leave missing mass. Filtering is a policy that changes the final distribution.
 
@@ -77,13 +81,13 @@ assert filtered[2] == 0
 np.testing.assert_allclose(filtered.sum(), 1, atol=1e-12, rtol=0)
 ```
 
-**Expected:** token 2 probability0; first two sum1.
+**Expected:** token 2 probability 0; first two sum 1.
 
-**Verify:** Compare the computed values or written argument with token 2 probability0; first two sum1.
+**Verify:** In a fresh process, the exercise checks confirm `filtered[2] == 0` and `filtered.sum()` matches `1` within 1e-12.
 
 ## Exercise 5: Declare ties
 
-The question is: Use equal scores[1,1,0] and choose the smallest-index maximum.
+The question is: Use equal scores [1, 1, 0] and choose the smallest-index maximum.
 
 A deterministic tie rule makes repeated decisions explainable. Other valid policies exist, but an undocumented implementation detail should not determine a public contract.
 
@@ -91,13 +95,13 @@ A deterministic tie rule makes repeated decisions explainable. Other valid polic
 assert int(np.argmax([1, 1, 0])) == 0
 ```
 
-**Expected:** token0 under the stated rule.
+**Expected:** token 0 under the stated rule.
 
-**Verify:** Compare the computed values or written argument with token0 under the stated rule.
+**Verify:** In a fresh process, the exercise checks confirm `int(np.argmax([1, 1, 0])) == 0`.
 
 ## Exercise 6: Reject invalid draws
 
-The question is: Validate draws0,.999,1 and-.1 before cumulative lookup.
+The question is: Validate draws 0, 0.999, 1 and -0.1 before cumulative lookup.
 
 A draw of one lies outside every half-open interval and can produce an out-of-range token. Input validation keeps a random-source contract failure distinct from vocabulary indexing.
 
@@ -118,9 +122,9 @@ for bad in [1, -0.1]:
         raise AssertionError("invalid draw")
 ```
 
-**Expected:** 0 and.999 accepted;1 and-.1 rejected.
+**Expected:** 0 and 0.999 accepted; 1 and -0.1 rejected.
 
-**Verify:** Compare the computed values or written argument with 0 and.999 accepted;1 and-.1 rejected.
+**Verify:** In a fresh process, the exercise checks confirm `validate_draw(0) == 0`; `validate_draw(0.999) == 0.999` and for every `bad` in `[1, -0.1]`, `validate_draw(bad)` raises `ValueError`.
 
 ## Review after comparison
 

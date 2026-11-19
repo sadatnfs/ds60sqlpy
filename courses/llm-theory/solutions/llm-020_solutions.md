@@ -18,7 +18,7 @@ Use torch.linalg.vector_norm to measure a tensor magnitude and torch.isfinite fo
 
 ## Exercise 1: Measure a small linear layer
 
-The question is: Apply.01*identity to input[1,-1,2,-2].
+The question is: Apply 0.01*identity to input [1, -1, 2, -2].
 
 The identity orientation preserves the input direction. Only scale changes, so the norm relation is independent of random projections.
 
@@ -31,13 +31,13 @@ np.testing.assert_allclose(
 )
 ```
 
-**Expected:** output norm.01*sqrt10.
+**Expected:** output norm \(0.01\sqrt{10}\).
 
-**Verify:** Compare the computed values or written argument with output norm.01*sqrt10.
+**Verify:** In a fresh process, the exercise checks confirm `torch.linalg.vector_norm(out).item()` matches `0.01 * np.sqrt(10)` within 1e-6.
 
 ## Exercise 2: Increase only the scale
 
-The question is: Replace.01*identity with 100*identity.
+The question is: Replace 0.01*identity with 100*identity.
 
 Changing both scale and random orientation would confound the comparison. Here the factor follows directly from linearity.
 
@@ -52,9 +52,9 @@ np.testing.assert_allclose(
 )
 ```
 
-**Expected:** activation norm increases by factor10000.
+**Expected:** activation norm increases by factor 10000.
 
-**Verify:** Compare the computed values or written argument with activation norm increases by factor10000.
+**Verify:** In a fresh process, the exercise checks confirm `(torch.linalg.vector_norm(bigger) / torch.linalg.vector_norm(out)).item()` matches `10000` within 0.01.
 
 ## Exercise 3: Trace gradients
 
@@ -74,11 +74,11 @@ assert np.isfinite(norms).all() and norms[1] > norms[0]
 
 **Expected:** both finite; large-scale gradient norm is larger.
 
-**Verify:** Compare the computed values or written argument with both finite; large-scale gradient norm is larger.
+**Verify:** In a fresh process, the exercise checks confirm `np.isfinite(norms).all()` and `norms[1] > norms[0]`.
 
 ## Exercise 4: Find the first overflow
 
-The question is: Apply a float32 matrix scaled1e38, then inspect matrix product and squared loss.
+The question is: Apply a float32 matrix scaled 1e38, then inspect matrix product and squared loss.
 
 The diagnostic should identify the squared objective as nonfinite, while separately recording whether its input product already overflowed. One unlabelled NaN at the end is insufficient.
 
@@ -90,11 +90,11 @@ assert not torch.isfinite(objective)
 
 **Expected:** squared loss is nonfinite.
 
-**Verify:** Compare the computed values or written argument with squared loss is nonfinite.
+**Verify:** In a fresh process, the exercise checks confirm `not torch.isfinite(objective)`.
 
 ## Exercise 5: Repair on the same input
 
-The question is: Restore the small scale and recalculate output and loss for the unchangedx.
+The question is: Restore the small scale and recalculate output and loss for the unchanged x.
 
 Changing the fixture would not test the proposed repair. Reusing the original input isolates the effect of the initialization scale.
 
@@ -105,11 +105,11 @@ assert torch.isfinite(repaired).all() and torch.isfinite(repaired.square().mean(
 
 **Expected:** both output and loss finite.
 
-**Verify:** Compare the computed values or written argument with both output and loss finite.
+**Verify:** In a fresh process, the exercise checks confirm `torch.isfinite(repaired).all()` and `torch.isfinite(repaired.square().mean())`.
 
 ## Exercise 6: Check residual dimensions
 
-The question is: Compare residualx+x@small with an incompatible three-feature branch.
+The question is: Compare residual x+x@small with an incompatible three-feature branch.
 
 Numeric scale and dimension compatibility are independent contracts. A stable norm cannot compensate for adding quantities with incompatible feature meaning.
 
@@ -123,9 +123,9 @@ else:
     raise AssertionError("incompatible residual accepted")
 ```
 
-**Expected:** valid residual shape(1,4); width3 branch rejected.
+**Expected:** valid residual shape (1, 4); width 3 branch rejected.
 
-**Verify:** Compare the computed values or written argument with valid residual shape(1,4); width3 branch rejected.
+**Verify:** In a fresh process, the exercise checks confirm `tuple((x + x @ small).shape) == (1, 4)` and `x + torch.ones((1, 3))` raises `RuntimeError`.
 
 ## Review after comparison
 

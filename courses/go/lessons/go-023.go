@@ -3,11 +3,11 @@ package main
 import "fmt"
 
 func main() {
-	// Exercise 1: Read a successful response: Use a fake transport returning status 200 and body ready.
-	// Expected: The client helper returns ready without error.
+	// Exercise 1: Read a successful response: change one input: Copy worked example 1 into a scratch pad and change `v, err := fetch(context.Background(), 200, "ready", 8)` to `v, err := fetch(context.Background(), 201, "ready", 8)`. Before running, predict which check fails and which value it now sees; then run it and restore the original line.
+	// Expected: The changed run panics with `client success` because `err == nil && v == "ready"` no longer holds. Restoring the original line brings back the worked observation: the client helper returns ready without error.
 
-	// Exercise 2: Reject an HTTP failure status: Return status 404 with a body.
-	// Expected: The helper returns an error despite transport success.
+	// Exercise 2: Reject an HTTP failure status: diagnose an edited check: A careless edit changed the check in worked example 2 so that it reads `check(err == nil, "HTTP status")`. Run worked example 2 with that line, explain why the edited check now fails for the same program state, and restore it.
+	// Expected: Before the repair the program panics with `HTTP status`; after it the line reads `check(err != nil, "HTTP status")` again and the helper returns an error despite transport success.
 
 	// Exercise 3: Detect an oversized body: Return five bytes with a maximum of four.
 	// Expected: The helper rejects the response.

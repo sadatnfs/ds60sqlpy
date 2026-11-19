@@ -1,11 +1,25 @@
 // Answer-free learner source. Save your own copy before editing.
-// Exercise 1: Cancel a pending timer
-// Start a timer with a signal, abort it, and inspect the rejection.
-// Expected: AbortError with the original reason as cause.
+// Exercise 1: Cancel a pending timer: predict an edited check
+// Copy Example A into a scratch `main.mjs` and change `await assert.rejects(pending, error
+// => error.name === 'AbortError' && error.cause === reason);` to `await
+// assert.rejects(pending, error => error.name === 'AbortError!' && error.cause === reason);`
+// inside its check. Before running it, predict whether the check still passes and explain
+// why; then restore it.
+// Expected: The changed run fails with an `AssertionError` at the check
+// `assert.rejects(pending, (error) => error.name === 'AbortError' && error.cause ===
+// reason)`. Restoring the original line brings back the worked observation: abortError with
+// the original reason as cause.
 
-// Exercise 2: Reject an already aborted request before work
-// Abort before calling the custom operation.
-// Expected: the exact reason is rejected; no timer starts.
+// Exercise 2: Reject an already aborted request before work: diagnose an edited check
+// A careless edit changed a check in Example B so that it reads `await
+// assert.rejects(cancellableValue(7, controller.signal, trace), error => error !==
+// reason);`. Run Example B with that line, explain why the edited check now fails for the
+// same program state, and restore it.
+// Expected: Before the repair the run fails with an `AssertionError` at the check
+// `assert.rejects(cancellableValue(7, controller.signal, trace), (error) => error ===
+// reason)`; after it the line reads `await assert.rejects(cancellableValue(7,
+// controller.signal, trace), error => error === reason);` again and the exact reason is
+// rejected; no timer starts.
 
 // Exercise 3: Complete normally and clean up once
 // Run the custom operation without aborting, then abort its signal after completion.
@@ -20,7 +34,9 @@
 // Expected: the first reason remains authoritative.
 
 // Exercise 6: Combine caller and deadline signals
-// Combine two controllers and abort the deadline controller.
-// Expected: combined signal is aborted with deadline reason.
+// Combine a caller signal with a disposable one-second deadline, abort the caller first,
+// then leave the block that owns the deadline.
+// Expected: combined signal carries the caller reason; the deadline stays unaborted and its
+// timer is cleared once when the block ends.
 
 console.log("Implement the six exercises in your saved copy.");

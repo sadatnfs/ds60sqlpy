@@ -37,7 +37,7 @@ bash run.sh check
 Apply writes only namespace-owned types/entities using stable qualified names.
 Existing incompatible types are rejected. Check is read-only: exact active asset
 identities, two expected lineage edges, absent unrecorded edge, classification,
-and actual401/403 for invalid fixture credentials. It does not claim Hive hooks,
+and an actual 401 or 403 for invalid fixture credentials. It does not claim Hive hooks,
 search-index recovery, data-engine enforcement or a complete lineage graph.
 No requests have been run against an external server as part of source authoring.
 

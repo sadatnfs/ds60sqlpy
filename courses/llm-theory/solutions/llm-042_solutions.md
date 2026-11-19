@@ -4,9 +4,9 @@ Compare these answers only after an attempt or an explicit solution reveal. They
 
 ## Mechanism review
 
-A defensible language-system decision compares candidate systems under one frozen task definition. The tiny transformer, count baseline and local retrieval variant have different capabilities, so use common questions and explicit correctness, support, abstention and resource criteria. Preserve tokenizer, data and model identities, verify causal and cache behavior, and report failure examples. A small local benchmark can justify a teaching conclusion or a no-go, but cannot establish broad deployment reliability. The capstone intentionally uses deterministic question records and a tiny decoder probe rather than pretending that fluent generated text is an automatic correctness test.
+This capstone implements a decision-report template using hand-authored candidate correctness records and a separate actual tiny-decoder parity probe. It does not generate or train the candidate answers whose scores appear in the ledger. The purpose is to learn which artifacts support a claim, how paired comparisons and required gates work, and why unknown or failed evidence can justify a no-go. A real language-system study must replace the illustrative records with actual frozen-question runs, answer artifacts and independent scoring. Keep task quality, numerical mechanism checks and resource observations separate throughout the review.
 
-**Common evaluation contract:** The same questions,units and scoring rules used for every candidate.
+**Common evaluation contract:** The same questions, units and scoring rules used for every candidate.
 
 **Go/no-go:** A decision applying declared acceptance gates to observed evidence.
 
@@ -14,11 +14,11 @@ A defensible language-system decision compares candidate systems under one froze
 
 ## Reading the implementation
 
-Keep result tables keyed by question ID and grouped by family. Compare paired errors, not unaligned averages. A release dictionary records each required gate asTrue,False or None for unexecuted. OnlyTrue satisfies a required gate. Hash the literal fixture and model state, retain exact token budgets, and keep measured latency as an observation rather than a universal performance promise. The cache oracle compares one-token execution with full-prefix output.
+Keep result tables keyed by question ID and grouped by family. Compare paired errors, not unaligned averages. A release dictionary records each required gate as True, False or None for unexecuted. Only True satisfies a required gate. Hash the literal fixture and model state, retain exact token budgets, and keep measured latency as an observation rather than a universal performance promise. The cache oracle compares one-token execution with full-prefix output.
 
 ## Exercise 1: Freeze common questions
 
-The question is: Defineq1 answerable square sides,q2 answerable circle color,q3 missing comet period with stable families.
+The question is: Define q1 answerable square sides, q2 answerable circle color, q3 missing comet period with stable families.
 
 The task contract is frozen before comparing systems. The unanswerable case tests abstention rather than rewarding a fabricated response.
 
@@ -36,11 +36,11 @@ assert len({q["id"] for q in questions}) == 3 and questions[2]["answerable"] is 
 
 **Expected:** 3 distinct questions and a missing-evidence case.
 
-**Verify:** Compare the computed values or written argument with 3 distinct questions and a missing-evidence case.
+**Verify:** In a fresh process, the exercise checks confirm `len({q['id'] for q in questions}) == 3` and `questions[2]['answerable'] is False`.
 
 ## Exercise 2: Compare saved candidate decisions
 
-The question is: Use per-question correctness tiny[1,0,0],count[0,0,0],retrieval[1,1,1],whereq3correctmeansabstaining.
+The question is: Use per-question correctness tiny [1, 0, 0], count [0, 0, 0], retrieval [1, 1, 1], where q3 correctmeansabstaining.
 
 These are explicitly saved deterministic decision records, not claims that a newly trained model generated those answers. A real study must attach the actual answer artifacts and scoring rationale.
 
@@ -58,13 +58,13 @@ assert {name: sum(rows[i] for i in ids) for name, rows in results.items()} == {
 }
 ```
 
-**Expected:** scores1/3,0/3,3/3 on this fixture only.
+**Expected:** scores 1/3, 0/3, 3/3 on this fixture only.
 
-**Verify:** Compare the computed values or written argument with scores1/3,0/3,3/3 on this fixture only.
+**Verify:** In a fresh process, the exercise checks confirm the combined assertion.
 
 ## Exercise 3: Run model mechanism checks
 
-The question is: Initialize the small decoder and compare full-prefix and incremental cached logits on2,5,7.
+The question is: Initialize the small decoder and compare full-prefix and incremental cached logits on 2, 5, 7.
 
 Mechanism parity is necessary for this decoder but does not certify its answer quality. The measured elapsed time belongs to this environment and fixture.
 
@@ -86,13 +86,13 @@ torch.testing.assert_close(torch.cat(parts, 1), full, atol=1e-6, rtol=0)
 assert sum(p.numel() for p in model.parameters()) < 50000 and elapsed >= 0
 ```
 
-**Expected:** parity within 1e-6;parameters below50000.
+**Expected:** parity within 1e-6; parameters below 50000.
 
-**Verify:** Compare the computed values or written argument with parity within 1e-6;parameters below50000.
+**Verify:** In a fresh process, the exercise checks confirm `torch.cat(parts, 1)` matches `full` within 1e-6; `sum((p.numel() for p in model.parameters())) < 50000` and `elapsed >= 0`.
 
 ## Exercise 4: Bind lineage and budgets
 
-The question is: Hash model parameter bytes and record fixture hash,context3 and generated-token cap4.
+The question is: Hash model parameter bytes and record fixture hash, context 3 and generated-token cap 4.
 
 Identity receipts help a reviewer reconstruct the exact state. They do not prove that a scoring table was produced by that model, so link actual outputs separately in a full experiment.
 
@@ -111,13 +111,13 @@ lineage = {
 assert len(lineage["fixture"]) == len(lineage["model"]) == 64 and lineage["generated_cap"] == 4
 ```
 
-**Expected:** two64-character hashes and cap4.
+**Expected:** two 64-character hashes and cap 4.
 
-**Verify:** Compare the computed values or written argument with two64-character hashes and cap4.
+**Verify:** In a fresh process, the exercise checks confirm `len(lineage['fixture']) == len(lineage['model']) == 64` and `lineage['generated_cap'] == 4`.
 
 ## Exercise 5: Apply an honest release gate
 
-The question is: Set mechanismTrue,trust-boundaryTrue,heldout-population evidenceNone and severe-failure gateFalse.
+The question is: Set mechanism True, trust-boundary True, heldout-population evidence None and severe-failure gate False.
 
 Unknown evidence and an explicit failure both block a required gate. A favorable toy score cannot turn either into a pass.
 
@@ -132,13 +132,13 @@ decision = "go" if all(value is True for value in gates.values()) else "no-go"
 assert decision == "no-go"
 ```
 
-**Expected:** decisionno-go.
+**Expected:** decision no-go.
 
-**Verify:** Compare the computed values or written argument with decisionno-go.
+**Verify:** In a fresh process, the exercise checks confirm `decision == 'no-go'`.
 
 ## Exercise 6: Write the reviewer decision
 
-The question is: Record one failure example,missing evidence and next action beside theno-go.
+The question is: Record one failure example, missing evidence and next action beside the no-go.
 
 The decision should be actionable without overstating the result. A no-go with a concrete failure and next evidence requirement is a complete capstone outcome.
 
@@ -155,9 +155,9 @@ assert (
 )
 ```
 
-**Expected:** report namesq3 unsupported answer and new independent families needed.
+**Expected:** report names q3 unsupported answer and new independent families needed.
 
-**Verify:** Compare the computed values or written argument with report namesq3 unsupported answer and new independent families needed.
+**Verify:** In a fresh process, the exercise checks confirm `report['decision'] == 'no-go'`, `'q3' in report['failure']` and `'families' in report['missing']`.
 
 ## Review after comparison
 

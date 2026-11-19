@@ -22,9 +22,9 @@ Call requires_grad_(False) on base parameters, clear their grad fields, and cons
 
 ## Trace what freezing preserves and what it does not
 
-The base is a bias-free 2-to-2 Linear layer initialized to identity. Its stored weight has shape(2, 2), and base(x)=x for the three fixture rows. The head has shape(1, 2) and begins at zero. Disabling base parameter gradients and supplying only head.parameters() to SGD establishes two distinct boundaries: the base does not receive new parameter derivatives, and the optimizer is not asked to update it.
+The base is a bias-free 2-to-2 Linear layer initialized to identity. Its stored weight has shape (2, 2), and base(x)=x for the three fixture rows. The head has shape (1, 2) and begins at zero. Disabling base parameter gradients and supplying only head.parameters() to SGD establishes two distinct boundaries: the base does not receive new parameter derivatives, and the optimizer is not asked to update it.
 
-The head update has an independent analytic value. With targets[1, 2, 3], zero predictions and mean squared error, the residuals are[-1, -2, -3]. The head gradient is(2/3) times the feature-weighted residual sum, namely[-8/3, -10/3]. SGD at 0.1 produces head weights[4/15, \(\frac{1}{3}\)] and predictions[4/15, \(\frac{1}{3}\), 3/5]. This explains both the observed nonzero head update and why the base need not change for the head to learn.
+The head update has an independent analytic value. With targets [1, 2, 3], zero predictions and mean squared error, the residuals are [-1, -2, -3]. The head gradient is (2/3) times the feature-weighted residual sum, namely [-8/3, -10/3]. SGD at 0.1 produces head weights [4/15, \(\frac{1}{3}\)] and predictions [4/15, \(\frac{1}{3}\), 3/5]. This explains both the observed nonzero head update and why the base need not change for the head to learn.
 
 When the base is later unfrozen, the derivative path through it becomes relevant. If its stored weight is B and the head row is h, features are \(XB^{\mathsf T}\) and logits are \(XB^{\mathsf T}h^{\mathsf T}\). The base gradient combines the output residuals with h and X. After the head has nonzero weights, that gradient can be nonzero. Enabling `requires_grad` does not add B to an optimizer that was constructed from head parameters only. The update set must be changed deliberately.
 
@@ -40,65 +40,63 @@ At unfreeze, there are two different optimizer-state policies. A new optimizer r
 
 The paired Keras guide uses trainable flags and a deliberate training argument for the base. Those mechanisms are not a one-to-one spelling substitution for PyTorch `requires_grad`, optimizer lists and train/eval. In either framework, verify before/after tensors, buffer behavior and actual updated identities. The local identity base is a controlled ownership fixture, not a downloaded pretrained model or evidence that transfer will improve an unseen task.
 
-## Exercise 1: Freeze a known base
+## Exercise 1: Freeze a scaling base
 
-The question is: Create a bias-free 2-to-2 identity Linear base and disable its parameter gradients.
+The question is: Create a bias-free 2-to-2 base whose weight is 2 times the identity, freeze it and evaluate the row [1, 2].
 
-The identity fixture isolates ownership. A learned base would have different values but should obey the same freeze contract.
+Freezing changes trainability, not the function the base computes.
 
 ```python
-base = nn.Linear(2, 2, bias=False)
+doubling = nn.Linear(2, 2, bias=False)
 with torch.no_grad():
-    base.weight.copy_(torch.eye(2))
-for parameter in base.parameters():
-    parameter.requires_grad_(False)
-    parameter.grad = None
-x = torch.tensor([[1.0, 0.0], [0.0, 1.0], [1.0, 1.0]])
-assert torch.equal(base(x), x) and not any(p.requires_grad for p in base.parameters())
+    doubling.weight.copy_(2 * torch.eye(2))
+doubling.requires_grad_(False)
+probe_x = torch.tensor([[1.0, 2.0]])
+assert doubling(probe_x).tolist() == [[2.0, 4.0]] and not doubling.weight.requires_grad
 ```
 
-**Expected:** base output equals input; all base parameters frozen.
+**Expected:** output [[2, 4]]; the base weight does not require gradients.
 
-**Verify:** Compare the computed values or written argument with base output equals input; all base parameters frozen.
+**Verify:** In a fresh process, the exercise checks confirm `doubling(probe_x).tolist() == [[2.0, 4.0]]` and `not doubling.weight.requires_grad`.
 
-## Exercise 2: Train a new head
+## Exercise 2: Predict the head update
 
-The question is: Attach a zero-initialized 2-to-1head and take one SGD.1step toward targets 1, 2, 3.
+The question is: Attach a zero-initialized bias-free 2-to-1 head, take one SGD step with learning rate 0.1 toward target 1 using mean squared error.
 
-The optimizer receives only head parameters. The direct snapshot check proves preservation rather than trusting a flag alone.
+The head sees features [2, 4]; the gradient 2(0-1)[2, 4] times -0.1 gives [0.4, 0.8].
 
 ```python
-head = nn.Linear(2, 1, bias=False)
+new_head = nn.Linear(2, 1, bias=False)
 with torch.no_grad():
-    head.weight.zero_()
-base_before = base.weight.detach().clone()
-head_before = head.weight.detach().clone()
-target = torch.tensor([[1.0], [2.0], [3.0]])
-optimizer = torch.optim.SGD(head.parameters(), lr=0.1)
-optimizer.zero_grad(set_to_none=True)
-loss = (head(base(x)) - target).square().mean()
-loss.backward()
-optimizer.step()
-assert not torch.equal(head.weight, head_before) and torch.equal(base.weight, base_before)
+    new_head.weight.zero_()
+head_opt = torch.optim.SGD(new_head.parameters(), lr=0.1)
+head_opt.zero_grad(set_to_none=True)
+(new_head(doubling(probe_x)) - torch.tensor([[1.0]])).square().mean().backward()
+head_opt.step()
+torch.testing.assert_close(new_head.weight, torch.tensor([[0.4, 0.8]]), atol=1e-6, rtol=0)
+assert doubling.weight.grad is None
 ```
 
-**Expected:** head changes; base remains exact identity.
+**Expected:** head weight [0.4, 0.8]; the base receives no gradient.
 
-**Verify:** Compare the computed values or written argument with head changes; base remains exact identity.
+**Verify:** In a fresh process, the exercise checks confirm `new_head.weight` matches `torch.tensor([[0.4, 0.8]])` within 1e-06 and `doubling.weight.grad is None`.
 
-## Exercise 3: Inspect absent base gradients
+## Exercise 3: Count trainable parameters
 
-The question is: Check the frozen base after head backward.
+The question is: Count the scalars that still require gradients across the frozen base and the new head.
 
-The head can learn from fixed features without differentiating base parameters. This is a computation path with a deliberate gradient boundary.
+Only the head's two weights are trainable; the four frozen base weights are excluded.
 
 ```python
-assert base.weight.grad is None and head.weight.grad is not None
+trainable = sum(
+    p.numel() for p in [*doubling.parameters(), *new_head.parameters()] if p.requires_grad
+)
+assert trainable == 2
 ```
 
-**Expected:** base gradient None; head gradient present.
+**Expected:** 2 trainable scalars, all in the head.
 
-**Verify:** Compare the computed values or written argument with base gradient None; head gradient present.
+**Verify:** In a fresh process, the exercise checks confirm `trainable == 2`.
 
 ## Exercise 4: Expose buffer updates despite freezing
 
@@ -118,7 +116,7 @@ assert not torch.equal(before, normalizer.running_mean)
 
 **Expected:** running mean changes.
 
-**Verify:** Compare the computed values or written argument with running mean changes.
+**Verify:** In a fresh process, the exercise checks confirm `not torch.equal(before, normalizer.running_mean)`.
 
 ## Exercise 5: Freeze normalization behavior with eval
 
@@ -135,7 +133,7 @@ assert torch.equal(fixed, normalizer.running_mean)
 
 **Expected:** running mean remains unchanged.
 
-**Verify:** Compare the computed values or written argument with running mean remains unchanged.
+**Verify:** In a fresh process, the exercise checks confirm `torch.equal(fixed, normalizer.running_mean)`.
 
 ## Exercise 6: Begin an explicit unfreeze phase
 
@@ -155,7 +153,7 @@ assert not torch.equal(base.weight, base_before)
 
 **Expected:** base weight now changes.
 
-**Verify:** Compare the computed values or written argument with base weight now changes.
+**Verify:** In a fresh process, the exercise checks confirm `not torch.equal(base.weight, base_before)`.
 
 ## Review after comparison
 

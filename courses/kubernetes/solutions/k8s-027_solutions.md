@@ -20,7 +20,7 @@ The metric definition determines what is measured. A successful status with a wr
 
 Counts reveal the small evidence base. The result illustrates arithmetic and cannot establish a production SLO or recurrence from five synthetic requests.
 
-**Expected:** Error.2, success.8 under the declared status rule.
+**Expected:** Error fraction 0.2 and success fraction 0.8 under the declared status rule.
 
 ## Exercise 3: Compute the stated quantiles
 
@@ -32,7 +32,7 @@ Another interpolation convention can yield a different value. Report the convent
 
 The reset changes the interpretation of a simple difference. Recovering a rate needs enough timing/reset data or a monitoring method designed for counters. Do not invent events that were not observed.
 
-**Expected:** Do not report negative117 requests; record reset and available interval evidence.
+**Expected:** Do not report negative 117 requests; record reset and available interval evidence.
 
 ## Exercise 5: Handle absent metrics
 

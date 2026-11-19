@@ -16,9 +16,9 @@
         "Entrypoint",
         "Assertion"
       ],
-      "outcome": "Explain and implement from source text to a checked go program.",
-      "lab": "Bind greeting to Hello, Go and check its exact text.",
-      "verification": "greeting equals Hello, Go. The checked result is amount=24."
+      "outcome": "Compile and run a one-file Go program and replace a printed claim with a checked value.",
+      "lab": "Start count at 1, add 1, then multiply by 3.",
+      "verification": "The final count is 6."
     },
     {
       "id": "go-002",
@@ -34,9 +34,9 @@
         "Conversion",
         "Truncation"
       ],
-      "outcome": "Explain and implement numeric types, constants and explicit conversions.",
-      "lab": "Compute 7/2 and float64(7)/2.",
-      "verification": "The results are 3 and 3.5. The quotient is -3 and the remainder is -1."
+      "outcome": "Predict integer division, narrowing conversions and floating rounding, and reject invalid numeric text instead of defaulting to zero.",
+      "lab": "Multiply two explicitly int64 values of 50000.",
+      "verification": "The product is 2500000000."
     },
     {
       "id": "go-003",
@@ -52,9 +52,9 @@
         "Short circuit",
         "Half-open interval"
       ],
-      "outcome": "Explain and implement decisions, loops and invariants.",
-      "lab": "Sum 2, 4 and 6 while checking every visited prefix.",
-      "verification": "The final sum is 12 and three elements were visited. Exactly 2 values satisfy the predicate."
+      "outcome": "Write loops with an explicit invariant that handle empty input, exact boundaries and early exit correctly.",
+      "lab": "Guard access to the first element of an empty slice with a length check.",
+      "verification": "The condition is false and no indexing occurs."
     },
     {
       "id": "go-004",
@@ -70,9 +70,9 @@
         "Pure function",
         "Precondition"
       ],
-      "outcome": "Explain and implement functions and value-passing contracts.",
-      "lab": "Implement twice and check inputs 7 and 0.",
-      "verification": "The results are 14 and 0. The invalid domain is rejected before returning a usable area."
+      "outcome": "Design functions that return results and errors explicitly and show which arguments a call can or cannot change.",
+      "lab": "Pass 5 to a helper that reassigns its local parameter.",
+      "verification": "The caller still holds 5."
     },
     {
       "id": "go-005",
@@ -88,9 +88,9 @@
         "Capacity",
         "Aliasing"
       ],
-      "outcome": "Explain and implement arrays, slices and backing-storage ownership.",
-      "lab": "Take the first two elements of 1, 2, 3 and change the first through the slice.",
-      "verification": "The original first element becomes 9. The original array remains unchanged."
+      "outcome": "Predict when two slices share a backing array and make independent copies or capacity-limited appends on purpose.",
+      "lab": "Take values[:1:1] and append 8.",
+      "verification": "The original second element remains 2."
     },
     {
       "id": "go-006",
@@ -106,9 +106,9 @@
         "Presence bit",
         "Deterministic order"
       ],
-      "outcome": "Explain and implement maps, presence and deterministic ordering.",
-      "lab": "Read present key zero and absent key missing with comma-ok.",
-      "verification": "Both values are 0, but only zero is present. The value is 0 and presence is false."
+      "outcome": "Distinguish a missing map key from a stored zero value and produce a deterministic report from map data.",
+      "lab": "Extract keys beta and alpha and sort them.",
+      "verification": "The first output key is alpha."
     },
     {
       "id": "go-007",
@@ -124,9 +124,9 @@
         "Rune",
         "UTF-8"
       ],
-      "outcome": "Explain and implement strings, bytes, runes and unicode boundaries.",
-      "lab": "Inspect A followed by a smiling face.",
-      "verification": "There are 5 bytes and 2 runes. The result is blue sky."
+      "outcome": "Count and slice text by bytes or runes deliberately and reject malformed UTF-8 instead of guessing.",
+      "lab": "Build a string from the single byte 0xff.",
+      "verification": "UTF-8 validation returns false."
     },
     {
       "id": "go-008",
@@ -142,9 +142,9 @@
         "Keyed literal",
         "Shallow copy"
       ],
-      "outcome": "Explain and implement structs and explicit domain models.",
-      "lab": "Construct Point with X 2 and Y 3 and calculate Manhattan distance from the origin.",
-      "verification": "The distance is 5. The empty name is rejected; the valid name is retained."
+      "outcome": "Model a small domain with structs, predict copy behavior, and validate values before they enter the model.",
+      "lab": "Copy a Batch struct containing a slice and mutate its first item.",
+      "verification": "The original batch observes the mutation."
     },
     {
       "id": "go-009",
@@ -160,9 +160,9 @@
         "Dereference",
         "Reachability"
       ],
-      "outcome": "Explain and implement pointers, mutation and allocation lifetimes.",
-      "lab": "Create an integer 4 and increment it through a helper receiving its address.",
-      "verification": "The caller value becomes 5. The absent call returns false; the present value becomes 8."
+      "outcome": "Use pointers to share or update state on purpose, guard nil, and separate copying a value from mutating a target.",
+      "lab": "Represent an optional integer with a nil pointer and inspect it without dereferencing.",
+      "verification": "The pointer is absent."
     },
     {
       "id": "go-010",
@@ -178,9 +178,9 @@
         "Interface",
         "Dynamic type"
       ],
-      "outcome": "Explain and implement methods, interfaces and the typed-nil trap.",
-      "lab": "Store Counter with value 3 in a Valuer interface.",
-      "verification": "Calling Value returns 3. Both implementations can be read through one contract."
+      "outcome": "Define behavior through interfaces and methods, choose value or pointer receivers, and detect the typed-nil interface trap.",
+      "lab": "Call a value-receiver helper that increments only its receiver copy.",
+      "verification": "The returned value is 4 but the original remains 3."
     },
     {
       "id": "go-011",
@@ -196,9 +196,9 @@
         "Wrapping",
         "Recovery policy"
       ],
-      "outcome": "Explain and implement errors as values and preserving causal context.",
-      "lab": "Wrap ErrMissing with a record-reading context.",
-      "verification": "errors.Is still recognizes ErrMissing. Both sentinels remain discoverable."
+      "outcome": "Wrap errors with %w and recover causes with errors.Is, errors.As and errors.Join instead of comparing message text.",
+      "lab": "Return a LimitError carrying an allowed maximum and inspect it with errors.As.",
+      "verification": "The extracted limit is 3."
     },
     {
       "id": "go-012",
@@ -214,9 +214,9 @@
         "Stack unwind",
         "Cleanup boundary"
       ],
-      "outcome": "Explain and implement defer, cleanup and deliberate panic boundaries.",
-      "lab": "Register first and second cleanup markers and return.",
-      "verification": "The observed order is second then first. All three markers are present after the loop."
+      "outcome": "Predict defer order and argument capture, and keep cleanup running when a deliberate panic is recovered at a boundary.",
+      "lab": "Defer a closure reading x, then change x to 2.",
+      "verification": "The closure observes 2."
     },
     {
       "id": "go-013",
@@ -232,9 +232,9 @@
         "Exported name",
         "Import path"
       ],
-      "outcome": "Explain and implement packages, modules and reproducible project boundaries.",
-      "lab": "Join logical slash-separated path segments with path.Join.",
-      "verification": "The result is reports/daily.json. The resulting logical name is reports/day-3.json."
+      "outcome": "Use standard-library packages through their exported API and read the module, go and toolchain directives in go.mod.",
+      "lab": "Classify ParseInt, parseInt and an empty name with one rule: a name is exported when its first rune is an uppercase letter.",
+      "verification": "Only ParseInt is exported."
     },
     {
       "id": "go-014",
@@ -250,9 +250,9 @@
         "Boundary case",
         "Regression case"
       ],
-      "outcome": "Explain and implement table-driven tests and useful counterexamples.",
-      "lab": "Test clamp with values below, inside and above the range 0 to 10.",
-      "verification": "The outputs are 0, 4 and 10. The result is 10."
+      "outcome": "Write table-driven checks with exact endpoints and a counterexample that rejects a plausible wrong implementation.",
+      "lab": "Apply clamp twice to values -2, 4 and 12.",
+      "verification": "Applying it twice gives the same result as once."
     },
     {
       "id": "go-015",
@@ -268,9 +268,9 @@
         "Constraint",
         "Type inference"
       ],
-      "outcome": "Explain and implement generics and constraints without losing semantics.",
-      "lab": "Call first with an integer slice and a string slice.",
-      "verification": "The results are 4 and red with presence true. Red and red remain distinct."
+      "outcome": "Write a generic function whose constraint admits exactly the operations it needs, including named underlying types.",
+      "lab": "Deduplicate 2, 1, 2 while preserving first occurrence.",
+      "verification": "The result is 2 then 1."
     },
     {
       "id": "go-016",
@@ -284,11 +284,12 @@
       "concepts": [
         "Closure",
         "Callback",
-        "Early termination"
+        "Early termination",
+        "Iterator function"
       ],
-      "outcome": "Explain and implement closures, callbacks and controlled iteration.",
-      "lab": "Create a closure referring to factor, change factor, then call it.",
-      "verification": "The closure uses the new factor 3. The collected values are 2 and 4."
+      "outcome": "Write closures with independent state and an iterator that stops early when its consumer breaks out of a range loop.",
+      "lab": "Map a doubling callback over 1, 2 and 3.",
+      "verification": "The result is 2, 4 and 6."
     },
     {
       "id": "go-017",
@@ -304,9 +305,9 @@
         "Short read",
         "Input budget"
       ],
-      "outcome": "Explain and implement readers, writers and bounded streaming.",
-      "lab": "Copy alpha from a strings.Reader into bytes.Buffer.",
-      "verification": "Five bytes are copied and output is alpha. The header is AB and payload is xyz."
+      "outcome": "Stream data through io.Reader and io.Writer with explicit size limits and exact record framing.",
+      "lab": "Read at most three bytes from abcdef.",
+      "verification": "The visible result is abc."
     },
     {
       "id": "go-018",
@@ -322,9 +323,9 @@
         "Path confinement",
         "Owned resource"
       ],
-      "outcome": "Explain and implement filesystems, paths and owned cleanup.",
-      "lab": "Read data/input.txt containing red and a newline.",
-      "verification": "The bytes decode to red followed by a newline. item.txt is readable within the logical subtree."
+      "outcome": "Read files through fs.FS, distinguish missing from empty files, and confine real file access to an owned directory with os.Root.",
+      "lab": "Validate ../private and data/input.txt.",
+      "verification": "The traversal path is invalid and the relative data path is valid."
     },
     {
       "id": "go-019",
@@ -340,9 +341,9 @@
         "Unknown field",
         "Trailing value"
       ],
-      "outcome": "Explain and implement json schemas, strict decoding and unknown input.",
-      "lab": "Decode a name and count into Config.",
-      "verification": "The fields become sample and 3. JSON syntax is valid but count validation fails."
+      "outcome": "Decode JSON strictly by rejecting unknown fields and trailing documents and preserving large integers as json.Number.",
+      "lab": "Decode two adjacent JSON objects and check whether another value exists.",
+      "verification": "A second value is observable, so the single-document contract fails."
     },
     {
       "id": "go-020",
@@ -358,9 +359,9 @@
         "Quoted field",
         "Schema validation"
       ],
-      "outcome": "Explain and implement csv, record shape and data-quality contracts.",
-      "lab": "Read name and city where the city is Springfield, West.",
-      "verification": "The record contains two fields. The schema order is name then count."
+      "outcome": "Parse CSV with encoding/csv and reject ragged rows, blank numeric fields and wrong headers with precise errors.",
+      "lab": "Parse the second field of item,12 as an integer.",
+      "verification": "The numeric value is 12."
     },
     {
       "id": "go-021",
@@ -376,9 +377,9 @@
         "Flag set",
         "Validation boundary"
       ],
-      "outcome": "Explain and implement command-line contracts and configuration precedence.",
-      "lab": "Parse -count=3 with a default of 1.",
-      "verification": "The resulting count is 3. The explicit setting wins."
+      "outcome": "Implement a command-line interface with flag that applies explicit precedence and rejects unknown or invalid options.",
+      "lab": "Parse -mystery=2.",
+      "verification": "Parsing returns an error."
     },
     {
       "id": "go-022",
@@ -394,9 +395,9 @@
         "Status code",
         "Response recorder"
       ],
-      "outcome": "Explain and implement http handlers and in-process service tests.",
-      "lab": "Send GET /health to the handler.",
-      "verification": "The status is 200 and the body is ok plus a newline. The path still matches and returns 200."
+      "outcome": "Write an HTTP handler and test its status codes, methods, routes and headers in process with httptest.",
+      "lab": "Send GET /missing.",
+      "verification": "The status is 404."
     },
     {
       "id": "go-023",
@@ -412,9 +413,9 @@
         "Response ownership",
         "Cancellation"
       ],
-      "outcome": "Explain and implement http clients, cancellation and response ownership.",
-      "lab": "Use a fake transport returning status 200 and body ready.",
-      "verification": "The client helper returns ready without error. The transport helper returns an empty string successfully."
+      "outcome": "Call an HTTP service with a cancelable context, close every response body and enforce a response size limit.",
+      "lab": "Return five bytes with a maximum of four.",
+      "verification": "The helper rejects the response."
     },
     {
       "id": "go-024",
@@ -430,9 +431,9 @@
         "Join",
         "Happens-before"
       ],
-      "outcome": "Explain and implement goroutines and explicit completion.",
-      "lab": "Start a goroutine computing 6 times 7 and receive its result.",
-      "verification": "The received value is 42. The sum is 30."
+      "outcome": "Start goroutines and prove their completion with a WaitGroup or channel instead of sleeping.",
+      "lab": "Have two goroutines compute from explicit arguments.",
+      "verification": "The results sum to 13."
     },
     {
       "id": "go-025",
@@ -448,9 +449,9 @@
         "Channel closure",
         "Directional channel"
       ],
-      "outcome": "Explain and implement channels, buffering and close ownership.",
-      "lab": "Buffer 2 and 3, close and sum the channel.",
-      "verification": "Both values arrive and the sum is 5. The received copy stays 1."
+      "outcome": "Design channel ownership so exactly one sender closes, receivers detect closure, and buffering is bounded.",
+      "lab": "Run a producer sending 1 and 2 before closing output.",
+      "verification": "The consumer receives exactly two values."
     },
     {
       "id": "go-026",
@@ -466,9 +467,9 @@
         "Deadline",
         "Cooperation"
       ],
-      "outcome": "Explain and implement select, contexts and cancellation trees.",
-      "lab": "Create a cancelable context and cancel it.",
-      "verification": "Err returns context.Canceled. It returns 8 without error."
+      "outcome": "Combine select with context cancellation and deadlines so that work stops promptly and reports why.",
+      "lab": "Cancel a child of a live parent.",
+      "verification": "The child is canceled; the parent is unchanged."
     },
     {
       "id": "go-027",
@@ -484,9 +485,9 @@
         "Compound invariant",
         "Atomic operation"
       ],
-      "outcome": "Explain and implement mutexes, atomics and shared-state invariants.",
-      "lab": "Run four workers doing 100 protected increments each.",
-      "verification": "The joined final count is 400. Both snapshots preserve total 10."
+      "outcome": "Protect shared invariants with a mutex, sync.Once or typed atomics and explain which operations each one makes safe.",
+      "lab": "Transfer 3 between two balances initially 5 and 5.",
+      "verification": "The balances become 2 and 8; their sum remains 10."
     },
     {
       "id": "go-028",
@@ -502,9 +503,9 @@
         "Task identity",
         "Fan-in"
       ],
-      "outcome": "Explain and implement bounded worker pools and result ordering.",
-      "lab": "Square 3, 1 and 2 with two workers.",
-      "verification": "The result is 9, 1, 4. One result equals 25 and all workers exit."
+      "outcome": "Build a bounded worker pool that returns results in input order and leaves no goroutine running.",
+      "lab": "Request zero workers.",
+      "verification": "The call returns an error immediately."
     },
     {
       "id": "go-029",
@@ -520,9 +521,9 @@
         "Publication",
         "Immutable snapshot"
       ],
-      "outcome": "Explain and implement the memory model, race diagnosis and publication.",
-      "lab": "Send an initialized record from a goroutine.",
-      "verification": "The reader observes count 3 and ready true. The reader receives ready:3."
+      "outcome": "Publish data between goroutines through a channel, a closed channel or an atomic value, and explain why an unsynchronized read is a data race.",
+      "lab": "Store a complete record in atomic.Value.",
+      "verification": "The loaded record has count 4."
     },
     {
       "id": "go-030",
@@ -538,9 +539,9 @@
         "Monotone predicate",
         "Preallocation"
       ],
-      "outcome": "Explain and implement algorithms, benchmarks and allocation-aware design.",
-      "lab": "Find the first value at least 5 in 2, 4, 6, 8.",
-      "verification": "The index is 2. The first duplicate has index 1."
+      "outcome": "Implement a binary search with correct boundaries and compare work and allocation instead of guessing performance.",
+      "lab": "Reserve capacity four, then append one value.",
+      "verification": "Length is 1, capacity is 4."
     },
     {
       "id": "go-031",
@@ -556,9 +557,9 @@
         "Correlation ID",
         "Redaction"
       ],
-      "outcome": "Explain and implement structured logging and observable operations.",
-      "lab": "Log processed with count 3 and parse its JSON.",
-      "verification": "The record has message processed and numeric count 3. The parsed field remains numeric 12."
+      "outcome": "Emit structured log/slog events with correlation fields and redact sensitive values before logging.",
+      "lab": "Inspect the deterministic fixture record.",
+      "verification": "The time attribute is absent."
     },
     {
       "id": "go-032",
@@ -574,9 +575,9 @@
         "Contextual escaping",
         "Allowlist"
       ],
-      "outcome": "Explain and implement security boundaries, escaping and input budgets.",
-      "lab": "Render script-like text with html/template.",
-      "verification": "Angle brackets become escaped text. read is accepted and exec is rejected."
+      "outcome": "Escape output for its context, enforce input byte budgets and compare secrets in constant time.",
+      "lab": "Compare ../outside with reports/item.txt.",
+      "verification": "Only the second path is lexically local."
     },
     {
       "id": "go-033",
@@ -592,9 +593,9 @@
         "Repository boundary",
         "Unknown outcome"
       ],
-      "outcome": "Explain and implement repository interfaces and transaction failure policy.",
-      "lab": "Transfer 3 between balances 5 and 5 in a staged transaction.",
-      "verification": "The committed balances are 2 and 8. The state is preserved and the operation succeeds."
+      "outcome": "Model a repository transaction that commits valid changes, rolls back failures and keeps retries idempotent.",
+      "lab": "Attempt a transfer larger than available balance.",
+      "verification": "The state remains 5 and 5."
     },
     {
       "id": "go-034",
@@ -610,9 +611,9 @@
         "Multi-stage build",
         "Graceful shutdown"
       ],
-      "outcome": "Explain and implement build targets, containers and graceful process design.",
-      "lab": "Read runtime target identifiers.",
-      "verification": "Both identifiers are nonempty. The result is lesson/1.0 revision=abc123."
+      "outcome": "Check the running build target against a supported set and model a graceful shutdown that drains work honestly.",
+      "lab": "Check plan9/386 and an incomplete linux tuple with the same lookup, keeping linux/arm64 as the control.",
+      "verification": "Both unsupported tuples are rejected while linux/arm64 is admitted."
     },
     {
       "id": "go-035",
@@ -628,9 +629,9 @@
         "Observed state",
         "Object UID"
       ],
-      "outcome": "Explain and implement kubernetes objects, metadata, spec and status.",
-      "lab": "Decode a fixture requesting 3 replicas with 2 ready.",
-      "verification": "Desired is 3 while ready is 2. Only the equal complete state satisfies this simplified predicate."
+      "outcome": "Decode Kubernetes object JSON and separate desired spec from observed status, name from UID and equality from version order.",
+      "lab": "Decode two objects that share namespace and name but carry different UIDs.",
+      "verification": "Their names match but their identities differ."
     },
     {
       "id": "go-036",
@@ -646,9 +647,9 @@
         "Selector",
         "Endpoint readiness"
       ],
-      "outcome": "Explain and implement labels, selectors and service membership.",
-      "lab": "Match app=web and tier=frontend against a Pod containing both.",
-      "verification": "The selector matches. Both versions match the stable app selector."
+      "outcome": "Evaluate label selectors with explicit presence rules and separate selection from endpoint readiness.",
+      "lab": "Require a present empty-valued label.",
+      "verification": "A present empty label matches; absence does not."
     },
     {
       "id": "go-037",
@@ -664,9 +665,9 @@
         "Idempotence",
         "Convergence"
       ],
-      "outcome": "Explain and implement reconciliation as an idempotent control loop.",
-      "lab": "Observe no child for a desired replica count of 3.",
-      "verification": "The action is create. The planner requests update, then converges at zero."
+      "outcome": "Write a reconcile function that plans only the changes needed and becomes a no-op once state has converged.",
+      "lab": "Observe an existing child already at count 3.",
+      "verification": "The action is none."
     },
     {
       "id": "go-038",
@@ -682,9 +683,9 @@
         "Conflict",
         "Field ownership"
       ],
-      "outcome": "Explain and implement resource versions and optimistic concurrency.",
-      "lab": "Update value 2 using its current token a.",
-      "verification": "The value changes and token becomes b. Both attempts conflict and neither changes state."
+      "outcome": "Implement optimistic concurrency that rejects stale resource versions and rereads current state before a retry.",
+      "lab": "Read the current token after conflict and recompute an increment.",
+      "verification": "The new value is based on current state."
     },
     {
       "id": "go-039",
@@ -700,9 +701,9 @@
         "Watch bookmark",
         "Expired history"
       ],
-      "outcome": "Explain and implement list-watch continuity, bookmarks and expired history.",
-      "lab": "Apply ADDED for demo with value 2.",
-      "verification": "The cache gains demo=2. An error is returned without accepting invented semantics."
+      "outcome": "Apply list-watch events to a local cache and restart from a fresh list when watch history has expired.",
+      "lab": "Apply a bookmark without an object.",
+      "verification": "The version advances and no item is created."
     },
     {
       "id": "go-040",
@@ -718,9 +719,9 @@
         "Backoff",
         "Retry budget"
       ],
-      "outcome": "Explain and implement work queues, retry budgets and error classification.",
-      "lab": "Inspect attempts 0, 1 and 2.",
-      "verification": "The delays are 1, 2 and 4 units. Exactly three attempts are admitted."
+      "outcome": "Classify failures as retryable or invalid and bound retries with capped delays and a total budget.",
+      "lab": "Enqueue alpha twice and beta once in a set model.",
+      "verification": "There are two pending identities."
     },
     {
       "id": "go-041",
@@ -736,9 +737,9 @@
         "Kubeconfig context",
         "Dependency pin"
       ],
-      "outcome": "Explain and implement a real client-go project and explicit cluster configuration.",
-      "lab": "Validate an HTTPS endpoint, lesson namespace and explicit context name.",
-      "verification": "The configuration is accepted. The embedded credential form is rejected."
+      "outcome": "Configure a client-go project from an explicit, secure cluster configuration and refuse ambient credentials.",
+      "lab": "Omit the context name.",
+      "verification": "Validation rejects the configuration."
     },
     {
       "id": "go-042",
@@ -754,9 +755,9 @@
         "Eventual consistency",
         "Deep copy"
       ],
-      "outcome": "Explain and implement informer caches, stale reads and safe object copies.",
-      "lab": "Copy a cached object and change its app label.",
-      "verification": "The cache still contains the original label. The original label count is unchanged."
+      "outcome": "Read from an informer-style cache safely by copying before mutation, gating on synchronization and queueing keys.",
+      "lab": "Deliver only the first of two watch events to a cache that starts at version a.",
+      "verification": "The cache shows b while the server's latest version is already c."
     },
     {
       "id": "go-043",
@@ -772,9 +773,9 @@
         "Deletion timestamp",
         "Owned incarnation"
       ],
-      "outcome": "Explain and implement finalizers, deletion and exact ownership.",
-      "lab": "Inspect a normal object without the controller finalizer.",
-      "verification": "The next action is add-finalizer. The unrelated entry remains."
+      "outcome": "Use a finalizer to finish exact-owner cleanup before deletion completes, without removing other controllers' finalizers.",
+      "lab": "Inspect a deleting object with outstanding owned cleanup.",
+      "verification": "The action is cleanup."
     },
     {
       "id": "go-044",
@@ -790,9 +791,9 @@
         "Authorization",
         "Least authority"
       ],
-      "outcome": "Explain and implement service accounts, rbac and least-authority controllers.",
-      "lab": "Allow get on pods in the lesson namespace.",
-      "verification": "The request is admitted by the local rule model. Only list is admitted."
+      "outcome": "Derive a least-authority RBAC rule set from a controller's actual reads and writes.",
+      "lab": "Use the lesson rule against another namespace.",
+      "verification": "The local model rejects it."
     },
     {
       "id": "go-045",
@@ -808,9 +809,9 @@
         "Split brain",
         "Fencing"
       ],
-      "outcome": "Explain and implement leader election, leases and fencing limits.",
-      "lab": "Let candidate a acquire at logical time 10 for five units.",
-      "verification": "Holder becomes a and expiry 15. No lease is acquired."
+      "outcome": "Model lease-based leader election and explain why a fencing check is still needed after a takeover.",
+      "lab": "Let a renew its lease before expiry.",
+      "verification": "Expiry advances to 18."
     },
     {
       "id": "go-046",
@@ -826,9 +827,9 @@
         "Failure policy",
         "Dry run"
       ],
-      "outcome": "Explain and implement admission decisions, webhook contracts and failure policy.",
-      "lab": "Validate replica count 3 under maximum 5.",
-      "verification": "The decision allows the request. The decision is denied."
+      "outcome": "Write an admission decision function that validates exact boundaries, echoes the request UID and has no side effects in dry run.",
+      "lab": "Validate counts 5 and 6 against maximum 5.",
+      "verification": "Five is allowed and six is denied."
     },
     {
       "id": "go-047",
@@ -844,15 +845,15 @@
         "Integration evidence",
         "Fault injection"
       ],
-      "outcome": "Explain and implement controller tests from pure functions to owned clusters.",
-      "lab": "Run a fake client configured to return a value.",
-      "verification": "The result is retained and exactly one call occurs. Both identifiers survive comparison."
+      "outcome": "Test controller logic with fakes that count calls and preserve error causes before running against an owned cluster.",
+      "lab": "Cancel context before invoking the adapter.",
+      "verification": "No API call is made."
     },
     {
       "id": "go-048",
       "title": "Capstone: a reliable, resumable controller design",
       "level": "advanced",
-      "minutes": 120,
+      "minutes": 180,
       "prerequisites": [
         "go-047"
       ],
@@ -862,9 +863,9 @@
         "Resumability",
         "Operational contract"
       ],
-      "outcome": "Explain and implement capstone: a reliable, resumable controller design.",
-      "lab": "Reconcile owned UID u1 from count 1 to desired 3.",
-      "verification": "The count becomes 3 with one write. The restarted invocation makes no additional write."
+      "outcome": "Design a resumable controller that converges from any starting state, refuses replacement objects and survives restarts.",
+      "lab": "Supply expected UID old while observed UID is new.",
+      "verification": "No write occurs and an ownership error is returned."
     }
   ]
 }

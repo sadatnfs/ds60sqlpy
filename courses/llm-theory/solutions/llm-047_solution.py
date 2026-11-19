@@ -59,7 +59,7 @@ def capacity_route(x, logits, experts, capacity):
 
 
 def verify():
-    # Exercise 1: Calculate a top2 expert mixture
+    # Exercise 1: Calculate a top-2 expert mixture
     x = np.array([[1.0, 0.0], [0.0, 1.0], [1.0, 1.0]])
     experts = np.stack([np.eye(2), 2 * np.eye(2), -np.eye(2)])
     logits = np.array(
@@ -101,12 +101,12 @@ def verify():
     )
     np.testing.assert_allclose(numeric, -3 / 16, atol=1e-8, rtol=0)
 
-    # Exercise 5: Separate total andactive parameter counts
+    # Exercise 5: Separate total and active parameter counts
     expert_count, width, hidden, active = 8, 64, 128, 2
     assert expert_count * 2 * width * hidden == 131072
     assert active * 2 * width * hidden == 32768
 
-    # Exercise 6: Validate routing policy andties
+    # Exercise 6: Validate routing policy and ties
     _, tied, _ = mixture(np.ones((1, 2)), np.zeros((1, 3)), experts, 2)
     assert tied.tolist() == [[0, 1]]
     for action in [

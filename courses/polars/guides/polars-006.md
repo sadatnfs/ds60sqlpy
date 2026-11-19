@@ -20,9 +20,7 @@ join takes a key, join type and optional cardinality validation. A left join pre
 
 ## Run the lesson
 
-Open this subject in `/classroom`, then show its code and notes. The prepared `data-engineering` worker runs `main.py` in a fresh temporary directory. The examples use installed packages and synthetic local fixtures; no account, cloud service, network request or package download is required. Save source and notes before switching lessons. Temporary databases, project files and tracking artifacts are recreated by each complete program and removed after the job. The classroom retains the submitted source and bounded output, not an indefinitely running external service. The guide distinguishes this local execution from the deployment decisions that need an owned production environment.
-
-
+Open `polars-006` in `/classroom`. Its starter `main.py` contains both worked cases, "Detect dimension fanout" and "Membership and unknown identity", and prints the dictionary each case returns. The prepared `data-engineering` worker runs it in a fresh temporary directory. An `AssertionError` means that an observation differs from the case's stated contract. The inputs are small literal tables. Cases that demonstrate Parquet scans write their files into a temporary directory that is removed when the case returns. No account, network request or package download is involved. Save source and notes before switching lessons.
 
 ## Worked case 1: Detect dimension fanout
 
@@ -56,7 +54,6 @@ if __name__ == "__main__":
     print(example_one())
 ```
 
-
 ## Worked case 2: Membership and unknown identity
 
 The second case divides left records into matching and nonmatching sets. It then turns on null equality to show that a missing key can become a match under a different policy. The choice must come from the meaning of the key, not from a desire to eliminate unmatched counts.
@@ -83,11 +80,9 @@ if __name__ == "__main__":
     print(example_two())
 ```
 
-
 ## Practice
 
-Make each requested change in a saved copy. Compare both the expected result and the deliberately changed assumption. The separate reference explains the answers.
-
+The starter contains both worked cases, so a task can change either one. Make each change in a saved copy, run it, and compare the printed result with the task's check before opening the separate explained answers.
 
 ### 1. Prove the expected key
 
@@ -97,7 +92,6 @@ Check the dimension key before enrichment.
 
 **Hint:** Inspect the right side independently.
 
-
 ### 2. Reconcile a total
 
 Verify that additive order revenue is unchanged by valid enrichment.
@@ -105,7 +99,6 @@ Verify that additive order revenue is unchanged by valid enrichment.
 **Check:** The total remains 21.
 
 **Hint:** Compare before and after.
-
 
 ### 3. Make a membership query
 
@@ -115,7 +108,6 @@ Return orders whose customers occur in the dimension without adding region.
 
 **Hint:** Use a semi join.
 
-
 ### 4. Audit unmatched rows
 
 Add a customer 30 order and inspect it using an anti join.
@@ -123,7 +115,6 @@ Add a customer 30 order and inspect it using an anti join.
 **Check:** The new order is explicitly listed.
 
 **Hint:** Use an identifier in the output.
-
 
 ### 5. Handle duplicate history
 
@@ -133,7 +124,6 @@ Explain why dropping duplicate customer rows can be incorrect.
 
 **Hint:** Which row was valid at the order time?
 
-
 ### 6. Define null-key policy
 
 Compare default and nulls_equal behavior for two missing keys.
@@ -142,20 +132,19 @@ Compare default and nulls_equal behavior for two missing keys.
 
 **Hint:** Missing identity is not a common identity.
 
-
 ## Diagnose errors and misleading results
 
 If the result has too many rows, inspect key multiplicities on both sides and calculate the expected product of counts for one key. If it has too few rows, inspect join type and the unmatched set. A post-join distinct operation can erase evidence while leaving incorrect aggregates; fix the relation and time contract before deduplicating the result.
 
 ## Transfer to independent work
 
-Enrich a fact table while proving its grain and totals remain valid. Extend the exercise with a legitimate historical dimension, then document the additional temporal rule required. Carry the same reconciliation into dbt tests and ML feature pipelines, where silent fanout can contaminate both training labels and online metrics.
+Extend the exercise with a legitimate historical dimension, then document the additional temporal rule required. Carry the same reconciliation into dbt tests and ML feature pipelines, where silent fanout can contaminate both training labels and online metrics.
 
 ## Primary references
 
-- [Polars documentation: Joins, cardinality and reconciliation](https://docs.pola.rs/user-guide/transformations/joins/)
+- [Polars user guide: Joins](https://docs.pola.rs/user-guide/transformations/joins/)
 - [Polars Python API reference](https://docs.pola.rs/api/python/stable/reference/index.html)
 
 ## Tutor guidance
 
-Use the repository learning-companion skill for `polars-006`. Inspect the learner's own source and observations, ask for an explanation of the relevant data or state contract, and give a focused hint. Separate an assertion on this fixture from a claim about an external dataset or deployed service.
+Use the repository's `$guide-ds60sqlpy-learning` skill (`.agents/skills/guide-ds60sqlpy-learning/SKILL.md`) for `polars-006`. Inspect the learner's own source and printed output first. Ask for an explanation of join, cardinality, fanout, semi join and anti join in their own words, then give one focused hint at a time. Keep an assertion on this synthetic fixture separate from a claim about an external dataset or deployed service.

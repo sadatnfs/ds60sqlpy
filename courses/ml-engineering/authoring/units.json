@@ -2,6 +2,7 @@
   "id": "ml-engineering",
   "title": "Machine learning engineering",
   "summary": "Build and investigate a connected local ML system: historical features, Feast, train/serve consistency, evaluation, MLflow, real API execution, safe deployment decisions, delayed labels, monitoring, rollback and governance.",
+  "run_notice": "Cases that use MLflow, Feast or a saved model create the tracking store, feature repository or artifact in a temporary directory and remove it when the case returns. The serving checks call the FastAPI application in process through its test client; no port is opened, and no account, cloud service, network request or package download is involved.",
   "units": [
     {
       "id": "mle-001",
@@ -45,7 +46,8 @@
           "task": "Add a feature-list validation that rejects label.",
           "check": "The target cannot enter training inputs accidentally.",
           "hint": "Availability is part of the contract.",
-          "answer": "Validate a reviewed allowlist, not every non-null column. Other leakage fields such as future status or post-decision aggregates need the same review."
+          "answer": "Validate a reviewed allowlist, not every non-null column. Other leakage fields such as future status or post-decision aggregates need the same review.",
+          "answer_code": "REVIEWED_FEATURES = {\"usage\", \"tickets\", \"region\"}\n\n\ndef validate_features(contract):\n    columns = set(contract[\"feature_columns\"])\n    if contract[\"label\"] in columns:\n        raise ValueError(\"The label cannot be a training input.\")\n    if not columns <= REVIEWED_FEATURES:\n        raise ValueError(f\"Unreviewed feature columns: {sorted(columns - REVIEWED_FEATURES)}\")\n\n\nvalidate_features({\"feature_columns\": [\"usage\", \"tickets\", \"region\"], \"label\": \"label\"})\ntry:\n    validate_features({\"feature_columns\": [\"usage\", \"label\"], \"label\": \"label\"})\nexcept ValueError as error:\n    assert \"label\" in str(error)\nelse:\n    raise AssertionError(\"The label was accepted as a feature.\")"
         },
         {
           "title": "Change the horizon",
@@ -66,7 +68,8 @@
           "task": "Change a contract field and compare hashes.",
           "check": "The exact identity changes.",
           "hint": "Hash identity is not semantic approval.",
-          "answer": "Retain the previous contract and explain the change. A new hash detects different bytes but cannot judge scientific validity."
+          "answer": "Retain the previous contract and explain the change. A new hash detects different bytes but cannot judge scientific validity.",
+          "answer_code": "# Uses digest() from main.py.\ncontract = {\n    \"unit\": \"one customer decision\",\n    \"prediction_time\": \"cutoff\",\n    \"feature_columns\": [\"usage\", \"tickets\", \"region\"],\n    \"label\": \"label\",\n    \"label_horizon_hours\": 4,\n    \"decision\": \"offer optional support\",\n    \"owner\": \"learning team\",\n}\nchanged = {**contract, \"label_horizon_hours\": 24}\nassert digest(changed) != digest(contract)\nassert digest(dict(reversed(list(contract.items())))) == digest(contract)"
         },
         {
           "title": "Define ownership",
@@ -77,13 +80,10 @@
         }
       ],
       "diagnosis": "A surprisingly strong score may indicate a poorly defined decision or target leakage. An incomplete pipeline can also look successful if publication is tied only to a training exit code. Inspect the contract and dependency graph before choosing another algorithm.",
-      "transfer": "Define an ML product through its decision, information boundary and accepted artifacts. Keep model fitting as one stage inside that contract, and use the later lessons to replace each local mechanism with actual inspected execution evidence.",
+      "transfer": "Keep model fitting as one stage inside that contract, and use the later lessons to replace each local mechanism with actual inspected execution evidence.",
       "lab": "Define an ML product through its decision, information boundary and accepted artifacts. Run both complete local examples, explain the changed assumption, and retain evidence for the six practice changes.",
       "references": [
-        [
-          "MLflow documentation: Define the decision and the data-product contract",
-          "https://mlflow.org/docs/latest/ml/tracking/"
-        ]
+        ["MLflow docs: MLflow Tracking", "https://mlflow.org/docs/latest/ml/tracking/"]
       ]
     },
     {
@@ -101,7 +101,7 @@
         {
           "title": "Reject late-known information",
           "explanation": "At cutoff 5, the event at 4 is not known until 7. The eligible value is 10, while an event-only selection would incorrectly use 999. At cutoff 9, value 30 is eligible under both clocks.",
-          "expected": "Correct feature values are [10,30]; the leaking event-only result includes 999."
+          "expected": "Correct feature values are [10, 30]; the leaking event-only result includes 999."
         },
         {
           "title": "Wait for mature training labels",
@@ -115,21 +115,24 @@
           "task": "Make the revision known before cutoff 5.",
           "check": "It becomes eligible under the same rule.",
           "hint": "The data history changed, not the rule.",
-          "answer": "Record the new source history and its identity. Retrospective conclusions depend on which version of history is being used."
+          "answer": "Record the new source history and its identity. Retrospective conclusions depend on which version of history is being used.",
+          "answer_code": "records = [\n    {\"id\": 1, \"event_at\": 2, \"known_at\": 3, \"value\": 10},\n    {\"id\": 2, \"event_at\": 4, \"known_at\": 4, \"value\": 999},\n    {\"id\": 3, \"event_at\": 8, \"known_at\": 8, \"value\": 30},\n]\n\n\ndef select(cutoff):\n    valid = [r for r in records if r[\"event_at\"] <= cutoff and r[\"known_at\"] <= cutoff]\n    return max(valid, key=lambda r: (r[\"event_at\"], r[\"known_at\"]))[\"value\"]\n\n\nassert [select(5), select(9)] == [999, 30]"
         },
         {
           "title": "Test an exact boundary",
           "task": "Set known_at equal to the prediction cutoff.",
           "check": "The example includes it under <=.",
           "hint": "Boundary conventions are assumptions.",
-          "answer": "A transaction or ingestion watermark may require a stricter operational rule. State and test that rule explicitly."
+          "answer": "A transaction or ingestion watermark may require a stricter operational rule. State and test that rule explicitly.",
+          "answer_code": "records = [\n    {\"id\": 1, \"event_at\": 2, \"known_at\": 3, \"value\": 10},\n    {\"id\": 2, \"event_at\": 4, \"known_at\": 5, \"value\": 999},\n    {\"id\": 3, \"event_at\": 8, \"known_at\": 8, \"value\": 30},\n]\ncutoff = 5\nvalid = [r for r in records if r[\"event_at\"] <= cutoff and r[\"known_at\"] <= cutoff]\nassert [r[\"id\"] for r in valid] == [1, 2]"
         },
         {
           "title": "Change the training cutoff",
           "task": "Move training cutoff from 180 to 181.",
           "check": "The label-maturity cohort changes predictably.",
           "hint": "Check label_available_at, not only decision time.",
-          "answer": "Recompute the eligible identifiers and report them. Training and evaluation should retain the cutoff that produced their cohorts."
+          "answer": "Recompute the eligible identifiers and report them. Training and evaluation should retain the cutoff that produced their cohorts.",
+          "answer_code": "# Uses dataset() from main.py.\nframe = dataset()\ncohorts = {}\nfor training_cutoff in (180, 181):\n    mature = frame[(frame.cutoff < training_cutoff) & (frame.label_available_at <= training_cutoff)]\n    cohorts[training_cutoff] = set(mature.id)\nassert len(cohorts[180]) == 77\nassert cohorts[180] <= cohorts[181]\nassert cohorts[181] - cohorts[180] == {77}"
         },
         {
           "title": "Identify a leakage field",
@@ -154,11 +157,11 @@
         }
       ],
       "diagnosis": "Do not diagnose every missing label as random missingness. Delays can depend on the outcome or workflow. Check known-time history, maturity windows and included identifiers before fitting or comparing models. A data warehouse's latest state is not automatically a valid historical training view.",
-      "transfer": "Construct an eligible training cohort from explicit feature and label clocks. Demonstrate a late-known counterexample and retain excluded identities. Apply these boundaries consistently to model selection, monitoring and feature-store retrieval.",
+      "transfer": "Demonstrate a late-known counterexample and retain excluded identities. Apply these boundaries consistently to model selection, monitoring and feature-store retrieval.",
       "lab": "Construct an eligible training cohort from explicit feature and label clocks. Run both complete local examples, explain the changed assumption, and retain evidence for the six practice changes.",
       "references": [
         [
-          "Feast documentation: Event time, knowledge time and label maturity",
+          "Feast docs: Point-in-time joins",
           "https://docs.feast.dev/getting-started/concepts/point-in-time-joins"
         ]
       ]
@@ -183,7 +186,7 @@
         {
           "title": "Keep zero separate from unavailable",
           "explanation": "The second fixture supplies a valid zero, a nonzero value and no selected value for a third request. The joined result preserves all three request identities.",
-          "expected": "Values are [0,4,null] and coverage is 2/3."
+          "expected": "Values are [0, 4, null] and coverage is 2/3."
         }
       ],
       "exercises": [
@@ -231,13 +234,10 @@
         }
       ],
       "diagnosis": "Unexpectedly high model quality may follow from dropping difficult unmatched requests. Unexpectedly large totals may follow from feature fanout. Inspect request coverage, key multiplicity and temporal eligibility before changing the model.",
-      "transfer": "Build features at the decision grain while preserving all requests and missingness categories. Verify the temporal rule with identified rows, then use the same contract to evaluate a real feature-store implementation.",
+      "transfer": "Verify the temporal rule with identified rows, then use the same contract to evaluate a real feature-store implementation.",
       "lab": "Build features at the decision grain while preserving all requests and missingness categories. Run both complete local examples, explain the changed assumption, and retain evidence for the six practice changes.",
       "references": [
-        [
-          "Polars documentation: Build features without losing the request population",
-          "https://docs.pola.rs/user-guide/transformations/joins/"
-        ]
+        ["Polars user guide: Joins", "https://docs.pola.rs/user-guide/transformations/joins/"]
       ]
     },
     {
@@ -308,13 +308,10 @@
         }
       ],
       "diagnosis": "When a model suddenly behaves differently, inspect units, vocabularies and missingness even if schemas still parse. Do not fix all unknown values by mapping them to a convenient valid category. Preserve rejected evidence and version semantic changes.",
-      "transfer": "Validate a feature interface structurally and semantically. Keep explicit rejection reasons and bind accepted feature meaning to the model artifact. This protects both reproducibility and useful diagnostics when inputs evolve.",
+      "transfer": "Keep explicit rejection reasons and bind accepted feature meaning to the model artifact. This protects both reproducibility and useful diagnostics when inputs evolve.",
       "lab": "Validate a feature interface structurally and semantically. Run both complete local examples, explain the changed assumption, and retain evidence for the six practice changes.",
       "references": [
-        [
-          "Feast documentation: Validate structural and semantic feature contracts",
-          "https://docs.feast.dev/getting-started/concepts/feature-view"
-        ]
+        ["Feast docs: Feature view", "https://docs.feast.dev/getting-started/concepts/feature-view"]
       ]
     },
     {
@@ -385,11 +382,11 @@
         }
       ],
       "diagnosis": "A strong score may reflect repeated entities, future labels or repeated holdout selection. Diagnose the evaluation design before increasing model complexity. A lower score under a more appropriate split can be more useful evidence for the intended deployment.",
-      "transfer": "Design evaluation around the target population and information boundary. Demonstrate the difference between repeat-entity, cold-start and future-time questions, and retain the complete selection/evaluation procedure with the resulting metrics.",
+      "transfer": "Demonstrate the difference between repeat-entity, cold-start and future-time questions, and retain the complete selection/evaluation procedure with the resulting metrics.",
       "lab": "Design evaluation around the target population and information boundary. Run both complete local examples, explain the changed assumption, and retain evidence for the six practice changes.",
       "references": [
         [
-          "scikit-learn documentation: Validation that matches deployment and time",
+          "scikit-learn user guide: Cross-validation: evaluating estimator performance",
           "https://scikit-learn.org/stable/modules/cross_validation.html"
         ]
       ]
@@ -397,7 +394,7 @@
     {
       "id": "mle-006",
       "title": "Register and retrieve actual Feast historical features",
-      "level": "beginner",
+      "level": "intermediate",
       "minutes": 90,
       "concepts": ["Feast", "entity", "feature view", "TTL", "historical retrieval", "coverage"],
       "prerequisites": ["mle-002", "mle-003", "mle-004"],
@@ -409,12 +406,12 @@
         {
           "title": "Observe actual point-in-time values",
           "explanation": "The first case registers the real view and retrieves three identified requests. Customer 1 receives 10 before its later version and 20 afterward; customer 2 receives 5. The result is sorted by request identity for comparison.",
-          "expected": "Historical usage is [10,20,5] and one feature view is registered."
+          "expected": "Historical usage is [10, 20, 5] and one feature view is registered."
         },
         {
           "title": "Retain unmatched and expired requests",
           "explanation": "The second case includes a valid request, one before recorded history and one outside TTL. It validates retrieved-key uniqueness and restores all three request rows. The two unavailable values remain missing rather than disappearing from coverage.",
-          "expected": "The normalized population has 3 rows with values [10,null,null], regardless of whether the backend returned unmatched rows."
+          "expected": "The normalized population has 3 rows with values [10, null, null], regardless of whether the backend returned unmatched rows."
         }
       ],
       "exercises": [
@@ -462,11 +459,11 @@
         }
       ],
       "diagnosis": "If results have fewer rows than requests, investigate coverage instead of fitting on the returned subset silently. If a value is temporally wrong, inspect the declared timestamp, TTL and source history. If registration fails, verify actual field types and owned paths before changing the model.",
-      "transfer": "Qualify a real feature-store retrieval against independent temporal and coverage checks. Preserve every requested decision, retain unavailable values explicitly and distinguish local API execution from external production guarantees.",
+      "transfer": "Preserve every requested decision, retain unavailable values explicitly and distinguish local API execution from external production guarantees.",
       "lab": "Qualify a real feature-store retrieval against independent temporal and coverage checks. Run both complete local examples, explain the changed assumption, and retain evidence for the six practice changes.",
       "references": [
         [
-          "Feast documentation: Register and retrieve actual Feast historical features",
+          "Feast docs: Point-in-time joins",
           "https://docs.feast.dev/getting-started/concepts/point-in-time-joins"
         ]
       ]
@@ -486,12 +483,12 @@
         {
           "title": "Populate and read the actual online store",
           "explanation": "The first case materializes feature versions through a declared endpoint and checks the SQLite file and retrieved values. It uses the real SDK rather than a dictionary standing in for a feature store.",
-          "expected": "Latest usage values are [20,5] for the two customers."
+          "expected": "Latest usage values are [20, 5] for the two customers."
         },
         {
           "title": "Apply an independent freshness policy",
           "explanation": "The second case uses decision time 2024-01-04 and a two-day maximum. It checks the actual ages and decisions. A stored value can therefore be retrievable yet rejected for this prediction.",
-          "expected": "Ages are 86,400 and 259,200 seconds; freshness decisions are [true,false]."
+          "expected": "Ages are 86,400 and 259,200 seconds; freshness decisions are [true, false]."
         }
       ],
       "exercises": [
@@ -539,11 +536,11 @@
         }
       ],
       "diagnosis": "If predictions use stale values, inspect the actual returned timestamp and the consumer policy. A successful materialization is not proof that every entity was covered. A recent write can also carry old information. Keep retrieval status, data age and downstream decision evidence separate.",
-      "transfer": "Populate a real online feature store and enforce a consumer freshness contract. Test missing, stale, future and boundary values, then connect only accepted features to the model interface. Preserve the declared clock when moving from a fixed fixture to a running service.",
+      "transfer": "Test missing, stale, future and boundary values, then connect only accepted features to the model interface. Preserve the declared clock when moving from a fixed fixture to a running service.",
       "lab": "Populate a real online feature store and enforce a consumer freshness contract. Run both complete local examples, explain the changed assumption, and retain evidence for the six practice changes.",
       "references": [
         [
-          "Feast documentation: Materialization, online retrieval and freshness decisions",
+          "Feast docs: Feature retrieval",
           "https://docs.feast.dev/getting-started/concepts/feature-retrieval"
         ]
       ]
@@ -577,7 +574,8 @@
           "task": "Construct a request with fields in a different dictionary order.",
           "check": "The named-column pipeline preserves the intended values.",
           "hint": "Names and feature order need a contract.",
-          "answer": "Use explicit named selections or validate a positional interface carefully. A raw array without a recorded order is easy to misuse."
+          "answer": "Use explicit named selections or validate a positional interface carefully. A raw array without a recorded order is easy to misuse.",
+          "answer_code": "# Uses pd, dataset() and fit_pipeline() from main.py.\nframe = dataset()\nmodel = fit_pipeline(frame[frame.label_available_at <= 180])\ndeclared_order = {\"usage\": 20.0, \"tickets\": 2, \"region\": \"north\"}\nother_order = {\"region\": \"north\", \"tickets\": 2, \"usage\": 20.0}\nfirst = model.predict_proba(pd.DataFrame([declared_order]))[0, 1]\n# The ColumnTransformer selects columns by name, so dictionary order does not matter.\nsecond = model.predict_proba(pd.DataFrame([other_order]))[0, 1]\nassert first == second"
         },
         {
           "title": "Add a missing numeric value",
@@ -616,11 +614,11 @@
         }
       ],
       "diagnosis": "If batch and serving disagree, inspect field order, units, missingness, category handling and fitted-state versions before changing model weights. If evaluation is suspiciously strong, check whether preprocessing was fitted on held-out or future rows.",
-      "transfer": "Package and use a single fitted preprocessing/model interface. Verify parity on contrasting request fixtures and retain the training population that estimated its state. Then evaluate predictive quality separately under the intended deployment design.",
+      "transfer": "Verify parity on contrasting request fixtures and retain the training population that estimated its state. Then evaluate predictive quality separately under the intended deployment design.",
       "lab": "Package and use a single fitted preprocessing/model interface. Run both complete local examples, explain the changed assumption, and retain evidence for the six practice changes.",
       "references": [
         [
-          "scikit-learn documentation: One fitted transformation for training and serving",
+          "scikit-learn user guide: Pipelines and composite estimators",
           "https://scikit-learn.org/stable/modules/compose.html"
         ]
       ]
@@ -668,7 +666,8 @@
           "task": "Increase false-positive cost and recompute threshold utilities.",
           "check": "The preferred action policy can change.",
           "hint": "Costs are part of the decision contract.",
-          "answer": "State the new values and compare the resulting actions. The model's ranking can remain unchanged while the useful policy changes."
+          "answer": "State the new values and compare the resulting actions. The model's ranking can remain unchanged while the useful policy changes. On this four-row fixture 0.5 admits no false positives, so it stays preferred at cost 6, while the utility of 0.3 falls from 8 to 4.",
+          "answer_code": "# Uses np from main.py.\ny = np.array([0, 0, 1, 1])\nprob = np.array([0.1, 0.4, 0.6, 0.9])\n\n\ndef utility(threshold, false_positive_cost):\n    chosen = prob >= threshold\n    true_positives = np.sum(chosen & (y == 1))\n    false_positives = np.sum(chosen & (y == 0))\n    return int(5 * true_positives - false_positive_cost * false_positives)\n\n\ntable = {cost: {t: utility(t, cost) for t in (0.3, 0.5, 0.8)} for cost in (2, 6)}\nassert table[2] == {0.3: 8, 0.5: 10, 0.8: 5}\nassert table[6] == {0.3: 4, 0.5: 10, 0.8: 5}\n# 0.5 has no false positives here, so it stays best; only thresholds that admit them lose."
         },
         {
           "title": "Protect the evaluation set",
@@ -693,11 +692,11 @@
         }
       ],
       "diagnosis": "A metric improvement can come from changed data, labels, thresholds or selection rather than a better model. Inspect cohort identity and maturity before comparing scores. A calibration plot without counts can hide weak evidence, and a utility table without stated costs can hide an undefined decision.",
-      "transfer": "Evaluate probabilities, ranking and actions with separately interpreted evidence. Retain the cohort, maturity cutoff, selected procedure and decision costs, and make figures auditable through their exact values. Use a broader design before making an external deployment claim.",
+      "transfer": "Retain the cohort, maturity cutoff, selected procedure and decision costs, and make figures auditable through their exact values. Use a broader design before making an external deployment claim.",
       "lab": "Evaluate probabilities, ranking and actions with separately interpreted evidence. Run both complete local examples, explain the changed assumption, and retain evidence for the six practice changes.",
       "references": [
         [
-          "scikit-learn documentation: Model evaluation, calibration and decision utility",
+          "scikit-learn user guide: Metrics and scoring: quantifying the quality of predictions",
           "https://scikit-learn.org/stable/modules/model_evaluation.html"
         ]
       ]
@@ -770,12 +769,12 @@
         }
       ],
       "diagnosis": "If expected evidence is missing, inspect the run identifier, destination URI, terminal status and artifact location. Do not infer a successful upload from an old local file. Retain failures and separate a reproducible local fixture from a deployed tracking-service claim.",
-      "transfer": "Use real tracking APIs to bind parameters, metrics, artifacts and terminal outcomes to an owned run. Verify readback and maintain explicit local routing. The artifact and registry lesson adds the consumer contract needed for serving.",
+      "transfer": "Verify readback and maintain explicit local routing. The artifact and registry lesson adds the consumer contract needed for serving.",
       "lab": "Use real tracking APIs to bind parameters, metrics, artifacts and terminal outcomes to an owned run. Run both complete local examples, explain the changed assumption, and retain evidence for the six practice changes.",
       "references": [
         [
-          "MLflow documentation: Actual MLflow tracking and artifact lineage",
-          "https://mlflow.org/docs/latest/tracking/backend-stores/"
+          "MLflow docs: Backend Stores",
+          "https://mlflow.org/docs/latest/self-hosting/architecture/backend-store/"
         ]
       ]
     },
@@ -853,13 +852,10 @@
         }
       ],
       "diagnosis": "A model can deserialize successfully and still expect the wrong inputs. An alias can resolve correctly and still point to an unaccepted candidate. Inspect artifact identity, feature meaning and acceptance evidence separately, and reject untrusted executable serialization.",
-      "transfer": "Publish and resolve a model artifact with an explicit trusted interface. Verify real registry linkage and prediction parity while keeping integrity, authenticity and deployment acceptance distinct. Prefer a safe bounded representation at a local demonstration service boundary.",
+      "transfer": "Verify real registry linkage and prediction parity while keeping integrity, authenticity and deployment acceptance distinct. Prefer a safe bounded representation at a local demonstration service boundary.",
       "lab": "Publish and resolve a model artifact with an explicit trusted interface. Run both complete local examples, explain the changed assumption, and retain evidence for the six practice changes.",
       "references": [
-        [
-          "MLflow documentation: Model artifacts, registry versions and trusted loading",
-          "https://mlflow.org/docs/latest/ml/model-registry/"
-        ]
+        ["MLflow docs: MLflow Model Registry", "https://mlflow.org/docs/latest/ml/model-registry/"]
       ]
     },
     {
@@ -930,13 +926,10 @@
         }
       ],
       "diagnosis": "An HTTP 422 can be correct input rejection rather than a model failure. A 200 response can still carry the wrong model or transformation. Compare the route with direct inference, inspect the version and keep the limits of in-process testing explicit.",
-      "transfer": "Define and test a serving contract with positive and negative requests. Verify model parity and version identity, then use the separate real Docker service project to qualify network and persistence behavior.",
+      "transfer": "Verify model parity and version identity, then use the separate real Docker service project to qualify network and persistence behavior.",
       "lab": "Define and test a serving contract with positive and negative requests. Run both complete local examples, explain the changed assumption, and retain evidence for the six practice changes.",
       "references": [
-        [
-          "FastAPI documentation: A real HTTP contract before a network deployment",
-          "https://fastapi.tiangolo.com/tutorial/testing/"
-        ]
+        ["FastAPI tutorial: Testing", "https://fastapi.tiangolo.com/tutorial/testing/"]
       ]
     },
     {
@@ -959,7 +952,7 @@
         {
           "title": "Invalidate work derived from changed input",
           "explanation": "The second case changes one source value. Its digest, derived features, model mean and publication identity change. Reusing the old result would violate the dependency contract.",
-          "expected": "New features are [2,4,8] and the mean is 14/3."
+          "expected": "New features are [2, 4, 8] and the mean is 14/3."
         }
       ],
       "exercises": [
@@ -1007,14 +1000,9 @@
         }
       ],
       "diagnosis": "If reruns produce duplicated effects, inspect operation identity and publication semantics. If changed inputs reuse old outputs, inspect checkpoint dependencies. If a job outcome is unknown, reconcile it before resubmission. A scheduler's green status does not by itself establish that the correct artifact was published.",
-      "transfer": "Define checkpoint and retry behavior using artifact identities. Demonstrate a known interruption and an input change, then map those contracts to a real orchestrator with separate persistence and execution evidence.",
+      "transfer": "Demonstrate a known interruption and an input change, then map those contracts to a real orchestrator with separate persistence and execution evidence.",
       "lab": "Define checkpoint and retry behavior using artifact identities. Run both complete local examples, explain the changed assumption, and retain evidence for the six practice changes.",
-      "references": [
-        [
-          "Prefect documentation: Orchestration, checkpoints and safe retries",
-          "https://docs.prefect.io/v3/concepts/states"
-        ]
-      ]
+      "references": [["Prefect docs: States", "https://docs.prefect.io/v3/concepts/states"]]
     },
     {
       "id": "mle-014",
@@ -1084,13 +1072,10 @@
         }
       ],
       "diagnosis": "Unstable cohorts can produce confusing comparisons and repeated exposure changes. Zero disagreement can conceal probability changes. A rollout that meets latency limits can still harm an outcome. Diagnose these separately and connect each decision to the evidence it actually requires.",
-      "transfer": "Design stable routing and shadow comparisons with bounded conclusions. Separate interface, operational and causal evidence, and retain a compatible rollback target before expanding exposure.",
+      "transfer": "Separate interface, operational and causal evidence, and retain a compatible rollback target before expanding exposure.",
       "lab": "Design stable routing and shadow comparisons with bounded conclusions. Run both complete local examples, explain the changed assumption, and retain evidence for the six practice changes.",
       "references": [
-        [
-          "MLflow documentation: Shadow comparison and stable rollout cohorts",
-          "https://mlflow.org/docs/latest/ml/model-registry/"
-        ]
+        ["MLflow docs: MLflow Model Registry", "https://mlflow.org/docs/latest/ml/model-registry/"]
       ]
     },
     {
@@ -1161,11 +1146,11 @@
         }
       ],
       "diagnosis": "A quality improvement can come from changing label coverage. A drift signal can occur without observed performance loss. A latency counter can reset on restart. Inspect populations, windows and evidence types before triggering a broad model replacement.",
-      "transfer": "Monitor operations, data contracts and mature outcomes as distinct signals. Keep their denominators and scopes explicit, and connect each to a reviewed response. The real local service demonstrates actual process metrics and stale-feature rejection without claiming production-scale observability.",
+      "transfer": "Keep their denominators and scopes explicit, and connect each to a reviewed response. The real local service demonstrates actual process metrics and stale-feature rejection without claiming production-scale observability.",
       "lab": "Monitor operations, data contracts and mature outcomes as distinct signals. Run both complete local examples, explain the changed assumption, and retain evidence for the six practice changes.",
       "references": [
         [
-          "scikit-learn documentation: Monitoring with delayed labels and bounded service metrics",
+          "scikit-learn user guide: Metrics and scoring: quantifying the quality of predictions",
           "https://scikit-learn.org/stable/modules/model_evaluation.html"
         ]
       ]
@@ -1238,13 +1223,10 @@
         }
       ],
       "diagnosis": "If an invalid candidate becomes active, inspect validation order. If a rollback changes predictions unexpectedly, inspect feature/preprocessing compatibility and artifact identity. If a response is uncertain, reconcile the current version before repeating or cleaning operations.",
-      "transfer": "Activate and recover model state through explicit accepted versions. Test failure before publication and exact rollback behavior, then distinguish local atomicity from the additional guarantees required by a deployed multi-process system.",
+      "transfer": "Test failure before publication and exact rollback behavior, then distinguish local atomicity from the additional guarantees required by a deployed multi-process system.",
       "lab": "Activate and recover model state through explicit accepted versions. Run both complete local examples, explain the changed assumption, and retain evidence for the six practice changes.",
       "references": [
-        [
-          "MLflow documentation: Accepted model pointers and rollback after failure",
-          "https://mlflow.org/docs/latest/ml/model-registry/"
-        ]
+        ["MLflow docs: MLflow Model Registry", "https://mlflow.org/docs/latest/ml/model-registry/"]
       ]
     },
     {
@@ -1315,11 +1297,11 @@
         }
       ],
       "diagnosis": "A clean aggregate metric can hide a weak slice or a changed population. A long model card can still omit the actual decision and evidence. Avoid converting one rate check, a template or an allowlist into a claim of universal fairness, safety or compliance.",
-      "transfer": "Write a model card that is grounded in actual data, metrics and operational decisions. Retain slice denominators, stated limitations and a minimal input contract, and identify which external governance claims require separate review.",
+      "transfer": "Retain slice denominators, stated limitations and a minimal input contract, and identify which external governance claims require separate review.",
       "lab": "Write a model card that is grounded in actual data, metrics and operational decisions. Run both complete local examples, explain the changed assumption, and retain evidence for the six practice changes.",
       "references": [
         [
-          "scikit-learn documentation: Model cards, slice evidence and data minimization",
+          "scikit-learn user guide: Metrics and scoring: quantifying the quality of predictions",
           "https://scikit-learn.org/stable/modules/model_evaluation.html"
         ]
       ]
@@ -1400,14 +1382,9 @@
         }
       ],
       "diagnosis": "If any boundary fails, diagnose the earliest mismatched contract rather than relabeling the whole pipeline successful. Check request coverage, clocks, feature identity, preprocessing, model version, artifact bytes and actual service responses. Keep candidate output separate from accepted publication and preserve meaningful failure evidence.",
-      "transfer": "Deliver a connected local ML product with actual tool execution and a reviewable acceptance decision. Use the owned service project to test persistent HTTP operation and recovery, then specify the additional evidence needed before adapting the design to a real organization and population.",
+      "transfer": "Use the owned service project to test persistent HTTP operation and recovery, then specify the additional evidence needed before adapting the design to a real organization and population.",
       "lab": "Deliver a connected local ML product with actual tool execution and a reviewable acceptance decision. Run both complete local examples, explain the changed assumption, and retain evidence for the six practice changes.",
-      "references": [
-        [
-          "Feast documentation: A connected local ML product and real service lifecycle",
-          "https://docs.feast.dev/getting-started"
-        ]
-      ]
+      "references": [["Feast docs: Quickstart", "https://docs.feast.dev/getting-started"]]
     }
   ],
   "project_readme": "projects/local-system/README.md",

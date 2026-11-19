@@ -121,7 +121,7 @@ Expression IDs and scratch paths identify this execution but are not the relatio
 
 Execute a nested projection/filter form of the direct query and compare its exact rows. Capture its extended plan and return a bounded receipt containing Spark version, ANSI, AQE and shuffle partition settings.
 
-**Expected:** The nested query has the same nine tuples. Receipt shows Spark 4.0.1, ANSItrue, AQEfalse, shuffle partitions 2. Both extended plans expose an optimized stage.
+**Expected:** The nested query has the same nine tuples. Receipt shows Spark 4.0.1, ANSI true, AQE false, shuffle partitions 2. Both extended plans expose an optimized stage.
 
 ```scala
 def configurationReceipt(spark: SparkSession): Map[String, String] = {
@@ -150,4 +150,4 @@ Semantic equality is established with concrete rows, and configuration is attach
 
 ## Execution and interpretation
 
-Run the complete reference in its prepared fixed worker. The small fixture is constructed inside the program,so opening a lesson does not fetch data. A final success line is printed only after the reference assertions complete. Plan observations,partition evidence and resource measurements apply to the actual local configuration; they do not establish cluster-scale performance. Session cleanup is explicit,and any additional owned file/query lifecycle is described in the lesson.
+Run the complete reference in its prepared fixed worker. The small fixture is constructed inside the program, so opening a lesson does not fetch data. A final success line is printed only after the reference assertions complete. Plan observations, partition evidence and resource measurements apply to the actual local configuration; they do not establish cluster-scale performance. Session cleanup is explicit, and any additional owned file/query lifecycle is described in the lesson.

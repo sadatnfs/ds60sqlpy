@@ -1,4 +1,4 @@
-"""dbt-006: worked starting point; complete the guide's six changes."""
+"""dbt-006: both worked cases; complete the guide's six changes."""
 
 import json
 import os
@@ -131,8 +131,13 @@ def example_one():
     return unit_case(False)
 
 
+def example_two():
+    return unit_case(True)
+
+
 if __name__ == "__main__":
     print(example_one())
+    print(example_two())
 
 # TODO 1: Supply a fixture with two customer groups.
 # TODO 2: Include a zero-valued order for an existing customer.

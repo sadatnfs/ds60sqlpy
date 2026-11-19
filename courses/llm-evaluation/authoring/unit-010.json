@@ -9,6 +9,7 @@
     "decision threshold"
   ],
   "outcome": "Choose and evaluate an abstention policy with explicit costs, coverage and held-out evidence instead of reporting only conditional accuracy.",
+  "verification": "Answering everything gives coverage 1, accuracy 0.5 and cost 2.5; abstaining on everything gives coverage 0, missing accuracy and cost 0.4; the calibrated-probability cutoff is 0.92; subgroup counts, coverage and cost are reported separately.",
   "level": "intermediate",
   "runtime": "python-core",
   "minutes": 120,

@@ -1,14 +1,16 @@
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     {
-        let policy = ["edition=2024", "locked", "offline-after-preparation"];
-        assert!(policy.contains(&"edition=2024"));
-        assert_ne!(policy[0], "compiler-version");
+        fn name_length() -> usize {
+            let cell = std::cell::RefCell::new(String::from("pear"));
+            cell.borrow().len()
+        }
+        assert_eq!(name_length(), 4);
     }
 
     {
-        let checks = [true, true, false];
-        assert!(!checks.iter().all(|passed| *passed));
-        assert_eq!(checks.iter().filter(|passed| !**passed).count(), 1);
+        let boxed: Box<[String]> = vec![String::from("a"), String::from("b")].into_boxed_slice();
+        let owned: Vec<String> = boxed.into_iter().collect();
+        assert_eq!(owned, ["a", "b"]);
     }
     println!("rust-036: passed");
     Ok(())

@@ -8,29 +8,33 @@ Several controller replicas improve availability, but some operations need a sin
 
 A lease model records holder and expiry. A current holder can renew, another candidate must wait until expiry, and a candidate must stop leader-only work when renewal is lost. Real lease acquisition requires optimistic concurrency at the API server, not a local map assignment. A monotonically enforced fencing token belongs at the protected external system; Kubernetes resourceVersion should not be repurposed as a numeric application token.
 
-## 1. Acquire an empty lease
+## 1. Acquire an empty lease: predict an edited check
 
-Let candidate a acquire at logical time 10 for five units.
+Copy worked example 1 into a scratch pad and change `check(acquire(&l, "a", 10, 5) && l.Holder == "a" && l.Expires == 15, "acquire")` to `check(acquire(&l, "a", 11, 5) && l.Holder == "a" && l.Expires == 15, "acquire")` inside its check. Before running, predict whether the check still passes and explain why; then restore it.
+
+The unchanged code is worked example 1:
 
 ```go
 l := Lease{}
 check(acquire(&l, "a", 10, 5) && l.Holder == "a" && l.Expires == 15, "acquire")
 ```
 
-**Expected:** Holder becomes a and expiry 15.
+**Expected:** The changed run panics with `acquire` because the edited check no longer holds. Restoring the original line brings back the worked observation: holder becomes a and expiry 15.
 
 This local policy model does not implement distributed atomicity. A real update must be protected by the API concurrency contract.
 
-## 2. Reject a competing candidate
+## 2. Reject a competing candidate: debug a regression
 
-Let b request an unexpired lease held by a.
+A regression changed one token in worked example 2, so one line now reads `l := Lease{Holder: "a!", Expires: 15}`. Run worked example 2 with that line, use the failure to locate the defect and repair it without changing the check.
+
+The unchanged code is worked example 2:
 
 ```go
 l := Lease{Holder: "a", Expires: 15}
 check(!acquire(&l, "b", 12, 5) && l.Holder == "a", "contender")
 ```
 
-**Expected:** The request fails and a remains holder.
+**Expected:** Before the repair the program panics with `contender`; after it the line reads `l := Lease{Holder: "a", Expires: 15}` again and the request fails and a remains holder.
 
 The contender waits while the current claim remains valid under this model.
 

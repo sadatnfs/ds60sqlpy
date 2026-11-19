@@ -1,22 +1,22 @@
 # spark-023: Broadcast joins, statistics and strategy evidence
 
-Authored paired Scala/PySpark teaching content. The default fixtures are tiny,local and deterministic. Runtime acceptance,logical correctness and learner understanding remain separate evidence.
+Authored paired Scala/PySpark teaching content. The default fixtures are tiny, local and deterministic. Runtime acceptance, logical correctness and learner understanding remain separate evidence.
 
 ## Level and prerequisites
 
-Intermediate; approximately 120 minutes. Direct design prerequisites: `spark-022`. The prepared baseline is Spark 4.0.1,Scala binary2.13,JDK 17 and Python 3.12. Read the [execution baseline](../execution-baseline.md); a proposed future tuple is not a runtime receipt.
+Intermediate; approximately 105 minutes. Direct prerequisites: `spark-022`. The prepared baseline is Spark 4.0.1, Scala binary 2.13, JDK 17 and Python 3.12. Read the [execution baseline](../execution-baseline.md).
 
 ## How to run this lesson
 
-Open `spark-023` in the classroom and choose the Scala or PySpark implementation you understand. Prepare only its fixed `spark-local-scala` or `spark-local-python` profile,save your pad and run the complete source. Scala stages as `Main.scala` with `object Main`; Python stages as `main.py` with a main guard. Each program creates its own local[2] session,disables the UI,binds the driver to loopback and stops the session in finally. No external dataset,package download,JDBC connection or cloud service is requested.
+Open `spark-023` in the classroom and choose the Scala or PySpark implementation you understand. Prepare only its fixed `spark-local-scala` or `spark-local-python` profile, save your pad and run the complete source. Scala stages as `Main.scala` with `object Main`; Python stages as `main.py` with a main guard. Each program creates its own local[2] session, disables the UI, binds the driver to loopback and stops the session in finally. No external dataset, package download, JDBC connection or cloud service is requested.
 
 The [Scala learner](../lessons/spark-023.scala) and [PySpark learner](../lessons/spark-023.py) run two complete demonstrations and retain six explicit task stubs. Use the [explained solutions](../solutions/spark-023_solutions.md) only after an attempt or an explicit worked comparison; the [Scala reference](../solutions/spark-023_solution.scala) and [PySpark reference](../solutions/spark-023_solution.py) contain complete assertions. A bounded collect is used only for the declared tiny fixture; do not copy it onto an unbounded or large production table.
 
 ## Learning objectives
 
 - Choose and verify a join strategy without turning a hint into a correctness assumption.
-- State the input and output grain,schema,NULL policy and ordering before executing a transformation.
-- Compare each language implementation with independent literal expectations,not only with the other implementation.
+- State the input and output grain, schema, NULL policy and ordering before executing a transformation.
+- Compare each language implementation with independent literal expectations, not only with the other implementation.
 
 ## Vocabulary and concepts
 
@@ -36,7 +36,7 @@ Broadcasting can avoid shuffling the large side for an eligible equijoin by maki
 
 The optimizer uses statistics and configuration to choose a strategy. This lesson records the optimized plan estimate of the dimension and a deliberately set 10 MiB automatic threshold. The estimate is inspected through classic Spark plan metadata, which is a version-specific diagnostic boundary. It is not substituted for the measured row-count/uniqueness gate or treated as a precise prediction of hash-table memory. Missing statistics can make an automatic decision unexpectedly conservative or unsafe.
 
-The automatic case records its observed operator with broadcasting enabled. The next case disables automatic broadcasting by setting the threshold to-1 while AQE stays disabled, then builds a fresh query. Under this controlled setup the join should use a shuffle-capable strategy rather than BroadcastHashJoin. Exact result metrics remain unchanged. Reusing an already-planned DataFrame after changing configuration could test an old decision, so every comparison builds a new join after applying its settings.
+The automatic case records its observed operator with broadcasting enabled. The next case disables automatic broadcasting by setting the threshold to -1 while AQE stays disabled, then builds a fresh query. Under this controlled setup the join should use a shuffle-capable strategy rather than BroadcastHashJoin. Exact result metrics remain unchanged. Reusing an already-planned DataFrame after changing configuration could test an old decision, so every comparison builds a new join after applying its settings.
 
 The explicit broadcast hint is then applied with automatic broadcasting still disabled. For this supported inner equijoin, the plan uses BroadcastHashJoin and BroadcastExchange. The hint requests a strategy; it does not change equality semantics, validate uniqueness or prove enough production memory exists. The reference compares the full identity/measure relation using distributed exceptAll in both directions so duplicate-sensitive parity is checked without collecting 20000 rows onto the driver.
 
@@ -155,9 +155,9 @@ Build an ordinary inner equality join on key, projecting fact_id, key, amount, f
 
 ### Exercise 3: Disable automatic broadcasting for a fresh comparison
 
-Set automatic broadcast threshold to-1, build a fresh ordinary join and record its plan with AQE disabled. Keep the logical result contract.
+Set automatic broadcast threshold to -1, build a fresh ordinary join and record its plan with AQE disabled. Keep the logical result contract.
 
-**Expected result/shape:** Same metrics as automatic. No BroadcastHashJoin in this fresh query underAQEfalse and threshold-1.
+**Expected result/shape:** Same metrics as automatic. No BroadcastHashJoin in this fresh query under AQE false and threshold -1.
 
 **Verify:** Assert all four metrics, the disabled setting and observed absence of BroadcastHashJoin.
 
@@ -199,15 +199,15 @@ Do not broadcast a relation just because it is named dimension. Do not treat a h
 
 ## Self-check
 
-Explain the contract of `estimatedBytes` / `estimated_bytes` without reading its solution. Trace the specified boundary case,then explain the final exercise's evidence and limitation. Identify where a transformation builds a plan and where an action requests execution. Retain exact values or operator evidence rather than treating a successful process exit as proof of the whole learning objective.
+Explain the contract of `estimatedBytes` / `estimated_bytes` without reading its solution. Trace the specified boundary case, then explain the final exercise's evidence and limitation. Identify where a transformation builds a plan and where an action requests execution. Retain exact values or operator evidence rather than treating a successful process exit as proof of the whole learning objective.
 
 ## Next step
 
-Use the [course route](../README.md) to continue. Paired-language agreement is useful only when both outputs also satisfy the independent fixture contract. Keep runtime/profile receipts separate from any cluster-performance or production-recovery claim.
+Use the [course route](../README.md) to continue. Paired-language agreement is useful only when both outputs also satisfy the independent fixture contract. A successful local run is not evidence of cluster performance or production recovery.
 
 ## Primary sources and official APIs
 
-- [Spark 4.0.1 statistics,broadcast thresholds and hint eligibility](https://spark.apache.org/docs/4.0.1/sql-performance-tuning.html)
+- [Spark 4.0.1 statistics, broadcast thresholds and hint eligibility](https://spark.apache.org/docs/4.0.1/sql-performance-tuning.html)
 
 - [Spark 4.0.1 join syntax](https://spark.apache.org/docs/4.0.1/sql-ref-syntax-qry-select-join.html)
 
@@ -215,8 +215,8 @@ Use the [course route](../README.md) to continue. Paired-language agreement is u
 
 ```text
 Use $guide-ds60sqlpy-learning to coach me through spark-023: Broadcast joins, statistics and strategy evidence.
-Read courses/scala-spark/guides/spark-023.md and courses/scala-spark/lessons/spark-023.scala;the paired sources are courses/scala-spark/lessons/spark-023.scala and courses/scala-spark/lessons/spark-023.py.
-Direct prerequisites: spark-022. Explain the schema,row grain and new Scala/Python/Spark syntax,ask me to predict a concrete result,then inspect my attempt. Give one hint at a time,review exact result and boundary evidence,and ask retrieval questions in my own words. Do not read solutions/ until I ask or have made an honest attempt.
-Use only the prepared local[2] worker profile and owned job scratch. Do not download dependencies,start a remote service,reset existing checkpoints or alter unrelated learner work.
+Read courses/scala-spark/guides/spark-023.md and courses/scala-spark/lessons/spark-023.scala; the paired sources are courses/scala-spark/lessons/spark-023.scala and courses/scala-spark/lessons/spark-023.py.
+Direct prerequisites: spark-022. Explain the schema, row grain and new Scala/Python/Spark syntax, ask me to predict a concrete result, then inspect my attempt. Give one hint at a time, review exact result and boundary evidence, and ask retrieval questions in my own words. Do not read solutions/ until I ask or have made an honest attempt.
+Use only the prepared local[2] worker profile and owned job scratch. Do not download dependencies, start a remote service, reset existing checkpoints or alter unrelated learner work.
 Done when all six contracts have inspected evidence and I can explain the stated assumptions and a meaningful failure case.
 ```

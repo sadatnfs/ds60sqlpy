@@ -27,12 +27,9 @@ internal static class Program {
             "framework assembly identity");
     }
     {
-      var configuration =
-          new Dictionary<string, string> { ["target"] = "net10.0",
-                                           ["nullable"] = "enable" };
-      Check(configuration["target"] == "net10.0" &&
-                configuration["nullable"] == "enable",
-            "reviewed build contract");
+      string? target = AppContext.TargetFrameworkName;
+      Check(target == ".NETCoreApp,Version=v10.0", "compiled target framework");
+      Check(Environment.Version.Major == 10, "running runtime generation");
     }
     Console.WriteLine("csharp-043: passed");
     await Task.CompletedTask;

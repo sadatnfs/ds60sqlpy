@@ -18,13 +18,13 @@ PyTorch inference_mode disables more autograd bookkeeping than no_grad and creat
 
 ## Reading the implementation
 
-The predict helper requires a CPU float32 tensor shaped(batch, 2), with batch size 1..4 and finite entries. It calls model.eval and uses inference_mode, then returns an owned clone suitable for caller inspection. The coefficient vector[2, -1] supplies an independent output oracle. Treat shape, dtype, device and value validation as different diagnostics rather than silently coercing every input.
+The predict helper requires a CPU float32 tensor shaped(batch, 2), with batch size 1..4 and finite entries. It calls model.eval and uses inference_mode, then returns an owned clone suitable for caller inspection. The coefficient vector [2, -1] supplies an independent output oracle. Treat shape, dtype, device and value validation as different diagnostics rather than silently coercing every input.
 
 ## Trace validation, mode, storage and batching as separate boundaries
 
-The function accepts a CPU float32 tensor shaped(B, 2), with \(1\le B\le 4\) and finite entries. Those checks occur before the model call. They are not interchangeable: an integer matrix has the wrong representation policy, a one-dimensional vector lacks the required batch axis, a three-feature matrix has the wrong schema, and a five-row matrix exceeds the declared work bound. A predictable validation order helps callers diagnose the first rejected condition.
+The function accepts a CPU float32 tensor shaped (B, 2), with \(1\le B\le 4\) and finite entries. Those checks occur before the model call. They are not interchangeable: an integer matrix has the wrong representation policy, a one-dimensional vector lacks the required batch axis, a three-feature matrix has the wrong schema, and a five-row matrix exceeds the declared work bound. A predictable validation order helps callers diagnose the first rejected condition.
 
-The model computes 2 x_0-x_1. For[1, 2] and[3, 4], the results are zero and two. Linear returns(B, 1), and squeeze(-1) removes only the known singleton output-feature axis to produce(B). A blanket squeeze() would also remove the batch axis when \(B=1\), creating a scalar result and breaking a stable one-result-per-record interface. This is why axis-specific shape operations belong in the API contract.
+The model computes 2 x_0-x_1. For [1, 2] and [3, 4], the results are zero and two. Linear returns (B, 1), and squeeze(-1) removes only the known singleton output-feature axis to produce (B). A blanket squeeze() would also remove the batch axis when \(B=1\), creating a scalar result and breaking a stable one-result-per-record interface. This is why axis-specific shape operations belong in the API contract.
 
 model.eval() changes mode-dependent behavior such as ordinary Dropout and BatchNorm. It does not disable autograd. no_grad disables ordinary reverse-mode recording for operations in its scope. inference_mode removes additional bookkeeping, including some view/version tracking, and also has restrictions relevant to later differentiation. The choice should follow the consumer's intended use, not a rule that one context is always faster or universally better. [PyTorch 2.9 inference_mode](https://docs.pytorch.org/docs/2.9/generated/torch.autograd.grad_mode.inference_mode.html).
 
@@ -38,64 +38,67 @@ The model object is dedicated to this teaching inference path. Calling eval on a
 
 Finite-value validation is also narrower than an output guarantee. A very large finite float32 input multiplied by two can overflow even though isfinite(input) passed. The literal rows here are small and produce exact finite outputs. If a service promises finite predictions for all accepted requests, it must bound feature magnitudes appropriately or validate output finiteness and define a failure policy. Silently clipping inputs would change the represented model unless that preprocessing rule was declared and tested.
 
-Likewise, shape validation cannot identify swapped features or changed units. The[2, -1] coefficient vector assumes one fixed ordering. A valid two-column float32 array carrying different semantics can pass every tensor check and still be the wrong request. Save names, units and preprocessing metadata with the predictor, and use known input/output cases through that complete path.
+Likewise, shape validation cannot identify swapped features or changed units. The [2, -1] coefficient vector assumes one fixed ordering. A valid two-column float32 array carrying different semantics can pass every tensor check and still be the wrong request. Save names, units and preprocessing metadata with the predictor, and use known input/output cases through that complete path.
 
 The paired TensorFlow helper accepts a float32 NumPy array and returns a copied NumPy output. Its immutable tensor operations and explicit copy have different mechanics from PyTorch inference tensors, but the application-level goals are comparable: strict input policy, one output per record, batch parity and no caller-data mutation. Compare those observed contracts rather than treating training=False and inference_mode as identical APIs.
 
-## Exercise 1: Predict a valid batch
+## Exercise 1: Predict a new valid batch
 
-The question is: Use float32 CPU rows 1, 2 and 3, 4.
+The question is: Predict the float32 rows [0, 1], [2, 0] and [1, 1] with the lesson's weight [2, -1].
 
-The output has one scalar per record. The absence of gradient tracking is part of this inference-only contract.
-
-```python
-x = torch.tensor([[1.0, 2.0], [3.0, 4.0]], dtype=torch.float32)
-result = predict(x)
-assert result.tolist() == [0.0, 2.0] and tuple(result.shape) == (2,) and not result.requires_grad
-```
-
-**Expected:** outputs 0, 2 with shape(2, ).
-
-**Verify:** Compare the computed values or written argument with outputs 0, 2 with shape(2, ).
-
-## Exercise 2: Check per-record batching parity
-
-The question is: Predict each row alone and concatenate.
-
-A training-mode BatchNorm layer could violate this property. The test therefore checks more than output shape.
+Each output is 2*first-second, returned as a one-dimensional batch.
 
 ```python
-single = torch.cat([predict(x[i : i + 1]) for i in range(len(x))])
-torch.testing.assert_close(single, result, atol=0, rtol=0)
+rows = torch.tensor([[0.0, 1.0], [2.0, 0.0], [1.0, 1.0]])
+assert predict(rows).tolist() == [-1.0, 4.0, 1.0]
 ```
 
-**Expected:** same values as batch prediction.
+**Expected:** outputs [-1, 4, 1] with shape (3,).
 
-**Verify:** Compare the computed values or written argument with same values as batch prediction.
+**Verify:** In a fresh process, the exercise checks confirm `predict(rows).tolist() == [-1.0, 4.0, 1.0]`.
 
-## Exercise 3: Reject empty and oversized batches
+## Exercise 2: Check the batch boundary
 
-The question is: Pass shapes 0 x2 and 5 x2.
+The question is: Predict a batch of four rows of ones, then a batch of five.
 
-A resource bound must be checked before computation. An empty batch also has no observations to score.
+The contract accepts 1 to 4 rows; testing both sides of the limit shows where it applies.
 
 ```python
-for bad in [torch.empty((0, 2)), torch.zeros((5, 2))]:
-    try:
-        predict(bad)
-    except ValueError as error:
-        assert "batch" in str(error)
-    else:
-        raise AssertionError("invalid batch accepted")
+assert tuple(predict(torch.ones((4, 2))).shape) == (4,)
+try:
+    predict(torch.ones((5, 2)))
+except ValueError:
+    pass
+else:
+    raise AssertionError("oversized batch accepted")
 ```
 
-**Expected:** ValueError naming batch limit.
+**Expected:** four rows return shape (4,); five rows raise ValueError.
 
-**Verify:** Compare the computed values or written argument with ValueError naming batch limit.
+**Verify:** In a fresh process, the exercise checks confirm `tuple(predict(torch.ones((4, 2))).shape) == (4,)` and `predict(torch.ones((5, 2)))` raises `ValueError`.
+
+## Exercise 3: Reject a float64 batch
+
+The question is: Pass the three valid rows converted to float64.
+
+Refusing other floating dtypes keeps the caller responsible for an explicit, visible conversion.
+
+```python
+try:
+    predict(rows.double())
+except TypeError:
+    pass
+else:
+    raise AssertionError("float64 accepted")
+```
+
+**Expected:** TypeError rather than a silent conversion.
+
+**Verify:** In a fresh process, the exercise checks confirm `predict(rows.double())` raises `TypeError`.
 
 ## Exercise 4: Reject shape and dtype ambiguity
 
-The question is: Pass a vector, a3-feature matrix and an int64 matrix.
+The question is: Pass a vector, a 3-feature matrix and an int64 matrix.
 
 Automatic reshaping or casting can hide which semantic interpretation the caller intended. A different API can permit conversion, but must document and test it.
 
@@ -115,11 +118,11 @@ for bad, kind in [
 
 **Expected:** shape ValueErrors and dtype TypeError.
 
-**Verify:** Compare the computed values or written argument with shape ValueErrors and dtype TypeError.
+**Verify:** In a fresh process, the exercise checks confirm for every looped case, `predict(bad)` raises `kind`.
 
 ## Exercise 5: Reject nonfinite values
 
-The question is: Pass aN aN feature and inspect the failure.
+The question is: Pass a NaN feature and inspect the failure.
 
 A finite weight matrix cannot repair invalid input data. Rejecting the case preserves a clear failure category.
 
@@ -134,7 +137,7 @@ else:
 
 **Expected:** ValueError for finite-value contract.
 
-**Verify:** Compare the computed values or written argument with ValueError for finite-value contract.
+**Verify:** In a fresh process, the exercise checks confirm `predict(torch.tensor([[float('nan'), 1.0]]))` raises `ValueError` and the raised error satisfies `'finite' in str(error)`.
 
 ## Exercise 6: Preserve caller data
 
@@ -151,7 +154,7 @@ assert torch.equal(x, saved)
 
 **Expected:** input unchanged.
 
-**Verify:** Compare the computed values or written argument with input unchanged.
+**Verify:** In a fresh process, the exercise checks confirm `torch.equal(x, saved)`.
 
 ## Review after comparison
 

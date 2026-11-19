@@ -87,7 +87,7 @@ LESSONS = [
                 "Product dimension, including the unsold Bag member.",
                 [
                     "Four product rows describe four catalog keys.",
-                    "Categories are Paper,Home,Travel and colors are Blue,Red,Green.",
+                    "Categories are Paper, Home, Travel and colors are Blue, Red, Green.",
                     "The dimension's domain includes valid attributes absent from current sales.",
                 ],
                 (
@@ -220,8 +220,8 @@ LESSONS = [
                     "customers; observed pair grain from Sales."
                 ),
                 [
-                    "The full dimension product is 4 times 4 =16 pairs.",
-                    "Observed pairs are(1,10),(2,10),(3,20),(2,30),(1,20),(3,30).",
+                    "The full dimension product is 4 times 4 = 16 pairs.",
+                    "Observed pairs are (1, 10), (2, 10), (3, 20), (2, 30), (1, 20), (3, 30).",
                     (
                         "Repeated purchases of the same pair do not add a new "
                         "pair, leaving six observed groups."
@@ -250,7 +250,7 @@ LESSONS = [
                     "possible versus observed product/customer/date cells."
                 ),
                 [
-                    "The possible-cell count is 4 *4 *731 =11696.",
+                    "The possible-cell count is 4 * 4 * 731 = 11696.",
                     (
                         "Each of the eight sales lines has a distinct "
                         "product/customer/order-date combination in this fixture."
@@ -269,13 +269,13 @@ LESSONS = [
             t(
                 "Predict candidate pairs after adding one unsold product.",
                 "The customer dimension still has four members.",
-                "The full candidate grid becomes 5 *4 =20; observed pairs can remain six.",
+                "The full candidate grid becomes 5 * 4 = 20; observed pairs can remain six.",
             ),
             t(
                 "Restrict the calendar to January 2025.",
                 "The selected Date dimension has 31 days.",
                 (
-                    "The candidate grid becomes 4 *4 *31 =496; the observed "
+                    "The candidate grid becomes 4 * 4 * 31 = 496; the observed "
                     "fact combinations in that month must be counted "
                     "separately."
                 ),
@@ -386,7 +386,7 @@ LESSONS = [
                 [[163, 163, 163]],
                 "No existing Quantity filter; all three forms select quantity at least two.",
                 [
-                    "S2 and S 6 have quantity 1 and contribute 4 +20 =24.",
+                    "S2 and S6 have quantity 1 and contribute 4 + 20 = 24.",
                     "Removing those lines from 187 leaves 163.",
                     "The three forms agree in this incoming context.",
                 ],
@@ -416,7 +416,7 @@ LESSONS = [
                     "with replacing or intersecting that column selection."
                 ),
                 [
-                    "The incoming visible fact rows are S2 and S 6, both quantity 1.",
+                    "The incoming visible fact rows are S2 and S6, both quantity 1.",
                     (
                         "FILTER over those rows finds no quantity>=2 line, while "
                         "the plain Boolean predicate replaces the original "
@@ -445,8 +445,8 @@ LESSONS = [
             ),
             t(
                 "Change the predicate to Quantity>=3.",
-                "Identify S4 and S 5.",
-                "Without other filters the retained revenue is 27 +20 =47.",
+                "Identify S4 and S5.",
+                "Without other filters the retained revenue is 27 + 20 = 47.",
             ),
             t(
                 "Write a minimum semantic regression grid.",
@@ -800,7 +800,7 @@ LESSONS = [
             t(
                 "Predict the mean if the warm 25 ms value is replaced by 40 ms.",
                 "Recompute the same statistic rather than selecting a favorable trial.",
-                "The mean becomes(20+40+21)/3 =27 ms for that revised synthetic scenario.",
+                "The mean becomes (20 + 40 + 21)/3 = 27 ms for that revised synthetic scenario.",
             ),
             t(
                 ("Compare A's cold trial with B's warm trial conceptually."),
@@ -902,7 +902,7 @@ LESSONS = [
                 ("Clean retail model; UnitCost is constant per product and unique on ProductKey."),
                 [
                     "Notebook has 7 units at 2, Pen 5 units at 1 and Mug 5 units at 5.",
-                    "Grouped costs are 14,5 and 25, totaling 44.",
+                    "Grouped costs are 14, 5 and 25, totaling 44.",
                     "The eight line-level costs independently sum to the same 44.",
                 ],
                 (
@@ -928,9 +928,9 @@ LESSONS = [
                     "expression iterates product keys."
                 ),
                 [
-                    "S4,S5,S8 are the eligible lines.",
-                    "Their costs are 6,4 and 10.",
-                    "The grouped quantities 3,4,2 at rates 2,1,5 also yield 20.",
+                    "S4, S5, S8 are the eligible lines.",
+                    "Their costs are 6, 4 and 10.",
+                    "The grouped quantities 3, 4, 2 at rates 2, 1, 5 also yield 20.",
                 ],
                 (
                     "This filtered case checks that a rewrite does not "

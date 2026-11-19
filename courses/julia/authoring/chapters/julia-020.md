@@ -8,7 +8,7 @@ Monte Carlo error comes from using finitely many draws. For independent draws wi
 
 ## Worked case A: compare a sample with a known model
 
-The first example samples a Normal distribution with mean 2 and standard deviation 3 using an explicit generator. A second generator with the same seed reproduces those draws in this runtime. The program compares the sample mean with the analytic mean using a deliberately broad, stated Monte Carlo bound. It also reports the standard-error scale instead of claiming an exact estimate.
+The first example samples a Normal distribution with mean 2 and standard deviation 3 using an explicit `Xoshiro` generator, the algorithm behind Julia's default random-number generator since Julia 1.7. A second generator with the same seed reproduces those draws in this runtime. `MersenneTwister` remains available when older code must reproduce a stream recorded with it. The program compares the sample mean with the analytic mean using a deliberately broad, stated Monte Carlo bound. It also reports the standard-error scale instead of claiming an exact estimate.
 
 {{WORKED_A}}
 

@@ -1,10 +1,10 @@
 # spark-001: Choose a Scala-first or PySpark-first local route
 
-Authored classroom lesson. Content availability and runtime readiness are separate checks. Read the current capability notice before running. No opening or saving this lesson installs tools, starts a cluster or proves mastery.
+Authored classroom lesson. Content availability and runtime readiness are separate checks. Read the current capability notice before running. Opening or saving this lesson does not install tools, start a cluster or prove mastery.
 
 ## Level and prerequisites
 
-Beginner; 45 minutes. Direct design prerequisites: none. Use the subject browser to open prerequisite lessons or review their concepts. Runtime readiness is checked separately before execution.
+Beginner; 45 minutes. Direct prerequisites: none. Use the subject browser to open prerequisite lessons or review their concepts. Runtime readiness is checked separately before execution.
 
 Learner artifact: [spark-001.md](../lessons/spark-001.md). Keep [solutions](../solutions/spark-001_solutions.md) closed until an attempt or explicit reveal.
 
@@ -28,7 +28,7 @@ it is separate from evidence that your current worker executed successfully.
 
 - **JDK:** the development kit including compiler/runtime tools for Java bytecode
 - **JVM:** the process executing compatible bytecode
-- **binary line:** a compatibility family such as Scala2.13, reflected by artifact suffix _2.13
+- **binary line:** a compatibility family such as Scala 2.13, reflected by artifact suffix _2.13
 - **driver:** the program coordinating a Spark application
 - **local[2]:** a local Spark master using two worker threads, not two remote computers
 
@@ -79,7 +79,7 @@ Choose a route for two learners: no programming background, and tested Python sk
 
 **Inputs/evidence:** For spark-001 Exercise 2, Learner A has no prior language; B can write functions and pytest tests.
 
-**Expected result/shape:** For spark-001 Exercise 2, A takes spark002-010; B takes spark011 after a python-10 competency check; both enter spark012.
+**Expected result/shape:** For spark-001 Exercise 2, A takes spark-002 to spark-010; B takes spark-011 after a python-10 competency check; both enter spark-012.
 
 **Verify:** For spark-001 Exercise 2, name both routes and explain why Scala-first needs no Python.
 
@@ -87,15 +87,15 @@ Choose a route for two learners: no programming background, and tested Python sk
 
 1. Prior knowledge changes the entry point.
 2. Do not require both languages before beginning.
-3. Scala010 OR Python bridge011 establishes readiness for012.
+3. Scala spark-010 OR Python bridge spark-011 establishes readiness for spark-012.
 
 ### Exercise 3: Check the binary suffix
 
 Review dependency labels before any download.
 
-**Inputs/evidence:** For spark-001 Exercise 3, spark-sql_2.13 at4.2.0 versus a proposed spark-sql_3 substitution.
+**Inputs/evidence:** For spark-001 Exercise 3, spark-sql_2.13 at 4.2.0 versus a proposed spark-sql_3 substitution.
 
-**Expected result/shape:** For spark-001 Exercise 3, retain the documented Scala2.13 line; reject the unsupported Scala3 substitution for this profile.
+**Expected result/shape:** For spark-001 Exercise 3, retain the documented Scala 2.13 line; reject the unsupported Scala3 substitution for this profile.
 
 **Verify:** For spark-001 Exercise 3, cite the binary suffix and actual profile receipt separately.
 
@@ -141,7 +141,7 @@ Compare local mode with a remote master.
 
 Explain a report that has Python but no JVM.
 
-**Inputs/evidence:** For spark-001 Exercise 6, Python3.12 present; java unavailable; Spark profile absent.
+**Inputs/evidence:** For spark-001 Exercise 6, Python 3.12 present; java unavailable; Spark profile absent.
 
 **Expected result/shape:** For spark-001 Exercise 6, ordinary Python may run, but Scala/Spark is unavailable; no installation occurs on Run.
 
@@ -164,7 +164,7 @@ Close the source. Explain the mechanism in your own words, name the boundary tha
 
 ## Common pitfalls
 
-Do not confuse Scala3 with the selected Scala2.13 Spark binary family. Do not treat a proposed tuple or an exit 0 from another program as a Spark qualification receipt. Never route this lesson to an ambient remote master.
+Do not confuse Scala3 with the selected Scala 2.13 Spark binary family. Do not treat a proposed tuple or an exit 0 from another program as a Spark qualification receipt. Never route this lesson to an ambient remote master.
 
 ## Next step
 
@@ -175,7 +175,7 @@ Continue with [spark-002](spark-002.md) for Scala-first study, or use the author
 ```text
 Use $guide-ds60sqlpy-learning to coach spark-001.
 Read courses/scala-spark/guides/spark-001.md and courses/scala-spark/lessons/spark-001.md.
-Direct design prerequisites: none. This lesson is authored; check its current runtime readiness and direct prerequisites.
+Direct prerequisites: none. This lesson is authored; check its current runtime readiness and direct prerequisites.
 Explain one mechanism, ask me to predict, let me attempt one exercise, then give one hint at a time.
 Do not read courses/scala-spark/solutions/ until I make an honest attempt or explicitly ask for a reveal.
 Review my exact values, diagnostics or written evidence; distinguish source inspection, process success and verified understanding.

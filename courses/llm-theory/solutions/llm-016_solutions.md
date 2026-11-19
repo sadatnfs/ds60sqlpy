@@ -34,36 +34,36 @@ The acceptance test is an information-flow contract: independently recomputing a
 | --- | --- | ---: |
 | Token embedding | 16 by 32 | 512 |
 | Absolute position embedding | 32 by 32 | 1,024 |
-| Two LayerNorm modules | two sets of gain32 plus bias32 | 128 |
+| Two LayerNorm modules | two sets of gain 32 plus bias 32 | 128 |
 | Combined Q/K/V projection | 96 by 32, no bias | 3,072 |
 | Attention output projection | 32 by 32, no bias | 1,024 |
-| Feed-forward first affine map | 64 by 32 plus bias64 | 2,112 |
-| Feed-forward second affine map | 32 by 64 plus bias32 | 2,080 |
+| Feed-forward first affine map | 64 by 32 plus bias 64 | 2,112 |
+| Feed-forward second affine map | 32 by 64 plus bias 32 | 2,080 |
 | Vocabulary output projection | 16 by 32, no bias | 512 |
 | Total | sum of these parameter groups | 10,464 |
 
-PyTorch Linear stores [out_features,in_features] and applies the transposed weight to a row-oriented input. That is why the QKV weight is [96,32], while a mathematical row-vector projection may be written as multiplication by a [32,96] matrix. Biases are omitted in the attention and vocabulary projections but present in both feed-forward Linear modules. Forgetting these 96 bias entries changes the parameter ledger.
+PyTorch Linear stores [out_features, in_features] and applies the transposed weight to a row-oriented input. That is why the QKV weight is [96, 32], while a mathematical row-vector projection may be written as multiplication by a [32, 96] matrix. Biases are omitted in the attention and vocabulary projections but present in both feed-forward Linear modules. Forgetting these 96 bias entries changes the parameter ledger.
 
 ### Trace batch 1, time 4 through the forward pass
 
 | Stage | Shape | Meaning of the last axes |
 | --- | --- | --- |
-| Input IDs | [1,4], int64 | four discrete token identities |
-| Token plus position vectors | [1,4,32], float32 | 32 features for each position |
-| First LayerNorm | [1,4,32] | feature statistics within each token |
-| Combined QKV projection | [1,4,96] | three width-32 projected vectors |
-| Each split Q, K or V | [1,2,4,16] | head, token, head feature |
-| Scores and weights | [1,2,4,4] | query position, key position |
-| Weighted values | [1,2,4,16] | one mixture per head and query |
-| Rejoined heads and output projection | [1,4,32] | model-width contextual branch |
-| First residual | [1,4,32] | input plus contextual branch |
-| Feed-forward hidden activation | [1,4,64] | expanded tokenwise feature space |
-| Second residual | [1,4,32] | transformed contextual representation |
-| Vocabulary logits | [1,4,16] | one score per vocabulary ID |
+| Input IDs | [1, 4], int64 | four discrete token identities |
+| Token plus position vectors | [1, 4, 32], float32 | 32 features for each position |
+| First LayerNorm | [1, 4, 32] | feature statistics within each token |
+| Combined QKV projection | [1, 4, 96] | three width-32 projected vectors |
+| Each split Q, K or V | [1, 2, 4, 16] | head, token, head feature |
+| Scores and weights | [1, 2, 4, 4] | query position, key position |
+| Weighted values | [1, 2, 4, 16] | one mixture per head and query |
+| Rejoined heads and output projection | [1, 4, 32] | model-width contextual branch |
+| First residual | [1, 4, 32] | input plus contextual branch |
+| Feed-forward hidden activation | [1, 4, 64] | expanded tokenwise feature space |
+| Second residual | [1, 4, 32] | transformed contextual representation |
+| Vocabulary logits | [1, 4, 16] | one score per vocabulary ID |
 
-Each head has width \(\frac{32}{2}=16\), so its dot products are divided by \(\sqrt{16}=4\). The Boolean triangle [4,4] broadcasts across batch and heads. Softmax reduces the final key axis, not the query axis or the vocabulary axis. The diagonal is allowed because the representation at input position t predicts the following token when training uses correctly shifted targets. The current input is therefore legal information under that objective.
+Each head has width \(\frac{32}{2}=16\), so its dot products are divided by \(\sqrt{16}=4\). The Boolean triangle [4, 4] broadcasts across batch and heads. Softmax reduces the final key axis, not the query axis or the vocabulary axis. The diagonal is allowed because the representation at input position t predicts the following token when training uses correctly shifted targets. The current input is therefore legal information under that objective.
 
-After attention, transpose restores [batch,time,head,head_width]. contiguous makes the requested layout explicit before reshape combines the last two axes into model width. A reshape with the correct number of elements can still scramble token/head membership if the transpose order is wrong. The exact shape ledger and prefix checks are complementary; neither substitutes for the other.
+After attention, transpose restores [batch, time, head, head_width]. contiguous makes the requested layout explicit before reshape combines the last two axes into model width. A reshape with the correct number of elements can still scramble token/head membership if the transpose order is wrong. The exact shape ledger and prefix checks are complementary; neither substitutes for the other.
 
 ## Exercise 1: Build a bounded decoder
 
@@ -81,7 +81,7 @@ assert count < 50000
 
 **Expected:** Exactly 10,464 trainable scalars, below the 50,000 teaching bound.
 
-**Verify:** Compare the computed values or written argument with Exactly 10,464 trainable scalars, below the 50,000 teaching bound.
+**Verify:** In a fresh process, the exercise checks confirm `count == 10464` and `count < 50000`.
 
 ## Exercise 2: Trace output axes
 
@@ -102,7 +102,7 @@ assert torch.isfinite(logits).all()
 
 **Expected:** Finite float32 logits with shape [1,4,16].
 
-**Verify:** Compare the computed values or written argument with Finite float32 logits with shape [1,4,16].
+**Verify:** In a fresh process, the exercise checks confirm `tuple(logits.shape) == (1, 4, 16)`; `logits.dtype == torch.float32` and `torch.isfinite(logits).all()`.
 
 ## Exercise 3: Recompute prefixes
 
@@ -123,7 +123,7 @@ with torch.no_grad():
 
 **Expected:** Every prefix matches the corresponding full-sequence early logits within 1e-6.
 
-**Verify:** Compare the computed values or written argument with Every prefix matches the corresponding full-sequence early logits within 1e-6.
+**Verify:** In a fresh process, the exercise checks confirm for every `length` in `range(1, 5)`, `prefix` matches `full[:, :length]` within 1e-6.
 
 ## Exercise 4: Perturb only future tokens
 
@@ -146,13 +146,13 @@ assert not torch.equal(ids, changed)
 
 **Expected:** The first two score vectors remain unchanged within 1e-6.
 
-**Verify:** Compare the computed values or written argument with The first two score vectors remain unchanged within 1e-6.
+**Verify:** In a fresh process, the exercise checks confirm `perturbed[:, :2]` matches `original[:, :2]` within 1e-6 and `not torch.equal(ids, changed)`.
 
 ## Exercise 5: Inspect head shapes
 
 The question is: Run without disabling autograd and inspect the returned K/V cache shapes, detachment and data-byte count.
 
-Width32 is split into two sixteen-dimensional heads. The cached time dimension grows with processed tokens, while the feature width remains fixed.
+Width 32 is split into two sixteen-dimensional heads. The cached time dimension grows with processed tokens, while the feature width remains fixed.
 
 ```python
 torch.manual_seed(7)
@@ -169,7 +169,7 @@ assert sum(tensor.numel() * tensor.element_size() for tensor in cache.values()) 
 
 **Expected:** Logits remain connected; each cache is detached float32 [1,2,4,16]; combined cache data occupies 1,024 bytes.
 
-**Verify:** Compare the computed values or written argument with Logits remain connected; each cache is detached float32 [1,2,4,16]; combined cache data occupies 1,024 bytes.
+**Verify:** In a fresh process, the exercise checks confirm `logits.requires_grad`; for every `tensor` in `cache.values()`, `tuple(tensor.shape) == (1, 2, 4, 16)`; for every `tensor` in `cache.values()`, `tensor.dtype == torch.float32`; for every `tensor` in `cache.values()`, `not tensor.requires_grad` and 1 further check.
 
 ## Exercise 6: Reject invalid token IDs
 
@@ -204,7 +204,7 @@ for options in [dict(width=5, heads=2), dict(heads=0), dict(context=0)]:
 
 **Expected:** Every invalid contract raises ValueError before a misleading reshape or embedding computation.
 
-**Verify:** Compare the computed values or written argument with Every invalid contract raises ValueError before a misleading reshape or embedding computation.
+**Verify:** In a fresh process, the exercise checks confirm for every `invalid` in `invalid_inputs`, `model(invalid)` raises `ValueError` and for every `options` in `[dict(width=5, heads=2), dict(heads=0), dict(context=0)]`, `TinyDecoder(**options)` raises `ValueError`.
 
 ## Review after comparison
 

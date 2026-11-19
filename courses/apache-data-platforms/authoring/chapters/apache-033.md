@@ -28,6 +28,19 @@ reads through the official Kafka CLI and compares the exact key/value multiset
 with a separate fixture file. It also checks that the sum of partition end offsets
 is three for this nontransactional fixture.
 
+The check script creates the topic with explicit policy instead of relying on broker
+defaults:
+
+<!-- include: projects/streaming/check-kafka.sh from="--create --if-not-exists" to="topic-check.log" bash -->
+
+It then writes the three keyed fixture lines with the console producer only when the
+topic is empty:
+
+<!-- include: projects/streaming/check-kafka.sh from="kafka-console-producer.sh" to="</project/events.txt" bash -->
+
+`parse.key=true` with `key.separator=|` turns each `key|value` line into a keyed
+record, and the record key decides which of the two partitions it lands in.
+
 Comparing a multiset is deliberate: partition-local order does not promise the
 original interleaving across two partitions. Sorting only for the oracle does
 not reorder the broker's log or create a global sequence. An application needing

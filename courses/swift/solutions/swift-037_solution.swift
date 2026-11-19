@@ -14,6 +14,17 @@ import Foundation
   var projectedValue: ClosedRange<Int> { range }
 }
 struct Control { @Clamped(0...10) var level = 0 }
+@propertyWrapper struct Trimmed {
+  private var text = ""
+  var wrappedValue: String {
+    get { text }
+    set { text = newValue.trimmingCharacters(in: .whitespaces) }
+  }
+  init(wrappedValue: String) { self.wrappedValue = wrappedValue }
+}
+struct DisplayLabel {
+  @Trimmed var title = ""
+}
 
 @main
 struct LessonMain {
@@ -31,6 +42,14 @@ struct LessonMain {
       control.level = 4
       precondition(control.level == 4)
       precondition(control.$level == 0...10)
+    }
+
+    do {
+      // Task 3: Independent construction
+      var label = DisplayLabel()
+      label.title = "  Report  "
+      precondition(label.title == "Report")
+      precondition(DisplayLabel(title: " x ").title == "x")
     }
     print("swift-037: passed")
   }

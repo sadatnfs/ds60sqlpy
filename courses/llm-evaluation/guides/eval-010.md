@@ -180,10 +180,21 @@ The held-out case exposes a bad threshold. What follows?
 - [Selective prediction with neural networks](https://arxiv.org/abs/1705.08500)
 - [Existing selective-inference chapter](../../../courses/statistics-ml/chapters/10-multiple-testing-sequential-inference-and-selective-inference.md)
 
-## Study companion
-
-Use the repository learning-companion skill with this lesson ID and your own source/output. Ask for clarification of the estimand, probability distribution, data split or gradient before a hint. Keep claims about the authored fixture separate from claims requiring real population or model evidence.
 
 ## Interactive figure variant
 
 Select **Interactive Plotly** in the lesson variant control. Its complete program uses the same authored inputs to draw the corresponding risk, calibration or policy curve. The captured figure retains a description and exact data table, and its JSON can be downloaded. Hovering a point does not create new statistical evidence. The default numerical reference remains separately saved.
+
+## Ask an AI tutor about this lesson
+
+```text
+Use the checked-in $guide-ds60sqlpy-learning skill for eval-010, Abstention, coverage and decision costs.
+Read courses/llm-evaluation/guides/eval-010.md and courses/llm-evaluation/lessons/eval-010.py. Direct prerequisites: eval-005, eval-009.
+Ask me to state the estimand, probability distribution, data split or gradient
+before giving a hint. Review my attempt at the six investigations one at a time,
+give one hint, and ask for the printed evidence.
+Keep courses/llm-evaluation/solutions/ closed until I attempt or explicitly request comparison.
+Keep claims about the authored fixture separate from claims that need real
+population or model evidence. Done when I can reproduce both worked programs,
+pass the six investigations and explain one failure case.
+```

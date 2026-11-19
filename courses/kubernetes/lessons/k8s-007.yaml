@@ -1,3 +1,4 @@
+# k8s-007 starter. The learner starter's Service selects app=wrong; Exercise 4 asks you to run that negative case and then restore app=hello. Compare with the separate reference in courses/kubernetes/solutions/ only after your attempt.
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -57,14 +58,20 @@ metadata:
   name: hello
 spec:
   selector:
-    app: hello
+    app: wrong
   ports:
     - name: http
       port: 8080
       targetPort: http
-# Exercise 1: Trace selector equality. Compare Deployment template app=hello with Service selector app=hello and app=wrong. Expected: Matching selector finds the intended set;wrong selector has no intended backends.
-# Exercise 2: Resolve the port chain. Read Service port,targetPort and container port name/number. Expected: Client8080 -> targetPort http -> container8080.
-# Exercise 3: Count unique backends. Deduplicate the four synthetic EndpointSlice entries. Expected: Exactly two unique Pod UIDs matching the owned Ready set.
-# Exercise 4: Run a selector negative case. Change only the allowed Service selector to app=wrong in an owned Run,then restore it. Expected: No matching ready backends;bounded failure and cleanup;restored source can pass separately.
-# Exercise 5: Verify an independent client. Inspect the fresh client Job and exact /version result after backend checks. Expected: Job/Pod ownership and exit0 accompany the expected ds60-fixture-v1 payload contract.
-# Exercise 6: Design a second-Service transfer. Explain a scoped host experiment using another Service without touching unrelated objects. Expected: A separate capability,unique owned resource receipt,selector/port/backend/client checks and UID-aware cleanup are specified.
+# Exercise 1: Trace selector equality. Compare Deployment template app=hello with Service selector app=hello and app=wrong.
+# My prediction and evidence:
+# Exercise 2: Resolve the port chain. Read Service port, targetPort and container port name/number.
+# My prediction and evidence:
+# Exercise 3: Count unique backends. Deduplicate the four synthetic EndpointSlice entries.
+# My prediction and evidence:
+# Exercise 4: Run a selector negative case. The starter's Service selects app=wrong. Run it unchanged and record the failure, then restore app=hello and Run again.
+# My prediction and evidence:
+# Exercise 5: Verify an independent client. Inspect the fresh client Job and exact /version result after backend checks.
+# My prediction and evidence:
+# Exercise 6: Design a second-Service transfer. Explain a scoped host experiment using another Service without touching unrelated objects.
+# My prediction and evidence:

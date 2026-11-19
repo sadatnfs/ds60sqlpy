@@ -1,22 +1,22 @@
 # spark-025: Parquet, column pruning and file layout
 
-Authored paired Scala/PySpark teaching content. The default fixtures are tiny,local and deterministic. Runtime acceptance,logical correctness and learner understanding remain separate evidence.
+Authored paired Scala/PySpark teaching content. The default fixtures are tiny, local and deterministic. Runtime acceptance, logical correctness and learner understanding remain separate evidence.
 
 ## Level and prerequisites
 
-Intermediate; approximately 120 minutes. Direct design prerequisites: `spark-024`. The prepared baseline is Spark 4.0.1,Scala binary2.13,JDK 17 and Python 3.12. Read the [execution baseline](../execution-baseline.md); a proposed future tuple is not a runtime receipt.
+Intermediate; approximately 105 minutes. Direct prerequisites: `spark-024`. The prepared baseline is Spark 4.0.1, Scala binary 2.13, JDK 17 and Python 3.12. Read the [execution baseline](../execution-baseline.md).
 
 ## How to run this lesson
 
-Open `spark-025` in the classroom and choose the Scala or PySpark implementation you understand. Prepare only its fixed `spark-local-scala` or `spark-local-python` profile,save your pad and run the complete source. Scala stages as `Main.scala` with `object Main`; Python stages as `main.py` with a main guard. Each program creates its own local[2] session,disables the UI,binds the driver to loopback and stops the session in finally. No external dataset,package download,JDBC connection or cloud service is requested.
+Open `spark-025` in the classroom and choose the Scala or PySpark implementation you understand. Prepare only its fixed `spark-local-scala` or `spark-local-python` profile, save your pad and run the complete source. Scala stages as `Main.scala` with `object Main`; Python stages as `main.py` with a main guard. Each program creates its own local[2] session, disables the UI, binds the driver to loopback and stops the session in finally. No external dataset, package download, JDBC connection or cloud service is requested.
 
 The [Scala learner](../lessons/spark-025.scala) and [PySpark learner](../lessons/spark-025.py) run two complete demonstrations and retain six explicit task stubs. Use the [explained solutions](../solutions/spark-025_solutions.md) only after an attempt or an explicit worked comparison; the [Scala reference](../solutions/spark-025_solution.scala) and [PySpark reference](../solutions/spark-025_solution.py) contain complete assertions. A bounded collect is used only for the declared tiny fixture; do not copy it onto an unbounded or large production table.
 
 ## Learning objectives
 
 - Use a columnar local file layout and verify that schema and logical results survive round trips.
-- State the input and output grain,schema,NULL policy and ordering before executing a transformation.
-- Compare each language implementation with independent literal expectations,not only with the other implementation.
+- State the input and output grain, schema, NULL policy and ordering before executing a transformation.
+- Compare each language implementation with independent literal expectations, not only with the other implementation.
 
 ## Vocabulary and concepts
 
@@ -32,7 +32,7 @@ The [Scala learner](../lessons/spark-025.scala) and [PySpark learner](../lessons
 
 - **Round-trip contract:** A declared comparison of field types, values and occurrence multiplicity after writing and reading a product.
 
-The fixture creates 2000 explicit-schema rows with a unique long id, a string partition value even or odd, an amount equal to seven times id, and a32-character payload. The round-trip contract concerns every field and occurrence. It does not require Parquet to preserve the original execution partitions, row arrival order or writer-side nonnull flags. Spark can mark read fields nullable for compatibility even though this particular file contains no nulls.
+The fixture creates 2000 explicit-schema rows with a unique long id, a string partition value even or odd, an amount equal to seven times id, and a 32-character payload. The round-trip contract concerns every field and occurrence. It does not require Parquet to preserve the original execution partitions, row arrival order or writer-side nonnull flags. Spark can mark read fields nullable for compatibility even though this particular file contains no nulls.
 
 The compact layout repartitions by the day field before writing partitionBy(day) into a fresh owned directory. Equal day values therefore reach one writer partition in this controlled setup, while separate output directories represent day=even and day=odd. The larger-file-count comparison repartitions the same rows into 12 round-robin execution partitions before the same directory partitioning. Several writers can then create a file for each day. Both layouts must read back the same logical bag.
 
@@ -221,11 +221,11 @@ Do not count all filesystem entries as data files or assume one file per storage
 
 ## Self-check
 
-Explain the contract of `writeCompact` / `write_compact` without reading its solution. Trace the specified boundary case,then explain the final exercise's evidence and limitation. Identify where a transformation builds a plan and where an action requests execution. Retain exact values or operator evidence rather than treating a successful process exit as proof of the whole learning objective.
+Explain the contract of `writeCompact` / `write_compact` without reading its solution. Trace the specified boundary case, then explain the final exercise's evidence and limitation. Identify where a transformation builds a plan and where an action requests execution. Retain exact values or operator evidence rather than treating a successful process exit as proof of the whole learning objective.
 
 ## Next step
 
-Use the [course route](../README.md) to continue. Paired-language agreement is useful only when both outputs also satisfy the independent fixture contract. Keep runtime/profile receipts separate from any cluster-performance or production-recovery claim.
+Use the [course route](../README.md) to continue. Paired-language agreement is useful only when both outputs also satisfy the independent fixture contract. A successful local run is not evidence of cluster performance or production recovery.
 
 ## Primary sources and official APIs
 
@@ -239,8 +239,8 @@ Use the [course route](../README.md) to continue. Paired-language agreement is u
 
 ```text
 Use $guide-ds60sqlpy-learning to coach me through spark-025: Parquet, column pruning and file layout.
-Read courses/scala-spark/guides/spark-025.md and courses/scala-spark/lessons/spark-025.py;the paired sources are courses/scala-spark/lessons/spark-025.scala and courses/scala-spark/lessons/spark-025.py.
-Direct prerequisites: spark-024. Explain the schema,row grain and new Scala/Python/Spark syntax,ask me to predict a concrete result,then inspect my attempt. Give one hint at a time,review exact result and boundary evidence,and ask retrieval questions in my own words. Do not read solutions/ until I ask or have made an honest attempt.
-Use only the prepared local[2] worker profile and owned job scratch. Do not download dependencies,start a remote service,reset existing checkpoints or alter unrelated learner work.
+Read courses/scala-spark/guides/spark-025.md and courses/scala-spark/lessons/spark-025.py; the paired sources are courses/scala-spark/lessons/spark-025.scala and courses/scala-spark/lessons/spark-025.py.
+Direct prerequisites: spark-024. Explain the schema, row grain and new Scala/Python/Spark syntax, ask me to predict a concrete result, then inspect my attempt. Give one hint at a time, review exact result and boundary evidence, and ask retrieval questions in my own words. Do not read solutions/ until I ask or have made an honest attempt.
+Use only the prepared local[2] worker profile and owned job scratch. Do not download dependencies, start a remote service, reset existing checkpoints or alter unrelated learner work.
 Done when all six contracts have inspected evidence and I can explain the stated assumptions and a meaningful failure case.
 ```

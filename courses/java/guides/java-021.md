@@ -6,13 +6,13 @@ Intermediate, approximately 90 minutes. Direct prerequisites: `java-020`
 
 ## Learning objectives
 
-Explain happens-before, atomic operation, interruption using a concrete program. Trace the normal execution, identify its boundary assumptions and make a failure case observable. The first investigation is Start a worker that writes 42 into a shared holder, join it with a bound, and inspect the result. The final exercise transfers the mechanism to respond to interruption.
+Create threads, publish results safely through start, join or volatile, and respond correctly to interruption. Along the way, explain happens-before, atomic operation, interruption using a concrete program. Trace the normal execution, identify its boundary assumptions and make a failure case observable. Exercises 1 and 2 start from the worked examples; the authored investigations begin with this task: Make two workers read counter 0, wait at a barrier, then each write its saved value plus 1. The final exercise transfers the mechanism to respond to interruption.
 
 ## Purpose and mental model
 
-Threads can execute concurrently while sharing memory. Correct communication requires a happens-before relationship,not an assumption that another thread has probably finished. Starting a thread publishes prior actions to it,and a successful join makes its completed actions visible to the joining thread. Volatile writes and reads establish a publication relationship for associated state,but volatile does not make a compound read-modify-write atomic. A counter increment reads,adds and writes,so two threads can lose an update even if each individual access is visible.
+Threads can execute concurrently while sharing memory. Correct communication requires a happens-before relationship, not an assumption that another thread has probably finished. Starting a thread publishes prior actions to it, and a successful join makes its completed actions visible to the joining thread. Volatile writes and reads establish a publication relationship for associated state, but volatile does not make a compound read-modify-write atomic. A counter increment reads, adds and writes, so two threads can lose an update even if each individual access is visible.
 
-This lesson uses bounded joins,latches and a barrier to make ordering deliberate. A controlled lost-update fixture forces both workers to read the same starting value before either writes. That demonstrates the mechanism without hoping a random stress run happens to fail. Interruption is a cooperative request,not forcible termination;blocking code should respond or preserve the interrupt status when it cannot complete its work.
+This lesson uses bounded joins, latches and a barrier to make ordering deliberate. A controlled lost-update fixture forces both workers to read the same starting value before either writes. That demonstrates the mechanism without hoping a random stress run happens to fail. Interruption is a cooperative request, not forcible termination; blocking code should respond or preserve the interrupt status when it cannot complete its work.
 
 ## Vocabulary and concepts
 
@@ -39,7 +39,7 @@ The public class name and source filename must agree. Each worked example below 
 
 ## Syntax anatomy and execution trace
 
-Thread.start begins a new execution;calling run directly is an ordinary method call. join(timeout) waits only up to a bound,so check isAlive afterward. CountDownLatch coordinates a one-time event,and CyclicBarrier can align two reads before their writes. A volatile ready flag can publish a preceding data assignment. InterruptedException clears the interrupted status,so a handler that propagates cancellation through state should restore it with interrupt().
+Thread.start begins a new execution; calling run directly is an ordinary method call. join(timeout) waits only up to a bound, so check isAlive afterward. CountDownLatch coordinates a one-time event, and CyclicBarrier can align two reads before their writes. A volatile ready flag can publish a preceding data assignment. InterruptedException clears the interrupted status, so a handler that propagates cancellation through state should restore it with interrupt().
 
 ## Worked example / walkthrough
 
@@ -115,7 +115,7 @@ public class Main {
 }
 ```
 
-**Expected:** worker observes7.
+**Expected:** worker observes 7.
 
 ## Prediction before your attempt
 
@@ -123,29 +123,29 @@ Read the source from the entry point and name each value before executing it. Id
 
 ## Exercises
 
-1. **Publish a result through join.** Start a worker that writes 42 into a shared holder, join it with a bound, and inspect the result.
-   **Expected:** worker terminated; result 42.
-   **Verify:** Compare your assertion values or captured diagnostic with worker terminated; result 42.
+1. **Publish a result through join: change one input.** Copy Example A into a scratch `Main.java` and change `Thread worker = Thread.ofPlatform().start(() -> result[0] = 42);` to `Thread worker = Thread.ofPlatform().start(() -> result[1] = 42);`. Before running it with `java -ea Main`, predict which assertion fails and which value it now sees; then run it and restore the original line.
+   **Expected:** The changed run fails with an `AssertionError` from the assertion on `result[0] == 42`. Restoring the original line brings back the worked observation: worker terminated; result 42.
+   **Verify:** Compare your written prediction with the reported `AssertionError` and its stack-trace line, and name the value that made `result[0] == 42` false. After restoring the line, the program completes without an `AssertionError` again.
 
-2. **Publish initial state through start.** Assign7 before starting a worker that reads the holder.
-   **Expected:** worker observes7.
-   **Verify:** Compare your assertion values or captured diagnostic with worker observes7.
+2. **Publish initial state through start: debug a regression.** A regression changed one token in the code that Example B adds after Example A, so one line now reads `int[] input = { 8 };`. Run Example B with that line, use the failing assertion to locate the defect and repair it without changing the assertion.
+   **Expected:** Before the repair the run fails with an `AssertionError` from the assertion on `observed.get() == 7`; after it the line reads `int[] input = { 7 };` again and worker observes 7.
+   **Verify:** Keep the failing and the repaired runs. Explain why the changed token alters the value tested by `observed.get() == 7` for this input.
 
-3. **Force a lost update.** Make two workers read counter0,wait at a barrier,then each write its saved value plus1.
-   **Expected:** final counter1 despite two increments.
-   **Verify:** Compare your assertion values or captured diagnostic with final counter1 despite two increments.
+3. **Force a lost update.** Make two workers read counter 0, wait at a barrier, then each write its saved value plus 1.
+   **Expected:** final counter 1 despite two increments.
+   **Verify:** Keep an assertion equivalent to `failure.get() == null && counter[0] == 1`. As a control, change `counter[0] = saved + 1;` to `counter[0] = saved - 1;`: the run must fail with an `AssertionError` from the assertion on `failure.get() == null && counter[0] == 1`. Restore the line before continuing.
 
-4. **Use a volatile publication flag.** Write data99 before setting a volatile ready flag;read after observing that flag.
-   **Expected:** reader sees99 and finishes within the bound.
-   **Verify:** Compare your assertion values or captured diagnostic with reader sees99 and finishes within the bound.
+4. **Use a volatile publication flag.** Write data 99 before setting a volatile ready flag; read after observing that flag.
+   **Expected:** reader sees 99 and finishes within the bound.
+   **Verify:** Keep an assertion equivalent to `seen.get() == 99`. As a control, change `long deadline = System.nanoTime() + 2_000_000_000L;` to `long deadline = System.nanoTime() - 2_000_000_000L;`: the run must fail with an `AssertionError` from the assertion on `seen.get() == 99`. Restore the line before continuing.
 
 5. **Distinguish run from start.** Invoke a Runnable directly and compare its thread identity with the caller.
-   **Expected:** same thread identity for directrun.
-   **Verify:** Compare your assertion values or captured diagnostic with same thread identity for directrun.
+   **Expected:** same thread identity for direct run.
+   **Verify:** Keep an assertion equivalent to `identity.get() == caller`. As a control, change `assert identity.get() == caller;` to `assert identity.get() != caller;` inside it: the run must fail with an `AssertionError`, which shows the assertion can fail. Restore it.
 
-6. **Respond to interruption.** Interrupt a worker waiting on a latch,restore its flag in the catch,and verify termination.
+6. **Respond to interruption.** Interrupt a worker waiting on a latch, restore its flag in the catch, and verify termination.
    **Expected:** interruption observed and worker terminated.
-   **Verify:** Compare your assertion values or captured diagnostic with interruption observed and worker terminated.
+   **Verify:** Keep an assertion equivalent to `interrupted.get()` and confirm that `java -ea Main` completes. Then name an input that would make it fail and explain which value changes.
 
 ## Common pitfalls and diagnosis
 
@@ -155,7 +155,14 @@ Do not replace a precise exception with a catch-all that returns a plausible def
 
 ## Progressive hints
 
-First reconstruct the values and identities in the worked example. Next isolate the line that changes the result when one input is altered. Finally compare the normal and failure paths with the stated contract. Use a small table of input, expected value, actual value and exception type. Ask for one hint about the first incorrect assumption before requesting the entire reference implementation.
+Read one hint at a time and attempt the exercise again before reading the next. Keep a small table of input, expected value, actual value and exception type. Ask for one hint about the first incorrect assumption before requesting the entire reference implementation.
+
+- **Exercise 1:** First restate the expected observation: worker terminated; result 42. Then list the values read by `result[0] == 42` and trace each one from its declaration. Finally, compute the asserted value with `Thread worker = Thread.ofPlatform().start(() -> result[1] = 42);` in place before running.
+- **Exercise 2:** First restate the expected observation: worker observes 7. Then list the values read by `observed.get() == 7` and trace each one from its declaration. Finally, compare `int[] input = { 8 };` with the same line in Example B and state the claim each version makes.
+- **Exercise 3:** First restate the expected observation: final counter 1 despite two increments. Then list the values read by `failure.get() == null && counter[0] == 1` and trace each one from its declaration. Finally, predict the effect of changing `counter[0] = saved + 1;` to `counter[0] = saved - 1;` before running anything.
+- **Exercise 4:** First restate the expected observation: reader sees 99 and finishes within the bound. Then list the values read by `seen.get() == 99` and trace each one from its declaration. Finally, predict the effect of changing `long deadline = System.nanoTime() + 2_000_000_000L;` to `long deadline = System.nanoTime() - 2_000_000_000L;` before running anything.
+- **Exercise 5:** First restate the expected observation: same thread identity for direct run. Then list the values read by `identity.get() == caller` and trace each one from its declaration. Finally, name one input that would make `identity.get() == caller` false.
+- **Exercise 6:** First restate the expected observation: interruption observed and worker terminated. Then list the values read by `interrupted.get()` and trace each one from its declaration. Finally, name one input that would make `interrupted.get()` false.
 
 ## Self-check and retrieval
 
@@ -167,7 +174,7 @@ Preserve the saved pad and the six exercise observations. Continue to the next l
 
 ## Sources and verification status
 
-[Official Java21 API or language reference](https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/Thread.html), reviewed2026-10-22. Examples and exercise fixtures are original course material. Use the [validation guide](../../../docs/validation.md) and CI artifacts for the exact revision and platform to inspect actual compile/run results. Authoring, parsing, compilation, execution and learner mastery are separate forms of evidence.
+[Official Java 21 API or language reference](https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/Thread.html), reviewed 2026-10-22. Examples and exercise fixtures are original course material. Use the [validation guide](../../../docs/validation.md) and CI artifacts for the exact revision and platform to inspect actual compile/run results. Authoring, parsing, compilation, execution and learner mastery are separate forms of evidence.
 
 ## Ask an AI tutor about this lesson
 
@@ -177,7 +184,7 @@ Read courses/java/guides/java-021.md and courses/java/lessons/java-021.java. Dir
 Explain the mechanism, ask for a prediction, review my attempt, give one hint,
 request compiler/runtime evidence, and ask a fresh retrieval question.
 Keep courses/java/solutions/ closed until I request comparison or show an attempt.
-Use Java21 and the declared offline fixture. Done when I can explain the state
+Use Java 21 and the declared offline fixture. Done when I can explain the state
 transitions, pass all six exercise contracts, diagnose one failure and solve a
 new boundary case without copying the solution.
 ```

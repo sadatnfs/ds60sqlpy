@@ -7,19 +7,19 @@ from torch.nn import functional as F
 
 
 def verify():
-    # Exercise 1: Compute the fixed spatial filter
+    # Worked example A: Compute the fixed spatial filter
     image = torch.arange(1, 10, dtype=torch.float64).reshape(1, 1, 3, 3)
     kernel = torch.tensor([[[[1.0, 0.0], [0.0, -1.0]]]], dtype=torch.float64)
     out = F.conv2d(image, kernel)
     assert tuple(out.shape) == (1, 1, 2, 2)
     torch.testing.assert_close(out, torch.full_like(out, -4), atol=0, rtol=0)
 
-    # Exercise 2: Rotate the kernel explicitly
+    # Worked example B: Rotate the kernel explicitly
     rotated = torch.flip(kernel, (-2, -1))
     changed = F.conv2d(image, rotated)
     torch.testing.assert_close(changed, torch.full_like(changed, 4), atol=0, rtol=0)
 
-    # Exercise 3: Translate image layout
+    # Worked example C: Translate image layout
     nhwc = image.permute(0, 2, 3, 1)
     assert tuple(nhwc.shape) == (1, 3, 3, 1)
     assert torch.equal(nhwc.permute(0, 3, 1, 2), image)
@@ -38,6 +38,24 @@ def verify():
     # Exercise 6: Count shared parameters
     layer = nn.Conv2d(1, 2, 2, bias=False)
     assert sum(p.numel() for p in layer.parameters()) == 8
+
+    # Exercise 1: Apply a summing kernel
+    ramp = torch.arange(1, 10, dtype=torch.float64).reshape(1, 1, 3, 3)
+    ones_kernel = torch.ones((1, 1, 2, 2), dtype=torch.float64)
+    summed = F.conv2d(ramp, ones_kernel)
+    assert summed.tolist() == [[[[12.0, 16.0], [24.0, 28.0]]]]
+
+    # Exercise 2: Predict the shape with padding
+    padded_out = F.conv2d(ramp, ones_kernel, padding=1)
+    assert tuple(padded_out.shape) == (1, 1, 4, 4) and padded_out[0, 0, 0, 0].item() == 1
+
+    # Exercise 3: Permute a two-channel image
+    two = torch.cat([ramp, -ramp], dim=1)
+    channels_last = two.permute(0, 2, 3, 1)
+    assert tuple(channels_last.shape) == (1, 3, 3, 2) and channels_last[0, 0, 2].tolist() == [
+        3.0,
+        -3.0,
+    ]
     return {"checks": 6, "status": "passed"}
 
 

@@ -179,14 +179,6 @@ def artifacts() -> dict[str, str]:
             + "\n".join(f"- [{title}]({url})" for title, url in row["sources"])
             + "\n\n"
         )
-        guide += (
-            "## Study companion\n\nUse the repository learning-companion "
-            "skill with this lesson ID and your own source/output. Ask "
-            "for clarification of the estimand, probability distribution,"
-            " data split or gradient before a hint. Keep claims about the"
-            " authored fixture separate from claims requiring real "
-            "population or model evidence.\n"
-        )
         has_plot = key + "_plotly_reference.py" in formatted
         if has_plot:
             guide += (
@@ -199,6 +191,20 @@ def artifacts() -> dict[str, str]:
                 "statistical evidence. The default numerical reference "
                 "remains separately saved.\n"
             )
+        prerequisites = ", ".join(row["prerequisites"]) or "none"
+        guide = guide.rstrip("\n") + (
+            "\n\n## Ask an AI tutor about this lesson\n\n```text\n"
+            f"Use the checked-in $guide-ds60sqlpy-learning skill for {key}, {row['title']}.\n"
+            f"Read {prefix}/guides/{key}.md and {prefix}/lessons/{key}.py. "
+            f"Direct prerequisites: {prerequisites}.\n"
+            "Ask me to state the estimand, probability distribution, data split or gradient\n"
+            "before giving a hint. Review my attempt at the six investigations one at a time,\n"
+            "give one hint, and ask for the printed evidence.\n"
+            f"Keep {prefix}/solutions/ closed until I attempt or explicitly request comparison.\n"
+            "Keep claims about the authored fixture separate from claims that need real\n"
+            "population or model evidence. Done when I can reproduce both worked programs,\n"
+            "pass the six investigations and explain one failure case.\n```\n"
+        )
         output[f"{prefix}/guides/{key}.md"] = guide
         output[f"{prefix}/lessons/{key}.py"] = formatted[key + "_learner.py"]
         output[f"{prefix}/solutions/{key}_reference.py"] = source
@@ -212,10 +218,7 @@ def artifacts() -> dict[str, str]:
                 "id": key,
                 "runtime": row["runtime"],
                 "lab": row["exercises"][0]["task"],
-                "verification": (
-                    f"The complete reference prints '{key}: all reference checks passed' "
-                    "after numerical and failure-case assertions."
-                ),
+                "verification": row["verification"],
             }
         )
         admitted.append(

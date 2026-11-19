@@ -1,4 +1,4 @@
-"""polars-017: worked starting point; complete the guide's six changes."""
+"""polars-017: both worked cases; complete the guide's six changes."""
 
 from statistics import median
 from time import perf_counter
@@ -25,8 +25,19 @@ def example_one():
     }
 
 
+def example_two():
+    frame = pl.DataFrame({"x": [3, 1, 2]})
+    ordered = frame.sort("x")
+    arbitrary = frame.sample(fraction=1, shuffle=True, seed=17)
+    assert ordered["x"].to_list() == [1, 2, 3]
+    assert arbitrary.sort("x").equals(ordered)
+    assert frame.equals(pl.DataFrame({"x": [3, 1, 2]}))
+    return {"bag_equality": True, "input_not_mutated": True, "sequence": arbitrary["x"].to_list()}
+
+
 if __name__ == "__main__":
     print(example_one())
+    print(example_two())
 
 # TODO 1: Move fixture creation outside timing and measure a fresh file scan separately.
 # TODO 2: Repeat at two declared input sizes.

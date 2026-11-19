@@ -62,7 +62,7 @@ These fields identify what API object is requested. They do not establish curren
 
 **Inputs/evidence:** For k8s-003 Exercise 2, one valid number and one invalid string.
 
-**Expected result/shape:** For k8s-003 Exercise 2, numeric1 is the intended request; the string is rejected by schema validation.
+**Expected result/shape:** For k8s-003 Exercise 2, numeric 1 is the intended request; the string is rejected by schema validation.
 
 **Verify:** For k8s-003 Exercise 2, retain the validation phase/result and do not claim a rejected object has a new UID.
 
@@ -70,9 +70,9 @@ A generic YAML parser can accept both scalar values. Kubernetes schema validatio
 
 ### Exercise 3: Trace selector and template labels
 
-**Inputs/evidence:** For k8s-003 Exercise 3, selector app:hello and template label app:hello.
+**Inputs/evidence:** For k8s-003 Exercise 3, selector app: hello and template label app: hello.
 
-**Expected result/shape:** For k8s-003 Exercise 3, the key/value pairs agree; app:wrong would violate the intended controller/template relation.
+**Expected result/shape:** For k8s-003 Exercise 3, the key/value pairs agree; app: wrong would violate the intended controller/template relation.
 
 **Verify:** For k8s-003 Exercise 3, compare the exact pair on both sides.
 
@@ -90,7 +90,7 @@ Omission is deliberate in this workflow. It delegates target binding to the type
 
 ### Exercise 5: Separate intent from observation
 
-**Inputs/evidence:** For k8s-003 Exercise 5, desired1, observed ready0.
+**Inputs/evidence:** For k8s-003 Exercise 5, desired 1, observed ready 0.
 
 **Expected result/shape:** For k8s-003 Exercise 5, the request can be accepted while readiness is not established.
 

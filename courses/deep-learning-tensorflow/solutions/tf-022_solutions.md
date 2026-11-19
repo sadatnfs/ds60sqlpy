@@ -18,7 +18,7 @@ Q@transpose(K) forms query-by-key scores, scaled by square root of key width. tf
 
 ## Exercise 1: Calculate uniform mixtures
 
-The question is: Use zero3x2 queries and keys with V[[2,0],[0,2],[6,6]].
+The question is: Use zero 3x2 queries and keys with V[[2, 0], [0, 2], [6, 6]].
 
 Each row averages exactly its legal values. The first row copies one vector, the second averages two, and the third averages three. No learned weights are needed to inspect the boundary.
 
@@ -29,13 +29,13 @@ out = attention(q, q, v).numpy()
 np.testing.assert_allclose(out, [[2, 0], [1, 1], [8 / 3, 8 / 3]], atol=1e-6, rtol=0)
 ```
 
-**Expected:** outputs[[2,0],[1,1],[8/3,8/3]].
+**Expected:** outputs [[2,0],[1,1],[8/3,8/3]].
 
-**Verify:** Compare the computed values or written argument with outputs[[2,0],[1,1],[8/3,8/3]].
+**Verify:** In a fresh process, the exercise checks confirm `out` matches `[[2, 0], [1, 1], [8 / 3, 8 / 3]]` within 1e-6.
 
 ## Exercise 2: Perturb the future
 
-The question is: Replace only the third value with[100,200].
+The question is: Replace only the third value with [100,200].
 
 A change to a future value must not influence earlier queries. This causal assertion is more informative than a visually triangular attention plot.
 
@@ -47,13 +47,13 @@ np.testing.assert_allclose(changed[:2], out[:2], atol=1e-6, rtol=0)
 np.testing.assert_allclose(changed[2], [34, 202 / 3], atol=1e-6, rtol=0)
 ```
 
-**Expected:** first two rows unchanged; final row[34,202/3].
+**Expected:** first two rows unchanged; final row [34,202/3].
 
-**Verify:** Compare the computed values or written argument with first two rows unchanged; final row[34,202/3].
+**Verify:** In a fresh process, the exercise checks confirm `changed[:2]` matches `out[:2]` within 1e-6 and `changed[2]` matches `[34, 202 / 3]` within 1e-6.
 
 ## Exercise 3: Recompute every prefix
 
-The question is: For prefix lengths1,2,3 run the function anew on sliced Q,K,V.
+The question is: For prefix lengths 1, 2, 3 run the function anew on sliced Q, K, V.
 
 The prefix computation reconstructs its mask and softmax. Slicing already-computed full weights would not independently test whether future information influenced them.
 
@@ -65,11 +65,11 @@ for cut in range(1, 4):
 
 **Expected:** all prefix outputs match the full early rows.
 
-**Verify:** Compare the computed values or written argument with all prefix outputs match the full early rows.
+**Verify:** In a fresh process, the exercise checks confirm for every `cut` in `range(1, 4)`, `prefix` matches `out[:cut]` within 1e-6.
 
 ## Exercise 4: Expose post-softmax masking
 
-The question is: Multiply uniform1/3 weights by a triangle without renormalizing.
+The question is: Multiply uniform 1/3 weights by a triangle without renormalizing.
 
 Zeros in forbidden positions do not prove a valid probability distribution. Masking after normalization leaves insufficient mass on early rows and changes their output scale.
 
@@ -78,13 +78,13 @@ broken = np.ones((3, 3)) / 3 * np.tri(3)
 np.testing.assert_allclose(broken.sum(1), [1 / 3, 2 / 3, 1], atol=1e-12, rtol=0)
 ```
 
-**Expected:** row sums[1/3,2/3,1].
+**Expected:** row sums [1/3, 2/3, 1].
 
-**Verify:** Compare the computed values or written argument with row sums[1/3,2/3,1].
+**Verify:** In a fresh process, the exercise checks confirm `broken.sum(1)` matches `[1 / 3, 2 / 3, 1]` within 1e-12.
 
 ## Exercise 5: Use nonuniform scores
 
-The question is: Set Q=K[[1,0],[0,1],[1,1]] and repeat the prefix test.
+The question is: Set Q=K[[1, 0], [0, 1], [1, 1]] and repeat the prefix test.
 
 Uniform scores can hide a missing scale factor or swapped query/key operation. A nonuniform fixture adds a second independent family of behavior.
 
@@ -99,7 +99,7 @@ for cut in range(1, 4):
 
 **Expected:** prefix comparisons pass within 1e-6.
 
-**Verify:** Compare the computed values or written argument with prefix comparisons pass within 1e-6.
+**Verify:** In a fresh process, the exercise checks confirm for every `cut` in `range(1, 4)`, `attention(non[:cut], non[:cut], v[:cut]).numpy()` matches `full[:cut]` within 1e-6.
 
 ## Exercise 6: Refuse malformed input
 
@@ -119,7 +119,7 @@ for args in [(np.empty((0, 2)), np.empty((0, 2)), np.empty((0, 2))), (q, q, v[:2
 
 **Expected:** both raise ValueError.
 
-**Verify:** Compare the computed values or written argument with both raise ValueError.
+**Verify:** In a fresh process, the exercise checks confirm for every `args` in `[(np.empty((0, 2)), np.empty((0, 2)), np.empty((0, 2))), (q, q, v[:2])]`, `attention(*args)` raises `ValueError`.
 
 ## Review after comparison
 

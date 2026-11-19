@@ -47,6 +47,21 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             .unwrap();
         assert_eq!(values.iter().collect::<Vec<_>>(), vec![Some(2), None]);
     }
+
+    {
+        // Task 3: Independent construction
+        use arrow::array::{Array, AsArray};
+        use arrow::datatypes::{DataType, Field, Int32Type, Schema};
+        use std::sync::Arc;
+        let field = Field::new("quantity", DataType::Int32, true);
+        let schema = Arc::new(Schema::new(vec![field]));
+        let input = b"{\"quantity\":2}\n{\"quantity\":null}\n{\"quantity\":-1}\n";
+        let mut reader = arrow::json::ReaderBuilder::new(schema).build(&input[..])?;
+        let batch = reader.next().unwrap()?;
+        let values = batch.column(0).as_primitive::<Int32Type>();
+        let negative = values.iter().flatten().filter(|v| *v < 0).count();
+        assert_eq!((values.len(), values.null_count(), negative), (3, 1, 1));
+    }
     println!("rust-043: passed");
     Ok(())
 }

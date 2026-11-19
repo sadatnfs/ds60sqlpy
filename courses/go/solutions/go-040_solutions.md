@@ -8,27 +8,31 @@ A controller queue decouples event ingestion from reconciliation. Repeated event
 
 A queue key usually names a namespace and object name, not a pointer to a stale object. The worker gets a key, defers Done, reconciles and either Forget on success or schedules a rate-limited retry. The fixture uses integer delay units to test a capped exponential policy deterministically. Production jitter should be tested with an injected source rather than a fixed assumption about wall-clock timing.
 
-## 1. Calculate increasing delay
+## 1. Calculate increasing delay: predict an edited check
 
-Inspect attempts 0, 1 and 2.
+Copy worked example 1 into a scratch pad and change `check(delay(0) == 1 && delay(1) == 2 && delay(2) == 4, "growth")` to `check(delay(1) == 1 && delay(1) == 2 && delay(2) == 4, "growth")` inside its check. Before running, predict whether the check still passes and explain why; then restore it.
+
+The unchanged code is worked example 1:
 
 ```go
 check(delay(0) == 1 && delay(1) == 2 && delay(2) == 4, "growth")
 ```
 
-**Expected:** The delays are 1, 2 and 4 units.
+**Expected:** The changed run panics with `growth` because the edited check no longer holds. Restoring the original line brings back the worked observation: the delays are 1, 2 and 4 units.
 
 The first attempt and retry numbering must be documented. Ambiguous numbering creates off-by-one operational behavior.
 
-## 2. Cap the delay
+## 2. Cap the delay: diagnose an edited check
 
-Inspect attempts beyond the configured cap.
+A careless edit changed the check in worked example 2 so that it reads `check(delay(3) != 8 && delay(10) == 8, "cap")`. Run worked example 2 with that line, explain why the edited check now fails for the same program state, and restore it.
+
+The unchanged code is worked example 2:
 
 ```go
 check(delay(3) == 8 && delay(10) == 8, "cap")
 ```
 
-**Expected:** The delay never exceeds 8 units.
+**Expected:** Before the repair the program panics with `cap`; after it the line reads `check(delay(3) == 8 && delay(10) == 8, "cap")` again and the delay never exceeds 8 units.
 
 A cap prevents exponential growth from becoming impractical or overflowing. It does not replace a total retry budget.
 
@@ -76,21 +80,24 @@ Success ends the current failure sequence. Retaining stale backoff can make a la
 
 ## 6. Transfer a total budget
 
-Allow at most three attempts and count admitted retries.
+Spend a total waiting budget of 10 units on retries whose delays come from delay(attempt).
 
 ```go
-admitted := 0
-for attempt := 0; attempt < 5; attempt++ {
-	if attempt < 3 {
-		admitted++
+spent, attempts := 0, 0
+for attempt := 0; ; attempt++ {
+	d := delay(attempt)
+	if spent+d > 10 {
+		break
 	}
+	spent += d
+	attempts++
 }
-check(admitted == 3, "budget")
+check(attempts == 3 && spent == 7, "budget")
 ```
 
-**Expected:** Exactly three attempts are admitted.
+**Expected:** Three retries fit (1+2+4=7 units); the fourth delay of 8 would exceed the budget.
 
-A delay cap bounds waiting per retry, while an attempt or elapsed-time budget bounds total work. Both are separate policies.
+A delay cap bounds waiting per retry, while an attempt or elapsed-time budget bounds total work. Both are separate policies, and the total budget is checked before a delay is spent.
 
 ## Transfer after comparison
 

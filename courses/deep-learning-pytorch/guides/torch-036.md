@@ -6,7 +6,13 @@ Advanced; approximately 240 minutes. Direct prerequisites: `torch-035`. The prer
 
 ## Learning objectives
 
-A reproducible model release is a bundle of state, schema, data identity, execution evidence and limitations. The central investigation is concrete: Use train x = [1, 2, 3] and holdout 4, 5 with target 2 x and disjoint IDs. The finish condition is 3 training and 2 holdout records. local checks True; production no-go; directory absent. A useful explanation connects the calculation to the reason it is needed, rather than treating a function name as a definition.
+Release a small model with hashed artifacts, a schema, a split manifest, fresh-process parity checks and a bounded decision record.
+
+Central investigation: Train a float64 Linear model for 30 steps, save weights, schema and manifest, reload them in a child process and corrupt the hash.
+
+Finish condition: Holdout error beats the training-mean baseline error of 26, the child reproduces holdout predictions within 1e-12, a zeroed hash makes the child exit nonzero with a mismatch diagnostic, and the record states a production no-go.
+
+The worked examples demonstrate the mechanism; exercises 1-3 transfer it to new inputs and exercises 4-6 extend it to failures and boundary cases. A useful explanation connects the calculation to the reason it is needed, rather than treating a function name as a definition.
 
 ## Purpose and mental model
 
@@ -52,7 +58,7 @@ The training objective is \(L(w)=\frac{14}{3}(w-2)^2\) on x=[1, 2, 3]. With lear
 
 The held-out inputs are 4 and 5, with targets 8 and 10. The training-mean target baseline predicts four, so its squared errors are 16 and 36 and MSE is 26. For the trained scalar model, the holdout MSE is \(\frac{16+25}{2}(w_{30}-2)^2=82\left(\frac{68}{75}\right)^{60}\), approximately 0.229442. The threshold below 26 is therefore interpretable for this visible fixture. It does not establish population quality: the rule y=2x is public, and both assessment inputs extrapolate beyond the training range.
 
-The predictor is more than its state tensor. Its architecture is bias-free Linear(1, 1), its dtype is float64, its feature list is['x'], and its output represents the same scalar target units. The manifest carries that schema, split IDs, step count and a digest of the serialized weight file. A future normalized or categorical model would also need its fitted preprocessing and label mapping. Reconstructing a tensor of the right shape cannot recover omitted semantic metadata.
+The predictor is more than its state tensor. Its architecture is bias-free Linear(1, 1), its dtype is float64, its feature list is ['x'], and its output represents the same scalar target units. The manifest carries that schema, split IDs, step count and a digest of the serialized weight file. A future normalized or categorical model would also need its fitted preprocessing and label mapping. Reconstructing a tensor of the right shape cannot recover omitted semantic metadata.
 
 The digest binds the manifest's expected weight identity to the actual saved bytes. The child recomputes SHA256 before loading and rejects a mismatch. The deliberate all-zero expected digest exercises that rejection path. It is a successful negative test because the invalid bundle fails with the expected diagnostic; it does not mean the corrupted bundle is an accepted release.
 
@@ -105,7 +111,7 @@ assert not set(split["train"]) & set(split["test"]) and len(split["test"]) == 2
 
 ### Example B: Train within a declared budget
 
-The budget is not extended after seeing the holdout. The baseline predicts training mean target 4, so gives errors 16 and 36on the two test rows.
+The budget is not extended after seeing the holdout. The baseline predicts training mean target 4, so gives errors 16 and 36 on the two test rows.
 
 ```python
 model = nn.Linear(1, 1, bias=False, dtype=torch.float64)
@@ -149,33 +155,33 @@ assert len(manifest["weight_sha256"]) == 64 and manifest["schema"]["width"] == 1
 
 ## Prediction before your attempt
 
-For the supplied fixture, name the input unit, the intermediate state and the final quantity that changes. Predict one normal result and one failure result before touching the code. In particular, explain this lesson's acceptance condition in your own words: 3 training and 2 holdout records. local checks True; production no-go; directory absent. Preserve the prediction beside your later observations so a correction is visible. A copied expected value is not a derivation.
+For the supplied fixture, name the input unit, the intermediate state and the final quantity that changes. Predict one normal result and one failure result before touching the code. In particular, explain this lesson's acceptance condition in your own words: Holdout error beats the training-mean baseline error of 26, the child reproduces holdout predictions within 1e-12, a zeroed hash makes the child exit nonzero with a mismatch diagnostic, and the record states a production no-go. Preserve the prediction beside your later observations so a correction is visible. A copied expected value is not a derivation.
 
 ## Exercises
 
-1. **Freeze the scalar experiment.** Use train x = [1, 2, 3] and holdout 4, 5 with target 2 x and disjoint IDs.
-   **Expected:** 3 training and 2 holdout records.
-   **Verify:** Save the assertion results for exercise 1, including 3 training and 2 holdout records.
+1. **Freeze a new split.** Assign IDs a, b, c, d to training and e, f to holdout and check that the sets are disjoint.
+   **Expected:** 4 training and 2 holdout IDs with no overlap.
+   **Verify:** In a fresh process, the exercise checks confirm `not set(release_split['train']) & set(release_split['test'])` and `(len(release_split['train']), len(release_split['test'])) == (4, 2)`.
 
-2. **Train within a declared budget.** Zero-initialize float64 Linear and run 30 SGD.01 updates.
-   **Expected:** finite weights; holdout error below constant training-mean baseline 26.
-   **Verify:** Save the assertion results for exercise 2, including finite weights; holdout error below constant training-mean baseline 26.
+2. **Predict a ten-step weight.** Train a zero-initialized float64 Linear(1, 1) without bias for 10 SGD steps with learning rate 0.01 on x = 1, 2, 3 and y = 2x.
+   **Expected:** weight 2-2*(68/75)**10, about 1.2492, within 1e-12.
+   **Verify:** In a fresh process, the exercise checks confirm `ten_model.weight.item()` matches `2 - 2 * (68 / 75) ** 10` within 1e-12.
 
-3. **Build the owned release bundle.** Save weights, schema and split manifest with a weight SHA256.
-   **Expected:** manifest has feature x, float64, width 1 and matching hash.
-   **Verify:** Save the assertion results for exercise 3, including manifest has feature x, float64, width 1 and matching hash.
+3. **Hash bytes deterministically.** Compute the SHA-256 of the bytes weights-v2 twice and of weights-v3 once.
+   **Expected:** identical bytes give identical 64-character digests; one changed byte changes the digest.
+   **Verify:** In a fresh process, the exercise checks confirm `first_hash == hashlib.sha256(b'weights-v2').hexdigest()`, `first_hash != hashlib.sha256(b'weights-v3').hexdigest()` and `len(first_hash) == 64`.
 
 4. **Verify fresh-process prediction parity.** Run the checked loader in a fresh interpreter and compare holdout predictions.
    **Expected:** predictions match within 1e-12.
-   **Verify:** Save the assertion results for exercise 4, including predictions match within 1e-12.
+   **Verify:** In a fresh process, the exercise checks confirm `not (result.returncode)` and `json.loads(result.stdout.strip().splitlines()[-1])` matches `expected.numpy()` within 1e-12.
 
 5. **Make a corrupted artifact fail.** Replace the declared weight hash with 64 zeros and rerun the loader.
    **Expected:** nonzero child exit and weight hash mismatch diagnostic.
-   **Verify:** Save the assertion results for exercise 5, including nonzero child exit and weight hash mismatch diagnostic.
+   **Verify:** In a fresh process, the exercise checks confirm `rejected.returncode != 0` and `'weight hash mismatch' in rejected.stderr`.
 
 6. **Record a bounded decision and cleanup.** Record local parity pass, holdout count 2, previous artifact v1 and production no-go, then remove owned files.
    **Expected:** local checks True; production no-go; directory absent.
-   **Verify:** Save the assertion results for exercise 6, including local checks True; production no-go; directory absent.
+   **Verify:** In a fresh process, the exercise checks confirm `receipt['local_contracts_pass']`, `not receipt['production_go']` and `not folder.exists()`.
 
 ## Common pitfalls and diagnosis
 
@@ -189,7 +195,7 @@ First draw the state described in the vocabulary section. Next use the smallest 
 
 ## Self-check and retrieval
 
-Close both worked examples. Explain Release bundle, Integrity gate, Fresh-process inference using the lesson fixture. Reconstruct one computation from its inputs. Then change one input while retaining the mechanism and predict whether the conclusion survives. Write which part is guaranteed by the code and which part would need new observations. This last distinction prevents a tiny deterministic teaching example from being presented as evidence about an unseen population or a production model.
+Close all three worked examples. Explain Release bundle, Integrity gate, Fresh-process inference using the lesson fixture. Reconstruct one computation from its inputs. Then change one input while retaining the mechanism and predict whether the conclusion survives. Write which part is guaranteed by the code and which part would need new observations. This last distinction prevents a tiny deterministic teaching example from being presented as evidence about an unseen population or a production model.
 
 ## Next step
 
@@ -197,7 +203,7 @@ Revisit the direct prerequisite `torch-035` if the calculation cannot be reconst
 
 ## Sources and verification status
 
-API and mechanism reference: [PyTorch2.9 reference](https://docs.pytorch.org/docs/2.9/index.html), reviewed 2026-10-22. The fixture, examples, counterexamples and exercise design are original course material. See [validation](../../../docs/validation.md) for execution gates. Check CI artifacts for the exact revision and platform to determine which runtime checks actually ran; authored content alone does not establish runtime execution.
+API and mechanism reference: [PyTorch 2.9 reference](https://docs.pytorch.org/docs/2.9/index.html), reviewed 2026-10-22. The fixture, examples, counterexamples and exercise design are original course material. See [validation](../../../docs/validation.md) for execution gates. Check CI artifacts for the exact revision and platform to determine which runtime checks actually ran; authored content alone does not establish runtime execution.
 
 ## Interview reasoning with worked answers
 

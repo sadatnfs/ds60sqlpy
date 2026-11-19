@@ -71,7 +71,7 @@ This optional final command deletes only verified owned synthetic state.
 
 ## Native JDK preparation without a duplicate client image
 
-The official Hive image contains JRE21, not javac. Explicit prepare therefore
+The official Hive image contains a Java 21 JRE, not javac. Explicit prepare therefore
 copies the actual pinned Hive/Hadoop classpath temporarily into this owned
 `.workshop/` directory and invokes the already prepared native java21 JDK worker
 to compile MetadataProbe.java with `--release 21`. It retains the class plus

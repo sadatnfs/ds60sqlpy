@@ -18,6 +18,11 @@ A timeout after a server commit does not tell the client whether the mutation
 was absent. Retrying with a new random identity can create a duplicate process
 or dataset even when the first request succeeded.
 
+**Execution boundary.** `bash run.sh plan` runs here and prints the payload whose
+digest case A retains. Applying it and comparing GUIDs across a retry need a
+separately prepared Atlas server, so those observations are the written answer for
+such a server rather than results reproduced in the repository.
+
 ## Worked case A: explicit API ingestion with provenance
 
 Generate the owned type/entity payload with plan and retain its source digest.

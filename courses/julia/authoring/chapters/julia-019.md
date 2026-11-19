@@ -8,7 +8,7 @@ Rank and conditioning answer different questions. A rank-deficient system has no
 
 ## Worked case A: solve and check the residual
 
-The first example solves a2-by -2 system using a reusable LU factorization. Its known solution is[2,3]. The program checks both that value and the residual. This provides an independent expected result instead of treating a successful library call as its own proof.
+The first example solves a 2-by-2 system using a reusable LU factorization. Its known solution is `[2, 3]`. The program checks both that value and the residual. This provides an independent expected result instead of treating a successful library call as its own proof.
 
 {{WORKED_A}}
 

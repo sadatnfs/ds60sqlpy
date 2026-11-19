@@ -50,6 +50,32 @@ teaching material; the complete six-case reference remains a separate reveal.
 Use raw Python string literals for embedded Go code so escapes and struct tags
 survive regeneration exactly.
 
+## Outcomes and derived practice
+
+`outcomes.py` holds one specific, observable outcome per lesson ID (and an
+optional minutes override for larger lessons); the renderer refuses a missing or
+templated outcome. The published `lab` and `verification` fields both come from
+the first independent investigation (case 3).
+
+Exercises 1 and 2 are not copies of the worked examples. `variants.py` derives
+them from the worked cases: exercise 1 changes one input of worked example 1 and
+asks for a prediction, exercise 2 shows a one-token regression of worked example 2
+to diagnose. Every `Verify` line and hint names that case's own check and a
+one-token edit that was executed and observed to make the check fail. Those
+observations live in `variants.json` and are refreshed after any case change:
+
+```sh
+python courses/go/authoring/qualify_variants.py
+```
+
+It needs a local Docker engine and the prepared `ds60sqlpy-worker-go` image. It
+compiles each candidate mutant offline with the classroom's fixed import
+configuration, first confirms that every unmodified reference passes, keeps
+records for unchanged cases, and prefers an edit to real computation over an edit
+to a check's own comparison, then an edit that fails the case's main (last) check.
+Rendering never executes code; it stops with a clear message if a case
+changed after its record was made.
+
 ## Shared maintenance gates
 
 Use [CONTRIBUTING](../../../CONTRIBUTING.md) for the prepared environment and

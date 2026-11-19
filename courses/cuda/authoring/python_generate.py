@@ -421,15 +421,22 @@ Confusing a correct tiny example with a general implementation is the central re
 Keep a small evidence table with columns **claim**, **input**, **expected observation**, **actual observation** and **limit**. For the first claim use `{exercises[0]}`. For the final claim use `{exercises[5]}`. An unperformed GPU or cluster experiment remains pending even when the CPU model is correct.
 
 {boundary}
-## Ask an AI tutor about this lesson
-
-> I am studying `{ident}` using `courses/cuda/{area}/guides/{ident}.md` and `courses/cuda/{area}/lessons/{ident}.md`. Help me reason about {record["title"]}. Start with my current attempt and the two worked examples. Ask which backend actually ran, give one progressive hint, and do not reveal the separate solution or mark progress unless I request it.
-
 ## Primary references
 
 {sources}
 
 Use the version-matched documentation of your prepared environment. These references describe interfaces and supported boundaries; the chapter's synthetic examples and CPU models are original teaching material.
+
+## Ask an AI tutor about this lesson
+
+```text
+Use the checked-in $guide-ds60sqlpy-learning skill for {ident}: {record["title"]}.
+Read courses/cuda/{area}/guides/{ident}.md and courses/cuda/{area}/lessons/{ident}.md.
+Start with my current attempt and the two worked examples, and ask which backend actually ran.
+Give one progressive hint at a time. Keep the separate solution closed and do not mark
+progress unless I request it. Treat synthetic timings and CPU models as model evidence,
+not as GPU or cluster measurements.
+```
 """
     put(guide, content)
     worksheet = f"# {ident}: {record['title']} worksheet\n\nRecord predictions and reasoning here. This reading pad does not execute GPU or cluster commands. The CPU reference model is a separate optional variant.\n\n"

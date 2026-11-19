@@ -47,28 +47,40 @@ func main() {
 
 	// Separate name and incarnation
 	{
-		a := Metadata{Name: "demo", Namespace: "lesson", UID: "old"}
-		b := Metadata{Name: "demo", Namespace: "lesson", UID: "new"}
-		check(a.Name == b.Name && a.UID != b.UID, "incarnation")
+		var a, b Deployment
+		errA := json.Unmarshal([]byte(`{"metadata":{"name":"demo","namespace":"lesson","uid":"old"}}`), &a)
+		errB := json.Unmarshal([]byte(`{"metadata":{"name":"demo","namespace":"lesson","uid":"new"}}`), &b)
+		check(errA == nil && errB == nil, "decode")
+		check(a.Metadata.Name == b.Metadata.Name && a.Metadata.UID != b.Metadata.UID, "incarnation")
 	}
 
 	// Keep namespaces in a key
 	{
-		a, b := "alpha/demo", "beta/demo"
-		check(a != b, "namespace key")
+		key := func(m Metadata) string { return m.Namespace + "/" + m.Name }
+		a := Metadata{Name: "demo", Namespace: "alpha"}
+		b := Metadata{Name: "demo", Namespace: "beta"}
+		check(key(a) == "alpha/demo" && key(a) != key(b), "namespace key")
 	}
 
 	// Treat versions as opaque
 	{
-		m := Metadata{Version: "opaque-v7"}
-		check(m.Version == "opaque-v7", "opaque version")
+		var a, b Metadata
+		errA := json.Unmarshal([]byte(`{"resourceVersion":"10"}`), &a)
+		errB := json.Unmarshal([]byte(`{"resourceVersion":"9"}`), &b)
+		check(errA == nil && errB == nil, "decode")
+		check(a.Version == "10" && a.Version != b.Version && a.Version < b.Version, "opaque version")
 	}
 
 	// Transfer readiness reasoning
 	{
-		wanted := 3
-		check(wanted == 3 && 3 == wanted, "ready")
-		check(2 != wanted, "not ready")
+		complete := func(d Deployment) bool { return d.Spec.Replicas != nil && d.Status.Ready == *d.Spec.Replicas }
+		want := 3
+		var d Deployment
+		d.Spec.Replicas = &want
+		d.Status.Ready = 3
+		check(complete(d), "ready")
+		d.Status.Ready = 2
+		check(!complete(d), "not ready")
 	}
 	fmt.Println("All lesson checks passed.")
 }

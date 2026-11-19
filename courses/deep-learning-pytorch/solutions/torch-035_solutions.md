@@ -18,7 +18,7 @@ PyTorch generators provide a local reproducible random stream for this calculati
 
 ## Reading the implementation
 
-Align prediction dictionaries by stable IDs and check equal keysets. Calculate squared-error A minus squared-errorB for each ID. Sample indices with torch.rand int and an explicit Generator, then index the paired difference vector. Use the same resampling unit for both systems by resampling the already-paired values. Report independent count and selection history beside the estimate.
+Align prediction dictionaries by stable IDs and check equal keysets. Calculate squared error A minus squared error B for each ID. Sample indices with torch.randint and an explicit Generator, then index the paired difference vector. Use the same resampling unit for both systems by resampling the already-paired values. Report independent count and selection history beside the estimate.
 
 ## Derive the paired contrast and the finite bootstrap law
 
@@ -36,7 +36,7 @@ Pairing preserves shared case difficulty. In general, \(\operatorname{Var}(\ell_
 
 A separate analytic example makes the dependence visible. Suppose two cases have losses A=[1, 11] and B=[0, 10]. Every paired difference is one, so every paired resampled mean is one. Independent resampling can pair the easy A loss with the hard B loss or vice versa and create variation that was absent from the paired contrast. This explains the method without claiming that the original three-case code exercised that different fixture.
 
-For the actual differences[-1, 0, -1], an empirical draw has probability \(\frac{2}{3}\) of-1 and \(\frac{1}{3}\) of zero. Each bootstrap estimate averages three independent draws from that empirical distribution. Let K count the selected-1 values; then K has a Binomial(3, \(\frac{2}{3}\)) law and the estimate is-K/3:
+For the actual differences [-1, 0, -1], an empirical draw has probability \(\frac{2}{3}\) of -1 and \(\frac{1}{3}\) of zero. Each bootstrap estimate averages three independent draws from that empirical distribution. Let K count the selected-1 values; then K has a Binomial(3, \(\frac{2}{3}\)) law and the estimate is -K/3:
 
 | Resampled mean | Exact empirical probability |
 | --- | --- |
@@ -57,62 +57,58 @@ This resampling holds the fitted prediction vectors fixed. It does not include v
 
 Finally, a negative point estimate is not a complete release decision. Record effect size, uncertainty, assessment coverage, severe failures and operating costs under their own evidence. The tiny fixture teaches pairing and resampling mechanics while making its limited independent sample size explicit.
 
-## Exercise 1: Align predictions by ID
+## Exercise 1: Align a new pair of models
 
-The question is: Use truth a0, b1, c2 with A0, 2, 2 and B 1, 2, 3 in different dictionary order.
+The question is: Use truth x=1, y=2 with model A predictions x=1, y=4 and model B predictions y=2, x=0 in different dictionary order.
 
-Dictionary insertion order is not an identity join. The contrast must keep each prediction attached to its own target.
+Sorting identities before pairing keeps each difference on one record.
 
 ```python
-truth = {"a": 0.0, "b": 1.0, "c": 2.0}
-a = {"a": 0.0, "b": 2.0, "c": 2.0}
-b = {"c": 3.0, "a": 1.0, "b": 2.0}
-ids = sorted(truth)
-difference = torch.tensor(
-    [(a[i] - truth[i]) ** 2 - (b[i] - truth[i]) ** 2 for i in ids], dtype=torch.float64
+truth2 = {"x": 1.0, "y": 2.0}
+model_a = {"x": 1.0, "y": 4.0}
+model_b = {"y": 2.0, "x": 0.0}
+keys = sorted(truth2)
+paired = torch.tensor(
+    [(model_a[k] - truth2[k]) ** 2 - (model_b[k] - truth2[k]) ** 2 for k in keys],
+    dtype=torch.float64,
 )
-assert difference.tolist() == [-1.0, 0.0, -1.0]
+assert paired.tolist() == [-1.0, 4.0]
 ```
 
-**Expected:** paired squared-loss differences-1, 0, -1.
+**Expected:** paired squared-loss differences A minus B: [-1, 4].
 
-**Verify:** Compare the computed values or written argument with paired squared-loss differences-1, 0, -1.
+**Verify:** In a fresh process, the exercise checks confirm `paired.tolist() == [-1.0, 4.0]`.
 
-## Exercise 2: Interpret the average contrast
+## Exercise 2: Interpret the new mean contrast
 
-The question is: Average the three paired differences.
+The question is: Average the two paired differences and state which model the fixture favors.
 
-The sign follows the declared A-minus-Blossorder. A negative value favors A only for this metric and assessment set.
+A positive mean of A minus B losses means A has the larger loss.
 
 ```python
-np.testing.assert_allclose(difference.mean().item(), -2 / 3, atol=1e-12, rtol=0)
+assert paired.mean().item() == 1.5
 ```
 
-**Expected:** mean \(\frac{-2}{3}\), favoring A on this loss fixture.
+**Expected:** mean 1.5, favoring model B on this loss.
 
-**Verify:** Compare the computed values or written argument with mean \(\frac{-2}{3}\), favoring A on this loss fixture.
+**Verify:** In a fresh process, the exercise checks confirm `paired.mean().item() == 1.5`.
 
-## Exercise 3: Resample pairs reproducibly
+## Exercise 3: Bound the new bootstrap means
 
-The question is: Draw 1000 three-index bootstrap samples with local Generator seed 7.
+The question is: Draw 500 two-index bootstrap samples with Generator seed 11 and inspect the possible means.
 
-The known range of per-record differences bounds every resampled mean. That independent bound can expose an indexing or reduction error.
+With two differences, a resample of size two can only average two copies of one value or one of each.
 
 ```python
-generator = torch.Generator().manual_seed(7)
-indices = torch.randint(0, 3, (1000, 3), generator=generator)
-estimates = difference[indices].mean(1)
-assert (
-    tuple(estimates.shape) == (1000,)
-    and torch.isfinite(estimates).all()
-    and estimates.min() >= -1
-    and estimates.max() <= 0
-)
+gen = torch.Generator().manual_seed(11)
+draws = torch.randint(0, 2, (500, 2), generator=gen)
+boot = paired[draws].mean(1)
+assert set(boot.tolist()) <= {-1.0, 1.5, 4.0} and boot.min() >= -1 and boot.max() <= 4
 ```
 
-**Expected:** 1000finite estimates within-1..0.
+**Expected:** every mean is -1, 1.5 or 4.
 
-**Verify:** Compare the computed values or written argument with 1000finite estimates within-1..0.
+**Verify:** In a fresh process, the exercise checks confirm `set(boot.tolist()) <= {-1.0, 1.5, 4.0}`; `boot.min() >= -1` and `boot.max() <= 4`.
 
 ## Exercise 4: Replay the local random stream
 
@@ -127,7 +123,7 @@ assert torch.equal(indices, again)
 
 **Expected:** exact match.
 
-**Verify:** Compare the computed values or written argument with exact match.
+**Verify:** In a fresh process, the exercise checks confirm `torch.equal(indices, again)`.
 
 ## Exercise 5: Reject missing assessment identities
 
@@ -142,7 +138,7 @@ assert set(missing) != set(truth)
 
 **Expected:** mismatch detected before comparison.
 
-**Verify:** Compare the computed values or written argument with mismatch detected before comparison.
+**Verify:** In a fresh process, the exercise checks confirm `set(missing) != set(truth)`.
 
 ## Exercise 6: Preserve a final-test boundary
 
@@ -158,7 +154,7 @@ assert ("choose", "test")[1] != "validation"
 
 **Expected:** test selection violates the declared boundary.
 
-**Verify:** Compare the computed values or written argument with test selection violates the declared boundary.
+**Verify:** In a fresh process, the exercise checks confirm `all((partition == 'validation' for action, partition in ledger if action == 'choose'))` and `('choose', 'test')[1] != 'validation'`.
 
 ## Review after comparison
 

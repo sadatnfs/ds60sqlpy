@@ -24,6 +24,8 @@ The default lessons use tiny literal offline fixtures and bounded CPU computatio
 
 For a subject assistant, retrieval or fine-tuning project, continue into [Applied LLM systems](../llm-applied/README.md). That route develops corpus provenance, chunking, lexical/hybrid retrieval, access boundaries, grounded citations, abstention, evaluation, actual tiny-model adaptation and an explicitly optional pretrained recipe. [NLP foundations](../nlp/README.md) supplies additional text and classical retrieval methods. The dedicated [PyTorch](../deep-learning-pytorch/README.md) and [TensorFlow](../deep-learning-tensorflow/README.md) journeys cover their frameworks broadly.
 
+For evaluation and alignment beyond chapters 027, 033 and 040, continue into [LLM evaluation and alignment](../llm-evaluation/README.md). It develops evaluation contracts, annotation agreement, paired and clustered uncertainty, judge calibration, reward models, DPO, PPO with generalized advantage estimation, GRPO and off-policy evaluation with explicit numerical checks. Actual GPU execution belongs to the [CUDA route](../cuda/README.md).
+
 ## Complete chapter index
 
 ### Probability, tokens and attention

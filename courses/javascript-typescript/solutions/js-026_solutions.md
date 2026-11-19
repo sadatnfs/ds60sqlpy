@@ -22,11 +22,13 @@ Composition supplies a collaborator through a small interface, such as a clock. 
 
 A constructor establishes initial state. #balance names a runtime private field, while the cents getter exposes a primitive observation. implements would check an interface without generating methods. Constructor parameter properties create fields as part of TypeScript emission. A readonly dependency reference prevents reassignment through that class; it does not guarantee the collaborator itself is immutable. Validate derived results before committing a state transition.
 
-## Exercise 1: Maintain balance through methods
+## Exercise 1: Maintain balance through methods: change one input
 
-Task: Start with 100 cents, deposit 50 and withdraw 30.
+Task: Copy Example A into a scratch `main.mts` and change `const wallet = new Wallet(100);` to `const wallet = new Wallet(101);`. Before running it, predict which check fails and which value it now sees; then run it and restore the original line.
 
 The public API exposes observations and controlled mutations. A caller cannot directly assign the private field by an ordinary property name.
+
+The unchanged code is the exercise block of Example A:
 
 ```typescript
 const wallet = new Wallet(100);
@@ -37,24 +39,26 @@ assert.equal(Object.hasOwn(wallet, 'balance'), false);
 assert.deepEqual(Object.keys(wallet), []);
 ```
 
-**Expected:** balance 120; no enumerable balance field.
+**Expected:** The changed run fails with an `AssertionError` at the check `assert.equal(wallet.cents, 120)`. Restoring the original line brings back the worked observation: balance 120; no enumerable balance field.
 
-**Verify:** Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.
+**Verify:** Compare your written prediction with the reported `AssertionError`, including its actual and expected values, and name the value that made `assert.equal(wallet.cents, 120)` fail. After restoring the line, the program prints its `{"checks":1,"status":"passed"}` receipt again.
 
-## Exercise 2: Inject a deterministic clock
+## Exercise 2: Inject a deterministic clock: debug a regression
 
-Task: Create a receipt service using a fixed clock.
+Task: A regression changed one token in Example B, so one line now reads `const service = new ReceiptService({ now: () => new Date('2027-01-01T00:00:00.000Z') });`. Run Example B with that line, use the failing check to locate the defect and repair it without changing the check.
 
 The time dependency is explicit and replaceable. The test does not mutate global time or rely on a fragile elapsed-time tolerance.
+
+The unchanged code is the exercise block of Example B:
 
 ```typescript
 const service = new ReceiptService({ now: () => new Date('2026-01-01T00:00:00.000Z') });
 assert.deepEqual(service.create('A'), { id: 'A', createdAt: '2026-01-01T00:00:00.000Z' });
 ```
 
-**Expected:** timestamp 2026-01-01T00:00:00.000Z.
+**Expected:** Before the repair the run fails with an `AssertionError` at the check `assert.deepEqual(service.create('A'), { id: 'A', createdAt: '2026-01-01T00:00:00.000Z' })`; after it the line reads `const service = new ReceiptService({ now: () => new Date('2026-01-01T00:00:00.000Z') });` again and timestamp 2026-01-01T00:00:00.000Z.
 
-**Verify:** Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.
+**Verify:** Keep the failing and the repaired runs. Explain why the changed token alters the value tested by `assert.deepEqual(service.create('A'), { id: 'A', createdAt: '2026-01-01T00:00:00.000Z' })` for this input.
 
 ## Exercise 3: Reject invalid transitions without mutation
 
@@ -71,7 +75,7 @@ assert.equal(wallet.cents, 100);
 
 **Expected:** both throw; balance stays 100.
 
-**Verify:** Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.
+**Verify:** Keep a check equivalent to `assert.throws(() => wallet.withdraw(101), RangeError)`. As a control, change `const wallet = new Wallet(100);` to `const wallet = new Wallet(101);`: the run must fail with an `AssertionError` at that check. Restore the line before continuing.
 
 ## Exercise 4: Guard derived overflow
 
@@ -87,7 +91,7 @@ assert.equal(wallet.cents, Number.MAX_SAFE_INTEGER);
 
 **Expected:** RangeError; original balance preserved.
 
-**Verify:** Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.
+**Verify:** Keep a check equivalent to `assert.equal(wallet.cents, Number.MAX_SAFE_INTEGER)` and confirm that the reference still passes. Then name an input that would make it fail and explain which value changes.
 
 ## Exercise 5: Reject an incompatible collaborator
 
@@ -109,7 +113,7 @@ assert.equal(
 
 **Expected:** expected compiler error; valid Date clock works.
 
-**Verify:** Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.
+**Verify:** Keep a check equivalent to `assert.equal(new ReceiptService({ now: () => new Date(0) }).create('B').createdAt, '1970-01-01T00:00:00.000Z')`. As a control, change `new ReceiptService({ now: () => new Date(0) }).create('B').createdAt,` to `new ReceiptService({ now: () => new Date(1) }).create('B').createdAt,` inside it: the run must fail with an `AssertionError`, which shows the check can fail. Restore it.
 
 ## Exercise 6: Distinguish private storage from a lookalike property
 
@@ -126,7 +130,7 @@ assert.equal(wallet.cents, 2);
 
 **Expected:** ordinary property 999; private cents remain 2.
 
-**Verify:** Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.
+**Verify:** Keep a check equivalent to `assert.equal(wallet.cents, 2)`. As a control, change `const wallet = new Wallet(2);` to `const wallet = new Wallet(3);`: the run must fail with an `AssertionError` at that check. Restore the line before continuing.
 
 ## After comparison
 

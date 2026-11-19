@@ -6,11 +6,17 @@ Beginner; approximately 120 minutes. Direct prerequisites: `torch-005`. The prer
 
 ## Learning objectives
 
-Autograd follows the chain of tensor operations from a scalar objective back to its inputs. The central investigation is concrete: Use \(w=1\), \(z=2\cdot w\), \(a=z\cdot z\) and \(\mathrm{loss}={\left(a-1\right)}^{2}\). The finish condition is z2, a4, loss 9, gradient 48. at new \(w=1.5\), gradient -1 for \({\left(w-2\right)}^{2}\). A useful explanation connects the calculation to the reason it is needed, rather than treating a function name as a definition.
+Trace a chain-rule derivative through an autograd graph and recognize the two in-place mutations that autograd refuses.
+
+Central investigation: Backpropagate loss = (a-1)**2 with a = z*z and z = 2w at w = 1, check it numerically and mutate a leaf and a saved tensor.
+
+Finish condition: The trace gives z = 2, a = 4, loss 9 and gradient 48, a central difference agrees within 1e-5, and both the leaf mutation and the saved-tensor mutation raise RuntimeError.
+
+The worked examples demonstrate the mechanism; exercises 1-3 transfer it to new inputs and exercises 4-6 extend it to failures and boundary cases. A useful explanation connects the calculation to the reason it is needed, rather than treating a function name as a definition.
 
 ## Purpose and mental model
 
-Autograd follows the chain of tensor operations from a scalar objective back to its inputs. Forz=2w, \(a={z}^{2}\), \(\mathrm{loss}={\left(a-1\right)}^{2}\), the derivative multiplies the local sensitivities along that chain. PyTorch builds the graph dynamically during the forward pass and saves values needed for backward. An in-place mutation can invalidate those saved values, so the framework uses version checks and restricts some mutations. A failure is a signal to understand ownership and graph lifetime, not a reason to bypass checks with.data.
+Autograd follows the chain of tensor operations from a scalar objective back to its inputs. Forz=2w, \(a={z}^{2}\), \(\mathrm{loss}={\left(a-1\right)}^{2}\), the derivative multiplies the local sensitivities along that chain. PyTorch builds the graph dynamically during the forward pass and saves values needed for backward. An in-place mutation can invalidate those saved values, so the framework uses version checks and restricts some mutations. A failure is a signal to understand ownership and graph lifetime, not a reason to bypass checks with .data.
 
 Graph state is also temporary. After a normal backward pass, the saved intermediates are released; reusing the same graph for another backward usually requires an explicit retention policy or a fresh forward computation. Most training loops should recompute the forward graph per batch. Nonlinearities such as ReLU introduce points where a derivative convention matters.
 
@@ -66,7 +72,7 @@ Using no_grad around the mutation prevents recording that new operation. It does
 
 After a normal derivative computation, saved intermediates can be released. Keeping a reference to loss does not promise another backward pass can reconstruct those released values. Repeated training usually needs a new forward pass, whereas an algorithm intentionally querying multiple derivatives can request graph retention and accept its memory cost. Do not confuse retaining a graph with accumulating gradients across distinct fresh graphs.
 
-ReLU adds a separate mathematical boundary. At a negative input the derivative is zero; at a positive input it is one. At zero there is no unique classical derivative, and PyTorch chooses zero for backward. The numerical convention is not a graph-disconnection error. It should be recorded explicitly when designing derivative tests rather than judged against a symmetric probe's0.5 as if both were the same object.
+ReLU adds a separate mathematical boundary. At a negative input the derivative is zero; at a positive input it is one. At zero there is no unique classical derivative, and PyTorch chooses zero for backward. The numerical convention is not a graph-disconnection error. It should be recorded explicitly when designing derivative tests rather than judged against a symmetric probe's 0.5 as if both were the same object.
 
 ## Worked example / walkthrough
 
@@ -88,7 +94,7 @@ gradient = torch.autograd.grad(loss, w)[0]
 assert (z.item(), a.item(), loss.item(), gradient.item()) == (2.0, 4.0, 9.0, 48.0)
 ```
 
-**Expected:** z2, a4, loss 9, gradient 48.
+**Expected:** z = 2, a = 4, loss 9, gradient 48.
 
 ### Example B: Check an independent slope
 
@@ -121,33 +127,33 @@ else:
 
 ## Prediction before your attempt
 
-For the supplied fixture, name the input unit, the intermediate state and the final quantity that changes. Predict one normal result and one failure result before touching the code. In particular, explain this lesson's acceptance condition in your own words: z2, a4, loss 9, gradient 48. at new \(w=1.5\), gradient -1 for \({\left(w-2\right)}^{2}\). Preserve the prediction beside your later observations so a correction is visible. A copied expected value is not a derivation.
+For the supplied fixture, name the input unit, the intermediate state and the final quantity that changes. Predict one normal result and one failure result before touching the code. In particular, explain this lesson's acceptance condition in your own words: The trace gives z = 2, a = 4, loss 9 and gradient 48, a central difference agrees within 1e-5, and both the leaf mutation and the saved-tensor mutation raise RuntimeError. Preserve the prediction beside your later observations so a correction is visible. A copied expected value is not a derivation.
 
 ## Exercises
 
-1. **Trace the chain rule.** Use \(w=1\), \(z=2\cdot w\), \(a=z\cdot z\) and \(\mathrm{loss}={\left(a-1\right)}^{2}\).
-   **Expected:** z2, a4, loss 9, gradient 48.
-   **Verify:** Save the assertion results for exercise 1, including z2, a4, loss 9, gradient 48.
+1. **Trace the chain at a new point.** Use w=2, \(z=2\cdot w\), \(a=z\cdot z\) and \(\mathrm{loss}={\left(a-1\right)}^{2}\), and predict each intermediate value and dloss/dw.
+   **Expected:** z = 4, a = 16, loss 225, gradient 480.
+   **Verify:** In a fresh process, the exercise checks confirm `(z2.item(), a2.item(), loss2.item()) == (4.0, 16.0, 225.0)` and `torch.autograd.grad(loss2, w2)[0].item() == 480`.
 
-2. **Check an independent slope.** Compare the chain derivative with a central difference of the complete scalar expression.
-   **Expected:** approximately 48 within 1e-5.
-   **Verify:** Save the assertion results for exercise 2, including approximately 48 within 1e-5.
+2. **Check the new slope numerically.** Compare 480 with a central difference of ((2w)**2-1)**2 at w=2 using h=1e-5.
+   **Expected:** the central difference agrees with 480 within 1e-6.
+   **Verify:** In a fresh process, the exercise checks confirm `(quartic(2 + step) - quartic(2 - step)) / (2 * step)` matches `480` within 1e-06.
 
-3. **Observe a leaf mutation guard.** Try an in-place add on a leaf requiring gradients outside no_grad.
-   **Expected:** RuntimeError.
-   **Verify:** Save the assertion results for exercise 3, including RuntimeError.
+3. **Update a leaf under no_grad.** Repeat the in-place add on a leaf that requires gradients, but inside torch.no_grad().
+   **Expected:** the update succeeds; the value is 2 and the tensor is still a leaf that requires gradients.
+   **Verify:** In a fresh process, the exercise checks confirm `guarded.item() == 2`, `guarded.requires_grad` and `guarded.is_leaf`.
 
 4. **Expose saved-value invalidation.** Build \(\mathrm{loss}=x\cdot x\), mutate x under no_grad before backward, and inspect the failure.
    **Expected:** RuntimeError from a changed saved tensor version.
-   **Verify:** Save the assertion results for exercise 4, including RuntimeError from a changed saved tensor version.
+   **Verify:** In a fresh process, the exercise checks confirm `objective.backward()` raises `RuntimeError`.
 
 5. **Inspect a ReLU convention.** Differentiate ReLU at negative, zero and positive inputs.
    **Expected:** gradients 0, 0, 1.
-   **Verify:** Save the assertion results for exercise 5, including gradients 0, 0, 1.
+   **Verify:** In a fresh process, the exercise checks confirm `points.grad` matches `torch.tensor([0.0, 0.0, 1.0])`.
 
 6. **Recompute after an update.** Update a scalar under no_grad, then build a fresh quadratic objective and request its derivative.
    **Expected:** at new \(w=1.5\), gradient -1 for \({\left(w-2\right)}^{2}\).
-   **Verify:** Save the assertion results for exercise 6, including at new \(w=1.5\), gradient -1 for \({\left(w-2\right)}^{2}\).
+   **Verify:** In a fresh process, the exercise checks confirm `torch.autograd.grad(fresh, parameter)[0].item() == -1`.
 
 ## Common pitfalls and diagnosis
 
@@ -161,7 +167,7 @@ First draw the state described in the vocabulary section. Next use the smallest 
 
 ## Self-check and retrieval
 
-Close both worked examples. Explain Autograd graph, Saved tensor, In-place hazard using the lesson fixture. Reconstruct one computation from its inputs. Then change one input while retaining the mechanism and predict whether the conclusion survives. Write which part is guaranteed by the code and which part would need new observations. This last distinction prevents a tiny deterministic teaching example from being presented as evidence about an unseen population or a production model.
+Close all three worked examples. Explain Autograd graph, Saved tensor, In-place hazard using the lesson fixture. Reconstruct one computation from its inputs. Then change one input while retaining the mechanism and predict whether the conclusion survives. Write which part is guaranteed by the code and which part would need new observations. This last distinction prevents a tiny deterministic teaching example from being presented as evidence about an unseen population or a production model.
 
 ## Next step
 
@@ -169,7 +175,7 @@ Revisit the direct prerequisite `torch-005` if the calculation cannot be reconst
 
 ## Sources and verification status
 
-API and mechanism reference: [PyTorch2.9 autograd](https://docs.pytorch.org/docs/2.9/autograd.html), reviewed 2026-10-22. The fixture, examples, counterexamples and exercise design are original course material. See [validation](../../../docs/validation.md) for execution gates. Check CI artifacts for the exact revision and platform to determine which runtime checks actually ran; authored content alone does not establish runtime execution.
+API and mechanism reference: [PyTorch 2.9 autograd](https://docs.pytorch.org/docs/2.9/autograd.html), reviewed 2026-10-22. The fixture, examples, counterexamples and exercise design are original course material. See [validation](../../../docs/validation.md) for execution gates. Check CI artifacts for the exact revision and platform to determine which runtime checks actually ran; authored content alone does not establish runtime execution.
 
 ## Interview reasoning with worked answers
 
@@ -177,7 +183,7 @@ API and mechanism reference: [PyTorch2.9 autograd](https://docs.pytorch.org/docs
 
 No. It stops recording new operations, but a mutation can still invalidate values saved by an earlier graph. Update only at a deliberate boundary and recompute the forward pass.
 
-**Why avoid.data as a workaround?**
+**Why avoid .data as a workaround?**
 
 It can bypass useful autograd safeguards and create silently incorrect derivatives. Understand the graph and use documented no_grad, detach and clone semantics instead.
 

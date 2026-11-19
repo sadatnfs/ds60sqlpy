@@ -2,11 +2,11 @@
 
 ## Level and prerequisites
 
-Advanced, approximately 120 minutes. Prerequisites: `rust-047`
+Advanced, approximately 180 minutes. Prerequisites: `rust-047`
 
 ## Learning objectives
 
-Build a multi-column RecordBatch report and round-trip it through IPC. Then deliver a project README with schema, ownership, bounds, failure policies, actual runtime evidence and one independent Arrow extension.
+Build a validated Arrow report with honest accounting and round-trip it through IPC. The central exercise is task 3: Build a multi-column RecordBatch report and round-trip it through IPC.
 
 ## Purpose and mental model
 
@@ -98,7 +98,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
 6. **Transfer and justify.** Deliver a project README with schema, ownership, bounds, failure policies, actual runtime evidence and one independent Arrow extension.
 
-For each task, keep a short evidence table: input or initial state, prediction, observed value or diagnostic, and the rule that explains it. The guided examples establish mechanisms; the independent and transfer tasks require your own representation and explanation. Use the separate solution after attempting the task, then close it and reconstruct one boundary case.
+For each task, keep a short evidence table: input or initial state, prediction, observed value or diagnostic, and the rule that explains it. The guided examples establish mechanisms; the independent and transfer tasks require your own representation and explanation. The separate explanation gives an executed reference answer where one has been written and says plainly where none exists yet. Open it only after your own attempt, then close it and reconstruct one boundary case.
 
 ## Common pitfalls and diagnosis
 
@@ -108,9 +108,9 @@ A useful regression case distinguishes the intended rule from the tempting wrong
 
 ## Progressive hints
 
-1. Name the input, output and invariant using the vocabulary above. Reproduce Example A before changing two things at once.
-2. Compare the changed condition in Example B. Identify the first line whose behavior differs and state why.
-3. Reduce your independent task to a normal case, an empty or boundary case, and an invalid case. Write expected observations before inspecting the reference.
+1. Reproduce Example A (Summarize a nullable measurement column) before changing anything, and confirm its observation: Three valid nonnegative values total five, alongside one null and one rejected negative.
+2. Compare Example B (Keep empty and all-null data distinct) with Example A and name the first line whose behavior differs. Its observation is: No submitted rows and two missing observations remain different reports.
+3. Before opening the explanation, test your task 3 attempt against this lesson's main pitfall: A passing kernel does not prove external storage, authentication or every architecture.
 
 ## Self-check and next step
 
@@ -118,7 +118,7 @@ Explain Analytical contract, Acceptance evidence, Extension boundary without rea
 
 ## Sources and execution boundary
 
-[Official language or framework documentation](https://docs.rs/arrow/60.0.0/arrow/). The prose, small fixtures and task designs in this chapter are original. Documentation links provide additional API detail, not a dependency fetched by the classroom. Runtime qualification is recorded separately by the repository validation workflow. Reading a guide, compiling a reference, running its assertions and completing an external project are distinct achievements.
+[Official language or framework documentation](https://docs.rs/arrow/60.0.0/arrow/). The prose, small fixtures and task designs in this chapter are original. Documentation links provide additional API detail, not a dependency fetched by the classroom. Reading a guide, compiling a reference, running its assertions and completing an external project are distinct achievements.
 
 ## Ask an AI tutor about this lesson
 

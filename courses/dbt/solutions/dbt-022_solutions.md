@@ -27,6 +27,20 @@ Retain a bounded source/result record in an owned environment. It helps prove wh
 
 Keep the same fixture and oracle while applying the correction. A new unrelated dataset would make the before/after comparison less informative.
 
+```python
+# Uses the tempfile import and the project(), invoke() and rows() helpers in main.py.
+with tempfile.TemporaryDirectory() as d:
+    p = project(
+        d,
+        models={"total": "select sum(amount) as amount from {{ ref('orders') }}"},
+        seeds={"orders": "id,amount\n1,5\n2,7\n"},
+    )
+    (p / "tests").mkdir()
+    (p / "tests/reconcile.sql").write_text("select * from {{ ref('total') }} where amount != 12")
+    invoke(p, "build")
+    assert rows(p, "select amount from total") == [(12,)]
+```
+
 **Expected:** The independent total becomes 12 and the test passes.
 
 ## 5. Avoid a circular oracle
@@ -150,7 +164,7 @@ def example_two():
     with tempfile.TemporaryDirectory() as d:
         p = project(
             d,
-            models={"total": "select sum(amount)*2 as amount from {{ ref('orders') }}"},
+            models={"total": "select sum(amount) * 2 as amount from {{ ref('orders') }}"},
             seeds={"orders": "id,amount\n1,5\n2,7\n"},
         )
         (p / "tests").mkdir()
@@ -175,4 +189,4 @@ if __name__ == "__main__":
 
 ## Interpretation
 
-Diagnose failures using the layer that actually rejected the work. Preserve bounded before/after evidence and verify a focused correction with an independent oracle. Apply the same method to feature and model pipelines where an apparently healthy process can still produce an invalid product.
+Preserve bounded before/after evidence and verify a focused correction with an independent oracle. Apply the same method to feature and model pipelines where an apparently healthy process can still produce an invalid product.

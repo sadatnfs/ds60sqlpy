@@ -20,11 +20,13 @@ Destructuring reads properties into bindings, and spread copies enumerable own p
 
 Object.create(proto) sets a chosen prototype. The in operator checks inherited as well as own properties, while Object.hasOwn checks only own membership. Object.keys enumerates own enumerable string keys. Destructuring defaults apply to undefined values. Object.freeze prevents direct property changes on that object but does not recursively freeze nested objects.
 
-## Exercise 1: Distinguish own and inherited properties
+## Exercise 1: Distinguish own and inherited properties: predict an edited check
 
-Task: Create a child inheriting kind and owning name.
+Task: Copy Example A into a scratch `main.mjs` and change `assert.equal(Object.hasOwn(child, 'name'), true);` to `assert.equal(Object.hasOwn(child, 'name!'), true);` inside its check. Before running it, predict whether the check still passes and explain why; then restore it.
 
 Property lookup and record schema inspection answer different questions. Accepting inherited fields as request data can violate a boundary contract.
+
+The unchanged code is the exercise block of Example A:
 
 ```javascript
 const parent = { kind: 'record' };
@@ -35,15 +37,17 @@ assert.equal(Object.hasOwn(child, 'kind'), false);
 assert.equal(Object.hasOwn(child, 'name'), true);
 ```
 
-**Expected:** kind found by in but not hasOwn; name is own.
+**Expected:** The changed run fails with an `AssertionError` at the check `assert.equal(Object.hasOwn(child, 'name'), true)`. Restoring the original line brings back the worked observation: kind found by in but not hasOwn; name is own.
 
-**Verify:** Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.
+**Verify:** Compare your written prediction with the reported `AssertionError`, including its actual and expected values, and explain why the edited check rejects the values that `assert.equal(Object.hasOwn(child, 'name'), true)` accepts. After restoring the line, the program prints its `{"checks":1,"status":"passed"}` receipt again.
 
-## Exercise 2: Copy only own enumerable fields
+## Exercise 2: Copy only own enumerable fields: diagnose an edited check
 
-Task: Spread the child into a plain record and inspect keys.
+Task: A careless edit changed a check in Example B so that it reads `assert.deepEqual(Object.keys(copy), ['name!']);`. Run Example B with that line, explain why the edited check now fails for the same program state, and restore it.
 
 Spread does not reproduce the prototype chain. It copies the declared enumerable own surface, which still may contain mutable nested references.
+
+The unchanged code is the exercise block of Example B:
 
 ```javascript
 const child = Object.create({ kind: 'record' });
@@ -53,9 +57,9 @@ assert.deepEqual(Object.keys(copy), ['name']);
 assert.equal(copy.kind, undefined);
 ```
 
-**Expected:** only name copied.
+**Expected:** Before the repair the run fails with an `AssertionError` at the check `assert.deepEqual(Object.keys(copy), ['name'])`; after it the line reads `assert.deepEqual(Object.keys(copy), ['name']);` again and only name copied.
 
-**Verify:** Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.
+**Verify:** Keep the failing and the repaired runs. Explain why the edited check rejects the same program state that `assert.deepEqual(Object.keys(copy), ['name'])` accepts.
 
 ## Exercise 3: Use destructuring defaults carefully
 
@@ -72,7 +76,7 @@ assert.equal(explicit, null);
 
 **Expected:** missing becomes 0; null remains null.
 
-**Verify:** Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.
+**Verify:** Keep a check equivalent to `assert.equal(absent, 0)`. As a control, change `const { count: absent = 0 } = {};` to `const { count: absent = 1 } = {};`: the run must fail with an `AssertionError` at that check. Restore the line before continuing.
 
 ## Exercise 4: Use a null-prototype dictionary for arbitrary keys
 
@@ -90,7 +94,7 @@ assert.equal(Object.hasOwn(dictionary, '__proto__'), true);
 
 **Expected:** own value preserved; prototype remains null.
 
-**Verify:** Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.
+**Verify:** Keep a check equivalent to `assert.equal(Object.hasOwn(dictionary, '__proto__'), true)`. As a control, change `assert.equal(Object.hasOwn(dictionary, '__proto__'), true);` to `assert.equal(Object.hasOwn(dictionary, '__proto__!'), true);` inside it: the run must fail with an `AssertionError`, which shows the check can fail. Restore it.
 
 ## Exercise 5: Expose shallow freeze
 
@@ -109,7 +113,7 @@ assert.equal(value.nested.count, 2);
 
 **Expected:** outer reassignment throws; inner value can change.
 
-**Verify:** Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.
+**Verify:** Keep a check equivalent to `assert.equal(value.nested.count, 2)`. As a control, change `value.nested.count = 2;` to `value.nested.count = 3;`: the run must fail with an `AssertionError` at that check. Restore the line before continuing.
 
 ## Exercise 6: Observe a getter side effect
 
@@ -132,7 +136,7 @@ assert.equal(calls, 2);
 
 **Expected:** values 1 then 2; getter executed twice.
 
-**Verify:** Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.
+**Verify:** Keep a check equivalent to `assert.equal(value.next, 1)`. As a control, change `calls += 1;` to `calls -= 1;`: the run must fail with an `AssertionError` at that check. Restore the line before continuing.
 
 ## After comparison
 

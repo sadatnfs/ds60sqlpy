@@ -6,7 +6,7 @@ Beginner, approximately 90 minutes. Direct prerequisites: `java-006`
 
 ## Learning objectives
 
-Explain instance, encapsulation, invariant using a concrete program. Trace the normal execution, identify its boundary assumptions and make a failure case observable. The first investigation is Construct accounts with 100 and 100 cents,deposit 50 into the first. The final exercise transfers the mechanism to protect against overflow.
+Encapsulate state in a class whose methods reject invalid input and leave the object unchanged on failure. Along the way, explain instance, encapsulation, invariant using a concrete program. Trace the normal execution, identify its boundary assumptions and make a failure case observable. Exercises 1 and 2 start from the worked examples; the authored investigations begin with this task: Attempt to withdraw 111 from balance 110. The final exercise transfers the mechanism to protect against overflow.
 
 ## Purpose and mental model
 
@@ -43,7 +43,7 @@ private fields are accessed by methods inside the class. this denotes the curren
 
 ### Example A: Create independent accounts
 
-Equal initial values do not mean shared identity. Eachnew expression creates a separate object whose field can evolve independently.
+Equal initial values do not mean shared identity. Each new expression creates a separate object whose field can evolve independently.
 
 ```java
 import java.util.*;
@@ -130,7 +130,7 @@ public class Main {
 }
 ```
 
-**Expected:** balance110.
+**Expected:** balance 110.
 
 ## Prediction before your attempt
 
@@ -138,29 +138,29 @@ Read the source from the entry point and name each value before executing it. Id
 
 ## Exercises
 
-1. **Create independent accounts.** Construct accounts with 100 and 100 cents,deposit 50 into the first.
-   **Expected:** balances 150 and 100.
-   **Verify:** Compare your assertion values or captured diagnostic with balances 150 and 100.
+1. **Create independent accounts: change one input.** Copy Example A into a scratch `Main.java` and change `Account first = new Account(100);` to `Account first = new Account(101);`. Before running it with `java -ea Main`, predict which assertion fails and which value it now sees; then run it and restore the original line.
+   **Expected:** The changed run fails with an `AssertionError` from the assertion on `first.balance() == 150 && second.balance() == 100`. Restoring the original line brings back the worked observation: balances 150 and 100.
+   **Verify:** Compare your written prediction with the reported `AssertionError` and its stack-trace line, and name the value that made `first.balance() == 150 && second.balance() == 100` false. After restoring the line, the program completes without an `AssertionError` again.
 
-2. **Withdraw within the contract.** Withdraw40 cents from the first account.
-   **Expected:** balance110.
-   **Verify:** Compare your assertion values or captured diagnostic with balance110.
+2. **Withdraw within the contract: debug a regression.** A regression changed one token in the code that Example B adds after Example A, so one line now reads `first.withdraw(41);`. Run Example B with that line, use the failing assertion to locate the defect and repair it without changing the assertion.
+   **Expected:** Before the repair the run fails with an `AssertionError` from the assertion on `first.balance() == 110`; after it the line reads `first.withdraw(40);` again and balance 110.
+   **Verify:** Keep the failing and the repaired runs. Explain why the changed token alters the value tested by `first.balance() == 110` for this input.
 
-3. **Reject overdraft atomically.** Attempt to withdraw111 from balance110.
-   **Expected:** IllegalArgumentException;balance still110.
-   **Verify:** Compare your assertion values or captured diagnostic with IllegalArgumentException;balance still110.
+3. **Reject overdraft atomically.** Attempt to withdraw 111 from balance 110.
+   **Expected:** IllegalArgumentException; balance still 110.
+   **Verify:** Keep an assertion equivalent to `overdraft && first.balance() == 110`. As a control, change `overdraft = true;` to `overdraft = false;`: the run must fail with an `AssertionError` from the assertion on `overdraft && first.balance() == 110`. Restore the line before continuing.
 
-4. **Reject negative input.** Attempt a deposit of-1.
-   **Expected:** IllegalArgumentException;balance unchanged.
-   **Verify:** Compare your assertion values or captured diagnostic with IllegalArgumentException;balance unchanged.
+4. **Reject negative input.** Attempt a deposit of -1.
+   **Expected:** IllegalArgumentException; balance unchanged.
+   **Verify:** Keep an assertion equivalent to `negative && first.balance() == 110`. As a control, change `negative = true;` to `negative = false;`: the run must fail with an `AssertionError` from the assertion on `negative && first.balance() == 110`. Restore the line before continuing.
 
-5. **Reject invalid construction.** Construct an account with-1 cents.
-   **Expected:** constructor throwsIllegalArgumentException.
-   **Verify:** Compare your assertion values or captured diagnostic with constructor throwsIllegalArgumentException.
+5. **Reject invalid construction.** Construct an account with -1 cents.
+   **Expected:** constructor throws IllegalArgumentException.
+   **Verify:** Keep an assertion equivalent to `invalidStart`. As a control, change `invalidStart = true;` to `invalidStart = false;`: the run must fail with an `AssertionError` from the assertion on `invalidStart`. Restore the line before continuing.
 
-6. **Protect against overflow.** Create an account atInteger.MAX_VALUE and deposit1.
-   **Expected:** ArithmeticException;original maximum balance preserved.
-   **Verify:** Compare your assertion values or captured diagnostic with ArithmeticException;original maximum balance preserved.
+6. **Protect against overflow.** Create an account at Integer.MAX_VALUE and deposit 1.
+   **Expected:** ArithmeticException; original maximum balance preserved.
+   **Verify:** Keep an assertion equivalent to `overflow && full.balance() == Integer.MAX_VALUE`. As a control, change `overflow = true;` to `overflow = false;`: the run must fail with an `AssertionError` from the assertion on `overflow && full.balance() == Integer.MAX_VALUE`. Restore the line before continuing.
 
 ## Common pitfalls and diagnosis
 
@@ -170,7 +170,14 @@ Do not replace a precise exception with a catch-all that returns a plausible def
 
 ## Progressive hints
 
-First reconstruct the values and identities in the worked example. Next isolate the line that changes the result when one input is altered. Finally compare the normal and failure paths with the stated contract. Use a small table of input, expected value, actual value and exception type. Ask for one hint about the first incorrect assumption before requesting the entire reference implementation.
+Read one hint at a time and attempt the exercise again before reading the next. Keep a small table of input, expected value, actual value and exception type. Ask for one hint about the first incorrect assumption before requesting the entire reference implementation.
+
+- **Exercise 1:** First restate the expected observation: balances 150 and 100. Then list the values read by `first.balance() == 150 && second.balance() == 100` and trace each one from its declaration. Finally, compute the asserted value with `Account first = new Account(101);` in place before running.
+- **Exercise 2:** First restate the expected observation: balance 110. Then list the values read by `first.balance() == 110` and trace each one from its declaration. Finally, compare `first.withdraw(41);` with the same line in Example B and state the claim each version makes.
+- **Exercise 3:** First restate the expected observation: illegalArgumentException; balance still 110. Then list the values read by `overdraft && first.balance() == 110` and trace each one from its declaration. Finally, predict the effect of changing `overdraft = true;` to `overdraft = false;` before running anything.
+- **Exercise 4:** First restate the expected observation: illegalArgumentException; balance unchanged. Then list the values read by `negative && first.balance() == 110` and trace each one from its declaration. Finally, predict the effect of changing `negative = true;` to `negative = false;` before running anything.
+- **Exercise 5:** First restate the expected observation: constructor throws IllegalArgumentException. Then list the values read by `invalidStart` and trace each one from its declaration. Finally, predict the effect of changing `invalidStart = true;` to `invalidStart = false;` before running anything.
+- **Exercise 6:** First restate the expected observation: arithmeticException; original maximum balance preserved. Then list the values read by `overflow && full.balance() == Integer.MAX_VALUE` and trace each one from its declaration. Finally, predict the effect of changing `overflow = true;` to `overflow = false;` before running anything.
 
 ## Self-check and retrieval
 
@@ -182,7 +189,7 @@ Preserve the saved pad and the six exercise observations. Continue to the next l
 
 ## Sources and verification status
 
-[Official Java21 API or language reference](https://docs.oracle.com/en/java/javase/21/docs/api/index.html), reviewed2026-10-22. Examples and exercise fixtures are original course material. Use the [validation guide](../../../docs/validation.md) and CI artifacts for the exact revision and platform to inspect actual compile/run results. Authoring, parsing, compilation, execution and learner mastery are separate forms of evidence.
+[Official Java 21 API or language reference](https://docs.oracle.com/en/java/javase/21/docs/api/index.html), reviewed 2026-10-22. Examples and exercise fixtures are original course material. Use the [validation guide](../../../docs/validation.md) and CI artifacts for the exact revision and platform to inspect actual compile/run results. Authoring, parsing, compilation, execution and learner mastery are separate forms of evidence.
 
 ## Ask an AI tutor about this lesson
 
@@ -192,7 +199,7 @@ Read courses/java/guides/java-007.md and courses/java/lessons/java-007.java. Dir
 Explain the mechanism, ask for a prediction, review my attempt, give one hint,
 request compiler/runtime evidence, and ask a fresh retrieval question.
 Keep courses/java/solutions/ closed until I request comparison or show an attempt.
-Use Java21 and the declared offline fixture. Done when I can explain the state
+Use Java 21 and the declared offline fixture. Done when I can explain the state
 transitions, pass all six exercise contracts, diagnose one failure and solve a
 new boundary case without copying the solution.
 ```

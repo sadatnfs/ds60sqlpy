@@ -1,6 +1,6 @@
 # rust-026: explanation and comparison
 
-Attempt the six guide tasks before opening this comparison. The executable reference is [rust-026_solution.rs](rust-026_solution.rs). Its assertions are always active under the prepared classroom compile settings.
+Attempt the six guide tasks before opening this comparison. The executable reference is [rust-026_solution.rs](rust-026_solution.rs). It runs both worked examples and the reference answers below, and its assertions are always active under the prepared classroom compile settings.
 
 ## Why the two examples differ
 
@@ -8,21 +8,60 @@ Attempt the six guide tasks before opening this comparison. The executable refer
 
 **Distinguish first and duplicate insertion:** Membership is a domain decision that can guide duplicate rejection or deduplication. The set reports a duplicate without creating a second entry.
 
-## Reason through the six tasks
+## Task answers
 
-1. **Predict and explain.** State the grain and identity policy of each result.
+### Task 1: Predict and explain
 
-2. **Guided modification.** Change duplicate handling from counting to rejection.
+State the grain and identity policy of each result.
 
-3. **Independent construction.** Build a deterministic frequency report.
+No separate reference answer has been written for this task. Example A is the evidence to compare with: Aggregation and presentation order are explicit parts of the chosen representation. Duplicate b accumulates and output keys are sorted.
 
-4. **Diagnose a defect.** Diagnose relying on HashMap iteration order for a saved report.
+### Task 2: Guided modification
 
-5. **Boundary evidence.** Test empty input and repeated keys.
+Change duplicate handling from counting to rejection.
 
-6. **Transfer and justify.** Compare repeated linear membership checks with a built index, including construction and memory costs.
+No separate reference answer has been written for this task. Start from Example B: Membership is a domain decision that can guide duplicate rejection or deduplication. The set reports a duplicate without creating a second entry.
 
-For tasks 1 and 2, use the checked values and mechanism trace in the two examples. For task 3, choose names that expose the input and result contract and retain the same invariants. For task 4, the diagnosed mistakes below supply a concrete wrong assumption: preserve its counterexample before repairing it. Task 5 needs an explicit expected value or documented rejection at the boundary, not just successful execution. For task 6, explain what changes in the new context and which part of the original mechanism remains applicable. Several representations may satisfy this transfer task; justify the choice rather than treating this reference as the only architecture.
+### Task 3: Independent construction
+
+Build a deterministic frequency report.
+
+**Reference answer.** The same statements run as the `Task 3` block of the reference program; here they are wrapped in `main` as a complete file.
+
+```rust
+fn main() -> Result<(), Box<dyn std::error::Error>> {
+    let words = ["pear", "fig", "pear", "apple"];
+    let mut counts = std::collections::BTreeMap::new();
+    for word in words {
+        *counts.entry(word).or_insert(0) += 1;
+    }
+    let report: Vec<String> = counts.iter().map(|(w, n)| format!("{w}={n}")).collect();
+    assert_eq!(report, ["apple=1", "fig=1", "pear=2"]);
+    Ok(())
+}
+```
+
+**Observe:** The report is apple=1, fig=1, pear=2, always in that order.
+
+A BTreeMap keeps keys sorted, so the output does not depend on hashing or insertion order.
+
+### Task 4: Diagnose a defect
+
+Diagnose relying on HashMap iteration order for a saved report.
+
+No reference answer has been written for this task yet. The wrong assumptions to look for are this lesson's pitfalls: Expected hash lookup cost is not a hard real-time guarantee. Do not persist hash values as stable identities. A collection choice does not by itself validate input or prevent overflow.
+
+### Task 5: Boundary evidence
+
+Test empty input and repeated keys.
+
+No reference answer has been written for this task yet. Write the expected value or documented rejection for each boundary before running it, and compare with the checks in Example A (Count repeated identities) and Example B (Distinguish first and duplicate insertion).
+
+### Task 6: Transfer and justify
+
+Compare repeated linear membership checks with a built index, including construction and memory costs.
+
+No single reference answer exists: several designs can satisfy this transfer task. Justify yours against the mechanism described below and the vocabulary entry **Identity policy**, and state one limitation of your choice.
 
 ## Mechanism and diagnostic reasoning
 
@@ -36,4 +75,4 @@ Expected hash lookup cost is not a hard real-time guarantee. Do not persist hash
 
 ## Review before continuing
 
-The reference checks the worked scenarios, including their boundary distinctions. Your independent and transfer artifacts may have additional checks. Compare observations rather than only source text. Preserve any new regression case you discover and explain why it would reject a plausible wrong implementation. External project steps require their own build and platform evidence and are not established by a portable reference passing.
+Run the reference and confirm that it prints `rust-026: passed`, then reconstruct one boundary case from memory and explain which check would reject a plausible wrong implementation. External project steps need their own build and platform evidence; a passing portable reference does not establish them.

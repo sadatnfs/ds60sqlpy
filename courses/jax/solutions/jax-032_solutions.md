@@ -8,7 +8,7 @@ The same mathematics can be correct while the accelerator toolchain or device op
 
 **Expected:** It supports CPU numerical behavior only.
 
-Retain the CPU receipt as a baseline and list the missing accelerator stages.
+Retain the CPU test record as a baseline and list the missing accelerator stages.
 
 ## Exercise 2: Separate compilation from execution
 
@@ -36,7 +36,7 @@ Hold inputs and operation fixed; validate numerical error first; then measure co
 
 ## Exercise 5: Distinguish TPU qualification
 
-The GPU receipt does not establish another backend's package or hardware behavior.
+The GPU test record does not establish another backend's package or hardware behavior.
 
 **Expected:** A separately prepared TPU environment, actual TPU allocation/computation/readback and target-specific measurements.
 
@@ -48,7 +48,7 @@ The repository's optional-device workflow treats serious faults separately from 
 
 **Expected:** Process cleanup alone does not prove device recovery; retain the outcome for the resource owner to inspect.
 
-Preserve the receipt, identify the owned device and require the explicit recovery workflow before requalification.
+Preserve the interrupted run record, identify the owned device and require the explicit recovery workflow before requalification.
 
 ## Scope of this evidence
 

@@ -36,6 +36,15 @@ internal static class Program {
       Check(values.Select(value => value * 10).ToArray().Length == 3,
             "projection count");
     }
+    {
+      // Task 3: Independent construction
+      var stock = new Dictionary<string, int> { ["pear"] = 2, ["fig"] = 0 };
+      stock["apple"] = 5;
+      var kept = stock.Where(row => row.Value > 0);
+      var ordered = kept.OrderBy(row => row.Key, StringComparer.Ordinal);
+      var report = ordered.Select(row => $"{row.Key}={row.Value}");
+      Check(report.SequenceEqual(new[] { "apple=5", "pear=2" }), "report");
+    }
     Console.WriteLine("csharp-020: passed");
     await Task.CompletedTask;
   }

@@ -22,6 +22,23 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         assert_eq!(typed.len(), 1);
         assert_eq!(typed.value(0), "middle");
     }
+
+    {
+        // Task 3: Independent construction
+        use arrow::array::{Array, Int32Builder, ListBuilder};
+        let rows = [vec![1, 2], vec![], vec![3]];
+        let mut builder = ListBuilder::new(Int32Builder::new());
+        for row in &rows {
+            for value in row {
+                builder.values().append_value(*value);
+            }
+            builder.append(true);
+        }
+        let lists = builder.finish();
+        assert_eq!(lists.len(), 3);
+        let lengths: Vec<i32> = (0..3).map(|i| lists.value_length(i)).collect();
+        assert_eq!(lengths, [2, 0, 1]);
+    }
     println!("rust-041: passed");
     Ok(())
 }

@@ -1,6 +1,6 @@
 # csharp-026: explanation and comparison
 
-Attempt the six guide tasks before opening this comparison. The executable reference is [csharp-026_solution.cs](csharp-026_solution.cs). Its assertions are always active under the prepared classroom compile settings.
+Attempt the six guide tasks before opening this comparison. The executable reference is [csharp-026_solution.cs](csharp-026_solution.cs). It runs both worked examples and the reference answers below, and its assertions are always active under the prepared classroom compile settings.
 
 ## Why the two examples differ
 
@@ -8,21 +8,64 @@ Attempt the six guide tasks before opening this comparison. The executable refer
 
 **Validate after structural decoding:** Parsing answers whether the representation is understood. Validation answers whether the application may use it. Valid JSON can decode into a rejected domain value.
 
-## Reason through the six tasks
+## Task answers
 
-1. **Predict and explain.** Predict what round-trip equality establishes and what it does not.
+### Task 1: Predict and explain
 
-2. **Guided modification.** Add a clearly versioned optional description field.
+Predict what round-trip equality establishes and what it does not.
 
-3. **Independent construction.** Write a decoder returning explicit validation errors for missing name and negative quantity.
+No separate reference answer has been written for this task. Example A is the evidence to compare with: Equality checks the modeled data rather than incidental property ordering in JSON text. The restored name and quantity match the original record.
 
-4. **Diagnose a defect.** Diagnose trusting default values from missing JSON fields.
+### Task 2: Guided modification
 
-5. **Boundary evidence.** Test malformed JSON, JSON null and an extra unknown field.
+Add a clearly versioned optional description field.
 
-6. **Transfer and justify.** Design a migration from a renamed quantity field while retaining old saved records.
+No separate reference answer has been written for this task. Start from Example B: Parsing answers whether the representation is understood. Validation answers whether the application may use it. Valid JSON can decode into a rejected domain value.
 
-For tasks 1 and 2, use the checked values and mechanism trace in the two examples. For task 3, choose names that expose the input and result contract and retain the same invariants. For task 4, the diagnosed mistakes below supply a concrete wrong assumption: preserve its counterexample before repairing it. Task 5 needs an explicit expected value or documented rejection at the boundary, not just successful execution. For task 6, explain what changes in the new context and which part of the original mechanism remains applicable. Several representations may satisfy this transfer task; justify the choice rather than treating this reference as the only architecture.
+### Task 3: Independent construction
+
+Write a decoder returning explicit validation errors for missing name and negative quantity.
+
+**Reference answer.** It runs as the `Task 3` block of the reference program.
+
+```csharp
+List<string> Decode(string json) {
+  var errors = new List<string>();
+  var item = JsonSerializer.Deserialize<ItemDto>(json);
+  if (item is null || string.IsNullOrWhiteSpace(item.Name)) {
+    errors.Add("name is required");
+  }
+  if (item is not null && item.Quantity < 0) {
+    errors.Add("quantity must be nonnegative");
+  }
+  return errors;
+}
+string valid = "{\"Name\":\"pear\",\"Quantity\":2}";
+Check(Decode(valid).Count == 0, "valid item");
+Check(Decode("{\"Quantity\":-1}").Count == 2, "both errors reported");
+```
+
+**Observe:** A valid item gives no errors; a missing name with quantity -1 gives two errors.
+
+Decoding and validation are separate steps, and the decoder reports every problem it finds instead of stopping at the first.
+
+### Task 4: Diagnose a defect
+
+Diagnose trusting default values from missing JSON fields.
+
+No reference answer has been written for this task yet. The wrong assumptions to look for are this lesson's pitfalls: JSON text equality is sensitive to formatting and property ordering. Structural decoding does not enforce every domain invariant. Keep public transport models separate from internal objects carrying credentials or resources.
+
+### Task 5: Boundary evidence
+
+Test malformed JSON, JSON null and an extra unknown field.
+
+No reference answer has been written for this task yet. Write the expected value or documented rejection for each boundary before running it, and compare with the checks in Example A (Round-trip a small transport record) and Example B (Validate after structural decoding).
+
+### Task 6: Transfer and justify
+
+Design a migration from a renamed quantity field while retaining old saved records.
+
+No single reference answer exists: several designs can satisfy this transfer task. Justify yours against the mechanism described below and the vocabulary entry **Serialization**, and state one limitation of your choice.
 
 ## Mechanism and diagnostic reasoning
 
@@ -36,4 +79,4 @@ JSON text equality is sensitive to formatting and property ordering. Structural 
 
 ## Review before continuing
 
-The reference checks the worked scenarios, including their boundary distinctions. Your independent and transfer artifacts may have additional checks. Compare observations rather than only source text. Preserve any new regression case you discover and explain why it would reject a plausible wrong implementation. External project steps require their own build and platform evidence and are not established by a portable reference passing.
+Run the reference and confirm that it prints `csharp-026: passed`, then reconstruct one boundary case from memory and explain which check would reject a plausible wrong implementation. External project steps need their own build and platform evidence; a passing portable reference does not establish them.

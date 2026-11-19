@@ -1,6 +1,6 @@
 # swift-032: explanation and comparison
 
-Attempt the six guide tasks before opening this comparison. The executable reference is [swift-032_solution.swift](swift-032_solution.swift). Its assertions are always active under the prepared classroom compile settings.
+Attempt the six guide tasks before opening this comparison. The executable reference is [swift-032_solution.swift](swift-032_solution.swift). It runs both worked examples and the reference answers below, and its assertions are always active under the prepared classroom compile settings.
 
 ## Why the two examples differ
 
@@ -8,21 +8,67 @@ Attempt the six guide tasks before opening this comparison. The executable refer
 
 **Reject conflicting identity reuse:** Reconciliation needs payload identity as well as an operation key. A changed payload is rejected and prior state remains intact.
 
-## Reason through the six tasks
+## Task answers
 
-1. **Predict and explain.** Trace effect and receipt for the first and repeated calls.
+### Task 1: Predict and explain
 
-2. **Guided modification.** Apply a second unique identity and predict the total.
+Trace effect and receipt for the first and repeated calls.
 
-3. **Independent construction.** Add a read-only receipt lookup that never re-executes work.
+No separate reference answer has been written for this task. Example A is the evidence to compare with: Identity lookup and state change occur under one actor-owned transition. A repeated operation returns its receipt without applying again.
 
-4. **Diagnose a defect.** Diagnose applying the effect before checking the operation identity.
+### Task 2: Guided modification
 
-5. **Boundary evidence.** Test negative payloads and concurrent identical requests.
+Apply a second unique identity and predict the total.
 
-6. **Transfer and justify.** Design a durable adapter and document what actor isolation alone cannot guarantee.
+No separate reference answer has been written for this task. Start from Example B: Reconciliation needs payload identity as well as an operation key. A changed payload is rejected and prior state remains intact.
 
-For tasks 1 and 2, use the checked values and mechanism trace in the two examples. For task 3, choose names that expose the input and result contract and retain the same invariants. For task 4, the diagnosed mistakes below supply a concrete wrong assumption: preserve its counterexample before repairing it. Task 5 needs an explicit expected value or documented rejection at the boundary, not just successful execution. For task 6, explain what changes in the new context and which part of the original mechanism remains applicable. Several representations may satisfy this transfer task; justify the choice rather than treating this reference as the only architecture.
+### Task 3: Independent construction
+
+Add a read-only receipt lookup that never re-executes work.
+
+**Reference answer.** It runs as the `Task 3` block of the reference program.
+
+```swift
+actor ReceiptLedger {
+  private var receipts: [String: Int] = [:]
+  private(set) var executions = 0
+  func apply(id: String, amount: Int) -> Int {
+    if let receipt = receipts[id] { return receipt }
+    executions += 1
+    receipts[id] = amount
+    return amount
+  }
+  func receipt(for id: String) -> Int? { receipts[id] }
+}
+let ledger = ReceiptLedger()
+_ = await ledger.apply(id: "one", amount: 3)
+let found = await ledger.receipt(for: "one")
+let missing = await ledger.receipt(for: "two")
+let executions = await ledger.executions
+precondition(found == 3 && missing == nil && executions == 1)
+```
+
+**Observe:** The lookup finds receipt 3 for one, reports nil for two, and the work ran only once.
+
+receipt(for:) only reads stored results, so asking about an operation can never execute it again.
+
+### Task 4: Diagnose a defect
+
+Diagnose applying the effect before checking the operation identity.
+
+No reference answer has been written for this task yet. The wrong assumptions to look for are this lesson's pitfalls: An in-memory actor ledger loses its state after restart. Overflow and retention policy remain explicit production requirements. Do not claim exactly-once delivery from a local dictionary.
+
+### Task 5: Boundary evidence
+
+Test negative payloads and concurrent identical requests.
+
+No reference answer has been written for this task yet. Write the expected value or documented rejection for each boundary before running it, and compare with the checks in Example A (Replay without duplicate effect) and Example B (Reject conflicting identity reuse).
+
+### Task 6: Transfer and justify
+
+Design a durable adapter and document what actor isolation alone cannot guarantee.
+
+No single reference answer exists: several designs can satisfy this transfer task. Justify yours against the mechanism described below and the vocabulary entry **Idempotency**, and state one limitation of your choice.
 
 ## Mechanism and diagnostic reasoning
 
@@ -36,4 +82,4 @@ An in-memory actor ledger loses its state after restart. Overflow and retention 
 
 ## Review before continuing
 
-The reference checks the worked scenarios, including their boundary distinctions. Your independent and transfer artifacts may have additional checks. Compare observations rather than only source text. Preserve any new regression case you discover and explain why it would reject a plausible wrong implementation. External project steps require their own build and platform evidence and are not established by a portable reference passing.
+Run the reference and confirm that it prints `swift-032: passed`, then reconstruct one boundary case from memory and explain which check would reject a plausible wrong implementation. External project steps need their own build and platform evidence; a passing portable reference does not establish them.

@@ -22,11 +22,13 @@ keyof and indexed access types connect property keys to property result types. A
 
 Declare type parameters in angle brackets on the function. T names a caller-selected type; extends constrains its allowed structure. K extends keyof T restricts a key to known properties, and T[K] gives the corresponding value type. A generic function returning the first element should expose T | undefined for an empty input even when the project's indexed-access checking is less strict. Runtime control flow must implement the same absence policy.
 
-## Exercise 1: Preserve identity type and object identity
+## Exercise 1: Preserve identity type and object identity: change one input
 
-Task: Pass a number and an object through identity.
+Task: Copy Example A into a scratch `main.mts` and change `const value: number = identity(7);` to `const value: number = identity(8);`. Before running it, predict which check fails and which value it now sees; then run it and restore the original line.
 
 The generic relationship preserves static information without copying data. Runtime identity is still a separate observation checked by the assertion.
+
+The unchanged code is the exercise block of Example A:
 
 ```typescript
 const value: number = identity(7);
@@ -41,15 +43,17 @@ function negativeTypeCheck(): void {
 void negativeTypeCheck;
 ```
 
-**Expected:** number remains 7; object is the same reference.
+**Expected:** The changed run fails with an `AssertionError` at the check `assert.equal(value, 7)`. Restoring the original line brings back the worked observation: number remains 7; object is the same reference.
 
-**Verify:** Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.
+**Verify:** Compare your written prediction with the reported `AssertionError`, including its actual and expected values, and name the value that made `assert.equal(value, 7)` fail. After restoring the line, the program prints its `{"checks":1,"status":"passed"}` receipt again.
 
-## Exercise 2: Connect a key to its exact result type
+## Exercise 2: Connect a key to its exact result type: debug a regression
 
-Task: Read id and count from one record with getProperty.
+Task: A regression changed one token in Example B, so one line now reads `const row = { id: 'A', count: 3 };`. Run Example B with that line, use the failing check to locate the defect and repair it without changing the check.
 
 Returning a broad string|number union would lose the connection between the selected key and its payload. T[K] preserves that correlation.
+
+The unchanged code is the exercise block of Example B:
 
 ```typescript
 const row = { id: 'A', count: 2 };
@@ -64,9 +68,9 @@ function negativeTypeCheck(): void {
 void negativeTypeCheck;
 ```
 
-**Expected:** id is string A; count is number 2.
+**Expected:** Before the repair the run fails with an `AssertionError` at the check `assert.equal(count, 2)`; after it the line reads `const row = { id: 'A', count: 2 };` again and id is string A; count is number 2.
 
-**Verify:** Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.
+**Verify:** Keep the failing and the repaired runs. Explain why the changed token alters the value tested by `assert.equal(count, 2)` for this input.
 
 ## Exercise 3: Expose absence in a generic first function
 
@@ -87,7 +91,7 @@ void negativeTypeCheck;
 
 **Expected:** 4 and undefined.
 
-**Verify:** Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.
+**Verify:** Keep a check equivalent to `assert.equal(first([4, 5]), 4)`. As a control, change `assert.equal(first([4, 5]), 4);` to `assert.equal(first([5, 5]), 4);` inside it: the run must fail with an `AssertionError`, which shows the check can fail. Restore it.
 
 ## Exercise 4: Use only the constrained length property
 
@@ -107,7 +111,7 @@ void negativeTypeCheck;
 
 **Expected:** lengths 3 and 2.
 
-**Verify:** Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.
+**Verify:** Keep a check equivalent to `assert.equal(measuredLength('abc'), 3)`. As a control, change `assert.equal(measuredLength('abc'), 3);` to `assert.equal(measuredLength('abc!'), 3);` inside it: the run must fail with an `AssertionError`, which shows the check can fail. Restore it.
 
 ## Exercise 5: Transform while preserving output element type
 
@@ -124,7 +128,7 @@ assert.deepEqual(values, [2, 4]);
 
 **Expected:** string array item:2,item:4; input unchanged.
 
-**Verify:** Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.
+**Verify:** Keep a check equivalent to `assert.deepEqual(labels, ['item:2', 'item:4'])`. As a control, change `const values = [2, 4];` to `const values = [3, 4];`: the run must fail with an `AssertionError` at that check. Restore the line before continuing.
 
 ## Exercise 6: Avoid pretending a constraint is the exact caller type
 
@@ -144,7 +148,7 @@ assert.equal(measuredLength({ length: 5, id: 'A' }), 5);
 
 **Expected:** expected compile error for returning a fabricated length-only object.
 
-**Verify:** Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.
+**Verify:** Keep a check equivalent to `assert.equal(measuredLength({ length: 5, id: 'A' }), 5)`. As a control, change `assert.equal(measuredLength({ length: 5, id: 'A' }), 5);` to `assert.equal(measuredLength({ length: 6, id: 'A' }), 5);` inside it: the run must fail with an `AssertionError`, which shows the check can fail. Restore it.
 
 ## After comparison
 

@@ -40,6 +40,25 @@ internal static class Program {
       Check((await ImportAsync("[]", CancellationToken.None)).Total == 0,
             "successful empty report");
     }
+    {
+      // Task 3: Independent construction
+      string pear = "{\"Name\":\"pear\",\"Quantity\":2}";
+      string blank = "{\"Name\":\"\",\"Quantity\":1}";
+      string json = $"[{pear},{blank}]";
+      var items = JsonSerializer.Deserialize<ImportItem[]>(json)!;
+      var accepted = new Dictionary<string, int>(StringComparer.Ordinal);
+      int rejected = 0;
+      foreach (var item in items) {
+        if (string.IsNullOrWhiteSpace(item.Name) || item.Quantity < 0) {
+          rejected++;
+          continue;
+        }
+        accepted.TryGetValue(item.Name, out int before);
+        accepted[item.Name] = checked(before + item.Quantity);
+      }
+      Check(accepted["pear"] == 2 && accepted.Count == 1, "per-item result");
+      Check(rejected == 1, "rejection preserved");
+    }
     Console.WriteLine("csharp-032: passed");
     await Task.CompletedTask;
   }

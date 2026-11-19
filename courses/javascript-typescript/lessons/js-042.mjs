@@ -1,11 +1,22 @@
 // Answer-free learner source. Save your own copy before editing.
-// Exercise 1: Build, verify and execute a fresh bundle
-// Create the authored bundle, verify hashes and run its self-test in a child.
-// Expected: three checks passed; actual Node version reported.
+// Exercise 1: Build, verify and execute a fresh bundle: change one input
+// Copy Example A into a scratch `main.mjs` and change `const result = runBundle(directory,
+// ['--self-test']);` to `const result = runBundle(directory, ['--self-test!']);`. Before
+// running it, predict which check fails and which value it now sees; then run it and restore
+// the original line.
+// Expected: The changed run fails with an `AssertionError` at the check
+// `assert.equal(result.status, 0, result.stderr)`. Restoring the original line brings back
+// the worked observation: three checks passed; actual Node version reported.
 
-// Exercise 2: Reject altered application bytes before execution
-// Append a harmless comment to the owned application after manifest creation.
-// Expected: digest verification fails.
+// Exercise 2: Reject altered application bytes before execution: debug a regression
+// A regression changed one token in Example B, so one line now reads `await
+// appendFile(join(directory, 'app.mjs!'), '\n// controlled tamper fixture\n');`. Run Example
+// B with that line, use the failing check to locate the defect and repair it without
+// changing the check.
+// Expected: Before the repair the run fails with an `AssertionError` at the check
+// `assert.rejects(verifyBundle(directory), /digest mismatch/u)`; after it the line reads
+// `await appendFile(join(directory, 'app.mjs'), '\n// controlled tamper fixture\n');` again
+// and digest verification fails.
 
 // Exercise 3: Reject a manifest path outside the allowlist
 // Replace one file entry with ../outside.txt.

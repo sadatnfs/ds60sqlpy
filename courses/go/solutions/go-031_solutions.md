@@ -8,29 +8,33 @@ Logs describe events; stable fields let operators inspect them without parsing p
 
 log/slog builds records from key/value attributes. JSONHandler writes to an io.Writer. HandlerOptions.ReplaceAttr can remove timestamps in deterministic tests. Logger.With attaches common attributes to a derived logger. A logged status is a report, while the actual operation and durable receipt remain separate evidence.
 
-## 1. Emit a structured event
+## 1. Emit a structured event: change one input
 
-Log processed with count 3 and parse its JSON.
+Copy worked example 1 into a scratch pad and change `v := logRecord("processed", "count", 3)` to `v := logRecord("processed", "count", 4)`. Before running, predict which check fails and which value it now sees; then run it and restore the original line.
+
+The unchanged code is worked example 1:
 
 ```go
 v := logRecord("processed", "count", 3)
 check(v["msg"] == "processed" && v["count"] == float64(3), "fields")
 ```
 
-**Expected:** The record has message processed and numeric count 3.
+**Expected:** The changed run panics with `fields` because `v["msg"] == "processed" && v["count"] == float64(3)` no longer holds. Restoring the original line brings back the worked observation: the record has message processed and numeric count 3.
 
 The check inspects meaning rather than serialized field order.
 
-## 2. Retain correlation
+## 2. Retain correlation: debug a regression
 
-Log request_id lesson-7.
+A regression changed one token in worked example 2, so one line now reads `v := logRecord("read", "request_id!", "lesson-7")`. Run worked example 2 with that line, use the failure to locate the defect and repair it without changing the check.
+
+The unchanged code is worked example 2:
 
 ```go
 v := logRecord("read", "request_id", "lesson-7")
 check(v["request_id"] == "lesson-7", "correlation")
 ```
 
-**Expected:** The ID is retained exactly.
+**Expected:** Before the repair the program panics with `correlation`; after it the line reads `v := logRecord("read", "request_id", "lesson-7")` again and the ID is retained exactly.
 
 A bounded synthetic ID is sufficient. Secrets and complete payloads are inappropriate correlation fields.
 

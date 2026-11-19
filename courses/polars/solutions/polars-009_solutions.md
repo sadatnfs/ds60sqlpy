@@ -21,6 +21,23 @@ Use an event sequence identifier when available. If simultaneous events should b
 
 A cumulative sum includes the current row. Shift it to represent prior history and explain whether a first event should map to zero or unknown.
 
+```python
+import polars as pl
+
+frame = pl.DataFrame(
+    {
+        "id": [3, 1, 2, 4],
+        "customer": ["A", "A", "B", "A"],
+        "time": [2, 1, 1, 3],
+        "value": [5, 2, 7, 4],
+    }
+)
+output = frame.sort("customer", "time", "id").with_columns(
+    pl.col("value").cum_sum().shift(1).over("customer").alias("running_before")
+)
+assert output.filter(pl.col("customer") == "A")["running_before"].to_list() == [None, 2, 7]
+```
+
 **Expected:** For A it is [null, 2, 7] before an explicit first-value policy.
 
 ## 4. Check group reset
@@ -38,6 +55,15 @@ Estimate preprocessing parameters on the training partition and apply those fixe
 ## 6. Compare grains
 
 Neither shape is inherently wrong. Choose the result grain needed by the next stage and verify key identity at that boundary.
+
+```python
+import polars as pl
+
+frame = pl.DataFrame({"group": ["A", "A", "B"], "value": [2.0, 6.0, 9.0]})
+window = frame.with_columns(pl.col("value").mean().over("group").alias("group_mean"))
+grouped = frame.group_by("group").agg(pl.col("value").mean().alias("group_mean"))
+assert (window.height, grouped.height) == (3, 2)
+```
 
 **Expected:** The count changes from 3 to 2.
 
@@ -91,4 +117,4 @@ if __name__ == "__main__":
 
 ## Interpretation
 
-Create row-preserving historical features with explicit ordering. Test shuffled inputs, entity boundaries and timestamp ties, then document whether each feature includes the current event. Extend the rule to an availability-time boundary before using the feature in model training.
+Test shuffled inputs, entity boundaries and timestamp ties, then document whether each feature includes the current event. Extend the rule to an availability-time boundary before using the feature in model training.

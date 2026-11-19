@@ -28,9 +28,9 @@ batches = [ids[i : i + 2] for i in range(0, 6, 2)]
 assert batches == [[1, 2], [3, 4], [5, 6]]
 ```
 
-**Expected:** batches [[1,2],[3,4],[5,6]] and 3 updates.
+**Expected:** batches [[1, 2], [3, 4], [5, 6]] and 3 updates.
 
-**Verify:** Compare the computed values or written argument with batches [[1,2],[3,4],[5,6]] and 3 updates.
+**Verify:** In a fresh process, the exercise checks confirm `batches == [[1, 2], [3, 4], [5, 6]]`.
 
 ## Exercise 2: Retain a remainder
 
@@ -45,13 +45,13 @@ assert list(map(len, batches)) == [2, 2, 1]
 assert sum((b for b in batches if len(b) == 2), []) == [1, 2, 3, 4]
 ```
 
-**Expected:** sizes [2,2,1]; dropping retains only IDs1..4.
+**Expected:** sizes [2, 2, 1]; dropping retains only IDs 1..4.
 
-**Verify:** Compare the computed values or written argument with sizes [2,2,1]; dropping retains only IDs1..4.
+**Verify:** In a fresh process, the exercise checks confirm `list(map(len, batches)) == [2, 2, 1]` and `sum((b for b in batches if len(b) == 2), []) == [1, 2, 3, 4]`.
 
 ## Exercise 3: Trace weight state
 
-The question is: Implement three batch updates for x=1..6,y=2x,\(w=0\),rate=.01; record the weight before each update.
+The question is: Implement three batch updates for x=1..6, y=2x, \(w=0\), rate=0.01; record the weight before each update.
 
 Each gradient depends on the current weight. Recording only the final loss would conceal whether the assignment happened. The finite and distinct states show real updates for this fixture without claiming that every possible dataset produces a different weight each time.
 
@@ -71,7 +71,7 @@ assert len(set(history)) == 3
 
 **Expected:** 3 finite, nonidentical updated weights.
 
-**Verify:** Compare the computed values or written argument with 3 finite, nonidentical updated weights.
+**Verify:** In a fresh process, the exercise checks confirm `len(history) == 3`, `all(np.isfinite(history))` and `len(set(history)) == 3`.
 
 ## Exercise 4: Compare batch policies
 
@@ -96,13 +96,13 @@ b, nb = train(3)
 assert (na, nb) == (6, 2) and abs(a - b) > 1e-6
 ```
 
-**Expected:** 6 versus2 steps and different endpoint weights.
+**Expected:** 6 versus 2 steps and different endpoint weights.
 
-**Verify:** Compare the computed values or written argument with 6 versus2 steps and different endpoint weights.
+**Verify:** In a fresh process, the exercise checks confirm `(na, nb) == (6, 2)` and `abs(a - b) > 1e-06`.
 
 ## Exercise 5: Preserve pairs
 
-The question is: Shuffle IDs with permutation [5,0,4,1,3,2] and apply the same permutation to inputs and targets.
+The question is: Shuffle IDs with permutation [5, 0, 4, 1, 3, 2] and apply the same permutation to inputs and targets.
 
 A shared index permutation preserves the relation between records. Independently shuffling targets creates a different task while preserving marginal value distributions, which is why checking only target histograms cannot detect this bug.
 
@@ -116,11 +116,11 @@ assert not np.allclose(y.numpy(), 2 * sx.numpy())
 
 **Expected:** Every shuffled target equals twice its paired input.
 
-**Verify:** Compare the computed values or written argument with Every shuffled target equals twice its paired input.
+**Verify:** In a fresh process, the exercise checks confirm `sy.numpy()` matches `2 * sx.numpy()` and `not np.allclose(y.numpy(), 2 * sx.numpy())`.
 
 ## Exercise 6: Aggregate unequal batches
 
-The question is: Combine batch mean losses2 and8 with counts2 and 1; compare mean-of-means with the record mean.
+The question is: Combine batch mean losses 2 and 8 with counts 2 and 1; compare the mean of means with the record mean.
 
 The correct epoch statistic counts examples. Batch means hide their denominators. Reconstruct sums by multiplying each mean by its batch count, sum those numerators, then divide by total examples.
 
@@ -129,9 +129,9 @@ assert (2 * 2 + 8 * 1) / 3 == 4
 assert (2 + 8) / 2 == 5
 ```
 
-**Expected:** record mean4; unweighted batch mean5.
+**Expected:** record mean 4; unweighted batch mean 5.
 
-**Verify:** Compare the computed values or written argument with record mean4; unweighted batch mean5.
+**Verify:** In a fresh process, the exercise checks confirm `(2 * 2 + 8 * 1) / 3 == 4` and `(2 + 8) / 2 == 5`.
 
 ## Review after comparison
 

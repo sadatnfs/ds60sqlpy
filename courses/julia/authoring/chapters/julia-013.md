@@ -8,7 +8,7 @@ Dotted expressions can fuse, and dotted assignment can update existing storage. 
 
 ## Worked case A: row and column contributions
 
-The first example adds row-specific offsets and column-specific offsets to a2-by -3 matrix. Reshaping the column offsets to a one-row matrix makes the intended axes explicit. The checked result corresponds to \(B_{ij}=A_{ij}+u_i+v_j\). An incompatible vector length produces a dimension error instead of a plausible but unintended result.
+The first example adds row-specific offsets and column-specific offsets to a 2-by-3 matrix. Reshaping the column offsets to a one-row matrix makes the intended axes explicit. The checked result corresponds to \(B_{ij}=A_{ij}+u_i+v_j\). An incompatible vector length produces a dimension error instead of a plausible but unintended result.
 
 {{WORKED_A}}
 

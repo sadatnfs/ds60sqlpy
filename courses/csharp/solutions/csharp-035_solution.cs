@@ -30,6 +30,20 @@ internal static class Program {
       Check(SumDigits("123".AsSpan()) == 6, "digit total");
       Check(SumDigits(ReadOnlySpan<char>.Empty) == 0, "empty identity");
     }
+    {
+      // Task 3: Independent construction
+      int CountSeparators(ReadOnlySpan<char> text, char separator) {
+        int count = 0;
+        foreach (char ch in text) {
+          if (ch == separator) {
+            count++;
+          }
+        }
+        return count;
+      }
+      Check(CountSeparators("a,b,c".AsSpan(), ',') == 2, "two separators");
+      Check(CountSeparators(ReadOnlySpan<char>.Empty, ',') == 0, "empty span");
+    }
     Console.WriteLine("csharp-035: passed");
     await Task.CompletedTask;
   }

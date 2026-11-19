@@ -26,23 +26,23 @@ Finally, every path feeding an earlier output must respect the intended visibili
 
 ## Reading the implementation
 
-Use the shape convention Q:[Tq,Dk], K:[Tk,Dk], V:[Tk,Dv]. Scores have shape [Tq,Tk], one comparison for each query/key pair. Row-wise softmax reduces the key axis, so every query receives a distribution over allowed keys. Multiplying weights [Tq,Tk] by V [Tk,Dv] gives output [Tq,Dv]. The key and value row counts must match because each attention weight selects a corresponding value row. Query count need not equal key count in cross-attention, although this lesson's main self-attention fixture uses both equal to three.
+Use the shape convention Q:[Tq, Dk], K:[Tk, Dk], V:[Tk, Dv]. Scores have shape [Tq, Tk], one comparison for each query/key pair. Row-wise softmax reduces the key axis, so every query receives a distribution over allowed keys. Multiplying weights [Tq, Tk] by V [Tk, Dv] gives output [Tq, Dv]. The key and value row counts must match because each attention weight selects a corresponding value row. Query count need not equal key count in cross-attention, although this lesson's main self-attention fixture uses both equal to three.
 
 The score rule is \(S=\frac{QK^{\mathsf T}}{\sqrt{D_k}}\). Stable softmax subtracts each row maximum before exponentiation. Subtracting a common row constant preserves the normalized probabilities, while reducing the risk of overflow. A Boolean allowed matrix has the score shape. Forbidden scores become negative infinity, giving zero exponential mass. Each query needs at least one allowed key: an all-forbidden row has no normalized distribution and is rejected instead of silently producing NaN.
 
-For feature normalization of X:[B,T,D], the mean and variance have shape [B,T,1]. They reduce only D, leaving batch and token dimensions distinct. keepdims=True retains the singleton axis so subtraction broadcasts over the intended features. The variance here divides by D, not D-1, because the operation normalizes the features of this token rather than estimating a population variance from independent sampled cases. The output has the same shape as X. Its mean is zero up to floating-point error; its variance is \(\frac{\sigma^2}{\sigma^2+\epsilon}\), not exactly one when epsilon is positive.
+For feature normalization of X:[B, T, D], the mean and variance have shape [B, T, 1]. They reduce only D, leaving batch and token dimensions distinct. keepdims=True retains the singleton axis so subtraction broadcasts over the intended features. The variance here divides by D, not D-1, because the operation normalizes the features of this token rather than estimating a population variance from independent sampled cases. The output has the same shape as X. Its mean is zero up to floating-point error; its variance is \(\frac{\sigma^2}{\sigma^2+\epsilon}\), not exactly one when epsilon is positive.
 
 ### Deriving the permutation identity
 
-Let P be a permutation matrix reordering token rows. Replacing Q,K,V by P Q,P K,P V gives scores P S \({P}^{T}\). This reorders both the query rows and the key columns. A row-wise softmax commutes with those reorders: \(\operatorname{softmax}(PSP^{\mathsf T})=P\operatorname{softmax}(S)P^{\mathsf T}\). The output is therefore \(P\operatorname{softmax}(S)P^{\mathsf T}PV=P\operatorname{softmax}(S)V\), because \({P}^{T}\) P is the identity. Reordering only Q, or forgetting to reorder V with K, is a different experiment and does not test this identity.
+Let P be a permutation matrix reordering token rows. Replacing Q, K, V by P Q, P K, P V gives scores P S \({P}^{T}\). This reorders both the query rows and the key columns. A row-wise softmax commutes with those reorders: \(\operatorname{softmax}(PSP^{\mathsf T})=P\operatorname{softmax}(S)P^{\mathsf T}\). The output is therefore \(P\operatorname{softmax}(S)P^{\mathsf T}PV=P\operatorname{softmax}(S)V\), because \({P}^{T}\) P is the identity. Reordering only Q, or forgetting to reorder V with K, is a different experiment and does not test this identity.
 
 If a mask M is present, the corresponding relabelling identity requires reordering the mask too, as P M \({P}^{T}\). Keeping a causal triangle fixed is intentionally different: it keeps the visibility graph attached to row positions while moving content. Similarly, adding a fixed position table E gives input P X + E after a content reorder, while a pure reorder of the original positioned input would be \(P(X+E)=PX+PE\). Unless E happens to remain unchanged under P, those expressions differ.
 
 ## Exercise 1: Permute content-only attention
 
-The question is: Use \(Q=K=[[1,0],[0,1],[1,1]]\) and \(V=[[1,2],[3,4],[5,6]]\). Reorder all three by [2,0,1] and compare outputs.
+The question is: Use \(Q=K=[[1,0],[0,1],[1,1]]\) and \(V=[[1,2],[3,4],[5,6]]\). Reorder all three by [2, 0, 1] and compare outputs.
 
-The first query has scores \([\frac{1}{\sqrt{2}},0,\frac{1}{\sqrt{2}}]\), so keys one and three receive equal weight. Their values are symmetric around [3,4], and the middle value is [3,4] itself, making the first weighted result exactly [3,4] in real arithmetic. The row permutation preserves these relationships. This is an unmasked calculation; a fixed causal triangle would change the experiment.
+The first query has scores \([\frac{1}{\sqrt{2}},0,\frac{1}{\sqrt{2}}]\), so keys one and three receive equal weight. Their values are symmetric around [3, 4], and the middle value is [3, 4] itself, making the first weighted result exactly [3, 4] in real arithmetic. The row permutation preserves these relationships. This is an unmasked calculation; a fixed causal triangle would change the experiment.
 
 ```python
 query = np.array([[1.0, 0.0], [0.0, 1.0], [1.0, 1.0]])
@@ -59,15 +59,15 @@ assert scores.shape == weights.shape == (3, 3)
 assert original.shape == (3, 2)
 ```
 
-**Expected:** attention weights move with key identities; output follows the same row reorder; the first original output is [3,4].
+**Expected:** attention weights move with key identities; output follows the same row reorder; the first original output is [3, 4].
 
-**Verify:** Compare the computed values or written argument with attention weights move with key identities; output follows the same row reorder; the first original output is [3,4].
+**Verify:** In a fresh process, the exercise checks confirm `changed` matches `original[order]` within 1e-12; `weights[0]` matches `expected_first_weights` within 1e-12; `original[0]` matches `[3, 4]` within 1e-12; `scores.shape == weights.shape == (3, 3)` and 1 further check.
 
 ## Exercise 2: Normalize each token
 
-The question is: Normalize [[1,3],[10,20]] across each row, then replace only the second row with [1000,2000].
+The question is: Normalize [[1, 3], [10, 20]] across each row, then replace only the second row with [1000, 2000].
 
-For [1,3], the mean is 2, centered features are [-1,1], and the mean squared centered value is 1. The second token uses a different mean and variance, but neither statistic appears in the first token calculation. Altering the future row cannot change the first normalized row. Positive epsilon makes the magnitude slightly below one.
+For [1, 3], the mean is 2, centered features are [-1, 1], and the mean squared centered value is 1. The second token uses a different mean and variance, but neither statistic appears in the first token calculation. Altering the future row cannot change the first normalized row. Positive epsilon makes the magnitude slightly below one.
 
 ```python
 values = np.array([[1.0, 3.0], [10.0, 20.0]])
@@ -80,15 +80,15 @@ np.testing.assert_allclose(layer_norm(changed)[0], normalized[0], atol=1e-12, rt
 assert normalized.shape == values.shape
 ```
 
-**Expected:** the first normalized row remains \(\frac{[-1,1]}{\sqrt{1+1\times10^{-5}}}\), approximately [-0.999995,0.999995].
+**Expected:** the first normalized row remains \(\frac{[-1,1]}{\sqrt{1+1\times10^{-5}}}\), approximately [-0.999995, 0.999995].
 
-**Verify:** Compare the computed values or written argument with the first normalized row remains \(\frac{[-1,1]}{\sqrt{1+1\times10^{-5}}}\), approximately [-0.999995,0.999995].
+**Verify:** In a fresh process, the exercise checks confirm `normalized[0]` matches `expected_first` within 1e-12, `layer_norm(changed)[0]` matches `normalized[0]` within 1e-12 and `normalized.shape == values.shape`.
 
 ## Exercise 3: Expose sequence-wide leakage
 
-The question is: Center each feature across the two token rows, then change the future row from [10,20] to [1000,2000].
+The question is: Center each feature across the two token rows, then change the future row from [10, 20] to [1000, 2000].
 
-The original feature means are [5.5,11.5]. Replacing the future row changes them to [500.5,1001.5], so subtracting those means changes the earlier row. There is no attention operation in this counterexample: the leakage is already present in preprocessing. This is why a mask test must be complemented by a full computation-path prefix test.
+The original feature means are [5.5, 11.5]. Replacing the future row changes them to [500.5, 1001.5], so subtracting those means changes the earlier row. There is no attention operation in this counterexample: the leakage is already present in preprocessing. This is why a mask test must be complemented by a full computation-path prefix test.
 
 ```python
 values = np.array([[1.0, 3.0], [10.0, 20.0]])
@@ -101,9 +101,9 @@ np.testing.assert_array_equal(changed_first, [-499.5, -998.5])
 assert not np.allclose(original_first, changed_first)
 ```
 
-**Expected:** the first centered row changes from [-4.5,-8.5] to [-499.5,-998.5].
+**Expected:** the first centered row changes from [-4.5, -8.5] to [-499.5, -998.5].
 
-**Verify:** Compare the computed values or written argument with the first centered row changes from [-4.5,-8.5] to [-499.5,-998.5].
+**Verify:** In a fresh process, the exercise checks confirm `original_first` equals `[-4.5, -8.5]`; `changed_first` equals `[-499.5, -998.5]` and `not np.allclose(original_first, changed_first)`.
 
 ## Exercise 4: Attach fixed positions
 
@@ -125,7 +125,7 @@ np.testing.assert_allclose(relabelled, original[order], atol=1e-12, rtol=0)
 
 **Expected:** fixed-position outputs do not follow a pure content permutation; jointly reordering E restores the relabelling identity.
 
-**Verify:** Compare the computed values or written argument with fixed-position outputs do not follow a pure content permutation; jointly reordering E restores the relabelling identity.
+**Verify:** In a fresh process, the exercise checks confirm `not np.allclose(fixed_positions, original[order])` and `relabelled` matches `original[order]` within 1e-12.
 
 ## Exercise 5: Check feature centering and causal prefixes
 
@@ -151,11 +151,11 @@ assert not np.allclose(fixed_mask, full[order])
 
 **Expected:** row means are approximately zero and every causal prefix matches; fixed-mask content permutation need not match.
 
-**Verify:** Compare the computed values or written argument with row means are approximately zero and every causal prefix matches; fixed-mask content permutation need not match.
+**Verify:** In a fresh process, the exercise checks confirm `normalized.mean(axis=-1)` matches `0` within 1e-12; for every `length` in `[1, 2, 3]`, `result` matches `full[:length]` within 1e-12 and `not np.allclose(fixed_mask, full[order])`.
 
 ## Exercise 6: Handle constant tokens and invalid normalization
 
-The question is: Normalize [5,5], then reject an empty feature axis, zero epsilon and an all-forbidden attention row.
+The question is: Normalize [5, 5], then reject an empty feature axis, zero epsilon and an all-forbidden attention row.
 
 A constant token has zero centered values and zero variance. Positive epsilon produces a finite zero output. This stabilizer does not justify accepting an empty feature dimension, nonfinite data or a query with no allowed key. Rejecting these cases makes the cause observable instead of producing NaN and diagnosing it several layers later.
 
@@ -178,9 +178,9 @@ for operation in [
         raise AssertionError("invalid contract was accepted")
 ```
 
-**Expected:** constant token becomes finite [0,0]; each invalid contract raises ValueError.
+**Expected:** constant token becomes finite [0, 0]; each invalid contract raises ValueError.
 
-**Verify:** Compare the computed values or written argument with constant token becomes finite [0,0]; each invalid contract raises ValueError.
+**Verify:** In a fresh process, the exercise checks confirm `constant` equals `[[0.0, 0.0]]`; `np.isfinite(constant).all()` and for every looped case, `operation()` raises `ValueError`.
 
 ## Review after comparison
 

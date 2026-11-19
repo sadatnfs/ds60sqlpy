@@ -8,13 +8,13 @@
 > work.
 
 
-This book develops the 1,005 named methods in the supplied 40-section outline into an end-to-end reference for data science decisions. Read sequentially for foundations, or use the topic manifest to find a method. Each chapter explains mechanisms, assumptions, appropriate uses, failure modes and interpretation, then connects them to complete Python demonstrations and answered interview discussions.
+This book develops the 1,005 named methods in its 40-section scope outline into an end-to-end reference for data science decisions. Read sequentially for foundations, or use the topic manifest to find a method: each chapter's prerequisites in [manifest.json](manifest.json) list only the chapters it directly builds on, so a later chapter does not require every earlier one. Each chapter combines a developed explanation of its central decision, concise reference entries for every named method, complete Python demonstrations and answered interview discussions; chapters 1 to 24 add extended case studies of mechanisms, assumptions, failure modes and interpretation. The method entries are short orientations rather than full treatments; the case studies, the connected tutorials and each chapter's primary sources supply depth.
 
 This is a tutorial and reference book. It contains no exams, problem sets or hidden solutions. The small examples explain mechanisms; their assertions check mathematical and implementation claims, not learner mastery. Advanced method descriptions are not claims that every research estimator has a production implementation in this repository.
 
 ## Running the worked examples
 
-Open a chapter in the classroom reader, or read its Markdown file. Reading needs no Python packages. The examples use Python 3.11 or 3.12 and the repository's prepared scientific environment: NumPy, pandas, SciPy, scikit-learn and statsmodels. No dataset, pretrained model, API key or network connection is required after dependencies are installed. Examples construct tiny local fixtures and print interpretable results.
+Open a chapter in the classroom reader, or read its Markdown file. Reading needs no Python packages. The examples use Python 3.12 and the repository's prepared scientific environment: NumPy, pandas, SciPy, scikit-learn and statsmodels. No dataset, pretrained model, API key or network connection is required after dependencies are installed. Examples construct tiny local fixtures and print interpretable results.
 
 Use `./classroom --starter`, open a chapter and select its Python worked
 example. The `python-core` worker supplies the scientific dependencies and
@@ -33,7 +33,7 @@ Replace `01` with the chapter number. Optional ecosystems such as PyMC/Stan, XGB
 
 ## Scope and provenance
 
-[source-outline.md](source-outline.md) is an unmodified copy of the user-provided scope. [manifest.json](manifest.json) records its SHA-256 digest and chapter metadata. [coverage.json](coverage.json) maps each of its 1,005 bold method bullets to a stable `stat-SS-NN` anchor. These IDs follow the original section and bullet order, so similarly named methods in different contexts retain different IDs. Coverage means an explanatory treatment of the named method, not an unsupported claim that one toy calculation validates the entire method family.
+[source-outline.md](source-outline.md) is an unmodified copy of the original scope outline that defines the book's 40 sections. [manifest.json](manifest.json) records its SHA-256 digest and chapter metadata. [coverage.json](coverage.json) maps each of its 1,005 bold method bullets to a stable `stat-SS-NN` anchor. These IDs follow the original section and bullet order, so similarly named methods in different contexts retain different IDs. Coverage means an explanatory treatment of the named method, not an unsupported claim that one toy calculation validates the entire method family.
 
 The prose, numerical fixtures and programs are original teaching material. Chapter references link to primary papers, author-maintained books or official API documentation. External reading is optional. Interpret each demonstration within its stated assumptions and distinguish a worked calculation, an estimator's mathematical guarantee, and evidence that a real deployment is useful.
 

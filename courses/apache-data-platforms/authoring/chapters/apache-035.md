@@ -25,6 +25,15 @@ consumer with the same group ID reads them again. The oracle compares exact
 key/value lists, rather than merely finding at least one row. The log retained
 the records and the group had no committed progress that advanced past them.
 
+Each read in the probe uses these consumer settings and this bounded loop:
+
+<!-- include: projects/streaming/ConsumerProbe.java from="private static Properties settings" until="public static void main" java -->
+
+`enable.auto.commit=false` means that progress is recorded only by the explicit
+`commitSync` call, and `auto.offset.reset=earliest` decides where a group with no
+committed position starts. The committed value is the next position to read, not
+the offset of the last record processed.
+
 This resembles a process interruption before its commit, but the probe uses an
 orderly close with auto-commit disabled to make the boundary deterministic. It
 does not claim an injected kernel crash or a filesystem durability test. A real

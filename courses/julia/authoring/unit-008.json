@@ -15,7 +15,7 @@
     {
       "title": "Make one tuple element",
       "task": "Represent a single integer as a tuple.",
-      "expected": "Use(7,), including its comma.",
+      "expected": "Use `(7,)`, including its comma.",
       "hint": "Parentheses alone group an expression.",
       "answer": "The tuple syntax distinguishes a one-field collection from the scalar value."
     },
@@ -28,7 +28,7 @@
     },
     {
       "title": "Preserve multiplicity",
-      "task": "Count labels a,b,b before converting to a set.",
+      "task": "Count the labels `a`, `b`, `b` before converting them to a set.",
       "expected": "Counts are 1 and 2 while the set has two distinct labels.",
       "hint": "Frequency and membership are different questions.",
       "answer": "Deduplication intentionally discards multiplicity and can change a scientific denominator."

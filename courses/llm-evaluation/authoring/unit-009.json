@@ -9,6 +9,7 @@
     "access policy"
   ],
   "outcome": "Separate claim truth, citation support, evidence coverage and source availability using an auditable claim-document relation.",
+  "verification": "One supported citation gives precision 1 and coverage 1/3, no citations gives missing precision and coverage 0, unknown relations and duplicate citations are rejected, and a newer document is ineligible for the historical reconstruction.",
   "level": "intermediate",
   "runtime": "python-core",
   "minutes": 120,

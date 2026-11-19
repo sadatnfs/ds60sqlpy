@@ -19,16 +19,16 @@ public class Main {
     queue.addLast("a");
     queue.addLast("b");
     queue.addLast("c");
-    assert List.of(queue.removeFirst(), queue.removeFirst(), queue.removeFirst()).equals(
-      List.of("a", "b", "c")
-    );
+    List<String> fifo = List.of(queue.removeFirst(), queue.removeFirst(), queue.removeFirst());
+    assert fifo.equals(List.of("a", "b", "c"));
 
     // Exercise 2: Use a LIFO stack
     Deque<Integer> stack = new ArrayDeque<>();
     stack.push(1);
     stack.push(2);
     stack.push(3);
-    assert List.of(stack.pop(), stack.pop(), stack.pop()).equals(List.of(3, 2, 1));
+    List<Integer> lifo = List.of(stack.pop(), stack.pop(), stack.pop());
+    assert lifo.equals(List.of(3, 2, 1));
 
     // Exercise 3: Poll a priority queue
     PriorityQueue<Integer> heap = new PriorityQueue<>(List.of(5, 1, 4, 2));
@@ -46,11 +46,13 @@ public class Main {
     );
     tasks.add(new Task(1, 2, "later"));
     tasks.add(new Task(1, 1, "earlier"));
-    assert tasks.remove().name().equals("earlier");
+    String firstName = tasks.remove().name();
+    assert firstName.equals("earlier");
 
     // Exercise 6: Handle empty removal explicitly
     Deque<Integer> empty = new ArrayDeque<>();
-    assert empty.pollFirst() == null;
+    Integer polled = empty.pollFirst();
+    assert polled == null;
     boolean failed = false;
     try {
       empty.removeFirst();

@@ -22,7 +22,7 @@ The advertised family bound requires the total allocation to remain within its d
 
 ## 4. Specify dependent looks
 
-The formula 1-(1-alpha)^m uses independence; the union-bound inequality does not.
+The formula \(1-(1-\alpha)^m\) uses independence; the union-bound inequality does not.
 
 **Expected observation:** It does not; individual error bounds still need to hold.
 

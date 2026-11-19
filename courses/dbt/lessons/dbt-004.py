@@ -1,4 +1,4 @@
-"""dbt-004: worked starting point; complete the guide's six changes."""
+"""dbt-004: both worked cases; complete the guide's six changes."""
 
 import json
 import os
@@ -108,8 +108,41 @@ def example_one():
         return {"tests_passed": 2, "rows": 2}
 
 
+def example_two():
+    with tempfile.TemporaryDirectory() as d:
+        schema = {
+            "models": [
+                {
+                    "name": "orders",
+                    "columns": [{"name": "id", "data_tests": ["not_null", "unique"]}],
+                }
+            ]
+        }
+        p = project(
+            d,
+            models={"orders": "select * from {{ ref('raw_orders') }}"},
+            seeds={"raw_orders": "id,amount\n1,5\n1,7\n"},
+            schema=schema,
+        )
+        invoke(p, "build", succeeds=False)
+        statuses = [r["status"] for r in artifact(p, "run_results.json")["results"]]
+        assert "fail" in statuses
+        assert rows(p, "select count(*) from orders") == [(2,)]
+        (p / "seeds/raw_orders.csv").write_text("id,amount\n1,5\n2,7\n")
+        invoke(p, "build", "--full-refresh")
+        assert all(
+            r["status"] in {"success", "pass"} for r in artifact(p, "run_results.json")["results"]
+        )
+        return {
+            "duplicate_test_failed": True,
+            "table_existed_before_repair": True,
+            "repaired": True,
+        }
+
+
 if __name__ == "__main__":
     print(example_one())
+    print(example_two())
 
 # TODO 1: Add a record with an absent identifier.
 # TODO 2: Use two equal rows with the same id and amount.

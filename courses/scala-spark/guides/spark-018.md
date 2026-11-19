@@ -1,22 +1,22 @@
 # spark-018: Timestamp types, time zones and interval boundaries
 
-Authored paired Scala/PySpark teaching content. The default fixtures are tiny,local and deterministic. Runtime acceptance,logical correctness and learner understanding remain separate evidence.
+Authored paired Scala/PySpark teaching content. The default fixtures are tiny, local and deterministic. Runtime acceptance, logical correctness and learner understanding remain separate evidence.
 
 ## Level and prerequisites
 
-Intermediate; approximately 120 minutes. Direct design prerequisites: `spark-017`. The prepared baseline is Spark 4.0.1,Scala binary2.13,JDK 17 and Python 3.12. Read the [execution baseline](../execution-baseline.md); a proposed future tuple is not a runtime receipt.
+Intermediate; approximately 105 minutes. Direct prerequisites: `spark-017`. The prepared baseline is Spark 4.0.1, Scala binary 2.13, JDK 17 and Python 3.12. Read the [execution baseline](../execution-baseline.md).
 
 ## How to run this lesson
 
-Open `spark-018` in the classroom and choose the Scala or PySpark implementation you understand. Prepare only its fixed `spark-local-scala` or `spark-local-python` profile,save your pad and run the complete source. Scala stages as `Main.scala` with `object Main`; Python stages as `main.py` with a main guard. Each program creates its own local[2] session,disables the UI,binds the driver to loopback and stops the session in finally. No external dataset,package download,JDBC connection or cloud service is requested.
+Open `spark-018` in the classroom and choose the Scala or PySpark implementation you understand. Prepare only its fixed `spark-local-scala` or `spark-local-python` profile, save your pad and run the complete source. Scala stages as `Main.scala` with `object Main`; Python stages as `main.py` with a main guard. Each program creates its own local[2] session, disables the UI, binds the driver to loopback and stops the session in finally. No external dataset, package download, JDBC connection or cloud service is requested.
 
 The [Scala learner](../lessons/spark-018.scala) and [PySpark learner](../lessons/spark-018.py) run two complete demonstrations and retain six explicit task stubs. Use the [explained solutions](../solutions/spark-018_solutions.md) only after an attempt or an explicit worked comparison; the [Scala reference](../solutions/spark-018_solution.scala) and [PySpark reference](../solutions/spark-018_solution.py) contain complete assertions. A bounded collect is used only for the declared tiny fixture; do not copy it onto an unbounded or large production table.
 
 ## Learning objectives
 
 - Distinguish an instant from a local timestamp and define event windows with explicit time-zone policy.
-- State the input and output grain,schema,NULL policy and ordering before executing a transformation.
-- Compare each language implementation with independent literal expectations,not only with the other implementation.
+- State the input and output grain, schema, NULL policy and ordering before executing a transformation.
+- Compare each language implementation with independent literal expectations, not only with the other implementation.
 
 ## Vocabulary and concepts
 
@@ -169,7 +169,7 @@ Return event_id, text, event_time by parsing the declared offset pattern yyyy-MM
 
 Return ordered(event_id, formatted_clock) pairs for a requested zone, formatting yyyy-MM-dd HH: mm: ss. Set the zone only during materialization and restore the previous setting in finally.
 
-**Expected result/shape:** Events 2 and 3 render 08:30 and 09:30 underUTC but both 01:30 underAmerica/Los_Angeles. Session zone is UTC afterward.
+**Expected result/shape:** Events 2 and 3 render 08:30 and 09:30 under UTC but both 01:30 under America/Los_Angeles. Session zone is UTC afterward.
 
 **Verify:** Assert both full clock strings for IDs 2/3 and the restored session configuration.
 
@@ -177,9 +177,9 @@ Return ordered(event_id, formatted_clock) pairs for a requested zone, formatting
 
 ### Exercise 3: Filter a complete local day with instant boundaries
 
-Select events in the half-open interval[2024-11-03T07:00:00Z,2024-11-04T08:00:00Z). Return all event columns.
+Select events in the half-open interval [2024-11-03T07:00:00Z,2024-11-04T08:00:00Z). Return all event columns.
 
-**Expected result/shape:** Ordered event IDs[1,2,3,5]. Lower-bound ID 1 included, upper-bound ID 4 excluded and prior-second ID 6 excluded.
+**Expected result/shape:** Ordered event IDs [1, 2, 3, 5]. Lower-bound ID 1 included, upper-bound ID 4 excluded and prior-second ID 6 excluded.
 
 **Verify:** Assert the exact ID set and the 25-hour boundary duration; do not use an inclusive BETWEEN.
 
@@ -187,7 +187,7 @@ Select events in the half-open interval[2024-11-03T07:00:00Z,2024-11-04T08:00:00
 
 ### Exercise 4: Keep an unresolved local timestamp as local fields
 
-Under bothUTC and America/Los_Angeles, cast 2024-11-03 01:30:00 explicitly to TIMESTAMP_NTZ, inspect its schema and render it as a string. Restore the prior zone.
+Under both UTC and America/Los_Angeles, cast 2024-11-03 01:30:00 explicitly to TIMESTAMP_NTZ, inspect its schema and render it as a string. Restore the prior zone.
 
 **Expected result/shape:** Both outputs are 2024-11-03 01:30:00 and the type is timestamp_ntz. No epoch or unique instant is claimed.
 
@@ -221,11 +221,11 @@ Do not confuse a timestamp's displayed timezone with its original textual offset
 
 ## Self-check
 
-Explain the contract of `parseInstants` / `parse_instants` without reading its solution. Trace the specified boundary case,then explain the final exercise's evidence and limitation. Identify where a transformation builds a plan and where an action requests execution. Retain exact values or operator evidence rather than treating a successful process exit as proof of the whole learning objective.
+Explain the contract of `parseInstants` / `parse_instants` without reading its solution. Trace the specified boundary case, then explain the final exercise's evidence and limitation. Identify where a transformation builds a plan and where an action requests execution. Retain exact values or operator evidence rather than treating a successful process exit as proof of the whole learning objective.
 
 ## Next step
 
-Use the [course route](../README.md) to continue. Paired-language agreement is useful only when both outputs also satisfy the independent fixture contract. Keep runtime/profile receipts separate from any cluster-performance or production-recovery claim.
+Use the [course route](../README.md) to continue. Paired-language agreement is useful only when both outputs also satisfy the independent fixture contract. A successful local run is not evidence of cluster performance or production recovery.
 
 ## Primary sources and official APIs
 
@@ -241,8 +241,8 @@ Use the [course route](../README.md) to continue. Paired-language agreement is u
 
 ```text
 Use $guide-ds60sqlpy-learning to coach me through spark-018: Timestamp types, time zones and interval boundaries.
-Read courses/scala-spark/guides/spark-018.md and courses/scala-spark/lessons/spark-018.scala;the paired sources are courses/scala-spark/lessons/spark-018.scala and courses/scala-spark/lessons/spark-018.py.
-Direct prerequisites: spark-017. Explain the schema,row grain and new Scala/Python/Spark syntax,ask me to predict a concrete result,then inspect my attempt. Give one hint at a time,review exact result and boundary evidence,and ask retrieval questions in my own words. Do not read solutions/ until I ask or have made an honest attempt.
-Use only the prepared local[2] worker profile and owned job scratch. Do not download dependencies,start a remote service,reset existing checkpoints or alter unrelated learner work.
+Read courses/scala-spark/guides/spark-018.md and courses/scala-spark/lessons/spark-018.scala; the paired sources are courses/scala-spark/lessons/spark-018.scala and courses/scala-spark/lessons/spark-018.py.
+Direct prerequisites: spark-017. Explain the schema, row grain and new Scala/Python/Spark syntax, ask me to predict a concrete result, then inspect my attempt. Give one hint at a time, review exact result and boundary evidence, and ask retrieval questions in my own words. Do not read solutions/ until I ask or have made an honest attempt.
+Use only the prepared local[2] worker profile and owned job scratch. Do not download dependencies, start a remote service, reset existing checkpoints or alter unrelated learner work.
 Done when all six contracts have inspected evidence and I can explain the stated assumptions and a meaningful failure case.
 ```

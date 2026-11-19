@@ -1,7 +1,7 @@
 {
   "language": "markdown",
   "runtime": "reading",
-  "level": "intermediate",
+  "level": "advanced",
   "minutes": 75,
   "prerequisites": ["apache-021", "apache-019", "rust-001"],
   "concepts": ["language bindings", "native Rust API", "version compatibility", "lazy actions"],

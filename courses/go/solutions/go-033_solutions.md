@@ -8,9 +8,11 @@ A repository boundary separates business operations from database mechanics. The
 
 A callback receiving a transaction-local value can stage changes before committing them to the outer state. An error aborts the staged changes. In a real database/sql adapter, begin with BeginTx(ctx, options), defer Rollback, execute parameterized statements through tx, and inspect Commit errors. SQL syntax and placeholder conventions depend on the selected driver. Never construct SQL by interpolating untrusted values. A transaction whose commit outcome is unknown cannot safely be replayed without an idempotency contract.
 
-## 1. Commit a valid change
+## 1. Commit a valid change: change one input
 
-Transfer 3 between balances 5 and 5 in a staged transaction.
+Copy worked example 1 into a scratch pad and change `s := Balances{A: 5, B: 5}` to `s := Balances{A: 6, B: 5}`. Before running, predict which check fails and which value it now sees; then run it and restore the original line.
+
+The unchanged code is worked example 1:
 
 ```go
 s := Balances{A: 5, B: 5}
@@ -18,13 +20,15 @@ err := transact(&s, func(t *Balances) error { t.A -= 3; t.B += 3; return nil })
 check(err == nil && s.A == 2 && s.B == 8, "commit")
 ```
 
-**Expected:** The committed balances are 2 and 8.
+**Expected:** The changed run panics with `commit` because `err == nil && s.A == 2 && s.B == 8` no longer holds. Restoring the original line brings back the worked observation: the committed balances are 2 and 8.
 
 The outer state changes only after the callback succeeds. This proves the local model policy, not database atomicity.
 
-## 2. Rollback an explicit failure
+## 2. Rollback an explicit failure: debug a regression
 
-Change staged state and return an error.
+A regression changed one token in worked example 2, so one line now reads `s := Balances{A: 6, B: 5}`. Run worked example 2 with that line, use the failure to locate the defect and repair it without changing the check.
+
+The unchanged code is worked example 2:
 
 ```go
 s := Balances{A: 5, B: 5}
@@ -32,7 +36,7 @@ err := transact(&s, func(t *Balances) error { t.A = 0; return errors.New("reject
 check(err != nil && s.A == 5, "rollback")
 ```
 
-**Expected:** The outer balances remain unchanged.
+**Expected:** Before the repair the program panics with `rollback`; after it the line reads `s := Balances{A: 5, B: 5}` again and the outer balances remain unchanged.
 
 A staged mutation is not a committed mutation. The distinction is visible because the model uses a separate value copy.
 

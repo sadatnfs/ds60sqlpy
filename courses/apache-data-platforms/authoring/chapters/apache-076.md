@@ -10,14 +10,21 @@ This split is useful for distributing large data without routing all bytes
 through the sharing control service. It also introduces separate failure and
 security boundaries. Service credentials, URL authorization, network egress,
 file availability and file-format compatibility must each be considered. A
-control endpoint returning200 is therefore weaker evidence than a completed
+control endpoint returning 200 is therefore weaker evidence than a completed
 row-level read.
 
 The prepared portable client implements actual basic unpartitioned Parquet responses with
-minReaderVersion1. It requires verified HTTPS, rejects redirects, restricts data
+`minReaderVersion` 1. It requires verified HTTPS, rejects redirects, restricts data
 hosts to an explicit allowlist and keeps bearer credentials off object requests.
 It limits response size, number of files, aggregate bytes and materialized rows.
 These are tutorial safeguards, not a full general-purpose sharing implementation.
+
+**Execution boundary.** These reads need a prepared reference server. The client
+code that runs against it is in the project: after the listings, it requests the
+pinned version and refuses any protocol other than `minReaderVersion` 1 before it
+fetches a data file:
+
+<!-- include: projects/delta-sharing/client.py from="_, metadata_headers, metadata_body = control(" to="Pinned table version was not confirmed" python -->
 
 ## Worked case A: read the exact bounded table
 
@@ -27,7 +34,7 @@ version response, reads the permitted URLs and decodes Parquet with PyArrow.
 It projects id, region and amount and compares exact ordered rows with the
 independent three-order oracle.
 
-A total amount of20 and count of3 provide useful cross-checks, but neither
+A total amount of 20 and a count of 3 provide useful cross-checks, but neither
 uniquely identifies the source rows. Retain the exact logical IDs and values.
 The evidence can record file count, data bytes and selected table version without
 storing signed URLs. Those URLs are transient capabilities, not durable public

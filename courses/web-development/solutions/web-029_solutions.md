@@ -1,51 +1,43 @@
 # web-029: explanatory solutions
 
-Compare after your own attempt or an explicit solution reveal. This file explains the supplied deterministic fixtures. It does not claim that a learner or a production deployment passed.
-
-## Why the mechanism works
-
-An origin is generally a combination of scheme, host and port. The browser uses origins to separate access to data and documents. The same-origin policy is not a complete application security system; a server still needs authentication, authorization and deliberate cross-origin behavior. CORS is a protocol for relaxing some browser response-reading restrictions, not a mechanism that makes an unsafe endpoint safe.
-
-Injection occurs when data is interpreted as code or structure in a context where it should remain data. textContent avoids HTML parsing for text, while building an href still requires a separate URL policy. Content Security Policy can reduce what a document may load or execute, but it is a defense layer rather than a replacement for correct output handling. The classroom preview is deliberately isolated and network restricted.
-
-Treat rendering contexts separately: HTML text, quoted HTML attribute, URL, JavaScript and CSS each have different rules. This reference renders an attack-shaped string only as text. No attack is performed against another site. A sandboxed iframe can have an opaque origin, so do not assume localStorage, cookies or a same-origin parent API exists inside the preview.
+Open this after your own attempt. Each answer explains the lesson's synthetic fixtures; it does not show that your work or a deployment passed. The mechanism is explained in `courses/web-development/guides/web-029.md`.
 
 ## Exercise 1: Compare origins for the same host on two different ports.
 
-Different ports form different origins even when the host matches.
+**Expected answer:** Different ports form different origins even when the host matches.
 
-Trace the smallest example before editing. Name which values are source and which are observations.
+**Why:** An origin is the triple of scheme, host and port, so a different port is a different origin.
 
 ## Exercise 2: Render an angle-bracket string safely as visible text.
 
-No extra element or event handler is created.
+**Expected evidence:** No extra element or event handler is created.
 
-Change only the named feature. Compare with the unchanged example and explain any unaffected behavior.
+**Why:** textContent creates a text node, so the angle brackets display as characters and no img element or handler is created.
 
 ## Exercise 3: Build a small rendering demo that separates text handling from URL policy.
 
-Plain text remains data and navigation candidates pass an explicit scheme decision.
+**Expected evidence:** Plain text remains data and navigation candidates pass an explicit scheme decision.
 
-Sketch the structure or data contract first. Reuse the mechanism from the examples without copying the reference.
+**Why:** Text needs safe insertion, while URLs need an explicit allowlist of schemes before they become navigation targets.
 
 ## Exercise 4: Explain why CORS is not authorization.
 
-Non-browser clients can still send requests, and the server must enforce permissions.
+**Expected answer:** Non-browser clients can still send requests, and the server must enforce permissions.
 
-Keep the failing input. Identify the first layer where the observed result differs from the intended contract.
+**Why:** CORS only controls which browser pages may read responses; it does not stop requests, so the server must check permissions.
 
 ## Exercise 5: Inspect the preview without relying on cookies or parent-window access.
 
-The lesson remains functional within its isolated local contract.
+**Expected evidence:** The lesson remains functional within its isolated local contract.
 
-Predict the boundary before running it. Add an explicit check or manual observation that would detect a regression.
+**Why:** The sandboxed preview has no cookies or parent access, so a correct lesson works without them.
 
 ## Exercise 6: Explain the separate roles of escaping, validation, CSP and sandboxing.
 
-They address contextual interpretation, accepted values, document capabilities and isolation respectively.
+**Expected answer:** They address contextual interpretation, accepted values, document capabilities and isolation respectively.
 
-Explain your choice to someone who has not seen the code. Include one limitation and the evidence needed to remove it.
+**Why:** Escaping stops data from being interpreted as code in one context, validation limits accepted values, CSP limits what the page may load or run, and sandboxing isolates a document's capabilities.
 
-## Reference comparison and limits
+## Reference comparison
 
-Read the separate executable reference, where supplied, only after retaining your attempt. Compare structure and decisions rather than matching every identifier. A different implementation is acceptable when it satisfies the same behavior, preserves accessibility and rejects the same invalid cases. The checked reference uses tiny synthetic inputs so that each transformation can be inspected. It is not a ready-to-deploy authenticated application. Server lifecycle, persistence, concurrency and security require their own integration evidence.
+Open `courses/web-development/solutions/web-029_solution.html` only after saving your attempt, and compare decisions rather than identifiers. A different implementation is acceptable when it shows the same behavior and rejects the same invalid cases. The reference checks only its named synthetic cases; its success message is not an accessibility audit or proof of responsive behavior at every size.

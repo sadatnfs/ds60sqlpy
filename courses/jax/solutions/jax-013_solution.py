@@ -84,11 +84,11 @@ def main():
     else:
         raise AssertionError("active sentinel accepted")
 
-    # Case 8: Compile the admitted calculation
+    # Case 8: Compile the validated calculation
     admit(logits, targets, active)
     close(jax.jit(token_mean)(logits, targets, active), math.log(3.0))
 
-    print("jax-013" + ": 8 asserted cases passed")
+    print("jax-013: 8 asserted cases passed")
 
 
 if __name__ == "__main__":

@@ -4,13 +4,13 @@ import numpy as np
 
 
 def verify():
-    # Exercise 1: Compute the full-precision reference
+    # Worked example A: Compute the full-precision reference
     w = np.array([[0.1, -0.9], [1.7, -0.2]])
     x = np.array([1.0, -2.0])
     reference = w @ x
     np.testing.assert_allclose(reference, [1.9, 2.1], atol=1e-12, rtol=0)
 
-    # Exercise 2: Quantize one shared scale
+    # Worked example B: Quantize one shared scale
     scale = np.abs(w).max() / 127
     raw = np.rint(w / scale)
     q = np.clip(raw, -127, 127).astype(np.int8)
@@ -42,6 +42,18 @@ def verify():
     saturated = np.count_nonzero((rounded < -127) | (rounded > 127))
     assert saturated == 1
     np.testing.assert_array_equal(np.rint([0.5, 1.5, 2.5]), [0, 2, 2])
+
+    # Exercise 1: Quantize a second matrix
+    w2 = np.array([[0.5, -1.2], [0.25, 2.0]])
+    scale2 = np.abs(w2).max() / 127
+    q2 = np.clip(np.rint(w2 / scale2), -127, 127).astype(np.int8)
+    np.testing.assert_array_equal(q2, [[32, -76], [16, 127]])
+    assert scale2 == 2 / 127
+
+    # Exercise 2: Predict the reconstruction error
+    err = np.abs(q2 * scale2 - w2).max()
+    np.testing.assert_allclose(err, 0.5 / 127, atol=1e-12, rtol=0)
+    assert err <= scale2 / 2
     return {"checks": 6, "status": "passed"}
 
 

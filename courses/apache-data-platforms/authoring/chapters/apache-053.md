@@ -28,6 +28,16 @@ The TWO-level read must fail with the actual insufficient-replica condition;
 the client checks the required and available replica counts. An unrelated driver
 exception does not count as the intended negative observation.
 
+The consistency level is set per statement. The check reads the same partition at
+ONE and QUORUM, then requires a TWO read to fail with the driver's `Unavailable`
+error:
+
+<!-- include: projects/cassandra/client.py from='for consistency in [ConsistencyLevel.ONE' to='raise AssertionError("Two-replica' python -->
+
+With one replica, a quorum is \(\lfloor 1/2 \rfloor + 1 = 1\) replica, so QUORUM
+succeeds while TWO needs two live replicas and reports `required_replicas` 2 and
+`alive_replicas` 1.
+
 This is useful preparation for understanding consistency without requiring a
 large local machine. It establishes the API and arithmetic boundary while
 explicitly excluding replication. A stopped single node makes its service unavailable.

@@ -217,7 +217,7 @@ For the supplied fixture, name the input unit, the intermediate state and the fi
 
 ## Exercises
 
-1. **Execute a bounded grouped mean.** Use rowsA 1, A3, B10 and the admittedgroup_mean request.
+1. **Execute a bounded grouped mean.** Use rows A1, A3, B10 and the admitted group_mean request.
    **Expected:** A count 2 mean 2; B count 1 mean 10.
    **Verify:** Save the assertion results for exercise 1, including A count 2 mean 2; B count 1 mean 10.
 

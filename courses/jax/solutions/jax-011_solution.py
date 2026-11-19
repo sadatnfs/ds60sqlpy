@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import math
 import numpy as np
 import jax
 import jax.numpy as jnp
@@ -73,7 +72,7 @@ def main():
     close(last, [2.0, 4.0])
     assert history.shape == (2, 2)
 
-    print("jax-011" + ": 8 asserted cases passed")
+    print("jax-011: 8 asserted cases passed")
 
 
 if __name__ == "__main__":

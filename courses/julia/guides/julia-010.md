@@ -8,7 +8,7 @@ Use owned types to represent data contracts and distinguish immutable bindings f
 
 ## Classroom execution
 
-Choose **Julia language and scientific computing** in `/classroom`, open this unit, and select its prepared `julia` runtime. The worker starts a fresh `main.jl` process with two Julia threads, a fixed package environment, no startup file and offline package settings. Both worked examples are complete under that environment. Save your current pad before replacing it. No package, model or dataset is fetched by a lesson.
+Open `julia-010` in `/classroom` with its prepared `julia` runtime. Worked case A (a measurement constructor) and worked case B (mutable fields inside an immutable object) are complete programs: save your current pad, paste one of them and press Run. The learner file contains the six investigations below; the explained reference ends by printing `julia-010: all reference checks passed`. The [course overview](../README.md) describes the shared runtime: a fresh offline `main.jl` process with two threads and a fixed package environment.
 
 ## A type can carry a data contract
 
@@ -169,4 +169,4 @@ Add a constructor with a default unit in an owned copy.
 
 ## Study companion
 
-Use the repository learning-companion skill with this lesson ID, your prediction and your actual source/output. Ask for a diagnosis of the first incorrect type, shape, state transition or assumption. Keep observed execution distinct from a timing claim, inferred mathematical result or external deployment.
+A repository-aware assistant with the learning-companion skill can review `julia-010` with you. Give it your prediction for one investigation, your source and the actual output, and ask it to find the first incorrect assumption about struct, constructor, mutable struct, invariant or nested state.

@@ -5,12 +5,12 @@ import tensorflow as tf
 
 
 def verify():
-    # Exercise 1: Observe batches
+    # Worked example A: Observe batches
     ds = tf.data.Dataset.from_tensor_slices((np.arange(5), np.arange(1, 6, dtype="float32")))
     batches = list(ds.batch(2).as_numpy_iterator())
     assert [len(ids) for ids, values in batches] == [2, 2, 1]
 
-    # Exercise 2: Apply training statistics
+    # Worked example B: Apply training statistics
     mean = np.mean([1.0, 2.0, 3.0])
     centered = ds.map(lambda i, v: (i, v - tf.cast(mean, tf.float32)))
     values = np.array([float(v) for i, v in centered.as_numpy_iterator()])
@@ -34,6 +34,23 @@ def verify():
     # Exercise 6: Check paired transformation
     scaled = ds.map(lambda i, v: (i, 2 * v))
     assert all(float(v) == 2 * (int(i) + 1) for i, v in scaled.as_numpy_iterator())
+
+    # Exercise 1: Replay a seeded shuffle
+    replay = ds.shuffle(5, seed=7, reshuffle_each_iteration=False)
+    first = [int(i) for i, v in replay.as_numpy_iterator()]
+    assert [int(i) for i, v in replay.as_numpy_iterator()] == first
+    rebuilt = tf.data.Dataset.from_tensor_slices(
+        (np.arange(5), np.arange(1, 6, dtype="float32"))
+    ).shuffle(5, seed=7, reshuffle_each_iteration=False)
+    assert [int(i) for i, v in rebuilt.as_numpy_iterator()] == first
+    assert sorted(first) == [0, 1, 2, 3, 4]
+    assert all(float(v) == int(i) + 1 for i, v in replay.as_numpy_iterator())
+
+    # Exercise 2: Predict a different batch size
+    sizes = [len(i) for i, v in ds.batch(3).as_numpy_iterator()]
+    kept = np.concatenate([i for i, v in ds.batch(3, drop_remainder=True).as_numpy_iterator()])
+    assert sizes == [3, 2]
+    assert kept.tolist() == [0, 1, 2]
     return {"checks": 6, "status": "passed"}
 
 

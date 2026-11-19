@@ -6,7 +6,7 @@ These answers explain the stated synthetic and scoped runtime contracts. Static 
 
 A PodDisruptionBudget, abbreviated PDB, constrains supported voluntary evictions of a selected application. It helps coordinate maintenance with the application's available replicas. It does not stop a machine from failing, guarantee scheduling capacity or make a directly deleted Pod survive. The distinction matters because the same observed lost replica can result from very different control paths.
 
-Our example selects app=hello and sets minAvailable1 while the Deployment desires two replicas. In a simplified healthy snapshot with both Pods available, one voluntary disruption can fit the budget. If only one is healthy, another disruption does not fit. The API status and eviction decision are authoritative for the actual moment, because readiness and in-progress disruptions can change between observations.
+Our example selects app=hello and sets minAvailable 1 while the Deployment desires two replicas. In a simplified healthy snapshot with both Pods available, one voluntary disruption can fit the budget. If only one is healthy, another disruption does not fit. The API status and eviction decision are authoritative for the actual moment, because readiness and in-progress disruptions can change between observations.
 
 The normal browser run does not drain Nodes or issue learner-controlled eviction requests. This advanced lab needs an exclusive multi-node lease and a host operation restricted to one owned worker Node. The application remains namespaced, but Node maintenance is a separate host-level capability with a deadline, cancellation and restoration plan.
 
@@ -20,7 +20,7 @@ A budget label should match the application it protects. Including an unrelated 
 
 Negative capacity is represented as no allowed disruptions. The live status can include additional controller bookkeeping, so this calculation is a prediction to compare with observations rather than an authorization token.
 
-**Expected:** Potential disruptions1, 0, 0 in the simplified model.
+**Expected:** Potential disruptions 1, 0, 0 in the simplified model.
 
 ## Exercise 3: Capture a denied eviction
 

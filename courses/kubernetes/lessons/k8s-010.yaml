@@ -1,3 +1,4 @@
+# k8s-010 starter. The learner starter sets requests equal to limits; Exercise 1 asks you to set the lower reference requests. Compare with the separate reference in courses/kubernetes/solutions/ only after your attempt.
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -39,8 +40,8 @@ spec:
             failureThreshold: 2
           resources:
             requests:
-              cpu: 10m
-              memory: 16Mi
+              cpu: 100m
+              memory: 64Mi
             limits:
               cpu: 100m
               memory: 64Mi
@@ -50,9 +51,15 @@ spec:
             capabilities:
               drop:
                 - ALL
-# Exercise 1: Read requests versus limits. Identify the source request/limit fields and explain their roles. Expected: 10m/16Mi requests and100m/64Mi limits in the baseline;requests influence placement,limits constrain runtime.
-# Exercise 2: Calculate the replica budget. Sum requests for two replicas and convert64Mi to bytes. Expected: 20m CPU,32Mi memory and67,108,864 bytes for64Mi.
-# Exercise 3: Reject invalid source budgets. Compare request200m with limit100m in a scratch source. Expected: Broker refuses requests greater than limits before creating resources.
-# Exercise 4: Diagnose quota versus scheduling. Match Forbidden/exceeded quota and Pending/FailedScheduling to their stages. Expected: Admission budget versus scheduler placement,with separate minimal investigations.
-# Exercise 5: Interpret memory failure. Review a scoped synthetic OOMKilled record and a generic exit137 record. Expected: OOMKilled is specific memory-enforcement evidence;exit137 alone is insufficient to prove that cause.
-# Exercise 6: Plan a bounded repair. Write a repair for one of the three failure records and its acceptance condition. Expected: One justified source/resource change,phase-specific success evidence and owned cleanup.
+# Exercise 1: Read requests versus limits. The starter sets requests equal to limits (100m CPU and 64Mi memory). Identify both mappings and explain their roles, then change the requests to 10m CPU and 16Mi memory.
+# My prediction and evidence:
+# Exercise 2: Calculate the replica budget. Sum requests for two replicas and convert 64Mi to bytes.
+# My prediction and evidence:
+# Exercise 3: Reject invalid source budgets. Compare request 200m with limit 100m in a scratch source.
+# My prediction and evidence:
+# Exercise 4: Diagnose quota versus scheduling. Match Forbidden/exceeded quota and Pending/FailedScheduling to their stages.
+# My prediction and evidence:
+# Exercise 5: Interpret memory failure. Review a scoped synthetic OOMKilled record and a generic exit 137 record.
+# My prediction and evidence:
+# Exercise 6: Plan a bounded repair. Write a repair for one of the three failure records and its acceptance condition.
+# My prediction and evidence:

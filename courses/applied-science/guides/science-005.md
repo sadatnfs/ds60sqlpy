@@ -1,6 +1,6 @@
 # science-005: Longitudinal interventions and the sequential g-formula
 
-Tutorial mode. Stage: beginner. Direct prerequisites: `science-001`, `statistics-science-008`.
+Tutorial mode. Stage: beginner. Direct prerequisites: `science-001`, `statistics-017`.
 
 ## Treatment-confounder feedback changes the analysis
 

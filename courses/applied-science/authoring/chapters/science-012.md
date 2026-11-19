@@ -20,11 +20,19 @@ Now treat cause-two events as censoring and compute one minus a cause-one Kaplan
 
 Cause-specific regression can still be useful, but predicted risks must combine the relevant cause-specific hazards. A subdistribution-hazard model uses a different risk-set construction and parameter interpretation. Choosing between them should follow the target and scientific assumptions, not a rule that one software command is always preferable.
 
-## Worked case 2: diagnose a time pattern in relative hazards
+## Worked case 2: test whether one coefficient fits two periods
 
-The final fixture contains a sequence of residual-like values that falls systematically with event time. The code calculates their strong negative correlation with time. These are deliberately constructed values, labeled `schoenfeld_style_trend`, rather than residuals from a fitted external dataset.
+The second fixture simulates 400 units with a binary covariate whose log hazard ratio is \(+1\) before time 1 and \(-1\) afterwards. Each unit's event time comes from inverting its piecewise-constant cumulative hazard, and every unit has an observed event. A single Cox model with one constant coefficient, fitted with statsmodels `PHReg`, reports a log hazard ratio of about 0.54. That number is a weighted compromise between two opposite effects; it describes neither period.
 
-In a Cox model, Schoenfeld residual diagnostics investigate whether the observed covariate contribution at event times differs from what the fitted risk-set model predicts. A systematic time pattern can challenge the constant-coefficient proportional-hazards assumption. A formal diagnostic needs the actual fitted residuals, their scaling and a suitable reference distribution; a simple correlation in this toy sequence is only a mechanism illustration.
+To test the constant-coefficient assumption directly, the program splits each unit's follow-up at time 1 into episodes. Every unit contributes \((0,\min(t,1)]\), with an event only if it failed by time 1, and a unit still at risk after time 1 contributes a second, delayed-entry episode \((1,t]\). The model then includes the covariate and its product with an after-split indicator:
+
+\[
+h(t\mid x)=h_0(t)\exp\{\beta_1x+\beta_2x\,\mathbf 1(t>1)\}.
+\]
+
+Here \(\beta_1\) is the log hazard ratio before time 1 and \(\beta_1+\beta_2\) the log hazard ratio afterwards, so \(\beta_2\) measures how far one constant coefficient fails to describe both periods. The fit gives \(\widehat\beta_1\approx0.86\) and \(\widehat\beta_2\approx-1.68\) with standard error about 0.30, a later log hazard ratio near \(-0.82\). The program asserts that the change is negative and more than three standard errors from zero. The estimates do not equal the generating values exactly because 400 simulated units give finite-sample error, and only 96 units remain at risk after time 1.
+
+Scaled Schoenfeld residuals are the usual graphical companion to this test: in a Cox model they compare each event's covariate value with its risk-set expectation, and their smoothed trend against time approximates how the coefficient changes. The episode-split interaction is the formal version of one such pattern, with a declared change point. Choosing the split after looking at the residuals would make the test optimistic, so a scientific analysis should state the candidate time pattern in advance.
 
 A lack of a visible pattern does not prove proportional hazards, especially with few events. It may be useful to estimate time interactions, stratify an appropriate variable or choose another model. Each alternative changes what can be interpreted directly. Stratification, for example, can allow different baseline hazards while sacrificing a single coefficient for the stratifying variable.
 

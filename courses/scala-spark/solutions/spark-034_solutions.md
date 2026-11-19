@@ -146,7 +146,7 @@ The independent recovery namespaces prevent one comparison query from consuming 
 
 Read either owned output as ordered(impression_id, click_id) pairs. After phase 1, compare inner and outer sinks with the two-pair literal oracle.
 
-**Expected:** Both sinks contain(i1, c1),(i3, c2). i2/NULL is absent because its possible match interval is not yet finalized. c3 and c4 produce no pair.
+**Expected:** Both sinks contain(i1, c1), (i3, c2). i2/NULL is absent because its possible match interval is not yet finalized. c3 and c4 produce no pair.
 
 ```scala
 def pairs(spark: SparkSession, root: Path, kind: String): Seq[(String, Option[String])] = {
@@ -172,7 +172,7 @@ def pairs(spark, root, kind):
     ]
 ```
 
-The exact identities expose both the key condition and the half-open temporal edge. The outer sink does not yet includei 2 because future eligibleB clicks are still possible under the policy. Returning from AvailableNow means the currently available files were processed, not that the business interval has become final by wall-clock passage.
+The exact identities expose both the key condition and the half-open temporal edge. The outer sink does not yet includei 2 because future eligible B clicks are still possible under the policy. Returning from AvailableNow means the currently available files were processed, not that the business interval has become final by wall-clock passage.
 
 **Verification evidence:** Assert exact pair lists and absence of prematurei 2/NULL; do not rely only on output count 2.
 
@@ -180,7 +180,7 @@ The exact identities expose both the key condition and the half-open temporal ed
 
 Publish distinct-key 00:30 advancers to both sources, rerun both compatible queries and extract actual watermark/state-removal evidence.
 
-**Expected:** Inner remains two pairs. Outer becomes(i1, c1),(i2, NULL),(i3, c2). Actual watermark reaches at least 00:25 and state removal is positive; the new advancer impression remains pending.
+**Expected:** Inner remains two pairs. Outer becomes(i1, c1), (i2, NULL), (i3, c2). Actual watermark reaches at least 00:25 and state removal is positive; the new advancer impression remains pending.
 
 ```scala
 def progressEvidence(progress: Seq[StreamingQueryProgress]): (Long, Seq[String], Long) = {
@@ -210,7 +210,7 @@ def progress_evidence(progress):
     )
 ```
 
-The two-sided advancers move the conservative progress boundary far enough to close old eligibility intervals. The output and state-removal receipt together establish why the unmatchedNULL row appears now. The administrative impression isnewer and remains pending, so the test does not equate finite source exhaustion with finalization of every left record.
+The two-sided advancers move the conservative progress boundary far enough to close old eligibility intervals. The output and state-removal receipt together establish why the unmatched NULL row appears now. The administrative impression isnewer and remains pending, so the test does not equate finite source exhaustion with finalization of every left record.
 
 **Verification evidence:** Assert the complete outer ledger, input 2 for each new run, observed progress boundary and removed-state count.
 
@@ -276,4 +276,4 @@ The negative control distinguishes an event-time retention declaration from an a
 
 ## Execution and interpretation
 
-Run the complete reference in its prepared fixed worker. The small fixture is constructed inside the program,so opening a lesson does not fetch data. A final success line is printed only after the reference assertions complete. Plan observations,partition evidence and resource measurements apply to the actual local configuration; they do not establish cluster-scale performance. Session cleanup is explicit,and any additional owned file/query lifecycle is described in the lesson.
+Run the complete reference in its prepared fixed worker. The small fixture is constructed inside the program, so opening a lesson does not fetch data. A final success line is printed only after the reference assertions complete. Plan observations, partition evidence and resource measurements apply to the actual local configuration; they do not establish cluster-scale performance. Session cleanup is explicit, and any additional owned file/query lifecycle is described in the lesson.

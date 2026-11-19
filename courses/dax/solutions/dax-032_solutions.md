@@ -18,7 +18,7 @@ An empty January 1 date does not disappear from the calendar set. It simply cont
 
 - The current date contains S5 and revenue 20.
 - The YTD set begins January 1 and ends January 3.
-- S4 and S 5 contribute 27 +20 =47.
+- S4 and S5 contribute 27 + 20 = 47.
 
 ### Case B: An anchor in February
 
@@ -32,13 +32,13 @@ The measure reevaluates over an expanded set, not over the text currently visibl
 
 - S8 contributes 36 on the current day.
 - The YTD set includes January plus February 1 through 3.
-- S4..S8 sum 27 +20 +20 +20 +36 =123.
+- S4..S8 sum 27 + 20 + 20 + 20 + 36 = 123.
 
 ## Explained practice answers
 
 ### Exercise 1
 
-Predict YTD at January 2,2025.
+Predict YTD at January 2, 2025.
 
 YTD is 27.
 

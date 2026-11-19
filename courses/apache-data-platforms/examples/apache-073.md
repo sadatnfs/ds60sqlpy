@@ -17,7 +17,7 @@ bash run.sh apply
 bash run.sh check
 ```
 
-Check requires actual401/403 for a deliberately invalid fixture credential. A valid-principal authorization comparison and actual denied data-engine query remain independent tests.
+Check requires an actual 401 or 403 for a deliberately invalid fixture credential. A valid-principal authorization comparison and actual denied data-engine query remain independent tests.
 
 Prepared payloads are not actual Atlas observations. Never place credentials or
 Authorization headers in notebooks, source, command arguments or receipts.

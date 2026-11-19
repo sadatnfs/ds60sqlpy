@@ -1,6 +1,6 @@
 # swift-019: explanation and comparison
 
-Attempt the six guide tasks before opening this comparison. The executable reference is [swift-019_solution.swift](swift-019_solution.swift). Its assertions are always active under the prepared classroom compile settings.
+Attempt the six guide tasks before opening this comparison. The executable reference is [swift-019_solution.swift](swift-019_solution.swift). It runs both worked examples and the reference answers below, and its assertions are always active under the prepared classroom compile settings.
 
 ## Why the two examples differ
 
@@ -8,21 +8,55 @@ Attempt the six guide tasks before opening this comparison. The executable refer
 
 **Hide representation with an opaque result:** The function selects one underlying result type while exposing its element relationship. The caller uses sequence behavior without naming the concrete array type.
 
-## Reason through the six tasks
+## Task answers
 
-1. **Predict and explain.** Trace the associated Item type through read.
+### Task 1: Predict and explain
 
-2. **Guided modification.** Add a String-producing conformance.
+Trace the associated Item type through read.
 
-3. **Independent construction.** Write a generic transformation preserving the producer item type.
+No separate reference answer has been written for this task. Example A is the evidence to compare with: The associated type relationship survives through the generic function. The generic consumer knows the produced value is an Int.
 
-4. **Diagnose a defect.** Explain why returning unrelated concrete types from one opaque-return function is invalid.
+### Task 2: Guided modification
 
-5. **Boundary evidence.** Test empty and nonempty opaque sequences.
+Add a String-producing conformance.
 
-6. **Transfer and justify.** Choose opaque output or existential storage for an API and document the preserved relationships.
+No separate reference answer has been written for this task. Start from Example B: The function selects one underlying result type while exposing its element relationship. The caller uses sequence behavior without naming the concrete array type.
 
-For tasks 1 and 2, use the checked values and mechanism trace in the two examples. For task 3, choose names that expose the input and result contract and retain the same invariants. For task 4, the diagnosed mistakes below supply a concrete wrong assumption: preserve its counterexample before repairing it. Task 5 needs an explicit expected value or documented rejection at the boundary, not just successful execution. For task 6, explain what changes in the new context and which part of the original mechanism remains applicable. Several representations may satisfy this transfer task; justify the choice rather than treating this reference as the only architecture.
+### Task 3: Independent construction
+
+Write a generic transformation preserving the producer item type.
+
+**Reference answer.** It runs as the `Task 3` block of the reference program.
+
+```swift
+func transformed<P: Producer>(_ producer: P, _ change: (P.Item) -> P.Item) -> P.Item {
+  change(producer.produce())
+}
+let value: Int = transformed(IntegerSource()) { $0 + 1 }
+precondition(value == 8)
+```
+
+**Observe:** Transforming the produced 7 gives 8, still an Int.
+
+The signature uses P.Item for both input and output, so the compiler guarantees the item type is preserved.
+
+### Task 4: Diagnose a defect
+
+Explain why returning unrelated concrete types from one opaque-return function is invalid.
+
+No reference answer has been written for this task yet. The wrong assumptions to look for are this lesson's pitfalls: Some does not mean any arbitrary type at each return. Existential containers can lose relationships needed by generic operations. Compiler diagnostics often point to a missing type relationship rather than a missing cast.
+
+### Task 5: Boundary evidence
+
+Test empty and nonempty opaque sequences.
+
+No reference answer has been written for this task yet. Write the expected value or documented rejection for each boundary before running it, and compare with the checks in Example A (Retain a produced type) and Example B (Hide representation with an opaque result).
+
+### Task 6: Transfer and justify
+
+Choose opaque output or existential storage for an API and document the preserved relationships.
+
+No single reference answer exists: several designs can satisfy this transfer task. Justify yours against the mechanism described below and the vocabulary entry **Associated type**, and state one limitation of your choice.
 
 ## Mechanism and diagnostic reasoning
 
@@ -36,4 +70,4 @@ Some does not mean any arbitrary type at each return. Existential containers can
 
 ## Review before continuing
 
-The reference checks the worked scenarios, including their boundary distinctions. Your independent and transfer artifacts may have additional checks. Compare observations rather than only source text. Preserve any new regression case you discover and explain why it would reject a plausible wrong implementation. External project steps require their own build and platform evidence and are not established by a portable reference passing.
+Run the reference and confirm that it prints `swift-019: passed`, then reconstruct one boundary case from memory and explain which check would reject a plausible wrong implementation. External project steps need their own build and platform evidence; a passing portable reference does not establish them.

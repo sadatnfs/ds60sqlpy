@@ -6,11 +6,11 @@ Intermediate, approximately 90 minutes. Direct prerequisites: `java-017`
 
 ## Learning objectives
 
-Explain test oracle, property, mutation test using a concrete program. Trace the normal execution, identify its boundary assumptions and make a failure case observable. The first investigation is Test clamp for values -2,0,3,9 under bounds 0..5. The final exercise transfers the mechanism to test a fresh transfer property.
+Write tests that fail on a broken implementation, including boundary, property and exception checks. Along the way, explain test oracle, property, mutation test using a concrete program. Trace the normal execution, identify its boundary assumptions and make a failure case observable. Exercises 1 and 2 start from the worked examples; the authored investigations begin with this task: For values -10 through 10, clamping an already clamped value leaves it unchanged. The final exercise transfers the mechanism to test a fresh transfer property.
 
 ## Purpose and mental model
 
-A useful test distinguishes correct behavior from a plausible mistake. Repeating the implementation formula in the expected value can reproduce the same bug on both sides. Use independent examples,boundary cases and properties that follow from the contract. A mutation test deliberately changes one behavior and checks that the tests detect it. Assertions are convenient in this course because the launcher enables-ea,but production test suites often use a dedicated framework so checks cannot be disabled accidentally. Tests should expose failures rather than catch every exception and print success.
+A useful test distinguishes correct behavior from a plausible mistake. Repeating the implementation formula in the expected value can reproduce the same bug on both sides. Use independent examples, boundary cases and properties that follow from the contract. A mutation test deliberately changes one behavior and checks that the tests detect it. Assertions are convenient in this course because the launcher enables-ea, but production test suites often use a dedicated framework so checks cannot be disabled accidentally. Tests should expose failures rather than catch every exception and print success.
 
 ## Vocabulary and concepts
 
@@ -37,7 +37,7 @@ The public class name and source filename must agree. Each worked example below 
 
 ## Syntax anatomy and execution trace
 
-A table-driven test stores inputs and expected outputs together,then runs the same checker over all cases. A property test checks a relation over several inputs,such as reversing twice restoring an array. An exception helper should verify the expected type and fail when no exception occurs. Keep test fixtures deterministic and avoid timing assumptions for concurrency. A test passing on one input says nothing about untested boundaries unless a valid general argument supports the claim.
+A table-driven test stores inputs and expected outputs together, then runs the same checker over all cases. A property test checks a relation over several inputs, such as reversing twice restoring an array. An exception helper should verify the expected type and fail when no exception occurs. Keep test fixtures deterministic and avoid timing assumptions for concurrency. A test passing on one input says nothing about untested boundaries unless a valid general argument supports the claim.
 
 ## Worked example / walkthrough
 
@@ -91,7 +91,7 @@ public class Main {
 }
 ```
 
-**Expected:** outputs 0,0,3,5.
+**Expected:** outputs 0, 0, 3, 5.
 
 ### Example B: Check a boundary failure
 
@@ -153,29 +153,29 @@ Read the source from the entry point and name each value before executing it. Id
 
 ## Exercises
 
-1. **Use independent table cases.** Test clamp for values -2,0,3,9 under bounds 0..5.
-   **Expected:** outputs 0,0,3,5.
-   **Verify:** Compare your assertion values or captured diagnostic with outputs 0,0,3,5.
+1. **Use independent table cases: change one input.** Copy Example A into a scratch `Main.java` and change `int[][] cases = { { -2, 0 }, { 0, 0 }, { 3, 3 }, { 9, 5 } };` to `int[][] cases = { { -2, 1 }, { 0, 0 }, { 3, 3 }, { 9, 5 } };`. Before running it with `java -ea Main`, predict which assertion fails and which value it now sees; then run it and restore the original line.
+   **Expected:** The changed run fails with an `AssertionError` from the assertion on `clamp(row[0], 0, 5) == row[1]`. Restoring the original line brings back the worked observation: outputs 0, 0, 3, 5.
+   **Verify:** Compare your written prediction with the reported `AssertionError` and its stack-trace line, and name the value that made `clamp(row[0], 0, 5) == row[1]` false. After restoring the line, the program completes without an `AssertionError` again.
 
-2. **Check a boundary failure.** Callclamp withlower5,upper2 and requireIllegalArgumentException.
-   **Expected:** exception observed.
-   **Verify:** Compare your assertion values or captured diagnostic with exception observed.
+2. **Check a boundary failure: debug a regression.** Introduce one deliberate defect into the code that Example B adds after Example A and explain which observation exposes it, then repair it.
+   **Expected:** The defective copy changes the observation; the repaired copy reproduces the worked observation: exception observed.
+   **Verify:** Keep the failing and the repaired runs and name the first statement whose value differs between them.
 
-3. **Test an idempotence property.** For values-10 through10,clamping an already clamped value leaves it unchanged.
-   **Expected:** all21 cases satisfyidempotence.
-   **Verify:** Compare your assertion values or captured diagnostic with all21 cases satisfyidempotence.
+3. **Test an idempotence property.** For values -10 through 10, clamping an already clamped value leaves it unchanged.
+   **Expected:** all 21 cases satisfy idempotence.
+   **Verify:** Keep an assertion equivalent to `clamp(once, 0, 5) == once`. As a control, change `int once = clamp(value, 0, 5);` to `int once = clamp(value, 0, 6);`: the run must fail with an `AssertionError` from the assertion on `clamp(once, 0, 5) == once`. Restore the line before continuing.
 
 4. **Detect a broken implementation.** Use a mutant that returns upper for values below lower and show the table rejects it.
    **Expected:** at least one mismatch.
-   **Verify:** Compare your assertion values or captured diagnostic with at least one mismatch.
+   **Verify:** Keep an assertion equivalent to `caught`. As a control, change `for (int[] row : cases) if (brokenClamp(row[0], 0, 5) != row[1]) caught = true;` to `for (int[] row : cases) if (brokenClamp(row[1], 0, 5) != row[1]) caught = true;`: the run must fail with an `AssertionError` from the assertion on `caught`. Restore the line before continuing.
 
-5. **Verify the exception checker itself.** Ask the helper to expect an exception from a successful action and catch itsAssertionError.
+5. **Verify the exception checker itself.** Ask the helper to expect an exception from a successful action and catch its AssertionError.
    **Expected:** checker fails when no exception is thrown.
-   **Verify:** Compare your assertion values or captured diagnostic with checker fails when no exception is thrown.
+   **Verify:** Keep an assertion equivalent to `checkerFailed`. As a control, change `checkerFailed = true;` to `checkerFailed = false;`: the run must fail with an `AssertionError` from the assertion on `checkerFailed`. Restore the line before continuing.
 
-6. **Test a fresh transfer property.** Reverse arrays oflength0,1,3 twice using a separate copy and compare with originals.
+6. **Test a fresh transfer property.** Reverse arrays of length 0, 1, 3 twice using a separate copy and compare with originals.
    **Expected:** all originals restored; input arrays unchanged.
-   **Verify:** Compare your assertion values or captured diagnostic with all originals restored; input arrays unchanged.
+   **Verify:** Keep an assertion equivalent to `first[0] == original[original.length - 1]`. As a control, change `if (original.length > 1) assert first[0] == original[original.length - 1];` to `if (original.length > 1) assert first[1] == original[original.length - 1];` inside it: the run must fail with an `AssertionError`, which shows the assertion can fail. Restore it.
 
 ## Common pitfalls and diagnosis
 
@@ -185,7 +185,14 @@ Do not replace a precise exception with a catch-all that returns a plausible def
 
 ## Progressive hints
 
-First reconstruct the values and identities in the worked example. Next isolate the line that changes the result when one input is altered. Finally compare the normal and failure paths with the stated contract. Use a small table of input, expected value, actual value and exception type. Ask for one hint about the first incorrect assumption before requesting the entire reference implementation.
+Read one hint at a time and attempt the exercise again before reading the next. Keep a small table of input, expected value, actual value and exception type. Ask for one hint about the first incorrect assumption before requesting the entire reference implementation.
+
+- **Exercise 1:** First restate the expected observation: outputs 0, 0, 3, 5. Then list the values read by `clamp(row[0], 0, 5) == row[1]` and trace each one from its declaration. Finally, compute the asserted value with `int[][] cases = { { -2, 1 }, { 0, 0 }, { 3, 3 }, { 9, 5 } };` in place before running.
+- **Exercise 2:** First restate the expected observation: exception observed. Then trace each value from its declaration to the observation. Finally, name one input that would change the observation.
+- **Exercise 3:** First restate the expected observation: all 21 cases satisfy idempotence. Then list the values read by `clamp(once, 0, 5) == once` and trace each one from its declaration. Finally, predict the effect of changing `int once = clamp(value, 0, 5);` to `int once = clamp(value, 0, 6);` before running anything.
+- **Exercise 4:** First restate the expected observation: at least one mismatch. Then list the values read by `caught` and trace each one from its declaration. Finally, predict the effect of changing `for (int[] row : cases) if (brokenClamp(row[0], 0, 5) != row[1]) caught = true;` to `for (int[] row : cases) if (brokenClamp(row[1], 0, 5) != row[1]) caught = true;` before running anything.
+- **Exercise 5:** First restate the expected observation: checker fails when no exception is thrown. Then list the values read by `checkerFailed` and trace each one from its declaration. Finally, predict the effect of changing `checkerFailed = true;` to `checkerFailed = false;` before running anything.
+- **Exercise 6:** First restate the expected observation: all originals restored; input arrays unchanged. Then list the values read by `first[0] == original[original.length - 1]` and trace each one from its declaration. Finally, name one input that would make `first[0] == original[original.length - 1]` false.
 
 ## Self-check and retrieval
 
@@ -197,7 +204,7 @@ Preserve the saved pad and the six exercise observations. Continue to the next l
 
 ## Sources and verification status
 
-[Official Java21 API or language reference](https://docs.oracle.com/en/java/javase/21/docs/api/index.html), reviewed2026-10-22. Examples and exercise fixtures are original course material. Use the [validation guide](../../../docs/validation.md) and CI artifacts for the exact revision and platform to inspect actual compile/run results. Authoring, parsing, compilation, execution and learner mastery are separate forms of evidence.
+[Official Java 21 API or language reference](https://docs.oracle.com/en/java/javase/21/docs/api/index.html), reviewed 2026-10-22. Examples and exercise fixtures are original course material. Use the [validation guide](../../../docs/validation.md) and CI artifacts for the exact revision and platform to inspect actual compile/run results. Authoring, parsing, compilation, execution and learner mastery are separate forms of evidence.
 
 ## Ask an AI tutor about this lesson
 
@@ -207,7 +214,7 @@ Read courses/java/guides/java-018.md and courses/java/lessons/java-018.java. Dir
 Explain the mechanism, ask for a prediction, review my attempt, give one hint,
 request compiler/runtime evidence, and ask a fresh retrieval question.
 Keep courses/java/solutions/ closed until I request comparison or show an attempt.
-Use Java21 and the declared offline fixture. Done when I can explain the state
+Use Java 21 and the declared offline fixture. Done when I can explain the state
 transitions, pass all six exercise contracts, diagnose one failure and solve a
 new boundary case without copying the solution.
 ```

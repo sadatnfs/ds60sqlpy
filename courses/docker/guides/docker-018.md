@@ -6,7 +6,7 @@ Intermediate; about 100 minutes, with additional time for the optional host expe
 
 ## Learning objectives
 
-Draw the DNS-to-request sequence. Design an internal-only database connection. Explain the difference between a configuration, an observed process and evidence of the application's behavior.
+Draw the DNS-to-request sequence. Design an internal-only database connection. Use bridge network, service DNS and container port accurately when you explain what you observed.
 
 ## Purpose, vocabulary and mental model
 
@@ -24,11 +24,11 @@ A DNS resolution failure, a refused connection and a valid HTTP error are differ
 
 ## How to use this lesson
 
-The classroom displays this guide and saves your worksheet. Its Run button does not control your Docker engine. Docker engine access is powerful host access, so the classroom deliberately receives no engine socket. Work through the supplied examples without starting anything, then use the optional host lab only in your own disposable project. Reading a command, parsing YAML and actually running the project are different forms of evidence.
+The classroom displays this guide and saves your worksheet, `courses/docker/lessons/docker-018.md`. Its Run button does not control your Docker engine. Docker engine access is powerful host access, so the classroom deliberately receives no engine socket. Work through the supplied examples without starting anything, then use the optional host lab only in your own disposable project. Reading a command, parsing YAML and actually running the project are different forms of evidence.
 
 Use Bash in Linux, macOS Terminal, or Ubuntu under WSL 2 on Windows. The supported engine runs Linux containers. The maintained fixture is `courses/docker/fixtures/compose-lab/`; its README explains copying it into a new ignored learner directory, checking the engine, building locally with visible logs, and using the fixed project name `ds60-docker-study`. The fixture uses port 18080 on host loopback. Stop if that project name or port belongs to unrelated work; choose a new project name consistently in your own copy. Never paste a command against a remote Docker context simply because it is currently selected.
 
-For Dockerfile examples, create a file named `Dockerfile` in a scratch project. YAML snippets describe a fragment unless explicitly called a complete file. Text transcripts are synthetic illustrations, not claims about your machine. Do not substitute a real password, token or private registry into a checked-in example.
+For Dockerfile examples, create a file named `Dockerfile` in a scratch project. YAML snippets describe a fragment unless explicitly called a complete file. Text transcripts are synthetic illustrations, not claims about your machine. Do not substitute a real password, token or private registry into a checked-in example. **How to use the lessons** in the [subject README](../README.md) collects these rules in one place.
 
 ## Worked example / walkthrough
 
@@ -56,58 +56,50 @@ app healthcheck: 127.0.0.1:8080
 
 ## Six progressive exercises
 
+For each exercise, name the object involved and the phase of its lifetime before changing anything, then vary only the condition the task names. Exercises that ask you to predict, explain, compare or diagnose keep their answers in the solutions file; the others show the evidence to look for.
+
 ### Exercise 1: Predict the name a peer uses for the app.
 
-**Expected evidence:** The Compose service name app.
-
-**Hint:** Identify the object and the phase of its lifetime before changing it. Use the relevant worked example, then vary only the condition named in this task.
+**Hint:** Look at the service keys in compose.yaml.
 
 ### Exercise 2: Explain why a peer should not use host loopback.
 
-**Expected evidence:** Its loopback refers to the peer itself.
-
-**Hint:** Identify the object and the phase of its lifetime before changing it. Use the relevant worked example, then vary only the condition named in this task.
+**Hint:** Ask whose loopback 127.0.0.1 is inside the peer.
 
 ### Exercise 3: Draw the DNS-to-request sequence.
 
-**Expected evidence:** Resolve app, connect to container port, send HTTP request, inspect body.
-
-**Hint:** Identify the object and the phase of its lifetime before changing it. Use the relevant worked example, then vary only the condition named in this task.
+**Hint:** Separate name resolution, the connection and the HTTP exchange.
 
 ### Exercise 4: Diagnose DNS success with connection refusal.
 
-**Expected evidence:** The destination resolved but no reachable listener accepted that port.
-
-**Hint:** Identify the object and the phase of its lifetime before changing it. Use the relevant worked example, then vary only the condition named in this task.
+**Hint:** Check the port the app listens on inside its container.
 
 ### Exercise 5: Predict a reconnect after app recreation.
 
-**Expected evidence:** A fresh lookup and connection can reach the new instance.
-
-**Hint:** Identify the object and the phase of its lifetime before changing it. Use the relevant worked example, then vary only the condition named in this task.
+**Hint:** Ask whether the service name or the IP address stays stable.
 
 ### Exercise 6: Design an internal-only database connection.
 
 **Expected evidence:** Use service DNS and container port without host publication.
 
-**Hint:** Identify the object and the phase of its lifetime before changing it. Use the relevant worked example, then vary only the condition named in this task.
+**Hint:** Decide whether a person on the host needs to reach the database at all.
 
 ## Common mistakes and diagnosis
 
-Start with the smallest observation that separates two plausible causes. An image inspection answers questions about the packaged filesystem and configuration; container inspection adds runtime mounts, network attachment and exit status. An application request adds another layer of evidence. A healthy container can still serve the wrong application result. Preserve the original failure and the exact changed field before retrying.
+Connecting from one container to another through `localhost`. Using the host port instead of the container port between services. Hard-coding a container IP that changes when the service is recreated.
 
-The boundary case in this chapter is: Diagnose DNS success with connection refusal. Use its expected observation, The destination resolved but no reachable listener accepted that port., to avoid treating a successful command as proof of the wrong claim. Keep source edits in your own copy. Do not make a container privileged, mount the engine socket, disable all checks or delete every volume to make an example succeed.
+Exercise 4 is this chapter's boundary case: Diagnose DNS success with connection refusal. Start with the smallest observation that separates two plausible causes. An image inspection answers questions about the packaged filesystem and configuration; container inspection adds runtime mounts, network attachment and exit status; an application request adds another layer, and a healthy container can still serve the wrong result. Preserve the original failure and the exact changed field before retrying. Keep source edits in your own copy. Do not make a container privileged, mount the engine socket, disable all checks or delete every volume to make an example succeed.
 
 ## Retrieval, transfer and next steps
 
-Close the explanations and draw the path from source files to image to container to the observation relevant here. Reconstruct the second worked example with one different value and predict what changes. Explain which state survives process restart, container recreation and image rebuild. If none of those operations applies to this mechanism, explain why.
+Close the explanations and draw the path from source files to image to container to the observation relevant here, using bridge network, service DNS, container port and network vantage point. Reconstruct worked example 2 (Contrast destination scopes) with one different value and predict what changes. Explain which state survives process restart, container recreation and image rebuild, or why none of those operations applies to this mechanism.
 
-Before proceeding, retain six evidence records. For the optional host project, use `docker compose -p ds60-docker-study down` from the fixture copy to stop its containers and remove its ordinary network. This command preserves named volumes. Volume deletion is a separate deliberate reset of that disposable lab after a backup or export, never a general cleanup step. The fixture README describes its exact scoped reset.
+When a host session ends, run `docker compose -p ds60-docker-study down` from your fixture copy. It removes the project's containers and network but keeps named volumes; deleting a volume is a separate, deliberate reset described in the fixture README.
 
 ## Primary references
 
-- [Official reference 1](https://docs.docker.com/engine/network/drivers/bridge/)
-- [Official reference 2](https://docs.docker.com/compose/how-tos/networking/)
+- [Bridge network driver](https://docs.docker.com/engine/network/drivers/bridge/)
+- [Networking in Compose](https://docs.docker.com/compose/how-tos/networking/)
 
 ## Ask an AI tutor about this lesson
 

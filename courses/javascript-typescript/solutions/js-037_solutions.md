@@ -24,11 +24,13 @@ Bounded concurrency limits simultaneous owned work. Promise.all over a huge inpu
 
 retry receives an operation, an injected wait, an injected random function and an AbortSignal. It checks cancellation before each attempt, retries only the explicit transient category and throws the final error on exhaustion. The delay bound is min(cap, base times 2 to the attempt index), and jitter scales it by a sample in [0,1). The bounded map shares a synchronous next-index counter across async workers; each takes an index before awaiting its operation, so no two workers claim the same item.
 
-## Exercise 1: Retry transient failures with deterministic full jitter
+## Exercise 1: Retry transient failures with deterministic full jitter: change one input
 
-Task: Fail twice transiently, then succeed, using random value 0.5 and a recording wait.
+Task: Copy Example A into a scratch `main.mjs` and change `let attempts = 0;` to `let attempts = 1;`. Before running it, predict which check fails and which value it now sees; then run it and restore the original line.
 
 The injected wait records policy without sleeping. The result demonstrates classification and arithmetic, not elapsed network latency or a live outage recovery.
+
+The unchanged code is the exercise block of Example A:
 
 ```javascript
 let attempts = 0;
@@ -51,15 +53,17 @@ assert.equal(attempts, 3);
 assert.deepEqual(waits, [50, 100]);
 ```
 
-**Expected:** three attempts; delays 50 and 100; result ready.
+**Expected:** The changed run fails with an `AssertionError` at the check `assert.deepEqual(waits, [50, 100])`. Restoring the original line brings back the worked observation: three attempts; delays 50 and 100; result ready.
 
-**Verify:** Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.
+**Verify:** Compare your written prediction with the reported `AssertionError`, including its actual and expected values, and name the value that made `assert.deepEqual(waits, [50, 100])` fail. After restoring the line, the program prints its `{"checks":1,"status":"passed"}` receipt again.
 
-## Exercise 2: Stop on permanent failure and on exhausted attempts
+## Exercise 2: Stop on permanent failure and on exhausted attempts: diagnose an edited check
 
-Task: Use one permanent failure, then an always-transient operation with a three-attempt budget.
+Task: A careless edit changed a check in Example B so that it reads `async () => { transient -= 1`. Run Example B with that line, explain why the edited check now fails for the same program state, and restore it.
 
 A retry policy must retain a bounded final failure. Converting exhaustion into a default success would erase the operation's actual outcome.
+
+The unchanged code is the exercise block of Example B:
 
 ```javascript
 let permanent = 0;
@@ -85,9 +89,9 @@ await assert.rejects(
 assert.equal(transient, 3);
 ```
 
-**Expected:** permanent attempted once; transient attempted three times and still rejects.
+**Expected:** Before the repair the run fails with an `AssertionError` at the check `assert.equal(transient, 3)`; after it the line reads `async () => { transient += 1` again and permanent attempted once; transient attempted three times and still rejects.
 
-**Verify:** Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.
+**Verify:** Keep the failing and the repaired runs. Explain why the edited check rejects the same program state that `assert.equal(transient, 3)` accepts.
 
 ## Exercise 3: Reuse a completed idempotent result
 
@@ -105,7 +109,7 @@ assert.equal(store.effects, 1);
 
 **Expected:** one side effect; identical returned receipt.
 
-**Verify:** Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.
+**Verify:** Keep a check equivalent to `assert.deepEqual(second, first)`. As a control, change `const first = store.apply('request-A', { amount: 5 });` to `const first = store.apply('request-A!', { amount: 5 });`: the run must fail with an `AssertionError` at that check. Restore the line before continuing.
 
 ## Exercise 4: Reject conflicting reuse of an idempotency key
 
@@ -122,7 +126,7 @@ assert.equal(store.effects, 1);
 
 **Expected:** conflict error; effects remains 1.
 
-**Verify:** Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.
+**Verify:** Keep a check equivalent to `assert.throws(() => store.apply('request-A', { amount: 7 }), /key conflict/u)`. As a control, change `store.apply('request-A', { amount: 5 });` to `store.apply('request-A!', { amount: 5 });`: the run must fail with an `AssertionError` at that check. Restore the line before continuing.
 
 ## Exercise 5: Bound active work while preserving input order
 
@@ -168,7 +172,7 @@ assert.deepEqual(await mapBounded([], 2, async (value) => value), []);
 
 **Expected:** results 2,4,6,8; peak active at most 2; active returns to 0.
 
-**Verify:** Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.
+**Verify:** Keep a check equivalent to `assert.ok(peak <= 2 && peak > 0)`. As a control, change `active += 1; peak = Math.max(peak, active);` to `active -= 1; peak = Math.max(peak, active);`: the run must fail with an `AssertionError` at that check. Restore the line before continuing.
 
 ## Exercise 6: Honor cancellation before the first attempt
 
@@ -196,7 +200,7 @@ assert.equal(attempts, 0);
 
 **Expected:** original reason rejects; attempts remain 0.
 
-**Verify:** Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.
+**Verify:** Keep a check equivalent to `assert.equal(attempts, 0)`. As a control, change `let attempts = 0;` to `let attempts = 1;`: the run must fail with an `AssertionError` at that check. Restore the line before continuing.
 
 ## After comparison
 

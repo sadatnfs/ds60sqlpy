@@ -16,7 +16,7 @@ A residual measures how closely the returned value satisfies the equation. A sma
 
 Differentiating a solve asks how its solution changes when A or b changes. The derivative assumes the local problem is nonsingular and sufficiently regular. If the matrix becomes singular, a smooth derivative of a unique solution may no longer exist. A finite printed gradient cannot create the missing mathematical assumptions.
 
-This unit uses an ordinary solve, an analytic diagonal parameterization and a ridge-regression example. Each has an independent oracle. The host admission helper implements one declared condition-number policy for the fixture. It is not a universal threshold for scientific validity, and it is intentionally outside the transformed numerical calculation.
+This unit uses an ordinary solve, an analytic diagonal parameterization and a ridge-regression example. Each has an independent oracle. The host-side validation helper `admitted_matrix` implements one declared condition-number policy for the fixture. It is not a universal threshold for scientific validity, and it is intentionally outside the transformed numerical calculation.
 
 Regularization changes the equation rather than merely repairing an implementation. Adding a diagonal penalty can improve conditioning while changing the estimated parameters. Explain that bias and its purpose before presenting a better-conditioned numerical result as a better scientific answer.""",
         r"""Differentiating \(A(\theta)x(\theta)=b(\theta)\) gives \(A\,dx/db=I\) when only b varies, and \(dx/d\theta=A^{-1}(db/d\theta-(dA/d\theta)x)\). This identity describes a solve, not a recommendation to form an inverse. For \(A=\operatorname{diag}(2+\theta,3)\), \(b=(2,6)\), the solution is \((2/(2+\theta),2)\). At zero, the derivative of its summed coordinates is \(-1/2\).""",
@@ -70,7 +70,7 @@ def parameter_solution(theta):
             ),
             case(
                 "Reject a singular fixture",
-                "Apply the declared admission policy to [[1,2],[2,4]].",
+                "Apply the declared validation policy, `admitted_matrix`, to [[1,2],[2,4]].",
                 "ValueError.",
                 "The second row is twice the first, so the system does not define a unique solution for arbitrary b.",
                 "try:\n    admitted_matrix(jnp.array([[1., 2.], [2., 4.]]))\nexcept ValueError:\n    pass\nelse:\n    raise AssertionError('singular matrix admitted')",
@@ -96,12 +96,12 @@ def parameter_solution(theta):
                 "Compile a valid solve",
                 "JIT the solution calculation and compare its residual.",
                 "The same [2,3] result with a small residual.",
-                "Compilation does not eliminate the need for conditioning and problem-admission checks.",
+                "Compilation does not eliminate the need for conditioning and problem-validation checks.",
                 "compiled = jax.jit(jnp.linalg.solve)\nsolution = compiled(matrix, right)\nclose(solution, [2., 3.])\nclose(matrix @ solution, right)",
-                "Keep numerical-domain admission separate from transformation compatibility.",
+                "Keep numerical-domain validation separate from transformation compatibility.",
             ),
         ),
-        "A large sensitivity with a small residual can be an ill-conditioned problem rather than a broken solver. An admission threshold is a declared policy, not a theorem. State the assumptions of a differentiable unique solution and test both primal residual and derivative behavior.",
+        "A large sensitivity with a small residual can be an ill-conditioned problem rather than a broken solver. A validation threshold is a declared policy, not a theorem. State the assumptions of a differentiable unique solution and test both primal residual and derivative behavior.",
         "Connect the ridge calculation to the statistics book's bias-variance discussion. Design a sensitivity report that separates perturbation of data, regularization choice and floating-point effects instead of calling every difference solver error.",
         (
             ("JAX NumPy linear algebra", "https://docs.jax.dev/en/latest/jax.numpy.html"),
@@ -543,7 +543,7 @@ right = jnp.array([2., 6.])""",
             (23,),
             ("eval_shape", "jaxpr", "lowering", "compiled signature"),
             "Inspect distinct staging artifacts without treating their existence as a proof of portability or performance.",
-            r"""A source function, a staged representation, a lowered computation and a compiled executable are different artifacts. The source expresses the user's numerical program. A jaxpr describes primitive operations under a tracing contract. Lowering prepares a compiler-facing representation. Compilation produces an executable for a particular backend and signature.
+            r"""A source function, a staged representation, a lowered computation and a compiled executable are different artifacts. The source expresses your numerical program. A jaxpr describes primitive operations under a tracing contract. Lowering prepares a compiler-facing representation. Compilation produces an executable for a particular backend and signature.
 
 Shape evaluation can answer an interface question before allocating a full concrete input. A ShapeDtypeStruct describes an abstract shape and dtype, and eval_shape follows the supported numerical function to infer its output structure. This is useful for detecting an interface mismatch, but it does not inspect actual input values or prove that a numerical domain condition holds.
 

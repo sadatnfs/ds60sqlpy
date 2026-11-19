@@ -1,43 +1,38 @@
 """Complete offline worked example. See the matching tutorial for assumptions."""
 
 import numpy as np
-from sklearn.linear_model import LogisticRegression, Ridge
-from sklearn.metrics import mean_squared_error
-from sklearn.model_selection import GridSearchCV, GroupKFold, StratifiedKFold, cross_val_score
+from sklearn.decomposition import PCA
+from sklearn.linear_model import LogisticRegression
 from sklearn.pipeline import make_pipeline
-from sklearn.preprocessing import OneHotEncoder, StandardScaler
+from sklearn.preprocessing import StandardScaler
 
 
 def case_06():
-    rng = np.random.default_rng(2206)
-    groups = np.repeat(np.arange(60), 4)
-    x = groups[:, None]
-    y = np.repeat(rng.binomial(1, 0.5, 60), 4)
-    model = make_pipeline(
-        OneHotEncoder(handle_unknown="ignore", sparse_output=False), LogisticRegression(C=10)
-    )
-    row_scores = cross_val_score(model, x, y, cv=StratifiedKFold(4, shuffle=True, random_state=6))
-    group_scores = cross_val_score(model, x, y, cv=GroupKFold(4), groups=groups)
-    assert row_scores.mean() > group_scores.mean() + 0.2
-    # A complete nested preprocessing/tuning workflow with group boundaries.
-    features = rng.normal(size=(240, 3))
-    target = features @ np.array([2.0, -1.0, 0.5]) + rng.normal(size=240)
-    outer_scores = []
-    for train, test in GroupKFold(3).split(features, target, groups):
-        search = GridSearchCV(
-            make_pipeline(StandardScaler(), Ridge()),
-            {"ridge__alpha": [0.1, 1, 10]},
-            cv=GroupKFold(3),
-            scoring="neg_mean_squared_error",
-        ).fit(features[train], target[train], groups=groups[train])
-        assert np.allclose(search.best_estimator_[0].mean_, features[train].mean(axis=0))
-        outer_scores.append(mean_squared_error(target[test], search.predict(features[test])))
+    # Balanced sign pairs make signal exactly orthogonal to the large nuisance.
+    nuisance = np.linspace(-100, 100, 100)
+    x = np.column_stack([np.repeat(nuisance, 2), np.tile([-0.1, 0.1], 100)])
+    y = np.tile([0, 1], 100)
+    test_x = np.column_stack([np.repeat(np.linspace(-95, 95, 40), 2), np.tile([-0.1, 0.1], 40)])
+    test_y = np.tile([0, 1], 40)
+    pca = PCA(n_components=1).fit(x)
+    reconstruction = pca.inverse_transform(pca.transform(x))
+    pca_model = make_pipeline(PCA(n_components=1), LogisticRegression()).fit(x, y)
+    full_model = make_pipeline(StandardScaler(), LogisticRegression()).fit(x, y)
+    assert pca.explained_variance_ratio_[0] > 0.9999
+    assert pca_model.score(test_x, test_y) == 0.5 and full_model.score(test_x, test_y) == 1
+    assert np.isclose(np.mean((x - reconstruction) ** 2), 0.005)
+    centered = x - x.mean(axis=0)
+    singular = np.linalg.svd(centered, compute_uv=False)
+    assert np.isclose(np.sum((x - reconstruction) ** 2), singular[1] ** 2)
+    scaled = PCA().fit(StandardScaler().fit_transform(x))
     result = {
-        "row_accuracy": row_scores.mean(),
-        "new_group_accuracy": group_scores.mean(),
-        "nested_outer_mse": outer_scores,
+        "raw_retained_variance": pca.explained_variance_ratio_[0],
+        "reconstruction_mse": np.mean((x - reconstruction) ** 2),
+        "pca_test_accuracy": pca_model.score(test_x, test_y),
+        "full_test_accuracy": full_model.score(test_x, test_y),
+        "scaled_variance_ratios": scaled.explained_variance_ratio_.tolist(),
     }
-    print("06 evaluation of the full procedure:", result)
+    print("06 compression versus prediction:", result)
     return result
 
 

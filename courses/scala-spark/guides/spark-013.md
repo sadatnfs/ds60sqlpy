@@ -1,4 +1,4 @@
-# spark-013: One row, one event
+# spark-013: One row, one event: NULL-aware aggregates
 
 A NULL-aware aggregate lesson in Scala, PySpark and Spark SQL.
 

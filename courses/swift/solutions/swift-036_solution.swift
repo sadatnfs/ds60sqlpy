@@ -18,6 +18,16 @@ struct LessonMain {
       precondition(index.contains(8) && !index.contains(9))
       precondition(index.count == 4)
     }
+
+    do {
+      // Task 3: Independent construction
+      let names = ["pear", "apple", "fig"]
+      let queries = ["fig", "kiwi", "pear"]
+      let scanHits = queries.filter { names.contains($0) }.count
+      let index = Set(names)
+      let indexHits = queries.filter { index.contains($0) }.count
+      precondition(scanHits == 2 && indexHits == scanHits)
+    }
     print("swift-036: passed")
   }
 }

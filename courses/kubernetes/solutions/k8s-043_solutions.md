@@ -46,6 +46,6 @@ A node can have private addresses only. External publication requires a separate
 
 ## Exercise 6: Explain a successful request with a changed backend UID.
 
-Record the actual serving identity when the exercise requires replacement evidence; a200 response alone cannot identify the process.
+Record the actual serving identity when the exercise requires replacement evidence; a 200 response alone cannot identify the process.
 
 **Expected:** Service continuity and backend identity are separate observations.

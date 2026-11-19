@@ -5,15 +5,66 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Flexbox: one-dimensional layout and resilient navigation: my attempt</title>
     <style>
-      /* Implement the lesson-specific CSS. Keep keyboard focus visible. */
+      /*
+        Worked example 1: Wrapping navigation
+        nav ul {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 0.75rem;
+          list-style: none;
+          padding: 0;
+        }
+      */
+
+      /*
+        Worked example 2: Flexible cards
+        .cards {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 1rem;
+        }
+        .card {
+          flex: 1 1 12rem;
+          min-inline-size: 0;
+        }
+      */
+
+      /* Write the CSS for the exercises here. Keep keyboard focus visible. */
     </style>
   </head>
   <body>
-    <!-- web-015: Build a wrapping navigation bar and flexible card row. -->
-    <!-- Save your prediction, then implement the six exercises from the guide. -->
+    <!--
+      web-015 exercises. Hints are in the guide; answers are in the solutions folder.
+      1. Name the axes for flex-direction:column.
+      2. Add gap between navigation items without per-item margins.
+      3. Build a wrapping navigation bar and flexible card row.
+      4. Diagnose a flex child that refuses to shrink.
+      5. Test one item, many items and a very long label.
+      6. Explain when Flexbox fits better than Grid.
+    -->
     <main>
-      <h1>Flexbox: one-dimensional layout and resilient navigation</h1>
-      <!-- Build your own document here. The reference is separate. -->
+      <h1>Flexible navigation</h1>
+      <nav aria-label="Topics">
+        <ul>
+          <li><a href="#html">HTML foundations</a></li>
+          <li><a href="#css">Responsive CSS</a></li>
+          <li><a href="#php">PHP applications</a></li>
+        </ul>
+      </nav>
+      <div class="cards">
+        <article class="card" id="html">
+          <h2>HTML</h2>
+          <p>Structure.</p>
+        </article>
+        <article class="card" id="css">
+          <h2>CSS</h2>
+          <p>Presentation.</p>
+        </article>
+        <article class="card" id="php">
+          <h2>PHP</h2>
+          <p>Server logic.</p>
+        </article>
+      </div>
     </main>
   </body>
 </html>

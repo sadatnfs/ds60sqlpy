@@ -48,7 +48,7 @@ The running value is 56, not all-year 123, unless another explicit semantic-mode
 
 Add a third observed month with revenue 10 at the end.
 
-The running values become 67,123,133 for that expanded snapshot.
+The running values become 67, 123, 133 for that expanded snapshot.
 
 ### Exercise 3
 

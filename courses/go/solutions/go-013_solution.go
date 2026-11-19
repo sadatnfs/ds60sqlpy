@@ -28,13 +28,21 @@ func main() {
 
 	// Inspect exported spelling
 	{
-		name := "ParseInt"
-		check(unicode.IsUpper([]rune(name)[0]), "export convention")
+		exported := func(name string) bool { return name != "" && unicode.IsUpper([]rune(name)[0]) }
+		check(exported("ParseInt") && !exported("parseInt") && !exported(""), "export convention")
 	}
 
-	// Keep logical imports separate
+	// Read the go and toolchain directives
 	{
-		check(path.Clean("reports/tmp/../daily") == "reports/daily", "logical clean")
+		mod := "module example.org/learning/report\n\ngo 1.27\n\ntoolchain go1.27.3\n"
+		directives := map[string]string{}
+		for _, line := range strings.Split(mod, "\n") {
+			fields := strings.Fields(line)
+			if len(fields) == 2 {
+				directives[fields[0]] = fields[1]
+			}
+		}
+		check(directives["module"] == "example.org/learning/report" && directives["go"] == "1.27" && directives["toolchain"] == "go1.27.3", "directives")
 	}
 
 	// Reject malformed input at an API boundary

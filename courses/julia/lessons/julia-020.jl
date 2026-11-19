@@ -7,8 +7,8 @@ using .DS60Plots
 # === EXAMPLE A ===
 function worked_a()
     distribution = Normal(2, 3)
-    first = rand(MersenneTwister(42), distribution, 4000)
-    second = rand(MersenneTwister(42), distribution, 4000)
+    first = rand(Xoshiro(42), distribution, 4000)
+    second = rand(Xoshiro(42), distribution, 4000)
     standard_error = 3 / sqrt(length(first))
     @test first == second
     @test mean(distribution) == 2

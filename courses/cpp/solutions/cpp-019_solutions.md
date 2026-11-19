@@ -52,7 +52,7 @@ Filter >=0 then double [-1, 0, 3].
 
 **Reasoning:** The predicate runs before transformation.
 
-**Verify:** Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.
+**Verify:** Collect the filtered and doubled view into a vector and assert it equals `std::vector<int>{0, 6}`.
 
 ## Exercise 2: Change composition
 
@@ -62,7 +62,7 @@ Double first, then filter >0.
 
 **Reasoning:** Changing order or boundary changes the contract.
 
-**Verify:** Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.
+**Verify:** Swap the two adaptors, change the predicate to `x > 0`, and assert the collected vector is `std::vector<int>{6}`; -1 doubles to -2 and 0 stays 0, so both drop out.
 
 ## Exercise 3: Materialize ownership
 
@@ -72,7 +72,7 @@ Collect the view into vector<int>.
 
 **Reasoning:** Materialization gives the result ownership.
 
-**Verify:** Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.
+**Verify:** After collecting, set `xs[2] = 100` and assert the stored vector is still `std::vector<int>{0, 6}`, while iterating the view again yields 0 and 200.
 
 ## Exercise 4: Repair dangling view
 
@@ -82,7 +82,7 @@ Review a view returned over a local vector.
 
 **Reasoning:** A lazy pipeline still borrows the original storage.
 
-**Verify:** Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.
+**Verify:** Trace where the local vector is destroyed and confirm the reviewed function returns a view over it; the repair returns `std::vector<int>` or takes the owner by reference from the caller.
 
 ## Exercise 5: Sort records
 
@@ -92,7 +92,7 @@ Sort scores (id1, 9), (id2, 4) by points.
 
 **Reasoning:** Projection selects the comparison key, not the output type.
 
-**Verify:** Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.
+**Verify:** Assert `scores[0].id == 2 && scores[1].id == 1` after `std::ranges::sort(scores, {}, &Score::points)`, as Worked example 2 does.
 
 ## Exercise 6: Transfer stable ties
 
@@ -102,4 +102,4 @@ Add (id3, 4) and define deterministic ordering by points then ID.
 
 **Reasoning:** A tie-breaker makes equal-key order explicit.
 
-**Verify:** Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.
+**Verify:** Sort with a comparator on `std::tie(a.points, a.id) < std::tie(b.points, b.id)` and assert the ids are 2, 3, 1; the tie at 4 points is broken by the smaller id.

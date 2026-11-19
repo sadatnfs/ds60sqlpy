@@ -36,7 +36,7 @@
     {
       "title": "State cutoff equality",
       "task": "Look up at the exact availability timestamp.",
-      "expected": "The inclusive fixture admits the row.",
+      "expected": "The inclusive cutoff returns the row whose availability time equals the lookup time.",
       "hint": "Use the declared boundary policy.",
       "answer": "Real ingestion timing may require another rule, which must be documented and tested."
     },

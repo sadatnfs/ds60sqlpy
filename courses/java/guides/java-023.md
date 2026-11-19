@@ -6,13 +6,13 @@ Intermediate, approximately 90 minutes. Direct prerequisites: `java-022`
 
 ## Learning objectives
 
-Explain critical section, compare-and-set, lock ordering using a concrete program. Trace the normal execution, identify its boundary assumptions and make a failure case observable. The first investigation is Run two workers making 1000 synchronized increments each. The final exercise transfers the mechanism to use one global order for two locks.
+Protect shared state with locks, atomics and concurrent maps, and avoid deadlock with a single lock order. Along the way, explain critical section, compare-and-set, lock ordering using a concrete program. Trace the normal execution, identify its boundary assumptions and make a failure case observable. Exercises 1 and 2 start from the worked examples; the authored investigations begin with this task: Change 0 to 1 with CAS, then retry expecting 0. The final exercise transfers the mechanism to use one global order for two locks.
 
 ## Purpose and mental model
 
-Synchronization protects a state transition,not merely a variable name. A synchronized block uses a monitor and provides mutual exclusion plus visibility when all participants follow the same locking policy. AtomicInteger supports individual atomic operations such as increment and compare-and-set. ConcurrentHashMap provides thread-safe operations,but a separate get followed by put is still a compound sequence unless a method such as compute or merge makes it atomic for a key.
+Synchronization protects a state transition, not merely a variable name. A synchronized block uses a monitor and provides mutual exclusion plus visibility when all participants follow the same locking policy. AtomicInteger supports individual atomic operations such as increment and compare-and-set. ConcurrentHashMap provides thread-safe operations, but a separate get followed by put is still a compound sequence unless a method such as compute or merge makes it atomic for a key.
 
-Locks also create lifetime and ordering obligations. Always release an explicit lock in finally. Acquiring multiple locks in inconsistent order can deadlock;using one global order removes that cycle for the declared lock set. A timed tryLock can make contention a bounded outcome rather than an indefinite wait. This lesson tests exact counts and controlled contention,not a universal concurrency performance claim.
+Locks also create lifetime and ordering obligations. Always release an explicit lock in finally. Acquiring multiple locks in inconsistent order can deadlock; using one global order removes that cycle for the declared lock set. A timed tryLock can make contention a bounded outcome rather than an indefinite wait. This lesson tests exact counts and controlled contention, not a universal concurrency performance claim.
 
 ## Vocabulary and concepts
 
@@ -39,7 +39,7 @@ The public class name and source filename must agree. Each worked example below 
 
 ## Syntax anatomy and execution trace
 
-Use synchronized around the entire read-modify-write. AtomicInteger.incrementAndGet performs one atomic increment. compareAndSet succeeds only when the current value matches the expected value. ConcurrentHashMap.merge combines updates atomically for a key. ReentrantLock.tryLock(timeout,unit) returns false on bounded contention;unlock belongs in finally after a successful acquisition.
+Use synchronized around the entire read-modify-write. AtomicInteger.incrementAndGet performs one atomic increment. compareAndSet succeeds only when the current value matches the expected value. ConcurrentHashMap.merge combines updates atomically for a key. ReentrantLock.tryLock(timeout, unit) returns false on bounded contention; unlock belongs in finally after a successful acquisition.
 
 ## Worked example / walkthrough
 
@@ -163,7 +163,7 @@ public class Main {
 }
 ```
 
-**Expected:** value2000.
+**Expected:** value 2000.
 
 ## Prediction before your attempt
 
@@ -171,29 +171,29 @@ Read the source from the entry point and name each value before executing it. Id
 
 ## Exercises
 
-1. **Protect a compound counter.** Run two workers making 1000 synchronized increments each.
-   **Expected:** counter 2000.
-   **Verify:** Compare your assertion values or captured diagnostic with counter 2000.
+1. **Protect a compound counter: change one input.** Copy Example A into a scratch `Main.java` and change `for (int i = 0; i < 1000; i++) counter.increment();` to `for (int i = 1; i < 1000; i++) counter.increment();`. Before running it with `java -ea Main`, predict which assertion fails and which value it now sees; then run it and restore the original line.
+   **Expected:** The changed run fails with an `AssertionError` from the assertion on `counter.value() == 2000`. Restoring the original line brings back the worked observation: counter 2000.
+   **Verify:** Compare your written prediction with the reported `AssertionError` and its stack-trace line, and name the value that made `counter.value() == 2000` false. After restoring the line, the program completes without an `AssertionError` again.
 
-2. **Use an atomic increment.** Repeat the workload withAtomicInteger.incrementAndGet.
-   **Expected:** value2000.
-   **Verify:** Compare your assertion values or captured diagnostic with value2000.
+2. **Use an atomic increment: debug a regression.** A regression changed one token in the code that Example B adds after Example A, so one line now reads `for (int i = 0; i <= 1000; i++) atomic.incrementAndGet();`. Run Example B with that line, use the failing assertion to locate the defect and repair it without changing the assertion.
+   **Expected:** Before the repair the run fails with an `AssertionError` from the assertion on `atomic.get() == 2000`; after it the line reads `for (int i = 0; i < 1000; i++) atomic.incrementAndGet();` again and value 2000.
+   **Verify:** Keep the failing and the repaired runs. Explain why the changed token alters the value tested by `atomic.get() == 2000` for this input.
 
-3. **Inspect compare-and-set.** Change0to1 with CAS,then retry expecting0.
-   **Expected:** first true;second false;value1.
-   **Verify:** Compare your assertion values or captured diagnostic with first true;second false;value1.
+3. **Inspect compare-and-set.** Change 0 to 1 with CAS, then retry expecting 0.
+   **Expected:** first true; second false; value 1.
+   **Verify:** Keep an assertion equivalent to `firstSwap && !staleSwap && state.get() == 1`. As a control, change `boolean firstSwap = state.compareAndSet(0, 1);` to `boolean firstSwap = state.compareAndSet(1, 1);`: the run must fail with an `AssertionError` from the assertion on `firstSwap && !staleSwap && state.get() == 1`. Restore the line before continuing.
 
-4. **Combine map updates atomically.** UseConcurrentHashMap.merge for2000 total increments ofkeyx.
-   **Expected:** stored count2000.
-   **Verify:** Compare your assertion values or captured diagnostic with stored count2000.
+4. **Combine map updates atomically.** Use ConcurrentHashMap.merge for 2000 total increments ofkeyx.
+   **Expected:** stored count 2000.
+   **Verify:** Keep an assertion equivalent to `counts.get("x") == 2000`. As a control, change `for (int i = 0; i < 1000; i++) counts.merge("x", 1, Integer::sum);` to `for (int i = 0; i <= 1000; i++) counts.merge("x", 1, Integer::sum);`: the run must fail with an `AssertionError` from the assertion on `counts.get("x") == 2000`. Restore the line before continuing.
 
 5. **Bound lock contention.** Hold a ReentrantLock in the caller while a worker tries to acquire it with a short timeout.
-   **Expected:** worker returns false;lock released in finally.
-   **Verify:** Compare your assertion values or captured diagnostic with worker returns false;lock released in finally.
+   **Expected:** worker returns false; lock released in finally.
+   **Verify:** Keep an assertion equivalent to `!lock.isLocked()`. As a control, change `assert !lock.isLocked();` to `assert lock.isLocked();` inside it: the run must fail with an `AssertionError`, which shows the assertion can fail. Restore it.
 
 6. **Use one global order for two locks.** Have both workers acquire first then second before incrementing shared state.
    **Expected:** 2000 increments and no blocked worker after bounded joins.
-   **Verify:** Compare your assertion values or captured diagnostic with 2000 increments and no blocked worker after bounded joins.
+   **Verify:** Keep an assertion equivalent to `total[0] == 2000`. As a control, change `for (int i = 0; i < 1000; i++) {` to `for (int i = 0; i <= 1000; i++) {`: the run must fail with an `AssertionError` from the assertion on `total[0] == 2000`. Restore the line before continuing.
 
 ## Common pitfalls and diagnosis
 
@@ -203,7 +203,14 @@ Do not replace a precise exception with a catch-all that returns a plausible def
 
 ## Progressive hints
 
-First reconstruct the values and identities in the worked example. Next isolate the line that changes the result when one input is altered. Finally compare the normal and failure paths with the stated contract. Use a small table of input, expected value, actual value and exception type. Ask for one hint about the first incorrect assumption before requesting the entire reference implementation.
+Read one hint at a time and attempt the exercise again before reading the next. Keep a small table of input, expected value, actual value and exception type. Ask for one hint about the first incorrect assumption before requesting the entire reference implementation.
+
+- **Exercise 1:** First restate the expected observation: counter 2000. Then list the values read by `counter.value() == 2000` and trace each one from its declaration. Finally, compute the asserted value with `for (int i = 1; i < 1000; i++) counter.increment();` in place before running.
+- **Exercise 2:** First restate the expected observation: value 2000. Then list the values read by `atomic.get() == 2000` and trace each one from its declaration. Finally, compare `for (int i = 0; i <= 1000; i++) atomic.incrementAndGet();` with the same line in Example B and state the claim each version makes.
+- **Exercise 3:** First restate the expected observation: first true; second false; value 1. Then list the values read by `firstSwap && !staleSwap && state.get() == 1` and trace each one from its declaration. Finally, predict the effect of changing `boolean firstSwap = state.compareAndSet(0, 1);` to `boolean firstSwap = state.compareAndSet(1, 1);` before running anything.
+- **Exercise 4:** First restate the expected observation: stored count 2000. Then list the values read by `counts.get("x") == 2000` and trace each one from its declaration. Finally, predict the effect of changing `for (int i = 0; i < 1000; i++) counts.merge("x", 1, Integer::sum);` to `for (int i = 0; i <= 1000; i++) counts.merge("x", 1, Integer::sum);` before running anything.
+- **Exercise 5:** First restate the expected observation: worker returns false; lock released in finally. Then list the values read by `!lock.isLocked()` and trace each one from its declaration. Finally, name one input that would make `!lock.isLocked()` false.
+- **Exercise 6:** First restate the expected observation: 2000 increments and no blocked worker after bounded joins. Then list the values read by `total[0] == 2000` and trace each one from its declaration. Finally, predict the effect of changing `for (int i = 0; i < 1000; i++) {` to `for (int i = 0; i <= 1000; i++) {` before running anything.
 
 ## Self-check and retrieval
 
@@ -215,7 +222,7 @@ Preserve the saved pad and the six exercise observations. Continue to the next l
 
 ## Sources and verification status
 
-[Official Java21 API or language reference](https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/concurrent/atomic/AtomicInteger.html), reviewed2026-10-22. Examples and exercise fixtures are original course material. Use the [validation guide](../../../docs/validation.md) and CI artifacts for the exact revision and platform to inspect actual compile/run results. Authoring, parsing, compilation, execution and learner mastery are separate forms of evidence.
+[Official Java 21 API or language reference](https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/concurrent/atomic/AtomicInteger.html), reviewed 2026-10-22. Examples and exercise fixtures are original course material. Use the [validation guide](../../../docs/validation.md) and CI artifacts for the exact revision and platform to inspect actual compile/run results. Authoring, parsing, compilation, execution and learner mastery are separate forms of evidence.
 
 ## Ask an AI tutor about this lesson
 
@@ -225,7 +232,7 @@ Read courses/java/guides/java-023.md and courses/java/lessons/java-023.java. Dir
 Explain the mechanism, ask for a prediction, review my attempt, give one hint,
 request compiler/runtime evidence, and ask a fresh retrieval question.
 Keep courses/java/solutions/ closed until I request comparison or show an attempt.
-Use Java21 and the declared offline fixture. Done when I can explain the state
+Use Java 21 and the declared offline fixture. Done when I can explain the state
 transitions, pass all six exercise contracts, diagnose one failure and solve a
 new boundary case without copying the solution.
 ```
