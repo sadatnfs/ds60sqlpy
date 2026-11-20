@@ -23,6 +23,19 @@ or an earlier successful run does not establish those gates.
 
 ## Published release and its evidence
 
+The [1.4.1 publisher](https://github.com/sadatnfs/ds60sqlpy/actions/runs/44639863899)
+completed on November 20, 2026 (UTC) from
+[source `9d45124b`](https://github.com/sadatnfs/ds60sqlpy/tree/9d45124b4c82217325f74cb208cb66c9005a7d9f),
+with its [PyTorch package verification](https://github.com/sadatnfs/ds60sqlpy/actions/runs/44639876692)
+dispatched right after the push. Its first attempt stopped while staging the
+AMD64 Core candidate, because Docker Hub briefly reported the just-pushed
+manifest as missing; nothing had been promoted. **Re-run failed jobs** kept the
+ARM64 receipts, qualified AMD64 again and promoted 26 combined AMD64/ARM64
+version indexes and 26 latest aliases in `sadatnfs/ds60sqlpy`. Its native AMD64
+and ARM64 pull jobs then inspected every published index and ran a fresh Core
+starter. Later sources wait out that brief absence (see
+[Retrying an interrupted run](#retrying-an-interrupted-run)).
+
 The [1.4.0 publisher](https://github.com/sadatnfs/ds60sqlpy/actions/runs/44605571702)
 completed on November 19, 2026 from
 [source `796055c2`](https://github.com/sadatnfs/ds60sqlpy/tree/796055c27a8a1a68c253b300d9bc1dd46c367226).
@@ -499,9 +512,9 @@ passed on AMD64 and ARM64 after a test expectation and learner-identity fix.
 A new release still needs its own promotion and automatic pull acceptance.
 
 Review the actual workflow result, receipts and published manifests before
-announcing availability. The 1.4.0 and historical 1.1.0 evidence is identified
-above; configuration, staging pushes and local tests do not establish a later
-release.
+announcing availability. The 1.4.1, 1.4.0 and historical 1.1.0 evidence is
+identified above; configuration, staging pushes and local tests do not
+establish a later release.
 
 ### Audit every published module without republishing
 
