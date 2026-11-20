@@ -20,7 +20,7 @@ same push does not select a release. `js` is a short alias for the
 `[publish-javascript-node]` publishes both workers after qualification. The
 `python-core` group selects only App and Core.
 
-Accepted full releases, such as 1.4.1, are described in the
+Accepted full releases, such as 1.4.2, are described in the
 [release/image guide](dockerhub.md#published-release-and-its-evidence). Each has distinct
 canonical tags for every ordinary profile. Selecting fewer workers when
 installing a full release is supported and does not require a new partial

@@ -23,6 +23,24 @@ or an earlier successful run does not establish those gates.
 
 ## Published release and its evidence
 
+The [1.4.2 publisher](https://github.com/sadatnfs/ds60sqlpy/actions/runs/44664370538)
+completed on November 20, 2026 (UTC) from
+[source `b395e350`](https://github.com/sadatnfs/ds60sqlpy/tree/b395e35080b9f0953cdce44b15937e69691f627f),
+with its [PyTorch package verification](https://github.com/sadatnfs/ds60sqlpy/actions/runs/44664370194)
+dispatched right after the push. That verification's ARM64 job passed on its
+second attempt, after a two-worker training case stalled in the first. The
+publisher needed three attempts. In the first, CRAN throttling (HTTP 429)
+stopped the R build on both architectures, so nothing was promoted. **Re-run
+failed jobs** rebuilt R, ran the scientific-project checks that had waited on
+it and reused every other qualified receipt. It wrote and verified all 26
+version indexes, but one moved latest alias did not yet read back its new digest
+right after the write; Docker Hub served the new digest moments later. The third
+attempt moved the remaining latest aliases, for 26 combined AMD64/ARM64 version
+indexes and 26 latest aliases in `sadatnfs/ds60sqlpy`. Its native AMD64 and
+ARM64 pull jobs then inspected every published index and ran a fresh Core
+starter. Later sources also wait out that brief stale read (see
+[Retrying an interrupted run](#retrying-an-interrupted-run)).
+
 The [1.4.1 publisher](https://github.com/sadatnfs/ds60sqlpy/actions/runs/44639863899)
 completed on November 20, 2026 (UTC) from
 [source `9d45124b`](https://github.com/sadatnfs/ds60sqlpy/tree/9d45124b4c82217325f74cb208cb66c9005a7d9f),
@@ -451,6 +469,11 @@ run's qualified receipts and rebuilds nothing. If `main` has already moved, the
 verification can no longer match the marked revision; publish from a new
 marked commit instead.
 
+If a verification job itself fails, read its evidence artifact before retrying.
+**Re-run failed jobs** on that verification run repeats only the failed job for
+the same revision, even after `main` has moved, and a successful later attempt
+satisfies the gate.
+
 ### Native builds, staging and promotion
 
 The gate waits for the exact revision's source validation and Docker starter
@@ -485,13 +508,19 @@ new app before its required worker versions are available.
 
 Registry operations across multiple tags are not a transaction. Staging and
 promotion read back every manifest they write, and wait up to about a minute
-when Docker Hub briefly reports a just-written manifest as missing; one that is
-still missing, or that shows a different digest, stops the run before any later
-tag is written. **Re-run failed jobs** can reuse successful receipts from earlier
+when Docker Hub briefly reports a just-written manifest as missing, or still
+serves a moved latest alias's previous manifest; one that is still missing, or
+that still shows a different digest, stops the run before any later tag is
+written. **Re-run failed jobs** can reuse successful receipts from earlier
 attempts of the same workflow run and source revision. The selected receipts
 must be unique and valid, and worker receipts must bind the exact app/Core seed
 digests they used. Receipts from another run or revision are rejected; rebuilt
 seeds cannot silently be combined with old worker results.
+
+Qualification builds also download locked upstream sources. The R installer
+retries CRAN throttling (HTTP 429) for about four minutes; if a qualification
+job still stops on it, wait several minutes before **Re-run failed jobs**, which
+rebuilds only the failed groups.
 
 A failed promotion can complete matching partial version tags using those
 original image identities, without rewriting completed matching tags. A new
@@ -512,7 +541,7 @@ passed on AMD64 and ARM64 after a test expectation and learner-identity fix.
 A new release still needs its own promotion and automatic pull acceptance.
 
 Review the actual workflow result, receipts and published manifests before
-announcing availability. The 1.4.1, 1.4.0 and historical 1.1.0 evidence is
+announcing availability. The 1.4.2, 1.4.1, 1.4.0 and historical 1.1.0 evidence is
 identified above; configuration, staging pushes and local tests do not
 establish a later release.
 
