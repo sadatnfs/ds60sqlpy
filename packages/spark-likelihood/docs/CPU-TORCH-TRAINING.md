@@ -64,6 +64,16 @@ executors and only metadata returns to the driver. The observer must verify
 executor placement and task attempts independently. A returned worker result
 alone is provisional.
 
+Each rank also leaves best-effort stall evidence under
+`<output_dir>/diagnostics/`. `rank-NNNNN-pid-P.progress.jsonl` records timed
+phase boundaries such as process group setup, each object collective, checkpoint
+writes and process group teardown. The matching `.stacks.txt` receives every
+Python thread's stack from `faulthandler` every `max(5, 0.3 * timeout_seconds)`
+seconds while the rank function runs, on SIGTERM, and once more if the process
+is still alive 15 seconds after the rank function returns. Training never reads
+these files, they never imply success, and a failed diagnostics write only
+disables later records.
+
 The [spark-submit entry point](../examples/cpu_torch_training.py) accepts an
 already prepared manifest, an owned output directory and the prepared Probe
 source/JAR identity. It does not prepare Spark or download dependencies.

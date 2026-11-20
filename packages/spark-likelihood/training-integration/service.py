@@ -172,6 +172,8 @@ def main() -> None:
             "spark.executorEnv.OMP_NUM_THREADS": "1",
             "spark.executorEnv.OPENBLAS_NUM_THREADS": "1",
             "spark.executorEnv.MKL_NUM_THREADS": "1",
+            # torchrun agents then log worker exit and exit-barrier progress to the driver.
+            "spark.executorEnv.LOGLEVEL": "INFO",
             "spark.executorEnv.DS60_TORCH_TEST_GATE_DIR": "/shared/gates",
             "spark.executorEnv.DS60_TORCH_TEST_GATE_TOKEN": gate_token or "",
         }

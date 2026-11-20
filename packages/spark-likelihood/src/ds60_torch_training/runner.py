@@ -7,12 +7,18 @@ TorchDistributor executor process with an explicit, fixed logical rank.
 
 from __future__ import annotations
 
+import atexit
+import contextlib
+import faulthandler
 import importlib.util
+import json
 import os
 import platform
 import random
+import signal
 import socket
 import sys
+import time
 from dataclasses import asdict
 from datetime import timedelta
 from pathlib import Path
@@ -247,13 +253,117 @@ def _tensor_digest(model, adapter=torch_adapter) -> str:
     return checkpoint.digest_value(members)
 
 
+DIAGNOSTICS_DIRECTORY = "diagnostics"
+EXIT_GRACE_SECONDS = 15.0
+MIN_STACK_INTERVAL_SECONDS = 5.0
+MAX_STEP_RECORDS = 256
+# faulthandler writes to these descriptors until process exit, so they stay open.
+_RETAINED_STREAMS: list = []
+
+
+def _open_new_text(path: Path):
+    descriptor = os.open(
+        checkpoint.safe_path(path),
+        os.O_WRONLY | os.O_CREAT | os.O_EXCL | getattr(os, "O_NOFOLLOW", 0),
+        0o600,
+    )
+    return os.fdopen(descriptor, "w", encoding="utf-8", buffering=1)
+
+
+def _thread_count() -> int | None:
+    try:
+        return sum(1 for _ in Path("/proc/self/task").iterdir())
+    except OSError:
+        return None
+
+
+class _RankDiagnostics:
+    """Best-effort rank progress and stack evidence beside the shared checkpoints.
+
+    Training never reads these files, and a failed diagnostics write only disables
+    later records. faulthandler writes every thread's Python stack periodically
+    before the driver deadline, on SIGTERM, and when the process outlives the rank
+    function by EXIT_GRACE_SECONDS, so a stalled rank leaves its location behind.
+    """
+
+    def __init__(self, progress=None, stacks=None):
+        self._progress = progress
+        self._stacks = stacks
+        self._began = time.monotonic()
+        self._steps = 0
+
+    @classmethod
+    def start(cls, plan: dict, rank: int) -> _RankDiagnostics:
+        try:
+            root = checkpoint.safe_path(Path(plan["output_dir"]) / DIAGNOSTICS_DIRECTORY)
+            root.mkdir(mode=0o700, exist_ok=True)
+            stem = f"rank-{rank:05d}-pid-{os.getpid()}"
+            progress = _open_new_text(root / (stem + ".progress.jsonl"))
+            stacks = _open_new_text(root / (stem + ".stacks.txt"))
+        except Exception:  # noqa: BLE001 - evidence must never change the training outcome
+            return cls()
+        _RETAINED_STREAMS.extend((progress, stacks))
+        diagnostics = cls(progress, stacks)
+        interval = max(MIN_STACK_INTERVAL_SECONDS, 0.3 * float(plan["timeout_seconds"]))
+        try:
+            faulthandler.dump_traceback_later(interval, repeat=True, file=stacks)
+            if hasattr(faulthandler, "register"):
+                faulthandler.register(signal.SIGTERM, file=stacks, all_threads=True, chain=True)
+            atexit.register(diagnostics.record, "interpreter_exit")
+        except Exception:  # noqa: BLE001 - progress records remain useful without stacks
+            pass
+        diagnostics.record(
+            "start",
+            rank=rank,
+            pid=os.getpid(),
+            hostname=socket.gethostname(),
+            run_id=plan["run_id"],
+            stack_interval_seconds=interval,
+            cpu_count=os.cpu_count(),
+            affinity=len(os.sched_getaffinity(0)) if hasattr(os, "sched_getaffinity") else None,
+            omp_num_threads=os.environ.get("OMP_NUM_THREADS"),
+            threads=_thread_count(),
+        )
+        return diagnostics
+
+    def record(self, event: str, **fields: Any) -> None:
+        if self._progress is None:
+            return
+        try:
+            entry = {
+                "event": event,
+                "seconds": round(time.monotonic() - self._began, 3),
+                "unix_time": round(time.time(), 3),
+                **fields,
+            }
+            self._progress.write(json.dumps(entry, sort_keys=True, default=str) + "\n")
+        except Exception:  # noqa: BLE001 - stop recording rather than fail training
+            self._progress = None
+
+    @contextlib.contextmanager
+    def phase(self, name: str, **fields: Any):
+        self.record(name, edge="begin", **fields)
+        yield
+        self.record(name, edge="end", **fields)
+
+    def step(self, **fields: Any) -> None:
+        self._steps += 1
+        if self._steps <= MAX_STEP_RECORDS:
+            self.record("step", **fields)
+
+    def finish(self, error: BaseException | None) -> None:
+        if error is None:
+            self.record("return", threads=_thread_count())
+        else:
+            self.record("raise", type=type(error).__name__, message=str(error)[:512])
+        if self._stacks is not None:
+            # Replaces the periodic dump: a healthy worker exits well before this.
+            with contextlib.suppress(Exception):
+                faulthandler.dump_traceback_later(EXIT_GRACE_SECONDS, file=self._stacks)
+
+
 def _run_rank(plan: dict) -> dict | None:
     """Run one prepared executor rank. Rank zero returns bounded metadata only."""
-    import numpy as np
-    import torch
-    import torch.distributed as dist
-    from torch.nn.parallel import DistributedDataParallel
-
     exact_keys(
         plan,
         {
@@ -287,6 +397,22 @@ def _run_rank(plan: dict) -> dict | None:
     if (plan["mode"], world) not in {("executor_single", 1), ("executor_ddp", 2)}:
         raise TrainingError("Unsupported executor training mode")
     rank = _rank_environment(world)
+    diagnostics = _RankDiagnostics.start(plan, rank)
+    try:
+        result = _train_rank(plan, world, rank, diagnostics)
+    except BaseException as error:
+        diagnostics.finish(error)
+        raise
+    diagnostics.finish(None)
+    return result
+
+
+def _train_rank(plan: dict, world: int, rank: int, diagnostics: _RankDiagnostics) -> dict | None:
+    import numpy as np
+    import torch
+    import torch.distributed as dist
+    from torch.nn.parallel import DistributedDataParallel
+
     _admit_runtime_identity(plan["runtime_identity"])
     if data.load_manifest(plan["manifest_path"]) != plan["dataset"]:
         raise TrainingError("Executor snapshot manifest differs from plan")
@@ -346,46 +472,61 @@ def _run_rank(plan: dict) -> dict | None:
     }
     checkpoint.validate_binding(binding)
     binding_digest = checkpoint.digest_value(binding)
+    diagnostics.record(
+        "model_ready",
+        rows=len(rows),
+        torch_threads=torch.get_num_threads(),
+        threads=_thread_count(),
+    )
     if world == 2:
-        dist.init_process_group(
-            "gloo",
-            init_method="env://",
-            rank=rank,
-            world_size=world,
-            timeout=timedelta(seconds=60),
-        )
+        with diagnostics.phase(
+            "init_process_group",
+            master_addr=os.environ.get("MASTER_ADDR"),
+            master_port=os.environ.get("MASTER_PORT"),
+            gloo_socket_ifname=os.environ.get("GLOO_SOCKET_IFNAME"),
+        ):
+            dist.init_process_group(
+                "gloo",
+                init_method="env://",
+                rank=rank,
+                world_size=world,
+                timeout=timedelta(seconds=60),
+            )
     try:
         if world == 2:
-            identities = _all_gather(
-                dist, {"binding_digest": binding_digest, "schema": schema}, world
-            )
+            with diagnostics.phase("gather_identities"):
+                identities = _all_gather(
+                    dist, {"binding_digest": binding_digest, "schema": schema}, world
+                )
             if len({item["binding_digest"] for item in identities}) != 1:
                 raise TrainingError("Rank model/loss/optimizer definitions differ")
-        train_model = (
-            DistributedDataParallel(model, device_ids=None, broadcast_buffers=False)
-            if world == 2
-            else model
-        )
+        with diagnostics.phase("wrap_model"):
+            train_model = (
+                DistributedDataParallel(model, device_ids=None, broadcast_buffers=False)
+                if world == 2
+                else model
+            )
         start_epoch = 0
         global_step = 0
         parent_digest = None
         if plan["resume"] is not None:
             reference = plan["resume"]
-            loaded = checkpoint.load_rank(
-                reference["path"],
-                expected_binding=binding,
-                expected_manifest_digest=reference["manifest_digest"],
-                rank=rank,
-            )
-            optimizer.zero_grad(set_to_none=True)
-            torch_adapter.restore_rank_state(
-                model,
-                optimizer,
-                loss,
-                loaded,
-                expected_binding=binding,
-                expected_module_schema_digest=schema,
-            )
+            with diagnostics.phase("restore_checkpoint"):
+                loaded = checkpoint.load_rank(
+                    reference["path"],
+                    expected_binding=binding,
+                    expected_manifest_digest=reference["manifest_digest"],
+                    rank=rank,
+                )
+                optimizer.zero_grad(set_to_none=True)
+                torch_adapter.restore_rank_state(
+                    model,
+                    optimizer,
+                    loss,
+                    loaded,
+                    expected_binding=binding,
+                    expected_module_schema_digest=schema,
+                )
             start_epoch = loaded.progress["epoch"] + 1
             global_step = loaded.progress["global_step"]
             parent_digest = reference["manifest_digest"]
@@ -405,6 +546,7 @@ def _run_rank(plan: dict) -> dict | None:
                 batch = rows[begin:end]
                 if not batch:
                     raise TrainingError("Every rank must participate in every step")
+                diagnostics.step(epoch=epoch, global_step=global_step, batch_rows=len(batch))
                 optimizer.zero_grad(set_to_none=True)
                 local_sum, local_mass = _batch_loss(
                     train_model,
@@ -461,36 +603,45 @@ def _run_rank(plan: dict) -> dict | None:
                 progress=progress,
                 sampler=sampler,
             )
-            ledgers = _all_gather(dist, final_ledger, world) if world == 2 else [final_ledger]
+            with diagnostics.phase("gather_ledgers", epoch=epoch):
+                ledgers = _all_gather(dist, final_ledger, world) if world == 2 else [final_ledger]
             if rank == 0:
-                transaction = checkpoint.begin_checkpoint(
-                    Path(plan["checkpoint_root"]),
-                    f"epoch-{epoch:04d}",
-                    binding,
-                    progress,
-                    ledgers,
-                    run_id=plan["run_id"],
-                    attempt_id=plan["run_id"],
-                    parent_manifest_digest=parent_digest,
-                )
+                with diagnostics.phase("begin_checkpoint", epoch=epoch):
+                    transaction = checkpoint.begin_checkpoint(
+                        Path(plan["checkpoint_root"]),
+                        f"epoch-{epoch:04d}",
+                        binding,
+                        progress,
+                        ledgers,
+                        run_id=plan["run_id"],
+                        attempt_id=plan["run_id"],
+                        parent_manifest_digest=parent_digest,
+                    )
                 transaction_value = asdict(transaction)
             else:
                 transaction_value = None
             if world == 2:
-                transaction_value = _broadcast(dist, transaction_value, rank)
+                with diagnostics.phase("broadcast_transaction", epoch=epoch):
+                    transaction_value = _broadcast(dist, transaction_value, rank)
             transaction = checkpoint.Transaction(**transaction_value)
-            ack = checkpoint.write_rank(transaction, rank, state, ledger=final_ledger)
-            acknowledgments = _all_gather(dist, asdict(ack), world) if world == 2 else [asdict(ack)]
-            if rank == 0:
-                latest = checkpoint.commit_checkpoint(
-                    transaction,
-                    [checkpoint.RankAck(**item) for item in acknowledgments],
+            with diagnostics.phase("write_rank_checkpoint", epoch=epoch):
+                ack = checkpoint.write_rank(transaction, rank, state, ledger=final_ledger)
+            with diagnostics.phase("gather_acknowledgments", epoch=epoch):
+                acknowledgments = (
+                    _all_gather(dist, asdict(ack), world) if world == 2 else [asdict(ack)]
                 )
+            if rank == 0:
+                with diagnostics.phase("commit_checkpoint", epoch=epoch):
+                    latest = checkpoint.commit_checkpoint(
+                        transaction,
+                        [checkpoint.RankAck(**item) for item in acknowledgments],
+                    )
                 reference_value = asdict(latest)
             else:
                 reference_value = None
             if world == 2:
-                reference_value = _broadcast(dist, reference_value, rank)
+                with diagnostics.phase("broadcast_reference", epoch=epoch):
+                    reference_value = _broadcast(dist, reference_value, rank)
             latest = checkpoint.CheckpointRef(**reference_value)
             parent_digest = latest.manifest_digest
             checkpoint_count += 1
@@ -530,7 +681,8 @@ def _run_rank(plan: dict) -> dict | None:
             "rank_seed": rank_seed,
             "mode": plan["mode"],
         }
-        receipts = _all_gather(dist, receipt, world) if world == 2 else [receipt]
+        with diagnostics.phase("gather_receipts"):
+            receipts = _all_gather(dist, receipt, world) if world == 2 else [receipt]
         if rank != 0:
             return None
         result = {
@@ -553,4 +705,5 @@ def _run_rank(plan: dict) -> dict | None:
         return result
     finally:
         if world == 2 and dist.is_initialized():
-            dist.destroy_process_group()
+            with diagnostics.phase("destroy_process_group"):
+                dist.destroy_process_group()
