@@ -6,7 +6,8 @@ COPY --from=java /opt/java/openjdk /opt/java/openjdk
 ENV JAVA_HOME=/opt/java/openjdk PATH="/opt/java/openjdk/bin:$PATH"
 # H2 is an embedded, in-process JDBC engine for offline transaction lessons.
 # Download only during image build; the SHA256 is pinned from Maven Central.
-RUN python -c "import hashlib,pathlib,urllib.request; u='https://repo.maven.apache.org/maven2/com/h2database/h2/2.5.252/h2-2.5.252.jar'; d=urllib.request.urlopen(u,timeout=60).read(); assert hashlib.sha256(d).hexdigest()=='90b11dc413da82070ef15fc943282c1408e6ffd34fa68998335fea8603b5ff20'; p=pathlib.Path('/opt/course-libs'); p.mkdir(); (p/'h2-2.5.252.jar').write_bytes(d)"
+COPY docker/workers/fetch_pinned.py /tmp/fetch_pinned.py
+RUN python /tmp/fetch_pinned.py https://repo.maven.apache.org/maven2/com/h2database/h2/2.5.252/h2-2.5.252.jar 90b11dc413da82070ef15fc943282c1408e6ffd34fa68998335fea8603b5ff20 /opt/course-libs/h2-2.5.252.jar && rm /tmp/fetch_pinned.py
 RUN java -version && javac -version && install -d -m 0700 /run/ds60
 WORKDIR /opt/worker
 COPY src/ds60sqlpy/__init__.py src/ds60sqlpy/http_server.py src/ds60sqlpy/module_worker.py src/ds60sqlpy/worker_operations.py src/ds60sqlpy/plot_artifacts.py src/ds60sqlpy/plot_capture.py src/ds60sqlpy/worker_figures.py /opt/worker/src/ds60sqlpy/

@@ -15,9 +15,11 @@ import shutil
 import sys
 import tempfile
 import time
+import urllib.error
 import urllib.request
 import uuid
 from pathlib import Path
+from typing import Any
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
@@ -52,9 +54,32 @@ def tool_targets(system: str | None = None, machine: str | None = None) -> tuple
     return operating, architecture, ""
 
 
+def open_download(source: Any, timeout: float, attempts: int = 5) -> Any:
+    """Open a pinned download, retrying brief throttling and gateway errors."""
+    for attempt in range(attempts):
+        try:
+            return urllib.request.urlopen(source, timeout=timeout)
+        except urllib.error.HTTPError as error:
+            if error.code not in {429, 502, 503, 504} or attempt + 1 == attempts:
+                raise
+            delay = float(min(30, 2 ** (attempt + 1)))
+            retry_after = error.headers.get("Retry-After", "") if error.headers else ""
+            if retry_after.isdecimal() and len(retry_after) <= 6:
+                delay = float(min(60, int(retry_after)))
+            print(
+                f"Download returned HTTP {error.code}; retrying the same pinned file "
+                f"in {delay:g}s (attempt {attempt + 2}/{attempts}).",
+                file=sys.stderr,
+                flush=True,
+            )
+            error.close()
+            time.sleep(delay)
+    raise AssertionError("Unreachable download attempt boundary")
+
+
 def download_tool(url: str, checksum_suffix: str, target: Path) -> None:
     """Connected explicit preparation: verify official checksum before publication."""
-    with urllib.request.urlopen(url + checksum_suffix, timeout=30) as response:
+    with open_download(url + checksum_suffix, 30) as response:
         text = response.read(1024).decode("ascii").strip()
     checksum = text.split()[0] if text else ""
     if not re.fullmatch(r"[0-9a-fA-F]{64}", checksum):
@@ -73,7 +98,7 @@ def download_tool(url: str, checksum_suffix: str, target: Path) -> None:
     digest = hashlib.sha256()
     total = 0
     try:
-        with urllib.request.urlopen(url, timeout=60) as response, temporary.open("xb") as output:
+        with open_download(url, 60) as response, temporary.open("xb") as output:
             while chunk := response.read(1024 * 1024):
                 total += len(chunk)
                 if total > 128 * 1024 * 1024:

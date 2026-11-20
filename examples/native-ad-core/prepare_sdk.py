@@ -8,9 +8,13 @@ import json
 import shutil
 import sys
 import tarfile
+import time
+import urllib.error
+import urllib.request
 from pathlib import Path
+from typing import Any
 from urllib.error import HTTPError
-from urllib.request import Request, urlopen
+from urllib.request import Request
 
 VERSION = "1.9.25"
 SHA256 = "cf9663b29949cd5eaccb32e11900c9e07caec7d6ac4f17cfd938317dc33acff2"
@@ -20,13 +24,36 @@ URLS = (
 )
 
 
+def open_download(source: Any, timeout: float, attempts: int = 5) -> Any:
+    """Open a pinned download, retrying brief throttling and gateway errors."""
+    for attempt in range(attempts):
+        try:
+            return urllib.request.urlopen(source, timeout=timeout)
+        except urllib.error.HTTPError as error:
+            if error.code not in {429, 502, 503, 504} or attempt + 1 == attempts:
+                raise
+            delay = float(min(30, 2 ** (attempt + 1)))
+            retry_after = error.headers.get("Retry-After", "") if error.headers else ""
+            if retry_after.isdecimal() and len(retry_after) <= 6:
+                delay = float(min(60, int(retry_after)))
+            print(
+                f"Download returned HTTP {error.code}; retrying the same pinned file "
+                f"in {delay:g}s (attempt {attempt + 2}/{attempts}).",
+                file=sys.stderr,
+                flush=True,
+            )
+            error.close()
+            time.sleep(delay)
+    raise AssertionError("Unreachable download attempt boundary")
+
+
 def prepare(destination: Path) -> None:
     body = None
     origin = ""
     for url in URLS:
         try:
-            with urlopen(
-                Request(url, headers={"User-Agent": "DS60-native-AD-probe"}), timeout=60
+            with open_download(
+                Request(url, headers={"User-Agent": "DS60-native-AD-probe"}), 60
             ) as response:
                 if not response.geturl().startswith("https://"):
                     raise ValueError("dependency download lost HTTPS")
@@ -75,7 +102,7 @@ def prepare(destination: Path) -> None:
         f"https://cran.r-project.org/src/contrib/Archive/RcppEigen/RcppEigen_{eigen_version}.tar.gz",
     ):
         try:
-            with urlopen(eigen_url, timeout=60) as response:
+            with open_download(eigen_url, 60) as response:
                 if not response.geturl().startswith("https://"):
                     raise ValueError("Eigen download lost HTTPS")
                 eigen_body = response.read(20_000_001)

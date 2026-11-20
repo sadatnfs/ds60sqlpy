@@ -6,13 +6,40 @@ import hashlib
 import json
 import shutil
 import subprocess
+import sys
 import tarfile
 import tempfile
+import time
+import urllib.error
 import urllib.request
 from pathlib import Path, PurePosixPath
+from typing import Any
 from urllib.parse import urlsplit
 
 LOCK = json.loads(Path(__file__).with_name("artifact-lock.json").read_text())
+
+
+def open_download(source: Any, timeout: float, attempts: int = 5) -> Any:
+    """Open a pinned download, retrying brief throttling and gateway errors."""
+    for attempt in range(attempts):
+        try:
+            return urllib.request.urlopen(source, timeout=timeout)
+        except urllib.error.HTTPError as error:
+            if error.code not in {429, 502, 503, 504} or attempt + 1 == attempts:
+                raise
+            delay = float(min(30, 2 ** (attempt + 1)))
+            retry_after = error.headers.get("Retry-After", "") if error.headers else ""
+            if retry_after.isdecimal() and len(retry_after) <= 6:
+                delay = float(min(60, int(retry_after)))
+            print(
+                f"Download returned HTTP {error.code}; retrying the same pinned file "
+                f"in {delay:g}s (attempt {attempt + 2}/{attempts}).",
+                file=sys.stderr,
+                flush=True,
+            )
+            error.close()
+            time.sleep(delay)
+    raise AssertionError("Unreachable download attempt boundary")
 
 
 def install(target: Path) -> None:
@@ -27,7 +54,7 @@ def install(target: Path) -> None:
         digest = hashlib.sha512()
         total = 0
         with (
-            urllib.request.urlopen(LOCK["url"], timeout=60) as response,
+            open_download(LOCK["url"], 60) as response,
             archive.open("xb") as output,
         ):
             parsed = urlsplit(response.geturl())

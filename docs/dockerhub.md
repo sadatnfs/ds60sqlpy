@@ -517,10 +517,11 @@ must be unique and valid, and worker receipts must bind the exact app/Core seed
 digests they used. Receipts from another run or revision are rejected; rebuilt
 seeds cannot silently be combined with old worker results.
 
-Qualification builds also download locked upstream sources. The R installer
-retries CRAN throttling (HTTP 429) for about four minutes; if a qualification
-job still stops on it, wait several minutes before **Re-run failed jobs**, which
-rebuilds only the failed groups.
+Qualification builds also download pinned upstream files, such as CRAN sources
+and Maven Central jars. Each download retries throttling (HTTP 429) and gateway
+errors for about four minutes; if a qualification job still stops on one, wait
+several minutes before **Re-run failed jobs**, which rebuilds only the failed
+groups.
 
 A failed promotion can complete matching partial version tags using those
 original image identities, without rewriting completed matching tags. A new

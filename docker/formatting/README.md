@@ -213,7 +213,8 @@ and disables package install scripts. Python uses exact versions and
 `--require-hashes`; `requirements.lock` covers the supported Linux wheel
 architectures. The pinned Go module versions are verified through Go's checksum
 database. `install-downloads.py` verifies SHA-256 before installing the exact
-Scalafmt and pgFormatter archives. Do not disable TLS verification or add local
+Scalafmt and pgFormatter archives, and retries brief upstream throttling (HTTP
+429) and gateway errors. Do not disable TLS verification or add local
 proxy credentials or certificates to this directory.
 
 To change a tool version, update its pin and applicable lockfile, run the
