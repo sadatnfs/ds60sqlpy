@@ -426,6 +426,9 @@ def test_classroom_compose_has_named_only_state_and_private_workers() -> None:
     base = yaml.safe_load((ROOT / "compose.yaml").read_text())
     assert set(base["services"]) == {"postgres", "lab"}
     assert "volumes" not in base["services"]["lab"]
+    # Docker's init runs as root and must signal the lab after gosu drops identity.
+    assert base["services"]["lab"]["init"] is True
+    assert "KILL" in base["services"]["lab"]["cap_add"]
     assert all(port.startswith("127.0.0.1:") for port in base["services"]["postgres"]["ports"])
     modules = yaml.safe_load((ROOT / "compose.modules.yaml").read_text())
     assert not {"postgres", "lab"} & modules["services"].keys()

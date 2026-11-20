@@ -6,6 +6,7 @@ import contextlib
 import json
 import math
 import os
+import signal
 import threading
 import webbrowser
 from http import HTTPStatus
@@ -477,6 +478,10 @@ class LabRequestHandler(CourseRequestHandler):
             self._send_error(HTTPStatus.BAD_REQUEST, str(exc))
 
 
+def _stop_serving(signum: int, frame: object) -> None:
+    raise KeyboardInterrupt
+
+
 def serve_lab(
     catalog: Catalog,
     *,
@@ -495,9 +500,18 @@ def serve_lab(
     print("Coding pads run trusted local code. Saved work is in .learning/. Press Ctrl+C to stop.")
     if open_browser:
         webbrowser.open(url)
+    # Docker stops containers with SIGTERM; treat it like Ctrl+C so running
+    # pads and module sessions are reaped instead of killed.
+    previous = (
+        signal.signal(signal.SIGTERM, _stop_serving)
+        if threading.current_thread() is threading.main_thread()
+        else None
+    )
     try:
         server.serve_forever()
     except KeyboardInterrupt:
         pass
     finally:
         server.server_close()
+        if previous is not None:
+            signal.signal(signal.SIGTERM, previous)

@@ -47,7 +47,9 @@ services:
     mem_limit: ${DS60_LAB_MEMORY:-2g}
     pids_limit: 128
     cap_drop: [ALL]
-    cap_add: [CHOWN, SETUID, SETGID]
+    # KILL lets Docker's root init forward the stop signal after gosu drops
+    # to the learner identity; without it the lab is killed, not stopped.
+    cap_add: [CHOWN, SETUID, SETGID, KILL]
     security_opt: ["no-new-privileges:true"]
     healthcheck:
       test: ["CMD", "python", "/opt/course/docker/healthcheck.py"]

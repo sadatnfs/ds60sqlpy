@@ -302,6 +302,43 @@ def test_lab_shutdown_waits_for_active_backend_cleanup(tmp_path: Path) -> None:
         serving.join(timeout=3)
 
 
+def test_sigterm_stops_the_lab_like_ctrl_c(monkeypatch: pytest.MonkeyPatch) -> None:
+    # Docker stops containers with SIGTERM; the lab must still run its cleanup.
+    import signal
+
+    from ds60sqlpy import lab
+
+    events: list[str] = []
+
+    class StoppedServer:
+        url = "http://127.0.0.1:9/"
+
+        def __init__(self, *args: object, **kwargs: object) -> None:
+            pass
+
+        def serve_forever(self) -> None:
+            signal.raise_signal(signal.SIGTERM)
+            events.append("kept serving")
+
+        def server_close(self) -> None:
+            events.append("closed")
+
+    class UnhandledStop(Exception):
+        pass
+
+    def unhandled(signum: int, frame: object) -> None:
+        raise UnhandledStop
+
+    monkeypatch.setattr(lab, "LabServer", StoppedServer)
+    previous = signal.signal(signal.SIGTERM, unhandled)
+    try:
+        lab.serve_lab(Catalog.load(), open_browser=False)
+        assert events == ["closed"]
+        assert signal.getsignal(signal.SIGTERM) is unhandled
+    finally:
+        signal.signal(signal.SIGTERM, previous)
+
+
 def test_workspace_initialization_preserves_prebound_learning_folder(tmp_path: Path) -> None:
     source = tmp_path / "bundle"
     source.mkdir()
