@@ -1,7 +1,7 @@
 # Build only from already prepared native images. Runtime never downloads packages.
 ARG TMB_IMAGE=ds60-tmb-local:dev-1.9.25
-ARG SPARK_IMAGE=ds60sqlpy-worker-spark-local-python:1.4.1
-ARG JAVA_IMAGE=ds60sqlpy-worker-java21:1.4.1
+ARG SPARK_IMAGE=ds60sqlpy-worker-spark-local-python:1.4.2
+ARG JAVA_IMAGE=ds60sqlpy-worker-java21:1.4.2
 FROM ${SPARK_IMAGE} AS spark
 FROM ${JAVA_IMAGE} AS java
 FROM ${TMB_IMAGE} AS prepared

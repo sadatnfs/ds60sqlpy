@@ -1,4 +1,4 @@
-ARG WEB_BASE_IMAGE=ds60sqlpy-worker-python-web:1.4.1
+ARG WEB_BASE_IMAGE=ds60sqlpy-worker-python-web:1.4.2
 FROM ${WEB_BASE_IMAGE}
 WORKDIR /opt/web-lab
 COPY . /opt/web-lab/

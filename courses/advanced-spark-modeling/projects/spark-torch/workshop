@@ -11,8 +11,8 @@ case "$command" in
       exit 64
     }
     docker build --pull=false --progress=plain \
-      --build-arg "TORCH_IMAGE=${DS60_TORCH_BASE:-ds60sqlpy-worker-llm-torch-cpu:1.4.1}" \
-      --build-arg "SPARK_IMAGE=${DS60_SPARK_BASE:-ds60sqlpy-worker-spark-local-python:1.4.1}" \
+      --build-arg "TORCH_IMAGE=${DS60_TORCH_BASE:-ds60sqlpy-worker-llm-torch-cpu:1.4.2}" \
+      --build-arg "SPARK_IMAGE=${DS60_SPARK_BASE:-ds60sqlpy-worker-spark-local-python:1.4.2}" \
       -f "$here/Dockerfile" -t "$image" "$repo"
     ;;
   run | check)

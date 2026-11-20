@@ -8,7 +8,7 @@ changing any exercise code:
     python courses/javascript-typescript/authoring/qualify_variants.py
 
 It needs a local Docker engine and the prepared worker images (defaults
-ds60sqlpy-worker-javascript-node:1.4.1 and ds60sqlpy-worker-typescript-node:1.4.1,
+ds60sqlpy-worker-javascript-node:1.4.2 and ds60sqlpy-worker-typescript-node:1.4.2,
 override with JS_VARIANT_IMAGE and TS_VARIANT_IMAGE). Programs run offline with the
 classroom's Node flags; TypeScript is compiled first with the classroom's tsc flags.
 For identification only, a marker call records which assertion of the mutated
@@ -33,8 +33,8 @@ for module in ("specs", "intermediate", "typed", "typed_advanced", "browser", "a
 __import__("applications")
 
 IMAGES = {
-    "js": os.environ.get("JS_VARIANT_IMAGE", "ds60sqlpy-worker-javascript-node:1.4.1"),
-    "ts": os.environ.get("TS_VARIANT_IMAGE", "ds60sqlpy-worker-typescript-node:1.4.1"),
+    "js": os.environ.get("JS_VARIANT_IMAGE", "ds60sqlpy-worker-javascript-node:1.4.2"),
+    "ts": os.environ.get("TS_VARIANT_IMAGE", "ds60sqlpy-worker-typescript-node:1.4.2"),
 }
 LIMIT = 10
 MARKER = {

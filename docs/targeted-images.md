@@ -24,7 +24,7 @@ Accepted full releases, such as 1.4.1, are described in the
 [release/image guide](dockerhub.md#published-release-and-its-evidence). Each has distinct
 canonical tags for every ordinary profile. Selecting fewer workers when
 installing a full release is supported and does not require a new partial
-publication. For example, `--profile r-statistics --from-hub sadatnfs --tag 1.4.1`
+publication. For example, `--profile r-statistics --from-hub sadatnfs --tag 1.4.2`
 selects the existing App/Core/R images plus PostgreSQL.
 
 ## Using a partial release
