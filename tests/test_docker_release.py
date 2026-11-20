@@ -77,6 +77,28 @@ class FakeRegistry(Registry):
         return self.add(body, tag).descriptor
 
 
+class LaggingRegistry(FakeRegistry):
+    """Answers 404 for a newly written tag's first reads, as Docker Hub briefly can."""
+
+    def __init__(self, misses: int) -> None:
+        super().__init__()
+        self.misses = misses
+        self.settled: set[str] = set()
+        self.pending: dict[str, int] = {}
+
+    def settle(self) -> None:
+        self.settled.update(self.tags)
+
+    def head(self, reference: str) -> Head | None:
+        if reference in self.tags and reference not in self.settled:
+            left = self.pending.setdefault(reference, self.misses)
+            if left:
+                self.pending[reference] = left - 1
+                self.heads.append(reference)
+                return None
+        return super().head(reference)
+
+
 def encoded(value: dict[str, Any]) -> bytes:
     return json.dumps(value, sort_keys=True, separators=(",", ":")).encode()
 
@@ -334,6 +356,25 @@ def test_complete_promotion_orders_workers_before_each_app_pointer(
     )
     assert len(registry.puts) == 6  # Exact repeat never rewrites immutable or matching aliases.
     assert release.gate_release(context, profiles, registry)["mode"] == "noop"
+
+
+def test_promotion_readback_waits_out_a_brief_registry_lag(
+    tmp_path: Path,
+    context: release.Context,
+    profiles: dict[str, release.Profile],
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    sleeps: list[float] = []
+    monkeypatch.setattr("time.sleep", sleeps.append)
+    registry = LaggingRegistry(misses=1)
+    complete_receipts(tmp_path / "receipts", registry, context, profiles)
+    registry.settle()
+    inputs = release.promotion_inputs(tmp_path / "receipts", context, profiles, registry, tmp_path)
+    report = release.promote_release(
+        context, profiles, registry, natives=inputs, output=tmp_path / "promotion.json"
+    )
+    assert report["status"] == "published"
+    assert sleeps == [2] * 6  # One brief absence per written tag, each read back.
 
 
 def add_unselected_group(root: Path) -> dict[str, release.Profile]:
@@ -749,6 +790,36 @@ def test_successful_seed_stage_binds_pushed_root_native_config_and_qualification
         image["tested_image_id"] for image in snapshot["images"]
     ]
     assert not any(tag in registry.tags for tag in ("1.0.0", "latest"))
+
+
+@pytest.mark.parametrize(
+    ("misses", "waits"), [(2, [2, 4, 2, 4]), (99, list(release.WRITE_VISIBILITY_WAITS))]
+)
+def test_stage_waits_briefly_for_a_just_pushed_candidate_then_fails_closed(
+    tmp_path: Path,
+    context: release.Context,
+    profiles: dict[str, release.Profile],
+    monkeypatch: pytest.MonkeyPatch,
+    misses: int,
+    waits: list[int],
+) -> None:
+    sleeps: list[float] = []
+    monkeypatch.setattr("time.sleep", sleeps.append)
+    registry = LaggingRegistry(misses=misses)
+    docker = local_images(registry, context, profiles, "amd64")
+    snapshot = release.inspect_images(
+        context, profiles, ["app", "python-core"], "amd64", docker, root=tmp_path
+    )
+    proof = proofs(set(release.SEEDS), "python-core")
+    if misses > len(release.WRITE_VISIBILITY_WAITS):
+        with pytest.raises(ReleaseError, match="Staged candidate manifest is missing"):
+            release.stage_images(context, profiles, snapshot, proof, registry, docker, tmp_path)
+    else:
+        staged = release.stage_images(
+            context, profiles, snapshot, proof, registry, docker, tmp_path
+        )
+        assert len(staged["images"]) == 2
+    assert sleeps == waits
 
 
 def test_seed_import_reuses_earlier_attempt_by_native_digest_and_pins_restored_tags(

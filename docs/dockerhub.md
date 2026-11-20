@@ -470,12 +470,15 @@ new app before its required worker versions are available.
 
 ### Retrying an interrupted run
 
-Registry operations across multiple tags are not a transaction. **Re-run failed
-jobs** can reuse successful receipts from earlier attempts of the same workflow
-run and source revision. The selected receipts must be unique and valid, and
-worker receipts must bind the exact app/Core seed digests they used. Receipts
-from another run or revision are rejected; rebuilt seeds cannot silently be
-combined with old worker results.
+Registry operations across multiple tags are not a transaction. Staging and
+promotion read back every manifest they write, and wait up to about a minute
+when Docker Hub briefly reports a just-written manifest as missing; one that is
+still missing, or that shows a different digest, stops the run before any later
+tag is written. **Re-run failed jobs** can reuse successful receipts from earlier
+attempts of the same workflow run and source revision. The selected receipts
+must be unique and valid, and worker receipts must bind the exact app/Core seed
+digests they used. Receipts from another run or revision are rejected; rebuilt
+seeds cannot silently be combined with old worker results.
 
 A failed promotion can complete matching partial version tags using those
 original image identities, without rewriting completed matching tags. A new

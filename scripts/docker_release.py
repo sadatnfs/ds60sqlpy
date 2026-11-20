@@ -35,6 +35,7 @@ from scripts.docker_registry import (  # noqa: E402
     NAMESPACE,
     OCI_INDEX,
     Descriptor,
+    Head,
     Manifest,
     Registry,
     ReleaseError,
@@ -47,6 +48,8 @@ from scripts.docker_registry import (  # noqa: E402
 
 ARCHITECTURES = ("amd64", "arm64")
 SEEDS = frozenset({"app", "python-core"})
+# Seconds between readbacks of a manifest this run just wrote (about a minute in all).
+WRITE_VISIBILITY_WAITS = (2, 4, 8, 16, 30)
 VERSION = re.compile(r"(0|[1-9][0-9]{0,5})\.(0|[1-9][0-9]{0,5})\.(0|[1-9][0-9]{0,5})\Z")
 SHA = re.compile(r"[a-f0-9]{40}\Z")
 HASH = re.compile(r"[a-f0-9]{64}\Z")
@@ -998,6 +1001,22 @@ def qualification_records(
     return records
 
 
+def head_after_write(registry: Registry, reference: str) -> Head | None:
+    """Read back a manifest this run just wrote, waiting out a brief absence.
+
+    Docker Hub can answer 404 for a newly pushed or written tag for a short
+    time. Only that absence is retried, for about a minute in total; a present
+    manifest is returned at once, so a changed digest still fails its check.
+    """
+    head = registry.head(reference)
+    for delay in WRITE_VISIBILITY_WAITS:
+        if head is not None:
+            break
+        time.sleep(delay)
+        head = registry.head(reference)
+    return head
+
+
 def verify_candidate(
     registry: Registry, context: Context, image: dict[str, Any], architecture: str
 ) -> dict[str, Any]:
@@ -1075,6 +1094,7 @@ def stage_images(
             target = context.repository + ":" + tag
             docker.tag(image["tested_image_id"], target)
             docker.push(target)
+            head_after_write(registry, tag)
         staged.append(verify_candidate(registry, context, image, architecture))
         print(f"Candidate verified: {image['profile']} ({architecture})", flush=True)
     return {
@@ -1452,7 +1472,7 @@ def promote_release(
             registry.put(tag, expected.body, OCI_INDEX)
         elif not same_head(head, expected.descriptor):
             raise ReleaseError("Version tag changed before publication; no overwrite is permitted")
-        if not same_head(registry.head(tag), expected.descriptor):
+        if not same_head(head_after_write(registry, tag), expected.descriptor):
             raise ReleaseError("Immutable version tag failed readback")
         report["version_tags"].append({"tag": tag, **expected.descriptor.record()})
         write_json(output, report)
@@ -1478,7 +1498,7 @@ def promote_release(
                             "Refusing to downgrade or replace a conflicting latest alias"
                         )
                 registry.put(tag, expected.body, OCI_INDEX)
-            if not same_head(registry.head(tag), expected.descriptor):
+            if not same_head(head_after_write(registry, tag), expected.descriptor):
                 raise ReleaseError("Latest alias failed readback")
             report["latest_tags"].append({"tag": tag, **expected.descriptor.record()})
             write_json(output, report)
