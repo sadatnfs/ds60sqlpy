@@ -754,6 +754,29 @@ def test_identical_stan_initialization_rejections_are_counted_once() -> None:
     assert display_output("stan-cpu", look_alike) == look_alike
 
 
+def test_stan_sampler_notes_are_hidden_but_model_output_and_summary_stay() -> None:
+    from ds60sqlpy.worker_operations import display_output
+
+    case = _fixture("stan-cpu", "success-shown")
+    shown = display_output("stan-cpu", case["output"])
+    for note in ("Gradient evaluation took", "Adjust your expectations", "WARNING:", "Elapsed"):
+        assert note in case["output"] and note not in shown
+    assert shown.startswith(
+        "\n--- Translating Stan model to C++ code ---\n\n--- Compiling C++ code ---\n\n"
+        "--- Linking model ---\n\nlearner note: data ready\n\n"
+        "Chain 1: 100 retained draws; divergences=0\n\nlearner note: data ready\n\n"
+        "Chain 2: 100 retained draws; divergences=0\nInference for Stan model: main_model\n"
+    )
+    assert "\nmu " in shown and shown.endswith("review diagnostics before inference.\n")
+    # A note interrupted by the model's own output is not CmdStan's, so it stays.
+    interrupted = (
+        "Gradient evaluation took 1 seconds\nmodel note\n"
+        "1000 transitions using 10 leapfrog steps per transition would take 9 seconds.\n"
+        "Adjust your expectations accordingly!\n"
+    )
+    assert display_output("stan-cpu", interrupted) == interrupted
+
+
 def test_swift_program_keeps_what_it_printed_before_a_crash(tmp_path: Path) -> None:
     import subprocess
 

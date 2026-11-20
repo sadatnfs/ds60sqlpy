@@ -232,6 +232,32 @@ _STAN_REJECTION_CAUSES = {
     "  Gradient evaluated at the initial value is not finite.",
 }
 _STAN_CANNOT_START = "  Stan can't start sampling from this initial value."
+# Notes CmdStan prints for every chain, whatever the model: a timing estimate
+# before sampling, a warning that the runner's fixed 100-iteration warmup is
+# shorter than its default adaptation windows, and the chain's elapsed time.
+_STAN_SAMPLER_NOTES = (
+    (
+        re.compile(r"Gradient evaluation took \S+ seconds"),
+        re.compile(
+            r"\d+ transitions using \d+ leapfrog steps per transition would take \S+ seconds\."
+        ),
+        re.compile(r"Adjust your expectations accordingly!"),
+    ),
+    (
+        re.compile(r"WARNING: There aren't enough warmup iterations to fit the"),
+        re.compile(r" +three stages of adaptation as currently configured\."),
+        re.compile(r" +Reducing each adaptation stage to 15%/75%/10% of"),
+        re.compile(r" +the given number of warmup iterations:"),
+        re.compile(r" +init_buffer = \d+"),
+        re.compile(r" +adapt_window = \d+"),
+        re.compile(r" +term_buffer = \d+"),
+    ),
+    (
+        re.compile(r" Elapsed Time: \S+ seconds \(Warm-up\)"),
+        re.compile(r" +\S+ seconds \(Sampling\)"),
+        re.compile(r" +\S+ seconds \(Total\)"),
+    ),
+)
 _SWIFT_CRASH_START = re.compile(
     r"\*\*\* Signal \d+: Backtracing from 0x[0-9a-f]+\.\.\. done \*\*\*"
 )
@@ -438,6 +464,44 @@ def _without_stan_arguments(text: str) -> str:
     return "\n".join(shown)
 
 
+def _without_stan_sampler_notes(text: str) -> str:
+    """Drop the timing and warmup notes CmdStan prints around each chain.
+
+    Only complete notes with CmdStan's exact wording are dropped. The model's
+    own messages, each chain's draw count and the summary table stay, and the
+    blank lines around a dropped note collapse to the one before it.
+    """
+    if not any(
+        marker in text
+        for marker in ("Gradient evaluation took", "enough warmup iterations", "Elapsed Time:")
+    ):
+        return text
+    lines = text.split("\n")
+    shown: list[str] = []
+    index = 0
+    while index < len(lines):
+        size = next(
+            (
+                len(note)
+                for note in _STAN_SAMPLER_NOTES
+                if len(lines) - index >= len(note)
+                and all(
+                    pattern.fullmatch(line)
+                    for pattern, line in zip(note, lines[index : index + len(note)], strict=True)
+                )
+            ),
+            0,
+        )
+        if not size:
+            shown.append(lines[index])
+            index += 1
+            continue
+        index += size
+        while index < len(lines) - 1 and not lines[index]:
+            index += 1
+    return "\n".join(shown)
+
+
 def _stan_rejection(lines: list[str]) -> bool:
     """Whether three lines are one of Stan's "Rejecting initial value" messages."""
     return (
@@ -569,7 +633,9 @@ def display_output(profile_id: str, text: str) -> str:
     if profile_id == "spark-local-scala":
         return _without_spark_launch_frames(text)
     if profile_id == "stan-cpu":
-        return _without_repeated_stan_rejections(_without_stan_arguments(text))
+        return _without_repeated_stan_rejections(
+            _without_stan_sampler_notes(_without_stan_arguments(text))
+        )
     if profile_id == "swift-linux":
         return _without_swift_crash_report(text)
     if profile_id == "dbt-duckdb":
