@@ -15,6 +15,7 @@ from scripts import docker_release as release
 from scripts.docker_registry import (
     OCI_INDEX,
     OCI_MANIFEST,
+    WRITE_VISIBILITY_WAITS,
     Descriptor,
     Head,
     Manifest,
@@ -97,6 +98,27 @@ class LaggingRegistry(FakeRegistry):
                 self.heads.append(reference)
                 return None
         return super().head(reference)
+
+
+class StaleAliasRegistry(FakeRegistry):
+    """Serves a moved tag's previous manifest once after the move, as Docker Hub can."""
+
+    def __init__(self) -> None:
+        super().__init__()
+        self.previous: dict[str, str] = {}
+
+    def put(self, tag: str, body: bytes, media_type: str = OCI_INDEX) -> Descriptor:
+        if tag in self.tags:
+            self.previous[tag] = self.tags[tag]
+        return super().put(tag, body, media_type)
+
+    def head(self, reference: str) -> Head | None:
+        stale = self.previous.pop(reference, None)
+        if stale is None:
+            return super().head(reference)
+        self.heads.append(reference)
+        value = self.objects[stale]
+        return Head(value.descriptor.media_type, stale, value.descriptor.size)
 
 
 def encoded(value: dict[str, Any]) -> bytes:
@@ -586,6 +608,26 @@ def test_an_older_rerun_never_moves_latest_backward(
     assert release.gate_release(context, profiles, registry)["mode"] == "noop"
 
 
+def test_promotion_waits_out_a_moved_alias_previous_manifest(
+    tmp_path: Path,
+    context: release.Context,
+    profiles: dict[str, release.Profile],
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    sleeps: list[float] = []
+    monkeypatch.setattr("time.sleep", sleeps.append)
+    registry = StaleAliasRegistry()
+    natives = complete_receipts(tmp_path / "receipts", registry, context, profiles)
+    older = replace(context, version="0.9.0", revision="b" * 40)
+    for key, profile in profiles.items():
+        registry.add(release.index_body(older, key, natives[key]), release.latest_tag(profile))
+    report = release.promote_release(
+        context, profiles, registry, natives=natives, output=tmp_path / "moved.json"
+    )
+    assert report["status"] == "published" and len(report["latest_tags"]) == len(profiles)
+    assert sleeps == [2] * len(profiles)  # One previous-manifest read per moved alias.
+
+
 def test_same_revision_complete_versions_can_finish_missing_aliases(
     tmp_path: Path, context: release.Context, profiles: dict[str, release.Profile]
 ) -> None:
@@ -793,7 +835,7 @@ def test_successful_seed_stage_binds_pushed_root_native_config_and_qualification
 
 
 @pytest.mark.parametrize(
-    ("misses", "waits"), [(2, [2, 4, 2, 4]), (99, list(release.WRITE_VISIBILITY_WAITS))]
+    ("misses", "waits"), [(2, [2, 4, 2, 4]), (99, list(WRITE_VISIBILITY_WAITS))]
 )
 def test_stage_waits_briefly_for_a_just_pushed_candidate_then_fails_closed(
     tmp_path: Path,
@@ -811,7 +853,7 @@ def test_stage_waits_briefly_for_a_just_pushed_candidate_then_fails_closed(
         context, profiles, ["app", "python-core"], "amd64", docker, root=tmp_path
     )
     proof = proofs(set(release.SEEDS), "python-core")
-    if misses > len(release.WRITE_VISIBILITY_WAITS):
+    if misses > len(WRITE_VISIBILITY_WAITS):
         with pytest.raises(ReleaseError, match="Staged candidate manifest is missing"):
             release.stage_images(context, profiles, snapshot, proof, registry, docker, tmp_path)
     else:

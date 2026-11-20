@@ -28,6 +28,8 @@ IMAGE_TYPES = frozenset({OCI_MANIFEST, DOCKER_MANIFEST})
 MANIFEST_TYPES = INDEX_TYPES | IMAGE_TYPES
 ACCEPT = ", ".join(sorted(MANIFEST_TYPES))
 MAX_MANIFEST_BYTES = 4 * 1024 * 1024
+# Seconds between readbacks of a manifest this run just wrote (about a minute in all).
+WRITE_VISIBILITY_WAITS = (2, 4, 8, 16, 30)
 DIGEST = re.compile(r"sha256:[a-f0-9]{64}\Z")
 NAMESPACE = re.compile(r"[a-z0-9][a-z0-9_-]{1,38}\Z")
 TAG = re.compile(r"[A-Za-z0-9_][A-Za-z0-9_.-]{0,127}\Z")
@@ -316,9 +318,24 @@ class Registry:
         except RegistryTransportError:
             # A lost response is not permission to PUT again. Reconcile the exact
             # expected digest using HEAD; authorization failures remain failures.
-            if same_head(self.head(tag), expected):
+            if self._written(tag, expected):
                 return expected
             raise RegistryTransportError("Manifest PUT outcome remains unverified") from None
-        if not same_head(self.head(tag), expected):
+        if not self._written(tag, expected):
             raise ReleaseError("Published manifest failed digest readback")
         return expected
+
+    def _written(self, tag: str, expected: Descriptor) -> bool:
+        """Confirm a write, waiting out Docker Hub's brief missing or previous reads.
+
+        Right after a PUT, Docker Hub can answer 404 for a new tag or still serve a
+        moved tag's previous manifest. Only a mismatch that outlasts the waits, such
+        as another writer's manifest, fails.
+        """
+        if same_head(self.head(tag), expected):
+            return True
+        for delay in WRITE_VISIBILITY_WAITS:
+            time.sleep(delay)
+            if same_head(self.head(tag), expected):
+                return True
+        return False

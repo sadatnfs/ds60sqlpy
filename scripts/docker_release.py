@@ -34,6 +34,7 @@ from scripts.docker_registry import (  # noqa: E402
     INDEX_TYPES,
     NAMESPACE,
     OCI_INDEX,
+    WRITE_VISIBILITY_WAITS,
     Descriptor,
     Head,
     Manifest,
@@ -48,8 +49,6 @@ from scripts.docker_registry import (  # noqa: E402
 
 ARCHITECTURES = ("amd64", "arm64")
 SEEDS = frozenset({"app", "python-core"})
-# Seconds between readbacks of a manifest this run just wrote (about a minute in all).
-WRITE_VISIBILITY_WAITS = (2, 4, 8, 16, 30)
 VERSION = re.compile(r"(0|[1-9][0-9]{0,5})\.(0|[1-9][0-9]{0,5})\.(0|[1-9][0-9]{0,5})\Z")
 SHA = re.compile(r"[a-f0-9]{40}\Z")
 HASH = re.compile(r"[a-f0-9]{64}\Z")
@@ -1001,16 +1000,23 @@ def qualification_records(
     return records
 
 
-def head_after_write(registry: Registry, reference: str) -> Head | None:
-    """Read back a manifest this run just wrote, waiting out a brief absence.
+def head_after_write(
+    registry: Registry, reference: str, expected: Descriptor | None = None
+) -> Head | None:
+    """Read back a manifest this run just wrote, waiting out a brief stale read.
 
     Docker Hub can answer 404 for a newly pushed or written tag for a short
-    time. Only that absence is retried, for about a minute in total; a present
-    manifest is returned at once, so a changed digest still fails its check.
+    time, and can still serve a moved tag's previous manifest. Absence is
+    retried for about a minute in total; with an expected descriptor, so is a
+    different manifest. A mismatch that outlasts the waits still fails its check.
     """
+
+    def settled(head: Head | None) -> bool:
+        return head is not None and (expected is None or same_head(head, expected))
+
     head = registry.head(reference)
     for delay in WRITE_VISIBILITY_WAITS:
-        if head is not None:
+        if settled(head):
             break
         time.sleep(delay)
         head = registry.head(reference)
@@ -1498,7 +1504,9 @@ def promote_release(
                             "Refusing to downgrade or replace a conflicting latest alias"
                         )
                 registry.put(tag, expected.body, OCI_INDEX)
-            if not same_head(head_after_write(registry, tag), expected.descriptor):
+            if not same_head(
+                head_after_write(registry, tag, expected.descriptor), expected.descriptor
+            ):
                 raise ReleaseError("Latest alias failed readback")
             report["latest_tags"].append({"tag": tag, **expected.descriptor.record()})
             write_json(output, report)

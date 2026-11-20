@@ -15,6 +15,7 @@ import pytest
 
 from scripts.docker_registry import (
     OCI_INDEX,
+    WRITE_VISIBILITY_WAITS,
     NoRedirect,
     Registry,
     RegistryTransportError,
@@ -25,6 +26,10 @@ from scripts.docker_registry import (
 PAT = "synthetic-private-pat"
 BEARER = "synthetic-private-bearer"
 BODY = b'{"schemaVersion":2,"mediaType":"application/vnd.oci.image.index.v1+json","manifests":[]}'
+PREVIOUS = (
+    b'{"schemaVersion":2,"mediaType":"application/vnd.oci.image.index.v1+json",'
+    b'"manifests":[],"annotations":{"previous":"1"}}'
+)
 
 
 @pytest.fixture(autouse=True)
@@ -141,11 +146,43 @@ def test_lost_put_response_is_reconciled_by_head_without_a_second_put() -> None:
     assert [request.get_method() for request in opener.requests] == ["GET", "PUT", "HEAD"]
 
 
-def test_unknown_put_without_expected_digest_remains_failure() -> None:
-    opener = Opener(auth(), urllib.error.URLError(PAT), http_error(404))
+def test_unknown_put_without_expected_digest_remains_failure(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    sleeps: list[float] = []
+    monkeypatch.setattr("time.sleep", sleeps.append)
+    missing = [http_error(404) for _ in range(1 + len(WRITE_VISIBILITY_WAITS))]
+    opener = Opener(auth(), urllib.error.URLError(PAT), *missing)
     with pytest.raises(RegistryTransportError, match="unverified"):
         Registry("exampleuser", PAT, push=True, opener=opener).put("1.0.0", BODY)
     assert sum(request.get_method() == "PUT" for request in opener.requests) == 1
+    assert sleeps == list(WRITE_VISIBILITY_WAITS)
+
+
+def test_put_readback_waits_out_a_moved_tags_previous_manifest(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    # Docker Hub can serve a moved alias's old manifest right after the PUT.
+    sleeps: list[float] = []
+    monkeypatch.setattr("time.sleep", sleeps.append)
+    opener = Opener(auth(), Response(b"", status=201), metadata(PREVIOUS), metadata())
+    result = Registry("exampleuser", PAT, push=True, opener=opener).put("latest", BODY)
+    assert result.digest == sha256(BODY)
+    assert [request.get_method() for request in opener.requests] == ["GET", "PUT", "HEAD", "HEAD"]
+    assert sleeps == [WRITE_VISIBILITY_WAITS[0]]
+
+
+def test_put_readback_fails_when_another_manifest_persists(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    sleeps: list[float] = []
+    monkeypatch.setattr("time.sleep", sleeps.append)
+    other = [metadata(PREVIOUS) for _ in range(1 + len(WRITE_VISIBILITY_WAITS))]
+    opener = Opener(auth(), Response(b"", status=201), *other)
+    with pytest.raises(ReleaseError, match="failed digest readback"):
+        Registry("exampleuser", PAT, push=True, opener=opener).put("latest", BODY)
+    assert sum(request.get_method() == "PUT" for request in opener.requests) == 1
+    assert sleeps == list(WRITE_VISIBILITY_WAITS)
 
 
 def test_denied_put_does_not_reconcile_as_success() -> None:
