@@ -1119,7 +1119,7 @@ wheels = [
 
 [[package]]
 name = "ds60sqlpy"
-version = "1.4.2"
+version = "1.4.3"
 source = { editable = "." }
 dependencies = [
     { name = "latex2mathml" },

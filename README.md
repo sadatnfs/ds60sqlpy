@@ -66,10 +66,10 @@ cd ds60sqlpy
 ./classroom
 ```
 
-This checkout targets release 1.4.2. To use prebuilt images, first verify a
+This checkout targets release 1.4.3. To use prebuilt images, first verify a
 completed full publisher and fresh-pull acceptance for that release, then use
 its matching source or starter with
-`./classroom --all --from-hub sadatnfs --tag 1.4.2`.
+`./classroom --all --from-hub sadatnfs --tag 1.4.3`.
 See [Docker Hub distribution](#optional-docker-hub-distribution) for historical
 evidence, current availability, selective installation and saved versions.
 
@@ -380,17 +380,17 @@ failed groups. An authenticated metadata check on October 30 returned HTTP 404
 for the old App tag. Those records describe historical results, not current
 availability or acceptance of this later source.
 
-For a completed full 1.4.2 publication, use the matching source or starter:
+For a completed full 1.4.3 publication, use the matching source or starter:
 
 ```sh
-./classroom --all --from-hub sadatnfs --tag 1.4.2
+./classroom --all --from-hub sadatnfs --tag 1.4.3
 ```
 
 Ordinary startup uploads nothing. For a new Hub selection, omitting `--tag`
 resolves the app's `latest` alias to a concrete release, requires a matching
-checked-in app version, and saves that version. App tags are `:1.4.2` and
-`:latest`; distinct worker tags include `:1.4.2-worker-r-statistics` and
-`:1.4.2-worker-python-core`. Docker selects the native architecture. Tags starting
+checked-in app version, and saves that version. App tags are `:1.4.3` and
+`:latest`; distinct worker tags include `:1.4.3-worker-r-statistics` and
+`:1.4.3-worker-python-core`. Docker selects the native architecture. Tags starting
 `ci-` are publication staging candidates, not learner releases. Hub mode never
 falls back to local builds. The [complete subject/profile/image mapping](docs/dockerhub.md#subjects-runtime-profiles-and-canonical-images)
 explains which runtime serves each subject and how to select only needed workers.
@@ -430,7 +430,7 @@ completed release deliberately. Later bare `./classroom resume` never builds,
 pulls or follows a moving latest tag.
 
 For a completed full release, download without starting services with
-`./classroom pull --all --from-hub YOUR_DOCKERHUB_USER --tag 1.4.2`.
+`./classroom pull --all --from-hub YOUR_DOCKERHUB_USER --tag 1.4.3`.
 For a partial release, use only its published profiles.
 For an existing project, switching image source/layout or applying an update
 requires the same command without `pull` and with `--rebuild`. In Hub mode
@@ -490,25 +490,25 @@ docker login
 Preview already built and tested images without uploading:
 
 ```sh
-./classroom publish --to-hub YOUR_DOCKERHUB_USER --tag 1.4.2
+./classroom publish --to-hub YOUR_DOCKERHUB_USER --tag 1.4.3
 ```
 
 After reviewing the mapping, explicitly upload:
 
 ```sh
-./classroom publish --to-hub YOUR_DOCKERHUB_USER --tag 1.4.2 --push
+./classroom publish --to-hub YOUR_DOCKERHUB_USER --tag 1.4.3 --push
 ```
 
 This requires the complete ordinary local set by default. It checks all
 selected images before tagging/pushing and does not build, log in, create
 another architecture or publish combined manifests. Prepare missing images
-with `./classroom build --all --local-build --tag 1.4.2`, then qualify them.
+with `./classroom build --all --local-build --tag 1.4.3`, then qualify them.
 
-Manual tags include architecture, such as `1.4.2-lab-arm64`. A matching-architecture
+Manual tags include architecture, such as `1.4.3-lab-arm64`. A matching-architecture
 learner selects that layout explicitly:
 
 ```sh
-./classroom --all --from-hub YOUR_DOCKERHUB_USER --tag 1.4.2 --architecture-tags
+./classroom --all --from-hub YOUR_DOCKERHUB_USER --tag 1.4.3 --architecture-tags
 ```
 
 An ARM64-only Mac publication does not supply AMD64 tags for a typical

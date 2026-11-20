@@ -154,12 +154,12 @@ rebuilding it. Replace `yourname` with the publisher's namespace. Docker selects
 the native architecture from the combined manifest:
 
 ```bash
-docker pull yourname/ds60sqlpy:1.4.2-worker-python-core
-docker tag yourname/ds60sqlpy:1.4.2-worker-python-core ds60sqlpy-worker-python-core:1.4.2
+docker pull yourname/ds60sqlpy:1.4.3-worker-python-core
+docker tag yourname/ds60sqlpy:1.4.3-worker-python-core ds60sqlpy-worker-python-core:1.4.3
 ```
 
 Then use the explicit `--reuse-core` preparation in a fresh copied workshop. The
 launcher still verifies the native image architecture. This pulls and locally
 retags an existing PythonCore base; it does not push an image or rebuild that base.
 The separate workshop dependencies are prepared by the explicit workshop command.
-Combined worker tags include `worker-`; `1.4.2-python-core` is not this layout.
+Combined worker tags include `worker-`; `1.4.3-python-core` is not this layout.

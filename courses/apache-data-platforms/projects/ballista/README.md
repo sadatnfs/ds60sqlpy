@@ -152,12 +152,12 @@ rebuilding it. Replace `yourname` with the publisher's namespace. Docker selects
 the native architecture from the combined manifest:
 
 ```bash
-docker pull yourname/ds60sqlpy:1.4.2-worker-swift-linux
-docker tag yourname/ds60sqlpy:1.4.2-worker-swift-linux ds60sqlpy-worker-swift-linux:1.4.2
+docker pull yourname/ds60sqlpy:1.4.3-worker-swift-linux
+docker tag yourname/ds60sqlpy:1.4.3-worker-swift-linux ds60sqlpy-worker-swift-linux:1.4.3
 ```
 
 Then use the explicit `--reuse-swift` preparation in a fresh copied workshop. The
 launcher still verifies the native image architecture. This pulls and locally
 retags an existing Swift/Noble base; it does not push an image or rebuild that base.
 The separate workshop dependencies are prepared by the explicit workshop command.
-Combined worker tags include `worker-`; `1.4.2-swift-linux` is not this layout.
+Combined worker tags include `worker-`; `1.4.3-swift-linux` is not this layout.

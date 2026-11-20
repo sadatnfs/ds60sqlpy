@@ -210,8 +210,8 @@ If the matching combined release exists, replace `yourname` with its publisher's
 namespace and prepare the same local Java 21 alias without rebuilding the base:
 
 ```bash
-docker pull yourname/ds60sqlpy:1.4.2-worker-java21
-docker tag yourname/ds60sqlpy:1.4.2-worker-java21 ds60sqlpy-worker-java21:1.4.2
+docker pull yourname/ds60sqlpy:1.4.3-worker-java21
+docker tag yourname/ds60sqlpy:1.4.3-worker-java21 ds60sqlpy-worker-java21:1.4.3
 ```
 
 Docker chooses the native architecture from that manifest; the workshop verifies
