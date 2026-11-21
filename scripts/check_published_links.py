@@ -30,6 +30,7 @@ ASSETS = {
     "/assets/browser-preview.js": "src/ds60sqlpy/assets/browser-preview.js",
     "/assets/classroom-editor.js": "src/ds60sqlpy/assets/classroom-editor.js",
     "/assets/classroom-shell.js": "src/ds60sqlpy/assets/classroom-shell.js",
+    "/assets/classroom-guide.js": "src/ds60sqlpy/assets/classroom-guide.js",
     "/assets/codemirror.js": "src/ds60sqlpy/assets/vendor/codemirror.v6.min.js",
     "/src/ds60sqlpy/assets/vendor/textbook/fonts.css": (
         "src/ds60sqlpy/assets/vendor/textbook/fonts.css"

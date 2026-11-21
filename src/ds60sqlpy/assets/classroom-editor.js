@@ -90,6 +90,8 @@
       return editor.replace(text);
     },
     undo: () => (typeof editor.undo === "function" ? editor.undo() : false),
+    // Character offset of the caret, used to pick the SQL statement to step through.
+    cursor: () => editor.view?.state.selection.main.head ?? null,
   };
 
   // A keyboard- and pointer-operable handle sets the editor height; the choice

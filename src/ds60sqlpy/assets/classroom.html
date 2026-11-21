@@ -58,6 +58,7 @@ spread; seed ccbdb85d.
       </button>
       <nav aria-label="Classroom">
         <button id="paths-button">All subjects</button
+        ><a id="manual-link" href="/classroom#how-it-works">How it works</a
         ><a href="/reference-pages/docs/docker-classroom.md.html">Setup &amp; saved work</a
         ><button id="theme-toggle" class="theme-toggle" aria-pressed="false"
           >Dark appearance</button
@@ -82,7 +83,7 @@ spread; seed ccbdb85d.
             </div>
             <p id="catalog-summary" class="catalog-summary"> Loading the classroom library... </p>
           </div>
-          <aside class="pace-card" aria-labelledby="start-guide-title">
+          <aside class="start-card" aria-labelledby="start-guide-title">
             <h2 id="start-guide-title">Three steps per lesson</h2>
             <ol class="start-steps">
               <li><strong>Read</strong> the guide and its worked examples.</li>
@@ -91,31 +92,18 @@ spread; seed ccbdb85d.
                 ><strong>Explain</strong> the result in your notes; they are saved with the run.</li
               >
             </ol>
-            <label for="pace">Typical study session</label
-            ><select id="pace">
-              <option value="15">15 minutes</option>
-              <option value="30" selected>30 minutes</option>
-              <option value="60">60 minutes</option>
-              <option value="90">90 minutes</option>
-            </select>
-            <p id="pace-note">
-              Used only to estimate sessions per lesson. It never limits access or run time.
-            </p>
+            <p class="start-help"
+              >New to the classroom? See what every box does before you begin.</p
+            >
+            <div class="start-links">
+              <a id="home-manual" class="button-link" href="/classroom#how-it-works"
+                >How the classroom works</a
+              ><button id="home-tour" type="button">Tour a lesson page</button>
+            </div>
           </aside>
         </div>
         <div class="browse-heading">
-          <div>
-            <h2>Browse courses</h2>
-          </div>
-          <div class="search-control">
-            <label for="catalog-search">Search every subject and lesson</label
-            ><input
-              id="catalog-search"
-              type="search"
-              placeholder="Try pandas, window functions, attention or Rust"
-              autocomplete="off"
-            />
-          </div>
+          <h2>Browse courses</h2>
         </div>
         <div
           id="subject-filters"
@@ -123,22 +111,9 @@ spread; seed ccbdb85d.
           role="toolbar"
           aria-label="Filter subjects by area"
         ></div>
-        <p id="search-summary" class="muted" role="status"></p>
         <div id="subject-cards" class="subject-cards">
           <div class="toc-skeleton" aria-hidden="true"><span></span><span></span><span></span></div>
         </div>
-        <section
-          id="search-lessons"
-          class="search-lessons"
-          aria-labelledby="search-lessons-title"
-          hidden
-        >
-          <h3 id="search-lessons-title">Matching lessons</h3>
-          <div id="search-lesson-list"></div>
-        </section>
-        <p id="no-results" class="notice" hidden>
-          No subjects or lessons match yet. Try a shorter topic, a language, or a lesson ID.
-        </p>
         <div class="home-footnote">
           <strong>Saved work</strong>
           <p>
@@ -160,8 +135,8 @@ spread; seed ccbdb85d.
           >
             Hide lesson list</button
           ><button id="lesson-menu" aria-expanded="false" aria-controls="lesson-sidebar">
-            Browse lessons
-          </button>
+            Browse lessons </button
+          ><button id="tour-start" class="quiet tour-start" type="button">Tour this page</button>
         </div>
         <div class="workspace-grid">
           <aside id="lesson-sidebar" class="lesson-sidebar" aria-label="Lesson navigation">
@@ -391,6 +366,8 @@ spread; seed ccbdb85d.
                             aria-pressed="false"
                             aria-controls="exercise-diff"
                             >Compare with my code</button
+                          ><button id="exercise-step-solution" type="button" hidden
+                            >Step through the solution</button
                           ><button id="exercise-use-solution" type="button"
                             >Use in my editor</button
                           >
@@ -576,21 +553,85 @@ spread; seed ccbdb85d.
                         >Run code</button
                       ><kbd id="run-shortcut" class="run-shortcut" title="Keyboard shortcut for Run"
                         >Ctrl Enter</kbd
+                      ><button
+                        id="step-through"
+                        type="button"
+                        hidden
+                        aria-controls="step-panel"
+                        title="Run your code one step at a time and watch what changes"
+                        >Step through</button
                       ><button id="cancel" disabled>Cancel job</button
                       ><span id="run-timer" class="run-timer" aria-hidden="true"></span>
                     </div>
                     <div class="run-extra">
-                      <label class="run-limit" for="timeout">Time limit</label
-                      ><select id="timeout">
-                        <option value="15">15 seconds</option>
-                        <option value="60" selected>60 seconds</option>
-                        <option value="120">120 seconds</option></select
-                      ><button id="save">Save work</button
-                      ><button id="refresh">Check runtime</button
+                      <button id="save">Save work</button
+                      ><details id="run-more" class="run-more">
+                        <summary>Run settings</summary>
+                        <div class="run-more-panel">
+                          <label class="run-limit" for="timeout">Time limit</label
+                          ><select id="timeout">
+                            <option value="15">15 seconds</option>
+                            <option value="60" selected>60 seconds</option>
+                            <option value="120">120 seconds</option></select
+                          ><p class="run-more-help"
+                            >A run that takes longer stops on its own, so a stuck loop never hangs
+                            the page.</p
+                          ><button id="refresh">Check runtime</button
+                          ><p class="run-more-help"
+                            >Asks the classroom whether this language is installed and ready.</p
+                          >
+                        </div> </details
                       ><button id="reconnect" hidden>Reconnect saved job</button
                       ><button id="recover" hidden> Confirm manual recovery </button>
                     </div>
                   </div>
+                  <section
+                    id="step-panel"
+                    class="step-panel"
+                    aria-labelledby="step-title"
+                    data-kind="python"
+                    hidden
+                  >
+                    <div class="step-head">
+                      <div>
+                        <h3 id="step-title" tabindex="-1">Step through</h3>
+                        <p id="step-source" class="step-source"></p>
+                      </div>
+                      <button id="step-close" class="quiet" type="button"
+                        >Close step-through</button
+                      >
+                    </div>
+                    <p id="step-status" class="step-status" role="status" aria-live="polite"></p>
+                    <div id="step-controls" class="step-controls" role="group" aria-label="Steps">
+                      <button id="step-first" type="button" aria-keyshortcuts="Home">First</button
+                      ><button
+                        id="step-prev"
+                        type="button"
+                        aria-keyshortcuts="ArrowLeft"
+                        aria-label="Previous step"
+                        >&larr; Back</button
+                      ><button
+                        id="step-next"
+                        class="primary"
+                        type="button"
+                        aria-keyshortcuts="ArrowRight"
+                        >Next step &rarr;</button
+                      ><button id="step-last" type="button" aria-keyshortcuts="End">Last</button
+                      ><label class="sr-only" for="step-range">Jump to a step</label
+                      ><input id="step-range" type="range" min="1" max="1" value="1" /><span
+                        id="step-count"
+                        class="step-count"
+                        aria-hidden="true"
+                      ></span>
+                    </div>
+                    <p id="step-narration" class="step-narration" aria-live="polite"></p>
+                    <div id="step-body" class="step-body"></div>
+                    <p class="step-hint"
+                      >Use <kbd>&larr;</kbd> and <kbd>&rarr;</kbd> to move one step,
+                      <kbd>Home</kbd> and <kbd>End</kbd> to jump. Stepping never saves your code or
+                      records a run.</p
+                    >
+                  </section>
                   <section id="runtime-results" class="results" aria-labelledby="results-title">
                     <div class="results-head">
                       <h3 id="results-title">Result</h3>
@@ -698,11 +739,489 @@ Press Run code. What your program prints, and any error messages, appear here.</
           </div>
         </div>
       </section>
+      <section id="manual-view" class="manual-view" aria-labelledby="manual-title" hidden>
+        <div class="manual-top">
+          <button id="manual-back" class="quiet" type="button">&larr; Back to the classroom</button>
+        </div>
+        <header class="manual-header">
+          <h1 id="manual-title" tabindex="-1">How the classroom works</h1>
+          <p class="manual-lede">
+            Every lesson page has the same parts in the same places. This page names each part, says
+            what to click, and shows how to start, switch and finish a lesson. You do not need any
+            coding experience to follow it.
+          </p>
+          <div class="manual-actions">
+            <button id="manual-tour" class="primary" type="button">Show me on a lesson page</button
+            ><button class="quiet" type="button" data-manual-jump="manual-switch"
+              >Jump to: open any lesson</button
+            >
+          </div>
+        </header>
+        <div class="manual-layout">
+          <nav class="manual-toc" aria-label="On this page">
+            <p class="manual-toc-title">On this page</p>
+            <ol>
+              <li><button type="button" data-manual-jump="manual-map">The lesson page</button></li>
+              <li
+                ><button type="button" data-manual-jump="manual-start"
+                  >Start the classroom</button
+                ></li
+              >
+              <li
+                ><button type="button" data-manual-jump="manual-switch"
+                  >Open or switch lessons</button
+                ></li
+              >
+              <li
+                ><button type="button" data-manual-jump="manual-loop"
+                  >Work through a lesson</button
+                ></li
+              >
+              <li
+                ><button type="button" data-manual-jump="manual-exercises"
+                  >Exercises and solutions</button
+                ></li
+              >
+              <li
+                ><button type="button" data-manual-jump="manual-step">Step through code</button></li
+              >
+              <li
+                ><button type="button" data-manual-jump="manual-sql"
+                  >SQL and the course database</button
+                ></li
+              >
+              <li
+                ><button type="button" data-manual-jump="manual-saved">Your saved work</button></li
+              >
+              <li
+                ><button type="button" data-manual-jump="manual-keys"
+                  >Keyboard shortcuts</button
+                ></li
+              >
+              <li
+                ><button type="button" data-manual-jump="manual-trouble"
+                  >When something goes wrong</button
+                ></li
+              >
+            </ol>
+          </nav>
+          <div class="manual-body">
+            <section id="manual-map" class="manual-section" aria-labelledby="manual-map-title">
+              <h2 id="manual-map-title" tabindex="-1">The lesson page at a glance</h2>
+              <p>
+                The lesson text is on the left and your code is on the right. Press a numbered box
+                to read about that part. Drag the thin divider between the two sides to give either
+                one more room.
+              </p>
+              <figure class="manual-map" aria-labelledby="manual-map-caption">
+                <div class="map-frame">
+                  <button class="map-box map-header" type="button" data-manual-jump="manual-part-1"
+                    ><span class="map-num">1</span>Header and search</button
+                  ><button class="map-box map-list" type="button" data-manual-jump="manual-part-2"
+                    ><span class="map-num">2</span>Lesson list</button
+                  ><button
+                    class="map-box map-heading"
+                    type="button"
+                    data-manual-jump="manual-part-3"
+                    ><span class="map-num">3</span>Lesson title, Previous and Next</button
+                  ><button class="map-box map-notice" type="button" data-manual-jump="manual-part-4"
+                    ><span class="map-num">4</span>Runtime notice</button
+                  ><button class="map-box map-lesson" type="button" data-manual-jump="manual-part-5"
+                    ><span class="map-num">5</span>Lesson text</button
+                  ><button
+                    class="map-box map-exercises"
+                    type="button"
+                    data-manual-jump="manual-part-6"
+                    ><span class="map-num">6</span>Exercises</button
+                  ><button class="map-box map-editor" type="button" data-manual-jump="manual-part-7"
+                    ><span class="map-num">7</span>Code editor</button
+                  ><button class="map-box map-run" type="button" data-manual-jump="manual-part-8"
+                    ><span class="map-num">8</span>Run bar</button
+                  ><button class="map-box map-result" type="button" data-manual-jump="manual-part-9"
+                    ><span class="map-num">9</span>Result</button
+                  ><button class="map-box map-notes" type="button" data-manual-jump="manual-part-10"
+                    ><span class="map-num">10</span>Your notes</button
+                  >
+                </div>
+                <figcaption id="manual-map-caption"
+                  >A lesson page, simplified. SQL lessons add a Course database panel at the top of
+                  the code side.</figcaption
+                >
+              </figure>
+              <ol class="manual-parts">
+                <li id="manual-part-1" tabindex="-1">
+                  <h3>Header and search</h3>
+                  <p>
+                    Always at the top. <strong>DS60 Classroom</strong> and
+                    <strong>All subjects</strong> return to the course catalog.
+                    <strong>Search lessons and subjects</strong> finds any lesson by topic, title or
+                    ID. <strong>How it works</strong> opens this page.
+                  </p>
+                </li>
+                <li id="manual-part-2" tabindex="-1">
+                  <h3>Lesson list</h3>
+                  <p>
+                    Every lesson in the current subject, in order. Click a lesson to open it.
+                    <strong>Switch subject</strong> at the top changes to another course,
+                    <strong>Find in this path</strong> filters the list, and
+                    <strong>Hide lesson list</strong> gives the lesson more room.
+                  </p>
+                </li>
+                <li id="manual-part-3" tabindex="-1">
+                  <h3>Lesson title, Previous and Next</h3>
+                  <p>
+                    The title says what you will be able to do by the end. Links under it name
+                    earlier lessons this one builds on. <strong>&larr; Previous</strong> and
+                    <strong>Next &rarr;</strong> move through the course in order. The
+                    <strong>Lesson</strong>, <strong>Code</strong> and <strong>Result</strong>
+                    buttons below jump to those parts of the page.
+                  </p>
+                </li>
+                <li id="manual-part-4" tabindex="-1">
+                  <h3>Runtime notice</h3>
+                  <p>
+                    Says whether this lesson's language is ready to run on your computer. If it is
+                    not, open <strong>Prepare this lesson's runtime</strong> for the exact command
+                    to paste into a terminal, then open <strong>Run settings</strong> below the
+                    editor and press <strong>Check runtime</strong>.
+                  </p>
+                </li>
+                <li id="manual-part-5" tabindex="-1">
+                  <h3>Lesson text</h3>
+                  <p>
+                    The explanation and worked examples. Use <strong>Contents</strong> to jump to a
+                    section and <strong>Focus on reading</strong> to widen the text. Worked
+                    solutions wait behind <strong>Reveal separate solutions</strong> at the end, so
+                    you can try first.
+                  </p>
+                </li>
+                <li id="manual-part-6" tabindex="-1">
+                  <h3>Exercises</h3>
+                  <p>
+                    Practice problems for this lesson, one at a time. The numbered buttons and
+                    arrows move between them. Each one offers <strong>Show a hint</strong>,
+                    <strong>Show the solution</strong> and <strong>Mark as solved</strong>.
+                    <strong>Hide</strong> folds the panel away when you want more room for code.
+                  </p>
+                </li>
+                <li id="manual-part-7" tabindex="-1">
+                  <h3>Code editor</h3>
+                  <p>
+                    Where you type. It starts with the lesson's example code, and your changes save
+                    automatically. Above it, <strong>Predict before you run</strong> is a place to
+                    write what you expect to happen. <strong>A&minus;</strong> and
+                    <strong>A+</strong> change the text size.
+                  </p>
+                </li>
+                <li id="manual-part-8" tabindex="-1">
+                  <h3>Run bar</h3>
+                  <p>
+                    <strong>Run code</strong> runs everything in the editor.
+                    <strong>Step through</strong> runs it one step at a time so you can watch what
+                    happens. <strong>Cancel job</strong> stops a long run, and
+                    <strong>Save work</strong> keeps your code and notes.
+                    <strong>Run settings</strong> holds the <strong>Time limit</strong> and
+                    <strong>Check runtime</strong>.
+                  </p>
+                </li>
+                <li id="manual-part-9" tabindex="-1">
+                  <h3>Result</h3>
+                  <p>
+                    What your program printed, tables, charts and any error message. When there is
+                    an error, <strong>Inspect source line</strong> jumps to the line that caused it.
+                    <strong>Saved runs</strong> lists earlier results for this lesson.
+                  </p>
+                </li>
+                <li id="manual-part-10" tabindex="-1">
+                  <h3>Your notes</h3>
+                  <p>
+                    <strong>Explain the evidence</strong> is where you write what the result showed
+                    and why. Notes are saved with your work for this lesson.
+                  </p>
+                </li>
+              </ol>
+            </section>
+
+            <section id="manual-start" class="manual-section" aria-labelledby="manual-start-title">
+              <h2 id="manual-start-title" tabindex="-1">Start the classroom</h2>
+              <p>
+                Open a terminal in the classroom folder with Docker running. On Windows, use WSL.
+                Each command prints the address to open in your browser.
+              </p>
+              <dl class="manual-commands">
+                <dt>First time on this computer</dt>
+                <dd><code>./classroom doctor</code> then <code>./classroom</code></dd>
+                <dt>Smaller download (Python, SQL and a few more)</dt>
+                <dd><code>./classroom --starter</code></dd>
+                <dt>Use the published images instead of building</dt>
+                <dd><code>./classroom --all --from-hub sadatnfs --tag 1.4.4</code></dd>
+                <dt>See whether it is running and where</dt>
+                <dd><code>./classroom status</code></dd>
+                <dt>Stop for today (keeps all your work)</dt>
+                <dd><code>./classroom stop</code></dd>
+                <dt>Come back later without downloading anything</dt>
+                <dd><code>./classroom resume</code></dd>
+              </dl>
+            </section>
+
+            <section
+              id="manual-switch"
+              class="manual-section"
+              aria-labelledby="manual-switch-title"
+            >
+              <h2 id="manual-switch-title" tabindex="-1">Open or switch lessons</h2>
+              <p>
+                Every lesson is open from the start. You can begin in the middle of a course; the
+                page prepares whatever that lesson needs.
+              </p>
+              <ol class="manual-steps">
+                <li>
+                  <strong>Search.</strong> Press <kbd>Ctrl K</kbd> (<kbd>Cmd K</kbd> on a Mac) or
+                  <kbd>/</kbd> anywhere, type a topic, title or lesson ID such as
+                  <code>sql-07</code>, and press <kbd>Enter</kbd>.
+                </li>
+                <li>
+                  <strong>Browse.</strong> Choose <strong>All subjects</strong>, pick a course, then
+                  pick a lesson from the list on the left.
+                </li>
+                <li>
+                  <strong>Switch.</strong> Inside a lesson, use <strong>Switch subject</strong> at
+                  the top of the lesson list, or <strong>&larr; Previous</strong> and
+                  <strong>Next &rarr;</strong> under the title.
+                </li>
+                <li>
+                  <strong>Return.</strong> <strong>Resume</strong> on the catalog page and
+                  <strong>Continue</strong> in search reopen the last lesson you used. You can also
+                  bookmark the address of any lesson.
+                </li>
+              </ol>
+              <p>
+                Code and notes are saved separately for each lesson, so switching never loses work.
+              </p>
+            </section>
+
+            <section id="manual-loop" class="manual-section" aria-labelledby="manual-loop-title">
+              <h2 id="manual-loop-title" tabindex="-1">Work through a lesson</h2>
+              <ol class="manual-steps">
+                <li>
+                  <strong>Read</strong> the lesson text on the left, including its worked examples.
+                </li>
+                <li>
+                  <strong>Predict.</strong> Write what you expect the code to do in
+                  <strong>Predict before you run</strong>. A wrong guess is useful; it shows what to
+                  look at.
+                </li>
+                <li>
+                  <strong>Run.</strong> Press <strong>Run code</strong> or <kbd>Ctrl Enter</kbd>.
+                  The result appears under the editor.
+                </li>
+                <li>
+                  <strong>Change one thing</strong> and run again. Small changes teach the most.
+                </li>
+                <li>
+                  <strong>Explain</strong> the result in <strong>Explain the evidence</strong>.
+                </li>
+              </ol>
+            </section>
+
+            <section
+              id="manual-exercises"
+              class="manual-section"
+              aria-labelledby="manual-exercises-title"
+            >
+              <h2 id="manual-exercises-title" tabindex="-1">Exercises and solutions</h2>
+              <ol class="manual-steps">
+                <li
+                  >Pick an exercise with its number. Read the task and write your answer in the
+                  editor.</li
+                >
+                <li>Stuck? <strong>Show a hint</strong> reveals one hint at a time.</li>
+                <li>
+                  <strong>Show the solution</strong> asks you to try once first, then opens the
+                  worked answer.
+                </li>
+              </ol>
+              <p>With the solution open you can:</p>
+              <dl class="manual-terms">
+                <dt>Run the solution</dt>
+                <dd>Runs the worked answer and shows its result. Your own code is not changed.</dd>
+                <dt>Step through the solution</dt>
+                <dd>Walks through the worked answer one step at a time (Python and SQL).</dd>
+                <dt>Compare with my code</dt>
+                <dd>Shows your code and the solution side by side, with differences marked.</dd>
+                <dt>Use in my editor</dt>
+                <dd
+                  >Copies the solution into your editor. <strong>Undo</strong> brings your own code
+                  back.</dd
+                >
+                <dt>Mark as solved</dt>
+                <dd>Records that you finished this exercise. It is a note for you, not a grade.</dd>
+              </dl>
+            </section>
+
+            <section id="manual-step" class="manual-section" aria-labelledby="manual-step-title">
+              <h2 id="manual-step-title" tabindex="-1">Step through code</h2>
+              <p>
+                <strong>Step through</strong> runs your code slowly, one step at a time, so you can
+                see what the computer does instead of only the final answer. It works in Python and
+                SQL lessons.
+              </p>
+              <dl class="manual-terms">
+                <dt>Python</dt>
+                <dd>
+                  The line about to run is highlighted. Beside it you see every variable and its
+                  value, with values that just changed marked, plus anything printed so far.
+                </dd>
+                <dt>SQL</dt>
+                <dd>
+                  A query is shown in the order the database actually works: first
+                  <code>FROM</code> and <code>JOIN</code>, then <code>WHERE</code>,
+                  <code>GROUP BY</code>, <code>SELECT</code> and <code>ORDER BY</code>. Each step
+                  shows the rows it produces. If the editor holds several queries, click inside the
+                  one you want first.
+                </dd>
+              </dl>
+              <p>
+                Move with <strong>Next step</strong> and <strong>Back</strong>, the slider, or the
+                arrow keys. Stepping never saves your code or records a run, so it is safe to
+                experiment.
+              </p>
+            </section>
+
+            <section id="manual-sql" class="manual-section" aria-labelledby="manual-sql-title">
+              <h2 id="manual-sql-title" tabindex="-1">SQL lessons and the course database</h2>
+              <p>
+                SQL lessons use a practice database with course tables. The
+                <strong>Course database</strong> panel at the top of the code side shows its state.
+              </p>
+              <dl class="manual-terms">
+                <dt>Starting in the middle of the course</dt>
+                <dd>
+                  Just press <strong>Run code</strong>. The course tables load automatically the
+                  first time. You can also press <strong>Load course tables</strong> first.
+                </dd>
+                <dt>Build the schema</dt>
+                <dd>Some later lessons use their own tables. This button creates them for you.</dd>
+                <dt>Reset training data</dt>
+                <dd>
+                  Puts the practice tables back to their original rows if an exercise changed or
+                  deleted data. Your saved code and notes are not affected.
+                </dd>
+                <dt>Check again</dt>
+                <dd>Refreshes the panel after you start or restart the classroom.</dd>
+              </dl>
+            </section>
+
+            <section id="manual-saved" class="manual-section" aria-labelledby="manual-saved-title">
+              <h2 id="manual-saved-title" tabindex="-1">Your saved work</h2>
+              <ul class="manual-list">
+                <li>
+                  Code saves automatically a moment after you stop typing.
+                  <strong>Save work</strong> or <kbd>Ctrl S</kbd> saves right away.
+                </li>
+                <li
+                  ><strong>Saved runs</strong> under the result lists earlier runs of this
+                  lesson.</li
+                >
+                <li>
+                  <strong>Recover an earlier saved pad</strong>, under
+                  <strong>How this code runs</strong>, restores an older version of your code.
+                </li>
+                <li>
+                  Everything is stored on your computer and kept when the classroom stops or
+                  restarts.
+                </li>
+              </ul>
+            </section>
+
+            <section id="manual-keys" class="manual-section" aria-labelledby="manual-keys-title">
+              <h2 id="manual-keys-title" tabindex="-1">Keyboard shortcuts</h2>
+              <p>On a Mac, use <kbd>Cmd</kbd> wherever this table says <kbd>Ctrl</kbd>.</p>
+              <table class="manual-table">
+                <thead>
+                  <tr><th scope="col">Keys</th><th scope="col">What happens</th></tr>
+                </thead>
+                <tbody>
+                  <tr
+                    ><td><kbd>Ctrl K</kbd> or <kbd>/</kbd></td
+                    ><td>Search lessons and subjects</td></tr
+                  >
+                  <tr
+                    ><td><kbd>Ctrl Enter</kbd></td
+                    ><td>Run code</td></tr
+                  >
+                  <tr
+                    ><td><kbd>Ctrl S</kbd></td
+                    ><td>Save work now</td></tr
+                  >
+                  <tr
+                    ><td><kbd>&larr;</kbd> <kbd>&rarr;</kbd></td
+                    ><td>Previous or next step while stepping through code</td></tr
+                  >
+                  <tr
+                    ><td><kbd>Esc</kbd> then <kbd>Tab</kbd></td
+                    ><td>Leave the code editor with the keyboard</td></tr
+                  >
+                  <tr
+                    ><td><kbd>Esc</kbd></td
+                    ><td>Close search or the page tour</td></tr
+                  >
+                </tbody>
+              </table>
+            </section>
+
+            <section
+              id="manual-trouble"
+              class="manual-section"
+              aria-labelledby="manual-trouble-title"
+            >
+              <h2 id="manual-trouble-title" tabindex="-1">When something goes wrong</h2>
+              <dl class="manual-terms">
+                <dt>The notice says the runtime is not ready</dt>
+                <dd>
+                  Open <strong>Prepare this lesson's runtime</strong>, run the command it shows in a
+                  terminal, then press <strong>Check runtime</strong> under
+                  <strong>Run settings</strong>.
+                </dd>
+                <dt>A run seems stuck</dt>
+                <dd>
+                  Press <strong>Cancel job</strong>. For slow programs, open
+                  <strong>Run settings</strong>, choose a longer <strong>Time limit</strong> and run
+                  again.
+                </dd>
+                <dt>My code shows an error</dt>
+                <dd>
+                  Read the last line of the error first; it names the problem. Press
+                  <strong>Inspect source line</strong> to jump to it, or
+                  <strong>Step through</strong>
+                  to watch where things go wrong.
+                </dd>
+                <dt>SQL says a table does not exist</dt>
+                <dd>
+                  Press <strong>Load course tables</strong> or the schema button in the
+                  <strong>Course database</strong> panel. If rows are missing, use
+                  <strong>Reset training data</strong>.
+                </dd>
+                <dt>The page reloaded during a run</dt>
+                <dd>Press <strong>Reconnect saved job</strong> to pick the run back up.</dd>
+              </dl>
+              <p>
+                More setup detail:
+                <a href="/reference-pages/docs/docker-classroom.md.html">Setup &amp; saved work</a>
+                and
+                <a href="/reference-pages/docs/one-command-classroom.md.html"
+                  >the classroom command</a
+                >.
+              </p>
+            </section>
+          </div>
+        </div>
+      </section>
     </main>
     <footer class="site-footer">
       <span>DS60 Classroom</span>
       <p>Local Docker classroom with saved code, notes and run history.</p>
-      <a href="/reference-pages/docs/one-command-classroom.md.html">Classroom guide</a>
+      <a id="footer-manual" href="/classroom#how-it-works">How the classroom works</a>
     </footer>
     <noscript
       ><p>
@@ -741,5 +1260,6 @@ Press Run code. What your program prints, and any error messages, appear here.</
     <script src="/assets/codemirror.js" defer></script>
     <script src="/assets/classroom-editor.js" defer></script>
     <script src="/assets/classroom-shell.js" defer></script>
+    <script src="/assets/classroom-guide.js" defer></script>
   </body>
 </html>

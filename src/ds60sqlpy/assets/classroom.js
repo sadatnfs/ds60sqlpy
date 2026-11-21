@@ -158,6 +158,8 @@ let submitInFlight = false,
   codeFocused = false,
   runTimer = null,
   editorEscape = false;
+let manualOpen = false,
+  manualReturn = null;
 let visibleRoute = "/classroom",
   highlightSequence = 0,
   highlightTimer = null,
@@ -168,8 +170,7 @@ let resultRevision = 0,
 let hintNumber = 1,
   phase = "read",
   phaseNotes = {},
-  darkMode = false,
-  catalogSearchTimer = null;
+  darkMode = false;
 const draftRevisions = new Map(),
   savedRevisions = new Map();
 const browserPreview =
@@ -543,6 +544,11 @@ function status(text, error = false) {
   $("status").textContent = text;
   $("status").className = "status" + (error ? " error" : "");
 }
+// Tells the scripts layered over this one (the guide, the shell) what changed.
+function announce(name, detail) {
+  if (typeof CustomEvent === "function" && typeof document.dispatchEvent === "function")
+    document.dispatchEvent(new CustomEvent(name, { detail }));
+}
 const LEGACY_RUN_NOTE =
   "Your source and notes are saved. You may read another lesson while this bounded run finishes.";
 function pref(key, fallback = null) {
@@ -765,7 +771,7 @@ function setTheme(dark) {
 }
 function estimatedSessions(record) {
   const minutes = Number(record.estimated_minutes);
-  return minutes > 0 ? Math.max(1, Math.ceil(minutes / Number($("pace").value || 30))) : null;
+  return minutes > 0 ? Math.max(1, Math.ceil(minutes / 30)) : null;
 }
 function areaOf(subject) {
   return subjectAreas.find((area) => area.subjects.includes(subject.id)) || otherArea;
@@ -824,9 +830,6 @@ function areaInk(area, element) {
 }
 function renderHome() {
   if (!index) return;
-  const query = $("catalog-search").value.trim().toLowerCase(),
-    terms = query.split(/\s+/).filter(Boolean),
-    matches = (text) => terms.every((term) => String(text).toLowerCase().includes(term));
   const areas = [...subjectAreas, otherArea],
     members = new Map(areas.map((area) => [area.id, []]));
   for (const subject of index.tracks) members.get(areaOf(subject).id).push(subject);
@@ -840,12 +843,11 @@ function renderHome() {
     button.type = "button";
     if (area) button.title = area.title;
     button.append(node("small", String(count)));
-    button.setAttribute("aria-pressed", String(subjectArea === id && !query));
+    button.setAttribute("aria-pressed", String(subjectArea === id));
     if (area) areaInk(area, button);
     button.addEventListener("click", () => {
       subjectArea = id;
       remember("area", id);
-      if (query) $("catalog-search").value = "";
       renderHome();
     });
     filters.append(button);
@@ -855,17 +857,10 @@ function renderHome() {
     if (members.get(area.id).length) tab(area.id, area.short, members.get(area.id).length, area);
   const cards = $("subject-cards");
   cards.replaceChildren();
-  let count = 0;
   for (const area of areas) {
-    if (!query && subjectArea !== "all" && subjectArea !== area.id) continue;
-    const visible = members
-      .get(area.id)
-      .filter(
-        (subject) =>
-          !query || matches(subject.title + " " + subject.description + " " + subject.id),
-      );
+    if (subjectArea !== "all" && subjectArea !== area.id) continue;
+    const visible = members.get(area.id);
     if (!visible.length) continue;
-    count += visible.length;
     const part = node("section", undefined, "toc-part"),
       head = node("div", undefined, "toc-part-head"),
       list = node("ol", undefined, "toc-list"),
@@ -893,32 +888,6 @@ function renderHome() {
     part.append(head, list);
     cards.append(part);
   }
-  const results = [];
-  if (query)
-    for (const subject of index.tracks)
-      for (const record of subject.lessons)
-        if (matches(record.title + " " + record.id + " " + (record.concepts || []).join(" ")))
-          results.push({ subject, record });
-  $("search-lessons").hidden = !results.length;
-  $("search-lesson-list").replaceChildren();
-  for (const { subject, record } of results.slice(0, 40)) {
-    const button = node("button");
-    const title = node("span", record.title);
-    title.append(node("small", subject.title + " · " + record.id));
-    button.append(title, node("small", record.level || ""));
-    button.addEventListener("click", () =>
-      openLesson(record.id).catch((error) => status(error.message, true)),
-    );
-    $("search-lesson-list").append(button);
-  }
-  $("search-summary").textContent = query
-    ? count +
-      " matching paths and " +
-      results.length +
-      " matching lessons" +
-      (results.length > 40 ? " (showing the first 40; refine your search)." : ".")
-    : "";
-  $("no-results").hidden = count > 0 || results.length > 0;
   const countLessons = index.tracks.reduce(
     (total, subject) => total + subject.lessons.filter((item) => item.status !== "planned").length,
     0,
@@ -965,6 +934,7 @@ async function showHome(historyMode = "push") {
   }
   stopBrowserPreview("Stopped when returning to all subjects.");
   ++loadSequence;
+  closeManualView();
   $("home-view").hidden = false;
   $("workspace-view").hidden = true;
   theme(null);
@@ -1231,6 +1201,7 @@ async function openLesson(id, save = true, requested = {}) {
     trackId = found.subject.id;
     lessonId = id;
     theme(found.subject);
+    closeManualView();
     $("home-view").hidden = true;
     $("workspace-view").hidden = false;
     renderNavigation();
@@ -1280,6 +1251,7 @@ async function openLesson(id, save = true, requested = {}) {
   trackId = found.subject.id;
   lessonId = id;
   theme(found.subject);
+  closeManualView();
   $("home-view").hidden = true;
   $("workspace-view").hidden = false;
   $("workspace-view").dataset.navigation = "closed";
@@ -1438,6 +1410,7 @@ async function openLesson(id, save = true, requested = {}) {
       ? "Chapter and saved notes loaded."
       : "Your guide, code, and notes are ready. Choose a small idea to try.",
   );
+  announce("ds60:lesson-opened", { id });
 }
 function renderPrerequisites(ids) {
   $("prerequisites").replaceChildren();
@@ -1581,6 +1554,7 @@ function showCapability(cap) {
   $("code-focus-toggle").hidden = browser;
   $("timeout").disabled = reading || browser || legacyRunActive;
   $("timeout").hidden = browser || draft;
+  $("run-more").hidden = $("timeout").hidden && $("refresh").hidden;
   if (current.engine === "legacy") {
     const allowed = current.effective.allowed_timeout_seconds || [15, 60, 120];
     const old = Number($("timeout").value);
@@ -2282,6 +2256,7 @@ function openSolutionView(view) {
   $("exercise-diff").hidden = true;
   $("exercise-solution-note").textContent = solutionNote(view, code);
   $("exercise-solution").hidden = false;
+  announce("ds60:solution-view", { view });
   $("exercise-reference").hidden = view.kind === "reference" || !exercise.reference;
   $("exercise-solution-title").focus();
 }
@@ -2300,6 +2275,7 @@ function solutionNote(view, code) {
 function hideExerciseSolution(focus = true) {
   const kind = exercise.view?.kind;
   exercise.view = null;
+  announce("ds60:solution-view", { view: null });
   exercise.comparing = false;
   $("exercise-solution").hidden = true;
   $("exercise-solution-html").replaceChildren();
@@ -3551,14 +3527,6 @@ $("theme-toggle").addEventListener("click", () => {
   remember("dark", !darkMode);
   setTheme(!darkMode);
 });
-$("pace").addEventListener("change", () => {
-  remember("pace", Number($("pace").value));
-  if (track()) renderLessons();
-});
-$("catalog-search").addEventListener("input", () => {
-  clearTimeout(catalogSearchTimer);
-  catalogSearchTimer = setTimeout(renderHome, 100);
-});
 $("subject-select").addEventListener("change", () =>
   switchTrack($("subject-select").value).catch((error) => {
     $("subject-select").value = trackId;
@@ -3755,6 +3723,16 @@ $("cancel").addEventListener("click", async () => {
   }
 });
 $("save").addEventListener("click", () => flushSave().catch(() => {}));
+document.addEventListener("click", (event) => {
+  const more = $("run-more");
+  if (more.open && !more.contains(event.target)) more.open = false;
+});
+$("run-more").addEventListener("keydown", (event) => {
+  if (event.key !== "Escape" || !$("run-more").open) return;
+  event.stopPropagation();
+  $("run-more").open = false;
+  $("run-more").querySelector("summary").focus();
+});
 $("refresh").addEventListener("click", async () => {
   if (!current) return;
   const intent = selectedViewIntent(),
@@ -4124,7 +4102,7 @@ document.addEventListener("keydown", (event) => {
     event.preventDefault();
     flushSave().catch(() => {});
   }
-  if ((event.ctrlKey || event.metaKey) && event.key === "Enter" && current) {
+  if ((event.ctrlKey || event.metaKey) && event.key === "Enter" && current && !manualOpen) {
     event.preventDefault();
     runCode();
   }
@@ -4143,7 +4121,6 @@ window.addEventListener("beforeunload", (event) => {
 });
 async function boot() {
   try {
-    $("pace").value = String([15, 30, 60, 90].includes(pref("pace")) ? pref("pace") : 30);
     subjectArea = typeof pref("area") === "string" ? pref("area") : "all";
     setTheme(
       pref(
@@ -4163,6 +4140,7 @@ async function boot() {
         mode: query.get("mode") || fragment.get("mode"),
         _history: "replace",
       });
+    else if (location.hash === "#how-it-works") showManual("replace");
     else {
       recordRoute("/classroom", "replace");
       status(
@@ -4178,12 +4156,67 @@ function recordRoute(url, mode = "push") {
   else history.pushState(null, "", url);
   visibleRoute = url;
 }
+function closeManualView() {
+  manualOpen = false;
+  $("manual-view").hidden = true;
+}
+function showManual(historyMode = "push") {
+  if (!manualOpen && visibleRoute !== "/classroom#how-it-works") manualReturn = visibleRoute;
+  manualOpen = true;
+  $("home-view").hidden = true;
+  $("workspace-view").hidden = true;
+  $("manual-view").hidden = false;
+  $("manual-back").textContent = current
+    ? "\u2190 Back to " + $("title").textContent
+    : "\u2190 Back to all subjects";
+  recordRoute("/classroom#how-it-works", historyMode);
+  document.title = "How the classroom works | DS60 Classroom";
+  $("manual-title").focus({ preventScroll: true });
+  window.scrollTo({ top: 0 });
+}
+async function hideManual() {
+  if (current && lessonId) {
+    closeManualView();
+    $("workspace-view").hidden = false;
+    recordRoute(
+      manualReturn && manualReturn.includes("lesson=")
+        ? manualReturn
+        : "/classroom#" + new URLSearchParams({ lesson: lessonId }),
+      "push",
+    );
+    document.title = $("title").textContent + " | DS60 Classroom";
+    $("title").focus({ preventScroll: true });
+    window.scrollTo({ top: 0 });
+  } else await showHome();
+}
+for (const id of ["manual-link", "footer-manual", "home-manual"])
+  $(id).addEventListener("click", (event) => {
+    if (event.button || event.ctrlKey || event.metaKey || event.shiftKey || event.altKey) return;
+    event.preventDefault();
+    showManual();
+  });
+$("manual-back").addEventListener("click", () => hideManual().catch(() => {}));
+$("manual-view").addEventListener("click", (event) => {
+  const jump = event.target.closest?.("[data-manual-jump]");
+  if (!jump) return;
+  const target = $(jump.dataset.manualJump);
+  if (!target) return;
+  const heading = target.matches("h2, h3, li") ? target : target.querySelector("h2") || target;
+  target.scrollIntoView({ block: "start" });
+  heading.focus({ preventScroll: true });
+});
 window.addEventListener("popstate", async () => {
   if (!index) return;
   const target = new URLSearchParams(location.hash.slice(1)),
     id = target.get("lesson");
   try {
-    if (id && locate(id))
+    if (location.hash === "#how-it-works") showManual("replace");
+    else if (manualOpen && id && id === lessonId && current) {
+      closeManualView();
+      $("workspace-view").hidden = false;
+      visibleRoute = location.pathname + location.hash;
+      document.title = $("title").textContent + " | DS60 Classroom";
+    } else if (id && locate(id))
       await openLesson(id, true, {
         language: target.get("language"),
         mode: target.get("mode"),

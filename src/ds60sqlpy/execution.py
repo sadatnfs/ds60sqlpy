@@ -26,6 +26,7 @@ from pathlib import Path
 from typing import Any, Literal, cast
 from urllib.parse import unquote, urlsplit
 
+from ds60sqlpy import step_through as stepping
 from ds60sqlpy.catalog import Catalog
 from ds60sqlpy.curriculum_framework import RUNNERS
 from ds60sqlpy.sql_notebook import (
@@ -629,6 +630,28 @@ class PadRunner:
                     "This input contains psql client directives. Use whole SQL lesson mode "
                     "for a cataloged SQL script, or the documented psql/Jupyter workflow."
                 )
+        except SqlNotebookError as exc:
+            raise ValueError(str(exc)) from exc
+        self._course_database_environment(environment, search_path)
+        command = [self.python, "-I", "-u", "-c", SQL_WORKER, str(path)]
+        result = (
+            self._execute(command, environment, language)
+            if timeout_seconds is None
+            else self._execute(command, environment, language, timeout_seconds=timeout_seconds)
+        )
+        response = asdict(result)
+        with contextlib.suppress(ValueError, TypeError):
+            diagnostic = json.loads(result.output)
+            line = diagnostic.get("error_line") if isinstance(diagnostic, dict) else None
+            if type(line) is int and 1 <= line <= path.read_text(encoding="utf-8").count("\n") + 1:
+                response["error_line"] = line
+        return response
+
+    @staticmethod
+    def _course_database_environment(environment: dict[str, str], search_path: str | None) -> None:
+        """Point a child environment at the validated course database and lesson schemas."""
+
+        try:
             target = validate_course_database_target(
                 os.environ.get("DS60_DATABASE_URL") or default_course_database_url()
             )
@@ -651,19 +674,126 @@ class PadRunner:
                 raise ValueError("The lesson's schema search path is not a plain schema list.")
             # Applied as a session default; the learner's own SET search_path still wins.
             environment["DS60_PAD_SEARCH_PATH"] = search_path
-        command = [self.python, "-I", "-u", "-c", SQL_WORKER, str(path)]
-        result = (
-            self._execute(command, environment, language)
-            if timeout_seconds is None
-            else self._execute(command, environment, language, timeout_seconds=timeout_seconds)
+
+    def step_through(
+        self,
+        lesson_id: str,
+        language: str,
+        code: str,
+        *,
+        cursor_offset: int | None = None,
+        timeout_seconds: int | None = None,
+    ) -> dict[str, Any]:
+        """Trace Python line by line, or walk one SELECT clause by clause, without saving."""
+
+        definition = RUNNERS.get(language)
+        if definition is None or definition.executor not in {"python", "sql"}:
+            raise ValueError("Step-through is available for Python and SQL lessons.")
+        if timeout_seconds is not None and (
+            type(timeout_seconds) is not int or timeout_seconds not in ALLOWED_TIMEOUT_SECONDS
+        ):
+            raise ValueError("Choose a run limit of 15, 60 or 120 seconds.")
+        size_message = f"Pad input must be text of at most {MAX_CODE_BYTES} UTF-8 bytes."
+        if not isinstance(code, str):
+            raise ValueError(size_message)
+        try:
+            size = len(code.encode("utf-8"))
+        except UnicodeEncodeError as exc:
+            raise ValueError(size_message) from exc
+        if size > MAX_CODE_BYTES:
+            raise ValueError(size_message)
+        if cursor_offset is not None and (type(cursor_offset) is not int or cursor_offset < 0):
+            raise ValueError("Choose a cursor position inside the code.")
+        if self.python is None:
+            raise ValueError("Install Python 3.12, then set DS60_PYTHON to its executable path.")
+        path = self._path(lesson_id, language)
+        path.parent.mkdir(parents=True, exist_ok=True)
+        limit = self.timeout if timeout_seconds is None else timeout_seconds
+        if definition.executor == "python":
+            return self._step_through_python(path.parent, code, limit)
+        return self._step_through_sql(path.parent, lesson_id, code, cursor_offset, limit)
+
+    def _step_environment(self) -> dict[str, str]:
+        environment = dict(os.environ)
+        environment["PYTHONIOENCODING"] = "utf-8"
+        environment["PYTHONUTF8"] = "1"
+        return environment
+
+    def _step_through_python(self, folder: Path, code: str, timeout: int) -> dict[str, Any]:
+        assert self.python is not None
+        environment = self._step_environment()
+        environment["PYTHONPATH"] = os.pathsep.join(
+            (str(self.catalog.repo_root), str(self.catalog.repo_root / "src"))
         )
-        response = asdict(result)
-        with contextlib.suppress(ValueError, TypeError):
-            diagnostic = json.loads(result.output)
-            line = diagnostic.get("error_line") if isinstance(diagnostic, dict) else None
-            if type(line) is int and 1 <= line <= path.read_text(encoding="utf-8").count("\n") + 1:
-                response["error_line"] = line
-        return response
+        environment.update(matplotlib_cache_environment(self.catalog.repo_root))
+        environment["MPLBACKEND"] = "Agg"
+        with tempfile.TemporaryDirectory(prefix=".step-", dir=folder) as scratch:
+            source = Path(scratch) / "main.py"
+            source.write_text(code, encoding="utf-8", newline="")
+            trace = Path(scratch) / "trace.jsonl"
+            command = [
+                self.python,
+                "-u",
+                "-c",
+                stepping.python_trace_worker(),
+                str(source),
+                str(trace),
+                stepping.PYTHON_TRACE_BACKEND,
+            ]
+            result = self._execute(command, environment, "python", timeout_seconds=timeout)
+            records = stepping.read_records(trace)
+        return stepping.python_response(
+            code,
+            records,
+            stopped=result.stopped,
+            elapsed_seconds=result.elapsed_seconds,
+            redact=lambda text: self._redact(text, environment),
+        )
+
+    def _step_through_sql(
+        self,
+        folder: Path,
+        lesson_id: str,
+        code: str,
+        cursor_offset: int | None,
+        timeout: int,
+    ) -> dict[str, Any]:
+        assert self.python is not None
+        plan = stepping.plan_sql(code, cursor_offset)
+        if plan.unsupported is not None or not plan.steps:
+            return {
+                "kind": "sql",
+                "statement": plan.statement,
+                "statement_offset": plan.statement_offset,
+                "steps": [],
+                "unsupported": plan.unsupported or stepping.NO_QUERY,
+                "elapsed_seconds": 0.0,
+                "error": None,
+            }
+        environment = self._step_environment()
+        self._course_database_environment(environment, lesson_search_path(self.catalog, lesson_id))
+        with tempfile.TemporaryDirectory(prefix=".step-", dir=folder) as scratch:
+            steps_file = Path(scratch) / "steps.json"
+            steps_file.write_text(json.dumps([step.sql for step in plan.steps]), encoding="utf-8")
+            results = Path(scratch) / "results.jsonl"
+            command = [
+                self.python,
+                "-I",
+                "-u",
+                "-c",
+                stepping.sql_step_worker(COURSE_ROLE_QUERY),
+                str(steps_file),
+                str(results),
+            ]
+            result = self._execute(command, environment, "sql", timeout_seconds=timeout)
+            records = stepping.read_records(results)
+        return stepping.sql_response(
+            plan,
+            records,
+            stopped=result.stopped,
+            elapsed_seconds=result.elapsed_seconds,
+            redact=lambda text: self._redact(text, environment),
+        )
 
     def _path(self, lesson_id: str, language: str) -> Path:
         self.catalog.get(lesson_id)

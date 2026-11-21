@@ -256,7 +256,7 @@ def classroom_checks(browser: Any, origin: str, audit: Audit, expect: Any) -> No
         audit.screenshot(page, "classroom-home-desktop")
         page.set_viewport_size({"width": 390, "height": 844})
         no_overflow(page)
-        expect(page.locator(".pace-card h2")).to_have_text(
+        expect(page.locator(".start-card h2")).to_have_text(
             "Three steps per lesson", use_inner_text=True
         )
         audit.screenshot(page, "classroom-home-mobile")

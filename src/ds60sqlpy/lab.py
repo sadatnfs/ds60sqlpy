@@ -16,12 +16,12 @@ from typing import Any, cast
 from urllib.parse import urlsplit
 
 from ds60sqlpy.capabilities import CapabilityService
-from ds60sqlpy.catalog import Catalog
+from ds60sqlpy.catalog import Catalog, Lesson
 from ds60sqlpy.classroom import ClassroomService
 from ds60sqlpy.classroom_http import CourseHTTPServer, CourseRequestHandler, RequestError
 from ds60sqlpy.coaching import CoachingService
 from ds60sqlpy.curriculum_framework import RUNNERS
-from ds60sqlpy.execution import ALLOWED_TIMEOUT_SECONDS, PadRunner
+from ds60sqlpy.execution import ALLOWED_TIMEOUT_SECONDS, MAX_CODE_BYTES, PadRunner
 from ds60sqlpy.lesson_reader import render_artifact, rendered_targets
 from ds60sqlpy.module_service import ModuleService
 from ds60sqlpy.run_explain import explain_pad_run
@@ -350,7 +350,63 @@ class LabServer(CourseHTTPServer):
                 return response
             finally:
                 self.execution_lock.release()
+        if action == "step-through":
+            return self._step_through(payload, lesson_id, lesson)
         raise ValueError("Unknown learning-lab action.")
+
+    def _step_through(
+        self, payload: dict[str, Any], lesson_id: str, lesson: Lesson
+    ) -> dict[str, Any]:
+        """Trace a pad without saving it, writing a receipt or touching its history."""
+
+        language = payload.get("language")
+        definition = RUNNERS.get(language) if isinstance(language, str) else None
+        if (
+            not isinstance(language, str)
+            or definition is None
+            or definition.executor not in {"python", "sql"}
+        ):
+            raise ValueError("Step-through is available for Python and SQL lessons.")
+        code = payload.get("code")
+        if not isinstance(code, str):
+            raise ValueError("Supply code as text.")
+        try:
+            oversized = len(code.encode("utf-8")) > MAX_CODE_BYTES
+        except UnicodeEncodeError:
+            oversized = True
+        if oversized:
+            raise ValueError(f"Pad input must be text of at most {MAX_CODE_BYTES} UTF-8 bytes.")
+        timeout = payload.get("timeout_seconds")
+        if timeout is not None and (
+            type(timeout) is not int or timeout not in ALLOWED_TIMEOUT_SECONDS
+        ):
+            raise ValueError("Choose a run limit of 15, 60 or 120 seconds.")
+        purpose = payload.get("purpose", "practice")
+        if not isinstance(purpose, str) or purpose not in {"practice", "solution"}:
+            raise ValueError("Choose a practice run or a worked-solution run.")
+        cursor = payload.get("cursor_offset")
+        if cursor is not None and (type(cursor) is not int or cursor < 0):
+            raise ValueError("Choose a cursor position inside the code.")
+        if not self.execution_lock.acquire(blocking=False):
+            raise ValueError("A pad is already running. Wait for its result before running again.")
+        try:
+            preparation = (
+                ensure_before_run(self.catalog, lesson_id)
+                if language == "sql" or uses_course_database(lesson)
+                else None
+            )
+            response = self.pads.step_through(
+                lesson_id,
+                language,
+                code,
+                cursor_offset=cursor if language == "sql" else None,
+                timeout_seconds=timeout,
+            )
+            if preparation:
+                response["database_preparation"] = preparation
+            return response
+        finally:
+            self.execution_lock.release()
 
 
 class LabRequestHandler(CourseRequestHandler):
@@ -370,6 +426,7 @@ class LabRequestHandler(CourseRequestHandler):
             "/assets/browser-preview.js": ("browser-preview.js", script),
             "/assets/classroom-editor.js": ("classroom-editor.js", script),
             "/assets/classroom-shell.js": ("classroom-shell.js", script),
+            "/assets/classroom-guide.js": ("classroom-guide.js", script),
             "/assets/codemirror.js": ("vendor/codemirror.v6.min.js", script),
         }
         if route not in classroom_routes | set(assets) | {

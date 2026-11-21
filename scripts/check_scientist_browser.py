@@ -487,6 +487,7 @@ def submit_once(
     page.locator(SOURCE_EDITOR).fill(case.source)
     page.locator("#explanation").fill("Disposable acceptance probe; no learner mastery claim.")
     save(page, expect)
+    page.evaluate("document.getElementById('run-more').open = true")
     page.locator("#timeout").select_option("120")
     before = len(network.submissions)
 

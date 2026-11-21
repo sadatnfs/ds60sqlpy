@@ -1,6 +1,6 @@
 "use strict";
 // classroom.js loads first and defines these shared script globals.
-/* global current, index, themes, locate, theme, openLesson, switchTrack, showHome, lab */
+/* global current, index, themes, locate, theme, openLesson, switchTrack, showHome, showManual, lab */
 // Workspace conveniences layered over classroom.js: the Ctrl/Cmd+K lesson index,
 // the resizable spread gutter, sidebar and mobile navigation, reading progress,
 // the status slug and result reveal. Everything degrades to the plain page.
@@ -133,6 +133,14 @@
       },
       {
         kind: "action",
+        id: "manual",
+        title: "How the classroom works",
+        detail: "What each part of a lesson page does",
+        mark: "?",
+        group: "Actions",
+      },
+      {
+        kind: "action",
         id: "theme",
         title: byId("theme-toggle")?.textContent.trim() || "Switch appearance",
         detail: "Switch between light and dark pages",
@@ -232,6 +240,7 @@
     else if (option.kind === "continue") action = openLesson(option.id, true, option.context);
     else if (option.kind === "subject") action = switchTrack(option.id);
     else if (option.id === "home") action = showHome();
+    else if (option.id === "manual") showManual();
     else if (option.id === "theme") byId("theme-toggle")?.click();
     Promise.resolve(action).catch(report);
   }

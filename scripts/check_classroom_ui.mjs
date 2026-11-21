@@ -161,7 +161,6 @@ function environment({ browserPreviewClass } = {}) {
     },
   });
   element("stage").value = "all";
-  element("pace").value = "30";
   element("workspace-view").hidden = true;
   vm.runInContext(script, context, { filename });
   const run = (code) => vm.runInContext(code, context);
@@ -2751,6 +2750,36 @@ await test("marking exercises solved updates the index and offers the next unsol
     source: "SELECT 2;", output: "2", returncode: 0, elapsed_seconds: 0.1, checks: [] })`);
   assert.equal(e.element("results-title").textContent, "Result");
   assert.equal(e.element("run-storage-status").textContent, "");
+});
+
+await test("the manual opens from any link and Back returns to the open lesson", async () => {
+  const e = environment();
+  e.current();
+  e.element("title").textContent = "Fixture lesson";
+  e.run('visibleRoute = "/classroom#lesson=llm-009"');
+  await e.event("home-manual");
+  assert.equal(e.element("manual-view").hidden, false);
+  assert.equal(e.element("workspace-view").hidden, true);
+  assert.equal(e.element("manual-back").textContent, "\u2190 Back to Fixture lesson");
+  assert.deepEqual(e.locations.at(-1), { mode: "push", url: "/classroom#how-it-works" });
+  assert.equal(e.context.document.title, "How the classroom works | DS60 Classroom");
+  await e.event("manual-back");
+  await settle();
+  assert.equal(e.element("manual-view").hidden, true);
+  assert.equal(e.element("workspace-view").hidden, false);
+  assert.deepEqual(e.locations.at(-1), { mode: "push", url: "/classroom#lesson=llm-009" });
+  assert.equal(e.run("manualOpen"), false);
+});
+
+await test("Run settings appears only when it holds a time limit or runtime check", async () => {
+  const e = environment();
+  e.current();
+  e.run("showCapability(current.capability)");
+  assert.equal(e.element("run-more").hidden, false);
+  e.run('current.execution_mode = "draft"; showCapability(current.capability)');
+  assert.equal(e.element("timeout").hidden, true);
+  assert.equal(e.element("refresh").hidden, true);
+  assert.equal(e.element("run-more").hidden, true);
 });
 
 console.log(JSON.stringify({ checks, passed: true, final: true }));

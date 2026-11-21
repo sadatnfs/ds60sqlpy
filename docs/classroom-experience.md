@@ -4,6 +4,21 @@ Start your local Linux-container engine, run `./classroom` in the course
 folder and open the URL it prints. The `/classroom` home lets you choose any
 registered subject and return to its saved code and notes.
 
+## Learn how the classroom works
+
+Choose **How the classroom works** on the home page, in the header or in the
+footer for the built-in manual. A labelled map of the lesson page numbers every
+box, and each number is explained: the lesson list, where you are, the runtime
+notice, the lesson, exercises, your code, the run bar, the result and your
+notes. The manual also covers starting and stopping the classroom, opening and
+switching lessons, saving, and what to do when something goes wrong.
+
+**Tour a lesson page** on the home page (or **Tour this page** above an open
+lesson) walks the same parts on the real page, one highlighted box at a time.
+Use the arrow keys or **Next** to move and Escape to leave. The first time you
+open a lesson with a code page the classroom offers the tour once, beside its
+button; it never starts on its own, and **No thanks** keeps it away.
+
 ## Choose a path
 
 | Area | Subjects |
@@ -13,7 +28,7 @@ registered subject and return to its saved code and notes.
 | Learning systems and language models | TensorFlow, PyTorch, NLP, LLM theory, applied LLM systems |
 | Infrastructure and acceleration | Docker, Kubernetes, GPU computing and CUDA |
 
-Use **All subjects**, search (Ctrl+K or Cmd+K) or **Switch subject** to change direction. Subject
+Use **All subjects**, search (Ctrl+K or Cmd+K, or the search box in the header) or **Switch subject** to change direction. Subject
 names and individual color themes identify the current path. Search within a
 path, filter its stage or choose a lesson from the list. A filter changes what
 you see; it does not erase your current draft.
@@ -80,6 +95,28 @@ script, the panel offers **Switch to the snippet pad**, where exercise answers
 belong, because the lesson script stays answer-free. SQL snippet results read as
 sentences above the result tables, and errors give PostgreSQL's message with
 its SQLSTATE code.
+
+## Step through Python and SQL
+
+Python and SQL lessons add **Step through** beside **Run code**, and a worked
+Python or SQL solution adds **Step through the solution**. Both run the code once
+in the same runtime and then let you replay it at your own speed. Use **Next
+step**, **Back**, **First**, **Last**, the slider, or the arrow, Home and End
+keys.
+
+- **Python** marks the line about to run and shows the variables that exist at
+  that moment, which ones just changed, the function calls in progress and the
+  output printed so far. A failing program stops on the line that raised the
+  error and explains it.
+- **SQL** takes the statement under your cursor (or the first one) and shows it
+  in the order PostgreSQL evaluates it: the rows from `FROM` and joins, what
+  `WHERE` keeps, the groups, what `HAVING` keeps, the selected columns, the
+  sorting and the limit. Each step explains the clause in plain words and shows
+  the rows at that point. A statement that cannot be split safely, such as one
+  that changes data, says so and is not stepped.
+
+Stepping never saves your code, never records a run and never changes your
+draft. Very long programs stop after a fixed number of steps and say so.
 
 ## Choose the right execution environment
 
