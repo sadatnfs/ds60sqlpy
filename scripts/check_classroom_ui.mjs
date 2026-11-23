@@ -5,6 +5,8 @@ import fs from "node:fs";
 import vm from "node:vm";
 const filename = process.argv[2] || "src/ds60sqlpy/assets/classroom.js";
 const script = fs.readFileSync(filename, "utf8");
+const guideFilename = "src/ds60sqlpy/assets/classroom-guide.js";
+const guideScript = fs.readFileSync(guideFilename, "utf8");
 const cssFilename = process.argv[3] || "src/ds60sqlpy/assets/classroom.css";
 const stylesheet = fs.readFileSync(cssFilename, "utf8");
 class Element {
@@ -2769,6 +2771,47 @@ await test("the manual opens from any link and Back returns to the open lesson",
   assert.equal(e.element("workspace-view").hidden, false);
   assert.deepEqual(e.locations.at(-1), { mode: "push", url: "/classroom#lesson=llm-009" });
   assert.equal(e.run("manualOpen"), false);
+});
+
+await test("tour entry without a selected lesson stays put and asks the learner to choose one", async () => {
+  const e = environment();
+  e.run("current = null; lessonId = null;");
+  vm.runInContext(guideScript, e.context, { filename: guideFilename });
+  let switches = 0;
+  let opens = 0;
+  e.context.switchTrack = () => {
+    switches++;
+    return Promise.resolve();
+  };
+  e.context.openLesson = () => {
+    opens++;
+    return Promise.resolve();
+  };
+  const homeUrl = e.location.href;
+  const requestCount = e.requests.length;
+  const locationCount = e.locations.length;
+  await e.event("home-tour");
+  assert.equal(e.element("status").textContent, "Choose a lesson before starting the tour.");
+  assert.equal(e.element("home-view").hidden, false);
+  assert.equal(e.element("workspace-view").hidden, true);
+  assert.equal(e.location.href, homeUrl);
+  assert.equal(e.requests.length, requestCount);
+  assert.equal(e.locations.length, locationCount);
+
+  await e.event("home-manual");
+  assert.equal(e.element("manual-view").hidden, false);
+  const manualUrl = e.location.href;
+  const manualRequests = e.requests.length;
+  const manualLocations = e.locations.length;
+  await e.event("manual-tour");
+  assert.equal(e.element("status").textContent, "Choose a lesson before starting the tour.");
+  assert.equal(e.element("manual-view").hidden, false);
+  assert.equal(e.element("workspace-view").hidden, true);
+  assert.equal(e.location.href, manualUrl);
+  assert.equal(e.requests.length, manualRequests);
+  assert.equal(e.locations.length, manualLocations);
+  assert.equal(switches, 0);
+  assert.equal(opens, 0);
 });
 
 await test("Run settings appears only when it holds a time limit or runtime check", async () => {

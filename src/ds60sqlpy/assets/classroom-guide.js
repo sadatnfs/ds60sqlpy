@@ -1,6 +1,6 @@
 "use strict";
 // classroom.js loads first and defines these shared script globals.
-/* global current, exercise, contextOf, lab, solutionCode, solutionIsStandalone, manualOpen, hideManual, switchTrack, openLesson, lessonId, index, pref, remember, status */
+/* global current, exercise, contextOf, lab, solutionCode, solutionIsStandalone, manualOpen, hideManual, openLesson, lessonId, pref, remember, status */
 // Guided help layered over the workspace: the step-through player that walks a
 // beginner through Python or SQL one step at a time, and the page tour that
 // points at each part of a lesson. Both only read the page; neither saves code.
@@ -743,8 +743,7 @@
   }
   tourButton?.addEventListener("click", () => startTour(tourButton));
 
-  // "Show me on a lesson page" in the manual: return to the open lesson, or
-  // open the Python path when no lesson is open yet, then start the tour.
+  // "Show me on a lesson page" in the manual: return to the open lesson, then start the tour.
   function waitForLesson() {
     return new Promise((resolve) => {
       const done = () => {
@@ -758,14 +757,14 @@
   async function tourFromAnywhere() {
     try {
       const lesson = typeof current === "object" && current && lessonId;
-      if (manualOpen && lesson) await hideManual();
-      else if (!lesson || byId("workspace-view")?.hidden) {
-        const subjects = (typeof index === "object" && index?.tracks) || [],
-          subject = subjects.find((item) => item.id === "python") || subjects[0];
-        if (!lesson && !subject) return;
+      if (!lesson) {
+        status("Choose a lesson before starting the tour.");
+        return;
+      }
+      if (manualOpen) await hideManual();
+      else if (byId("workspace-view")?.hidden) {
         const opened = waitForLesson();
-        if (lesson) await openLesson(lessonId, true);
-        else await switchTrack(subject.id);
+        await openLesson(lessonId, true);
         await opened;
       }
       setTimeout(() => startTour(tourButton), 60);

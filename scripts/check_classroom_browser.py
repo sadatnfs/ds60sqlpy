@@ -260,6 +260,21 @@ def learner_snapshot(page: Any, lesson_id: str) -> dict[str, Any]:
     )
 
 
+def assert_learning_state_unchanged(
+    page: Any, lesson_id: str, before: dict[str, Any], action: str
+) -> None:
+    """Verify a guide or tour action did not alter a learner's saved work."""
+    after = learner_snapshot(page, lesson_id)
+    changed = [key for key in before if before[key] != after[key]]
+    assert not changed, f"{action} changed learner state: {changed}"
+
+
+def assert_no_execution_requests(actions: list[str], start: int, action: str) -> None:
+    """Ensure navigation and explanation controls never submit learner execution."""
+    executed = [name for name in actions[start:] if name in {"run", "step-through"}]
+    assert not executed, f"{action} submitted execution request(s): {executed}"
+
+
 def reveal_steppable_solution(page: Any, expect: Any) -> None:
     """Open one available standalone Python exercise solution for step-through."""
     exercises = page.locator("#exercise-steps .exercise-step")
@@ -366,6 +381,17 @@ def classroom_checks(browser: Any, origin: str, audit: Audit, expect: Any) -> No
         expect(page.locator("#output")).to_have_text(python_marker, timeout=90_000)
         expect(page.locator("#job-status")).to_contain_text("Finished \u00b7 exit 0")
         expect(page.locator("#run-storage-status")).to_contain_text("Saved run")
+        offer = page.locator("#tour-offer")
+        expect(offer).to_be_visible()
+        before_decline = learner_snapshot(page, "python-02")
+        decline_action_start = len(lab_actions)
+        offer.get_by_role("button", name="No thanks").click()
+        expect(offer).to_have_count(0)
+        assert_learning_state_unchanged(
+            page, "python-02", before_decline, "Declining the tour offer"
+        )
+        assert_no_execution_requests(lab_actions, decline_action_start, "Declining the tour offer")
+        audit.passed("Declining the optional tour preserves the lesson and learner state")
         reveal_steppable_solution(page, expect)
         before_walk = learner_snapshot(page, "python-02")
         assert before_walk["source"] == python_source
@@ -400,9 +426,9 @@ def classroom_checks(browser: Any, origin: str, audit: Audit, expect: Any) -> No
         assert page.locator("#step-body").inner_text().strip(), (
             "The browser did not render the Python solution trace."
         )
-        after_walk = learner_snapshot(page, "python-02")
-        changed = [key for key in before_walk if before_walk[key] != after_walk[key]]
-        assert not changed, f"The solution walkthrough changed learner state: {changed}"
+        assert_learning_state_unchanged(
+            page, "python-02", before_walk, "The solution walkthrough"
+        )
         walkthrough_actions = lab_actions[trace_start:]
         assert walkthrough_actions.count("step-through") == 1
         assert "run" not in walkthrough_actions
@@ -411,6 +437,86 @@ def classroom_checks(browser: Any, origin: str, audit: Audit, expect: Any) -> No
         )
         page.locator("#step-close").click()
         page.locator("#exercise-hide-solution").click()
+        before_manual = learner_snapshot(page, "python-02")
+        manual_action_start = len(lab_actions)
+        lesson_url = page.url
+        page.locator("#manual-link").click()
+        expect(page.locator("#manual-view")).to_be_visible()
+        expect(page.locator(".manual-parts li")).to_have_count(10)
+        expect(page.locator("#manual-start")).to_contain_text("./classroom doctor")
+        expect(page.locator("#manual-start")).to_contain_text("Docker Compose 2.28.0")
+        expect(page.locator("#manual-switch")).to_contain_text("Switch subject")
+        expect(page.locator("#manual-switch")).to_contain_text("Previous")
+        expect(page.locator("#manual-switch")).to_contain_text("Next")
+        page.locator("#manual-back").click()
+        expect(page.locator("#workspace-view")).to_be_visible()
+        assert page.url == lesson_url, "Manual Back did not restore the lesson route."
+        assert_learning_state_unchanged(
+            page, "python-02", before_manual, "Opening and leaving the manual"
+        )
+        assert_no_execution_requests(
+            lab_actions, manual_action_start, "Opening and leaving the manual"
+        )
+        audit.passed("The manual explains its controls and returns to the same lesson")
+
+        before_tour = learner_snapshot(page, "python-02")
+        tour_action_start = len(lab_actions)
+        page.locator("#manual-link").click()
+        page.locator("#manual-tour").click()
+        expect(page.locator(".tour-card")).to_be_visible()
+        expect(page.locator("#workspace-view")).to_be_visible()
+        assert page.url == lesson_url, "Starting the tour from the manual changed lessons."
+        assert_learning_state_unchanged(
+            page, "python-02", before_tour, "Starting the tour from the manual"
+        )
+        page.get_by_role("button", name="End tour").click()
+        expect(page.locator(".tour-card")).to_have_count(0)
+        assert_learning_state_unchanged(
+            page, "python-02", before_tour, "Ending the tour"
+        )
+        page.locator("#tour-start").click()
+        expect(page.locator(".tour-card")).to_be_visible()
+        page.keyboard.press("Escape")
+        expect(page.locator(".tour-card")).to_have_count(0)
+        assert_learning_state_unchanged(
+            page, "python-02", before_tour, "Dismissing the restarted tour"
+        )
+        page.locator("#tour-start").click()
+        expect(page.locator(".tour-card")).to_be_visible()
+        for _ in range(16):
+            next_button = page.locator(".tour-next")
+            if next_button.inner_text() == "Finish":
+                break
+            next_button.click()
+        else:
+            raise AssertionError("The tour did not reach its Finish step.")
+        page.locator(".tour-next").click()
+        expect(page.locator(".tour-card")).to_have_count(0)
+        assert_learning_state_unchanged(
+            page, "python-02", before_tour, "Completing the tour"
+        )
+        assert_no_execution_requests(lab_actions, tour_action_start, "Tour lifecycle")
+        audit.passed("The lesson tour starts, dismisses, restarts and completes without data loss")
+        before_home_tour = learner_snapshot(page, "python-02")
+        home_tour_action_start = len(lab_actions)
+        page.locator("#home-button").click()
+        expect(page.locator("#home-view")).to_be_visible()
+        page.locator("#home-tour").click()
+        expect(page.locator(".tour-card")).to_be_visible()
+        expect(page.locator("#workspace-view")).to_be_visible()
+        expect(page.locator('#lessons button[aria-current="page"] small')).to_contain_text(
+            "python-02"
+        )
+        assert page.url == lesson_url, "Starting the tour from home did not restore the lesson."
+        assert_learning_state_unchanged(
+            page, "python-02", before_home_tour, "Returning from home to start the tour"
+        )
+        assert_no_execution_requests(
+            lab_actions, home_tour_action_start, "Starting the tour from home"
+        )
+        page.get_by_role("button", name="End tour").click()
+        expect(page.locator(".tour-card")).to_have_count(0)
+        audit.passed("Starting a tour from home returns to the previously selected lesson")
         for mode in ("light", "dark"):
             if page.locator("body").get_attribute("data-mode") != mode:
                 page.locator("#theme-toggle").click()
@@ -486,6 +592,54 @@ def classroom_checks(browser: Any, origin: str, audit: Audit, expect: Any) -> No
     context = audit.context(browser, origin)
     try:
         page = context.new_page()
+        api_actions: list[tuple[str, str]] = []
+
+        def record_api_action(request: Any) -> None:
+            if request.method != "POST":
+                return
+            path = urlsplit(request.url).path
+            if path not in {"/api/lab", "/api/classroom"}:
+                return
+            payload = request.post_data_json
+            if isinstance(payload, dict) and isinstance(payload.get("action"), str):
+                api_actions.append((path, payload["action"]))
+
+        page.on("request", record_api_action)
+        page.goto(origin + "/classroom")
+        expect(page.locator("#subject-cards .subject-card")).to_have_count(
+            4, timeout=90_000
+        )
+        home_url = page.url
+        home_storage = page.evaluate(
+            "() => Object.entries(localStorage).sort(([a], [b]) => a.localeCompare(b))"
+        )
+        action_count = len(api_actions)
+        page.locator("#home-tour").click()
+        expect(page.locator("#status")).to_have_text("Choose a lesson before starting the tour.")
+        expect(page.locator("#home-view")).to_be_visible()
+        expect(page.locator("#workspace-view")).to_be_hidden()
+        expect(page.locator(".tour-card")).to_have_count(0)
+        assert page.url == home_url
+        assert len(api_actions) == action_count, "The home tour request opened or ran a lesson."
+
+        page.locator("#home-manual").click()
+        expect(page.locator("#manual-view")).to_be_visible()
+        manual_url = page.url
+        action_count = len(api_actions)
+        page.locator("#manual-tour").click()
+        expect(page.locator("#status")).to_have_text("Choose a lesson before starting the tour.")
+        expect(page.locator("#manual-view")).to_be_visible()
+        expect(page.locator("#workspace-view")).to_be_hidden()
+        expect(page.locator(".tour-card")).to_have_count(0)
+        assert page.url == manual_url
+        assert len(api_actions) == action_count, "The manual tour request opened or ran a lesson."
+        page.locator("#manual-back").click()
+        expect(page.locator("#home-view")).to_be_visible()
+        assert page.evaluate(
+            "() => Object.entries(localStorage).sort(([a], [b]) => a.localeCompare(b))"
+        ) == home_storage, "No-selection tour navigation changed browser learner storage."
+        audit.passed("No-selection home and manual tour entries stay put and request no execution")
+
         page.goto(origin + "/classroom#lesson=statistics-009")
         expect(page.locator("#read-chapter")).to_be_checked()
         show_code_and_notes(page, expect)

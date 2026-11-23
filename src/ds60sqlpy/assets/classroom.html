@@ -945,8 +945,13 @@ Press Run code. What your program prints, and any error messages, appear here.</
             <section id="manual-start" class="manual-section" aria-labelledby="manual-start-title">
               <h2 id="manual-start-title" tabindex="-1">Start the classroom</h2>
               <p>
-                Open a terminal in the classroom folder with Docker running. On Windows, use WSL.
-                Each command prints the address to open in your browser.
+                Open a Bash terminal in the project folder. On Windows, use WSL. Before your
+                first start, run <code>./classroom doctor</code> to check that your
+                Docker-compatible engine is using Linux containers and that Docker Compose 2.28.0
+                or newer is available. The check does not start services. If it passes, run
+                <code>./classroom</code> to build only missing images, start the services, and
+                print the classroom address to open in your browser. This local build does not
+                publish images.
               </p>
               <dl class="manual-commands">
                 <dt>First time on this computer</dt>
