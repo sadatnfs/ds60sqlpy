@@ -40,7 +40,7 @@ Keep the existing classroom architecture and add acceptance coverage around its 
 
 The backend already separates step-through from ordinary execution and documents that the walkthrough does not save a pad, write a receipt, or touch history. Python tracing has explicit bounds. SQL planning supplies statement and step offsets, but an internal planner fallback produces a whole-query step rather than an unsupported result. Further, SQL course preparation currently runs before the walkthrough parser. Tests and learner-facing claims must reflect those behaviors rather than promise that every unrecognized SQL construct is rejected or that a walkthrough has no database setup effects. [VERIFIED: `lab.py:357-360,393-404`; `step_through.py:18-30,1026-1059`]
 
-**Primary recommendation:** Keep runtime dependencies unchanged. Fix the guide's unverified image-pull instruction, make the tour selection-neutral, and qualify trace/highlight behavior with focused unit tests, disposable PostgreSQL integration, and the existing desktop browser route.
+**Primary recommendation:** Keep runtime dependencies unchanged. Limit Phase 1 guide edits to source-verified local initialization and lesson switching. Defer changes to the existing Hub instruction and all Hub operations because the publication target/version is unverified; verify the target in the later release-target phase. Make the tour selection-neutral, and qualify trace/highlight behavior with focused unit tests, disposable PostgreSQL integration, and the existing desktop browser route.
 
 ## Architectural Responsibility Map
 
