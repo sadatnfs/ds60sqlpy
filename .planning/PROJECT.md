@@ -22,6 +22,7 @@ Learners can understand, practice, run, and keep their work in any DS60 course w
 - [ ] Improve the desktop classroom's navigation, lesson operation, exercises, and run experience without losing drafts or saved results.
 - [ ] Review and improve the content and learning experience for every existing language and subject track, using clear, accurate, practical instruction at least as strong as the Python and SQL reference.
 - [ ] Verify supported Docker images, runtime behavior, startup, saved work, and release distribution through reproducible tests.
+- [ ] Scan every image in a release and remediate detected CVEs before publication.
 - [ ] Gate changes with focused automated tests, repository quality checks, and bounded desktop browser review.
 - [ ] Publish a release only after its code, image, and registry checks pass; stop DS60-owned test containers when the work is finished.
 
@@ -47,6 +48,7 @@ Learners can understand, practice, run, and keep their work in any DS60 course w
 - **Runtime**: Preserve local Docker delivery, the existing course/profile boundaries, and offline classroom assets.
 - **Learner state**: Keep drafts, progress, receipts, and volumes intact across UI and runtime changes.
 - **Content quality**: Preserve accurate source material and stable lesson identities; make improvements evidence-based and testable.
+- **Image security**: Release images must have no unresolved CVEs in the applicable scan results; rebuild or remediate affected images before publication.
 - **Release safety**: Separate ordinary code changes from pushing to `main` and publishing images. Verify all release gates and the Docker Hub target before publishing.
 - **Cleanup**: Stop DS60-owned test containers at completion, but do not stop unrelated services or remove learner volumes.
 
@@ -59,6 +61,7 @@ Learners can understand, practice, run, and keep their work in any DS60 course w
 | Use Python and SQL as a quality reference, not as exclusive scope | The original near-term work targets these tracks, while the owner expanded the overhaul to all languages | Pending |
 | Keep the target desktop-only | Mobile-specific work is not wanted for this classroom | Pending |
 | Preserve the local Docker model and all learner state | This is the established product and its saved work is essential | Pending |
+| Require clean image vulnerability scans before publication | The owner requires all built images to be CVE-free | Pending |
 
 ## Evolution
 
