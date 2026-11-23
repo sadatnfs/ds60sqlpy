@@ -31,10 +31,19 @@ Qualify the unfinished release 1.4.4 classroom-guide and Python/SQL walkthrough 
   4. Learners can tell walkthroughs from ordinary runs and inspect the Python/SQL solution walkthroughs without replacing their drafts; checkpoint acceptance evidence covers automated, disposable PostgreSQL integration, and desktop-browser checks.
 **Plans**: 5 plans
 Plans:
+**Wave 1**
 - [ ] 01-01-PLAN.md — Prove the walkthrough tracer and qualify guide/tour safety
+
+**Wave 2** *(blocked on Wave 1 completion)*
 - [ ] 01-02-PLAN.md — Qualify bounded source-linked Python traces
+
+**Wave 3** *(blocked on Wave 2 completion)*
 - [ ] 01-03-PLAN.md — Reject unsupported SQL and verify offsets/results
+
+**Wave 4** *(blocked on Wave 3 completion)*
 - [ ] 01-04-PLAN.md — Validate SQL before database preparation
+
+**Wave 5** *(blocked on Wave 4 completion)*
 - [ ] 01-05-PLAN.md — Align SQL guidance and complete browser acceptance
 **UI hint**: yes
 
