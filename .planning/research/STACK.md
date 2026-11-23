@@ -1,11 +1,11 @@
 # Technology Stack
 
-**Project:** DS60 Classroom Overhaul — brownfield milestone
+**Project:** DS60 Classroom Overhaul; brownfield milestone
 **Researched:** 2026-11-23
 
 ## Recommended Stack
 
-**Recommendation:** Keep the established stack intact. The all-language content work is a curriculum, renderer, and verification effort—not a reason to introduce another web framework, frontend toolchain, database, or content platform. The only stack evolution recommended is to extend the current pytest-based quality gates across all registered language and subject tracks, using Python’s standard library where small offline content checks are needed.
+**Recommendation:** Keep the established stack intact. The all-language content work is a curriculum, renderer, and verification effort - not a reason to introduce another web framework, frontend toolchain, database, or content platform. The only stack evolution recommended is to extend the current pytest-based quality gates across all registered language and subject tracks, using Python’s standard library where small offline content checks are needed.
 
 ### Core Framework
 
@@ -96,6 +96,6 @@ Do not install the optional teaching extras unless working on those specific les
 ## Sources
 
 - Repository baseline: `.planning/PROJECT.md`, `.planning/codebase/STACK.md`, `.planning/codebase/ARCHITECTURE.md`, and `pyproject.toml` (reviewed 2026-11-23).
-- [Python 3.12 `html.parser` documentation](https://docs.python.org/3.12/library/html.parser.html) — official scope and limitations of `HTMLParser`. **Confidence: MEDIUM** (official source, retrieved and cross-checked).
-- [pytest: How to parametrize fixtures and test functions](https://docs.pytest.org/en/stable/how-to/parametrize.html) — official parametrization guidance. **Confidence: MEDIUM** (official source, retrieved and cross-checked).
-- [Python Packaging User Guide: Writing your `pyproject.toml`](https://packaging.python.org/en/latest/guides/writing-pyproject-toml/) and [`pyproject.toml` specification](https://packaging.python.org/en/latest/specifications/pyproject-toml/) — official optional-dependency/extras guidance. **Confidence: MEDIUM** (official sources, retrieved and cross-checked).
+- [Python 3.12 `html.parser` documentation](https://docs.python.org/3.12/library/html.parser.html); official scope and limitations of `HTMLParser`. **Confidence: MEDIUM** (official source, retrieved and cross-checked).
+- [pytest: How to parametrize fixtures and test functions](https://docs.pytest.org/en/stable/how-to/parametrize.html); official parametrization guidance. **Confidence: MEDIUM** (official source, retrieved and cross-checked).
+- [Python Packaging User Guide: Writing your `pyproject.toml`](https://packaging.python.org/en/latest/guides/writing-pyproject-toml/) and [`pyproject.toml` specification](https://packaging.python.org/en/latest/specifications/pyproject-toml/); official optional-dependency/extras guidance. **Confidence: MEDIUM** (official sources, retrieved and cross-checked).

@@ -2,7 +2,7 @@
 
 **Domain:** Multi-language educational programming classroom with local Docker runtimes  
 **Researched:** 2026-11-23  
-**Confidence:** MEDIUM overall — repository risks are grounded in the supplied planning/codebase maps; external guidance is from current official documentation and established computing-education research. No application tests, browser checks, or Docker builds were run for this research.
+**Confidence:** MEDIUM overall; repository risks are grounded in the supplied planning/codebase maps; external guidance is from current official documentation and established computing-education research. No application tests, browser checks, or Docker builds were run for this research.
 
 ## Critical Pitfalls
 

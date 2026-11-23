@@ -51,21 +51,21 @@ See [FEATURES.md](FEATURES.md) for the full feature landscape and research limit
 Retain the local modular monolith and standardize the learner-facing contract across current boundaries. Subject sources, legacy catalogs, authored module plans/manifests, and the statistics tutorial have distinct authoring and validation lifecycles; loaders compose normalized learner-facing views for the shared `/classroom` shell. Subject says what is learned; lesson mode and a registered profile say how it is learned and whether/how it runs. The shared UI should be capability-driven, while adapters choose fixed worker operations. Keep saved drafts, progress, notes, receipts, and job state separate and source-bound; viewing old evidence must not rerun code or overwrite current work. See [ARCHITECTURE.md](ARCHITECTURE.md).
 
 **Major components:**
-1. **Maintained curriculum sources and generators** — track-specific instructional source, stable identity, prerequisites, artifacts, and references; generated HTML/readers are outputs, not authoring sources.
-2. **Catalog loaders and normalized views** — validate identity, prerequisites, artifact completeness, mode, and profile; planned entries do not become runnable lessons by implication.
-3. **Shared classroom and application services** — common navigation/workspace behavior, drafts, runs, progress, and results while retaining subject-specific content and capability distinctions.
-4. **Fixed runtime adapters and prepared Docker workers** — allowlisted profiles and constrained operations, bounded I/O and cleanup; curriculum metadata must not choose arbitrary shell commands.
-5. **Learner-state stores and local delivery** — preserve current store/volume boundaries through app and worker recreation; integration tests use explicitly disposable project state.
+1. **Maintained curriculum sources and generators**; track-specific instructional source, stable identity, prerequisites, artifacts, and references; generated HTML/readers are outputs, not authoring sources.
+2. **Catalog loaders and normalized views**; validate identity, prerequisites, artifact completeness, mode, and profile; planned entries do not become runnable lessons by implication.
+3. **Shared classroom and application services**; common navigation/workspace behavior, drafts, runs, progress, and results while retaining subject-specific content and capability distinctions.
+4. **Fixed runtime adapters and prepared Docker workers**; allowlisted profiles and constrained operations, bounded I/O and cleanup; curriculum metadata must not choose arbitrary shell commands.
+5. **Learner-state stores and local delivery**; preserve current store/volume boundaries through app and worker recreation; integration tests use explicitly disposable project state.
 
 ### Critical Pitfalls
 
 These are risks, not blanket claims that the current product contains defective lessons or a confirmed data-loss/security incident.
 
-1. **Plausible but incorrect or unlearnable instruction** — align outcomes, prerequisites, explanations, examples, expected results, exercises, and solutions; execute examples in their target runtime and get an independent learner-level review. CS2023 is a competency reference, not lesson validation.
-2. **Fake all-track parity** — do not equate lesson counts or catalog registration with equivalent learning. Track outcomes, prerequisites, examples, practice, solutions, and runtime evidence; preserve appropriate course-specific depth and label gaps instead of adding placeholders.
-3. **Unverified SQL walkthroughs (observed repository risk)** — the codebase concern map identifies a new custom tokenizer/planner/response path without matching automated coverage, and PostgreSQL verification remains outstanding. Test supported and rejected syntax explicitly, fail closed or fall back when a trustworthy explanation is unavailable, and compare behavior with the supported PostgreSQL runtime using disposable data.
-4. **Learner-state loss (high-impact change risk)** — retain separate state contracts and stable identities; test with `tmp_path`/disposable databases or Compose projects, include existing-state fixtures and recovery checks, and never use learner volumes as test cleanup targets.
-5. **Execution-boundary and delivery mistakes (observed architecture boundary; release readiness incomplete)** — preserve trusted-local-code assumptions and fixed worker operations; do not treat CPU/time limits or “containerized” as a full sandbox. Rebuild/test images from the approved revision, check the intended registry target just before publication, and pull/smoke-test the pushed digest before declaring release readiness.
+1. **Plausible but incorrect or unlearnable instruction**; align outcomes, prerequisites, explanations, examples, expected results, exercises, and solutions; execute examples in their target runtime and get an independent learner-level review. CS2023 is a competency reference, not lesson validation.
+2. **Fake all-track parity**; do not equate lesson counts or catalog registration with equivalent learning. Track outcomes, prerequisites, examples, practice, solutions, and runtime evidence; preserve appropriate course-specific depth and label gaps instead of adding placeholders.
+3. **Unverified SQL walkthroughs (observed repository risk)**; the codebase concern map identifies a new custom tokenizer/planner/response path without matching automated coverage, and PostgreSQL verification remains outstanding. Test supported and rejected syntax explicitly, fail closed or fall back when a trustworthy explanation is unavailable, and compare behavior with the supported PostgreSQL runtime using disposable data.
+4. **Learner-state loss (high-impact change risk)**; retain separate state contracts and stable identities; test with `tmp_path`/disposable databases or Compose projects, include existing-state fixtures and recovery checks, and never use learner volumes as test cleanup targets.
+5. **Execution-boundary and delivery mistakes (observed architecture boundary; release readiness incomplete)**; preserve trusted-local-code assumptions and fixed worker operations; do not treat CPU/time limits or “containerized” as a full sandbox. Rebuild/test images from the approved revision, check the intended registry target just before publication, and pull/smoke-test the pushed digest before declaring release readiness.
 
 Detailed evidence, warning signs, prevention, and phase-specific mitigations are in [PITFALLS.md](PITFALLS.md).
 
@@ -134,7 +134,7 @@ The following is a dependency-ordered proposal, not a claim that the project alr
 | Architecture | HIGH | Strong repository-specific evidence from the codebase map and authoring/implementation documentation. External official docs corroborate Docker volume and WCAG guidance, not the DS60 contracts themselves. |
 | Pitfalls | MEDIUM | The key implementation/state/runtime risks are tied to the repository concern map and project constraints; general instructional risks are evidence-informed, not proof of defects in individual DS60 lessons. No code, tests, browser, or Docker builds were run as part of this research. |
 
-**Overall confidence:** MEDIUM. The architectural direction and scope are clear, but the breadth and quality of current lesson content have not been independently audited, and this synthesis is research—not qualification evidence.
+**Overall confidence:** MEDIUM. The architectural direction and scope are clear, but the breadth and quality of current lesson content have not been independently audited, and this synthesis is research - not qualification evidence.
 
 ### Gaps to Address
 
@@ -149,30 +149,30 @@ The following is a dependency-ordered proposal, not a claim that the project alr
 
 ### Primary: Repository evidence (HIGH for product context)
 
-- [`.planning/PROJECT.md`](../PROJECT.md) — active scope, validated baseline, checkpoint status, constraints, state preservation, and release/cleanup rules.
-- [`STACK.md`](STACK.md) — existing stack, version support, dependency policy, and test/tool recommendations.
-- [`FEATURES.md`](FEATURES.md) — table stakes, differentiators, deferrals, and feature dependencies.
-- [`ARCHITECTURE.md`](ARCHITECTURE.md) — curriculum/catalog boundaries, runtime adapters, learner state, integration order, and local delivery.
-- [`PITFALLS.md`](PITFALLS.md) — evidence-classified risks, warnings, and mitigations.
+- [`.planning/PROJECT.md`](../PROJECT.md); active scope, validated baseline, checkpoint status, constraints, state preservation, and release/cleanup rules.
+- [`STACK.md`](STACK.md); existing stack, version support, dependency policy, and test/tool recommendations.
+- [`FEATURES.md`](FEATURES.md); table stakes, differentiators, deferrals, and feature dependencies.
+- [`ARCHITECTURE.md`](ARCHITECTURE.md); curriculum/catalog boundaries, runtime adapters, learner state, integration order, and local delivery.
+- [`PITFALLS.md`](PITFALLS.md); evidence-classified risks, warnings, and mitigations.
 - Repository maps/docs cited by the research inputs: `.planning/codebase/STACK.md`, `ARCHITECTURE.md`, `CONCERNS.md`, `TESTING.md`; `docs/repository-tour.md`, `docs/content-authoring.md`, `docs/implementation/ADDING_A_MODULE.md`, and `docs/implementation/CHECKPOINT.md`. These describe the repository and are not external efficacy evidence.
 
 ### Primary/official external references
 
-- [Python 3.12 `html.parser`](https://docs.python.org/3.12/library/html.parser.html) — limits of lightweight HTML token inspection.
-- [pytest parametrization](https://docs.pytest.org/en/stable/how-to/parametrize.html) and [Python Packaging User Guide: `pyproject.toml`](https://packaging.python.org/en/latest/guides/writing-pyproject-toml/) — established test matrix and optional-dependency practices.
-- [PostgreSQL 17 lexical structure](https://www.postgresql.org/docs/17/sql-syntax-lexical.html), [`SELECT`](https://www.postgresql.org/docs/17/sql-select.html), and [transaction modes](https://www.postgresql.org/docs/17/sql-set-transaction.html) — SQL grammar/runtime boundaries relevant to the walkthrough risk.
-- [Docker Compose application model](https://docs.docker.com/compose/intro/compose-application-model/), [Docker volumes](https://docs.docker.com/engine/storage/volumes/), and [Docker Engine security](https://docs.docker.com/engine/security/) — local service/project and persistence/security boundaries.
-- [Docker build best practices](https://docs.docker.com/build/building/best-practices/), [build context](https://docs.docker.com/build/concepts/context/), and [build attestations](https://docs.docker.com/build/metadata/attestations/) — reproducible inputs and release artifact verification.
-- [W3C WCAG 2.2](https://www.w3.org/TR/WCAG22/) — web content accessibility criteria.
-- [ACM/IEEE-CS/AAAI CS2023](https://csed.acm.org/) — curriculum competency reference, not a DS60 lesson certification.
+- [Python 3.12 `html.parser`](https://docs.python.org/3.12/library/html.parser.html); limits of lightweight HTML token inspection.
+- [pytest parametrization](https://docs.pytest.org/en/stable/how-to/parametrize.html) and [Python Packaging User Guide: `pyproject.toml`](https://packaging.python.org/en/latest/guides/writing-pyproject-toml/); established test matrix and optional-dependency practices.
+- [PostgreSQL 17 lexical structure](https://www.postgresql.org/docs/17/sql-syntax-lexical.html), [`SELECT`](https://www.postgresql.org/docs/17/sql-select.html), and [transaction modes](https://www.postgresql.org/docs/17/sql-set-transaction.html); SQL grammar/runtime boundaries relevant to the walkthrough risk.
+- [Docker Compose application model](https://docs.docker.com/compose/intro/compose-application-model/), [Docker volumes](https://docs.docker.com/engine/storage/volumes/), and [Docker Engine security](https://docs.docker.com/engine/security/); local service/project and persistence/security boundaries.
+- [Docker build best practices](https://docs.docker.com/build/building/best-practices/), [build context](https://docs.docker.com/build/concepts/context/), and [build attestations](https://docs.docker.com/build/metadata/attestations/); reproducible inputs and release artifact verification.
+- [W3C WCAG 2.2](https://www.w3.org/TR/WCAG22/); web content accessibility criteria.
+- [ACM/IEEE-CS/AAAI CS2023](https://csed.acm.org/); curriculum competency reference, not a DS60 lesson certification.
 
 ### Secondary: Computing-education research (MEDIUM; transfer limits apply)
 
-- [PRIMM research project](https://computingeducationresearch.org/projects/primm/) and [2019 study](https://doi.org/10.1080/08993408.2019.1608781) — investigate/predict/run/modify/make sequencing; evidence context is not adult local self-study.
-- Thangaraj, Ward & O’Riordan, [systematic review of formative assessment in programming](https://doi.org/10.4230/OASIcs.ICPEC.2023.7) — feedback/check patterns and evidence-base limitations.
-- Ericson et al., [Parsons problems systematic review](https://doi.org/10.1145/3571785.3574127) — constrained code-ordering as a selective practice option, not a universal replacement for writing.
-- Barba et al., [Teaching and Learning with Jupyter](https://jupyter4edu.github.io/jupyter-edu-book/index.html) — computational narrative, examples, assignments, and assessment patterns.
-- Cambridge Handbook, [Novice Programmers and Introductory Programming](https://www.cambridge.org/core/books/cambridge-handbook-of-computing-education-research/novice-programmers-and-introductory-programming/0CEDFE1B121198D3FB5F1541EBE3DCAD) — novice mental models, misconceptions, and cognitive load.
+- [PRIMM research project](https://computingeducationresearch.org/projects/primm/) and [2019 study](https://doi.org/10.1080/08993408.2019.1608781); investigate/predict/run/modify/make sequencing; evidence context is not adult local self-study.
+- Thangaraj, Ward & O’Riordan, [systematic review of formative assessment in programming](https://doi.org/10.4230/OASIcs.ICPEC.2023.7); feedback/check patterns and evidence-base limitations.
+- Ericson et al., [Parsons problems systematic review](https://doi.org/10.1145/3571785.3574127); constrained code-ordering as a selective practice option, not a universal replacement for writing.
+- Barba et al., [Teaching and Learning with Jupyter](https://jupyter4edu.github.io/jupyter-edu-book/index.html); computational narrative, examples, assignments, and assessment patterns.
+- Cambridge Handbook, [Novice Programmers and Introductory Programming](https://www.cambridge.org/core/books/cambridge-handbook-of-computing-education-research/novice-programmers-and-introductory-programming/0CEDFE1B121198D3FB5F1541EBE3DCAD); novice mental models, misconceptions, and cognitive load.
 
 ---
 *Research completed: 2026-11-23*  

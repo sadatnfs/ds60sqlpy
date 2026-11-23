@@ -6,7 +6,7 @@
 
 ## Recommended Architecture
 
-Keep the existing local Python modular monolith, shared `/classroom` browser shell, independent curriculum loaders, fixed runtime-profile workers, and local learner-state stores. Improve the experience through the contracts between these layers—not by collapsing subject catalogs, turning profiles into curriculum categories, or introducing a new application per language.
+Keep the existing local Python modular monolith, shared `/classroom` browser shell, independent curriculum loaders, fixed runtime-profile workers, and local learner-state stores. Improve the experience through the contracts between these layers - not by collapsing subject catalogs, turning profiles into curriculum categories, or introducing a new application per language.
 
 ```text
 Maintained subject sources
@@ -139,19 +139,19 @@ Do not optimize for these larger scales in the current overhaul. If shared hosti
 
 ### Repository evidence
 
-- [Project scope and constraints](../PROJECT.md) — local desktop classroom, all existing tracks, Docker, saved-work requirements.
-- [Codebase architecture map](../codebase/ARCHITECTURE.md) and [stack map](../codebase/STACK.md) — current layers, APIs, catalogs, profiles, stores, and delivery.
-- [`docs/repository-tour.md`](../../docs/repository-tour.md) — lesson flow, maintained/generated/private artifacts, and source map.
-- [`docs/content-authoring.md`](../../docs/content-authoring.md) — shared lesson contract, authoring order, modes, accessibility, generators, and validation.
-- [`docs/implementation/ADDING_A_MODULE.md`](../../docs/implementation/ADDING_A_MODULE.md) — route metadata, artifact admission, profile boundaries, and end-to-end qualification.
-- [`docs/implementation/CHECKPOINT.md`](../../docs/implementation/CHECKPOINT.md) — current shared UI, route types, prepared runtimes, and volume/resume constraints.
-- [Codebase concerns](../codebase/CONCERNS.md) — step-through test gap, trusted-local-code boundary, and single-active-job limit.
+- [Project scope and constraints](../PROJECT.md); local desktop classroom, all existing tracks, Docker, saved-work requirements.
+- [Codebase architecture map](../codebase/ARCHITECTURE.md) and [stack map](../codebase/STACK.md); current layers, APIs, catalogs, profiles, stores, and delivery.
+- [`docs/repository-tour.md`](../../docs/repository-tour.md); lesson flow, maintained/generated/private artifacts, and source map.
+- [`docs/content-authoring.md`](../../docs/content-authoring.md); shared lesson contract, authoring order, modes, accessibility, generators, and validation.
+- [`docs/implementation/ADDING_A_MODULE.md`](../../docs/implementation/ADDING_A_MODULE.md); route metadata, artifact admission, profile boundaries, and end-to-end qualification.
+- [`docs/implementation/CHECKPOINT.md`](../../docs/implementation/CHECKPOINT.md); current shared UI, route types, prepared runtimes, and volume/resume constraints.
+- [Codebase concerns](../codebase/CONCERNS.md); step-through test gap, trusted-local-code boundary, and single-active-job limit.
 
 ### Authoritative external references
 
-- [Docker Compose application model](https://docs.docker.com/compose/intro/compose-application-model/) — services, networks, volumes, and project isolation.
-- [Docker volumes](https://docs.docker.com/engine/storage/volumes/) — volume lifecycle is independent of an individual container; supports the recommendation to preserve named learner-state volumes.
-- [Python 3.12 `os.replace`](https://docs.python.org/3.12/library/os.html#os.replace) — documents replacement behavior and atomicity on POSIX when successful; this supports, but does not replace, DS60's locking, validation, and whole-record update logic.
-- [W3C WCAG 2.2 Recommendation](https://www.w3.org/TR/WCAG22/) — current W3C accessibility recommendation for consistent, operable web content; use it alongside DS60's existing classroom-specific accessibility checklist.
+- [Docker Compose application model](https://docs.docker.com/compose/intro/compose-application-model/); services, networks, volumes, and project isolation.
+- [Docker volumes](https://docs.docker.com/engine/storage/volumes/); volume lifecycle is independent of an individual container; supports the recommendation to preserve named learner-state volumes.
+- [Python 3.12 `os.replace`](https://docs.python.org/3.12/library/os.html#os.replace); documents replacement behavior and atomicity on POSIX when successful; this supports, but does not replace, DS60's locking, validation, and whole-record update logic.
+- [W3C WCAG 2.2 Recommendation](https://www.w3.org/TR/WCAG22/); current W3C accessibility recommendation for consistent, operable web content; use it alongside DS60's existing classroom-specific accessibility checklist.
 
 **Confidence:** High for the repository-specific architecture and integration order (direct source documentation reviewed). External-source findings are linked to official documentation; the research provider's confidence classifier rated web-fetched sources LOW, so they support rather than determine the recommendations.
