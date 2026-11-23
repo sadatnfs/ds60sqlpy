@@ -20,7 +20,7 @@ Qualify the unfinished release 1.4.4 classroom-guide and Python/SQL walkthrough 
 ## Phase Details
 
 ### Phase 1: Qualify 1.4.4 Guide & Python/SQL Walkthroughs
-**Goal:** Learners can orient themselves in the existing desktop classroom and use the Python and SQL walkthrough reference flows with verified, non-destructive behavior; the unfinished 1.4.4 checkpoint is qualified without implying that the full overhaul is complete or published.
+**Goal:** As a new learner, I want to use safe lesson guidance, so that I can learn without losing work.
 **Mode:** mvp
 **Depends on**: Nothing (first phase)
 **Requirements**: GUIDE-01, GUIDE-02, WALK-01, WALK-02, WALK-04
@@ -29,7 +29,13 @@ Qualify the unfinished release 1.4.4 classroom-guide and Python/SQL walkthrough 
   2. A learner can start, dismiss, and restart the optional tour without changing the selected lesson, overwriting a draft, or executing code.
   3. Python traces expose bounded source-linked events and state, while SQL highlights correspond to supported syntax and verified PostgreSQL behavior; unsupported SQL is clearly rejected or safely handled without learner-data changes.
   4. Learners can tell walkthroughs from ordinary runs and inspect the Python/SQL solution walkthroughs without replacing their drafts; checkpoint acceptance evidence covers automated, disposable PostgreSQL integration, and desktop-browser checks.
-**Plans**: TBD
+**Plans**: 5 plans
+Plans:
+- [ ] 01-01-PLAN.md — Prove the walkthrough tracer and qualify guide/tour safety
+- [ ] 01-02-PLAN.md — Qualify bounded source-linked Python traces
+- [ ] 01-03-PLAN.md — Reject unsupported SQL and verify offsets/results
+- [ ] 01-04-PLAN.md — Validate SQL before database preparation
+- [ ] 01-05-PLAN.md — Align SQL guidance and complete browser acceptance
 **UI hint**: yes
 
 ### Phase 2: Catalog-wide Coverage Matrix
@@ -130,7 +136,7 @@ Qualify the unfinished release 1.4.4 classroom-guide and Python/SQL walkthrough 
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Qualify 1.4.4 Guide & Python/SQL Walkthroughs | 0/TBD | Not started | - |
+| 1. Qualify 1.4.4 Guide & Python/SQL Walkthroughs | 0/5 | Not started | - |
 | 2. Catalog-wide Coverage Matrix | 0/TBD | Not started | - |
 | 3. Lesson Foundations & Source Integrity | 0/TBD | Not started | - |
 | 4. Worked Examples & Practice | 0/TBD | Not started | - |
