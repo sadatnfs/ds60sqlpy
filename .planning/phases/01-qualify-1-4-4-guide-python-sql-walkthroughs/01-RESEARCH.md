@@ -27,7 +27,7 @@
 
 | ID | Description | Research Support |
 |----|-------------|------------------|
-| GUIDE-01 | A learner can open the classroom guide from the home screen and lesson workspace, find what each major screen and control does, and follow initialization and lesson-switching instructions. | Verify manual content and both entry routes. Correct or qualify the unverified Hub command; use the desktop browser acceptance route. |
+| GUIDE-01 | A learner can open the classroom guide from the home screen and lesson workspace, find what each major screen and control does, and follow initialization and lesson-switching instructions. | Verify manual content and both entry routes. Keep Phase 1 guide edits on source-verified local initialization and lesson switching; defer Hub command edits and operations until the release target is verified. |
 | GUIDE-02 | A learner can start, dismiss, and restart the optional classroom tour without changing the selected lesson, overwriting work, or starting code execution. | Add browser-level lifecycle checks that preserve lesson selection and draft and assert that no run or walkthrough request occurs. Cover the no-selection home route separately. |
 | WALK-01 | A Python walkthrough presents a bounded, testable execution trace with relevant source location, event, stack or local state, output, and clear limit or error behavior. | Reuse the current bounded trace worker; add focused tests for source links, events, state, limits, and error behavior. |
 | WALK-02 | A SQL walkthrough explains only its documented, verified query subset, ties clause highlights to source offsets and PostgreSQL results, and clearly handles unsupported input without modifying learner data. | Derive the documented subset from the existing planner, test offset mapping, and qualify supported and unsupported input against the disposable PostgreSQL 17 CI service. Account for course-database preparation before parsing. |
@@ -213,7 +213,7 @@ For explicitly rejected or empty plans, the execution layer returns an empty ste
 
 **What goes wrong:** The manual's image-pull command can be mistaken for an approved owner/tag. The same repository declares a different project version.
 **Why it happens:** The manual contains `./classroom --all --from-hub sadatnfs --tag 1.4.4`, while the package metadata contains `version = "1.4.3"`. These strings do not verify a Docker Hub target.
-**How to avoid:** Keep local `./classroom doctor` and `./classroom` guidance primary; verify the Hub owner and tag immediately before any publication or image-pull instruction is promoted. Do not publish or infer an owner in this phase.
+**How to avoid:** Keep local `./classroom doctor` and `./classroom` guidance primary. Do not edit or operate the existing Hub instruction or infer its target in this phase; verify the target at the separate release gate immediately before publication.
 **Warning signs:** Documentation treats the `1.4.4` tag or `sadatnfs` owner as authoritative without a fresh owner check. [VERIFIED: `classroom.html:956-961`; `pyproject.toml:7`]
 
 ### Pitfall 3: Unsupported SQL can still execute as a whole-query step
@@ -302,22 +302,22 @@ No unverified package or release target is recommended. The Docker Hub owner/tag
 |---|-------|---------|---------------|
 | N/A | None | N/A | N/A |
 
-## Open Questions
+## Planning Resolutions and Validation Requirements
 
-1. **What exact SQL grammar will the guide promise?**
-   - What we know: the planner recognizes query entry forms including `SELECT`, `WITH`, `VALUES`, and `TABLE`; an internal fallback may return a whole-query step. [VERIFIED: `step_through.py:1022-1059`]
-   - What's unclear: which grammar cases are intended to be documented and which unsupported/fallback cases need a visible warning.
-   - Recommendation: use targeted planner tests plus PostgreSQL 17 tests to define the smallest safe, useful subset; do not promise all PostgreSQL syntax.
+1. **SQL grammar and learner-facing support claims**
+   - Resolution: Phase 1 will not promise a complete PostgreSQL grammar or infer support from query-start detection. `plan_sql` tokenizes and splits statements; its query classifier recognizes `SELECT`, `WITH`, `VALUES`, or `TABLE` as the first non-open significant token and then delegates to `_Planner`. The `SELECT` planner recognizes a bounded set of top-level clauses and raises `_Fallback` for structures it cannot plan. Query-start recognition is not proof that the full query form is supported. [VERIFIED: `step_through.py:872-956,986-1059,1100-1107,1331-1384`]
+   - Phase contract: the manual may name only the exact deterministic query fixtures and clause steps whose planner assertions and PostgreSQL 17 integration cases pass. The planned simple `SELECT` fixture and the `sql-start-02` Exercise 1 solution are not evidence until their required tests pass. Unsupported or fallback input must return no executable step. No broader grammar claim is allowed.
+   - Flagged validation requirement: the final exact set of documented fixture shapes and returned step labels remains dependent on actual test output. If the PostgreSQL 17 gate is unavailable, report it unavailable and make no new support claim.
 
-2. **Should SQL syntax be validated before course database preparation?**
-   - What we know: `ensure_before_run` currently occurs before `PadRunner.step_through`. [VERIFIED: `lab.py:393-404`]
-   - What's unclear: whether acceptance allows course fixture setup as a side effect when a query is rejected.
-   - Recommendation: decide explicitly in planning. For a strict no-change contract, parse/validate before preparation and include a before/after database-state test.
+2. **Validation before course database preparation**
+   - Resolution: unsupported walkthrough SQL must not trigger setup, a pad-path write, or execution, consistent with the approved no-run/no-mutation safety behavior. Current source validates the request, calls `ensure_before_run`, and only then calls `PadRunner.step_through`; SQL parsing is therefore later than preparation today. The pure `plan_sql` planner is the existing classification boundary. [VERIFIED: `lab.py:357-414`; `step_through.py:1026-1059`; `execution.py:753-790`]
+   - Phase contract: Plan 03 changes planner fallback from an executable whole-query step to explicit unsupported/no steps. Plan 04 calls the planner before `ensure_before_run` and returns unsupported input before preparation, pad-directory creation, or worker dispatch; parser-approved SQL retains existing preparation before execution.
+   - Validation requirement: exercise the actual `LabServer.action` boundary and assert rejected SQL makes no preparation, pad-path, or worker call. Validate accepted setup order with boundary spies, and compare database state around rejected input only in the existing disposable PostgreSQL 17 service. These are planned checks, not observed results.
 
-3. **Which Docker Hub owner and tag, if any, should the manual document?**
-   - What we know: the current manual contains a concrete Hub command, while project metadata declares `1.4.3`; the phase decision requires a fresh target check before publication. [VERIFIED: `classroom.html:956-961`; `pyproject.toml:7`; `.planning/STATE.md:63`]
-   - What's unclear: approved owner/tag and whether this manual should describe Hub pulls at all.
-   - Recommendation: do not infer an answer. Keep local initialization guidance actionable and require owner confirmation before documenting or using a registry target.
+3. **Docker Hub manual instruction**
+   - Resolution: the checked-in manual contains `./classroom --all --from-hub sadatnfs --tag 1.4.4`, while project metadata declares version `1.4.3`; neither value verifies the approved Hub target. [VERIFIED: `classroom.html:956-961`; `pyproject.toml:7`]
+   - Phase contract: Phase 1 does not verify, run, edit, remove, replace, or endorse the Hub command or its owner/tag. Guide edits stay on source-verified local initialization and lesson switching, including `./classroom doctor` and `./classroom`. Hub command changes and operations are deferred until the target is verified at the separate release/publication gate, consistent with `.planning/STATE.md`.
+   - Flagged validation requirement: do not treat Phase 1 guide acceptance as approval of the existing Hub instruction. Verify the target immediately before any later publication or Hub operation; its owner/tag remains unresolved until then.
 
 ## Environment Availability
 

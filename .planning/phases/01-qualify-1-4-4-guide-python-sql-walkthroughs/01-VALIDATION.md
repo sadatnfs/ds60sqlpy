@@ -85,6 +85,8 @@ may be substituted.
 |----------|-------------|------------|-------------------|
 | Confirm the guide and walkthrough controls are understandable at the supported desktop viewport | GUIDE-01, GUIDE-02, WALK-04 | Automated interaction checks cannot establish whether the instructions are clear to a first-time learner | Open the disposable classroom in a desktop browser; follow initialization and lesson-switching instructions, then start, dismiss, and restart the tour and inspect both solution walkthroughs while checking that the draft and selected lesson remain unchanged. |
 
+Scheduled in Plan 05, Task 3. Record the first-time learner outcome, observed confusion, selected lesson before/after, and draft-preservation result in `.planning/phases/01-qualify-1-4-4-guide-python-sql-walkthroughs/01-VERIFICATION.md`. Use a disposable classroom and do not record its URL, secrets, or learner source text. If the desktop environment is unavailable, record the check as unavailable rather than passed.
+
 ---
 
 ## Validation Sign-Off
