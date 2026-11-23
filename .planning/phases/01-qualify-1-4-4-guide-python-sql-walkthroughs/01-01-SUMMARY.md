@@ -139,6 +139,11 @@ None.
 - Plan 01-01 is **halted** until a prepared disposable classroom browser environment and `CLASSROOM_URL` are available. Run the exact browser command from the plan, review its receipt report, then re-summarize this plan as complete only if the acceptance criteria pass.
 - Dependent Phase 1 waves remain blocked. `GUIDE-01`, `GUIDE-02`, and `WALK-04` remain pending; this summary does not mark them complete.
 
+## Self-Check: FAILED
+
+- Local UI regression, Python compilation, Ruff, JavaScript syntax, and whitespace checks passed.
+- The required disposable-browser acceptance could not run because its prepared runtime and target URL are unavailable. Real-browser acceptance criteria remain unverified, so the plan is halted.
+
 ---
 *Phase: 01-qualify-1-4-4-guide-python-sql-walkthroughs*
 *Completed: 2026-11-23*
