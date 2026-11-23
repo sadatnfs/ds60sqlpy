@@ -229,6 +229,58 @@ def save(page: Any, expect: Any) -> None:
     expect(page.locator("#save-state")).to_have_text("Saved in your local learning workspace.")
 
 
+def learner_snapshot(page: Any, lesson_id: str) -> dict[str, Any]:
+    """Capture persisted and visible learning state around a read-only walkthrough."""
+    return page.evaluate(
+        """async lessonId => {
+          const language = document.getElementById("runner").value;
+          const mode = document.getElementById("pad-mode").value || "snippet";
+          const scope = { lesson_id: lessonId, language, mode };
+          const [lesson, pad, padHistory, receipts] = await Promise.all([
+            lab("lesson", { lesson_id: lessonId }),
+            lab("read-pad", scope),
+            lab("pad-history", scope),
+            classroom("classroom-history", scope)
+          ]);
+          return {
+            route: location.pathname + location.hash,
+            selectedLesson:
+              document.querySelector('#lessons button[aria-current="page"] small')
+                ?.textContent.trim() || null,
+            source: document.getElementById("source").value,
+            note: document.getElementById("phase-note").value,
+            session: lesson.session,
+            exerciseProgress: exerciseProgress(),
+            pad,
+            padHistory: padHistory.history,
+            receipts: receipts.history
+          };
+        }""",
+        lesson_id,
+    )
+
+
+def reveal_steppable_solution(page: Any, expect: Any) -> None:
+    """Open one available standalone Python exercise solution for step-through."""
+    exercises = page.locator("#exercise-steps .exercise-step")
+    assert exercises.count() > 0, "The selected Python lesson has no exercises."
+    for position in range(exercises.count()):
+        if position:
+            exercises.nth(position).click()
+        solve = page.locator("#exercise-solve")
+        if not solve.is_visible():
+            continue
+        solve.click()
+        expect(page.locator("#exercise-confirm")).to_be_visible()
+        page.locator("#exercise-confirm-yes").click()
+        expect(page.locator("#exercise-solution")).to_be_visible()
+        step_solution = page.locator("#exercise-step-solution")
+        if step_solution.is_visible() and step_solution.is_enabled():
+            return
+        page.locator("#exercise-hide-solution").click()
+    raise AssertionError("The selected Python lesson has no standalone step-through solution.")
+
+
 def no_overflow(page: Any) -> None:
     assert page.evaluate("document.documentElement.scrollWidth <= innerWidth + 1"), (
         "The document overflows the viewport."
@@ -247,6 +299,16 @@ def classroom_checks(browser: Any, origin: str, audit: Audit, expect: Any) -> No
     context = audit.context(browser, origin)
     try:
         page = context.new_page()
+        lab_actions: list[str] = []
+
+        def record_lab_action(request: Any) -> None:
+            if urlsplit(request.url).path != "/api/lab" or request.method != "POST":
+                return
+            payload = request.post_data_json
+            if isinstance(payload, dict) and isinstance(payload.get("action"), str):
+                lab_actions.append(payload["action"])
+
+        page.on("request", record_lab_action)
         page.goto(origin + "/classroom")
         # The first catalog read can outlast the default five-second expect timeout.
         expect(page.locator("#subject-cards .subject-card")).to_have_count(
@@ -304,6 +366,51 @@ def classroom_checks(browser: Any, origin: str, audit: Audit, expect: Any) -> No
         expect(page.locator("#output")).to_have_text(python_marker, timeout=90_000)
         expect(page.locator("#job-status")).to_contain_text("Finished \u00b7 exit 0")
         expect(page.locator("#run-storage-status")).to_contain_text("Saved run")
+        reveal_steppable_solution(page, expect)
+        before_walk = learner_snapshot(page, "python-02")
+        assert before_walk["source"] == python_source
+        assert before_walk["note"] == NOTE
+        assert before_walk["pad"]["code"] == python_source
+        assert before_walk["receipts"], "The baseline Python run did not create a receipt."
+
+        def is_python_solution_trace(response: Any) -> bool:
+            if urlsplit(response.url).path != "/api/lab" or response.request.method != "POST":
+                return False
+            payload = response.request.post_data_json
+            return bool(
+                isinstance(payload, dict)
+                and payload.get("action") == "step-through"
+                and payload.get("lesson_id") == "python-02"
+            )
+
+        trace_start = len(lab_actions)
+        with page.expect_response(is_python_solution_trace, timeout=90_000) as trace_response:
+            page.locator("#exercise-step-solution").click()
+        trace = trace_response.value.json()
+        trace_request = trace_response.value.request.post_data_json
+        assert trace_request["purpose"] == "solution"
+        assert trace_request["language"] == "python"
+        assert trace_request["code"].strip()
+        assert trace_request["code"] != python_source
+        assert trace.get("kind") == "python" and trace.get("steps"), (
+            "The worked solution returned no Python trace steps."
+        )
+        expect(page.locator("#step-panel")).to_be_visible()
+        expect(page.locator("#step-count")).to_contain_text("Step 1 of")
+        assert page.locator("#step-body").inner_text().strip(), (
+            "The browser did not render the Python solution trace."
+        )
+        after_walk = learner_snapshot(page, "python-02")
+        changed = [key for key in before_walk if before_walk[key] != after_walk[key]]
+        assert not changed, f"The solution walkthrough changed learner state: {changed}"
+        walkthrough_actions = lab_actions[trace_start:]
+        assert walkthrough_actions.count("step-through") == 1
+        assert "run" not in walkthrough_actions
+        audit.passed(
+            "Python solution step-through uses a distinct request and preserves learner state"
+        )
+        page.locator("#step-close").click()
+        page.locator("#exercise-hide-solution").click()
         for mode in ("light", "dark"):
             if page.locator("body").get_attribute("data-mode") != mode:
                 page.locator("#theme-toggle").click()
