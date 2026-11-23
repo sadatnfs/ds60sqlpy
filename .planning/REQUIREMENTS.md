@@ -73,34 +73,34 @@ Deferred until the existing course quality floor and core classroom workflows ar
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| GUIDE-01 | Pending roadmap | Pending |
-| GUIDE-02 | Pending roadmap | Pending |
-| UX-01 | Pending roadmap | Pending |
-| UX-02 | Pending roadmap | Pending |
-| STATE-01 | Pending roadmap | Pending |
-| WALK-01 | Pending roadmap | Pending |
-| WALK-02 | Pending roadmap | Pending |
-| WALK-03 | Pending roadmap | Pending |
-| WALK-04 | Pending roadmap | Pending |
-| CURR-01 | Pending roadmap | Pending |
-| CURR-02 | Pending roadmap | Pending |
-| CURR-03 | Pending roadmap | Pending |
-| CURR-04 | Pending roadmap | Pending |
-| CURR-05 | Pending roadmap | Pending |
-| CURR-06 | Pending roadmap | Pending |
-| CURR-07 | Pending roadmap | Pending |
-| RUN-01 | Pending roadmap | Pending |
-| RUN-02 | Pending roadmap | Pending |
-| SEC-01 | Pending roadmap | Pending |
-| QUAL-01 | Pending roadmap | Pending |
-| QUAL-02 | Pending roadmap | Pending |
-| REL-01 | Pending roadmap | Pending |
-| REL-02 | Pending roadmap | Pending |
+| GUIDE-01 | Phase 1 | Pending |
+| GUIDE-02 | Phase 1 | Pending |
+| UX-01 | Phase 6 | Pending |
+| UX-02 | Phase 6 | Pending |
+| STATE-01 | Phase 6 | Pending |
+| WALK-01 | Phase 1 | Pending |
+| WALK-02 | Phase 1 | Pending |
+| WALK-03 | Phase 5 | Pending |
+| WALK-04 | Phase 1 | Pending |
+| CURR-01 | Phase 2 | Pending |
+| CURR-02 | Phase 3 | Pending |
+| CURR-03 | Phase 4 | Pending |
+| CURR-04 | Phase 4 | Pending |
+| CURR-05 | Phase 5 | Pending |
+| CURR-06 | Phase 5 | Pending |
+| CURR-07 | Phase 3 | Pending |
+| RUN-01 | Phase 7 | Pending |
+| RUN-02 | Phase 7 | Pending |
+| SEC-01 | Phase 8 | Pending |
+| QUAL-01 | Phase 9 | Pending |
+| QUAL-02 | Phase 9 | Pending |
+| REL-01 | Phase 10 | Pending |
+| REL-02 | Phase 10 | Pending |
 
 **Coverage:**
 - v1 requirements: 23 total
-- Mapped to phases: 0
-- Unmapped: 23
+- Mapped to phases: 23
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-11-23*
