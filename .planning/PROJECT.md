@@ -56,12 +56,12 @@ Learners can understand, practice, run, and keep their work in any DS60 course w
 
 | Decision | Rationale | Outcome |
 |----------|-----------|---------|
-| Track the whole DS60 overhaul, with checkpoint qualification first | The owner asked to continue the pending beginner-experience work and improve the full product | Pending |
-| Improve all existing language and subject tracks now | The owner clarified that improvements should not stop at Python and SQL | Pending |
-| Use Python and SQL as a quality reference, not as exclusive scope | The original near-term work targets these tracks, while the owner expanded the overhaul to all languages | Pending |
-| Keep the target desktop-only | Mobile-specific work is not wanted for this classroom | Pending |
-| Preserve the local Docker model and all learner state | This is the established product and its saved work is essential | Pending |
-| Require clean image vulnerability scans before publication | The owner requires all built images to be CVE-free | Pending |
+| Track the whole DS60 overhaul, with checkpoint qualification first | The owner asked to continue the pending beginner-experience work and improve the full product | Accepted |
+| Improve all existing language and subject tracks now | The owner clarified that improvements should not stop at Python and SQL | Accepted |
+| Use Python and SQL as a quality reference, not as exclusive scope | The original near-term work targets these tracks, while the owner expanded the overhaul to all languages | Accepted |
+| Keep the target desktop-only | Mobile-specific work is not wanted for this classroom | Accepted |
+| Preserve the local Docker model and all learner state | This is the established product and its saved work is essential | Accepted |
+| Require clean image vulnerability scans before publication | The owner requires all built images to be CVE-free | Accepted |
 
 ## Evolution
 

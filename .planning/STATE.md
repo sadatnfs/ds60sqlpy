@@ -59,7 +59,7 @@ None yet.
 
 ### Blockers/Concerns
 
-- No response to the requirements approval form is available; use the owner's explicit scope instructions and committed requirements as authority.
+- The project owner approved the v1 requirements on 2026-11-23.
 - Verify the Docker Hub target immediately before any publication; do not stop unrelated containers or remove learner volumes.
 
 ## Deferred Items

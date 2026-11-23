@@ -1,6 +1,7 @@
 # Requirements: DS60 Classroom Overhaul
 
 **Defined:** 2026-11-23
+**Approved by project owner:** 2026-11-23
 **Core Value:** Learners can understand, practice, run, and keep their work in any DS60 course without installing toolchains or losing learning state.
 
 ## v1 Requirements
