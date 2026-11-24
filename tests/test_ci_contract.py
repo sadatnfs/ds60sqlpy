@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 import os
 import re
 import shlex
@@ -7,6 +8,7 @@ import subprocess
 import sys
 import tomllib
 from pathlib import Path
+from typing import Any
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 WORKFLOW = REPO_ROOT / ".github" / "workflows" / "ci.yml"
@@ -206,6 +208,14 @@ def test_release_jobs_target_linux_containers_and_contributor_tooling() -> None:
             assert "docker push" not in workflow and "--push" not in workflow
             assert "setup-qemu" not in workflow
             assert "if: always()" in workflow
+        elif path.name == "runtime-qualification.yml":
+            assert runners == ["ubuntu-24.04", "${{ matrix.runner }}", "${{ matrix.runner }}"]
+            assert "runner: ubuntu-24.04-arm" in workflow
+            assert "workflow_dispatch:" in workflow and "  push:" not in workflow
+            assert "contents: read" in workflow and "contents: write" not in workflow
+            assert "docker push" not in workflow and "--push" not in workflow
+            assert "setup-qemu" not in workflow
+            assert "if: always()" in workflow
         else:
             assert runners and set(runners) == {"ubuntu-latest"}, path.name
         assert "windows-latest" not in workflow and "macos-latest" not in workflow
@@ -329,3 +339,72 @@ def test_owned_kubernetes_build_matches_the_selected_overlay_image() -> None:
     selected = re.findall(r"image: (ds60sqlpy-worker-k8s-kind:[^\s]+)", overlay)
     version = tomllib.loads(PYPROJECT.read_text())["project"]["version"]
     assert built == selected == [f"ds60sqlpy-worker-k8s-kind:{version}"]
+
+
+def _workflow_jobs(path: Path) -> dict[str, Any]:
+    import pytest
+
+    yaml = pytest.importorskip("yaml")
+    document = yaml.load(path.read_text(encoding="utf-8"), Loader=yaml.BaseLoader)
+    return dict(document.get("jobs", {}))
+
+
+def _run(step: dict[str, Any]) -> str:
+    return str(step.get("run", ""))
+
+
+def test_release_scan_gate_precedes_every_stage() -> None:
+    staging_jobs = 0
+    for path in sorted(WORKFLOW.parent.glob("*.yml")):
+        for name, job in _workflow_jobs(path).items():
+            steps = job.get("steps", [])
+            stages = [i for i, step in enumerate(steps) if "docker_release.py stage" in _run(step)]
+            if not stages:
+                continue
+            staging_jobs += 1
+            where = f"{path.name}:{name}"
+            qualify = [i for i, s in enumerate(steps) if "ci_classroom.py qualify" in _run(s)]
+            scans = [i for i, s in enumerate(steps) if "scripts/image_scan.py scan" in _run(s)]
+            assert len(qualify) == 1 and len(scans) == 1 and len(stages) == 1, where
+            assert qualify[0] < scans[0] < stages[0], where
+            scan = steps[scans[0]]
+            assert "publish" not in scan.get("if", ""), where
+            assert "secrets." not in json.dumps(scan), where
+            assert "scripts/image_scan.py download-db" in _run(scan), where
+            assert '--cache "$RUNNER_TEMP/trivy"' in _run(scan), where
+            assert "--policy docker/cve-policy.json" in _run(scan), where
+            assert "--tested work/tested-images.json" in _run(scan), where
+            assert "set -euo pipefail" in _run(scan), where
+            if name == "seed":
+                assert '--reference "postgres=$postgres"' in _run(scan), where
+            assert "--scan work/scan-evidence.json" in _run(steps[stages[0]]), where
+            cache = [s for s in steps[: scans[0]] if s.get("uses", "").startswith("actions/cache@")]
+            assert len(cache) == 1, where
+            assert cache[0]["with"]["path"] == "${{ runner.temp }}/trivy", where
+            assert cache[0]["with"]["key"].startswith("trivy-db-${{ runner.os }}-"), where
+            uploads = [
+                s
+                for s in steps
+                if s.get("uses", "").startswith("actions/upload-artifact@")
+                and s.get("with", {}).get("name", "").startswith("scan-reports-")
+            ]
+            assert len(uploads) == 1, where
+            assert uploads[0]["if"] == "always()", where
+            assert steps.index(uploads[0]) < stages[0], where
+            receipt = [
+                s for s in steps if s.get("with", {}).get("name", "").startswith("release-receipt-")
+            ]
+            assert all(s["with"]["path"] == "work/release-receipt.json" for s in receipt), where
+    # Seed and workers in both the full and targeted publication workflows.
+    assert staging_jobs == 4
+
+
+def test_trivy_runs_only_through_the_pinned_image_scan_wrapper() -> None:
+    from scripts import image_scan
+
+    assert re.fullmatch(r"aquasec/trivy:[\w.]+@sha256:[0-9a-f]{64}", image_scan.TRIVY_IMAGE)
+    for path in WORKFLOW.parent.glob("*.yml"):
+        workflow = path.read_text(encoding="utf-8")
+        assert "aquasecurity/" not in workflow, path.name
+        assert "aquasec/trivy" not in workflow, path.name
+        assert not re.search(r"^\s*(?:-\s+)?run:.*\btrivy\b", workflow, re.M), path.name

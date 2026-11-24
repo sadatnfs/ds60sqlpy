@@ -59,7 +59,7 @@ def test_large_archives_and_nonpositive_ids_are_rejected() -> None:
 
 def seed_document() -> dict[str, Any]:
     return {
-        "schema_version": 1,
+        "schema_version": 2,
         "kind": "ds60-staged-images",
         "architecture": "arm64",
         "context": {
@@ -113,6 +113,29 @@ def test_cross_run_revision_repository_and_artifact_attempt_are_rejected(
     document["context"][field] = value
     with pytest.raises(ValueError, match="selected run, revision and attempt"):
         read(archive(json.dumps(document).encode()))
+
+
+@pytest.mark.parametrize("version", [1, 3, "2", True])
+def test_staged_receipts_require_schema_2_with_scan_evidence(version: Any) -> None:
+    document = seed_document()
+    document["schema_version"] = version
+    with pytest.raises(ValueError, match="Unexpected release receipt type"):
+        read(archive(json.dumps(document).encode()))
+
+
+def test_gate_receipts_keep_schema_1() -> None:
+    document = {
+        "schema_version": 1,
+        "kind": "ds60-release-gate",
+        "context": seed_document()["context"],
+    }
+    raw = json.dumps(document).encode()
+    artifact = Artifact("gate", 1, 7, "release-gate-attempt-1")
+    options = {"repository": "example/classroom", "revision": SHA, "run_id": "123"}
+    assert receipt_bytes(archive(raw, "gate.json"), artifact, **options) == raw
+    document["schema_version"] = 2
+    with pytest.raises(ValueError, match="Unexpected release receipt type"):
+        receipt_bytes(archive(json.dumps(document).encode(), "gate.json"), artifact, **options)
 
 
 def test_logical_seed_identity_cannot_hide_another_architecture_or_worker() -> None:

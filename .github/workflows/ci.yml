@@ -147,6 +147,8 @@ jobs:
         run: uv run --no-sync python scripts/check_published_links.py
       - name: Validate authored module manifests
         run: uv run --no-sync python scripts/check_modules.py
+      - name: Validate authored walkthrough bindings
+        run: uv run --no-sync python scripts/check_walkthroughs.py --check
       - name: Exercise unified classroom behavior
         run: node scripts/check_classroom_ui.mjs
       - name: Lint

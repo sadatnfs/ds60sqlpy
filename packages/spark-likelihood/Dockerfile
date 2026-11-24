@@ -1,5 +1,5 @@
 # Standalone context: this package directory only. No classroom image is required.
-ARG PYTHON_IMAGE=python:3.12.16-slim-bookworm@sha256:935c3c5b12357a7e10caa9c1e6ca5692344d97cf229832ef584be2cec9fc03df
+ARG PYTHON_IMAGE=python:3.12.16-slim-trixie@sha256:5e2bdb1b0d542d5039cffb8181c65930093949194a65c365dfb1b0fe13a4fa5b
 ARG SPARK_IMAGE=spark:4.0.1-scala2.13-java17-python3-ubuntu@sha256:a552a335e0aedb44fa28b20ed7e9dc52c2e856faf87fb0409fb57dbf37b45bf7
 FROM ${SPARK_IMAGE} AS spark-distribution
 
@@ -7,15 +7,18 @@ FROM ${PYTHON_IMAGE} AS runtime-base
 USER root
 ARG TARGETARCH
 ARG PREPARED_OS_PACKAGES=0
+# Debian 13 has no OpenJDK 17 package; the Temurin 17 JDK comes from the Spark image.
+# hadolint ignore=DL3005
 RUN case "$PREPARED_OS_PACKAGES" in \
-      0) apt-get update && apt-get install -y --no-install-recommends \
-           openjdk-17-jdk-headless libgomp1 ca-certificates \
+      0) apt-get update && apt-get upgrade -y && apt-get install -y --no-install-recommends \
+           libgomp1 ca-certificates \
            && rm -rf /var/lib/apt/lists/* ;; \
-      1) java -version ;; \
+      1) ;; \
       *) exit 2 ;; esac
+COPY --from=spark-distribution /opt/java/openjdk /opt/java/openjdk
 COPY --from=spark-distribution /opt/spark /opt/spark
-ENV SPARK_HOME=/opt/spark \
-    PATH=/opt/spark/bin:/usr/local/bin:/usr/local/sbin:/usr/sbin:/usr/bin:/sbin:/bin \
+ENV SPARK_HOME=/opt/spark JAVA_HOME=/opt/java/openjdk \
+    PATH=/opt/java/openjdk/bin:/opt/spark/bin:/usr/local/bin:/usr/local/sbin:/usr/sbin:/usr/bin:/sbin:/bin \
     PYTHONPATH="" PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1 \
     PYSPARK_PYTHON=/usr/local/bin/python3 PYSPARK_DRIVER_PYTHON=/usr/local/bin/python3 \
     OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 CUDA_VISIBLE_DEVICES="" \

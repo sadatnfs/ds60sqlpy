@@ -1,0 +1,373 @@
+{
+  "schema": 1,
+  "spark_version": "4.0.1",
+  "remove_paths": [
+    "examples",
+    "jars/connect-repl"
+  ],
+  "remove_jars": [
+    "HikariCP-2.5.1.jar",
+    "ST4-4.0.4.jar",
+    "antlr-runtime-3.5.2.jar",
+    "commons-dbcp-1.4.jar",
+    "commons-pool-1.5.4.jar",
+    "curator-client-5.7.1.jar",
+    "curator-framework-5.7.1.jar",
+    "curator-recipes-5.7.1.jar",
+    "datanucleus-api-jdo-4.2.4.jar",
+    "datanucleus-core-4.1.17.jar",
+    "datanucleus-rdbms-4.1.19.jar",
+    "derby-10.16.1.1.jar",
+    "derbyshared-10.16.1.1.jar",
+    "derbytools-10.16.1.1.jar",
+    "hive-beeline-2.3.10.jar",
+    "hive-cli-2.3.10.jar",
+    "hive-common-2.3.10.jar",
+    "hive-exec-2.3.10-core.jar",
+    "hive-jdbc-2.3.10.jar",
+    "hive-metastore-2.3.10.jar",
+    "hive-serde-2.3.10.jar",
+    "hive-service-rpc-4.0.0.jar",
+    "hive-shims-0.23-2.3.10.jar",
+    "hive-shims-2.3.10.jar",
+    "hive-shims-common-2.3.10.jar",
+    "hive-shims-scheduler-2.3.10.jar",
+    "javax.jdo-3.2.0-m3.jar",
+    "javolution-5.5.1.jar",
+    "jdo-api-3.0.1.jar",
+    "jline-2.14.6.jar",
+    "jodd-core-3.5.2.jar",
+    "jpam-1.1.jar",
+    "kubernetes-client-7.1.0.jar",
+    "kubernetes-client-api-7.1.0.jar",
+    "kubernetes-httpclient-vertx-7.1.0.jar",
+    "kubernetes-model-admissionregistration-7.1.0.jar",
+    "kubernetes-model-apiextensions-7.1.0.jar",
+    "kubernetes-model-apps-7.1.0.jar",
+    "kubernetes-model-autoscaling-7.1.0.jar",
+    "kubernetes-model-batch-7.1.0.jar",
+    "kubernetes-model-certificates-7.1.0.jar",
+    "kubernetes-model-common-7.1.0.jar",
+    "kubernetes-model-coordination-7.1.0.jar",
+    "kubernetes-model-core-7.1.0.jar",
+    "kubernetes-model-discovery-7.1.0.jar",
+    "kubernetes-model-events-7.1.0.jar",
+    "kubernetes-model-extensions-7.1.0.jar",
+    "kubernetes-model-flowcontrol-7.1.0.jar",
+    "kubernetes-model-gatewayapi-7.1.0.jar",
+    "kubernetes-model-metrics-7.1.0.jar",
+    "kubernetes-model-networking-7.1.0.jar",
+    "kubernetes-model-node-7.1.0.jar",
+    "kubernetes-model-policy-7.1.0.jar",
+    "kubernetes-model-rbac-7.1.0.jar",
+    "kubernetes-model-resource-7.1.0.jar",
+    "kubernetes-model-scheduling-7.1.0.jar",
+    "kubernetes-model-storageclass-7.1.0.jar",
+    "libfb303-0.9.3.jar",
+    "libthrift-0.16.0.jar",
+    "netty-tcnative-boringssl-static-2.0.70.Final-osx-aarch_64.jar",
+    "netty-tcnative-boringssl-static-2.0.70.Final-osx-x86_64.jar",
+    "netty-tcnative-boringssl-static-2.0.70.Final-windows-x86_64.jar",
+    "netty-transport-classes-kqueue-4.1.118.Final.jar",
+    "netty-transport-native-epoll-4.1.118.Final-linux-riscv64.jar",
+    "netty-transport-native-kqueue-4.1.118.Final-osx-aarch_64.jar",
+    "netty-transport-native-kqueue-4.1.118.Final-osx-x86_64.jar",
+    "opencsv-2.3.jar",
+    "spark-connect_2.13-4.0.1.jar",
+    "spark-hive-thriftserver_2.13-4.0.1.jar",
+    "spark-hive_2.13-4.0.1.jar",
+    "spark-kubernetes_2.13-4.0.1.jar",
+    "super-csv-2.2.0.jar",
+    "transaction-api-1.1.jar",
+    "vertx-auth-common-4.5.12.jar",
+    "vertx-core-4.5.12.jar",
+    "vertx-web-client-4.5.12.jar",
+    "vertx-web-common-4.5.12.jar",
+    "zookeeper-3.9.3.jar",
+    "zookeeper-jute-3.9.3.jar"
+  ],
+  "replace_jars": [
+    {
+      "remove": "aircompressor-2.0.2.jar",
+      "url": "https://repo1.maven.org/maven2/io/airlift/aircompressor/2.0.3/aircompressor-2.0.3.jar",
+      "sha256": "b86bb66f610079e0bf790d62e2ff68853eb0dc4748a6d68ae28bce92b68094aa",
+      "jar": "aircompressor-2.0.3.jar"
+    },
+    {
+      "remove": "bcprov-jdk18on-1.80.jar",
+      "url": "https://repo1.maven.org/maven2/org/bouncycastle/bcprov-jdk18on/1.87/bcprov-jdk18on-1.87.jar",
+      "sha256": "12d2d3dd82a9ec15e92ec7c7943ee64f6097c6dc12c07e984f1693b77565b9aa",
+      "jar": "bcprov-jdk18on-1.87.jar"
+    },
+    {
+      "remove": "guava-33.4.0-jre.jar",
+      "url": "https://repo1.maven.org/maven2/com/google/guava/guava/33.7.2-jre/guava-33.7.2-jre.jar",
+      "sha256": "b530942257fb935f8b2cfaa5f8eb5bd59c555fd8e8d01b8ce98912e077ea606c",
+      "jar": "guava-33.7.2-jre.jar"
+    },
+    {
+      "remove": "failureaccess-1.0.2.jar",
+      "url": "https://repo1.maven.org/maven2/com/google/guava/failureaccess/1.0.3/failureaccess-1.0.3.jar",
+      "sha256": "cbfc3906b19b8f55dd7cfd6dfe0aa4532e834250d7f080bd8d211a3e246b59cb",
+      "jar": "failureaccess-1.0.3.jar"
+    },
+    {
+      "remove": "jackson-annotations-2.18.2.jar",
+      "url": "https://repo1.maven.org/maven2/com/fasterxml/jackson/core/jackson-annotations/2.18.12/jackson-annotations-2.18.12.jar",
+      "sha256": "143b94dd8caa3d5eb4417672f7d00472cec33626cbcb0fd35f0616de0dbccabf",
+      "jar": "jackson-annotations-2.18.12.jar"
+    },
+    {
+      "remove": "jackson-core-2.18.2.jar",
+      "url": "https://repo1.maven.org/maven2/com/fasterxml/jackson/core/jackson-core/2.18.12/jackson-core-2.18.12.jar",
+      "sha256": "367afb4be3efa8a1636200b5faefb67d7d0a1b730f64ec55a971229cb673bc23",
+      "jar": "jackson-core-2.18.12.jar"
+    },
+    {
+      "remove": "jackson-databind-2.18.2.jar",
+      "url": "https://repo1.maven.org/maven2/com/fasterxml/jackson/core/jackson-databind/2.18.12/jackson-databind-2.18.12.jar",
+      "sha256": "02b62d64819bc1dbad7f1195c805f950ab3dceef1a479d0e9c55d99b7a04c255",
+      "jar": "jackson-databind-2.18.12.jar"
+    },
+    {
+      "remove": "jackson-dataformat-yaml-2.18.2.jar",
+      "url": "https://repo1.maven.org/maven2/com/fasterxml/jackson/dataformat/jackson-dataformat-yaml/2.18.12/jackson-dataformat-yaml-2.18.12.jar",
+      "sha256": "a9ac98af0e0a3e3f2e9491abb8b55a1b431415397ce4e5e215622755a4506871",
+      "jar": "jackson-dataformat-yaml-2.18.12.jar"
+    },
+    {
+      "remove": "jackson-datatype-jsr310-2.18.2.jar",
+      "url": "https://repo1.maven.org/maven2/com/fasterxml/jackson/datatype/jackson-datatype-jsr310/2.18.12/jackson-datatype-jsr310-2.18.12.jar",
+      "sha256": "bfea00e5943be62b8d126fa679fb607f3ae2c0e0c6495477c866a715bb54a04e",
+      "jar": "jackson-datatype-jsr310-2.18.12.jar"
+    },
+    {
+      "remove": "jackson-module-scala_2.13-2.18.2.jar",
+      "url": "https://repo1.maven.org/maven2/com/fasterxml/jackson/module/jackson-module-scala_2.13/2.18.12/jackson-module-scala_2.13-2.18.12.jar",
+      "sha256": "a3b8577602c1f547367d9efabd7077ad776b0a53568dd4b639460bb518941714",
+      "jar": "jackson-module-scala_2.13-2.18.12.jar"
+    },
+    {
+      "remove": "jersey-client-3.0.16.jar",
+      "url": "https://repo1.maven.org/maven2/org/glassfish/jersey/core/jersey-client/3.0.18/jersey-client-3.0.18.jar",
+      "sha256": "6eb0009203ddc6c98d68be2f0ae9749304e88b91cce41f8898f8f1ca50b4eb5e",
+      "jar": "jersey-client-3.0.18.jar"
+    },
+    {
+      "remove": "jersey-common-3.0.16.jar",
+      "url": "https://repo1.maven.org/maven2/org/glassfish/jersey/core/jersey-common/3.0.18/jersey-common-3.0.18.jar",
+      "sha256": "8ad2eaf8f6825b8d5f729070376767c34c874b3e4cb87a3a908205f9b7fdc359",
+      "jar": "jersey-common-3.0.18.jar"
+    },
+    {
+      "remove": "jersey-server-3.0.16.jar",
+      "url": "https://repo1.maven.org/maven2/org/glassfish/jersey/core/jersey-server/3.0.18/jersey-server-3.0.18.jar",
+      "sha256": "3ec2978b0a739613d2fb835ba398c85413b41ed18407b126f5a52595efa530ad",
+      "jar": "jersey-server-3.0.18.jar"
+    },
+    {
+      "remove": "jersey-hk2-3.0.16.jar",
+      "url": "https://repo1.maven.org/maven2/org/glassfish/jersey/inject/jersey-hk2/3.0.18/jersey-hk2-3.0.18.jar",
+      "sha256": "eef55a8e3c8267ef220272caa3fc587a3c02ad2f1edc22b1157ce9a0761abfa5",
+      "jar": "jersey-hk2-3.0.18.jar"
+    },
+    {
+      "remove": "jersey-container-servlet-3.0.16.jar",
+      "url": "https://repo1.maven.org/maven2/org/glassfish/jersey/containers/jersey-container-servlet/3.0.18/jersey-container-servlet-3.0.18.jar",
+      "sha256": "285dce04c5b1959d5b4334ea134447d0c63a336879de0d582058abf6409cec49",
+      "jar": "jersey-container-servlet-3.0.18.jar"
+    },
+    {
+      "remove": "jersey-container-servlet-core-3.0.16.jar",
+      "url": "https://repo1.maven.org/maven2/org/glassfish/jersey/containers/jersey-container-servlet-core/3.0.18/jersey-container-servlet-core-3.0.18.jar",
+      "sha256": "d46b4f35a1af6ded25e4fe558d30f93d42a7d0b587a6a5f4273d43d8debd1ca1",
+      "jar": "jersey-container-servlet-core-3.0.18.jar"
+    },
+    {
+      "remove": "jline-3.27.1-jdk8.jar",
+      "url": "https://repo1.maven.org/maven2/org/jline/jline/3.30.17/jline-3.30.17-jdk8.jar",
+      "sha256": "44a242fec11e344fdfa54fc430d79416b71a508bbace165e9feba3d85dc2ee84",
+      "jar": "jline-3.30.17-jdk8.jar"
+    },
+    {
+      "remove": "lz4-java-1.8.0.jar",
+      "url": "https://repo1.maven.org/maven2/at/yawk/lz4/lz4-java/1.11.4/lz4-java-1.11.4.jar",
+      "sha256": "58c8e0b813960d2a248e050c353baea73139b48a2ffc55382d42c69707e17325",
+      "jar": "lz4-java-1.11.4.jar"
+    },
+    {
+      "remove": "commons-lang3-3.17.0.jar",
+      "url": "https://repo1.maven.org/maven2/org/apache/commons/commons-lang3/3.18.0/commons-lang3-3.18.0.jar",
+      "sha256": "4eeeae8d20c078abb64b015ec158add383ac581571cddc45c68f0c9ae0230720",
+      "jar": "commons-lang3-3.18.0.jar"
+    },
+    {
+      "remove": "log4j-1.2-api-2.24.3.jar",
+      "url": "https://repo1.maven.org/maven2/org/apache/logging/log4j/log4j-1.2-api/2.25.5/log4j-1.2-api-2.25.5.jar",
+      "sha256": "4dd812dc5a6343f542a9e0046b1ec78ecf10bdd5a8c15745101cdd8b9aa24974",
+      "jar": "log4j-1.2-api-2.25.5.jar"
+    },
+    {
+      "remove": "log4j-api-2.24.3.jar",
+      "url": "https://repo1.maven.org/maven2/org/apache/logging/log4j/log4j-api/2.25.5/log4j-api-2.25.5.jar",
+      "sha256": "64777f73ea0b3104c04eb82befbdccc30a425a19e83ad06cb2f93aa303511863",
+      "jar": "log4j-api-2.25.5.jar"
+    },
+    {
+      "remove": "log4j-core-2.24.3.jar",
+      "url": "https://repo1.maven.org/maven2/org/apache/logging/log4j/log4j-core/2.25.5/log4j-core-2.25.5.jar",
+      "sha256": "050c4f85deb48b055e9c041ac39043fbb79ce477841a11a1eb2969c86c6a0072",
+      "jar": "log4j-core-2.25.5.jar"
+    },
+    {
+      "remove": "log4j-layout-template-json-2.24.3.jar",
+      "url": "https://repo1.maven.org/maven2/org/apache/logging/log4j/log4j-layout-template-json/2.25.5/log4j-layout-template-json-2.25.5.jar",
+      "sha256": "27c37313e20c16bf0178e38d9d1a5c7320e34c03aa35bc2c66a589ea14abf545",
+      "jar": "log4j-layout-template-json-2.25.5.jar"
+    },
+    {
+      "remove": "log4j-slf4j2-impl-2.24.3.jar",
+      "url": "https://repo1.maven.org/maven2/org/apache/logging/log4j/log4j-slf4j2-impl/2.25.5/log4j-slf4j2-impl-2.25.5.jar",
+      "sha256": "8cab16dd6fc4c8f14c1c473022cb217512f2bbb2d59a70f8ec90a268d64d8831",
+      "jar": "log4j-slf4j2-impl-2.25.5.jar"
+    },
+    {
+      "remove": "snappy-java-1.1.10.7.jar",
+      "url": "https://repo1.maven.org/maven2/org/xerial/snappy/snappy-java/1.1.10.12/snappy-java-1.1.10.12.jar",
+      "sha256": "1c03ce77b3f2e926c25a952612e372404d80bc88c6c8052bede964804fabd732",
+      "jar": "snappy-java-1.1.10.12.jar"
+    },
+    {
+      "remove": "hadoop-client-api-3.4.1.jar",
+      "url": "https://repo1.maven.org/maven2/org/apache/hadoop/hadoop-client-api/3.4.3/hadoop-client-api-3.4.3.jar",
+      "sha256": "6443332781f26a7199009d9517cd1eb013fbf54ca1c9759a2a9e487542b1d52a",
+      "jar": "hadoop-client-api-3.4.3.jar"
+    },
+    {
+      "remove": "hadoop-client-runtime-3.4.1.jar",
+      "url": "https://repo1.maven.org/maven2/org/apache/hadoop/hadoop-client-runtime/3.4.3/hadoop-client-runtime-3.4.3.jar",
+      "sha256": "bd20267b0555766ae84697dd888f074ca326d8e2ec3c0008928a6ac2966c67de",
+      "jar": "hadoop-client-runtime-3.4.3.jar"
+    },
+    {
+      "remove": "netty-all-4.1.118.Final.jar",
+      "url": "https://repo1.maven.org/maven2/io/netty/netty-all/4.1.141.Final/netty-all-4.1.141.Final.jar",
+      "sha256": "f8422fcc2df168ca690ec6ef50e1f63abc54b9f0be0bf6e105f00259b4a7dc2f",
+      "jar": "netty-all-4.1.141.Final.jar"
+    },
+    {
+      "remove": "netty-buffer-4.1.118.Final.jar",
+      "url": "https://repo1.maven.org/maven2/io/netty/netty-buffer/4.1.141.Final/netty-buffer-4.1.141.Final.jar",
+      "sha256": "1d9fbe43dd93c5a447ec13a9f877cfdaac17dc1da947b87439cb7d8ffbd731e3",
+      "jar": "netty-buffer-4.1.141.Final.jar"
+    },
+    {
+      "remove": "netty-codec-4.1.118.Final.jar",
+      "url": "https://repo1.maven.org/maven2/io/netty/netty-codec/4.1.141.Final/netty-codec-4.1.141.Final.jar",
+      "sha256": "a4e8bcd07e74ce3300ec18af52d1c4aa46b5a33ae25a6fe9ae281f812cb131b0",
+      "jar": "netty-codec-4.1.141.Final.jar"
+    },
+    {
+      "remove": "netty-codec-dns-4.1.118.Final.jar",
+      "url": "https://repo1.maven.org/maven2/io/netty/netty-codec-dns/4.1.141.Final/netty-codec-dns-4.1.141.Final.jar",
+      "sha256": "6f23a67d8a61cc889523911fbc86cc87dcd7b493bf509cea6d7ae209ce1c4ee6",
+      "jar": "netty-codec-dns-4.1.141.Final.jar"
+    },
+    {
+      "remove": "netty-codec-http-4.1.118.Final.jar",
+      "url": "https://repo1.maven.org/maven2/io/netty/netty-codec-http/4.1.141.Final/netty-codec-http-4.1.141.Final.jar",
+      "sha256": "2be71653e7a0214978282d95c3b41781a4386f3119ace935c9eeb52a7260812b",
+      "jar": "netty-codec-http-4.1.141.Final.jar"
+    },
+    {
+      "remove": "netty-codec-http2-4.1.118.Final.jar",
+      "url": "https://repo1.maven.org/maven2/io/netty/netty-codec-http2/4.1.141.Final/netty-codec-http2-4.1.141.Final.jar",
+      "sha256": "7159b84c9002402c23a04d6ba6a4592759a5e3ad0be9527e1c1185bc2fdf7b9b",
+      "jar": "netty-codec-http2-4.1.141.Final.jar"
+    },
+    {
+      "remove": "netty-codec-socks-4.1.118.Final.jar",
+      "url": "https://repo1.maven.org/maven2/io/netty/netty-codec-socks/4.1.141.Final/netty-codec-socks-4.1.141.Final.jar",
+      "sha256": "8f209c1c4c9c9a103d36affbc299929b7193d0b1ad07d7e1a641ee69263edd76",
+      "jar": "netty-codec-socks-4.1.141.Final.jar"
+    },
+    {
+      "remove": "netty-common-4.1.118.Final.jar",
+      "url": "https://repo1.maven.org/maven2/io/netty/netty-common/4.1.141.Final/netty-common-4.1.141.Final.jar",
+      "sha256": "27ea9204a986e08cec79ba7bedb7e9c486efdd524323d519f6ed32f7a556e3aa",
+      "jar": "netty-common-4.1.141.Final.jar"
+    },
+    {
+      "remove": "netty-handler-4.1.118.Final.jar",
+      "url": "https://repo1.maven.org/maven2/io/netty/netty-handler/4.1.141.Final/netty-handler-4.1.141.Final.jar",
+      "sha256": "7074ebb3e72dad0ed9fecb6ebb3f85537d263429d7812dabf5bc9bfecfe38b1b",
+      "jar": "netty-handler-4.1.141.Final.jar"
+    },
+    {
+      "remove": "netty-handler-proxy-4.1.118.Final.jar",
+      "url": "https://repo1.maven.org/maven2/io/netty/netty-handler-proxy/4.1.141.Final/netty-handler-proxy-4.1.141.Final.jar",
+      "sha256": "4881971e3fdd3217af69e7bf7fa087bf3248e83ab6f10d27e96935f0687cb16b",
+      "jar": "netty-handler-proxy-4.1.141.Final.jar"
+    },
+    {
+      "remove": "netty-resolver-4.1.118.Final.jar",
+      "url": "https://repo1.maven.org/maven2/io/netty/netty-resolver/4.1.141.Final/netty-resolver-4.1.141.Final.jar",
+      "sha256": "22b830f044f9c3431d18eae317036cab097ccc75f8f498673d9dc32e84226b86",
+      "jar": "netty-resolver-4.1.141.Final.jar"
+    },
+    {
+      "remove": "netty-resolver-dns-4.1.118.Final.jar",
+      "url": "https://repo1.maven.org/maven2/io/netty/netty-resolver-dns/4.1.141.Final/netty-resolver-dns-4.1.141.Final.jar",
+      "sha256": "9bc2b8c188746364c627e92a434db3cb2f0a2974227430f698954e17e523b798",
+      "jar": "netty-resolver-dns-4.1.141.Final.jar"
+    },
+    {
+      "remove": "netty-tcnative-boringssl-static-2.0.70.Final-linux-aarch_64.jar",
+      "url": "https://repo1.maven.org/maven2/io/netty/netty-tcnative-boringssl-static/2.0.85.Final/netty-tcnative-boringssl-static-2.0.85.Final-linux-aarch_64.jar",
+      "sha256": "a26ef5c0de387a686c31d773c5b45d2cef11e3722cd7c775067588db78b566fa",
+      "jar": "netty-tcnative-boringssl-static-2.0.85.Final-linux-aarch_64.jar"
+    },
+    {
+      "remove": "netty-tcnative-boringssl-static-2.0.70.Final-linux-x86_64.jar",
+      "url": "https://repo1.maven.org/maven2/io/netty/netty-tcnative-boringssl-static/2.0.85.Final/netty-tcnative-boringssl-static-2.0.85.Final-linux-x86_64.jar",
+      "sha256": "6ed7189a01c38dd7c2161feb93c5318df3ad67dc1b246d166d7751b7010042d4",
+      "jar": "netty-tcnative-boringssl-static-2.0.85.Final-linux-x86_64.jar"
+    },
+    {
+      "remove": "netty-tcnative-classes-2.0.70.Final.jar",
+      "url": "https://repo1.maven.org/maven2/io/netty/netty-tcnative-classes/2.0.85.Final/netty-tcnative-classes-2.0.85.Final.jar",
+      "sha256": "3c1bcba8d80d7002277effe67509979b3a7bd22341bab276b946837f0b76f831",
+      "jar": "netty-tcnative-classes-2.0.85.Final.jar"
+    },
+    {
+      "remove": "netty-transport-4.1.118.Final.jar",
+      "url": "https://repo1.maven.org/maven2/io/netty/netty-transport/4.1.141.Final/netty-transport-4.1.141.Final.jar",
+      "sha256": "f25fec715e9d3a423df9086f5813b4b86aba53798031cb7ebac80d09188ea5cd",
+      "jar": "netty-transport-4.1.141.Final.jar"
+    },
+    {
+      "remove": "netty-transport-classes-epoll-4.1.118.Final.jar",
+      "url": "https://repo1.maven.org/maven2/io/netty/netty-transport-classes-epoll/4.1.141.Final/netty-transport-classes-epoll-4.1.141.Final.jar",
+      "sha256": "4a179cb26c6bdd0b6daacea3fdfcbfb9fd4b23ef2da57b2cccbd65f7b76e3188",
+      "jar": "netty-transport-classes-epoll-4.1.141.Final.jar"
+    },
+    {
+      "remove": "netty-transport-native-epoll-4.1.118.Final-linux-aarch_64.jar",
+      "url": "https://repo1.maven.org/maven2/io/netty/netty-transport-native-epoll/4.1.141.Final/netty-transport-native-epoll-4.1.141.Final-linux-aarch_64.jar",
+      "sha256": "68d265be8f10b6c07d8ea18002810a0e3792e7076846b89e778b2e55cd3413ce",
+      "jar": "netty-transport-native-epoll-4.1.141.Final-linux-aarch_64.jar"
+    },
+    {
+      "remove": "netty-transport-native-epoll-4.1.118.Final-linux-x86_64.jar",
+      "url": "https://repo1.maven.org/maven2/io/netty/netty-transport-native-epoll/4.1.141.Final/netty-transport-native-epoll-4.1.141.Final-linux-x86_64.jar",
+      "sha256": "cc15ad235cebbeb80bf0f318463cd1076dbca7421499e04170974da46a37093d",
+      "jar": "netty-transport-native-epoll-4.1.141.Final-linux-x86_64.jar"
+    },
+    {
+      "remove": "netty-transport-native-unix-common-4.1.118.Final.jar",
+      "url": "https://repo1.maven.org/maven2/io/netty/netty-transport-native-unix-common/4.1.141.Final/netty-transport-native-unix-common-4.1.141.Final.jar",
+      "sha256": "eb0c6fd8134ab04d4abfe9aced91ded318473322ffcefe415b76680c4e8bee02",
+      "jar": "netty-transport-native-unix-common-4.1.141.Final.jar"
+    }
+  ]
+}

@@ -14,6 +14,7 @@ Qualify the unfinished release 1.4.4 classroom-guide and Python/SQL walkthrough 
 - [ ] **Phase 6: Desktop Workspace & Learner State** - Make classroom capabilities clear and preserve learner work through normal operation.
 - [ ] **Phase 7: Docker Runtime & Persistence Qualification** - Verify release image profiles and disposable lifecycle behavior without losing saved work.
 - [ ] **Phase 8: Release Image Security** - Require clean applicable vulnerability scans for every image intended for publication.
+- [ ] **Phase 08.1: Unslop Classroom UI Chrome (INSERTED)** - Remove visual slop from the classroom chrome without touching lesson content.
 - [ ] **Phase 9: Code & Desktop Acceptance Gates** - Pass repository quality checks and bounded desktop browser acceptance for the overhaul.
 - [ ] **Phase 10: Verified Publication & Safe Closeout** - Publish only qualified artifacts, smoke-test the pull, and separately verify safe cleanup.
 
@@ -183,10 +184,26 @@ Plans:
 **Wave 3**
 - [ ] 08-04-PLAN.md: Remediate the native and SDK workers
 
+### Phase 08.1: Unslop Classroom UI Chrome (INSERTED)
+
+**Goal:** The classroom chrome (home, workspace, guide, tour, dialogs and status surfaces) reads as a designed teaching tool, with the visual slop identified by the heydamir/unslop audit removed and lesson content left exactly as authored.
+**Mode:** mvp
+**Depends on:** Phase 6 (desktop workspace); runs alongside the Phase 8 CI proof
+**Requirements**: UX-03
+**Success Criteria** (what must be TRUE):
+  1. A recorded unslop audit lists every sign found in the classroom chrome with its location, and each one is fixed or explicitly justified.
+  2. The chrome uses one tinted neutral ramp, three text roles, one accent with sufficient contrast, the 4px spacing scale, one icon treatment, sentence-case labels and no decorative looping motion, gradients, glows or emoji icons.
+  3. Lesson plans, lesson prose, examples, practice and generated readers are byte-for-byte unchanged by this phase.
+  4. Existing UI, guide, tour, walkthrough, accessibility and contrast checks still pass, with before and after desktop screenshots at 1440x900.
+**Plans:** 1 plan
+
+Plans:
+- [ ] 08.1-01-PLAN.md: Unslop audit, direction and nine-pass chrome refinement
+
 ### Phase 9: Code & Desktop Acceptance Gates
 **Goal:** The overhaul has recorded repository and desktop-browser evidence for the relevant changed flows before any publication decision.
 **Mode:** mvp
-**Depends on**: Phase 6, Phase 7, and Phase 8
+**Depends on**: Phase 6, Phase 7, Phase 8, and Phase 08.1
 **Requirements**: QUAL-01, QUAL-02
 **Success Criteria** (what must be TRUE):
   1. Focused automated tests, repository lint and type checks, and generated-content checks relevant to the changes pass.
@@ -202,15 +219,16 @@ Plans:
 **Goal:** A release is available only as a verified registry artifact, and finishing the work leaves learner data and unrelated services untouched.
 **Mode:** mvp
 **Depends on**: Phase 9
-**Requirements**: REL-01, REL-02
+**Requirements**: REL-01, REL-02, REL-03
 **Success Criteria** (what must be TRUE):
-  1. Source, tests, Docker images, image scans, registry target, and version tags are verified before publication; the published artifact is then pulled and smoke-tested.
+  1. Source, tests, Docker images, image scans, registry target, and version tags are verified before publication of release 2.0.0; the published artifact and its GitHub release are then pulled and smoke-tested.
   2. Test cleanup stops only DS60-owned services and containers, preserves learner volumes, and leaves unrelated containers running.
+  3. After the 2.0.0 GitHub release is verified, every DS60 Docker container and image on the local machine is removed (including older local tags), learner volumes are preserved, and unrelated resources are untouched.
 **Plans**: 2 plans
 
 Plans:
-- [ ] 10-01-PLAN.md: Publish and verify release 1.4.4
-- [ ] 10-02-PLAN.md: Safe closeout
+- [ ] 10-01-PLAN.md: Publish and verify release 2.0.0
+- [ ] 10-02-PLAN.md: Safe closeout and local DS60 Docker cleanup
 
 ## Progress
 
@@ -224,5 +242,6 @@ Plans:
 | 6. Desktop Workspace & Learner State | 4/4 | Verified, human UAT pending | - |
 | 7. Docker Runtime & Persistence Qualification | 2/4 | In Progress | - |
 | 8. Release Image Security | 2/4 | In Progress | - |
+| 08.1. Unslop Classroom UI Chrome (INSERTED) | 0/1 | Planned | - |
 | 9. Code & Desktop Acceptance Gates | 0/2 | Planned | - |
 | 10. Verified Publication & Safe Closeout | 0/2 | Planned | - |

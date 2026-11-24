@@ -12,6 +12,7 @@
 - [x] **GUIDE-02**: A learner can start, dismiss, and restart the optional classroom tour without changing the selected lesson, overwriting work, or starting code execution.
 - [x] **UX-01**: In each supported desktop lesson mode, the workspace clearly identifies the current lesson, available actions, runtime or reading capability, readiness, and where results appear.
 - [x] **UX-02**: A learner can operate the desktop classroom with the keyboard and see clear focus and status cues; applicable project contrast and accessibility checks pass.
+- [ ] **UX-03**: The classroom chrome passes an unslop audit (heydamir/unslop): no decorative gradients, glows, emoji icons, uppercase tracked labels, looping motion or off-scale spacing, one accent on a quiet neutral ramp, while lesson plans and lesson content stay unchanged.
 - [x] **STATE-01**: Navigation, lesson switching, viewing old results, test setup, and runtime restart preserve learner drafts, progress, and receipts; viewing old evidence never re-executes code.
 
 ### Walkthroughs
@@ -40,6 +41,7 @@
 - [ ] **QUAL-02**: Desktop browser acceptance verifies the affected lesson and operation flows, including errors and recovery, at the supported desktop viewport without relying on mobile layouts.
 - [ ] **REL-01**: A release is published only after its source, tests, Docker images, image scans, registry target, and version tags are verified; the published artifact is pulled and smoke-tested.
 - [ ] **REL-02**: Completion stops only DS60-owned test services and containers, preserves learner volumes, and leaves unrelated containers untouched.
+- [ ] **REL-03**: Release 2.0.0 is published as a verified GitHub release with its registry images, after which every local DS60 Docker container and image is removed, learner volumes are preserved, and unrelated resources are untouched.
 
 ## v2 Requirements
 
@@ -97,6 +99,8 @@ Deferred until the existing course quality floor and core classroom workflows ar
 | QUAL-02 | Phase 9 | Pending |
 | REL-01 | Phase 10 | Pending |
 | REL-02 | Phase 10 | Pending |
+| UX-03 | Phase 08.1 | Pending |
+| REL-03 | Phase 10 | Pending |
 
 **Coverage:**
 - v1 requirements: 23 total

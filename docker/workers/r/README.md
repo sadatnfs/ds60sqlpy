@@ -5,6 +5,14 @@ closure in `packages.lock.json`. Downloads remain SHA-256 verified and the R
 version check remains mandatory. A failed installation stops the build; later
 packages are not attempted.
 
+The worker builds on the digest-pinned `rocker/r-ver` image, which compiles R
+from source on Ubuntu LTS. Its bundled recommended Matrix is older than the
+Matrix the course and the TMB project were qualified with, so the lock lists
+Matrix first and installs it into the site library. The compilers and kernel
+headers are needed only for these source builds and are purged afterwards; no
+lesson compiles code in the worker. The separately prepared TMB image installs
+its own toolchain.
+
 CRAN can rate-limit simultaneous source builds. HTTP 429, 502, 503 and 504
 responses retry the same reviewed URL at most five times, with bounded backoff
 and a maximum 60-second numeric Retry-After delay. Every retry remains visible.

@@ -1,6 +1,6 @@
 # Build context is this independent package directory. No classroom image is required.
-ARG CPP_IMAGE=python:3.12.16-slim-bookworm@sha256:935c3c5b12357a7e10caa9c1e6ca5692344d97cf229832ef584be2cec9fc03df
-ARG PYTHON_IMAGE=python:3.12.16-slim-bookworm@sha256:935c3c5b12357a7e10caa9c1e6ca5692344d97cf229832ef584be2cec9fc03df
+ARG CPP_IMAGE=python:3.12.16-slim-trixie@sha256:5e2bdb1b0d542d5039cffb8181c65930093949194a65c365dfb1b0fe13a4fa5b
+ARG PYTHON_IMAGE=python:3.12.16-slim-trixie@sha256:5e2bdb1b0d542d5039cffb8181c65930093949194a65c365dfb1b0fe13a4fa5b
 ARG SPARK_IMAGE=spark:4.0.1-scala2.13-java17-python3-ubuntu@sha256:a552a335e0aedb44fa28b20ed7e9dc52c2e856faf87fb0409fb57dbf37b45bf7
 FROM ${SPARK_IMAGE} AS spark-distribution
 
@@ -9,21 +9,25 @@ USER root
 # Explicitly prepared local bases may opt out after verifying these packages.
 # The default builds a neutral Python/Spark/JDK environment from public bases.
 ARG PREPARED_OS_PACKAGES=0
+# Debian 13 has no OpenJDK 17 package; the Temurin 17 JDK comes from the Spark image.
+# hadolint ignore=DL3005
 RUN if [ "$PREPARED_OS_PACKAGES" = 0 ]; then \
-      apt-get update && apt-get install -y --no-install-recommends \
-        openjdk-17-jdk-headless libstdc++6 libssl3 ca-certificates \
+      apt-get update && apt-get upgrade -y && apt-get install -y --no-install-recommends \
+        libstdc++6 libssl3t64 ca-certificates \
       && rm -rf /var/lib/apt/lists/*; \
     elif [ "$PREPARED_OS_PACKAGES" != 1 ]; then exit 2; fi
+COPY --from=spark-distribution /opt/java/openjdk /opt/java/openjdk
 COPY --from=spark-distribution /opt/spark /opt/spark
-ENV SPARK_HOME=/opt/spark \
-    PATH=/opt/spark/bin:/usr/local/bin:/usr/local/sbin:/usr/sbin:/usr/bin:/sbin:/bin \
+ENV SPARK_HOME=/opt/spark JAVA_HOME=/opt/java/openjdk \
+    PATH=/opt/java/openjdk/bin:/opt/spark/bin:/usr/local/bin:/usr/local/sbin:/usr/sbin:/usr/bin:/sbin:/bin \
     PYTHONPATH="" PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1
 
 FROM ${CPP_IMAGE} AS native
 USER root
 ARG PREPARED_OS_PACKAGES=0
+# hadolint ignore=DL3005
 RUN if [ "$PREPARED_OS_PACKAGES" = 0 ]; then \
-      apt-get update && apt-get install -y --no-install-recommends \
+      apt-get update && apt-get upgrade -y && apt-get install -y --no-install-recommends \
         g++-12 libssl-dev openssl ca-certificates \
       && rm -rf /var/lib/apt/lists/*; \
     elif [ "$PREPARED_OS_PACKAGES" != 1 ]; then exit 2; fi

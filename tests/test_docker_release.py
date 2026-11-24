@@ -3,15 +3,18 @@
 from __future__ import annotations
 
 import copy
+import hashlib
 import json
 import platform
 from dataclasses import asdict, replace
+from datetime import UTC, datetime, timedelta
 from pathlib import Path
 from typing import Any
 
 import pytest
 
 from scripts import docker_release as release
+from scripts import image_scan
 from scripts.docker_registry import (
     OCI_INDEX,
     OCI_MANIFEST,
@@ -163,6 +166,41 @@ def root_index(
     return registry.add(encoded({"schemaVersion": 2, "mediaType": OCI_INDEX, "manifests": entries}))
 
 
+POLICY = b'{"schema": 1, "entries": []}\n'
+POLICY_SHA = hashlib.sha256(POLICY).hexdigest()
+COUNTS = {"CRITICAL": 0, "HIGH": 0, "MEDIUM": 2, "LOW": 1, "UNKNOWN": 0}
+
+
+def stamp(moment: datetime) -> str:
+    return moment.astimezone(UTC).strftime("%Y-%m-%dT%H:%M:%SZ")
+
+
+def scan_block(
+    images: list[dict[str, Any]], *, db_age: timedelta = timedelta(hours=1)
+) -> dict[str, Any]:
+    """Receipt scan block for synthetic tested images; never presented as real evidence."""
+    now = datetime.now(UTC)
+    return {
+        "evidence_sha256": "e" * 64,
+        "scanner_image": image_scan.TRIVY_IMAGE,
+        "scanner_version": image_scan.TRIVY_VERSION,
+        "db_updated_at": stamp(now - db_age),
+        "java_db_updated_at": stamp(now - timedelta(days=2)),
+        "policy_sha256": POLICY_SHA,
+        "scanned_at": stamp(now - timedelta(minutes=30)),
+        "images": [
+            {
+                "profile": image["profile"],
+                "tested_image_id": image["tested_image_id"],
+                "counts": dict(COUNTS),
+                "suppressed": [],
+                "report_sha256": "f" * 64,
+            }
+            for image in images
+        ],
+    }
+
+
 @pytest.fixture
 def context() -> release.Context:
     return release.Context(
@@ -173,6 +211,7 @@ def context() -> release.Context:
 @pytest.fixture
 def profiles(tmp_path: Path) -> dict[str, release.Profile]:
     (tmp_path / "docker").mkdir()
+    (tmp_path / "docker/cve-policy.json").write_bytes(POLICY)
     (tmp_path / "docker/classroom-images.tsv").write_text(
         "app lab ds60sqlpy-lab lab DS60_LAB_IMAGE app\n"
         "python-core core ds60sqlpy-worker-python-core worker-python-core "
@@ -245,13 +284,14 @@ def receipt(
             }
         )
     return {
-        "schema_version": 1,
+        "schema_version": 2,
         "kind": "ds60-staged-images",
         "context": asdict(context),
         "architecture": arch,
         "group": group,
         "seed_native_digests": seed_digests or {},
         "qualification": proofs(set(selected), group),
+        "scan": scan_block(images),
         "images": images,
     }
 
@@ -777,7 +817,12 @@ def local_images(
             "Os": "linux",
             "Architecture": arch,
             "Descriptor": root.descriptor.record(),
-            "Config": {"Labels": {release.RELEASE_VERSION: context.version}},
+            "Config": {
+                "Labels": {
+                    release.RELEASE_VERSION: context.version,
+                    release.REVISION: context.revision,
+                }
+            },
         }
         docker.by_id[root.descriptor.digest] = root
     return docker
@@ -803,6 +848,7 @@ def test_stage_rejects_changed_tested_images_before_any_candidate_tag_or_push(
             registry,
             docker,
             tmp_path,
+            scan=scan_block(snapshot["images"]),
         )
     assert not [op for op in docker.operations if op[0] in {"tag", "push"}]
 
@@ -823,6 +869,7 @@ def test_successful_seed_stage_binds_pushed_root_native_config_and_qualification
         registry,
         docker,
         tmp_path,
+        scan=scan_block(snapshot["images"]),
     )
     assert release.staged_receipt(result, context, profiles, root=tmp_path) == result
     assert all(
@@ -855,10 +902,26 @@ def test_stage_waits_briefly_for_a_just_pushed_candidate_then_fails_closed(
     proof = proofs(set(release.SEEDS), "python-core")
     if misses > len(WRITE_VISIBILITY_WAITS):
         with pytest.raises(ReleaseError, match="Staged candidate manifest is missing"):
-            release.stage_images(context, profiles, snapshot, proof, registry, docker, tmp_path)
+            release.stage_images(
+                context,
+                profiles,
+                snapshot,
+                proof,
+                registry,
+                docker,
+                tmp_path,
+                scan=scan_block(snapshot["images"]),
+            )
     else:
         staged = release.stage_images(
-            context, profiles, snapshot, proof, registry, docker, tmp_path
+            context,
+            profiles,
+            snapshot,
+            proof,
+            registry,
+            docker,
+            tmp_path,
+            scan=scan_block(snapshot["images"]),
         )
         assert len(staged["images"]) == 2
     assert sleeps == waits
@@ -876,7 +939,12 @@ def test_seed_import_reuses_earlier_attempt_by_native_digest_and_pins_restored_t
             "Id": image["config_digest"],
             "Os": "linux",
             "Architecture": "arm64",
-            "Config": {"Labels": {release.RELEASE_VERSION: context.version}},
+            "Config": {
+                "Labels": {
+                    release.RELEASE_VERSION: context.version,
+                    release.REVISION: context.revision,
+                }
+            },
         }
     release.import_seed(
         replace(context, run_attempt="2"), profiles, seed, "arm64", registry, docker, tmp_path
@@ -896,6 +964,28 @@ def test_worker_inspection_requires_the_selected_native_seed_receipt(
     docker = local_images(registry, context, profiles, "amd64")
     with pytest.raises(ReleaseError, match="seed-receipt"):
         release.inspect_images(context, profiles, ["java21"], "amd64", docker, root=tmp_path)
+
+
+@pytest.mark.parametrize("label", ["", "f" * 40, None, "dirty"])
+@pytest.mark.parametrize("profile", ["app", "python-core", "java21"])
+def test_inspected_image_refuses_a_revision_label_other_than_the_release_revision(
+    context: release.Context, profiles: dict[str, release.Profile], profile: str, label: Any
+) -> None:
+    labels: dict[str, Any] = {release.RELEASE_VERSION: context.version}
+    if label == "dirty":
+        labels[release.REVISION] = context.revision + "-dirty"
+    elif label is not None:
+        labels[release.REVISION] = label
+    raw = {
+        "Id": "sha256:" + "c" * 64,
+        "Os": "linux",
+        "Architecture": "amd64",
+        "Config": {"Labels": labels},
+    }
+    with pytest.raises(ReleaseError, match="revision label must match the release revision"):
+        release.inspected_image(raw, profiles[profile], context, "amd64")
+    labels[release.REVISION] = context.revision
+    assert release.inspected_image(raw, profiles[profile], context, "amd64")["profile"] == profile
 
 
 def qualification_files(
@@ -1226,3 +1316,347 @@ def test_metadata_output_is_bounded_while_reading_and_its_process_is_reaped(
     with pytest.raises(ReleaseError, match="exceeds limits"):
         release.Docker().output(["info"], timeout=5)
     assert len(children) == 1 and children[0].poll() is not None
+
+
+def scan_evidence(snapshot: dict[str, Any], policy_sha: str) -> dict[str, Any]:
+    """Synthetic `image_scan.py scan --tested` evidence for gate tests."""
+    now = datetime.now(UTC)
+    image = {
+        "revision_label": snapshot["context"]["revision"],
+        "reference": False,
+        "scanners": "vuln,secret",
+        "counts": dict(COUNTS),
+        "blocking": [],
+        "suppressed": [],
+        "reported": [],
+        "report_sha256": "f" * 64,
+    }
+    return {
+        "schema": 1,
+        "kind": "ds60-scan-evidence",
+        "context": copy.deepcopy(snapshot["context"]),
+        "architecture": snapshot["architecture"],
+        "scanner": {
+            "image": image_scan.TRIVY_IMAGE,
+            "version": image_scan.TRIVY_VERSION,
+            "db_updated_at": stamp(now - timedelta(hours=2)),
+            "java_db_updated_at": stamp(now - timedelta(days=3)),
+        },
+        "policy_sha256": policy_sha,
+        "scanned_at": stamp(now - timedelta(minutes=5)),
+        "passed": True,
+        "unused_policy_entries": [],
+        "images": [
+            {**image, "profile": row["profile"], "tested_image_id": row["tested_image_id"]}
+            for row in snapshot["images"]
+        ]
+        + [
+            {
+                **image,
+                "profile": "postgres",
+                "tested_image_id": "sha256:" + "9" * 64,
+                "revision_label": "",
+                "reference": True,
+            }
+        ],
+    }
+
+
+def stage_cli(
+    tmp_path: Path,
+    context: release.Context,
+    profiles: dict[str, release.Profile],
+    monkeypatch: pytest.MonkeyPatch,
+) -> tuple[FakeDocker, dict[str, Any], list[str]]:
+    registry = FakeRegistry()
+    docker = local_images(registry, context, profiles, "amd64")
+    snapshot = release.inspect_images(
+        context, profiles, ["app", "python-core"], "amd64", docker, root=tmp_path
+    )
+    docker.operations.clear()
+    gate = tmp_path / "gate.json"
+    gate.write_text(json.dumps({"selection": None}))
+    monkeypatch.setattr(release, "load_gate", lambda path: (context, profiles, "build"))
+    monkeypatch.setattr(release, "load_tested", lambda path, ctx, found: snapshot)
+    monkeypatch.setattr(
+        release,
+        "qualification_records",
+        lambda *args: proofs(set(release.SEEDS), "python-core"),
+    )
+    monkeypatch.setattr(release, "registry_for", lambda *args, **kwargs: registry)
+    monkeypatch.setattr(release, "Docker", lambda: docker)
+    argv = [
+        "stage",
+        "--gate",
+        str(gate),
+        "--tested-images",
+        str(tmp_path / "tested.json"),
+        "--qualification",
+        str(tmp_path / "q.json"),
+        "--output",
+        str(tmp_path / "receipt.json"),
+    ]
+    return docker, snapshot, argv
+
+
+def test_stage_without_scan_evidence_is_a_usage_error_before_any_tag(
+    tmp_path: Path,
+    context: release.Context,
+    profiles: dict[str, release.Profile],
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    docker, _, argv = stage_cli(tmp_path, context, profiles, monkeypatch)
+    assert release.main(argv) == 2
+    assert not [op for op in docker.operations if op[0] in {"tag", "push"}]
+    assert not (tmp_path / "receipt.json").exists()
+
+
+def committed_policy_sha() -> str:
+    return hashlib.sha256((release.ROOT / "docker/cve-policy.json").read_bytes()).hexdigest()
+
+
+@pytest.mark.parametrize(
+    ("change", "message"),
+    [
+        ("image-id", "different image than was qualified"),
+        ("blocking", "blocking findings"),
+        ("missing-profile", "each tested profile exactly once"),
+        ("architecture", "another architecture"),
+        ("revision", "another source, run or attempt"),
+        ("stale-db", "last 24 hours"),
+        ("future-db", "last 24 hours"),
+        ("policy", "different CVE policy"),
+        ("failed-reference", "blocking findings"),
+        ("scanner", "pinned scanner"),
+        ("kind", "Invalid image scan evidence"),
+    ],
+)
+def test_stage_scan_gate_rejects_unbound_or_unclean_evidence_before_any_tag(
+    tmp_path: Path,
+    context: release.Context,
+    profiles: dict[str, release.Profile],
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+    change: str,
+    message: str,
+) -> None:
+    docker, snapshot, argv = stage_cli(tmp_path, context, profiles, monkeypatch)
+    evidence = scan_evidence(snapshot, committed_policy_sha())
+    now = datetime.now(UTC)
+    if change == "image-id":
+        evidence["images"][0]["tested_image_id"] = "sha256:" + "0" * 64
+    elif change == "blocking":
+        evidence["images"][1]["blocking"] = [{"id": "CVE-2026-0001", "reason": "fixable"}]
+    elif change == "missing-profile":
+        del evidence["images"][1]
+    elif change == "architecture":
+        evidence["architecture"] = "arm64"
+    elif change == "revision":
+        evidence["context"]["revision"] = "b" * 40
+    elif change == "stale-db":
+        evidence["scanner"]["db_updated_at"] = stamp(now - timedelta(hours=25))
+    elif change == "future-db":
+        evidence["scanner"]["db_updated_at"] = stamp(now + timedelta(hours=2))
+    elif change == "policy":
+        evidence["policy_sha256"] = "0" * 64
+    elif change == "failed-reference":
+        evidence["passed"] = False
+        evidence["images"][-1]["blocking"] = [{"id": "CVE-2026-0002", "reason": "fixable"}]
+    elif change == "scanner":
+        evidence["scanner"]["image"] = "aquasec/trivy:latest"
+    else:
+        evidence["kind"] = "trivy-report"
+    path = tmp_path / "scan-evidence.json"
+    path.write_text(json.dumps(evidence))
+    assert release.main([*argv, "--scan", str(path)]) == 2
+    assert message in capsys.readouterr().err
+    assert docker.operations == []  # No preflight, tag or push ran.
+    assert not (tmp_path / "receipt.json").exists()
+
+
+def test_stage_with_clean_fresh_evidence_writes_a_schema_2_receipt_with_scan_summary(
+    tmp_path: Path,
+    context: release.Context,
+    profiles: dict[str, release.Profile],
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    docker, snapshot, argv = stage_cli(tmp_path, context, profiles, monkeypatch)
+    evidence = scan_evidence(snapshot, committed_policy_sha())
+    evidence["images"][0]["suppressed"] = [
+        {
+            "id": "CVE-2026-0003",
+            "kind": "vulnerability",
+            "package": "libexample",
+            "installed": "1",
+            "fixed": "",
+            "severity": "HIGH",
+            "target": "debian",
+            "reason": "accepted",
+            "expires_at": "2099-01-01",
+            "reviewer": "pending-owner",
+        }
+    ]
+    path = tmp_path / "scan-evidence.json"
+    path.write_bytes(json.dumps(evidence).encode())
+    assert release.main([*argv, "--scan", str(path)]) == 0
+    staged = json.loads((tmp_path / "receipt.json").read_text())
+    assert staged["schema_version"] == 2
+    scan = staged["scan"]
+    assert scan["evidence_sha256"] == hashlib.sha256(path.read_bytes()).hexdigest()
+    assert scan["policy_sha256"] == committed_policy_sha()
+    assert scan["scanner_image"] == image_scan.TRIVY_IMAGE
+    assert [row["profile"] for row in scan["images"]] == ["app", "python-core"]
+    assert scan["images"][0]["suppressed"] == [
+        {"id": "CVE-2026-0003", "package": "libexample", "expires_at": "2099-01-01"}
+    ]
+    assert {row["tested_image_id"] for row in scan["images"]} == {
+        row["tested_image_id"] for row in snapshot["images"]
+    }
+    assert [op[1] for op in docker.operations if op[0] == "tag"] == [
+        row["tested_image_id"] for row in snapshot["images"]
+    ]
+
+
+def test_stage_images_refuses_a_scan_block_for_other_image_ids(
+    tmp_path: Path, context: release.Context, profiles: dict[str, release.Profile]
+) -> None:
+    registry = FakeRegistry()
+    docker = local_images(registry, context, profiles, "amd64")
+    snapshot = release.inspect_images(
+        context, profiles, ["app", "python-core"], "amd64", docker, root=tmp_path
+    )
+    scan = scan_block(snapshot["images"])
+    scan["images"][0]["tested_image_id"] = "sha256:" + "0" * 64
+    with pytest.raises(ReleaseError, match="exactly the staged image IDs"):
+        release.stage_images(
+            context,
+            profiles,
+            snapshot,
+            proofs(set(release.SEEDS), "python-core"),
+            registry,
+            docker,
+            tmp_path,
+            scan=scan,
+        )
+    assert not [op for op in docker.operations if op[0] in {"tag", "push"}]
+
+
+@pytest.mark.parametrize("change", ["schema-1", "missing-scan", "extra-scan-key", "wrong-id"])
+def test_staged_receipt_requires_schema_2_with_an_exact_scan_block(
+    tmp_path: Path,
+    context: release.Context,
+    profiles: dict[str, release.Profile],
+    change: str,
+) -> None:
+    value = receipt(FakeRegistry(), context, profiles, "amd64", "python-core")
+    assert release.staged_receipt(value, context, profiles, root=tmp_path) == value
+    if change == "schema-1":
+        value["schema_version"] = 1
+    elif change == "missing-scan":
+        del value["scan"]
+    elif change == "extra-scan-key":
+        value["scan"]["blocking"] = []
+    else:
+        value["scan"]["images"][0]["tested_image_id"] = "sha256:" + "0" * 64
+    with pytest.raises(ReleaseError):
+        release.staged_receipt(value, context, profiles, root=tmp_path)
+
+
+EXPIRED_ENTRY = {
+    "id": "CVE-2026-0004",
+    "kind": "vulnerability",
+    "package": "libexample",
+    "images": ["app"],
+    "justification": "No upstream fix; not reachable from the classroom.",
+    "reviewer": "pending-owner",
+    "reviewed_at": "2026-01-01",
+    "expires_at": "2026-02-01",
+}
+
+
+@pytest.mark.parametrize(
+    ("change", "message"),
+    [
+        ("stale-db", "last 24 hours"),
+        ("policy-changed", "differs from the committed"),
+        ("policy-expired", "invalid or expired"),
+        ("suppression-expired", "has expired"),
+    ],
+)
+def test_promote_scan_rejects_stale_changed_or_expired_evidence(
+    tmp_path: Path,
+    context: release.Context,
+    profiles: dict[str, release.Profile],
+    change: str,
+    message: str,
+) -> None:
+    registry = FakeRegistry()
+    folder = tmp_path / "receipts"
+    complete_receipts(folder, registry, context, profiles)
+    now = datetime.now(UTC)
+    policy = tmp_path / "docker/cve-policy.json"
+    if change == "stale-db":
+        now += timedelta(hours=24)
+    elif change == "policy-changed":
+        policy.write_text('{"schema": 1, "entries": []}')
+    elif change == "policy-expired":
+        policy.write_text(json.dumps({"schema": 1, "entries": [EXPIRED_ENTRY]}))
+    else:
+        path = folder / "java-arm64/release-receipt.json"
+        value = json.loads(path.read_text())
+        value["scan"]["images"][0]["suppressed"] = [
+            {
+                "id": "CVE-2026-0005",
+                "package": "libexample",
+                "expires_at": (now.date() - timedelta(days=1)).isoformat(),
+            }
+        ]
+        path.write_text(json.dumps(value))
+    with pytest.raises(ReleaseError, match=message):
+        release.promotion_inputs(folder, context, profiles, registry, tmp_path, now=now)
+    assert registry.puts == []
+
+
+def test_promote_scan_accepts_fresh_evidence_and_records_it_per_promoted_digest(
+    tmp_path: Path, context: release.Context, profiles: dict[str, release.Profile]
+) -> None:
+    registry = FakeRegistry()
+    folder = tmp_path / "receipts"
+    expected = complete_receipts(folder, registry, context, profiles)
+    scans: dict[str, dict[str, Any]] = {}
+    inputs = release.promotion_inputs(
+        folder,
+        context,
+        profiles,
+        registry,
+        tmp_path,
+        now=datetime.now(UTC) + timedelta(hours=22),
+        scans=scans,
+    )
+    assert inputs == expected
+    assert set(scans) == set(profiles)
+    output = tmp_path / "release.json"
+    report = release.promote_release(
+        context, profiles, registry, natives=inputs, output=output, root=tmp_path, scan=scans
+    )
+    written = json.loads(output.read_text())
+    assert written["scan"] == report["scan"] == scans
+    for key, by_arch in report["scan"].items():
+        assert set(by_arch) == set(release.ARCHITECTURES)
+        for arch, row in by_arch.items():
+            assert row["native_digest"] == inputs[key][arch].digest
+            assert row["policy_sha256"] == POLICY_SHA
+            assert row["counts"] == COUNTS
+            assert row["suppressed"] == []
+    tampered = copy.deepcopy(scans)
+    tampered["java21"]["amd64"]["native_digest"] = "sha256:" + "0" * 64
+    with pytest.raises(ReleaseError, match="exactly the promoted native digests"):
+        release.promote_release(
+            context,
+            profiles,
+            registry,
+            natives=inputs,
+            output=tmp_path / "other.json",
+            root=tmp_path,
+            scan=tampered,
+        )

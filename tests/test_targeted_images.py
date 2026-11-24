@@ -42,6 +42,13 @@ def test_workflow_keeps_build_test_free_of_hub_secrets_and_image_uploads() -> No
                 artifact = step["with"]
                 if artifact["name"].startswith("release-receipt-"):
                     assert step.get("if") == "needs.intent.outputs.mode == 'publish'"
+                elif artifact["name"].startswith("scan-reports-"):
+                    assert step.get("if") == "always()"
+                    assert artifact["retention-days"] == "30"
+                    assert set(artifact["path"].splitlines()) == {
+                        "work/scan-evidence*.json",
+                        "work/scan-reports/",
+                    }
                 elif artifact["name"].startswith("r-build-logs-"):
                     assert job_name == "workers"
                     assert step.get("if") == "always() && matrix.group == 'r'"
@@ -66,6 +73,7 @@ def test_workflow_keeps_build_test_free_of_hub_secrets_and_image_uploads() -> No
             for step in jobs[job_name]["steps"]
             if step.get("uses", "").startswith("actions/upload-artifact@")
             and step.get("if") == "always()"
+            and not step["with"]["name"].startswith("scan-reports-")
         ]
         assert len(reports) == 1
         cleanup = next(

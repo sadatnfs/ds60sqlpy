@@ -8,3 +8,9 @@ COPY courses/llm-theory/fixtures/ /opt/worker/courses/llm-theory/fixtures/
 ENV PYTHONPATH=/opt/worker/src PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1 DS60_WORKER_PROFILE=python-core
 ENTRYPOINT ["python", "-m", "ds60sqlpy.module_worker", "--host", "0.0.0.0", "--port", "8081"]
 CMD []
+# Keep the revision last so a new commit reuses every earlier cached layer.
+ARG DS60_SOURCE_REVISION=""
+ARG DS60_RELEASE_VERSION=""
+LABEL org.opencontainers.image.revision="${DS60_SOURCE_REVISION}" \
+    org.opencontainers.image.version="${DS60_RELEASE_VERSION}" \
+    org.opencontainers.image.source="https://github.com/sadatnfs/ds60sqlpy"

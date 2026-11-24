@@ -494,6 +494,106 @@ def test_security_lab_roles_stay_plain_nologin_set_only_memberships() -> None:
     assert "WITH INHERIT FALSE, SET TRUE" in grants[1]
 
 
+PINNED_REFERENCE = re.compile(r"[a-z0-9][\w./-]*(?::[\w.-]+)?@sha256:[0-9a-f]{64}")
+
+
+def unpinned_base_images(name: str, text: str) -> list[str]:
+    """Return external base-image references in one Dockerfile, Compose file or mirror list
+    that lack a sha256 digest. DS60-built images (ds60sqlpy-*) and build stages are exempt."""
+    problems: list[str] = []
+
+    def check(reference: str, where: str) -> None:
+        reference = reference.strip().strip("\"'")
+        default = re.fullmatch(r"\$\{\w+:-(.+)\}", reference)
+        if default:
+            reference = default.group(1)
+        if (
+            not reference
+            or reference.startswith(("$", "ds60sqlpy-", "ds60sqlpy:"))
+            or reference == "scratch"
+        ):
+            return
+        if not PINNED_REFERENCE.fullmatch(reference):
+            problems.append(f"{name}: {where}: {reference}")
+
+    if name.endswith(".env.txt"):
+        for line in text.splitlines():
+            if line and not line.startswith("#") and line.split("=", 1)[0].endswith("_IMAGE"):
+                check(line.split("=", 1)[1], line.split("=", 1)[0])
+        return problems
+    if name.endswith((".yaml", ".yml")):
+        # Names bound to another service (additional_contexts: NAME: service:lab) are DS60 builds.
+        contexts = set(re.findall(r"^\s+([\w.-]+):\s*service:\S+$", text, re.MULTILINE))
+        for match in re.finditer(r"^\s+(image|DS60_\w+_IMAGE):\s*(\S.*)$", text, re.MULTILINE):
+            if match.group(2).strip() not in contexts:
+                check(match.group(2), match.group(1))
+        return problems
+    stages: set[str] = set()
+    for line in text.splitlines():
+        arg = re.match(r"\s*ARG\s+(\w+_IMAGE)=(\S+)", line)
+        if arg:
+            check(arg.group(2), "ARG " + arg.group(1))
+        base = re.match(r"\s*FROM\s+(?:--platform=\S+\s+)?(\S+)(?:\s+AS\s+(\S+))?", line, re.I)
+        if base:
+            if base.group(1).lower() not in stages:
+                check(base.group(1), "FROM")
+            if base.group(2):
+                stages.add(base.group(2).lower())
+        for source in re.findall(r"COPY\s+--from=(\S+)", line):
+            if source.lower() not in stages:
+                check(source, "COPY --from")
+    return problems
+
+
+def test_every_external_base_image_is_digest_pinned() -> None:
+    sources = [
+        ROOT / "Dockerfile",
+        *sorted(ROOT.glob("compose*.yaml")),
+        *sorted((ROOT / "docker").rglob("Dockerfile*")),
+        *sorted((ROOT / "packages").glob("*/Dockerfile")),
+        ROOT / "docker/registry-mirrors.env.txt",
+    ]
+    problems = [
+        problem
+        for path in sources
+        for problem in unpinned_base_images(path.relative_to(ROOT).as_posix(), path.read_text())
+    ]
+    assert len(sources) > 25 and problems == []
+
+
+def test_digest_pin_contract_rejects_tags_and_accepts_digests() -> None:
+    digest = "@sha256:" + "a" * 64
+    dockerfile = (
+        f"ARG DS60_GOOD_IMAGE=debian:trixie-slim{digest}\n"
+        "ARG DS60_BAD_IMAGE=gcc:14.3.0-bookworm\n"
+        "FROM ${DS60_GOOD_IMAGE} AS build\n"
+        "FROM build\n"
+        "FROM ubuntu:24.04\n"
+        "COPY --from=build /out /out\n"
+        "COPY --from=busybox:1.37 /bin/sh /bin/sh\n"
+    )
+    assert unpinned_base_images("Dockerfile", dockerfile) == [
+        "Dockerfile: ARG DS60_BAD_IMAGE: gcc:14.3.0-bookworm",
+        "Dockerfile: FROM: ubuntu:24.04",
+        "Dockerfile: COPY --from: busybox:1.37",
+    ]
+    compose = (
+        "  db:\n    image: ${DS60_DB_IMAGE:-postgres:17}\n"
+        "  lab:\n    image: ${DS60_LAB_IMAGE:-ds60sqlpy:1.0.0}\n"
+        f"      args:\n        DS60_GO_IMAGE: ${{DS60_GO_IMAGE:-golang:1.26{digest}}}\n"
+        "        DS60_CORE_IMAGE: base\n      additional_contexts:\n        base: service:lab\n"
+        "        DS60_JAVA_IMAGE: temurin\n"
+    )
+    assert unpinned_base_images("compose.yaml", compose) == [
+        "compose.yaml: image: postgres:17",
+        "compose.yaml: DS60_JAVA_IMAGE: temurin",
+    ]
+    mirrors = f"DS60_A_IMAGE=mirror.gcr.io/library/a:1{digest}\nDS60_B_IMAGE=mirror.gcr.io/b:2\n"
+    assert unpinned_base_images("m.env.txt", mirrors) == [
+        "m.env.txt: DS60_B_IMAGE: mirror.gcr.io/b:2"
+    ]
+
+
 def test_every_python_base_is_one_maintained_pinned_image() -> None:
     sources = [
         ROOT / "Dockerfile",
@@ -511,7 +611,28 @@ def test_every_python_base_is_one_maintained_pinned_image() -> None:
         )
     }
     assert len(references) == 1, references
-    assert re.fullmatch(r"python:3\.\d+\.\d+-slim-[a-z]+@sha256:[0-9a-f]{64}", references.pop())
+    assert re.fullmatch(r"python:3\.\d+\.\d+-slim-trixie@sha256:[0-9a-f]{64}", references.pop())
+    node = {
+        match.group(1)
+        for text in texts.values()
+        for match in re.finditer(
+            r"(?<![\w.-])(?:mirror\.gcr\.io/library/)?(node:\d[^\s\"'}]*)", text
+        )
+    }
+    assert len(node) == 1, node
+    assert re.fullmatch(r"node:[\d.]+-trixie-slim@sha256:[0-9a-f]{64}", node.pop())
+    postgres = {
+        match.group(1)
+        for text in [
+            *texts.values(),
+            (ROOT / "scripts/classroom.sh").read_text(),
+        ]
+        for match in re.finditer(
+            r"(?<![\w.-])(?:mirror\.gcr\.io/library/)?(postgres:\d[^\s\"'}]*)", text
+        )
+    }
+    assert len(postgres) == 1, postgres
+    assert re.fullmatch(r"postgres:\d+\.\d+-trixie@sha256:[0-9a-f]{64}", postgres.pop())
     assert not [name for name, text in texts.items() if "astral-sh/uv:python" in text]
     spark = {
         match.group(1)

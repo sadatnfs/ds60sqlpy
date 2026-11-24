@@ -244,7 +244,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line">      <span class="syntax-tag">dockerfile</span><span class="syntax-punctuation">:</span> docker/workers/Dockerfile.python-web</span>
 <span class="source-line">      <span class="syntax-tag">args</span><span class="syntax-punctuation">:</span></span>
 <span class="source-line">        <span class="syntax-tag">&lt;&lt;</span><span class="syntax-punctuation">:</span> *python-mirror</span>
-<span class="source-line">        <span class="syntax-tag">DS60_PYTHON_IMAGE</span><span class="syntax-punctuation">:</span> ${DS60_PYTHON_IMAGE:-python:3.12.16-slim-bookworm@sha256:935c3c5b12357a7e10caa9c1e6ca5692344d97cf229832ef584be2cec9fc03df}</span>
+<span class="source-line">        <span class="syntax-tag">DS60_PYTHON_IMAGE</span><span class="syntax-punctuation">:</span> ${DS60_PYTHON_IMAGE:-python:3.12.16-slim-trixie@sha256:5e2bdb1b0d542d5039cffb8181c65930093949194a65c365dfb1b0fe13a4fa5b}</span>
 <span class="source-line">    <span class="syntax-tag">environment</span><span class="syntax-punctuation">:</span></span>
 <span class="source-line">      <span class="syntax-tag">DS60_WORKER_PROFILE</span><span class="syntax-punctuation">:</span> python-web</span>
 <span class="source-line">  <span class="syntax-tag">dbt-worker</span><span class="syntax-punctuation">:</span></span>
@@ -259,7 +259,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line">      <span class="syntax-tag">dockerfile</span><span class="syntax-punctuation">:</span> docker/workers/Dockerfile.data</span>
 <span class="source-line">      <span class="syntax-tag">args</span><span class="syntax-punctuation">:</span></span>
 <span class="source-line">        <span class="syntax-tag">&lt;&lt;</span><span class="syntax-punctuation">:</span> *python-mirror</span>
-<span class="source-line">        <span class="syntax-tag">DS60_PYTHON_IMAGE</span><span class="syntax-punctuation">:</span> ${DS60_PYTHON_IMAGE:-python:3.12.16-slim-bookworm@sha256:935c3c5b12357a7e10caa9c1e6ca5692344d97cf229832ef584be2cec9fc03df}</span>
+<span class="source-line">        <span class="syntax-tag">DS60_PYTHON_IMAGE</span><span class="syntax-punctuation">:</span> ${DS60_PYTHON_IMAGE:-python:3.12.16-slim-trixie@sha256:5e2bdb1b0d542d5039cffb8181c65930093949194a65c365dfb1b0fe13a4fa5b}</span>
 <span class="source-line">    <span class="syntax-tag">environment</span><span class="syntax-punctuation">:</span></span>
 <span class="source-line">      <span class="syntax-tag">DS60_WORKER_PROFILE</span><span class="syntax-punctuation">:</span> dbt-duckdb</span>
 <span class="source-line">  <span class="syntax-tag">data-platforms-worker</span><span class="syntax-punctuation">:</span></span>
@@ -271,7 +271,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line">      <span class="syntax-tag">dockerfile</span><span class="syntax-punctuation">:</span> docker/workers/Dockerfile.data-platforms</span>
 <span class="source-line">      <span class="syntax-tag">args</span><span class="syntax-punctuation">:</span></span>
 <span class="source-line">        <span class="syntax-tag">&lt;&lt;</span><span class="syntax-punctuation">:</span> *python-mirror</span>
-<span class="source-line">        <span class="syntax-tag">DS60_PYTHON_IMAGE</span><span class="syntax-punctuation">:</span> ${DS60_PYTHON_IMAGE:-python:3.12.16-slim-bookworm@sha256:935c3c5b12357a7e10caa9c1e6ca5692344d97cf229832ef584be2cec9fc03df}</span>
+<span class="source-line">        <span class="syntax-tag">DS60_PYTHON_IMAGE</span><span class="syntax-punctuation">:</span> ${DS60_PYTHON_IMAGE:-python:3.12.16-slim-trixie@sha256:5e2bdb1b0d542d5039cffb8181c65930093949194a65c365dfb1b0fe13a4fa5b}</span>
 <span class="source-line">    <span class="syntax-tag">environment</span><span class="syntax-punctuation">:</span></span>
 <span class="source-line">      <span class="syntax-tag">DS60_WORKER_PROFILE</span><span class="syntax-punctuation">:</span> data-platforms-python</span>
 <span class="source-line">  <span class="syntax-tag">data-engineering-worker</span><span class="syntax-punctuation">:</span></span>
@@ -286,7 +286,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line">      <span class="syntax-tag">dockerfile</span><span class="syntax-punctuation">:</span> docker/workers/Dockerfile.data</span>
 <span class="source-line">      <span class="syntax-tag">args</span><span class="syntax-punctuation">:</span></span>
 <span class="source-line">        <span class="syntax-tag">&lt;&lt;</span><span class="syntax-punctuation">:</span> *python-mirror</span>
-<span class="source-line">        <span class="syntax-tag">DS60_PYTHON_IMAGE</span><span class="syntax-punctuation">:</span> ${DS60_PYTHON_IMAGE:-python:3.12.16-slim-bookworm@sha256:935c3c5b12357a7e10caa9c1e6ca5692344d97cf229832ef584be2cec9fc03df}</span>
+<span class="source-line">        <span class="syntax-tag">DS60_PYTHON_IMAGE</span><span class="syntax-punctuation">:</span> ${DS60_PYTHON_IMAGE:-python:3.12.16-slim-trixie@sha256:5e2bdb1b0d542d5039cffb8181c65930093949194a65c365dfb1b0fe13a4fa5b}</span>
 <span class="source-line">    <span class="syntax-tag">environment</span><span class="syntax-punctuation">:</span></span>
 <span class="source-line">      <span class="syntax-tag">DS60_WORKER_PROFILE</span><span class="syntax-punctuation">:</span> data-engineering</span>
 <span class="source-line">  <span class="syntax-tag">stan-worker</span><span class="syntax-punctuation">:</span></span>
@@ -301,7 +301,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line">      <span class="syntax-tag">dockerfile</span><span class="syntax-punctuation">:</span> docker/workers/Dockerfile.stan</span>
 <span class="source-line">      <span class="syntax-tag">args</span><span class="syntax-punctuation">:</span></span>
 <span class="source-line">        <span class="syntax-tag">&lt;&lt;</span><span class="syntax-punctuation">:</span> *python-mirror</span>
-<span class="source-line">        <span class="syntax-tag">DS60_PYTHON_IMAGE</span><span class="syntax-punctuation">:</span> ${DS60_PYTHON_IMAGE:-python:3.12.16-slim-bookworm@sha256:935c3c5b12357a7e10caa9c1e6ca5692344d97cf229832ef584be2cec9fc03df}</span>
+<span class="source-line">        <span class="syntax-tag">DS60_PYTHON_IMAGE</span><span class="syntax-punctuation">:</span> ${DS60_PYTHON_IMAGE:-python:3.12.16-slim-trixie@sha256:5e2bdb1b0d542d5039cffb8181c65930093949194a65c365dfb1b0fe13a4fa5b}</span>
 <span class="source-line">    <span class="syntax-tag">environment</span><span class="syntax-punctuation">:</span></span>
 <span class="source-line">      <span class="syntax-tag">DS60_WORKER_PROFILE</span><span class="syntax-punctuation">:</span> stan-cpu</span>
 <span class="source-line">  <span class="syntax-tag">julia-worker</span><span class="syntax-punctuation">:</span></span>
@@ -315,7 +315,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line">      <span class="syntax-tag">context</span><span class="syntax-punctuation">:</span> .</span>
 <span class="source-line">      <span class="syntax-tag">dockerfile</span><span class="syntax-punctuation">:</span> docker/workers/Dockerfile.julia</span>
 <span class="source-line">      <span class="syntax-tag">args</span><span class="syntax-punctuation">:</span></span>
-<span class="source-line">        <span class="syntax-tag">DS60_PYTHON_IMAGE</span><span class="syntax-punctuation">:</span> ${DS60_PYTHON_IMAGE:-python:3.12.16-slim-bookworm@sha256:935c3c5b12357a7e10caa9c1e6ca5692344d97cf229832ef584be2cec9fc03df}</span>
+<span class="source-line">        <span class="syntax-tag">DS60_PYTHON_IMAGE</span><span class="syntax-punctuation">:</span> ${DS60_PYTHON_IMAGE:-python:3.12.16-slim-trixie@sha256:5e2bdb1b0d542d5039cffb8181c65930093949194a65c365dfb1b0fe13a4fa5b}</span>
 <span class="source-line">    <span class="syntax-tag">environment</span><span class="syntax-punctuation">:</span></span>
 <span class="source-line">      <span class="syntax-tag">DS60_WORKER_PROFILE</span><span class="syntax-punctuation">:</span> julia</span>
 <span class="source-line">  <span class="syntax-tag">jax-worker</span><span class="syntax-punctuation">:</span></span>
@@ -328,7 +328,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line">      <span class="syntax-tag">dockerfile</span><span class="syntax-punctuation">:</span> docker/workers/Dockerfile.jax</span>
 <span class="source-line">      <span class="syntax-tag">args</span><span class="syntax-punctuation">:</span></span>
 <span class="source-line">        <span class="syntax-tag">&lt;&lt;</span><span class="syntax-punctuation">:</span> *python-mirror</span>
-<span class="source-line">        <span class="syntax-tag">DS60_PYTHON_IMAGE</span><span class="syntax-punctuation">:</span> ${DS60_PYTHON_IMAGE:-python:3.12.16-slim-bookworm@sha256:935c3c5b12357a7e10caa9c1e6ca5692344d97cf229832ef584be2cec9fc03df}</span>
+<span class="source-line">        <span class="syntax-tag">DS60_PYTHON_IMAGE</span><span class="syntax-punctuation">:</span> ${DS60_PYTHON_IMAGE:-python:3.12.16-slim-trixie@sha256:5e2bdb1b0d542d5039cffb8181c65930093949194a65c365dfb1b0fe13a4fa5b}</span>
 <span class="source-line">    <span class="syntax-tag">environment</span><span class="syntax-punctuation">:</span></span>
 <span class="source-line">      <span class="syntax-tag">DS60_WORKER_PROFILE</span><span class="syntax-punctuation">:</span> jax-cpu</span>
 <span class="source-line">  <span class="syntax-tag">bayesian-worker</span><span class="syntax-punctuation">:</span></span>
@@ -341,7 +341,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line">      <span class="syntax-tag">dockerfile</span><span class="syntax-punctuation">:</span> docker/workers/Dockerfile.bayesian</span>
 <span class="source-line">      <span class="syntax-tag">args</span><span class="syntax-punctuation">:</span></span>
 <span class="source-line">        <span class="syntax-tag">&lt;&lt;</span><span class="syntax-punctuation">:</span> *python-mirror</span>
-<span class="source-line">        <span class="syntax-tag">DS60_PYTHON_IMAGE</span><span class="syntax-punctuation">:</span> ${DS60_PYTHON_IMAGE:-python:3.12.16-slim-bookworm@sha256:935c3c5b12357a7e10caa9c1e6ca5692344d97cf229832ef584be2cec9fc03df}</span>
+<span class="source-line">        <span class="syntax-tag">DS60_PYTHON_IMAGE</span><span class="syntax-punctuation">:</span> ${DS60_PYTHON_IMAGE:-python:3.12.16-slim-trixie@sha256:5e2bdb1b0d542d5039cffb8181c65930093949194a65c365dfb1b0fe13a4fa5b}</span>
 <span class="source-line">    <span class="syntax-tag">environment</span><span class="syntax-punctuation">:</span></span>
 <span class="source-line">      <span class="syntax-tag">DS60_WORKER_PROFILE</span><span class="syntax-punctuation">:</span> bayesian-cpu</span>
 <span class="source-line">  <span class="syntax-tag">r-worker</span><span class="syntax-punctuation">:</span></span>
@@ -375,8 +375,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line">      <span class="syntax-tag">context</span><span class="syntax-punctuation">:</span> .</span>
 <span class="source-line">      <span class="syntax-tag">dockerfile</span><span class="syntax-punctuation">:</span> docker/workers/Dockerfile.cpp</span>
 <span class="source-line">      <span class="syntax-tag">args</span><span class="syntax-punctuation">:</span></span>
-<span class="source-line">        <span class="syntax-tag">&lt;&lt;</span><span class="syntax-punctuation">:</span> *python-mirror</span>
-<span class="source-line">        <span class="syntax-tag">DS60_CPP_IMAGE</span><span class="syntax-punctuation">:</span> ${DS60_CPP_IMAGE:-gcc:14.3.0-bookworm}</span>
+<span class="source-line">        <span class="syntax-tag">DS60_PYTHON_IMAGE</span><span class="syntax-punctuation">:</span> ${DS60_PYTHON_IMAGE:-python:3.12.16-slim-trixie@sha256:5e2bdb1b0d542d5039cffb8181c65930093949194a65c365dfb1b0fe13a4fa5b}</span>
 <span class="source-line">    <span class="syntax-tag">environment</span><span class="syntax-punctuation">:</span></span>
 <span class="source-line">      <span class="syntax-tag">DS60_WORKER_PROFILE</span><span class="syntax-punctuation">:</span> cpp20</span>
 <span class="source-line">  <span class="syntax-tag">tensorflow-worker</span><span class="syntax-punctuation">:</span></span>
@@ -389,7 +388,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line">      <span class="syntax-tag">dockerfile</span><span class="syntax-punctuation">:</span> docker/workers/Dockerfile.tensorflow</span>
 <span class="source-line">      <span class="syntax-tag">args</span><span class="syntax-punctuation">:</span></span>
 <span class="source-line">        <span class="syntax-tag">&lt;&lt;</span><span class="syntax-punctuation">:</span> *python-mirror</span>
-<span class="source-line">        <span class="syntax-tag">DS60_PYTHON_IMAGE</span><span class="syntax-punctuation">:</span> ${DS60_PYTHON_IMAGE:-python:3.12.16-slim-bookworm@sha256:935c3c5b12357a7e10caa9c1e6ca5692344d97cf229832ef584be2cec9fc03df}</span>
+<span class="source-line">        <span class="syntax-tag">DS60_PYTHON_IMAGE</span><span class="syntax-punctuation">:</span> ${DS60_PYTHON_IMAGE:-python:3.12.16-slim-trixie@sha256:5e2bdb1b0d542d5039cffb8181c65930093949194a65c365dfb1b0fe13a4fa5b}</span>
 <span class="source-line">    <span class="syntax-tag">environment</span><span class="syntax-punctuation">:</span></span>
 <span class="source-line">      <span class="syntax-tag">DS60_WORKER_PROFILE</span><span class="syntax-punctuation">:</span> tensorflow-cpu</span>
 <span class="source-line">  <span class="syntax-tag">llm-worker</span><span class="syntax-punctuation">:</span></span>
@@ -402,7 +401,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line">      <span class="syntax-tag">dockerfile</span><span class="syntax-punctuation">:</span> docker/workers/Dockerfile.torch</span>
 <span class="source-line">      <span class="syntax-tag">args</span><span class="syntax-punctuation">:</span></span>
 <span class="source-line">        <span class="syntax-tag">&lt;&lt;</span><span class="syntax-punctuation">:</span> *python-mirror</span>
-<span class="source-line">        <span class="syntax-tag">DS60_PYTHON_IMAGE</span><span class="syntax-punctuation">:</span> ${DS60_PYTHON_IMAGE:-python:3.12.16-slim-bookworm@sha256:935c3c5b12357a7e10caa9c1e6ca5692344d97cf229832ef584be2cec9fc03df}</span>
+<span class="source-line">        <span class="syntax-tag">DS60_PYTHON_IMAGE</span><span class="syntax-punctuation">:</span> ${DS60_PYTHON_IMAGE:-python:3.12.16-slim-trixie@sha256:5e2bdb1b0d542d5039cffb8181c65930093949194a65c365dfb1b0fe13a4fa5b}</span>
 <span class="source-line">    <span class="syntax-tag">environment</span><span class="syntax-punctuation">:</span></span>
 <span class="source-line">      <span class="syntax-tag">DS60_WORKER_PROFILE</span><span class="syntax-punctuation">:</span> llm-torch-cpu</span>
 <span class="source-line">  <span class="syntax-tag">scala-worker</span><span class="syntax-punctuation">:</span></span>
@@ -414,7 +413,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line">      <span class="syntax-tag">dockerfile</span><span class="syntax-punctuation">:</span> docker/workers/Dockerfile.spark</span>
 <span class="source-line">      <span class="syntax-tag">args</span><span class="syntax-punctuation">:</span></span>
 <span class="source-line">        <span class="syntax-tag">DS60_SPARK_IMAGE</span><span class="syntax-punctuation">:</span> ${DS60_SPARK_IMAGE:-spark:4.0.1-scala2.13-java17-python3-ubuntu@sha256:a552a335e0aedb44fa28b20ed7e9dc52c2e856faf87fb0409fb57dbf37b45bf7}</span>
-<span class="source-line">        <span class="syntax-tag">DS60_PYTHON_IMAGE</span><span class="syntax-punctuation">:</span> ${DS60_PYTHON_IMAGE:-python:3.12.16-slim-bookworm@sha256:935c3c5b12357a7e10caa9c1e6ca5692344d97cf229832ef584be2cec9fc03df}</span>
+<span class="source-line">        <span class="syntax-tag">DS60_PYTHON_IMAGE</span><span class="syntax-punctuation">:</span> ${DS60_PYTHON_IMAGE:-python:3.12.16-slim-trixie@sha256:5e2bdb1b0d542d5039cffb8181c65930093949194a65c365dfb1b0fe13a4fa5b}</span>
 <span class="source-line">    <span class="syntax-tag">environment</span><span class="syntax-punctuation">:</span></span>
 <span class="source-line">      <span class="syntax-tag">DS60_WORKER_PROFILE</span><span class="syntax-punctuation">:</span> scala-jvm</span>
 <span class="source-line">  <span class="syntax-tag">spark-scala-worker</span><span class="syntax-punctuation">:</span></span>
@@ -428,7 +427,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line">      <span class="syntax-tag">dockerfile</span><span class="syntax-punctuation">:</span> docker/workers/Dockerfile.spark</span>
 <span class="source-line">      <span class="syntax-tag">args</span><span class="syntax-punctuation">:</span></span>
 <span class="source-line">        <span class="syntax-tag">DS60_SPARK_IMAGE</span><span class="syntax-punctuation">:</span> ${DS60_SPARK_IMAGE:-spark:4.0.1-scala2.13-java17-python3-ubuntu@sha256:a552a335e0aedb44fa28b20ed7e9dc52c2e856faf87fb0409fb57dbf37b45bf7}</span>
-<span class="source-line">        <span class="syntax-tag">DS60_PYTHON_IMAGE</span><span class="syntax-punctuation">:</span> ${DS60_PYTHON_IMAGE:-python:3.12.16-slim-bookworm@sha256:935c3c5b12357a7e10caa9c1e6ca5692344d97cf229832ef584be2cec9fc03df}</span>
+<span class="source-line">        <span class="syntax-tag">DS60_PYTHON_IMAGE</span><span class="syntax-punctuation">:</span> ${DS60_PYTHON_IMAGE:-python:3.12.16-slim-trixie@sha256:5e2bdb1b0d542d5039cffb8181c65930093949194a65c365dfb1b0fe13a4fa5b}</span>
 <span class="source-line">    <span class="syntax-tag">environment</span><span class="syntax-punctuation">:</span></span>
 <span class="source-line">      <span class="syntax-tag">DS60_WORKER_PROFILE</span><span class="syntax-punctuation">:</span> spark-local-scala</span>
 <span class="source-line">  <span class="syntax-tag">spark-python-worker</span><span class="syntax-punctuation">:</span></span>
@@ -442,7 +441,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line">      <span class="syntax-tag">dockerfile</span><span class="syntax-punctuation">:</span> docker/workers/Dockerfile.spark</span>
 <span class="source-line">      <span class="syntax-tag">args</span><span class="syntax-punctuation">:</span></span>
 <span class="source-line">        <span class="syntax-tag">DS60_SPARK_IMAGE</span><span class="syntax-punctuation">:</span> ${DS60_SPARK_IMAGE:-spark:4.0.1-scala2.13-java17-python3-ubuntu@sha256:a552a335e0aedb44fa28b20ed7e9dc52c2e856faf87fb0409fb57dbf37b45bf7}</span>
-<span class="source-line">        <span class="syntax-tag">DS60_PYTHON_IMAGE</span><span class="syntax-punctuation">:</span> ${DS60_PYTHON_IMAGE:-python:3.12.16-slim-bookworm@sha256:935c3c5b12357a7e10caa9c1e6ca5692344d97cf229832ef584be2cec9fc03df}</span>
+<span class="source-line">        <span class="syntax-tag">DS60_PYTHON_IMAGE</span><span class="syntax-punctuation">:</span> ${DS60_PYTHON_IMAGE:-python:3.12.16-slim-trixie@sha256:5e2bdb1b0d542d5039cffb8181c65930093949194a65c365dfb1b0fe13a4fa5b}</span>
 <span class="source-line">    <span class="syntax-tag">environment</span><span class="syntax-punctuation">:</span></span>
 <span class="source-line">      <span class="syntax-tag">DS60_WORKER_PROFILE</span><span class="syntax-punctuation">:</span> spark-local-python</span>
 <span class="source-line"></span>
@@ -454,8 +453,8 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line">      <span class="syntax-tag">context</span><span class="syntax-punctuation">:</span> .</span>
 <span class="source-line">      <span class="syntax-tag">dockerfile</span><span class="syntax-punctuation">:</span> docker/workers/Dockerfile.java</span>
 <span class="source-line">      <span class="syntax-tag">args</span><span class="syntax-punctuation">:</span></span>
-<span class="source-line">        <span class="syntax-tag">DS60_JAVA_IMAGE</span><span class="syntax-punctuation">:</span> ${DS60_JAVA_IMAGE:-eclipse-temurin:21-jdk-jammy@sha256:432e54724c3e57d1846aeb886f4d339f3b0522931c4e64119c2797013b7cfc3c}</span>
-<span class="source-line">        <span class="syntax-tag">DS60_PYTHON_IMAGE</span><span class="syntax-punctuation">:</span> ${DS60_PYTHON_IMAGE:-python:3.12.16-slim-bookworm@sha256:935c3c5b12357a7e10caa9c1e6ca5692344d97cf229832ef584be2cec9fc03df}</span>
+<span class="source-line">        <span class="syntax-tag">DS60_JAVA_IMAGE</span><span class="syntax-punctuation">:</span> ${DS60_JAVA_IMAGE:-eclipse-temurin:21-jdk-noble@sha256:a09e64f4976df9c4f2029c6abe64fc26f069a342ec9a7f147dce7b1933ebda16}</span>
+<span class="source-line">        <span class="syntax-tag">DS60_PYTHON_IMAGE</span><span class="syntax-punctuation">:</span> ${DS60_PYTHON_IMAGE:-python:3.12.16-slim-trixie@sha256:5e2bdb1b0d542d5039cffb8181c65930093949194a65c365dfb1b0fe13a4fa5b}</span>
 <span class="source-line">    <span class="syntax-tag">environment</span><span class="syntax-punctuation">:</span></span>
 <span class="source-line">      <span class="syntax-tag">DS60_WORKER_PROFILE</span><span class="syntax-punctuation">:</span> java21</span>
 <span class="source-line">  <span class="syntax-tag">javascript-worker</span><span class="syntax-punctuation">:</span></span>
@@ -467,8 +466,8 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line">      <span class="syntax-tag">dockerfile</span><span class="syntax-punctuation">:</span> docker/workers/Dockerfile.node</span>
 <span class="source-line">      <span class="syntax-tag">args</span><span class="syntax-punctuation">:</span></span>
 <span class="source-line">        <span class="syntax-tag">&lt;&lt;</span><span class="syntax-punctuation">:</span> *npm-mirror</span>
-<span class="source-line">        <span class="syntax-tag">DS60_NODE_IMAGE</span><span class="syntax-punctuation">:</span> ${DS60_NODE_IMAGE:-node:24.22.3-bookworm-slim@sha256:dc26ae92c9fb15cf6b1d63e20f0944b2efe0f115b20e00be48fb23fceb061c54}</span>
-<span class="source-line">        <span class="syntax-tag">DS60_PYTHON_IMAGE</span><span class="syntax-punctuation">:</span> ${DS60_PYTHON_IMAGE:-python:3.12.16-slim-bookworm@sha256:935c3c5b12357a7e10caa9c1e6ca5692344d97cf229832ef584be2cec9fc03df}</span>
+<span class="source-line">        <span class="syntax-tag">DS60_NODE_IMAGE</span><span class="syntax-punctuation">:</span> ${DS60_NODE_IMAGE:-node:24.22.3-trixie-slim@sha256:af02d57b57719b9657a45199a79264a9437940cd55b3c7b3fc99615654f124a0}</span>
+<span class="source-line">        <span class="syntax-tag">DS60_PYTHON_IMAGE</span><span class="syntax-punctuation">:</span> ${DS60_PYTHON_IMAGE:-python:3.12.16-slim-trixie@sha256:5e2bdb1b0d542d5039cffb8181c65930093949194a65c365dfb1b0fe13a4fa5b}</span>
 <span class="source-line">    <span class="syntax-tag">environment</span><span class="syntax-punctuation">:</span></span>
 <span class="source-line">      <span class="syntax-tag">DS60_WORKER_PROFILE</span><span class="syntax-punctuation">:</span> javascript-node</span>
 <span class="source-line">  <span class="syntax-tag">typescript-worker</span><span class="syntax-punctuation">:</span></span>
@@ -480,8 +479,8 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line">      <span class="syntax-tag">dockerfile</span><span class="syntax-punctuation">:</span> docker/workers/Dockerfile.node</span>
 <span class="source-line">      <span class="syntax-tag">args</span><span class="syntax-punctuation">:</span></span>
 <span class="source-line">        <span class="syntax-tag">&lt;&lt;</span><span class="syntax-punctuation">:</span> *npm-mirror</span>
-<span class="source-line">        <span class="syntax-tag">DS60_NODE_IMAGE</span><span class="syntax-punctuation">:</span> ${DS60_NODE_IMAGE:-node:24.22.3-bookworm-slim@sha256:dc26ae92c9fb15cf6b1d63e20f0944b2efe0f115b20e00be48fb23fceb061c54}</span>
-<span class="source-line">        <span class="syntax-tag">DS60_PYTHON_IMAGE</span><span class="syntax-punctuation">:</span> ${DS60_PYTHON_IMAGE:-python:3.12.16-slim-bookworm@sha256:935c3c5b12357a7e10caa9c1e6ca5692344d97cf229832ef584be2cec9fc03df}</span>
+<span class="source-line">        <span class="syntax-tag">DS60_NODE_IMAGE</span><span class="syntax-punctuation">:</span> ${DS60_NODE_IMAGE:-node:24.22.3-trixie-slim@sha256:af02d57b57719b9657a45199a79264a9437940cd55b3c7b3fc99615654f124a0}</span>
+<span class="source-line">        <span class="syntax-tag">DS60_PYTHON_IMAGE</span><span class="syntax-punctuation">:</span> ${DS60_PYTHON_IMAGE:-python:3.12.16-slim-trixie@sha256:5e2bdb1b0d542d5039cffb8181c65930093949194a65c365dfb1b0fe13a4fa5b}</span>
 <span class="source-line">    <span class="syntax-tag">environment</span><span class="syntax-punctuation">:</span></span>
 <span class="source-line">      <span class="syntax-tag">DS60_WORKER_PROFILE</span><span class="syntax-punctuation">:</span> typescript-node</span>
 <span class="source-line"></span>
@@ -493,7 +492,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line">      <span class="syntax-tag">context</span><span class="syntax-punctuation">:</span> .</span>
 <span class="source-line">      <span class="syntax-tag">dockerfile</span><span class="syntax-punctuation">:</span> docker/workers/Dockerfile.c</span>
 <span class="source-line">      <span class="syntax-tag">args</span><span class="syntax-punctuation">:</span></span>
-<span class="source-line">        <span class="syntax-tag">DS60_C_IMAGE</span><span class="syntax-punctuation">:</span> ${DS60_C_IMAGE:-gcc:14.3.0-bookworm}</span>
+<span class="source-line">        <span class="syntax-tag">DS60_PYTHON_IMAGE</span><span class="syntax-punctuation">:</span> ${DS60_PYTHON_IMAGE:-python:3.12.16-slim-trixie@sha256:5e2bdb1b0d542d5039cffb8181c65930093949194a65c365dfb1b0fe13a4fa5b}</span>
 <span class="source-line">    <span class="syntax-tag">environment</span><span class="syntax-punctuation">:</span></span>
 <span class="source-line">      <span class="syntax-tag">DS60_WORKER_PROFILE</span><span class="syntax-punctuation">:</span> c17</span>
 <span class="source-line"></span>
@@ -505,7 +504,8 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line">      <span class="syntax-tag">context</span><span class="syntax-punctuation">:</span> .</span>
 <span class="source-line">      <span class="syntax-tag">dockerfile</span><span class="syntax-punctuation">:</span> docker/workers/Dockerfile.go</span>
 <span class="source-line">      <span class="syntax-tag">args</span><span class="syntax-punctuation">:</span></span>
-<span class="source-line">        <span class="syntax-tag">DS60_GO_IMAGE</span><span class="syntax-punctuation">:</span> ${DS60_GO_IMAGE:-golang:1.27.4-bookworm@sha256:4fa7c968ba93f1635670522dbb01a2c78150443e1385746924566079f36570ea}</span>
+<span class="source-line">        <span class="syntax-tag">DS60_GO_IMAGE</span><span class="syntax-punctuation">:</span> ${DS60_GO_IMAGE:-golang:1.27.4-trixie@sha256:f18c3d73a184fb0582828510722e723b63a93f7188d11dd223d9be6f6880e65d}</span>
+<span class="source-line">        <span class="syntax-tag">DS60_PYTHON_IMAGE</span><span class="syntax-punctuation">:</span> ${DS60_PYTHON_IMAGE:-python:3.12.16-slim-trixie@sha256:5e2bdb1b0d542d5039cffb8181c65930093949194a65c365dfb1b0fe13a4fa5b}</span>
 <span class="source-line">    <span class="syntax-tag">environment</span><span class="syntax-punctuation">:</span></span>
 <span class="source-line">      <span class="syntax-tag">DS60_WORKER_PROFILE</span><span class="syntax-punctuation">:</span> go</span>
 <span class="source-line"></span>
@@ -517,7 +517,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line">      <span class="syntax-tag">context</span><span class="syntax-punctuation">:</span> .</span>
 <span class="source-line">      <span class="syntax-tag">dockerfile</span><span class="syntax-punctuation">:</span> docker/workers/Dockerfile.csharp</span>
 <span class="source-line">      <span class="syntax-tag">args</span><span class="syntax-punctuation">:</span></span>
-<span class="source-line">        <span class="syntax-tag">DS60_DOTNET_IMAGE</span><span class="syntax-punctuation">:</span> ${DS60_DOTNET_IMAGE:-mcr.microsoft.com/dotnet/sdk:10.0@sha256:bef136a371963aaa46ec97882845ef6f54dec15728bb4b128b1c2a400ffbc9b4}</span>
+<span class="source-line">        <span class="syntax-tag">DS60_DOTNET_IMAGE</span><span class="syntax-punctuation">:</span> ${DS60_DOTNET_IMAGE:-mcr.microsoft.com/dotnet/sdk:10.0@sha256:8c6edfb26c85153f236d26efebd9ad349aec403583f343f201ee67838b23658d}</span>
 <span class="source-line">    <span class="syntax-tag">environment</span><span class="syntax-punctuation">:</span></span>
 <span class="source-line">      <span class="syntax-tag">DS60_WORKER_PROFILE</span><span class="syntax-punctuation">:</span> csharp-dotnet</span>
 <span class="source-line"></span>
@@ -529,7 +529,8 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line">      <span class="syntax-tag">context</span><span class="syntax-punctuation">:</span> .</span>
 <span class="source-line">      <span class="syntax-tag">dockerfile</span><span class="syntax-punctuation">:</span> docker/workers/Dockerfile.rust</span>
 <span class="source-line">      <span class="syntax-tag">args</span><span class="syntax-punctuation">:</span></span>
-<span class="source-line">        <span class="syntax-tag">DS60_RUST_IMAGE</span><span class="syntax-punctuation">:</span> ${DS60_RUST_IMAGE:-rust:1.99.1-bookworm@sha256:48b7f435b8fc6378ce43b44f15e3a47fd8919b2825f835c39bd4bd3da50af5b8}</span>
+<span class="source-line">        <span class="syntax-tag">DS60_RUST_IMAGE</span><span class="syntax-punctuation">:</span> ${DS60_RUST_IMAGE:-rust:1.99.1-slim-trixie@sha256:f6c4a35d21dbb3c89d7a8d056c193e94fc09037f2b58dd858b09c39a47dd02d7}</span>
+<span class="source-line">        <span class="syntax-tag">DS60_PYTHON_IMAGE</span><span class="syntax-punctuation">:</span> ${DS60_PYTHON_IMAGE:-python:3.12.16-slim-trixie@sha256:5e2bdb1b0d542d5039cffb8181c65930093949194a65c365dfb1b0fe13a4fa5b}</span>
 <span class="source-line">    <span class="syntax-tag">environment</span><span class="syntax-punctuation">:</span></span>
 <span class="source-line">      <span class="syntax-tag">DS60_WORKER_PROFILE</span><span class="syntax-punctuation">:</span> rust-stable</span>
 <span class="source-line"></span>
@@ -541,7 +542,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line">      <span class="syntax-tag">context</span><span class="syntax-punctuation">:</span> .</span>
 <span class="source-line">      <span class="syntax-tag">dockerfile</span><span class="syntax-punctuation">:</span> docker/workers/Dockerfile.swift</span>
 <span class="source-line">      <span class="syntax-tag">args</span><span class="syntax-punctuation">:</span></span>
-<span class="source-line">        <span class="syntax-tag">DS60_SWIFT_IMAGE</span><span class="syntax-punctuation">:</span> ${DS60_SWIFT_IMAGE:-swift:6.3.3-noble@sha256:c2f3ac2eb806ce43f68859c3d52bd3bb1cfc88672fb3a948b76e136d98e39278}</span>
+<span class="source-line">        <span class="syntax-tag">DS60_SWIFT_IMAGE</span><span class="syntax-punctuation">:</span> ${DS60_SWIFT_IMAGE:-swift:6.3.3-noble@sha256:4f42306306fe7e5a773a8d47d7e2a24dc3a975d1feb77996297ecfd7c329b1e9}</span>
 <span class="source-line">    <span class="syntax-tag">environment</span><span class="syntax-punctuation">:</span></span>
 <span class="source-line">      <span class="syntax-tag">DS60_WORKER_PROFILE</span><span class="syntax-punctuation">:</span> swift-linux</span>
 <span class="source-line"></span>
@@ -553,7 +554,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line">      <span class="syntax-tag">context</span><span class="syntax-punctuation">:</span> .</span>
 <span class="source-line">      <span class="syntax-tag">dockerfile</span><span class="syntax-punctuation">:</span> docker/workers/Dockerfile.php</span>
 <span class="source-line">      <span class="syntax-tag">args</span><span class="syntax-punctuation">:</span></span>
-<span class="source-line">        <span class="syntax-tag">DS60_PHP_IMAGE</span><span class="syntax-punctuation">:</span> ${DS60_PHP_IMAGE:-php:8.4.27-cli-bookworm@sha256:b3e907a1108629c562c4bb313ce3449e34d49991f6bb2487913f6146f47200fe}</span>
+<span class="source-line">        <span class="syntax-tag">DS60_PHP_IMAGE</span><span class="syntax-punctuation">:</span> ${DS60_PHP_IMAGE:-php:8.4.28-cli-trixie@sha256:6b13a8678b38ca38e4e3950be57b664ed8c8706131a0586111f68792aede4c58}</span>
 <span class="source-line">    <span class="syntax-tag">environment</span><span class="syntax-punctuation">:</span></span>
 <span class="source-line">      <span class="syntax-tag">DS60_WORKER_PROFILE</span><span class="syntax-punctuation">:</span> php-cli</span>
 <span class="source-line"></span>

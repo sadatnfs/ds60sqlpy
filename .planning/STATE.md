@@ -5,15 +5,15 @@ current_phase_name: Release Image Security
 current_plan: 3
 status: in_progress
 stopped_at: Phase-8-plan-03
-last_updated: "2026-11-24T02:34:35.980Z"
-last_activity: 2026-11-23; Phase 4 verified (passed); 08-04 image remediation in progress.
-state_head: 2c465c7d1729c289c83534aea48bdea5d96a44c3
+last_updated: "2026-11-24T07:46:57.760Z"
+last_activity: 2026-11-23; Phase 4 verification written after the accuracy spot-check fixes; 08-04 local remediation in progress.
+state_head: 7f50b9da05a077f7c006c6ce456c8a8953d9228b
 progress:
-  total_phases: 10
-  completed_phases: 1
-  total_plans: 6
-  completed_plans: 6
-  percent: 20
+  total_phases: 11
+  completed_phases: 3
+  total_plans: 34
+  completed_plans: 29
+  percent: 27
 ---
 
 # Project State
@@ -33,7 +33,7 @@ Total Plans in Phase: 4
 Status: Phases 2, 3 and 4 verified (passed); Phases 1 and 6 verified human_needed (first-time learner walkthrough). Phase 5 plans 01 to 04 complete; 05-05 pending. Phase 7 plans 01 and 02 complete; 07-03 CI dispatch and 07-04 ledger pending. Phase 8 plans 01 and 02 complete; 08-03 and 08-04 in progress.
 Last activity: 2026-11-23; Phase 4 verification written after the accuracy spot-check fixes; 08-04 local remediation in progress.
 
-Progress: [██████░░░░] 60%
+Progress: [███░░░░░░░] 27%
 
 ## Performance Metrics
 
@@ -82,6 +82,10 @@ None yet.
 - The project owner approved the v1 requirements on 2026-11-23.
 - Verify the Docker Hub target immediately before any publication; do not stop unrelated containers or remove learner volumes.
 - Browser gates run in a disposable classroom project with the containerized Playwright runner; never use the learner project `ds60-classroom` or its volumes.
+
+### Roadmap Evolution
+
+- Phase 08.1 inserted after Phase 8: Unslop classroom UI chrome per heydamir/unslop (user request); lesson content untouched (URGENT)
 
 ## Deferred Items
 

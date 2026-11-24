@@ -16,6 +16,7 @@ import pytest
 from scripts import ci_release_artifacts as artifacts
 from scripts import ci_scientific_projects as execution
 from scripts import docker_release as release
+from scripts import image_scan
 from scripts import scientific_receipts as scientific
 from scripts.docker_registry import OCI_MANIFEST, Descriptor, ReleaseError
 
@@ -117,7 +118,7 @@ def ordinary(fixture: dict[str, Any], architecture: str, group: str) -> dict[str
         "complete": True,
     }
     return {
-        "schema_version": 1,
+        "schema_version": 2,
         "kind": "ds60-staged-images",
         "context": asdict(context),
         "architecture": architecture,
@@ -134,6 +135,25 @@ def ordinary(fixture: dict[str, Any], architecture: str, group: str) -> dict[str
                 "checks": sorted(release.mandatory_ci_checks(group)),
             },
         ],
+        "scan": {
+            "evidence_sha256": "e" * 64,
+            "scanner_image": image_scan.TRIVY_IMAGE,
+            "scanner_version": image_scan.TRIVY_VERSION,
+            "db_updated_at": "2026-11-24T01:05:31Z",
+            "java_db_updated_at": "2026-11-24T00:59:05Z",
+            "policy_sha256": "d" * 64,
+            "scanned_at": "2026-11-24T02:00:00Z",
+            "images": [
+                {
+                    "profile": image["profile"],
+                    "tested_image_id": image["tested_image_id"],
+                    "counts": dict.fromkeys(image_scan.SEVERITIES, 0),
+                    "suppressed": [],
+                    "report_sha256": "f" * 64,
+                }
+                for image in images
+            ],
+        },
         "images": images,
     }
 
@@ -809,7 +829,12 @@ def test_base_import_pulls_only_four_qualified_native_digests(
                 "Os": "linux",
                 "Architecture": architecture,
                 "Descriptor": manifest.descriptor.record(),
-                "Config": {"Labels": {}},
+                "Config": {
+                    "Labels": {
+                        release.REVISION: fixture["context"].revision,
+                        release.RELEASE_VERSION: fixture["context"].version,
+                    }
+                },
             }
 
     docker = ImportedDocker()
@@ -847,6 +872,10 @@ def test_immutable_config_readback_catches_a_tampered_import_when_old_worker_con
             image["config_digest"] = None
             image["identity_basis"] = "root"
             image["tested_image_id"] = image["candidate_root"]["digest"]
+            scanned = next(
+                row for row in base["receipt"]["scan"]["images"] if row["profile"] == "java21"
+            )
+            scanned["tested_image_id"] = image["tested_image_id"]
             base["receipt_sha256"] = scientific.digest(base["receipt"])
             base["config_digest"] = hashed("tampered-config")
             base["local_image_id"] = hashed("tampered-config")

@@ -428,6 +428,99 @@ After validation, stop only the test project with:
 Removing named volumes is a separate destructive action. Never use a global
 volume prune as part of a learner-facing cleanup procedure.
 
+### Prove which commit an image came from
+
+Every local build through `./classroom` labels the app and worker images with
+`org.opencontainers.image.revision`. The launcher sets it to the checkout's
+commit, appends `-dirty` when the checkout has uncommitted changes, and leaves it
+empty when git is unavailable or the directory is not its own repository. Worker
+images also carry `org.opencontainers.image.version` from `pyproject.toml` and
+`org.opencontainers.image.source`.
+
+Builds used as qualification evidence must come from a clean `git worktree` of
+the target commit (or a clean CI checkout), never a working copy with local
+edits. Build with a disposable tag so shared tags stay untouched, then verify:
+
+```bash
+python scripts/verify_image_revision.py --revision "$(git rev-parse HEAD)" --tag <tag> --profile <profile>
+```
+
+`app` is always checked; repeat `--profile` for each worker. The verifier
+rejects empty and `-dirty` revision labels, a different commit, a wrong version
+or source label, and a non-native architecture, and writes the image IDs and
+labels to `work/image-revision.json` (change it with `--report`).
+
+### Qualify both architectures at one commit
+
+`.github/workflows/runtime-qualification.yml` is a manual (`workflow_dispatch`)
+workflow. One run qualifies the Docker product at the dispatched commit on
+native runners only, with no emulation:
+
+- **Group jobs** (`Runtime <architecture> (<group>)`): each of the 19 ordinary
+  profile groups from `docker/ci-profile-groups.json` runs on `ubuntu-24.04`
+  (amd64) and `ubuntu-24.04-arm` (arm64), 38 jobs in total. Each job builds
+  through `./classroom` with `scripts/ci_classroom.py prepare`, proves with
+  `scripts/verify_image_revision.py --revision "$GITHUB_SHA"` that the app,
+  python-core and group images carry the run's commit, then runs `qualify`
+  and removes only its own `ds60-ci-` project.
+- **Lifecycle jobs** (`Lifecycle <architecture>`): the lifecycle harness runs
+  every transition on the starter profile on each architecture, from
+  `HEAD~1` to `HEAD`, so the update step really rebuilds.
+
+The token is read-only and the workflow uses no secrets. The workflow file must
+already be on `main` before it can be dispatched. Run a quick smoke on one group
+first, then the full matrix:
+
+```bash
+gh workflow run runtime-qualification.yml --ref main -f groups="python-core"
+gh workflow run runtime-qualification.yml --ref main
+```
+
+The `groups` input takes space-separated group IDs; an unknown ID fails the
+selection job before any runner starts. To read the evidence, download every
+artifact of a run:
+
+```bash
+gh run download <run-id> --dir work/p7-evidence/<run-id>
+```
+
+Each `runtime-<architecture>-<group>` artifact holds `ci-qualification.json`
+(group, profiles, architecture, revision and the passed checks),
+`image-revision.json` (image IDs and labels), the runtime receipts and any
+browser screenshots. Each `lifecycle-<architecture>` artifact holds
+`p7-lifecycle-<architecture>.json` and the redacted harness logs.
+
+Not covered, by design:
+
+- GPU profiles (`cuda-cpp`, `cuda-python`, `pytorch-cuda`, `tensorflow-cuda`):
+  hosted runners have no GPUs, and release staging already excludes the `gpu`
+  image kind in `scripts/docker_release.py`.
+- Kubernetes images: qualified by the separate owned-cluster workflow
+  (`kubernetes.yml`).
+- Docker daemon or Docker Desktop restarts: hosted runners cannot restart the
+  engine safely, so they are not exercised.
+
+### Exercise lifecycle transitions locally
+
+Run the same harness on a workstation with a fresh, disposable project name:
+
+```bash
+python scripts/check_classroom_lifecycle.py --project ds60-p7-local-<suffix> --base HEAD~1 --target HEAD
+```
+
+It walks eight transitions in order: fresh, stop, resume, rerun, restart,
+recreate (Compose down without removing volumes), update (`--rebuild` from base
+to target) and final-rerun. After each start it checks that learner progress,
+the saved pad, the run receipt, the worker token and a learner-created SQL
+table survived on the same volumes. The project name must start with `ds60-p7-`
+and must not exist yet. Before any Docker write the harness records an
+ownership marker (`p7-owner.json`) in the project's state directory, and
+cleanup removes only the project, tags and worktree that marker proves it
+created. It also snapshots protected resources (the `ds60-classroom` and
+`ds60-phase1-browser` projects, their volumes and the shared image IDs) before
+and after the run and fails if a volume or shared image changed. The report
+defaults to `work/p7-lifecycle-<project>.json`.
+
 ## Browser acceptance
 
 The Python Core Docker job runs `scripts/check_classroom_browser.py` against
@@ -547,6 +640,49 @@ the previous and updated presentation hashes, baseline commit and reason in the
 binding's `presentation_history`, then update its current presentation hash and
 run the existing parity tests. This records a documentation change, not another
 execution. Never use it to approve changed examples or rewrite runtime receipts.
+
+## Image vulnerability scans
+
+`scripts/image_scan.py` is the release image gate (SEC-01). It runs Trivy
+0.76.2 only as the digest-pinned container
+`aquasec/trivy:0.76.2@sha256:8f6bb947...` through `docker run`, with the Docker
+socket mounted read-only and no registry credentials. Never use the
+`aquasecurity/trivy-action` or `setup-trivy` GitHub actions. Trivy only writes
+JSON (`--exit-code 0`, no ignorefile); DS60 code decides the verdict:
+
+- Any finding with a fixed version blocks at every severity, including LOW and
+  UNKNOWN. Fix it by upgrading or rebuilding; the policy cannot accept it, and
+  an entry stops suppressing a finding once a fix appears.
+- An unfixed CRITICAL or HIGH finding blocks unless a live policy entry covers
+  it. Unfixed MEDIUM, LOW and UNKNOWN findings are recorded but do not block.
+- Secret findings always block. The app image is also scanned for
+  misconfigurations; a HIGH or CRITICAL failure blocks unless accepted.
+- An image whose OS Trivy cannot map (for example Debian sid), with no detected
+  packages, or scanned with a vulnerability DB older than 24 hours fails closed.
+- For the `postgres` reference image, only fixable CRITICAL or HIGH findings
+  block.
+
+Accepted findings live in `docker/cve-policy.json` (schema 1). Each entry names
+one exact finding: `id` (CVE, GHSA, distro advisory or check id), `kind`
+(`vulnerability`, `misconfig` or `coverage`), `package` (the misconfig target
+path, or the OS name for coverage), `images` (catalog profiles or `postgres`),
+`justification`, `reviewer`, `reviewed_at` and `expires_at`. Wildcards are
+rejected, and `expires_at` may be at most 90 days after `reviewed_at`. Any
+expired or malformed entry fails every scan. Entries with
+`"reviewer": "pending-owner"` are proposals awaiting owner review;
+`python scripts/image_scan.py propose-entries --evidence <file>` drafts them
+for unfixed findings and never for fixable ones. Check the file with
+`python scripts/image_scan.py validate-policy`.
+
+Scan a local image read-only with `make scan` (defaults
+`IMAGE=ds60sqlpy-lab:1.4.3 PROFILE=app`). It downloads the vulnerability DB
+and the Java DB into `~/.cache/ds60sqlpy/trivy` (caches never live in the
+repository), writes the raw report to `work/p8-scan/reports/` and writes
+evidence to `work/p8-scan/<profile>.json`. Evidence binds each verdict to the
+image ID, revision label, scanner digest, DB timestamps and policy hash. In
+release jobs, `scan --tested work/tested-images.json` scans every
+`tested_image_id` from `docker_release.py inspect`. Exit status 2 means the
+gate blocked.
 
 ## Release decision
 

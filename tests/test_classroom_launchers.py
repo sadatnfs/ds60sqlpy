@@ -21,6 +21,8 @@ ROOT = Path(__file__).resolve().parents[1]
 RELEASE_VERSION: str = tomllib.loads((ROOT / "pyproject.toml").read_text())["project"]["version"]
 _major, _minor, _patch = (int(part) for part in RELEASE_VERSION.split("."))
 NEXT_PATCH_VERSION = f"{_major}.{_minor}.{_patch + 1}"
+# The launcher builds this DS60 PostgreSQL image locally unless DS60_POSTGRES_IMAGE overrides it.
+DATABASE_IMAGE = f"ds60sqlpy-postgres:{RELEASE_VERSION}"
 IMAGE_ROWS = [
     line.split()
     for line in (ROOT / "docker/classroom-images.tsv").read_text().splitlines()
@@ -64,7 +66,8 @@ def launcher(tmp_path: Path) -> Any:
         shutil.copyfile(ROOT / name, root / name)
     (root / "compose.classroom.yaml").write_text("services: {}\n")
     (root / "docker/registry-mirrors.env.txt").write_text(
-        "DS60_POSTGRES_IMAGE=mirror.gcr.io/library/postgres:17\n"
+        "DS60_POSTGRES_BASE_IMAGE=mirror.gcr.io/library/postgres:17.12-trixie@sha256:"
+        "223efeb196329b55b3b9a13db144956411dbc18e727e59f681c3e0aede6475cf\n"
     )
     binaries = tmp_path / "bin"
     binaries.mkdir()
@@ -86,7 +89,21 @@ row={'args':a,'port':os.getenv('DS60_CLASSROOM_PORT'),
 if '-' in a and '--hash' in a:row['stdin']=sys.stdin.read()
 with open(os.environ['CALLS'],'a') as f:f.write(json.dumps(row)+'\n')
 version=tomllib.loads((Path.cwd()/'pyproject.toml').read_text())['project']['version']
-images={'postgres':'mirror.gcr.io/library/postgres:17'}
+def compose_environment():
+ values={'COMPOSE_PROJECT_NAME':'ds60-classroom','UNRELATED_SECRET':'DUMMY_NEVER_LOG_THIS'}
+ for i,v in enumerate(a):
+  if v=='--env-file':
+   for line in Path(a[i+1]).read_text().splitlines():
+    if '=' in line and not line.startswith('#'):
+     k,v=line.split('=',1);values[k]=v
+ for k,v in os.environ.items():
+  if k.startswith('DS60_') or k=='COMPOSE_PROJECT_NAME':values[k]=v
+ if '--project-name' in a:values['COMPOSE_PROJECT_NAME']=a[a.index('--project-name')+1]
+ values.update(c.get('environment',{}))
+ return values
+# Like compose.classroom.yaml: the DS60 database image unless DS60_POSTGRES_IMAGE overrides it.
+database=compose_environment().get('DS60_POSTGRES_IMAGE')
+images={'postgres':database or 'ds60sqlpy-postgres:'+version}
 for line in (Path.cwd()/'docker/classroom-images.tsv').read_text().splitlines():
  if not line or line.startswith('#'):continue
  profile,service,repository,suffix,variable,kind=line.split()
@@ -175,17 +192,7 @@ elif a[:1]==['inspect']:
   print(c.get('existing_db_port','55432')
        if '5432/tcp' in fmt else c.get('existing_port','8765'))
 elif 'config' in a and '--environment' in a:
- values={'COMPOSE_PROJECT_NAME':'ds60-classroom','UNRELATED_SECRET':'DUMMY_NEVER_LOG_THIS'}
- for i,v in enumerate(a):
-  if v=='--env-file':
-   for line in Path(a[i+1]).read_text().splitlines():
-    if '=' in line and not line.startswith('#'):
-     k,v=line.split('=',1);values[k]=v
- for k,v in os.environ.items():
-  if k.startswith('DS60_') or k=='COMPOSE_PROJECT_NAME':values[k]=v
- if '--project-name' in a:values['COMPOSE_PROJECT_NAME']=a[a.index('--project-name')+1]
- values.update(c.get('environment',{}))
- for k,v in values.items():print(k+'='+v)
+ for k,v in compose_environment().items():print(k+'='+v)
 elif 'config' in a and '--images' in a:print(images[a[-1]])
 elif 'config' in a and '--hash' in a:
  value=c.get('config_hashes',{}).get(a[-1],'a'*64)
@@ -315,6 +322,13 @@ elif 'exec' in a and c.get('fail')=='http':sys.exit(7)
     return Harness()
 
 
+def hub_local_builds(calls: list[dict[str, Any]]) -> list[str]:
+    """Local builds in Hub mode; only the unpublished DS60 database may be built."""
+    services = built_services(calls)
+    assert services.count("postgres") <= 1
+    return [service for service in services if service != "postgres"]
+
+
 def built_services(calls: list[dict[str, Any]]) -> list[str]:
     result = []
     for call in calls:
@@ -358,8 +372,8 @@ def test_default_command_builds_all_profiles_then_starts_health_checks_before_br
     commands = [x["args"] for x in calls]
     builds = [a for a in commands if "build" in a]
     expected = [service for _, service in ORDINARY_PROFILE_SERVICES]
-    assert built_services(calls) == ["lab", *expected]
-    assert commands.index(next(a for a in commands if "pull" in a)) < commands.index(builds[0])
+    assert built_services(calls) == ["postgres", "lab", *expected]
+    assert builds[0][-1] == "postgres" and not any("pull" in a for a in commands)
     starts = [a for a in commands if "up" in a]
     assert [a[-1] for a in starts] == ["postgres", "lab", *expected]
     assert commands.index(builds[-1]) < commands.index(starts[0])
@@ -381,7 +395,11 @@ def test_default_command_builds_all_profiles_then_starts_health_checks_before_br
     "failure", ["pull", "build", "up", "java-worker", "http", "external-http", "port"]
 )
 def test_failure_never_opens_browser_or_deletes_data(launcher: Any, failure: str) -> None:
-    launcher.set(fail=failure, missing_database=True)
+    # Only an overridden database image is pulled; the DS60 default is built.
+    override = {"DS60_POSTGRES_IMAGE": "registry.example.org/postgres:17@sha256:" + "d" * 64}
+    launcher.set(
+        fail=failure, missing_database=True, environment=override if failure == "pull" else {}
+    )
     result = launcher.run()
     assert result.returncode != 0
     assert not launcher.opened()
@@ -750,7 +768,7 @@ def test_failed_serial_build_prevents_later_builds_and_startup(
     assert result.returncode != 0
     commands = [call["args"] for call in launcher.calls()]
     builds = built_services(launcher.calls())
-    order = ["lab", "python-core-worker", "cpp-worker", "java-worker"]
+    order = ["postgres", "lab", "python-core-worker", "cpp-worker", "java-worker"]
     assert builds == order[: order.index(failed_service) + 1]
     assert not any("up" in command or "exec" in command for command in commands)
     assert not launcher.opened()
@@ -938,7 +956,7 @@ def test_saved_registry_is_reused_but_readonly_commands_do_not_modify_selection(
 def test_strict_resume_missing_only_database_reports_before_start(launcher: Any) -> None:
     launcher.set(
         containers={s: "old-" + s for s in ("lab", "python-core-worker")},
-        missing_images=["mirror.gcr.io/library/postgres:17"],
+        missing_images=[DATABASE_IMAGE],
     )
     result = launcher.run("resume", "--no-browser")
     assert result.returncode != 0 and "database=1" in result.stderr
@@ -1062,12 +1080,30 @@ def test_missing_core_recovers_its_app_base_without_rebuilding_the_app(launcher:
 def test_rebuild_prepares_missing_database_image_even_when_container_exists(launcher: Any) -> None:
     launcher.set(
         containers={s: "old-" + s for s in ("postgres", "lab", "python-core-worker")},
-        missing_images=["mirror.gcr.io/library/postgres:17"],
+        missing_images=[DATABASE_IMAGE],
     )
     result = launcher.run("--starter", "--rebuild", "--no-browser")
     assert result.returncode == 0, result.stdout + result.stderr
-    pulls = [c["args"] for c in launcher.calls() if "pull" in c["args"]]
+    calls = launcher.calls()
+    assert not [c["args"] for c in calls if "pull" in c["args"]]
+    assert built_services(calls).count("postgres") == 1
+    build = next(c["args"] for c in calls if "build" in c["args"] and c["args"][-1] == "postgres")
+    assert "DS60_RELEASE_VERSION=" + RELEASE_VERSION in build
+
+
+def test_database_image_override_is_pulled_instead_of_built(launcher: Any) -> None:
+    override = "registry.example.org/postgres:17.12-trixie@sha256:" + "c" * 64
+    launcher.set(
+        containers={s: "old-" + s for s in ("postgres", "lab", "python-core-worker")},
+        environment={"DS60_POSTGRES_IMAGE": override},
+        missing_images=[override],
+    )
+    result = launcher.run("--starter", "--rebuild", "--no-browser")
+    assert result.returncode == 0, result.stdout + result.stderr
+    calls = launcher.calls()
+    pulls = [c["args"] for c in calls if "pull" in c["args"]]
     assert len(pulls) == 1 and pulls[0][-1] == "postgres"
+    assert "postgres" not in built_services(calls)
 
 
 def test_changed_app_tag_does_not_silently_upgrade_during_port_repair(launcher: Any) -> None:
@@ -1170,9 +1206,9 @@ def test_hub_missing_images_pull_matching_architecture_without_any_build(
     )
     assert result.returncode == 0, result.stdout + result.stderr
     calls = launcher.calls()
-    assert not built_services(calls)
+    assert not hub_local_builds(calls) and built_services(calls) == ["postgres"]
     pulls = [call for call in calls if "pull" in call["args"] and "up" not in call["args"]]
-    assert [call["args"][-1] for call in pulls] == ["postgres", "lab", "python-core-worker"]
+    assert [call["args"][-1] for call in pulls] == ["lab", "python-core-worker"]
     assert pulls[-1]["image_env"]["DS60_LAB_IMAGE"] == f"exampleuser/ds60sqlpy:0.4.1-lab-{suffix}"
     assert (
         pulls[-1]["image_env"]["DS60_WORKER_PYTHON_CORE_IMAGE"]
@@ -1230,8 +1266,9 @@ def test_hub_pull_action_prepares_images_without_starting_services(launcher: Any
     result = launcher.run("pull", "--starter", "--from-hub", "exampleuser")
     assert result.returncode == 0, result.stdout + result.stderr
     assert any("pull" in call["args"] for call in launcher.calls())
+    assert not hub_local_builds(launcher.calls())
     assert not any(
-        any(action in call["args"] for action in ("build", "up", "start", "exec"))
+        any(action in call["args"] for action in ("up", "start", "exec"))
         for call in launcher.calls()
     )
     assert not launcher.opened()
@@ -1252,8 +1289,9 @@ def test_failed_hub_pull_preserves_project_preferences_and_never_deletes_volumes
     assert retained.read_text() == "keep my work"
     assert "DS60_IMAGE_SOURCE=hub" in (state / "images.env").read_text()
     assert not (state / "launcher.lock").exists()
+    assert not hub_local_builds(launcher.calls())
     assert not any(
-        any(action in call["args"] for action in ("down", "prune", "--volumes", "build", "up"))
+        any(action in call["args"] for action in ("down", "prune", "--volumes", "up"))
         for call in launcher.calls()
     )
 
@@ -1311,7 +1349,7 @@ def test_hub_rebuild_retains_selected_release_until_tag_explicitly_changes(launc
     result = launcher.run("--starter", "--rebuild", "--no-browser")
     assert result.returncode == 0, result.stdout + result.stderr
     assert "DS60_IMAGE_TAG=0.3.0" in state.read_text()
-    assert not built_services(launcher.calls())
+    assert not hub_local_builds(launcher.calls())
     assert any(
         call["image_env"].get("DS60_LAB_IMAGE") == "exampleuser/ds60sqlpy:0.3.0-lab-amd64"
         for call in launcher.calls()
@@ -1545,10 +1583,9 @@ def test_hub_all_profiles_prepares_complete_catalog_without_local_builds(
     )
     assert result.returncode == 0, result.stdout + result.stderr
     calls = launcher.calls()
-    assert not built_services(calls)
+    assert not hub_local_builds(calls) and built_services(calls) == ["postgres"]
     pulls = [call for call in calls if "pull" in call["args"] and "up" not in call["args"]]
     assert [call["args"][-1] for call in pulls] == [
-        "postgres",
         "lab",
         *[service for _, service in ORDINARY_PROFILE_SERVICES],
     ]
@@ -1586,7 +1623,7 @@ def test_hub_new_containers_reject_wrongly_tagged_platform_without_starting(
     )
     assert result.returncode != 0, result.stdout + result.stderr
     assert "does not match Linux/arm64" in result.stderr
-    assert not built_services(launcher.calls())
+    assert not hub_local_builds(launcher.calls())
     assert not any(
         any(
             operation in call["args"] for operation in ("up", "start", "down", "prune", "--volumes")
@@ -1632,7 +1669,7 @@ def test_latest_resolves_once_then_pins_all_services_and_resume(
     )
     assert result.returncode == 0, result.stdout + result.stderr
     calls = launcher.calls()
-    assert calls and not built_services(calls)
+    assert calls and not hub_local_builds(calls)
     latest_pulls = [call for call in calls if call["args"][:2] == ["image", "pull"]]
     assert len(latest_pulls) == 1
     assert latest_pulls[0]["args"][-1] == "exampleuser/ds60sqlpy:latest"
@@ -1641,7 +1678,7 @@ def test_latest_resolves_once_then_pins_all_services_and_resume(
         for call in calls
         if call["args"][0] == "compose" and "pull" in call["args"] and "up" not in call["args"]
     ]
-    assert {call["args"][-1] for call in service_pulls} == {"postgres", "lab", "python-core-worker"}
+    assert {call["args"][-1] for call in service_pulls} == {"lab", "python-core-worker"}
     assert all(
         call["image_env"]["DS60_LAB_IMAGE"] == f"exampleuser/ds60sqlpy:{RELEASE_VERSION}"
         and call["image_env"]["DS60_WORKER_PYTHON_CORE_IMAGE"]
@@ -1741,7 +1778,7 @@ def test_interrupted_first_latest_pull_remembers_hub_and_starter_selection(launc
     retried = launcher.run("--no-browser")
     assert retried.returncode == 0, retried.stdout + retried.stderr
     calls = launcher.calls()[before:]
-    assert not built_services(calls)
+    assert not hub_local_builds(calls)
     assert not any("java-worker" in call["args"] for call in calls)
     assert f"DS60_IMAGE_TAG={RELEASE_VERSION}\n" in (state / "images.env").read_text()
 

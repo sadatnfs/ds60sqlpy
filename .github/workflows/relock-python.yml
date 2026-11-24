@@ -1,0 +1,83 @@
+name: Relock Python dependencies
+
+# Re-locks uv.lock against public PyPI with targeted upgrades and uploads the
+# result for review. Nothing is committed or pushed by this workflow.
+on:
+  workflow_dispatch:
+    inputs:
+      packages:
+        description: Space-separated package names to pass to uv lock --upgrade-package
+        required: true
+        default: >-
+          anyio certifi filelock jupyter-server jupyterlab msgpack nbconvert
+          notebook packaging pillow pip prefect setuptools soupsieve sqlparse
+          tornado urllib3 virtualenv
+
+permissions:
+  contents: read
+
+concurrency:
+  group: relock-python
+  cancel-in-progress: false
+
+jobs:
+  relock:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Install uv
+        uses: astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2 # v10.3.3
+        with:
+          # Same uv as the CI lock check so the lock format matches.
+          version: "0.11.6"
+          enable-cache: false
+      - name: Relock with targeted upgrades
+        env:
+          PACKAGES: ${{ inputs.packages }}
+        run: |
+          set -euo pipefail
+          read -r -a names <<<"$PACKAGES"
+          if [ "${#names[@]}" -eq 0 ]; then
+            echo "No package names given." >&2
+            exit 1
+          fi
+          args=()
+          for name in "${names[@]}"; do
+            if ! [[ "$name" =~ ^[A-Za-z0-9][A-Za-z0-9._-]*$ ]]; then
+              echo "Refusing package name: $name" >&2
+              exit 1
+            fi
+            args+=(--upgrade-package "$name")
+          done
+          empty_config="$RUNNER_TEMP/empty-uv.toml"
+          : >"$empty_config"
+          uv lock --config-file "$empty_config" \
+            --default-index https://pypi.org/simple "${args[@]}"
+          uv lock --check --config-file "$empty_config" \
+            --default-index https://pypi.org/simple
+      - name: Check recorded sources
+        run: |
+          set -euo pipefail
+          if grep -n packagefeedproxy uv.lock; then
+            echo "uv.lock records a proxy URL." >&2
+            exit 1
+          fi
+          grep -o 'registry = "[^"]*"' uv.lock | sort | uniq -c
+          unexpected=$(grep -o 'registry = "[^"]*"' uv.lock | sort -u \
+            | grep -v -x -e 'registry = "https://pypi.org/simple"' \
+              -e 'registry = "https://download.pytorch.org/whl/cpu"' || true)
+          if [ -n "$unexpected" ]; then
+            echo "Unexpected registries: $unexpected" >&2
+            exit 1
+          fi
+          git diff --stat -- uv.lock
+      - name: Upload uv.lock
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: relocked-uv-lock
+          path: uv.lock
+          if-no-files-found: error
+          retention-days: 14

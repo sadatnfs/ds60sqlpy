@@ -1,0 +1,128 @@
+{
+  "SchemaVersion": 2,
+  "Trivy": {
+    "Version": "0.76.2"
+  },
+  "CreatedAt": "2026-11-24T04:03:09.908815468Z",
+  "ArtifactName": "ds60sqlpy-lab:1.4.3",
+  "ArtifactType": "container_image",
+  "Metadata": {
+    "OS": {
+      "Family": "debian",
+      "Name": "12.15"
+    },
+    "ImageID": "sha256:42a928f2fff807948d30e7841c5de4a7e7e8bac30084be5f887e1b03d9ff7d6d"
+  },
+  "Results": [
+    {
+      "Target": "ds60sqlpy-lab:1.4.3 (debian 12.15)",
+      "Class": "os-pkgs",
+      "Type": "debian",
+      "Packages": [
+        {
+          "ID": "adduser@3.134",
+          "Name": "adduser",
+          "Version": "3.134"
+        },
+        {
+          "ID": "apt@2.6.2",
+          "Name": "apt",
+          "Version": "2.6.2"
+        },
+        {
+          "ID": "base-files@12.4+deb12u15",
+          "Name": "base-files",
+          "Version": "12.4+deb12u15"
+        }
+      ],
+      "Vulnerabilities": [
+        {
+          "VulnerabilityID": "CVE-2025-7458",
+          "PkgID": "libsqlite3-0@3.40.1-2+deb12u2",
+          "PkgName": "libsqlite3-0",
+          "InstalledVersion": "3.40.1-2+deb12u2",
+          "Status": "affected",
+          "SeveritySource": "nvd",
+          "PrimaryURL": "https://avd.aquasec.com/nvd/cve-2025-7458",
+          "Title": "sqlite: SQLite integer overflow",
+          "Severity": "CRITICAL"
+        },
+        {
+          "VulnerabilityID": "CVE-2026-53613",
+          "PkgID": "bsdutils@1:2.38.1-5+deb12u3",
+          "PkgName": "bsdutils",
+          "InstalledVersion": "1:2.38.1-5+deb12u3",
+          "Status": "affected",
+          "PrimaryURL": "https://avd.aquasec.com/nvd/cve-2026-53613",
+          "Title": "util-linux: TOCTOU in the mount program via ancestor directory swap on target path",
+          "Severity": "HIGH"
+        },
+        {
+          "VulnerabilityID": "CVE-2026-13595",
+          "PkgID": "bsdutils@1:2.38.1-5+deb12u3",
+          "PkgName": "bsdutils",
+          "InstalledVersion": "1:2.38.1-5+deb12u3",
+          "Status": "affected",
+          "SeveritySource": "nvd",
+          "PrimaryURL": "https://avd.aquasec.com/nvd/cve-2026-13595",
+          "Title": "util-linux: util-linux: heap use-after-free in libblkid nested partition probing",
+          "Severity": "MEDIUM"
+        },
+        {
+          "VulnerabilityID": "CVE-2011-3374",
+          "PkgID": "apt@2.6.2",
+          "PkgName": "apt",
+          "InstalledVersion": "2.6.2",
+          "Status": "affected",
+          "SeveritySource": "debian",
+          "PrimaryURL": "https://avd.aquasec.com/nvd/cve-2011-3374",
+          "Title": "It was found that apt-key in apt, all versions, do not correctly valid ...",
+          "Severity": "LOW"
+        },
+        {
+          "VulnerabilityID": "CVE-2026-91094",
+          "PkgID": "dpkg@1.21.23",
+          "PkgName": "dpkg",
+          "InstalledVersion": "1.21.23",
+          "Status": "affected",
+          "PrimaryURL": "https://avd.aquasec.com/nvd/cve-2026-91094",
+          "Title": "A directory traversal bug was discovered when unpacking 3.0 (quilt) so ...",
+          "Severity": "UNKNOWN"
+        }
+      ]
+    },
+    {
+      "Target": "Python",
+      "Class": "lang-pkgs",
+      "Type": "python-pkg",
+      "Packages": [
+        {
+          "ID": "CacheControl@0.14.4",
+          "Name": "CacheControl",
+          "Version": "0.14.4"
+        },
+        {
+          "Name": "Jinja2",
+          "Version": "3.1.6"
+        },
+        {
+          "Name": "MarkupSafe",
+          "Version": "3.0.3"
+        }
+      ],
+      "Vulnerabilities": [
+        {
+          "VulnerabilityID": "CVE-2026-112393",
+          "PkgName": "pillow",
+          "InstalledVersion": "12.3.0",
+          "FixedVersion": "13.0.0",
+          "Status": "fixed",
+          "SeveritySource": "ghsa",
+          "PrimaryURL": "https://avd.aquasec.com/nvd/cve-2026-112393",
+          "Title": "pillow: Pillow: Heap buffer overflow in _tiffWriteProc when saving TIFF to BytesIO",
+          "Severity": "CRITICAL"
+        }
+      ]
+    }
+  ]
+}

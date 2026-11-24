@@ -1,7 +1,7 @@
 PYTHON ?= $(if $(wildcard .venv/bin/python),.venv/bin/python,python3)
 TEST_WORKERS ?= 4
 
-.PHONY: help setup generate format format-check lint check test test-serial testserial serve mcp starter docker docker-stop docker-status modules-check classroom classroom-build classroom-start classroom-stop
+.PHONY: help setup generate format format-check lint check test test-serial testserial serve mcp starter docker docker-stop docker-status modules-check classroom classroom-build classroom-start classroom-stop scan
 help:
 	@echo "classroom: resume saved containers; build only missing images (or run ./classroom)"
 	@echo "Windows: run in the WSL 2 Ubuntu shell with Docker integration enabled"
@@ -14,6 +14,7 @@ help:
 	@echo "format: style maintained sources with Docker; format-check: check without changing sources"
 	@echo "lint: read-only static source checks using the same Docker toolchain"
 	@echo "test: grouped parallel suite (TEST_WORKERS=4); test-serial: serial debugging"
+	@echo "scan: Trivy-scan a local image read-only (IMAGE=ds60sqlpy-lab:1.4.3 PROFILE=app)"
 
 setup:
 	bash scripts/setup.sh
@@ -75,6 +76,14 @@ docker-stop:
 
 docker-status:
 	bash classroom status
+
+# Read-only image vulnerability gate; see docs/validation.md "Image vulnerability scans".
+IMAGE ?= ds60sqlpy-lab:1.4.3
+PROFILE ?= app
+
+scan:
+	$(PYTHON) scripts/image_scan.py download-db
+	$(PYTHON) scripts/image_scan.py scan --image "$(IMAGE)" --profile "$(PROFILE)" --output work/p8-scan/$(PROFILE).json --reports work/p8-scan/reports
 
 modules-check:
 	$(PYTHON) scripts/check_modules.py

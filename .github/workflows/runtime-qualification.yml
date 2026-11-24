@@ -1,0 +1,165 @@
+name: Runtime qualification
+
+# Manual only: qualifies every ordinary profile group and the lifecycle harness on
+# native amd64 and native arm64 runners at the dispatched commit. No emulation.
+on:
+  workflow_dispatch:
+    inputs:
+      groups:
+        description: Space-separated CI group IDs to run (empty runs every ordinary group)
+        type: string
+        required: false
+        default: ""
+
+permissions:
+  contents: read
+
+env:
+  PYTHONUTF8: "1"
+
+concurrency:
+  group: runtime-qualification-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  matrix:
+    name: Select native qualification groups
+    runs-on: ubuntu-24.04
+    outputs:
+      matrix: ${{ steps.selection.outputs.matrix }}
+      version: ${{ steps.selection.outputs.version }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+        with:
+          python-version: "3.12"
+      - name: Derive native group rows and the source version
+        id: selection
+        env:
+          GROUPS_FILTER: ${{ inputs.groups }}
+        run: |
+          native="$(python scripts/ci_profiles.py --native)"
+          MATRIX_JSON="$native" python - <<'PYTHON'
+          import json, os, pathlib, sys, tomllib
+          rows = json.loads(os.environ['MATRIX_JSON'])['include']
+          known = {row['group'] for row in rows}
+          requested = list(dict.fromkeys(os.environ.get('GROUPS_FILTER', '').split()))
+          unknown = [name for name in requested if name not in known]
+          if unknown:
+              sys.exit('Unknown CI group(s): ' + ', '.join(repr(name) for name in unknown))
+          if requested:
+              rows = [row for row in rows if row['group'] in requested]
+          version = tomllib.loads(pathlib.Path('pyproject.toml').read_text())['project']['version']
+          with open(os.environ['GITHUB_OUTPUT'], 'a') as stream:
+              stream.write('matrix=' + json.dumps({'include': rows}) + '\n')
+              stream.write('version=' + version + '\n')
+          print(f'{len(rows)} native group jobs selected for version {version}')
+          PYTHON
+
+  groups:
+    name: Runtime ${{ matrix.architecture }} (${{ matrix.group }})
+    needs: matrix
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 180
+    strategy:
+      fail-fast: false
+      max-parallel: 8
+      matrix: ${{ fromJSON(needs.matrix.outputs.matrix) }}
+    env:
+      CI_GROUP: ${{ matrix.group }}
+      CI_PROFILES: ${{ matrix.profiles }}
+      CI_ARCH: ${{ matrix.architecture }}
+      # ci_profiles.py bounds project_group so this fits the 49-character launcher limit.
+      CI_PROJECT: ds60-ci-${{ matrix.project_group }}-${{ matrix.architecture }}-${{ github.run_id }}-${{ github.run_attempt }}
+      RELEASE_VERSION: ${{ needs.matrix.outputs.version }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+        with:
+          python-version: "3.12"
+      - name: Build and start through the learner entrypoint on the native engine
+        run: >-
+          python scripts/ci_classroom.py prepare --group "$CI_GROUP" --project "$CI_PROJECT"
+          --version "$RELEASE_VERSION" --architecture "$CI_ARCH" --confirm-disposable
+      - name: Prove every built image carries this commit as its revision
+        run: |
+          # The launcher always builds python-core alongside the group profiles.
+          args=(--profile python-core)
+          read -ra profiles <<< "$CI_PROFILES"
+          for profile in "${profiles[@]}"; do
+            if [ "$profile" != python-core ]; then args+=(--profile "$profile"); fi
+          done
+          python scripts/verify_image_revision.py --revision "$GITHUB_SHA" \
+            --tag "$RELEASE_VERSION" --architecture "$CI_ARCH" \
+            --report work/image-revision.json "${args[@]}"
+      - name: Qualify complete references, failures, browser behavior and retained state
+        run: >-
+          python scripts/ci_classroom.py qualify --group "$CI_GROUP" --project "$CI_PROJECT"
+          --version "$RELEASE_VERSION" --architecture "$CI_ARCH" --confirm-disposable
+      # Image scans can be added after qualification; cleanup below keeps local images.
+      - name: Capture owned service diagnostics
+        if: failure()
+        run: >-
+          python scripts/ci_classroom.py diagnostics --group "$CI_GROUP" --project "$CI_PROJECT"
+          --version "$RELEASE_VERSION" --architecture "$CI_ARCH" --confirm-disposable
+      - name: Retain bounded runtime reports
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: runtime-${{ matrix.architecture }}-${{ matrix.group }}
+          path: |
+            work/*receipts.json
+            work/runtime-failures.json
+            work/module-reference-results.json
+            work/scientist-browser.json
+            work/ci-qualification.json
+            work/image-revision.json
+            work/browser-screenshots/*.png
+          if-no-files-found: ignore
+          retention-days: 14
+      - name: Remove only this disposable CI project
+        if: always()
+        run: >-
+          python scripts/ci_classroom.py cleanup --group "$CI_GROUP" --project "$CI_PROJECT"
+          --version "$RELEASE_VERSION" --architecture "$CI_ARCH" --confirm-disposable
+
+  lifecycle:
+    name: Lifecycle ${{ matrix.architecture }}
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 150
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - architecture: amd64
+            runner: ubuntu-24.04
+          - architecture: arm64
+            runner: ubuntu-24.04-arm
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          fetch-depth: 2
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+        with:
+          python-version: "3.12"
+      - name: Run every lifecycle transition with a real update rebuild
+        run: >-
+          python scripts/check_classroom_lifecycle.py
+          --project "ds60-p7-${{ matrix.architecture }}-${{ github.run_id }}-${{ github.run_attempt }}"
+          --base HEAD~1 --target HEAD --architecture ${{ matrix.architecture }}
+          --report work/p7-lifecycle-${{ matrix.architecture }}.json
+      - name: Retain lifecycle report and redacted logs
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: lifecycle-${{ matrix.architecture }}
+          path: |
+            work/p7-lifecycle-*.json
+            work/p7-logs/
+          if-no-files-found: ignore
+          retention-days: 14

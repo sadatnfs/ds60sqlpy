@@ -1,8 +1,24 @@
 {
   "schema_version": 1,
   "r_version": "4.6.1",
-  "roots": ["ggplot2", "plotly", "R6", "S7", "jsonlite", "styler", "lintr"],
+  "roots": [
+    "ggplot2",
+    "plotly",
+    "R6",
+    "S7",
+    "jsonlite",
+    "styler",
+    "lintr"
+  ],
   "packages": [
+    {
+      "name": "Matrix",
+      "version": "1.7-6",
+      "sha256": "694239dbe47e659d6d39a49af95157f46bd94977c283df00c4e8a016601cf143",
+      "url": "https://cloud.r-project.org/src/contrib/Matrix_1.7-6.tar.gz",
+      "archive_url": "https://cloud.r-project.org/src/contrib/Archive/Matrix/Matrix_1.7-6.tar.gz",
+      "license": "GPL (>= 2) | file LICENCE"
+    },
     {
       "name": "cli",
       "version": "3.6.6",

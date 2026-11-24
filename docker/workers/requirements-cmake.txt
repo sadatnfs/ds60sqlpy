@@ -1,2 +1,0 @@
-# Match the authored CMake minimum in an image-only environment.
-cmake==3.28.4

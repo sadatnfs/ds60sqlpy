@@ -16,3 +16,9 @@ WORKDIR /opt/worker
 COPY src/ds60sqlpy/__init__.py src/ds60sqlpy/http_server.py src/ds60sqlpy/module_worker.py src/ds60sqlpy/worker_operations.py src/ds60sqlpy/plot_artifacts.py src/ds60sqlpy/plot_capture.py src/ds60sqlpy/worker_figures.py src/ds60sqlpy/gpu_runtime.py /opt/worker/src/ds60sqlpy/
 ENV DS60_WORKER_PROFILE=${DS60_GPU_PROFILE}
 ENTRYPOINT ["python3", "-m", "ds60sqlpy.module_worker", "--host", "0.0.0.0", "--port", "8081"]
+# Keep the revision last so a new commit reuses every earlier cached layer.
+ARG DS60_SOURCE_REVISION=""
+ARG DS60_RELEASE_VERSION=""
+LABEL org.opencontainers.image.revision="${DS60_SOURCE_REVISION}" \
+    org.opencontainers.image.version="${DS60_RELEASE_VERSION}" \
+    org.opencontainers.image.source="https://github.com/sadatnfs/ds60sqlpy"

@@ -266,6 +266,11 @@ def release_selection(
         "latest_tags",
         "latest_skipped_newer_release",
     }
+    # Releases promoted after Phase 8 also record their image scan evidence.
+    if "scan" in receipt:
+        if type(receipt["scan"]) is not dict or not receipt["scan"]:
+            raise ReleaseError("Promotion receipt scan evidence is malformed")
+        base.add("scan")
     if mode == "partial":
         if (
             set(receipt) != base | {"scope", "group", "profiles"}

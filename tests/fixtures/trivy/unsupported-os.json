@@ -1,0 +1,40 @@
+{
+  "SchemaVersion": 2,
+  "Trivy": {
+    "Version": "0.76.2"
+  },
+  "CreatedAt": "2026-11-24T03:33:13.656623178Z",
+  "ArtifactName": "r-base:4.6.1@sha256:ad9b3bbca751f3ead77704fed4c20246127647b3d567b2bf970b7789e8d7b9a8",
+  "ArtifactType": "container_image",
+  "Metadata": {
+    "OS": {
+      "Family": "debian",
+      "Name": "forky/sid"
+    },
+    "ImageID": "sha256:0811f9b7a3d8293c1cc7ac14bb24ddb9651887301a56ce8a27758c63721c664b"
+  },
+  "Results": [
+    {
+      "Target": "r-base:4.6.1@sha256:ad9b3bbca751f3ead77704fed4c20246127647b3d567b2bf970b7789e8d7b9a8 (debian forky/sid)",
+      "Class": "os-pkgs",
+      "Type": "debian",
+      "Packages": [
+        {
+          "ID": "apt@3.3.3",
+          "Name": "apt",
+          "Version": "3.3.3"
+        },
+        {
+          "ID": "base-files@14.2",
+          "Name": "base-files",
+          "Version": "14.2"
+        },
+        {
+          "ID": "base-passwd@3.6.8",
+          "Name": "base-passwd",
+          "Version": "3.6.8"
+        }
+      ]
+    }
+  ]
+}

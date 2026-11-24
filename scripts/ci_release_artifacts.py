@@ -152,10 +152,13 @@ def receipt_bytes(
         if scientific
         else "ds60-staged-images"
     )
+    # Staged-image receipts carry the image scan block since schema 2; gates and
+    # scientific receipts keep schema 1.
+    expected_schema = 2 if expected_kind == "ds60-staged-images" else 1
     if (
         document.get("kind") != expected_kind
         or type(document.get("schema_version")) is not int
-        or document["schema_version"] != 1
+        or document["schema_version"] != expected_schema
     ):
         raise ValueError("Unexpected release receipt type")
     for field, expected in {

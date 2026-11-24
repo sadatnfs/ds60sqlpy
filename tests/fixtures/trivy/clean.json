@@ -1,0 +1,40 @@
+{
+  "SchemaVersion": 2,
+  "Trivy": {
+    "Version": "0.76.2"
+  },
+  "CreatedAt": "2026-11-24T03:31:29.044387713Z",
+  "ArtifactName": "cgr.dev/chainguard/python:latest-dev",
+  "ArtifactType": "container_image",
+  "Metadata": {
+    "OS": {
+      "Family": "wolfi",
+      "Name": "20230201"
+    },
+    "ImageID": "sha256:7b2fbdb7a14ef0a6de2a9b6e5b8beeac36c8f5853fb50535d8585eed34c6c188"
+  },
+  "Results": [
+    {
+      "Target": "cgr.dev/chainguard/python:latest-dev (wolfi 20230201)",
+      "Class": "os-pkgs",
+      "Type": "wolfi",
+      "Packages": [
+        {
+          "ID": "apk-tools@2.14.13-r1",
+          "Name": "apk-tools",
+          "Version": "2.14.13-r1"
+        },
+        {
+          "ID": "bash@5.3-r15",
+          "Name": "bash",
+          "Version": "5.3-r15"
+        },
+        {
+          "ID": "binutils@2.47-r4",
+          "Name": "binutils",
+          "Version": "2.47-r4"
+        }
+      ]
+    }
+  ]
+}

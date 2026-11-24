@@ -22,6 +22,7 @@ import tempfile
 import time
 import tomllib
 from dataclasses import asdict, dataclass
+from datetime import UTC, date, datetime
 from pathlib import Path
 from typing import Any, NoReturn
 
@@ -29,6 +30,7 @@ ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
+from scripts import image_scan  # noqa: E402
 from scripts.docker_registry import (  # noqa: E402
     IMAGE_TYPES,
     INDEX_TYPES,
@@ -636,6 +638,8 @@ def inspected_image(
         not isinstance(labels, dict) or labels.get(RELEASE_VERSION) != context.version
     ):
         raise ReleaseError("App/Core image release label must match pyproject.toml")
+    if not isinstance(labels, dict) or labels.get(REVISION) != context.revision:
+        raise ReleaseError("Local image revision label must match the release revision")
     return {
         "profile": profile.profile,
         "local_repository": profile.local_repository,
@@ -831,6 +835,227 @@ def load_tested(
     elif not isinstance(raw.get("seed_receipt"), dict):
         raise ReleaseError("Worker snapshot must retain its selected seed receipt")
     return raw
+
+
+SCAN_KEYS = frozenset(
+    {
+        "evidence_sha256",
+        "scanner_image",
+        "scanner_version",
+        "db_updated_at",
+        "java_db_updated_at",
+        "policy_sha256",
+        "scanned_at",
+        "images",
+    }
+)
+SCAN_IMAGE_KEYS = frozenset({"profile", "tested_image_id", "counts", "suppressed", "report_sha256"})
+SUPPRESSED_KEYS = frozenset({"id", "package", "expires_at"})
+TIMESTAMP = re.compile(r"[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z\Z")
+MAX_SCAN_EVIDENCE = 64 * 1024 * 1024
+MAX_SUPPRESSED = 500
+
+
+def utc_now() -> datetime:
+    return datetime.now(UTC)
+
+
+def scan_time(value: Any) -> datetime:
+    if not isinstance(value, str) or TIMESTAMP.fullmatch(value) is None:
+        raise ReleaseError("Scan evidence timestamps must be UTC ISO 8601 seconds")
+    try:
+        return datetime.fromisoformat(value.removesuffix("Z") + "+00:00")
+    except ValueError:
+        raise ReleaseError("Scan evidence has an invalid timestamp") from None
+
+
+def committed_policy(root: Path, today: date) -> image_scan.Policy:
+    """The committed DS60 CVE policy; malformed or expired entries reject the release."""
+    try:
+        return image_scan.load_policy(
+            root / "docker/cve-policy.json", today, image_scan.policy_profiles(root)
+        )
+    except image_scan.ScanError as error:
+        raise ReleaseError("Committed CVE policy is invalid or expired: " + str(error)) from None
+
+
+def fresh_scan_database(updated: Any, now: datetime) -> None:
+    moment = scan_time(updated)
+    if moment > now or now - moment > image_scan.MAX_DB_AGE:
+        raise ReleaseError("Scan evidence vulnerability DB is not from the last 24 hours")
+
+
+def scan_binding(
+    evidence: Any,
+    evidence_sha256: str,
+    tested: dict[str, Any],
+    root: Path = ROOT,
+    now: datetime | None = None,
+) -> dict[str, Any]:
+    """Bind clean, fresh, policy-current scan evidence to every tested image ID (D-02)."""
+    now = now or utc_now()
+    if (
+        not isinstance(evidence, dict)
+        or type(evidence.get("schema")) is not int
+        or evidence["schema"] != 1
+        or evidence.get("kind") != "ds60-scan-evidence"
+    ):
+        raise ReleaseError("Invalid image scan evidence")
+    if evidence.get("context") != tested["context"]:
+        raise ReleaseError("Scan evidence belongs to another source, run or attempt")
+    if evidence.get("architecture") != tested["architecture"]:
+        raise ReleaseError("Scan evidence covers another architecture")
+    scanner = evidence.get("scanner")
+    if (
+        not isinstance(scanner, dict)
+        or scanner.get("image") != image_scan.TRIVY_IMAGE
+        or scanner.get("version") != image_scan.TRIVY_VERSION
+    ):
+        raise ReleaseError("Scan evidence was not produced by the pinned scanner")
+    fresh_scan_database(scanner.get("db_updated_at"), now)
+    scan_time(scanner.get("java_db_updated_at"))
+    scan_time(evidence.get("scanned_at"))
+    policy = committed_policy(root, now.date())
+    if evidence.get("policy_sha256") != policy.sha256:
+        raise ReleaseError("Scan evidence used a different CVE policy than the committed one")
+    if evidence.get("passed") is not True:
+        raise ReleaseError("Scan evidence has blocking findings; nothing may be staged")
+    rows = evidence.get("images")
+    if not isinstance(rows, list) or any(not isinstance(row, dict) for row in rows):
+        raise ReleaseError("Invalid scan evidence image list")
+    images = []
+    for image in tested["images"]:
+        matches = [row for row in rows if row.get("profile") == image["profile"]]
+        if len(matches) != 1:
+            raise ReleaseError("Scan evidence must cover each tested profile exactly once")
+        row = matches[0]
+        if row.get("tested_image_id") != image["tested_image_id"] or row.get("reference"):
+            raise ReleaseError("Scan evidence covers a different image than was qualified")
+        if row.get("revision_label") != tested["context"]["revision"]:
+            raise ReleaseError("Scanned image revision label differs from the release revision")
+        if row.get("blocking") != []:
+            raise ReleaseError("Scan evidence has blocking findings; nothing may be staged")
+        suppressed = row.get("suppressed")
+        if not isinstance(suppressed, list) or any(
+            not isinstance(found, dict) for found in suppressed
+        ):
+            raise ReleaseError("Invalid suppressed scan findings")
+        kept = {
+            (found.get("id"), found.get("package"), found.get("expires_at")) for found in suppressed
+        }
+        images.append(
+            scan_image_record(
+                {
+                    "profile": image["profile"],
+                    "tested_image_id": image["tested_image_id"],
+                    "counts": row.get("counts"),
+                    "report_sha256": row.get("report_sha256"),
+                    "suppressed": [
+                        {"id": key, "package": package, "expires_at": expires}
+                        for key, package, expires in sorted(kept, key=str)
+                    ],
+                }
+            )
+        )
+    return {
+        "evidence_sha256": evidence_sha256,
+        "scanner_image": scanner["image"],
+        "scanner_version": scanner["version"],
+        "db_updated_at": scanner["db_updated_at"],
+        "java_db_updated_at": scanner["java_db_updated_at"],
+        "policy_sha256": policy.sha256,
+        "scanned_at": evidence["scanned_at"],
+        "images": images,
+    }
+
+
+def load_scan(
+    path: Path, tested: dict[str, Any], root: Path = ROOT, now: datetime | None = None
+) -> dict[str, Any]:
+    if path.is_symlink() or not path.is_file() or path.stat().st_size > MAX_SCAN_EVIDENCE:
+        raise ReleaseError("Scan evidence must be a bounded ordinary file")
+    data = path.read_bytes()
+    return scan_binding(
+        json_object(data, MAX_SCAN_EVIDENCE),
+        sha256(data).removeprefix("sha256:"),
+        tested,
+        root,
+        now,
+    )
+
+
+def scan_image_record(image: Any) -> dict[str, Any]:
+    if not isinstance(image, dict) or set(image) != SCAN_IMAGE_KEYS:
+        raise ReleaseError("Invalid scan image fields")
+    require_digest(image["tested_image_id"])
+    counts = image["counts"]
+    if (
+        not isinstance(counts, dict)
+        or set(counts) != set(image_scan.SEVERITIES)
+        or any(type(value) is not int or value < 0 for value in counts.values())
+    ):
+        raise ReleaseError("Invalid scan severity counts")
+    if (
+        not isinstance(image["report_sha256"], str)
+        or HASH.fullmatch(image["report_sha256"]) is None
+    ):
+        raise ReleaseError("Invalid scan report hash")
+    suppressed = image["suppressed"]
+    if not isinstance(suppressed, list) or len(suppressed) > MAX_SUPPRESSED:
+        raise ReleaseError("Invalid suppressed scan findings")
+    for found in suppressed:
+        if (
+            not isinstance(found, dict)
+            or set(found) != SUPPRESSED_KEYS
+            or not isinstance(found["id"], str)
+            or not isinstance(found["package"], str)
+            or not 1 <= len(found["id"]) <= 200
+            or not 1 <= len(found["package"]) <= 500
+            or image_scan.policy_date(found["expires_at"]) is None
+        ):
+            raise ReleaseError("Invalid suppressed scan finding")
+    return image
+
+
+def scan_block(value: Any, images: list[dict[str, Any]]) -> dict[str, Any]:
+    """Structural check of a receipt's scan block; freshness is enforced at stage and promote."""
+    if not isinstance(value, dict) or set(value) != SCAN_KEYS:
+        raise ReleaseError("Staged receipt lacks its exact scan evidence block")
+    for name in ("evidence_sha256", "policy_sha256"):
+        if not isinstance(value[name], str) or HASH.fullmatch(value[name]) is None:
+            raise ReleaseError("Invalid scan evidence hash")
+    if (
+        value["scanner_image"] != image_scan.TRIVY_IMAGE
+        or value["scanner_version"] != image_scan.TRIVY_VERSION
+    ):
+        raise ReleaseError("Staged receipt scan used another scanner")
+    for name in ("db_updated_at", "java_db_updated_at", "scanned_at"):
+        scan_time(value[name])
+    rows = value["images"]
+    if not isinstance(rows, list):
+        raise ReleaseError("Invalid scan image list")
+    scanned = {}
+    for row in rows:
+        scan_image_record(row)
+        if row["profile"] in scanned:
+            raise ReleaseError("Duplicate scan image record")
+        scanned[row["profile"]] = row["tested_image_id"]
+    if scanned != {image["profile"]: image["tested_image_id"] for image in images}:
+        raise ReleaseError("Scan evidence does not cover exactly the staged image IDs")
+    return value
+
+
+def promotion_scan_check(scan: dict[str, Any], root: Path, now: datetime) -> None:
+    """Re-verify staged scan evidence at promote time (D-02, D-05)."""
+    fresh_scan_database(scan["db_updated_at"], now)
+    if scan["policy_sha256"] != committed_policy(root, now.date()).sha256:
+        raise ReleaseError("Staged scan used a CVE policy that differs from the committed one")
+    today = now.date()
+    for image in scan["images"]:
+        for found in image["suppressed"]:
+            expires = image_scan.policy_date(found["expires_at"])
+            if expires is None or expires < today:
+                raise ReleaseError("A suppression the staged scan relied on has expired")
 
 
 def source_file(root: Path, relative: Any) -> Path:
@@ -1073,8 +1298,11 @@ def stage_images(
     registry: Registry,
     docker: Docker,
     root: Path = ROOT,
+    *,
+    scan: dict[str, Any],
 ) -> dict[str, Any]:
     architecture = tested["architecture"]
+    scan_block(scan, tested["images"])
     docker.native(architecture)
     seed_bindings = {}
     if tested["group"] != "python-core":
@@ -1104,13 +1332,14 @@ def stage_images(
         staged.append(verify_candidate(registry, context, image, architecture))
         print(f"Candidate verified: {image['profile']} ({architecture})", flush=True)
     return {
-        "schema_version": 1,
+        "schema_version": 2,
         "kind": "ds60-staged-images",
         "context": asdict(context),
         "architecture": architecture,
         "group": tested["group"],
         "seed_native_digests": seed_bindings,
         "qualification": qualifications,
+        "scan": scan,
         "images": staged,
     }
 
@@ -1128,10 +1357,11 @@ def staged_receipt(
             "group",
             "seed_native_digests",
             "qualification",
+            "scan",
             "images",
         }
         or type(raw.get("schema_version")) is not int
-        or raw["schema_version"] != 1
+        or raw["schema_version"] != 2
         or raw.get("kind") != "ds60-staged-images"
         or raw.get("architecture") not in ARCHITECTURES
     ):
@@ -1183,6 +1413,7 @@ def staged_receipt(
             raise ReleaseError("Seed receipts require the native image config digest")
     if raw.get("group") != image_group(selected, profiles, root):
         raise ReleaseError("Staged receipt profile set differs from its qualification group")
+    scan_block(raw["scan"], images)
     bindings = raw.get("seed_native_digests")
     if not isinstance(bindings, dict) or set(bindings) != (
         set() if selected == SEEDS else set(SEEDS)
@@ -1307,10 +1538,15 @@ def promotion_inputs(
     root: Path = ROOT,
     *,
     target_group: str | None = None,
+    now: datetime | None = None,
+    scans: dict[str, dict[str, Any]] | None = None,
 ) -> dict[str, dict[str, Descriptor]]:
+    """Select qualified natives; `scans` receives the per-profile/architecture scan record."""
+    now = now or utc_now()
     selected: dict[tuple[str, str], dict[str, Any]] = {}
     for path in receipt_files(directory):
         raw = staged_receipt(read_json(path), context, profiles, root=root)
+        promotion_scan_check(raw["scan"], root, now)
         identity = (raw["group"], raw["architecture"])
         attempt = int(raw["context"]["run_attempt"])
         prior = selected.get(identity)
@@ -1339,7 +1575,9 @@ def promotion_inputs(
     }
     selected_profiles = set(profiles) if target_group is None else set(SEEDS | groups[target_group])
     result: dict[str, dict[str, Descriptor]] = {key: {} for key in selected_profiles}
+    records: dict[str, dict[str, Any]] = {key: {} for key in selected_profiles}
     for (group, arch), raw in selected.items():
+        scanned = {row["profile"]: row for row in raw["scan"]["images"]}
         if group != "python-core" and raw["seed_native_digests"] != seeds[arch]:
             raise ReleaseError(
                 "Worker receipts used different seeds; rerun those groups against "
@@ -1357,12 +1595,28 @@ def promotion_inputs(
             if not same_head(registry.head(expected.digest), expected):
                 raise ReleaseError("Qualified native manifest is missing")
             result[key][arch] = expected
+            row = scanned[key]
+            records[key][arch] = {
+                "tested_image_id": image["tested_image_id"],
+                "native_digest": expected.digest,
+                "counts": row["counts"],
+                "suppressed": sorted({found["id"] for found in row["suppressed"]}),
+                "report_sha256": row["report_sha256"],
+                "evidence_sha256": raw["scan"]["evidence_sha256"],
+                "scanner_image": raw["scan"]["scanner_image"],
+                "db_updated_at": raw["scan"]["db_updated_at"],
+                "policy_sha256": raw["scan"]["policy_sha256"],
+                "scanned_at": raw["scan"]["scanned_at"],
+            }
     if any(set(items) != set(ARCHITECTURES) for items in result.values()):
         raise ReleaseError(
             "Promotion requires complete catalog coverage on amd64 and arm64"
             if target_group is None
             else "Promotion requires complete selected coverage on amd64 and arm64"
         )
+    if scans is not None:
+        scans.clear()
+        scans.update(records)
     return result
 
 
@@ -1420,10 +1674,23 @@ def promote_release(
     output: Path,
     target_group: str | None = None,
     root: Path = ROOT,
+    scan: dict[str, dict[str, Any]] | None = None,
 ) -> dict[str, Any]:
     selected = selected_release_profiles(profiles, target_group, root)
     if natives is not None and set(natives) != selected:
         raise ReleaseError("Qualified native selection differs from the promotion scope")
+    if scan is not None and (
+        natives is None
+        or set(scan) != selected
+        or any(
+            set(scan[key]) != set(ARCHITECTURES)
+            or any(
+                scan[key][arch]["native_digest"] != natives[key][arch].digest for arch in scan[key]
+            )
+            for key in selected
+        )
+    ):
+        raise ReleaseError("Scan records do not cover exactly the promoted native digests")
     scoped_profiles = {key: profile for key, profile in profiles.items() if key in selected}
     releases: dict[str, Manifest] = {}
     # Validate the entire version set before any canonical write, including when
@@ -1468,6 +1735,8 @@ def promote_release(
         report["scope"] = "partial"
         report["group"] = target_group
         report["profiles"] = sorted(selected)
+    if scan is not None:
+        report["scan"] = scan
     write_json(output, report)
     order = [key for key in scoped_profiles if key != "app"] + ["app"]
     for key in order:
@@ -1549,6 +1818,7 @@ def main(argv: list[str] | None = None) -> int:
         elif name == "stage":
             command.add_argument("--tested-images", required=True, type=Path)
             command.add_argument("--qualification", required=True, action="append", type=Path)
+            command.add_argument("--scan", required=True, type=Path)
             command.add_argument("--output", required=True, type=Path)
         elif name == "import-seed":
             command.add_argument("--receipt", required=True, type=Path)
@@ -1600,6 +1870,8 @@ def main(argv: list[str] | None = None) -> int:
                 target_group,
             }:
                 raise ReleaseError("Staged profiles differ from the targeted gate")
+            # The scan gate runs before qualification files, local preflight, tags or pushes.
+            scan = load_scan(args.scan, tested)
             records = qualification_records(
                 args.qualification,
                 context,
@@ -1608,7 +1880,13 @@ def main(argv: list[str] | None = None) -> int:
                 ROOT,
             )
             value = stage_images(
-                context, profiles, tested, records, registry_for(context, push=True), Docker()
+                context,
+                profiles,
+                tested,
+                records,
+                registry_for(context, push=True),
+                Docker(),
+                scan=scan,
             )
             write_json(args.output, value)
         elif args.command == "import-seed":
@@ -1626,6 +1904,7 @@ def main(argv: list[str] | None = None) -> int:
             if mode == "noop":
                 raise ReleaseError("A no-op gate does not authorize another promotion")
             registry = registry_for(context, push=True)
+            scans: dict[str, dict[str, Any]] = {}
             natives = (
                 promotion_inputs(
                     args.receipts_dir,
@@ -1633,6 +1912,7 @@ def main(argv: list[str] | None = None) -> int:
                     profiles,
                     registry,
                     target_group=target_group,
+                    scans=scans,
                 )
                 if mode == "build" or target_group is None
                 else None
@@ -1653,6 +1933,7 @@ def main(argv: list[str] | None = None) -> int:
                 natives=natives,
                 output=args.output,
                 target_group=target_group,
+                scan=scans if natives is not None else None,
             )
         print("Release operation completed: " + args.command)
         return 0

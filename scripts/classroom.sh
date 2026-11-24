@@ -210,7 +210,9 @@ project_name=''
 internal_port=8765
 configured_port=''
 configured_db_port=''
-db_image=postgres:17
+db_image=''
+# 1 when DS60_POSTGRES_IMAGE names another image: pull it instead of building docker/postgres.
+db_override=0
 while IFS='=' read -r key value; do
   case "$key" in
     COMPOSE_PROJECT_NAME) project_name="$value" ;;
@@ -220,7 +222,7 @@ while IFS='=' read -r key value; do
       ;;
     DS60_CLASSROOM_PORT) requested_port="${requested_port:-$value}" ;;
     DS60_POSTGRES_PORT) configured_db_port="$value" ;;
-    DS60_POSTGRES_IMAGE) db_image="${value:-postgres:17}" ;;
+    DS60_POSTGRES_IMAGE) [ -z "$value" ] || db_override=1 ;;
     DS60_PYTHON_INDEX_URL | DS60_NPM_REGISTRY)
       # Optional build-only mirrors must be anonymous HTTPS URLs; never print them.
       case "$value" in
@@ -603,7 +605,36 @@ fi
 if [ "$no_build" -eq 1 ] && { [ "$need_database" -eq 1 ] || [ "${#build_services[@]}" -gt 0 ]; }; then
   fail "Required local images are missing (database=$need_database; services: ${build_services[*]-}; Hub profiles: ${missing_descriptions[*]-}). Resume never builds or pulls. Run ./classroom with the same project/options to prepare only missing images."
 fi
-if [ "$need_database" -eq 1 ]; then "${compose[@]}" pull postgres; fi
+if [ "$need_database" -eq 1 ] && [ "$db_override" -eq 1 ]; then "${compose[@]}" pull postgres; fi
+# Label local builds with the checkout commit: <sha>, <sha>-dirty, or empty when
+# git is missing or this directory is not its own repository top level.
+image_source_revision() {
+  local top revision changes
+  command -v git >/dev/null 2>&1 || return 0
+  top="$(git -C "$repo_dir" rev-parse --show-toplevel 2>/dev/null)" || return 0
+  top="$(cd "$top" 2>/dev/null && pwd -P)" || return 0
+  [ "$top" = "$repo_dir" ] || return 0
+  revision="$(git -C "$repo_dir" rev-parse HEAD 2>/dev/null)" || return 0
+  [[ "$revision" =~ ^[0-9a-f]{40}$ ]] || return 0
+  changes="$(git -C "$repo_dir" status --porcelain 2>/dev/null)" || return 0
+  [ -z "$changes" ] || revision="$revision-dirty"
+  printf '%s' "$revision"
+}
+build_release_version="$(awk -F'"' '/^version = "/ { print $2; exit }' "$repo_dir/pyproject.toml")"
+source_revision=''
+revision_args=()
+build_database=0
+[ "$need_database" -eq 0 ] || [ "$db_override" -eq 1 ] || build_database=1
+if { [ "$image_source" != hub ] && [ "${#build_services[@]}" -gt 0 ]; } || [ "$build_database" -eq 1 ]; then
+  source_revision="$(image_source_revision)"
+  revision_args=(--build-arg "DS60_SOURCE_REVISION=$source_revision" --build-arg "DS60_RELEASE_VERSION=$build_release_version")
+  printf '\nBuilding from source revision %s.\n' "${source_revision:-unknown}"
+fi
+# DS60 PostgreSQL is not published to the Hub yet, so every source builds it.
+if [ "$build_database" -eq 1 ]; then
+  printf '\nBuilding the DS60 PostgreSQL image locally...\n'
+  "${compose[@]}" build ${revision_args[@]+"${revision_args[@]}"} postgres
+fi
 for service in ${build_services[@]+"${build_services[@]}"}; do
   if [ "$image_source" = hub ]; then
     profile="$(image_profile_for_service "$service")"
@@ -616,9 +647,9 @@ for service in ${build_services[@]+"${build_services[@]}"}; do
     # The Compose service:lab additional context would rebuild the app as a
     # dependency. Use its already prepared image directly for this small worker.
     worker_image="$(image_for "$service")"
-    "$docker_cli" build --progress plain --pull=false --build-arg "DS60_CORE_IMAGE=$app_image" --file "$repo_dir/docker/workers/Dockerfile.python-core" --tag "$worker_image" "$repo_dir"
+    "$docker_cli" build --progress plain --pull=false --build-arg "DS60_CORE_IMAGE=$app_image" ${revision_args[@]+"${revision_args[@]}"} --file "$repo_dir/docker/workers/Dockerfile.python-core" --tag "$worker_image" "$repo_dir"
   else
-    "${compose[@]}" build "$service"
+    "${compose[@]}" build ${revision_args[@]+"${revision_args[@]}"} "$service"
   fi
 done
 verify_hub_prepared_images

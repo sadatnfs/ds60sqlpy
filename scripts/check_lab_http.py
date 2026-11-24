@@ -11,6 +11,31 @@ from typing import Any
 from urllib.parse import urlsplit
 from urllib.request import ProxyHandler, Request, build_opener
 
+SENTINEL_NAME = re.compile(r"^p7_[a-z0-9_]{1,40}$")
+SENTINEL_TOKEN = re.compile(r"^[A-Za-z0-9]{8,64}$")
+
+
+def parse_sentinel(value: str) -> tuple[str, str]:
+    """Split NAME:TOKEN; both parts are strictly validated so they embed safely in SQL."""
+    name, separator, token = value.partition(":")
+    if not separator or not SENTINEL_NAME.fullmatch(name) or not SENTINEL_TOKEN.fullmatch(token):
+        raise ValueError(
+            "--sql-sentinel needs NAME:TOKEN with NAME matching p7_[a-z0-9_]{1,40} "
+            "and TOKEN of 8 to 64 ASCII letters or digits."
+        )
+    return name, token
+
+
+def sentinel_seed_sql(name: str, token: str) -> str:
+    return (
+        f"CREATE TABLE IF NOT EXISTS public.{name} (token text primary key);\n"
+        f"INSERT INTO public.{name} (token) VALUES ('{token}') ON CONFLICT DO NOTHING;"
+    )
+
+
+def sentinel_query_sql(name: str) -> str:
+    return f"SELECT token FROM public.{name} ORDER BY token;"
+
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
@@ -26,11 +51,25 @@ def main() -> int:
         action="store_true",
         help="Require a previous smoke run's pad and evidence to survive application recreation.",
     )
+    parser.add_argument(
+        "--sql-sentinel",
+        metavar="NAME:TOKEN",
+        help=(
+            "Create a learner-owned table public.NAME holding TOKEN through the SQL pad; "
+            "with --check-persistence, require exactly that one row instead."
+        ),
+    )
     args = parser.parse_args()
     if not args.confirm_disposable:
         parser.error(
             "This writes test pads/evidence. Use --confirm-disposable only on a test workspace."
         )
+    sentinel: tuple[str, str] | None = None
+    if args.sql_sentinel is not None:
+        try:
+            sentinel = parse_sentinel(args.sql_sentinel)
+        except ValueError as exc:
+            parser.error(str(exc))
     parsed = urlsplit(args.url)
     if (
         parsed.scheme != "http"
@@ -157,6 +196,28 @@ def main() -> int:
         raise RuntimeError("The previous Python pad is missing from recovery history.")
     call("save-pad", lesson_id="python-01", language="python", code=python_source)
     call("save", lesson_id="python-01", phase="read", note=note)
+    if sentinel is not None:
+        name, value = sentinel
+        if args.check_persistence:
+            found = call(
+                "run", lesson_id="sql-start-01", language="sql", code=sentinel_query_sql(name)
+            )
+            if found["returncode"] or json.loads(found["output"])["results"][0]["rows"] != [
+                [value]
+            ]:
+                raise RuntimeError("The learner-created SQL sentinel table did not survive.")
+            print("SQL sentinel survived.")
+        else:
+            created = call(
+                "run",
+                lesson_id="sql-start-01",
+                language="sql",
+                code=sentinel_seed_sql(name, value),
+            )
+            if created["returncode"]:
+                raise RuntimeError(
+                    "The SQL sentinel table could not be created as the course role."
+                )
     print(
         f"PASS: {info['lesson_count']} lessons, planning, Python/SQL pads, limited role, "
         "empty-pad/history recovery, durable run receipts"

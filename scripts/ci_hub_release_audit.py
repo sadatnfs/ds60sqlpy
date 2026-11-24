@@ -125,6 +125,9 @@ def validate_receipt(receipt: dict[str, Any], request: recovery.Request) -> Cont
         "latest_tags",
         "latest_skipped_newer_release",
     }
+    # Releases promoted after Phase 8 also record their image scan evidence.
+    if "scan" in receipt and type(receipt["scan"]) is dict and receipt["scan"]:
+        expected.add("scan")
     context = context_record(receipt.get("context"))
     if (
         set(receipt) != expected

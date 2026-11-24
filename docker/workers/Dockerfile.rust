@@ -1,7 +1,20 @@
-ARG DS60_RUST_IMAGE=rust:1.99.1-bookworm@sha256:48b7f435b8fc6378ce43b44f15e3a47fd8919b2825f835c39bd4bd3da50af5b8
-FROM ${DS60_RUST_IMAGE}
-RUN apt-get update && apt-get install -y --no-install-recommends python3 \
-    && rm -rf /var/lib/apt/lists/* && install -d -m 0700 /run/ds60
+# The official slim Rust image supplies the minimal rustup toolchain. Only the
+# toolchain is copied onto the shared Debian 13 Python slim base, so Debian's own
+# python3 package (and its unfixed CVEs) is not installed.
+ARG DS60_RUST_IMAGE=rust:1.99.1-slim-trixie@sha256:f6c4a35d21dbb3c89d7a8d056c193e94fc09037f2b58dd858b09c39a47dd02d7
+ARG DS60_PYTHON_IMAGE=python:3.12.16-slim-trixie@sha256:5e2bdb1b0d542d5039cffb8181c65930093949194a65c365dfb1b0fe13a4fa5b
+FROM ${DS60_RUST_IMAGE} AS rust
+FROM ${DS60_PYTHON_IMAGE}
+# rustc links with the system C compiler driver. No Python packages are
+# installed, so pip is removed rather than upgraded.
+# hadolint ignore=DL3005
+RUN apt-get update && apt-get upgrade -y \
+    && apt-get install -y --no-install-recommends gcc libc6-dev \
+    && rm -rf /var/lib/apt/lists/* \
+    && python -m pip uninstall --yes pip && install -d -m 0700 /run/ds60
+COPY --from=rust /usr/local/rustup /usr/local/rustup
+COPY --from=rust /usr/local/cargo /usr/local/cargo
+ENV RUSTUP_HOME=/usr/local/rustup CARGO_HOME=/usr/local/cargo PATH="/usr/local/cargo/bin:$PATH"
 WORKDIR /opt/course-rust
 COPY docker/workers/rust/Cargo.toml docker/workers/rust/Cargo.lock ./
 COPY docker/workers/rust/src/ ./src/
@@ -9,8 +22,15 @@ COPY docker/workers/rust/src/ ./src/
 # only at image build; every learner attempt uses readonly compiled libraries.
 RUN cargo build --release --locked --jobs 2 \
     && python3 -c "from pathlib import Path; import shutil; p=list(Path('target/release/deps').glob('libarrow-*.rlib')); assert len(p)==1; shutil.copyfile(p[0], 'libarrow.rlib')" \
-    && chmod -R a+rX /opt/course-rust /usr/local/rustup
+    && rm -rf /usr/local/cargo/registry /usr/local/cargo/git \
+    && chmod -R a+rX /opt/course-rust /usr/local/rustup /usr/local/cargo
 WORKDIR /opt/worker
 COPY src/ds60sqlpy/__init__.py src/ds60sqlpy/http_server.py src/ds60sqlpy/module_worker.py src/ds60sqlpy/worker_operations.py src/ds60sqlpy/plot_artifacts.py src/ds60sqlpy/plot_capture.py src/ds60sqlpy/worker_figures.py /opt/worker/src/ds60sqlpy/
 ENV PYTHONPATH=/opt/worker/src PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1 DS60_WORKER_PROFILE=rust-stable
 ENTRYPOINT ["python3", "-m", "ds60sqlpy.module_worker", "--host", "0.0.0.0", "--port", "8081"]
+# Keep the revision last so a new commit reuses every earlier cached layer.
+ARG DS60_SOURCE_REVISION=""
+ARG DS60_RELEASE_VERSION=""
+LABEL org.opencontainers.image.revision="${DS60_SOURCE_REVISION}" \
+    org.opencontainers.image.version="${DS60_RELEASE_VERSION}" \
+    org.opencontainers.image.source="https://github.com/sadatnfs/ds60sqlpy"
