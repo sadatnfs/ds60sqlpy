@@ -68,7 +68,7 @@ def seed_document() -> dict[str, Any]:
             "run_id": "123",
             "run_attempt": "1",
         },
-        "images": [{"profile": "app"}, {"profile": "python-core"}],
+        "images": [{"profile": "app"}, {"profile": "python-core"}, {"profile": "postgres"}],
     }
 
 
@@ -145,6 +145,13 @@ def test_logical_seed_identity_cannot_hide_another_architecture_or_worker() -> N
         read(archive(json.dumps(document).encode()))
     document = seed_document()
     document["images"] = [{"profile": "rust-stable"}]
+    with pytest.raises(ValueError, match="logical CI group"):
+        read(archive(json.dumps(document).encode()))
+
+
+def test_seed_receipt_must_include_the_postgres_image() -> None:
+    document = seed_document()
+    document["images"] = [{"profile": "app"}, {"profile": "python-core"}]
     with pytest.raises(ValueError, match="logical CI group"):
         read(archive(json.dumps(document).encode()))
 

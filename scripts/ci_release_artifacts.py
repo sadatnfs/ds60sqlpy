@@ -19,6 +19,7 @@ from typing import Any
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 from scripts.ci_profiles import RUNNERS, groups  # noqa: E402
+from scripts.docker_release import SEEDS  # noqa: E402
 
 MAX_JSON = 256 * 1024
 MAX_ARCHIVE = 512 * 1024
@@ -178,8 +179,9 @@ def receipt_bytes(
         group, architecture = artifact.key.rsplit("-", 1)
         if document.get("architecture") != architecture:
             raise ValueError("Receipt architecture differs from its logical artifact")
+        # The native seed stages the App, Core and PostgreSQL images together.
         required = (
-            {"app", "python-core"}
+            set(SEEDS)
             if group == "seed"
             else set(next(row["profiles"] for row in groups() if row["id"] == group))
         )
