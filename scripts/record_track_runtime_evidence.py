@@ -44,7 +44,9 @@ SOURCE_PATHS = (
     "scripts/check_module_references.py",
     "src/ds60sqlpy/walkthroughs.py",
 )
-PRINT_WIDTH = 80
+PRINT_WIDTH: int = json.loads(
+    (ROOT / "docker/formatting/prettier.json").read_text(encoding="utf-8")
+)["printWidth"]
 
 
 def fetch_run(run_id: str, repo: str = REPO) -> dict[str, Any]:
@@ -159,11 +161,13 @@ def _scalar(value: Any) -> str:
     return json.dumps(value, ensure_ascii=False)
 
 
-def dump_json(value: Any, indent: int = 0, used: int = 0) -> str:
+def dump_json(value: Any, indent: int = 0, used: int = 0, tail: int = 0) -> str:
     """Serialize like Prettier: objects expanded, scalar arrays inline when they fit.
 
-    `used` is the width already taken on the current line (indent and key); a
-    trailing comma is counted so a fitting inline array never exceeds 80 columns.
+    `used` is the width already taken on the current line (indent and key) and
+    `tail` the width that follows the value there (1 for a separating comma), so
+    an inline array is kept only when the whole line fits the repository's
+    Prettier `printWidth`.
     """
     pad = " " * indent
     inner = " " * (indent + 2)
@@ -171,18 +175,22 @@ def dump_json(value: Any, indent: int = 0, used: int = 0) -> str:
         if not value:
             return "{}"
         items = []
-        for key, item in value.items():
+        for position, (key, item) in enumerate(value.items(), start=1):
             head = f"{inner}{_scalar(key)}: "
-            items.append(head + dump_json(item, indent + 2, len(head)))
+            comma = int(position < len(value))
+            items.append(head + dump_json(item, indent + 2, len(head), comma))
         return "{\n" + ",\n".join(items) + "\n" + pad + "}"
     if isinstance(value, list):
         if not value:
             return "[]"
         if all(not isinstance(item, (dict, list)) for item in value):
             flat = "[" + ", ".join(_scalar(item) for item in value) + "]"
-            if max(used, indent) + len(flat) + 1 <= PRINT_WIDTH:
+            if max(used, indent) + len(flat) + tail <= PRINT_WIDTH:
                 return flat
-        items = [inner + dump_json(item, indent + 2, indent + 2) for item in value]
+        items = [
+            inner + dump_json(item, indent + 2, indent + 2, int(position < len(value)))
+            for position, item in enumerate(value, start=1)
+        ]
         return "[\n" + ",\n".join(items) + "\n" + pad + "]"
     return _scalar(value)
 

@@ -25,6 +25,24 @@ def payload() -> dict[str, Any]:
     return data
 
 
+def pending_ledger() -> dict[str, Any]:
+    """The committed ledger with recorded CI evidence removed, as before any run."""
+    ledger = qualification.load_ledger(ROOT)
+    for record in ledger["tracks"]:
+        required = qualification.required_ci_groups(record)
+        if not required or record["runtime"].pop("evidence", None) is None:
+            continue
+        record["runtime"]["walkthrough_outputs_checked"] = False
+        record["criteria"]["R10"] = {
+            "status": "gap",
+            "justification": (
+                "No recorded app-build run yet cites a successful qualify job for the "
+                f"ordinary CI groups {', '.join(required)}."
+            ),
+        }
+    return ledger
+
+
 def test_parse_run_reads_each_group_qualify_outcome() -> None:
     commit, outcomes = evidence.parse_run(payload(), KNOWN)
     assert commit == COMMIT
@@ -51,7 +69,7 @@ def test_parse_run_rejects_other_workflows_and_bad_commits() -> None:
 
 
 def test_plan_records_only_tracks_whose_groups_all_succeeded() -> None:
-    ledger = qualification.load_ledger(ROOT)
+    ledger = pending_ledger()
     before = copy.deepcopy(ledger)
     _commit, outcomes = evidence.parse_run(payload(), KNOWN)
     updated, lines = evidence.plan_updates(ledger, "123456", COMMIT, outcomes)
@@ -77,9 +95,7 @@ def test_plan_records_only_tracks_whose_groups_all_succeeded() -> None:
 
 def test_full_success_run_qualifies_every_track() -> None:
     outcomes = dict.fromkeys(KNOWN, "success")
-    updated, lines = evidence.plan_updates(
-        qualification.load_ledger(ROOT), "123456", COMMIT, outcomes
-    )
+    updated, lines = evidence.plan_updates(pending_ledger(), "123456", COMMIT, outcomes)
     assert not any(line.startswith("SKIP") for line in lines)
     matrix = qualification.load_matrix(ROOT)
     for record in updated["tracks"]:
@@ -96,6 +112,9 @@ def test_dump_json_matches_the_committed_ledger_format() -> None:
     assert '"groups": ["c-go"]' in dumped
     assert '"long": [\n' in dumped
     assert all(len(line) <= evidence.PRINT_WIDTH for line in dumped.splitlines())
+    edge = ["x" * (evidence.PRINT_WIDTH - len('  "k": [""]'))]
+    assert evidence.dump_json({"k": edge}).splitlines()[1] == f'  "k": ["{edge[0]}"]'
+    assert '"k": [\n' in evidence.dump_json({"k": edge, "z": 1})
 
 
 def test_main_rejects_non_numeric_run(capsys: pytest.CaptureFixture[str]) -> None:

@@ -30,7 +30,12 @@
           }
         ],
         "guide_examples": "Executable reference checked by the CI corpus; guide code blocks are covered by content rendering checks and are not executed in this phase.",
-        "walkthrough_outputs_checked": false
+        "walkthrough_outputs_checked": true,
+        "evidence": {
+          "ci_run": "45399494825",
+          "commit": "0770e8fd4c58030c20d8267ed3820eb630d1442f",
+          "groups": ["scala-spark"]
+        }
       },
       "walkthrough": {
         "route": "authored",
@@ -69,8 +74,7 @@
           "status": "pass"
         },
         "R10": {
-          "status": "gap",
-          "justification": "The runtime ledger is consistent, but no recorded app-build run yet cites a successful qualify job for the ordinary CI groups scala-spark, so walkthrough expected outputs are not yet confirmed against real references; scripts/record_track_runtime_evidence.py records that evidence."
+          "status": "pass"
         },
         "R11": {
           "status": "not-assessed",
@@ -102,7 +106,12 @@
           }
         ],
         "guide_examples": "Executable reference checked by the CI corpus; guide code blocks are covered by content rendering checks and are not executed in this phase.",
-        "walkthrough_outputs_checked": false
+        "walkthrough_outputs_checked": true,
+        "evidence": {
+          "ci_run": "45399494825",
+          "commit": "0770e8fd4c58030c20d8267ed3820eb630d1442f",
+          "groups": ["data-platforms"]
+        }
       },
       "walkthrough": {
         "route": "authored",
@@ -141,8 +150,7 @@
           "status": "pass"
         },
         "R10": {
-          "status": "gap",
-          "justification": "The runtime ledger is consistent, but no recorded app-build run yet cites a successful qualify job for the ordinary CI groups data-platforms, so walkthrough expected outputs are not yet confirmed against real references; scripts/record_track_runtime_evidence.py records that evidence."
+          "status": "pass"
         },
         "R11": {
           "status": "not-assessed",
@@ -165,7 +173,12 @@
         },
         "unavailable": [],
         "guide_examples": "Executable reference checked by the CI corpus; guide code blocks are covered by content rendering checks and are not executed in this phase.",
-        "walkthrough_outputs_checked": false
+        "walkthrough_outputs_checked": true,
+        "evidence": {
+          "ci_run": "45399494825",
+          "commit": "0770e8fd4c58030c20d8267ed3820eb630d1442f",
+          "groups": ["python-core"]
+        }
       },
       "walkthrough": {
         "route": "authored",
@@ -204,8 +217,7 @@
           "status": "pass"
         },
         "R10": {
-          "status": "gap",
-          "justification": "The runtime ledger is consistent, but no recorded app-build run yet cites a successful qualify job for the ordinary CI groups python-core, so walkthrough expected outputs are not yet confirmed against real references; scripts/record_track_runtime_evidence.py records that evidence."
+          "status": "pass"
         },
         "R11": {
           "status": "not-assessed",
@@ -238,7 +250,12 @@
         },
         "unavailable": [],
         "guide_examples": "Executable reference checked by the CI corpus; guide code blocks are covered by content rendering checks and are not executed in this phase.",
-        "walkthrough_outputs_checked": false
+        "walkthrough_outputs_checked": true,
+        "evidence": {
+          "ci_run": "45399494825",
+          "commit": "0770e8fd4c58030c20d8267ed3820eb630d1442f",
+          "groups": ["bayesian", "python-core", "stan"]
+        }
       },
       "walkthrough": {
         "route": "authored",
@@ -277,8 +294,7 @@
           "status": "pass"
         },
         "R10": {
-          "status": "gap",
-          "justification": "The runtime ledger is consistent, but no recorded app-build run yet cites a successful qualify job for the ordinary CI groups bayesian, python-core, stan, so walkthrough expected outputs are not yet confirmed against real references; scripts/record_track_runtime_evidence.py records that evidence."
+          "status": "pass"
         },
         "R11": {
           "status": "not-assessed",
@@ -359,7 +375,12 @@
         },
         "unavailable": [],
         "guide_examples": "Executable reference checked by the CI corpus; guide code blocks are covered by content rendering checks and are not executed in this phase.",
-        "walkthrough_outputs_checked": false
+        "walkthrough_outputs_checked": true,
+        "evidence": {
+          "ci_run": "45399494825",
+          "commit": "0770e8fd4c58030c20d8267ed3820eb630d1442f",
+          "groups": ["c-go"]
+        }
       },
       "walkthrough": {
         "route": "authored",
@@ -396,8 +417,7 @@
           "status": "pass"
         },
         "R10": {
-          "status": "gap",
-          "justification": "The runtime ledger is consistent, but no recorded app-build run yet cites a successful qualify job for the ordinary CI groups c-go, so walkthrough expected outputs are not yet confirmed against real references; scripts/record_track_runtime_evidence.py records that evidence."
+          "status": "pass"
         },
         "R11": {
           "status": "not-assessed",
@@ -429,7 +449,12 @@
           }
         ],
         "guide_examples": "Executable reference checked by the CI corpus; guide code blocks are covered by content rendering checks and are not executed in this phase. C++ worked examples are also compiled and compared with documented expected outputs by tests/test_cpp_worked_examples.py when a host compiler is present.",
-        "walkthrough_outputs_checked": false
+        "walkthrough_outputs_checked": true,
+        "evidence": {
+          "ci_run": "45399494825",
+          "commit": "0770e8fd4c58030c20d8267ed3820eb630d1442f",
+          "groups": ["cpp"]
+        }
       },
       "walkthrough": {
         "route": "authored",
@@ -466,8 +491,7 @@
           "status": "pass"
         },
         "R10": {
-          "status": "gap",
-          "justification": "The runtime ledger is consistent, but no recorded app-build run yet cites a successful qualify job for the ordinary CI groups cpp, so walkthrough expected outputs are not yet confirmed against real references; scripts/record_track_runtime_evidence.py records that evidence."
+          "status": "pass"
         },
         "R11": {
           "status": "not-assessed",
@@ -490,7 +514,12 @@
         },
         "unavailable": [],
         "guide_examples": "Executable reference checked by the CI corpus; guide code blocks are covered by content rendering checks and are not executed in this phase.",
-        "walkthrough_outputs_checked": false
+        "walkthrough_outputs_checked": true,
+        "evidence": {
+          "ci_run": "45399494825",
+          "commit": "0770e8fd4c58030c20d8267ed3820eb630d1442f",
+          "groups": ["csharp"]
+        }
       },
       "walkthrough": {
         "route": "authored",
@@ -527,8 +556,7 @@
           "status": "pass"
         },
         "R10": {
-          "status": "gap",
-          "justification": "The runtime ledger is consistent, but no recorded app-build run yet cites a successful qualify job for the ordinary CI groups csharp, so walkthrough expected outputs are not yet confirmed against real references; scripts/record_track_runtime_evidence.py records that evidence."
+          "status": "pass"
         },
         "R11": {
           "status": "not-assessed",
@@ -615,7 +643,12 @@
         },
         "unavailable": [],
         "guide_examples": "Executable reference checked by the CI corpus; guide code blocks are covered by content rendering checks and are not executed in this phase.",
-        "walkthrough_outputs_checked": false
+        "walkthrough_outputs_checked": true,
+        "evidence": {
+          "ci_run": "45399494825",
+          "commit": "0770e8fd4c58030c20d8267ed3820eb630d1442f",
+          "groups": ["pytorch"]
+        }
       },
       "walkthrough": {
         "route": "authored",
@@ -654,8 +687,7 @@
           "status": "pass"
         },
         "R10": {
-          "status": "gap",
-          "justification": "The runtime ledger is consistent, but no recorded app-build run yet cites a successful qualify job for the ordinary CI groups pytorch, so walkthrough expected outputs are not yet confirmed against real references; scripts/record_track_runtime_evidence.py records that evidence."
+          "status": "pass"
         },
         "R11": {
           "status": "not-assessed",
@@ -693,7 +725,12 @@
         },
         "unavailable": [],
         "guide_examples": "Executable reference checked by the CI corpus; guide code blocks are covered by content rendering checks and are not executed in this phase.",
-        "walkthrough_outputs_checked": false
+        "walkthrough_outputs_checked": true,
+        "evidence": {
+          "ci_run": "45399494825",
+          "commit": "0770e8fd4c58030c20d8267ed3820eb630d1442f",
+          "groups": ["data-engineering", "python-core", "pytorch", "scala-spark"]
+        }
       },
       "walkthrough": {
         "route": "authored",
@@ -732,8 +769,7 @@
           "status": "pass"
         },
         "R10": {
-          "status": "gap",
-          "justification": "The runtime ledger is consistent, but no recorded app-build run yet cites a successful qualify job for the ordinary CI groups data-engineering, python-core, pytorch, scala-spark, so walkthrough expected outputs are not yet confirmed against real references; scripts/record_track_runtime_evidence.py records that evidence."
+          "status": "pass"
         },
         "R11": {
           "status": "not-assessed",
@@ -756,7 +792,12 @@
         },
         "unavailable": [],
         "guide_examples": "Executable reference checked by the CI corpus; guide code blocks are covered by content rendering checks and are not executed in this phase.",
-        "walkthrough_outputs_checked": false
+        "walkthrough_outputs_checked": true,
+        "evidence": {
+          "ci_run": "45399494825",
+          "commit": "0770e8fd4c58030c20d8267ed3820eb630d1442f",
+          "groups": ["python-core"]
+        }
       },
       "walkthrough": {
         "route": "authored",
@@ -793,8 +834,7 @@
           "status": "pass"
         },
         "R10": {
-          "status": "gap",
-          "justification": "The runtime ledger is consistent, but no recorded app-build run yet cites a successful qualify job for the ordinary CI groups python-core, so walkthrough expected outputs are not yet confirmed against real references; scripts/record_track_runtime_evidence.py records that evidence."
+          "status": "pass"
         },
         "R11": {
           "status": "not-assessed",
@@ -880,7 +920,12 @@
         },
         "unavailable": [],
         "guide_examples": "Executable reference checked by the CI corpus; guide code blocks are covered by content rendering checks and are not executed in this phase.",
-        "walkthrough_outputs_checked": false
+        "walkthrough_outputs_checked": true,
+        "evidence": {
+          "ci_run": "45399494825",
+          "commit": "0770e8fd4c58030c20d8267ed3820eb630d1442f",
+          "groups": ["data-engineering"]
+        }
       },
       "walkthrough": {
         "route": "authored",
@@ -917,8 +962,7 @@
           "status": "pass"
         },
         "R10": {
-          "status": "gap",
-          "justification": "The runtime ledger is consistent, but no recorded app-build run yet cites a successful qualify job for the ordinary CI groups data-engineering, so walkthrough expected outputs are not yet confirmed against real references; scripts/record_track_runtime_evidence.py records that evidence."
+          "status": "pass"
         },
         "R11": {
           "status": "not-assessed",
@@ -950,7 +994,12 @@
           }
         ],
         "guide_examples": "Executable reference checked by the CI corpus; guide code blocks are covered by content rendering checks and are not executed in this phase.",
-        "walkthrough_outputs_checked": false
+        "walkthrough_outputs_checked": true,
+        "evidence": {
+          "ci_run": "45399494825",
+          "commit": "0770e8fd4c58030c20d8267ed3820eb630d1442f",
+          "groups": ["pytorch"]
+        }
       },
       "walkthrough": {
         "route": "authored",
@@ -987,8 +1036,7 @@
           "status": "pass"
         },
         "R10": {
-          "status": "gap",
-          "justification": "The runtime ledger is consistent, but no recorded app-build run yet cites a successful qualify job for the ordinary CI groups pytorch, so walkthrough expected outputs are not yet confirmed against real references; scripts/record_track_runtime_evidence.py records that evidence."
+          "status": "pass"
         },
         "R11": {
           "status": "not-assessed",
@@ -1025,7 +1073,12 @@
           }
         ],
         "guide_examples": "Executable reference checked by the CI corpus; guide code blocks are covered by content rendering checks and are not executed in this phase.",
-        "walkthrough_outputs_checked": false
+        "walkthrough_outputs_checked": true,
+        "evidence": {
+          "ci_run": "45399494825",
+          "commit": "0770e8fd4c58030c20d8267ed3820eb630d1442f",
+          "groups": ["python-core", "tensorflow"]
+        }
       },
       "walkthrough": {
         "route": "authored",
@@ -1062,8 +1115,7 @@
           "status": "pass"
         },
         "R10": {
-          "status": "gap",
-          "justification": "The runtime ledger is consistent, but no recorded app-build run yet cites a successful qualify job for the ordinary CI groups python-core, tensorflow, so walkthrough expected outputs are not yet confirmed against real references; scripts/record_track_runtime_evidence.py records that evidence."
+          "status": "pass"
         },
         "R11": {
           "status": "not-assessed",
@@ -1150,7 +1202,12 @@
         },
         "unavailable": [],
         "guide_examples": "Executable reference checked by the CI corpus; guide code blocks are covered by content rendering checks and are not executed in this phase.",
-        "walkthrough_outputs_checked": false
+        "walkthrough_outputs_checked": true,
+        "evidence": {
+          "ci_run": "45399494825",
+          "commit": "0770e8fd4c58030c20d8267ed3820eb630d1442f",
+          "groups": ["c-go"]
+        }
       },
       "walkthrough": {
         "route": "authored",
@@ -1187,8 +1244,7 @@
           "status": "pass"
         },
         "R10": {
-          "status": "gap",
-          "justification": "The runtime ledger is consistent, but no recorded app-build run yet cites a successful qualify job for the ordinary CI groups c-go, so walkthrough expected outputs are not yet confirmed against real references; scripts/record_track_runtime_evidence.py records that evidence."
+          "status": "pass"
         },
         "R11": {
           "status": "not-assessed",
@@ -1211,7 +1267,12 @@
         },
         "unavailable": [],
         "guide_examples": "Executable reference checked by the CI corpus; guide code blocks are covered by content rendering checks and are not executed in this phase.",
-        "walkthrough_outputs_checked": false
+        "walkthrough_outputs_checked": true,
+        "evidence": {
+          "ci_run": "45399494825",
+          "commit": "0770e8fd4c58030c20d8267ed3820eb630d1442f",
+          "groups": ["java"]
+        }
       },
       "walkthrough": {
         "route": "authored",
@@ -1248,8 +1309,7 @@
           "status": "pass"
         },
         "R10": {
-          "status": "gap",
-          "justification": "The runtime ledger is consistent, but no recorded app-build run yet cites a successful qualify job for the ordinary CI groups java, so walkthrough expected outputs are not yet confirmed against real references; scripts/record_track_runtime_evidence.py records that evidence."
+          "status": "pass"
         },
         "R11": {
           "status": "not-assessed",
@@ -1294,7 +1354,12 @@
           }
         ],
         "guide_examples": "Executable reference checked by the CI corpus; guide code blocks are covered by content rendering checks and are not executed in this phase. JavaScript guide fences are also syntax checked with node --check by tests/test_javascript_lessons.py when a host Node is present.",
-        "walkthrough_outputs_checked": false
+        "walkthrough_outputs_checked": true,
+        "evidence": {
+          "ci_run": "45399494825",
+          "commit": "0770e8fd4c58030c20d8267ed3820eb630d1442f",
+          "groups": ["javascript-typescript"]
+        }
       },
       "walkthrough": {
         "route": "authored",
@@ -1331,8 +1396,7 @@
           "status": "pass"
         },
         "R10": {
-          "status": "gap",
-          "justification": "The runtime ledger is consistent, but no recorded app-build run yet cites a successful qualify job for the ordinary CI groups javascript-typescript, so walkthrough expected outputs are not yet confirmed against real references; scripts/record_track_runtime_evidence.py records that evidence."
+          "status": "pass"
         },
         "R11": {
           "status": "not-assessed",
@@ -1364,7 +1428,12 @@
           }
         ],
         "guide_examples": "Executable reference checked by the CI corpus; guide code blocks are covered by content rendering checks and are not executed in this phase.",
-        "walkthrough_outputs_checked": false
+        "walkthrough_outputs_checked": true,
+        "evidence": {
+          "ci_run": "45399494825",
+          "commit": "0770e8fd4c58030c20d8267ed3820eb630d1442f",
+          "groups": ["jax"]
+        }
       },
       "walkthrough": {
         "route": "authored",
@@ -1401,8 +1470,7 @@
           "status": "pass"
         },
         "R10": {
-          "status": "gap",
-          "justification": "The runtime ledger is consistent, but no recorded app-build run yet cites a successful qualify job for the ordinary CI groups jax, so walkthrough expected outputs are not yet confirmed against real references; scripts/record_track_runtime_evidence.py records that evidence."
+          "status": "pass"
         },
         "R11": {
           "status": "not-assessed",
@@ -1425,7 +1493,12 @@
         },
         "unavailable": [],
         "guide_examples": "Executable reference checked by the CI corpus; guide code blocks are covered by content rendering checks and are not executed in this phase.",
-        "walkthrough_outputs_checked": false
+        "walkthrough_outputs_checked": true,
+        "evidence": {
+          "ci_run": "45399494825",
+          "commit": "0770e8fd4c58030c20d8267ed3820eb630d1442f",
+          "groups": ["julia"]
+        }
       },
       "walkthrough": {
         "route": "authored",
@@ -1462,8 +1535,7 @@
           "status": "pass"
         },
         "R10": {
-          "status": "gap",
-          "justification": "The runtime ledger is consistent, but no recorded app-build run yet cites a successful qualify job for the ordinary CI groups julia, so walkthrough expected outputs are not yet confirmed against real references; scripts/record_track_runtime_evidence.py records that evidence."
+          "status": "pass"
         },
         "R11": {
           "status": "not-assessed",
@@ -1572,7 +1644,12 @@
           }
         ],
         "guide_examples": "Executable reference checked by the CI corpus; guide code blocks are covered by content rendering checks and are not executed in this phase.",
-        "walkthrough_outputs_checked": false
+        "walkthrough_outputs_checked": true,
+        "evidence": {
+          "ci_run": "45399494825",
+          "commit": "0770e8fd4c58030c20d8267ed3820eb630d1442f",
+          "groups": ["python-core", "pytorch"]
+        }
       },
       "walkthrough": {
         "route": "authored",
@@ -1609,8 +1686,7 @@
           "status": "pass"
         },
         "R10": {
-          "status": "gap",
-          "justification": "The runtime ledger is consistent, but no recorded app-build run yet cites a successful qualify job for the ordinary CI groups python-core, pytorch, so walkthrough expected outputs are not yet confirmed against real references; scripts/record_track_runtime_evidence.py records that evidence."
+          "status": "pass"
         },
         "R11": {
           "status": "not-assessed",
@@ -1638,7 +1714,12 @@
         },
         "unavailable": [],
         "guide_examples": "Executable reference checked by the CI corpus; guide code blocks are covered by content rendering checks and are not executed in this phase.",
-        "walkthrough_outputs_checked": false
+        "walkthrough_outputs_checked": true,
+        "evidence": {
+          "ci_run": "45399494825",
+          "commit": "0770e8fd4c58030c20d8267ed3820eb630d1442f",
+          "groups": ["python-core", "pytorch"]
+        }
       },
       "walkthrough": {
         "route": "authored",
@@ -1675,8 +1756,7 @@
           "status": "pass"
         },
         "R10": {
-          "status": "gap",
-          "justification": "The runtime ledger is consistent, but no recorded app-build run yet cites a successful qualify job for the ordinary CI groups python-core, pytorch, so walkthrough expected outputs are not yet confirmed against real references; scripts/record_track_runtime_evidence.py records that evidence."
+          "status": "pass"
         },
         "R11": {
           "status": "not-assessed",
@@ -1713,7 +1793,12 @@
           }
         ],
         "guide_examples": "Executable reference checked by the CI corpus; guide code blocks are covered by content rendering checks and are not executed in this phase.",
-        "walkthrough_outputs_checked": false
+        "walkthrough_outputs_checked": true,
+        "evidence": {
+          "ci_run": "45399494825",
+          "commit": "0770e8fd4c58030c20d8267ed3820eb630d1442f",
+          "groups": ["python-core", "pytorch"]
+        }
       },
       "walkthrough": {
         "route": "authored",
@@ -1750,8 +1835,7 @@
           "status": "pass"
         },
         "R10": {
-          "status": "gap",
-          "justification": "The runtime ledger is consistent, but no recorded app-build run yet cites a successful qualify job for the ordinary CI groups python-core, pytorch, so walkthrough expected outputs are not yet confirmed against real references; scripts/record_track_runtime_evidence.py records that evidence."
+          "status": "pass"
         },
         "R11": {
           "status": "not-assessed",
@@ -1774,7 +1858,12 @@
         },
         "unavailable": [],
         "guide_examples": "Executable reference checked by the CI corpus; guide code blocks are covered by content rendering checks and are not executed in this phase.",
-        "walkthrough_outputs_checked": false
+        "walkthrough_outputs_checked": true,
+        "evidence": {
+          "ci_run": "45399494825",
+          "commit": "0770e8fd4c58030c20d8267ed3820eb630d1442f",
+          "groups": ["data-engineering"]
+        }
       },
       "walkthrough": {
         "route": "authored",
@@ -1811,8 +1900,7 @@
           "status": "pass"
         },
         "R10": {
-          "status": "gap",
-          "justification": "The runtime ledger is consistent, but no recorded app-build run yet cites a successful qualify job for the ordinary CI groups data-engineering, so walkthrough expected outputs are not yet confirmed against real references; scripts/record_track_runtime_evidence.py records that evidence."
+          "status": "pass"
         },
         "R11": {
           "status": "not-assessed",
@@ -1835,7 +1923,12 @@
         },
         "unavailable": [],
         "guide_examples": "Executable reference checked by the CI corpus; guide code blocks are covered by content rendering checks and are not executed in this phase.",
-        "walkthrough_outputs_checked": false
+        "walkthrough_outputs_checked": true,
+        "evidence": {
+          "ci_run": "45399494825",
+          "commit": "0770e8fd4c58030c20d8267ed3820eb630d1442f",
+          "groups": ["python-core"]
+        }
       },
       "walkthrough": {
         "route": "authored",
@@ -1872,8 +1965,7 @@
           "status": "pass"
         },
         "R10": {
-          "status": "gap",
-          "justification": "The runtime ledger is consistent, but no recorded app-build run yet cites a successful qualify job for the ordinary CI groups python-core, so walkthrough expected outputs are not yet confirmed against real references; scripts/record_track_runtime_evidence.py records that evidence."
+          "status": "pass"
         },
         "R11": {
           "status": "not-assessed",
@@ -1896,7 +1988,12 @@
         },
         "unavailable": [],
         "guide_examples": "Executable reference checked by the CI corpus; guide code blocks are covered by content rendering checks and are not executed in this phase.",
-        "walkthrough_outputs_checked": false
+        "walkthrough_outputs_checked": true,
+        "evidence": {
+          "ci_run": "45399494825",
+          "commit": "0770e8fd4c58030c20d8267ed3820eb630d1442f",
+          "groups": ["data-engineering"]
+        }
       },
       "walkthrough": {
         "route": "authored",
@@ -1933,8 +2030,7 @@
           "status": "pass"
         },
         "R10": {
-          "status": "gap",
-          "justification": "The runtime ledger is consistent, but no recorded app-build run yet cites a successful qualify job for the ordinary CI groups data-engineering, so walkthrough expected outputs are not yet confirmed against real references; scripts/record_track_runtime_evidence.py records that evidence."
+          "status": "pass"
         },
         "R11": {
           "status": "not-assessed",
@@ -2024,7 +2120,12 @@
           }
         ],
         "guide_examples": "Executable reference checked by the CI corpus; guide code blocks are covered by content rendering checks and are not executed in this phase.",
-        "walkthrough_outputs_checked": false
+        "walkthrough_outputs_checked": true,
+        "evidence": {
+          "ci_run": "45399494825",
+          "commit": "0770e8fd4c58030c20d8267ed3820eb630d1442f",
+          "groups": ["python-web"]
+        }
       },
       "walkthrough": {
         "route": "authored",
@@ -2063,8 +2164,7 @@
           "status": "pass"
         },
         "R10": {
-          "status": "gap",
-          "justification": "The runtime ledger is consistent, but no recorded app-build run yet cites a successful qualify job for the ordinary CI groups python-web, so walkthrough expected outputs are not yet confirmed against real references; scripts/record_track_runtime_evidence.py records that evidence."
+          "status": "pass"
         },
         "R11": {
           "status": "not-assessed",
@@ -2087,7 +2187,12 @@
         },
         "unavailable": [],
         "guide_examples": "Executable reference checked by the CI corpus; guide code blocks are covered by content rendering checks and are not executed in this phase.",
-        "walkthrough_outputs_checked": false
+        "walkthrough_outputs_checked": true,
+        "evidence": {
+          "ci_run": "45399494825",
+          "commit": "0770e8fd4c58030c20d8267ed3820eb630d1442f",
+          "groups": ["r"]
+        }
       },
       "walkthrough": {
         "route": "authored",
@@ -2124,8 +2229,7 @@
           "status": "pass"
         },
         "R10": {
-          "status": "gap",
-          "justification": "The runtime ledger is consistent, but no recorded app-build run yet cites a successful qualify job for the ordinary CI groups r, so walkthrough expected outputs are not yet confirmed against real references; scripts/record_track_runtime_evidence.py records that evidence."
+          "status": "pass"
         },
         "R11": {
           "status": "not-assessed",
@@ -2148,7 +2252,12 @@
         },
         "unavailable": [],
         "guide_examples": "Executable reference checked by the CI corpus; guide code blocks are covered by content rendering checks and are not executed in this phase.",
-        "walkthrough_outputs_checked": false
+        "walkthrough_outputs_checked": true,
+        "evidence": {
+          "ci_run": "45399494825",
+          "commit": "0770e8fd4c58030c20d8267ed3820eb630d1442f",
+          "groups": ["data-platforms"]
+        }
       },
       "walkthrough": {
         "route": "authored",
@@ -2185,8 +2294,7 @@
           "status": "pass"
         },
         "R10": {
-          "status": "gap",
-          "justification": "The runtime ledger is consistent, but no recorded app-build run yet cites a successful qualify job for the ordinary CI groups data-platforms, so walkthrough expected outputs are not yet confirmed against real references; scripts/record_track_runtime_evidence.py records that evidence."
+          "status": "pass"
         },
         "R11": {
           "status": "not-assessed",
@@ -2228,7 +2336,12 @@
           }
         ],
         "guide_examples": "Executable reference checked by the CI corpus; guide code blocks are covered by content rendering checks and are not executed in this phase.",
-        "walkthrough_outputs_checked": false
+        "walkthrough_outputs_checked": true,
+        "evidence": {
+          "ci_run": "45399494825",
+          "commit": "0770e8fd4c58030c20d8267ed3820eb630d1442f",
+          "groups": ["scala-spark"]
+        }
       },
       "walkthrough": {
         "route": "authored",
@@ -2265,8 +2378,7 @@
           "status": "pass"
         },
         "R10": {
-          "status": "gap",
-          "justification": "The runtime ledger is consistent, but no recorded app-build run yet cites a successful qualify job for the ordinary CI groups scala-spark, so walkthrough expected outputs are not yet confirmed against real references; scripts/record_track_runtime_evidence.py records that evidence."
+          "status": "pass"
         },
         "R11": {
           "status": "not-assessed",
@@ -2418,7 +2530,12 @@
         },
         "unavailable": [],
         "guide_examples": "Executable reference checked by the CI corpus; guide code blocks are covered by content rendering checks and are not executed in this phase. Statistics book fences are also checked for AST parity with the executed examples by scripts/sync_example_fences.py.",
-        "walkthrough_outputs_checked": false
+        "walkthrough_outputs_checked": true,
+        "evidence": {
+          "ci_run": "45399494825",
+          "commit": "0770e8fd4c58030c20d8267ed3820eb630d1442f",
+          "groups": ["bayesian", "python-core"]
+        }
       },
       "walkthrough": {
         "route": "authored",
@@ -2457,8 +2574,7 @@
           "status": "pass"
         },
         "R10": {
-          "status": "gap",
-          "justification": "The runtime ledger is consistent, but no recorded app-build run yet cites a successful qualify job for the ordinary CI groups bayesian, python-core, so walkthrough expected outputs are not yet confirmed against real references; scripts/record_track_runtime_evidence.py records that evidence."
+          "status": "pass"
         },
         "R11": {
           "status": "not-assessed",
@@ -2481,7 +2597,12 @@
         },
         "unavailable": [],
         "guide_examples": "Executable reference checked by the CI corpus; guide code blocks are covered by content rendering checks and are not executed in this phase.",
-        "walkthrough_outputs_checked": false
+        "walkthrough_outputs_checked": true,
+        "evidence": {
+          "ci_run": "45399494825",
+          "commit": "0770e8fd4c58030c20d8267ed3820eb630d1442f",
+          "groups": ["swift"]
+        }
       },
       "walkthrough": {
         "route": "authored",
@@ -2518,8 +2639,7 @@
           "status": "pass"
         },
         "R10": {
-          "status": "gap",
-          "justification": "The runtime ledger is consistent, but no recorded app-build run yet cites a successful qualify job for the ordinary CI groups swift, so walkthrough expected outputs are not yet confirmed against real references; scripts/record_track_runtime_evidence.py records that evidence."
+          "status": "pass"
         },
         "R11": {
           "status": "not-assessed",
@@ -2542,7 +2662,12 @@
         },
         "unavailable": [],
         "guide_examples": "Executable reference checked by the CI corpus; guide code blocks are covered by content rendering checks and are not executed in this phase.",
-        "walkthrough_outputs_checked": false
+        "walkthrough_outputs_checked": true,
+        "evidence": {
+          "ci_run": "45399494825",
+          "commit": "0770e8fd4c58030c20d8267ed3820eb630d1442f",
+          "groups": ["r"]
+        }
       },
       "walkthrough": {
         "route": "authored",
@@ -2581,8 +2706,7 @@
           "status": "pass"
         },
         "R10": {
-          "status": "gap",
-          "justification": "The runtime ledger is consistent, but no recorded app-build run yet cites a successful qualify job for the ordinary CI groups r, so walkthrough expected outputs are not yet confirmed against real references; scripts/record_track_runtime_evidence.py records that evidence."
+          "status": "pass"
         },
         "R11": {
           "status": "not-assessed",
@@ -2622,7 +2746,12 @@
           }
         ],
         "guide_examples": "Executable reference checked by the CI corpus; guide code blocks are covered by content rendering checks and are not executed in this phase.",
-        "walkthrough_outputs_checked": false
+        "walkthrough_outputs_checked": true,
+        "evidence": {
+          "ci_run": "45399494825",
+          "commit": "0770e8fd4c58030c20d8267ed3820eb630d1442f",
+          "groups": ["php"]
+        }
       },
       "walkthrough": {
         "route": "authored",
@@ -2659,8 +2788,7 @@
           "status": "pass"
         },
         "R10": {
-          "status": "gap",
-          "justification": "The runtime ledger is consistent, but no recorded app-build run yet cites a successful qualify job for the ordinary CI groups php, so walkthrough expected outputs are not yet confirmed against real references; scripts/record_track_runtime_evidence.py records that evidence."
+          "status": "pass"
         },
         "R11": {
           "status": "not-assessed",
