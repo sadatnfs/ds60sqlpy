@@ -162,11 +162,10 @@ For WALK-02, assert source offsets/highlights against planner steps and verify q
 def no_receipt(*args: object, **kwargs: object) -> None:
     raise AssertionError("A worked-solution run must not create a learner run receipt.")
 
+
 monkeypatch.setattr(server._classroom.runs, "record", no_receipt)
 ...
-result = server.action(
-    {"action": "run", **scope, "code": "print(6 * 7)\n", "purpose": "solution"}
-)
+result = server.action({"action": "run", **scope, "code": "print(6 * 7)\n", "purpose": "solution"})
 assert server.action({"action": "read-pad", **scope})["code"] == "print('mine')\n"
 assert server.action({"action": "pad-history", **scope})["history"] == []
 ```
@@ -245,6 +244,7 @@ Use the planner's actual offsets. Do not label every parser fallback unsupported
 
 ```python
 """Trace Python line by line, or walk one SELECT clause by clause, without saving."""
+
 ...
 if definition.executor == "python":
     return self._step_through_python(path.parent, code, limit)
@@ -261,6 +261,7 @@ Preserve input-size and timeout validation, Python-versus-SQL dispatch, and the 
 
 ```python
 """Trace a pad without saving it, writing a receipt or touching its history."""
+
 ...
 preparation = (
     ensure_before_run(self.catalog, lesson_id)

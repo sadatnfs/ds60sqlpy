@@ -19,9 +19,12 @@ last_mapped_at: 2026-11-23
 
 **Run Commands:**
 ```bash
-make test                                      # Parallel suite, default TEST_WORKERS=4
-make test TEST_WORKERS=2                       # Parallel suite with a chosen worker count
-make test-serial                               # Serial debugging run (-n 0)
+# Parallel suite, default TEST_WORKERS=4
+make test
+# Parallel suite with a chosen worker count
+make test TEST_WORKERS=2
+# Serial debugging run (-n 0)
+make test-serial
 uv run --no-sync python -m pytest -n 4 --dist loadgroup
 ```
 

@@ -457,6 +457,9 @@ class UnknownPage:
     def select_option(self, _: str) -> None:
         pass
 
+    def evaluate(self, _: str) -> None:
+        pass
+
     def click(self) -> None:
         self.clicks += 1
         self.network.submissions.append(
