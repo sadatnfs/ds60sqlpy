@@ -7,7 +7,7 @@ name = "ds60sqlpy"
 version = "1.4.3"
 description = "Offline-capable classroom for programming, data science and machine learning"
 readme = "README.md"
-requires-python = ">=3.11,<3.13"
+requires-python = ">=3.11.5,<3.13"
 license = "Apache-2.0"
 authors = [{ name = "DS60 contributors" }]
 classifiers = [
