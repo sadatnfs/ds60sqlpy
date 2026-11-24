@@ -4073,8 +4073,10 @@ details.notice::before {
 }
 .tour-offer {
   display: inline-flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: 6px;
+  max-width: 100%;
   margin: 0;
   font-size: var(--fs-sm);
 }

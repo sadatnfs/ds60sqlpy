@@ -426,9 +426,7 @@ def classroom_checks(browser: Any, origin: str, audit: Audit, expect: Any) -> No
         assert page.locator("#step-body").inner_text().strip(), (
             "The browser did not render the Python solution trace."
         )
-        assert_learning_state_unchanged(
-            page, "python-02", before_walk, "The solution walkthrough"
-        )
+        assert_learning_state_unchanged(page, "python-02", before_walk, "The solution walkthrough")
         walkthrough_actions = lab_actions[trace_start:]
         assert walkthrough_actions.count("step-through") == 1
         assert "run" not in walkthrough_actions
@@ -471,9 +469,7 @@ def classroom_checks(browser: Any, origin: str, audit: Audit, expect: Any) -> No
         )
         page.get_by_role("button", name="End tour").click()
         expect(page.locator(".tour-card")).to_have_count(0)
-        assert_learning_state_unchanged(
-            page, "python-02", before_tour, "Ending the tour"
-        )
+        assert_learning_state_unchanged(page, "python-02", before_tour, "Ending the tour")
         page.locator("#tour-start").click()
         expect(page.locator(".tour-card")).to_be_visible()
         page.keyboard.press("Escape")
@@ -492,9 +488,7 @@ def classroom_checks(browser: Any, origin: str, audit: Audit, expect: Any) -> No
             raise AssertionError("The tour did not reach its Finish step.")
         page.locator(".tour-next").click()
         expect(page.locator(".tour-card")).to_have_count(0)
-        assert_learning_state_unchanged(
-            page, "python-02", before_tour, "Completing the tour"
-        )
+        assert_learning_state_unchanged(page, "python-02", before_tour, "Completing the tour")
         assert_no_execution_requests(lab_actions, tour_action_start, "Tour lifecycle")
         audit.passed("The lesson tour starts, dismisses, restarts and completes without data loss")
         before_home_tour = learner_snapshot(page, "python-02")
@@ -607,7 +601,7 @@ def classroom_checks(browser: Any, origin: str, audit: Audit, expect: Any) -> No
         page.on("request", record_api_action)
         page.goto(origin + "/classroom")
         expect(page.locator("#subject-cards .subject-card")).to_have_count(
-            4, timeout=90_000
+            len(SUBJECTS), timeout=90_000
         )
         home_url = page.url
         home_storage = page.evaluate(
@@ -635,9 +629,12 @@ def classroom_checks(browser: Any, origin: str, audit: Audit, expect: Any) -> No
         assert len(api_actions) == action_count, "The manual tour request opened or ran a lesson."
         page.locator("#manual-back").click()
         expect(page.locator("#home-view")).to_be_visible()
-        assert page.evaluate(
-            "() => Object.entries(localStorage).sort(([a], [b]) => a.localeCompare(b))"
-        ) == home_storage, "No-selection tour navigation changed browser learner storage."
+        assert (
+            page.evaluate(
+                "() => Object.entries(localStorage).sort(([a], [b]) => a.localeCompare(b))"
+            )
+            == home_storage
+        ), "No-selection tour navigation changed browser learner storage."
         audit.passed("No-selection home and manual tour entries stay put and request no execution")
 
         page.goto(origin + "/classroom#lesson=statistics-009")
