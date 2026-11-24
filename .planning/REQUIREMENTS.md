@@ -8,8 +8,8 @@
 
 ### Guided Classroom
 
-- [ ] **GUIDE-01**: A learner can open the classroom guide from the home screen and lesson workspace, find what each major screen and control does, and follow initialization and lesson-switching instructions.
-- [ ] **GUIDE-02**: A learner can start, dismiss, and restart the optional classroom tour without changing the selected lesson, overwriting work, or starting code execution.
+- [x] **GUIDE-01**: A learner can open the classroom guide from the home screen and lesson workspace, find what each major screen and control does, and follow initialization and lesson-switching instructions.
+- [x] **GUIDE-02**: A learner can start, dismiss, and restart the optional classroom tour without changing the selected lesson, overwriting work, or starting code execution.
 - [ ] **UX-01**: In each supported desktop lesson mode, the workspace clearly identifies the current lesson, available actions, runtime or reading capability, readiness, and where results appear.
 - [ ] **UX-02**: A learner can operate the desktop classroom with the keyboard and see clear focus and status cues; applicable project contrast and accessibility checks pass.
 - [ ] **STATE-01**: Navigation, lesson switching, viewing old results, test setup, and runtime restart preserve learner drafts, progress, and receipts; viewing old evidence never re-executes code.
@@ -19,7 +19,7 @@
 - [x] **WALK-01**: A Python walkthrough presents a bounded, testable execution trace with relevant source location, event, stack or local state, output, and clear limit or error behavior.
 - [x] **WALK-02**: A SQL walkthrough explains only its documented, verified query subset, ties clause highlights to source offsets and PostgreSQL results, and clearly handles unsupported input without modifying learner data.
 - [ ] **WALK-03**: Each existing track that benefits from a guided worked-example or solution walkthrough provides a course-appropriate explanation through a tested adapter or authored steps, without claiming universal automatic tracing.
-- [ ] **WALK-04**: Learners can distinguish a code walkthrough from an ordinary run and inspect a solution walkthrough without replacing their own draft.
+- [x] **WALK-04**: Learners can distinguish a code walkthrough from an ordinary run and inspect a solution walkthrough without replacing their own draft.
 
 ### Curriculum Quality
 
@@ -74,15 +74,15 @@ Deferred until the existing course quality floor and core classroom workflows ar
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| GUIDE-01 | Phase 1 | Pending |
-| GUIDE-02 | Phase 1 | Pending |
+| GUIDE-01 | Phase 1 | Complete |
+| GUIDE-02 | Phase 1 | Complete |
 | UX-01 | Phase 6 | Pending |
 | UX-02 | Phase 6 | Pending |
 | STATE-01 | Phase 6 | Pending |
 | WALK-01 | Phase 1 | Complete |
 | WALK-02 | Phase 1 | Complete |
 | WALK-03 | Phase 5 | Pending |
-| WALK-04 | Phase 1 | Pending |
+| WALK-04 | Phase 1 | Complete |
 | CURR-01 | Phase 2 | Pending |
 | CURR-02 | Phase 3 | Pending |
 | CURR-03 | Phase 4 | Pending |
