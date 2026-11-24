@@ -276,9 +276,6 @@ if [ -e "$state_dir/selection.env" ] || [ -L "$state_dir/selection.env" ]; then
   [ "$registry_explicit" -eq 1 ] || registry="$saved_registry"
 fi
 make_compose
-# Re-resolve only the selected database image after restoring the registry preference.
-db_image="$("${compose[@]}" config --images postgres)"
-[ -n "$db_image" ] && [[ "$db_image" != *$'\n'* ]] || fail 'Compose did not resolve one database image.'
 if [ "$profiles_explicit" -eq 0 ]; then
   if [ -n "$saved_profiles" ]; then
     profiles=("${saved_profile_list[@]}")
@@ -472,6 +469,9 @@ save_profile_selection() {
   mv -f "$selection_temp" "$state_dir/selection.env"
 }
 resolve_latest_hub_release
+# Resolve the database image after the registry preference and the latest app release.
+db_image="$("${compose[@]}" config --images postgres)"
+[ -n "$db_image" ] && [[ "$db_image" != *$'\n'* ]] || fail 'Compose did not resolve one database image.'
 printf '\nDS60 Classroom | %s\nProfiles: %s\n' "$project_name" "${selected_profiles[*]}"
 printf 'Images: %s (release %s)\n' "$image_source" "$image_tag"
 # Persist the chosen intent before preparation so Ctrl+C or a failed download does
@@ -606,6 +606,10 @@ if [ "$no_build" -eq 1 ] && { [ "$need_database" -eq 1 ] || [ "${#build_services
   fail "Required local images are missing (database=$need_database; services: ${build_services[*]-}; Hub profiles: ${missing_descriptions[*]-}). Resume never builds or pulls. Run ./classroom with the same project/options to prepare only missing images."
 fi
 if [ "$need_database" -eq 1 ] && [ "$db_override" -eq 1 ]; then "${compose[@]}" pull postgres; fi
+if [ "$need_database" -eq 1 ] && [ "$database_from_hub" -eq 1 ]; then
+  printf '\nPulling published DS60 PostgreSQL (%s) for %s...\n' "$db_image" "$image_arch"
+  "${compose[@]}" pull --policy always postgres || fail "Could not pull the published DS60 PostgreSQL image $db_image for Linux/$image_arch. Check that this release was published. Saved volumes are retained."
+fi
 # Label local builds with the checkout commit: <sha>, <sha>-dirty, or empty when
 # git is missing or this directory is not its own repository top level.
 image_source_revision() {
@@ -624,13 +628,13 @@ build_release_version="$(awk -F'"' '/^version = "/ { print $2; exit }' "$repo_di
 source_revision=''
 revision_args=()
 build_database=0
-[ "$need_database" -eq 0 ] || [ "$db_override" -eq 1 ] || build_database=1
+[ "$need_database" -eq 0 ] || [ "$db_override" -eq 1 ] || [ "$database_from_hub" -eq 1 ] || build_database=1
 if { [ "$image_source" != hub ] && [ "${#build_services[@]}" -gt 0 ]; } || [ "$build_database" -eq 1 ]; then
   source_revision="$(image_source_revision)"
   revision_args=(--build-arg "DS60_SOURCE_REVISION=$source_revision" --build-arg "DS60_RELEASE_VERSION=$build_release_version")
   printf '\nBuilding from source revision %s.\n' "${source_revision:-unknown}"
 fi
-# DS60 PostgreSQL is not published to the Hub yet, so every source builds it.
+# Local sources, and Hub releases published before the database image, build DS60 PostgreSQL.
 if [ "$build_database" -eq 1 ]; then
   printf '\nBuilding the DS60 PostgreSQL image locally...\n'
   "${compose[@]}" build ${revision_args[@]+"${revision_args[@]}"} postgres

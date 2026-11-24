@@ -233,7 +233,9 @@ def profiles(tmp_path: Path) -> dict[str, release.Profile]:
 
 
 def proofs(selected: set[str], group: str) -> list[dict[str, Any]]:
-    required = (selected - {"app"}) | ({"python-core"} if "app" in selected else set())
+    required = (selected - {"app", release.DATABASE}) | (
+        {"python-core"} if "app" in selected else set()
+    )
     common = {
         "sha256": sha256(b"report"),
         "profiles": sorted(required),
@@ -405,18 +407,20 @@ def test_complete_promotion_orders_workers_before_each_app_pointer(
     assert registry.puts == [
         "1.0.0-worker-python-core",
         "1.0.0-worker-java21",
+        "1.0.0-postgres",
         "1.0.0",
         "latest-worker-python-core",
         "latest-worker-java21",
+        "latest-postgres",
         "latest",
     ]
     assert report["status"] == "published"
-    assert len(report["version_tags"]) == len(report["latest_tags"]) == 3
+    assert len(report["version_tags"]) == len(report["latest_tags"]) == 4
     assert registry.gets == []  # Descriptor HEAD verification and direct index PUT only.
     release.promote_release(
         context, profiles, registry, natives=inputs, output=tmp_path / "repeat.json"
     )
-    assert len(registry.puts) == 6  # Exact repeat never rewrites immutable or matching aliases.
+    assert len(registry.puts) == 8  # Exact repeat never rewrites immutable or matching aliases.
     assert release.gate_release(context, profiles, registry)["mode"] == "noop"
 
 
@@ -436,7 +440,7 @@ def test_promotion_readback_waits_out_a_brief_registry_lag(
         context, profiles, registry, natives=inputs, output=tmp_path / "promotion.json"
     )
     assert report["status"] == "published"
-    assert sleeps == [2] * 6  # One brief absence per written tag, each read back.
+    assert sleeps == [2] * 8  # One brief absence per written tag, each read back.
 
 
 def add_unselected_group(root: Path) -> dict[str, release.Profile]:
@@ -459,12 +463,15 @@ def test_targeted_publication_binds_exact_group_and_only_moves_selected_aliases(
     registry = FakeRegistry()
     gate = release.gate_release(context, profiles, registry, target_group="java", root=tmp_path)
     assert gate["mode"] == "build"
-    assert gate["selection"] == {"group": "java", "profiles": ["app", "java21", "python-core"]}
+    assert gate["selection"] == {
+        "group": "java",
+        "profiles": ["app", "java21", "postgres", "python-core"],
+    }
     complete_receipts(tmp_path / "receipts", registry, context, profiles)
     inputs = release.promotion_inputs(
         tmp_path / "receipts", context, profiles, registry, tmp_path, target_group="java"
     )
-    assert set(inputs) == {"app", "python-core", "java21"}
+    assert set(inputs) == {"app", "python-core", "java21", release.DATABASE}
     report = release.promote_release(
         context,
         profiles,
@@ -475,17 +482,19 @@ def test_targeted_publication_binds_exact_group_and_only_moves_selected_aliases(
         root=tmp_path,
     )
     assert report["scope"] == "partial" and report["group"] == "java"
-    assert report["profiles"] == ["app", "java21", "python-core"]
+    assert report["profiles"] == ["app", "java21", "postgres", "python-core"]
     assert registry.puts == [
         "1.0.0-worker-python-core",
         "1.0.0-worker-java21",
+        "1.0.0-postgres",
         "1.0.0",
         "latest-worker-python-core",
         "latest-worker-java21",
+        "latest-postgres",
         "latest",
     ]
     assert not any("cpp20" in tag for tag in registry.tags)
-    for key in ("app", "python-core", "java21"):
+    for key in ("app", "python-core", "java21", release.DATABASE):
         manifest = registry.get(release.version_tag(profiles[key], context.version))
         assert manifest.document["annotations"][release.SCOPE] == "partial"
         assert manifest.document["annotations"][release.GROUP] == "java"
@@ -570,7 +579,7 @@ def test_core_only_targeted_publication_needs_no_worker_receipts(
     inputs = release.promotion_inputs(
         folder, context, profiles, registry, tmp_path, target_group="python-core"
     )
-    assert set(inputs) == {"app", "python-core"}
+    assert set(inputs) == release.SEEDS
     release.promote_release(
         context,
         profiles,
@@ -582,8 +591,10 @@ def test_core_only_targeted_publication_needs_no_worker_receipts(
     )
     assert registry.puts == [
         "1.0.0-worker-python-core",
+        "1.0.0-postgres",
         "1.0.0",
         "latest-worker-python-core",
+        "latest-postgres",
         "latest",
     ]
 
@@ -682,7 +693,12 @@ def test_same_revision_complete_versions_can_finish_missing_aliases(
     release.promote_release(
         context, profiles, registry, natives=None, output=tmp_path / "aliases.json"
     )
-    assert registry.puts == ["latest-worker-python-core", "latest-worker-java21", "latest"]
+    assert registry.puts == [
+        "latest-worker-python-core",
+        "latest-worker-java21",
+        "latest-postgres",
+        "latest",
+    ]
 
 
 def test_latest_unique_same_run_worker_receipts_reuse_exact_selected_seeds(
@@ -834,7 +850,7 @@ def test_stage_rejects_changed_tested_images_before_any_candidate_tag_or_push(
     registry = FakeRegistry()
     docker = local_images(registry, context, profiles, "amd64")
     snapshot = release.inspect_images(
-        context, profiles, ["app", "python-core"], "amd64", docker, root=tmp_path
+        context, profiles, sorted(release.SEEDS), "amd64", docker, root=tmp_path
     )
     docker.images[profiles["python-core"].local_repository + ":" + context.version]["Id"] = (
         "sha256:" + "0" * 64
@@ -859,7 +875,7 @@ def test_successful_seed_stage_binds_pushed_root_native_config_and_qualification
     registry = FakeRegistry()
     docker = local_images(registry, context, profiles, "arm64")
     snapshot = release.inspect_images(
-        context, profiles, ["app", "python-core"], "arm64", docker, root=tmp_path
+        context, profiles, sorted(release.SEEDS), "arm64", docker, root=tmp_path
     )
     result = release.stage_images(
         context,
@@ -881,9 +897,7 @@ def test_successful_seed_stage_binds_pushed_root_native_config_and_qualification
     assert not any(tag in registry.tags for tag in ("1.0.0", "latest"))
 
 
-@pytest.mark.parametrize(
-    ("misses", "waits"), [(2, [2, 4, 2, 4]), (99, list(WRITE_VISIBILITY_WAITS))]
-)
+@pytest.mark.parametrize(("misses", "waits"), [(2, [2, 4] * 3), (99, list(WRITE_VISIBILITY_WAITS))])
 def test_stage_waits_briefly_for_a_just_pushed_candidate_then_fails_closed(
     tmp_path: Path,
     context: release.Context,
@@ -897,7 +911,7 @@ def test_stage_waits_briefly_for_a_just_pushed_candidate_then_fails_closed(
     registry = LaggingRegistry(misses=misses)
     docker = local_images(registry, context, profiles, "amd64")
     snapshot = release.inspect_images(
-        context, profiles, ["app", "python-core"], "amd64", docker, root=tmp_path
+        context, profiles, sorted(release.SEEDS), "amd64", docker, root=tmp_path
     )
     proof = proofs(set(release.SEEDS), "python-core")
     if misses > len(WRITE_VISIBILITY_WAITS):
@@ -923,7 +937,7 @@ def test_stage_waits_briefly_for_a_just_pushed_candidate_then_fails_closed(
             tmp_path,
             scan=scan_block(snapshot["images"]),
         )
-        assert len(staged["images"]) == 2
+        assert len(staged["images"]) == len(release.SEEDS)
     assert sleeps == waits
 
 
@@ -1349,15 +1363,6 @@ def scan_evidence(snapshot: dict[str, Any], policy_sha: str) -> dict[str, Any]:
         "images": [
             {**image, "profile": row["profile"], "tested_image_id": row["tested_image_id"]}
             for row in snapshot["images"]
-        ]
-        + [
-            {
-                **image,
-                "profile": "postgres",
-                "tested_image_id": "sha256:" + "9" * 64,
-                "revision_label": "",
-                "reference": True,
-            }
         ],
     }
 
@@ -1371,7 +1376,7 @@ def stage_cli(
     registry = FakeRegistry()
     docker = local_images(registry, context, profiles, "amd64")
     snapshot = release.inspect_images(
-        context, profiles, ["app", "python-core"], "amd64", docker, root=tmp_path
+        context, profiles, sorted(release.SEEDS), "amd64", docker, root=tmp_path
     )
     docker.operations.clear()
     gate = tmp_path / "gate.json"
@@ -1426,7 +1431,7 @@ def committed_policy_sha() -> str:
         ("stale-db", "last 24 hours"),
         ("future-db", "last 24 hours"),
         ("policy", "different CVE policy"),
-        ("failed-reference", "blocking findings"),
+        ("failed-database", "blocking findings"),
         ("scanner", "pinned scanner"),
         ("kind", "Invalid image scan evidence"),
     ],
@@ -1459,7 +1464,7 @@ def test_stage_scan_gate_rejects_unbound_or_unclean_evidence_before_any_tag(
         evidence["scanner"]["db_updated_at"] = stamp(now + timedelta(hours=2))
     elif change == "policy":
         evidence["policy_sha256"] = "0" * 64
-    elif change == "failed-reference":
+    elif change == "failed-database":
         evidence["passed"] = False
         evidence["images"][-1]["blocking"] = [{"id": "CVE-2026-0002", "reason": "fixable"}]
     elif change == "scanner":
@@ -1505,7 +1510,7 @@ def test_stage_with_clean_fresh_evidence_writes_a_schema_2_receipt_with_scan_sum
     assert scan["evidence_sha256"] == hashlib.sha256(path.read_bytes()).hexdigest()
     assert scan["policy_sha256"] == committed_policy_sha()
     assert scan["scanner_image"] == image_scan.TRIVY_IMAGE
-    assert [row["profile"] for row in scan["images"]] == ["app", "python-core"]
+    assert [row["profile"] for row in scan["images"]] == ["app", "postgres", "python-core"]
     assert scan["images"][0]["suppressed"] == [
         {"id": "CVE-2026-0003", "package": "libexample", "expires_at": "2099-01-01"}
     ]
@@ -1523,7 +1528,7 @@ def test_stage_images_refuses_a_scan_block_for_other_image_ids(
     registry = FakeRegistry()
     docker = local_images(registry, context, profiles, "amd64")
     snapshot = release.inspect_images(
-        context, profiles, ["app", "python-core"], "amd64", docker, root=tmp_path
+        context, profiles, sorted(release.SEEDS), "amd64", docker, root=tmp_path
     )
     scan = scan_block(snapshot["images"])
     scan["images"][0]["tested_image_id"] = "sha256:" + "0" * 64

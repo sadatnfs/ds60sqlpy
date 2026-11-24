@@ -50,7 +50,13 @@ from scripts.docker_registry import (  # noqa: E402
 )
 
 ARCHITECTURES = ("amd64", "arm64")
-SEEDS = frozenset({"app", "python-core"})
+# DS60 PostgreSQL is not a learner profile in the image catalog, but it ships
+# with every release seed so Hub learners pull it instead of building it.
+DATABASE = image_scan.DATABASE_PROFILE
+SEEDS = frozenset({"app", "python-core", DATABASE})
+# First stable release whose seed publishes the database image. Older Hub
+# releases have no database tag, and their launcher builds the image locally.
+DATABASE_SINCE = (2, 0, 0)
 VERSION = re.compile(r"(0|[1-9][0-9]{0,5})\.(0|[1-9][0-9]{0,5})\.(0|[1-9][0-9]{0,5})\Z")
 SHA = re.compile(r"[a-f0-9]{40}\Z")
 HASH = re.compile(r"[a-f0-9]{64}\Z")
@@ -170,14 +176,16 @@ def catalog(root: Path = ROOT) -> dict[str, Profile]:
             or suffix in seen_suffixes
             or kind not in {"app", "ordinary", "gpu"}
             or (kind == "app") != (profile == "app")
+            or DATABASE in {profile, suffix}
         ):
             raise ReleaseError("Image catalog is ambiguous or malformed")
         seen_ids.add(profile)
         seen_suffixes.add(suffix)
         if kind != "gpu":
             result[profile] = Profile(profile, local, suffix)
-    if not result.keys() >= SEEDS or len(result) < 2:
-        raise ReleaseError("Image catalog needs the app and Core seed")
+    result[DATABASE] = Profile(DATABASE, "ds60sqlpy-postgres", DATABASE)
+    if not result.keys() >= SEEDS:
+        raise ReleaseError("Image catalog needs the app, Core and PostgreSQL seed")
     return result
 
 
@@ -415,6 +423,11 @@ def require_scope(manifest: Manifest, target_group: str | None) -> None:
             raise ReleaseError("A partial version tag cannot complete a full release")
     elif annotations.get(SCOPE) != "partial" or annotations.get(GROUP) != target_group:
         raise ReleaseError("Existing version tag belongs to another publication scope")
+
+
+def database_published(version: str) -> bool:
+    match = re.fullmatch(r"(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)", version)
+    return match is not None and tuple(int(part) for part in match.groups()) >= DATABASE_SINCE
 
 
 def selected_release_profiles(
@@ -672,13 +685,18 @@ def release_groups(profiles: dict[str, Profile], root: Path = ROOT) -> dict[str,
             raise ReleaseError("Invalid release qualification group")
         members = row["profiles"]
         if any(
-            not isinstance(key, str) or key not in profiles or key == "app" or key in seen
+            not isinstance(key, str)
+            or key not in profiles
+            or key in {"app", DATABASE}
+            or key in seen
             for key in members
         ) or len(members) != len(set(members)):
             raise ReleaseError("Release qualification groups overlap or include unknown images")
         seen.update(members)
         result[row["id"]] = frozenset(members)
-    if seen != set(profiles) - {"app"} or result.get("python-core") != frozenset({"python-core"}):
+    if seen != set(profiles) - {"app", DATABASE} or result.get("python-core") != frozenset(
+        {"python-core"}
+    ):
         raise ReleaseError("Release groups must cover every worker with a separate Core seed")
     result["python-core"] = SEEDS
     return result
@@ -1087,10 +1105,16 @@ def mandatory_ci_checks(group: str) -> frozenset[str]:
     return required_checks(group)
 
 
+def qualified_profiles(selected: set[str]) -> set[str]:
+    """Return the module-qualified profiles; the app and PostgreSQL ride on Core."""
+    seed = {"python-core"} if "app" in selected else set()
+    return (selected - {"app", DATABASE}) | seed
+
+
 def qualification_records(
     paths: list[Path], context: Context, architecture: str, selected: set[str], root: Path
 ) -> list[dict[str, Any]]:
-    required = (selected - {"app"}) | ({"python-core"} if "app" in selected else set())
+    required = qualified_profiles(selected)
     records = []
     expected_cases = expected_references(root, required)
     have_corpus = have_summary = False
@@ -1421,7 +1445,7 @@ def staged_receipt(
         raise ReleaseError("Staged receipt is missing its exact seed binding")
     for value in bindings.values():
         require_digest(value)
-    required = (selected - {"app"}) | ({"python-core"} if "app" in selected else set())
+    required = qualified_profiles(selected)
     records = raw["qualification"]
     if (
         not isinstance(records, list)
@@ -1487,7 +1511,7 @@ def import_seed(
         or {row["profile"] for row in receipt["images"]} != SEEDS
     ):
         raise ReleaseError(
-            "Seed import requires exactly app and Core from the selected native architecture"
+            "Seed import requires exactly the app, Core and PostgreSQL seed of this architecture"
         )
     docker.native(architecture)
     for image in receipt["images"]:

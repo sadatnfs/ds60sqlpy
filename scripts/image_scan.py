@@ -31,7 +31,10 @@ TRIVY_IMAGE = (
 )
 DEFAULT_CACHE = Path("~/.cache/ds60sqlpy/trivy")
 DEFAULT_POLICY = ROOT / "docker/cve-policy.json"
-REFERENCE_PROFILES = frozenset({"postgres"})
+# The DS60 PostgreSQL image is built from docker/postgres, not the catalog, and is
+# published with the release seed. Upstream images may still be scanned as references.
+DATABASE_PROFILE = "postgres"
+REFERENCE_PROFILES = frozenset({DATABASE_PROFILE})
 SEVERITIES = ("CRITICAL", "HIGH", "MEDIUM", "LOW", "UNKNOWN")
 SERIOUS = frozenset({"CRITICAL", "HIGH"})
 MAX_POLICY_DAYS = 90
@@ -174,7 +177,7 @@ def resolve_cache(path: Path, root: Path = ROOT) -> Path:
 
 
 def catalog_profiles(root: Path = ROOT) -> frozenset[str]:
-    """Publishable (non-GPU) catalog profiles, as `docker_release.catalog` reads them."""
+    """Publishable (non-GPU) profiles, as `docker_release.catalog` reads them."""
     path = root / "docker/classroom-images.tsv"
     if path.is_symlink() or not path.is_file() or path.stat().st_size > 64_000:
         raise ScanError("Invalid image catalog")
@@ -189,18 +192,20 @@ def catalog_profiles(root: Path = ROOT) -> frozenset[str]:
             result.add(fields[0])
     if "app" not in result:
         raise ScanError("Image catalog lacks the app profile")
-    return frozenset(result)
+    if DATABASE_PROFILE in result:
+        raise ScanError("The database profile is built in and must not be a catalog row")
+    return frozenset(result | {DATABASE_PROFILE})
 
 
 def policy_profiles(root: Path = ROOT) -> frozenset[str]:
     return catalog_profiles(root) | REFERENCE_PROFILES
 
 
-def scanners_for(profile: str) -> str:
+def scanners_for(profile: str, *, reference: bool = False) -> str:
+    if reference:
+        return "vuln"
     if profile == "app":
         return "vuln,secret,misconfig"
-    if profile in REFERENCE_PROFILES:
-        return "vuln"
     return "vuln,secret"
 
 
@@ -656,7 +661,9 @@ def scan_targets(
             raise ScanError(
                 f"{target.profile} is {local['architecture']}, evidence is for {architecture}"
             )
-        output = runner(trivy_argv(cache, local["id"], scanners_for(target.profile)))
+        output = runner(
+            trivy_argv(cache, local["id"], scanners_for(target.profile, reference=target.reference))
+        )
         if len(output) > MAX_REPORT:
             raise ScanError(f"Trivy report for {target.profile} is too large")
         try:
@@ -693,7 +700,7 @@ def scan_targets(
                 "tested_image_id": local["id"],
                 "revision_label": revision,
                 "reference": target.reference,
-                "scanners": scanners_for(target.profile),
+                "scanners": scanners_for(target.profile, reference=target.reference),
                 "report_sha256": sha256_bytes(output.encode("utf-8")),
             }
         )
@@ -792,7 +799,7 @@ def command_scan(args: argparse.Namespace, runner: Runner, now: datetime) -> int
             Target(image["profile"], image["tested_image_id"]) for image in snapshot["images"]
         ]
     elif args.image is not None:
-        if args.profile not in profiles - REFERENCE_PROFILES:
+        if args.profile not in catalog_profiles(ROOT):
             raise ScanError(
                 f"--profile must be a publishable catalog profile, not {args.profile!r}"
             )

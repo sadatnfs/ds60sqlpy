@@ -212,9 +212,30 @@ load_image_selection() {
   export_image_selection
 }
 
+# PostgreSQL joins the published release seed from this version. Earlier
+# releases have no database tag on the Hub, so they keep building it locally.
+database_published_since=2.0.0
+
+database_published_for() {
+  local version="$1" major minor patch since_major since_minor since_patch
+  [[ "$version" =~ ^([0-9]+)\.([0-9]+)\.([0-9]+)$ ]] || return 1
+  major="${BASH_REMATCH[1]}" minor="${BASH_REMATCH[2]}" patch="${BASH_REMATCH[3]}"
+  IFS=. read -r since_major since_minor since_patch <<<"$database_published_since"
+  ((10#$major != since_major ? 10#$major > since_major : (10#$minor != since_minor ? 10#$minor > since_minor : 10#$patch >= since_patch)))
+}
+
 export_image_selection() {
-  local profile _service local_name suffix variable _kind profile_tag
+  local profile _service local_name suffix variable _kind profile_tag app_tag
   local source_root="${repo_dir:?The launcher must resolve its source directory}"
+  # 1 when the database image is the published release image for the app tag.
+  database_from_hub=0
+  app_tag="$(image_tag_for app)"
+  if [ "$image_source" = hub ] && [ "$image_layout" = manifest ] && [ "${db_override:-0}" -eq 0 ] && database_published_for "$app_tag"; then
+    export "DS60_POSTGRES_IMAGE=$image_namespace/ds60sqlpy:$app_tag-postgres"
+    database_from_hub=1
+  elif [ "${db_override:-0}" -eq 0 ]; then
+    unset DS60_POSTGRES_IMAGE
+  fi
   while read -r profile _service local_name suffix variable _kind; do
     [[ "$profile" == \#* ]] && continue
     [ -n "$profile" ] || continue

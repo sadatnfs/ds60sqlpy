@@ -78,14 +78,14 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: python scripts/ci_release_artifacts.py gate --destination work/release
-      - name: Build the native application and Core once
+      - name: Build the native application, Core and PostgreSQL once
         run: >-
           python scripts/ci_classroom.py prepare --group python-core --project "$CI_PROJECT"
           --version "$RELEASE_VERSION" --architecture "$ARCHITECTURE" --confirm-disposable
       - name: Record the immutable images before qualification
         run: >-
           python scripts/docker_release.py inspect --gate work/release/gate.json
-          --profiles "app python-core" --architecture "$ARCHITECTURE" --output work/tested-images.json
+          --profiles "app python-core postgres" --architecture "$ARCHITECTURE" --output work/tested-images.json
       - name: Qualify all Core references, SQL, failures, browser behavior and persistence
         run: >-
           python scripts/ci_classroom.py qualify --group python-core --project "$CI_PROJECT"
@@ -103,12 +103,8 @@ jobs:
         run: |
           set -euo pipefail
           python scripts/image_scan.py download-db --cache "$RUNNER_TEMP/trivy"
-          postgres="$(python -c "import re; print(re.search(r'DS60_POSTGRES_IMAGE:-([^}]+)', open('compose.classroom.yaml').read()).group(1))")"
-          # The DS60 PostgreSQL image is built from docker/postgres, never pulled.
-          docker image inspect "$postgres" >/dev/null 2>&1 || docker compose -f compose.yaml build postgres
           python scripts/image_scan.py scan --tested work/tested-images.json --policy docker/cve-policy.json \
-            --cache "$RUNNER_TEMP/trivy" --output work/scan-evidence.json --reports work/scan-reports \
-            --reference "postgres=$postgres"
+            --cache "$RUNNER_TEMP/trivy" --output work/scan-evidence.json --reports work/scan-reports
       - name: Retain scan evidence and reports
         if: always()
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
@@ -119,7 +115,7 @@ jobs:
             work/scan-reports/*.json
           if-no-files-found: ignore
           retention-days: 30
-      - name: Stage only the qualified application and Core image IDs
+      - name: Stage only the qualified application, Core and PostgreSQL image IDs
         env:
           DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
           DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}

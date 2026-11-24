@@ -14,7 +14,10 @@ pulls and resumes never upload images. There are three explicit publication rout
 
 All publication routes use one repository, `YOUR_DOCKERHUB_USER/ds60sqlpy`. Replace the placeholder
 with the actual lowercase username or organization namespace. The app and every
-ordinary worker have separate tags. PostgreSQL keeps its upstream/mirror image;
+ordinary worker have separate tags. From release 2.0.0 the DS60 PostgreSQL image
+is published with the App and Core seed as `VERSION-postgres` and `latest-postgres`,
+scanned under the same CVE policy, and Hub mode pulls it. Earlier releases have no
+database tag, so Hub mode builds it locally from `docker/postgres` for them.
 GPU workers, SDK/tooling base images and unrelated local images are excluded.
 
 This checkout targets **1.4.3**. Its publication, native image indexes and fresh
@@ -157,7 +160,7 @@ when explicitly choosing the app version.
 | Python Web Development | `python-web` | `1.4.3-worker-python-web` |
 
 Legacy Python and Python/PostgreSQL bridge work also uses the Core environment;
-PostgreSQL uses its separately selected upstream database image. Browser
+PostgreSQL uses the DS60 database image described above. Browser
 JavaScript/D3, HTML/CSS previews, reading lessons and offline DAX do not need
 additional ordinary worker images. Optional CUDA profiles and the owned
 Kubernetes adapter are outside the full ordinary image set. Persistent service

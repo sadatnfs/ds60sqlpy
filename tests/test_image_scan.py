@@ -165,7 +165,19 @@ def test_cache_inside_repository_is_refused(tmp_path: Path) -> None:
 def test_scanners_per_profile() -> None:
     assert scan.scanners_for("app") == "vuln,secret,misconfig"
     assert scan.scanners_for("cpp20") == "vuln,secret"
-    assert scan.scanners_for("postgres") == "vuln"
+    assert scan.scanners_for("postgres") == "vuln,secret"
+    assert scan.scanners_for("postgres", reference=True) == "vuln"
+
+
+def test_database_is_a_built_in_published_profile(tmp_path: Path) -> None:
+    assert scan.DATABASE_PROFILE in scan.catalog_profiles(scan.ROOT)
+    (tmp_path / "docker").mkdir()
+    (tmp_path / "docker/classroom-images.tsv").write_text(
+        "app lab ds60sqlpy-lab lab DS60_LAB_IMAGE app\n"
+        "postgres db ds60sqlpy-postgres postgres DS60_POSTGRES_IMAGE ordinary\n"
+    )
+    with pytest.raises(scan.ScanError, match="built in"):
+        scan.catalog_profiles(tmp_path)
 
 
 def test_clean_report_has_no_blocking() -> None:

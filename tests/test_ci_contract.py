@@ -375,8 +375,11 @@ def test_release_scan_gate_precedes_every_stage() -> None:
             assert "--policy docker/cve-policy.json" in _run(scan), where
             assert "--tested work/tested-images.json" in _run(scan), where
             assert "set -euo pipefail" in _run(scan), where
+            assert "--reference" not in _run(scan), where
             if name == "seed":
-                assert '--reference "postgres=$postgres"' in _run(scan), where
+                inspect = [s for s in steps[: scans[0]] if "docker_release.py inspect" in _run(s)]
+                assert len(inspect) == 1, where
+                assert '--profiles "app python-core postgres"' in _run(inspect[0]), where
             assert "--scan work/scan-evidence.json" in _run(steps[stages[0]]), where
             cache = [s for s in steps[: scans[0]] if s.get("uses", "").startswith("actions/cache@")]
             assert len(cache) == 1, where

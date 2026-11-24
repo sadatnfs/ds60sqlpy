@@ -7,7 +7,7 @@ import json
 import stat
 import subprocess
 import zipfile
-from dataclasses import asdict
+from dataclasses import asdict, replace
 from pathlib import Path
 from typing import Any
 
@@ -19,7 +19,15 @@ from scripts import ci_hub_reverify as recovery
 from scripts import ci_profiles
 from scripts import ci_release_artifacts as artifacts
 from scripts.docker_registry import OCI_MANIFEST, Descriptor, ReleaseError, sha256
-from scripts.docker_release import Context, catalog, index_body, latest_tag, version_tag, write_json
+from scripts.docker_release import (
+    DATABASE,
+    Context,
+    catalog,
+    index_body,
+    latest_tag,
+    version_tag,
+    write_json,
+)
 
 ROOT = Path(__file__).resolve().parents[1]
 PUBLISHED = "a" * 40
@@ -101,7 +109,7 @@ def test_full_receipt_covers_every_profile_and_matches_exported_version(
     receipt, _ = full_receipt()
     monkeypatch.setattr(audit, "source_version", lambda root: context().version)
     profiles, versions, aliases = audit.receipt_indexes(receipt, context(), ROOT)
-    assert len(profiles) == len(versions) == len(aliases) == 26
+    assert len(profiles) == len(versions) == len(aliases) == 27
     receipt["version_tags"].pop(0)
     with pytest.raises(ReleaseError, match="incomplete"):
         audit.receipt_indexes(receipt, context(), ROOT)
@@ -109,6 +117,41 @@ def test_full_receipt_covers_every_profile_and_matches_exported_version(
     monkeypatch.setattr(audit, "source_version", lambda root: "1.1.1")
     with pytest.raises(ReleaseError, match="source version"):
         audit.receipt_indexes(receipt, context(), ROOT)
+
+
+def without_database(receipt: dict[str, Any]) -> dict[str, Any]:
+    for kind in ("version_tags", "latest_tags"):
+        receipt[kind] = [row for row in receipt[kind] if "postgres" not in row["tag"]]
+    return receipt
+
+
+def test_only_releases_before_the_database_image_may_omit_its_tags(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    receipt = without_database(full_receipt()[0])
+    monkeypatch.setattr(audit, "source_version", lambda root: context().version)
+    profiles, versions, aliases = audit.receipt_indexes(receipt, context(), ROOT)
+    assert DATABASE not in profiles
+    assert len(versions) == len(aliases) == 26
+    newer = replace(context(), version="2.0.0")
+    monkeypatch.setattr(audit, "source_version", lambda root: "2.0.0")
+    receipt["context"]["version"] = "2.0.0"
+    with pytest.raises(ReleaseError, match="incomplete"):
+        audit.receipt_indexes(receipt, newer, ROOT)
+
+
+def test_hub_audit_pulls_the_database_image_from_its_first_release() -> None:
+    assert audit.pulled_profiles(["python-core", "r-statistics"], "1.4.3") == [
+        "app",
+        "python-core",
+        "r-statistics",
+    ]
+    assert audit.pulled_profiles(["r-statistics"], "2.0.0") == [
+        "app",
+        "python-core",
+        "r-statistics",
+        "postgres",
+    ]
 
 
 def archive(entries: list[tuple[str, bytes, int]]) -> bytes:

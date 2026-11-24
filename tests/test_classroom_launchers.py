@@ -1605,6 +1605,55 @@ def test_hub_all_profiles_prepares_complete_catalog_without_local_builds(
     )
 
 
+@pytest.mark.parametrize("architecture", ["amd64", "arm64"])
+def test_hub_release_with_published_database_pulls_it_instead_of_building(
+    launcher: Any, architecture: str
+) -> None:
+    launcher.set(missing_images=True, architecture=architecture)
+    result = launcher.run(
+        "--starter", "--from-hub", "exampleuser", "--tag", "2.0.0", "--no-browser"
+    )
+    assert result.returncode == 0, result.stdout + result.stderr
+    calls = launcher.calls()
+    assert built_services(calls) == []
+    pulls = [call for call in calls if "pull" in call["args"] and "up" not in call["args"]]
+    database = [call for call in pulls if call["args"][-1] == "postgres"]
+    assert len(database) == 1 and "--policy" in database[0]["args"]
+    assert all(
+        call["image_env"]["DS60_POSTGRES_IMAGE"] == "exampleuser/ds60sqlpy:2.0.0-postgres"
+        for call in calls
+        if call["args"][0] == "compose" and ("pull" in call["args"] or "up" in call["args"])
+    )
+    assert "Pulling published DS60 PostgreSQL" in result.stdout
+
+
+@pytest.mark.parametrize(
+    "arguments",
+    [
+        ("--from-hub", "exampleuser", "--tag", "1.4.3"),
+        ("--from-hub", "exampleuser", "--architecture-tags", "--tag", "2.0.0"),
+        (),
+    ],
+)
+def test_older_hub_releases_and_local_sources_still_build_the_database(
+    launcher: Any, arguments: tuple[str, ...]
+) -> None:
+    launcher.set(missing_images=True)
+    result = launcher.run("--starter", *arguments, "--no-browser")
+    assert result.returncode == 0, result.stdout + result.stderr
+    calls = launcher.calls()
+    assert built_services(calls).count("postgres") == 1
+    assert not any(
+        call["args"][-1] == "postgres" and "pull" in call["args"] and "up" not in call["args"]
+        for call in calls
+    )
+    assert all(
+        "DS60_POSTGRES_IMAGE" not in call["image_env"]
+        for call in calls
+        if call["args"][0] == "compose"
+    )
+
+
 @pytest.mark.parametrize("action", ["up", "pull", "resume"])
 @pytest.mark.parametrize("platform", ["linux amd64", "windows arm64"])
 def test_hub_new_containers_reject_wrongly_tagged_platform_without_starting(

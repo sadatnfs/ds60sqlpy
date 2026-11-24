@@ -35,10 +35,12 @@ from scripts.ci_targeted_images import parse_marker  # noqa: E402
 from scripts.docker_registry import Manifest, ReleaseError, json_object, sha256  # noqa: E402
 from scripts.docker_release import (  # noqa: E402
     ARCHITECTURES,
+    DATABASE,
     Context,
     catalog,
     config_digest,
     context_record,
+    database_published,
     latest_tag,
     read_json,
     source_version,
@@ -304,6 +306,11 @@ def receipt_indexes(
     profiles = catalog(source)
     if source_version(source) != context.version:
         raise ReleaseError("Exported source version differs from the published image version")
+    database = version_tag(profiles[DATABASE], context.version)
+    if not database_published(context.version) and all(
+        not isinstance(row, dict) or row.get("tag") != database for row in receipt["version_tags"]
+    ):
+        del profiles[DATABASE]
     versions = hub.receipt_tags(
         receipt["version_tags"],
         {key: version_tag(profile, context.version) for key, profile in profiles.items()},
@@ -402,7 +409,7 @@ def validate_prior_acceptance(
     architecture: str,
 ) -> None:
     workers = ci_profiles.selected(group, source)
-    selected = list(dict.fromkeys(["app", "python-core", *workers]))
+    selected = pulled_profiles(workers, context.version)
     profiles = catalog(source)
     if (
         value.get("schema_version") != 1
@@ -472,7 +479,7 @@ def validate_prior_acceptance(
             "lab",
             "classroom-init",
             "postgres",
-            *[service_for_profile(key, source) for key in selected if key != "app"],
+            *[service_for_profile(key, source) for key in selected if key not in {"app", DATABASE}],
         }
     )
     for key in ("started_observation", "resumed_observation"):
@@ -933,6 +940,12 @@ def selected_image_ids(
     return expected
 
 
+def pulled_profiles(workers: list[str], version: str) -> list[str]:
+    """Release images the Hub launcher pulls; older releases build the database."""
+    database = [DATABASE] if database_published(version) else []
+    return list(dict.fromkeys(["app", "python-core", *workers, *database]))
+
+
 def service_for_profile(profile: str, source: Path) -> str:
     rows = [
         line.split()
@@ -1006,7 +1019,7 @@ def accept(
         if context.namespace != os.environ.get("DOCKERHUB_USERNAME"):
             raise ReleaseError("Read credential namespace differs from the published destination")
         workers = list(dict.fromkeys(["python-core", *ci_profiles.selected(group, source)]))
-        selected = ["app", *workers]
+        selected = pulled_profiles(workers, context.version)
         hub.native_engine(architecture, source)
         expected = selected_image_ids(
             context, receipt, selected, architecture, check_latest, source
@@ -1056,7 +1069,7 @@ def accept(
             expected_services = {
                 "lab": "app",
                 "classroom-init": "app",
-                "postgres": None,
+                "postgres": DATABASE if DATABASE in selected else None,
                 **{service_for_profile(key, source): key for key in workers},
             }
             observed: dict[str, str] = {}

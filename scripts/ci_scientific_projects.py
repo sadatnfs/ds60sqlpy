@@ -204,7 +204,7 @@ def import_bases(
     root: Path = ROOT,
 ) -> dict[str, Any]:
     declared = policy(root)
-    if len(profiles) != declared["ordinary_profile_count"]:
+    if len(set(profiles) - {release.DATABASE}) != declared["ordinary_profile_count"]:
         raise ReleaseError(
             "Scientific gate must preserve the complete declared ordinary-image release"
         )

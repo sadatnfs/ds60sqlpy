@@ -9,10 +9,15 @@ FROM ${DS60_GOSU_GO_IMAGE} AS gosu
 ENV CGO_ENABLED=0 GOFLAGS=-trimpath
 WORKDIR /src
 # GitHub's archive of the gosu 1.20 tag; BuildKit verifies the digest before
-# use and go.sum verifies every module the build downloads.
+# use and go.sum verifies every module the build downloads. gosu 1.20 pins
+# golang.org/x/sys v0.1.0, which has fixed advisories, so the build moves it
+# to a current release verified against the Go checksum database.
 ADD --checksum=sha256:207a2045e890d3ca3326027c5f585733085960b401a49dbc00e3bb628c054cf8 \
     https://github.com/tianon/gosu/archive/refs/tags/1.20.tar.gz /tmp/gosu.tar.gz
 RUN tar -xzf /tmp/gosu.tar.gz --strip-components=1 \
+    && go get golang.org/x/sys@v0.50.0 \
+    && go mod tidy \
+    && go mod verify \
     && go build -ldflags='-s -w' -o /out/gosu . \
     && /out/gosu --version
 
@@ -25,9 +30,16 @@ LABEL org.opencontainers.image.title="DS60 PostgreSQL" \
     org.opencontainers.image.licenses="PostgreSQL AND Apache-2.0" \
     org.opencontainers.image.created=""
 # The pinned base can lag Debian security fixes; apply them at build time.
+# GnuPG only verified the upstream apt keys, and postgresql-common needs
+# sysusers and tmpfiles rather than the full systemd, so both are removed to
+# shrink what the image ships and scans.
 # hadolint ignore=DL3005
 RUN apt-get update \
     && apt-get upgrade -y --no-install-recommends \
+    && apt-get install -y --no-install-recommends \
+        systemd-standalone-sysusers systemd-standalone-tmpfiles \
+    && apt-get purge -y --auto-remove \
+        dirmngr gnupg gnupg-l10n gpg gpg-agent gpgconf gpgsm systemd \
     && rm -rf /var/lib/apt/lists/*
 COPY --from=gosu /out/gosu /usr/local/bin/gosu
 RUN gosu --version && gosu nobody true

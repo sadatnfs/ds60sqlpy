@@ -66,7 +66,7 @@ def test_web_image_is_an_explicit_complete_native_ci_group() -> None:
     ]
     assert {row["architecture"] for row in entries} == {"amd64", "arm64"}
     images = catalog(ROOT)
-    assert len(images) == 26 and "python-web" in images
+    assert len(images) == 27 and "python-web" in images
 
 
 def test_web_image_uses_only_prepared_packages_and_one_probe_source() -> None:

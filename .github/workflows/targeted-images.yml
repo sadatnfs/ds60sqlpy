@@ -114,7 +114,7 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: python scripts/ci_release_artifacts.py gate --destination work/release
-      - name: Build native application and Core through the learner entrypoint
+      - name: Build native application, Core and PostgreSQL through the learner entrypoint
         run: >-
           python scripts/ci_classroom.py prepare --group python-core --project "$CI_PROJECT"
           --version "$RELEASE_VERSION" --architecture "$ARCHITECTURE" --confirm-disposable
@@ -122,7 +122,7 @@ jobs:
         if: needs.intent.outputs.mode == 'publish'
         run: >-
           python scripts/docker_release.py inspect --gate work/release/gate.json
-          --profiles "app python-core" --architecture "$ARCHITECTURE" --output work/tested-images.json
+          --profiles "app python-core postgres" --architecture "$ARCHITECTURE" --output work/tested-images.json
       - name: Qualify Core references, SQL, failures, browser and persistence
         run: >-
           python scripts/ci_classroom.py qualify --group python-core --project "$CI_PROJECT"
@@ -142,22 +142,17 @@ jobs:
         run: |
           set -euo pipefail
           python scripts/image_scan.py download-db --cache "$RUNNER_TEMP/trivy"
-          postgres="$(python -c "import re; print(re.search(r'DS60_POSTGRES_IMAGE:-([^}]+)', open('compose.classroom.yaml').read()).group(1))")"
-          # The DS60 PostgreSQL image is built from docker/postgres, never pulled.
-          docker image inspect "$postgres" >/dev/null 2>&1 || docker compose -f compose.yaml build postgres
           if [ "$MODE" = publish ]; then
             python scripts/image_scan.py scan --tested work/tested-images.json --policy docker/cve-policy.json \
-              --cache "$RUNNER_TEMP/trivy" --output work/scan-evidence.json --reports work/scan-reports \
-              --reference "postgres=$postgres"
+              --cache "$RUNNER_TEMP/trivy" --output work/scan-evidence.json --reports work/scan-reports
             exit 0
           fi
           # Build-test mode records no tested snapshot, so scan each local image by tag.
           status=0
-          python scripts/image_scan.py scan --reference "postgres=$postgres" --policy docker/cve-policy.json \
-            --cache "$RUNNER_TEMP/trivy" --output work/scan-evidence-postgres.json \
-            --reports work/scan-reports/postgres || status=1
-          for profile in app python-core; do
-            repository="$(awk -v p="$profile" '$1 == p { print $3 }' docker/classroom-images.tsv)"
+          for profile in app python-core postgres; do
+            # PostgreSQL is a built-in release image, not a catalog row.
+            repository=ds60sqlpy-postgres
+            [ "$profile" = postgres ] || repository="$(awk -v p="$profile" '$1 == p { print $3 }' docker/classroom-images.tsv)"
             python scripts/image_scan.py scan --image "$repository:$RELEASE_VERSION" --profile "$profile" \
               --policy docker/cve-policy.json --cache "$RUNNER_TEMP/trivy" \
               --output "work/scan-evidence-$profile.json" --reports "work/scan-reports/$profile" || status=1

@@ -110,7 +110,9 @@ def ordinary(fixture: dict[str, Any], architecture: str, group: str) -> dict[str
                 "identity_basis": "config",
             }
         )
-    covered = (set(selected) - {"app"}) | ({"python-core"} if "app" in selected else set())
+    covered = (set(selected) - {"app", release.DATABASE}) | (
+        {"python-core"} if "app" in selected else set()
+    )
     common = {
         "sha256": hashed("qualification"),
         "profiles": sorted(covered),
@@ -760,7 +762,8 @@ def test_workflow_native_order_concurrency_and_secret_separation() -> None:
         for command in commands
         if "ci_scientific_projects.py qualify" in command
     ] == ["spark-torch", "spark-tmb"]
-    assert len(release.catalog(ROOT)) == 26
+    assert len(release.catalog(ROOT)) == 27
+    assert release.DATABASE in release.catalog(ROOT)
     assert "python-web" in release.catalog(ROOT)
     assert (
         "ci_scientific_projects" not in (ROOT / ".github/workflows/targeted-images.yml").read_text()
