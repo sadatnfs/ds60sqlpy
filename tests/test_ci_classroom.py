@@ -115,8 +115,12 @@ def test_qualification_does_not_inherit_registry_secrets(monkeypatch: pytest.Mon
     )
     for key in secret_keys:
         monkeypatch.setenv(key, "not-public")
+    monkeypatch.setenv("DS60_PYTHON_INDEX_URL", "https://mirror.example.com/pypi/simple/")
+    monkeypatch.setenv("DS60_NPM_REGISTRY", "https://mirror.example.com/npm/")
     result = ci_classroom.clean_environment("ds60-ci-owned")
     assert all(key not in result for key in secret_keys)
+    assert result["DS60_PYTHON_INDEX_URL"] == "https://mirror.example.com/pypi/simple/"
+    assert result["DS60_NPM_REGISTRY"] == "https://mirror.example.com/npm/"
     assert result["COMPOSE_PROJECT_NAME"] == "ds60-ci-owned"
     assert result["DS60_CLASSROOM_PORT"] == result["DS60_POSTGRES_PORT"] == "0"
 

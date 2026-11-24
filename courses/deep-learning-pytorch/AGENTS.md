@@ -14,7 +14,7 @@ interview reasoning. Compare the equivalent TensorFlow operation explicitly,
 including different defaults, layouts, reductions and state behavior.
 
 Use the existing llm-torch-cpu worker as the prepared PyTorch CPU runtime.
-Its current dependency lock is PyTorch 2.9.1 CPU and NumPy 2.2.6, with no sklearn,
+Its current dependency lock is PyTorch 2.15.0 CPU and NumPy 2.2.6, with no sklearn,
 torchvision, external datasets or pretrained weights assumed. The profile's
 historical name does not restrict it to LLMs. New runtime registration is not
 needed. The first reading lesson uses reading/markdown; other lessons run as

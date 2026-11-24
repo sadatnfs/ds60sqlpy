@@ -2587,7 +2587,7 @@ try: exported_module(three)
 except AssertionError as error:
     if 'Guard failed: input.size()[0] == 2' not in str(error): raise
 else: raise AssertionError('static export constraint not enforced')""",
-            "Mathematical batch flexibility does not automatically make an export contract dynamic. The pinned PyTorch 2.9.1 profile raises AssertionError with the exact guard input.size()[0] == 2 for this invalid batch. The handler recognizes that shape guard and re-raises unrelated assertions. Exception types can differ across framework versions, so the diagnostic is tied to the prepared profile.",
+            "Mathematical batch flexibility does not automatically make an export contract dynamic. The pinned PyTorch 2.15.0 CPU profile raises AssertionError with the exact guard input.size()[0] == 2 for this invalid batch. The handler recognizes that shape guard and re-raises unrelated assertions. Exception types can differ across framework versions, so the diagnostic is tied to the prepared profile.",
         ),
         ex(
             "Declare a bounded dynamic batch and clean up",

@@ -110,7 +110,7 @@ def test_shared_teaching_depth_and_practice_contracts() -> None:
 
 @pytest.mark.skipif(
     os.environ.get("DS60_TEST_TORCH") != "1",
-    reason="Requires the separately prepared PyTorch2.9 CPU runtime",
+    reason="Requires the separately prepared PyTorch CPU runtime",
 )
 @pytest.mark.parametrize(
     "lesson_id", [entry["id"] for entry in ENTRIES if entry["language"] == "python"]

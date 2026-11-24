@@ -2,7 +2,7 @@
 phase: 07-docker-runtime-persistence-qualification
 plan: 03
 subsystem: ci-runtime-qualification
-status: partial
+status: complete
 requirements: [RUN-01, RUN-02]
 tags: [ci, docker, native-arm64, qualification, lifecycle]
 requires: [07-01, 07-02]
@@ -17,29 +17,29 @@ key-files:
     - tests/test_runtime_qualification_workflow.py
   modified:
     - docs/validation.md
-  proposed_patch_not_applied:
-    - tests/test_ci_contract.py (work/07-03/test_ci_contract.patch)
+    - tests/test_ci_contract.py (runtime-qualification.yml branch, applied in 09f0c0cc)
 decisions:
   - The revision step verifies python-core plus the group profiles, because the launcher always builds python-core.
   - The group filter is validated in Python against known group IDs; unknown or hostile tokens fail the selection job.
   - Cleanup is not asserted to be the final step, so Phase 8 can append an image scan step (cleanup keeps local images).
   - Lifecycle uploads the redacted work/p7-logs/ directory as well as the JSON report.
-commits: 0
+commits: 2
 actuals:
-  tasks: 2
-  commits: 0
-completed: 2026-11-23
+  tasks: 3
+  commits: 2
+completed: 2026-11-24
 ---
 
-# Phase 7 Plan 03: Two-architecture runtime qualification workflow Summary (partial)
+# Phase 7 Plan 03: Two-architecture runtime qualification workflow Summary
 
 A manual `runtime-qualification.yml` workflow builds every ordinary profile group through
 `./classroom` on native amd64 and arm64 runners, proves each image's revision label equals
 `$GITHUB_SHA`, qualifies the group, and runs the full 07-02 lifecycle harness (with a real
 update rebuild) on both architectures. A 14-test contract pins its behavior.
 
-Tasks 1 and 2 are done. Task 3 (push and dispatch) is owned by the orchestrator and is pending.
-No commits were made by this executor (orchestrator rules).
+All three tasks are done. The executor made no commits (orchestrator rules); the orchestrator
+committed the workflow, test and contract branch in `09f0c0cc` and adjusted the workflow in
+`a2958a3a`, then pushed and dispatched it (Task 3 below).
 
 ## What was done
 
@@ -94,12 +94,13 @@ Task 2: `docs/validation.md`
 3. **Cleanup is not required to be the last step.** This lets 08-04 append a scan step; the comment in the groups job marks the spot.
 4. **Plan basetemp `work/test-tmp` replaced** by `work/test-tmp-07-03` (orchestrator rule); deleted afterwards.
 
-## Open items (Task 3, orchestrator)
+## Task 3: push and dispatch (orchestrator)
 
-- Apply `work/07-03/test_ci_contract.patch` first.
-- The lifecycle job uses `HEAD~1` as base. The base commit must have the 07-02 launcher flags it relies on (`--port 0`, `--registry mirrors`); any recent main commit does.
-- If the pushed tip's parent predates 07-01, the fresh step's images have no revision label. That is fine, because only the update target is label-checked.
-- Record the pushed SHA, smoke and full run IDs and the evidence directory in this summary (or 07-04).
+- `tests/test_ci_contract.py` gained the `runtime-qualification.yml` branch in `09f0c0cc` (line 211), so `ci.yml` stays green.
+- Smoke dispatch 45353094698 at `3a7cf526` (`groups=python-core`) failed in both python-core runtime jobs: the host side `scripts/check_module_references.py` imported `pygments`, which the hosted runner Python lacks. Lifecycle was not the cause.
+- `3e228c34` made the host reference checker free of third-party imports. Smoke dispatch 45356808560 at `3e228c34` then passed every job: `Select native qualification groups`, `Runtime amd64 (python-core)`, `Runtime arm64 (python-core)`, `Lifecycle amd64` and `Lifecycle arm64` (build mode, all eight steps including the real update).
+- Full dispatch 45367221536 at `6f4bf87c` was cancelled and superseded by a dispatch at the final Phase 9 commit.
+- Full dispatch 45381453466 targets the pushed SHA `46dc32fc41badbe5128ceeb145740b5bcdc32f89` (all 38 group rows and both lifecycle rows). Its artifacts go to `work/p7-evidence/45381453466/`, and 07-04 turns them into `07-VERIFICATION.md`.
 
 ## Known Stubs
 

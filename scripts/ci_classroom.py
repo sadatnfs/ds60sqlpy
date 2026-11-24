@@ -79,10 +79,14 @@ def clean_environment(project: str) -> dict[str, str]:
         "DOCKER_CONFIG",
         "DOCKER_DEFAULT_PLATFORM",
     }
+    # The launcher validates these anonymous package mirrors, and hash-locked installs
+    # keep the built images identical, so restricted networks can still qualify.
+    package_mirrors = {"DS60_PYTHON_INDEX_URL", "DS60_NPM_REGISTRY"}
     env = {
         key: value
         for key, value in os.environ.items()
-        if key not in secret_keys and not key.startswith(("DS60_", "COMPOSE_"))
+        if key not in secret_keys
+        and (key in package_mirrors or not key.startswith(("DS60_", "COMPOSE_")))
     }
     env.update(
         COMPOSE_PROJECT_NAME=project,

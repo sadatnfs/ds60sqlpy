@@ -1,8 +1,8 @@
 # Phase 8 Image Scan Ledger
 
 Local evidence: `work/p8-scan/<profile>.json` and `work/p8-scan/reports/` (not committed).
-Scanner: `scripts/image_scan.py scan` with `docker/cve-policy.json` (274 entries, all
-pending-owner: 247 vulnerability, 27 misconfig; `validate-policy` passes).
+Scanner: `scripts/image_scan.py scan` with `docker/cve-policy.json` (276 entries, all
+pending-owner: 249 vulnerability, 27 misconfig; `validate-policy` passes).
 Local host: macOS arm64 (Docker Desktop, linux/arm64 images). Scan date 2026-11-24.
 
 "Fixable" means serious findings with a fixed version upstream; they always block and
@@ -55,6 +55,22 @@ Not scanned locally (CI is the first scan after the 08-03 base moves): javascrip
 typescript-node, tensorflow-cpu, llm-torch-cpu, dbt-duckdb, stan-cpu, julia, jax-cpu,
 bayesian-cpu, data-platforms-python.
 
+### PyTorch blocker (resolved after the first CI scan)
+
+Before: the first `[build-test-pytorch]` run (`45381359769`) failed its arm64 scan with 68
+blocking findings in llm-torch-cpu: fixable torch 2.9.1+cpu (CVE-2026-24747 High, fixed
+in 2.10.0; CVE-2025-3000 and CVE-2025-3001 Low), fixable filelock 3.32.3 (12 findings,
+fixed in 4.2.1), plus 53 unfixed Debian trixie findings because llm-torch-cpu was not
+listed in any policy entry's `images`.
+
+After: `docker/workers/requirements-torch.txt` pins torch 2.15.0+cpu (2.10.0 was rejected
+because CVE-2025-3000 is only fixed in 2.13.0), and both architecture locks resolve
+filelock 4.2.11 and NumPy 2.2.6 with sha256 hashes. The same 53 Debian entries that
+already cover python-core (same python slim trixie base) now also list llm-torch-cpu; no
+new entry was added, so the policy stays at 276 entries. A local arm64 build passed
+`tests/test_custom_likelihood_pytorch.py` 24/24 and all 36 deep-learning-pytorch reference
+executions. The torch-032 `torch.export` guard message is unchanged on 2.15.0.
+
 ## CI proof (amd64 + arm64)
 
 Workflow: `.github/workflows/targeted-images.yml`, push-triggered. Each pushed HEAD commit
@@ -64,14 +80,14 @@ plus the postgres reference. Nineteen groups means nineteen marker commits.
 
 | Group (marker) | Profiles | Run id | amd64 | arm64 |
 |---|---|---|---|---|
-| `[build-test-python-core]` | python-core | `<RUN_ID_PENDING>` | `<PENDING>` | `<PENDING>` |
-| `[build-test-python-web]` | python-web | `<RUN_ID_PENDING>` | `<PENDING>` | `<PENDING>` |
-| `[build-test-cpp]` | cpp20 | `<RUN_ID_PENDING>` | `<PENDING>` | `<PENDING>` |
-| `[build-test-java]` | java21 | `<RUN_ID_PENDING>` | `<PENDING>` | `<PENDING>` |
-| `[build-test-php]` | php-cli | `<RUN_ID_PENDING>` | `<PENDING>` | `<PENDING>` |
-| `[build-test-c-go]` | c17, go | `<RUN_ID_PENDING>` | `<PENDING>` | `<PENDING>` |
-| `[build-test-csharp]` | csharp-dotnet | `<RUN_ID_PENDING>` | `<PENDING>` | `<PENDING>` |
-| `[build-test-swift]` | swift-linux | `<RUN_ID_PENDING>` | `<PENDING>` | `<PENDING>` |
+| `[build-test-python-core]` | python-core | `45365632986` at `1c0c1b48` | success | success |
+| `[build-test-python-web]` | python-web | `45365631189` at `5b997840` | success | success |
+| `[build-test-cpp]` | cpp20 | `45365632462` at `31eec5a4` | success | success |
+| `[build-test-java]` | java21 | `45365633290` at `24840c6d` | success | success |
+| `[build-test-php]` | php-cli | `45365629413` at `cd9233f1` | success | success |
+| `[build-test-c-go]` | c17, go | `45365632612` at `25d34ad2` | success | success |
+| `[build-test-csharp]` | csharp-dotnet | `45365630097` at `727192be` | success | success |
+| `[build-test-swift]` | swift-linux | `45365628998` at `f06c3e34` | success | success |
 | `[build-test-javascript-typescript]` | javascript-node, typescript-node | `<RUN_ID_PENDING>` | `<PENDING>` | `<PENDING>` |
 | `[build-test-scala-spark]` | scala-jvm, spark-local-scala, spark-local-python | `<RUN_ID_PENDING>` | `<PENDING>` | `<PENDING>` |
 | `[build-test-tensorflow]` | tensorflow-cpu | `<RUN_ID_PENDING>` | `<PENDING>` | `<PENDING>` |

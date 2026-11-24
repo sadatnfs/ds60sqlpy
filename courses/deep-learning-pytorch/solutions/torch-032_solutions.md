@@ -137,7 +137,7 @@ np.testing.assert_allclose(b, expected.numpy(), atol=1e-6, rtol=0)
 
 The question is: Pass three rows to the statically exported module and compare with ordinary Linear.
 
-Mathematical batch flexibility does not automatically make an export contract dynamic. The pinned PyTorch 2.9.1 profile raises AssertionError with the exact guard input.size()[0] == 2 for this invalid batch. The handler recognizes that shape guard and re-raises unrelated assertions. Exception types can differ across framework versions, so the diagnostic is tied to the prepared profile.
+Mathematical batch flexibility does not automatically make an export contract dynamic. The pinned PyTorch 2.15.0 CPU profile raises AssertionError with the exact guard input.size()[0] == 2 for this invalid batch. The handler recognizes that shape guard and re-raises unrelated assertions. Exception types can differ across framework versions, so the diagnostic is tied to the prepared profile.
 
 ```python
 three = torch.tensor([[0.0, 0.0], [1.0, 2.0], [3.0, 4.0]])

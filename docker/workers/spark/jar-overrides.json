@@ -1,10 +1,7 @@
 {
   "schema": 1,
   "spark_version": "4.3.0",
-  "remove_paths": [
-    "examples",
-    "jars/connect-repl"
-  ],
+  "remove_paths": ["examples", "jars/connect-repl"],
   "remove_jars": [
     "HikariCP-2.5.1.jar",
     "ST4-4.0.4.jar",
@@ -306,9 +303,7 @@
       "items": [
         {
           "name": "jetty",
-          "namespaces": [
-            "org/sparkproject/jetty/"
-          ],
+          "namespaces": ["org/sparkproject/jetty/"],
           "metadata": [
             "org.eclipse.jetty/jetty-util",
             "org.eclipse.jetty/jetty-server",
@@ -416,13 +411,8 @@
       "items": [
         {
           "name": "guava",
-          "namespaces": [
-            "org/sparkproject/guava/"
-          ],
-          "metadata": [
-            "com.google.guava/guava",
-            "com.google.guava/failureaccess"
-          ],
+          "namespaces": ["org/sparkproject/guava/"],
+          "metadata": ["com.google.guava/guava", "com.google.guava/failureaccess"],
           "sources": [
             {
               "url": "https://repo1.maven.org/maven2/com/google/guava/guava/33.8.0-jre/guava-33.8.0-jre.jar",
@@ -551,9 +541,7 @@
         },
         {
           "name": "kerby",
-          "namespaces": [
-            "org/apache/hadoop/shaded/org/apache/kerby/"
-          ],
+          "namespaces": ["org/apache/hadoop/shaded/org/apache/kerby/"],
           "metadata": [
             "org.apache.kerby/kerb-util",
             "org.apache.kerby/kerby-config",
@@ -603,12 +591,8 @@
         },
         {
           "name": "commons-configuration2",
-          "namespaces": [
-            "org/apache/hadoop/shaded/org/apache/commons/configuration2/"
-          ],
-          "metadata": [
-            "org.apache.commons/commons-configuration2"
-          ],
+          "namespaces": ["org/apache/hadoop/shaded/org/apache/commons/configuration2/"],
+          "metadata": ["org.apache.commons/commons-configuration2"],
           "sources": [
             {
               "url": "https://repo1.maven.org/maven2/org/apache/commons/commons-configuration2/2.15.1/commons-configuration2-2.15.1.jar",
@@ -619,9 +603,7 @@
         },
         {
           "name": "jline",
-          "namespaces": [
-            "org/apache/hadoop/shaded/org/jline/"
-          ],
+          "namespaces": ["org/apache/hadoop/shaded/org/jline/"],
           "metadata": [
             "org.jline/jline",
             "org.jline/jline-terminal",
@@ -705,9 +687,7 @@
         },
         {
           "name": "jetty",
-          "namespaces": [
-            "org/apache/hadoop/shaded/org/eclipse/jetty/"
-          ],
+          "namespaces": ["org/apache/hadoop/shaded/org/eclipse/jetty/"],
           "metadata": [
             "org.eclipse.jetty/jetty-util-ajax",
             "org.eclipse.jetty/jetty-webapp",
