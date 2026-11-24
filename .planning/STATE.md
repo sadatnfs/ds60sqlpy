@@ -1,12 +1,12 @@
 ---
 gsd_state_version: "1.0"
-current_phase: 02
-current_phase_name: Catalog-wide Coverage Matrix
-current_plan: 1
-status: complete
-stopped_at: Phase-2-complete
+current_phase: 08
+current_phase_name: Release Image Security
+current_plan: 3
+status: in_progress
+stopped_at: Phase-8-plan-03
 last_updated: "2026-11-24T02:34:35.980Z"
-last_activity: 2026-11-23; Plan 02-01 complete; catalog coverage matrix generated, tested and gated in CI.
+last_activity: 2026-11-23; Phase 4 verified (passed); 08-04 image remediation in progress.
 state_head: 2c465c7d1729c289c83534aea48bdea5d96a44c3
 progress:
   total_phases: 10
@@ -23,17 +23,17 @@ progress:
 See: .planning/PROJECT.md (updated 2026-11-23)
 
 **Core value:** Learners can understand, practice, run, and keep their work in any DS60 course without installing toolchains or losing learning state.
-**Current focus:** Phase 3; Lesson Foundations & Source Integrity
+**Current focus:** Phase 8; Release Image Security, then Phase 3 to 5 gates and Phases 9 and 10
 
 ## Current Position
 
-Phase: 02 (Catalog-wide Coverage Matrix): COMPLETE
-Current Plan: 1
-Total Plans in Phase: 1
-Status: Phase 2 complete and verified. Phase 1 still has one human check outstanding.
-Last activity: 2026-11-23; Plan 02-01 complete; catalog coverage matrix generated, tested and gated in CI.
+Phase: 08 (Release Image Security): IN PROGRESS
+Current Plan: 3
+Total Plans in Phase: 4
+Status: Phases 2, 3 and 4 verified (passed); Phases 1 and 6 verified human_needed (first-time learner walkthrough). Phase 5 plans 01 to 04 complete; 05-05 pending. Phase 7 plans 01 and 02 complete; 07-03 CI dispatch and 07-04 ledger pending. Phase 8 plans 01 and 02 complete; 08-03 and 08-04 in progress.
+Last activity: 2026-11-23; Phase 4 verification written after the accuracy spot-check fixes; 08-04 local remediation in progress.
 
-Progress: [██░░░░░░░░] 20%
+Progress: [██████░░░░] 60%
 
 ## Performance Metrics
 

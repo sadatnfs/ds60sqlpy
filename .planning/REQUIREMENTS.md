@@ -10,9 +10,9 @@
 
 - [x] **GUIDE-01**: A learner can open the classroom guide from the home screen and lesson workspace, find what each major screen and control does, and follow initialization and lesson-switching instructions.
 - [x] **GUIDE-02**: A learner can start, dismiss, and restart the optional classroom tour without changing the selected lesson, overwriting work, or starting code execution.
-- [ ] **UX-01**: In each supported desktop lesson mode, the workspace clearly identifies the current lesson, available actions, runtime or reading capability, readiness, and where results appear.
-- [ ] **UX-02**: A learner can operate the desktop classroom with the keyboard and see clear focus and status cues; applicable project contrast and accessibility checks pass.
-- [ ] **STATE-01**: Navigation, lesson switching, viewing old results, test setup, and runtime restart preserve learner drafts, progress, and receipts; viewing old evidence never re-executes code.
+- [x] **UX-01**: In each supported desktop lesson mode, the workspace clearly identifies the current lesson, available actions, runtime or reading capability, readiness, and where results appear.
+- [x] **UX-02**: A learner can operate the desktop classroom with the keyboard and see clear focus and status cues; applicable project contrast and accessibility checks pass.
+- [x] **STATE-01**: Navigation, lesson switching, viewing old results, test setup, and runtime restart preserve learner drafts, progress, and receipts; viewing old evidence never re-executes code.
 
 ### Walkthroughs
 
@@ -24,12 +24,12 @@
 ### Curriculum Quality
 
 - [x] **CURR-01**: A maintained catalog-driven matrix accounts for every current subject and lesson, distinguishing authored, planned, reading-only, and runnable content and recording source, profile, dependencies, and known gaps.
-- [ ] **CURR-02**: Every authored lesson states observable learning outcomes, direct prerequisites, essential terms, and enough context to orient a new learner while preserving stable lesson identity.
-- [ ] **CURR-03**: Every authored lesson includes an accurate, substantive worked example with explanation and interpretation appropriate to its subject; non-code lessons use an appropriate non-code artifact.
-- [ ] **CURR-04**: Every practice lesson progresses from supported reasoning or modification toward appropriate independent application and includes a solution or feedback that explains the reasoning.
+- [x] **CURR-02**: Every authored lesson states observable learning outcomes, direct prerequisites, essential terms, and enough context to orient a new learner while preserving stable lesson identity.
+- [x] **CURR-03**: Every authored lesson includes an accurate, substantive worked example with explanation and interpretation appropriate to its subject; non-code lessons use an appropriate non-code artifact.
+- [x] **CURR-04**: Every practice lesson progresses from supported reasoning or modification toward appropriate independent application and includes a solution or feedback that explains the reasoning.
 - [ ] **CURR-05**: Each runnable example is checked against its registered runtime and required data or fixture, with actual behavior matching the explanation; unsupported or unavailable capabilities are identified honestly.
 - [ ] **CURR-06**: Every existing language and subject track is reviewed against the shared quality rubric and reaches its acceptance threshold, with each non-applicable criterion or remaining gap explicitly justified.
-- [ ] **CURR-07**: Content improvements are source-led and course-specific; generated readers, stable IDs, prerequisites, and authored-versus-planned distinctions remain consistent.
+- [x] **CURR-07**: Content improvements are source-led and course-specific; generated readers, stable IDs, prerequisites, and authored-versus-planned distinctions remain consistent.
 
 ### Runtime and Release
 
@@ -76,20 +76,20 @@ Deferred until the existing course quality floor and core classroom workflows ar
 |-------------|-------|--------|
 | GUIDE-01 | Phase 1 | Complete |
 | GUIDE-02 | Phase 1 | Complete |
-| UX-01 | Phase 6 | Pending |
-| UX-02 | Phase 6 | Pending |
-| STATE-01 | Phase 6 | Pending |
+| UX-01 | Phase 6 | Complete |
+| UX-02 | Phase 6 | Complete |
+| STATE-01 | Phase 6 | Complete |
 | WALK-01 | Phase 1 | Complete |
 | WALK-02 | Phase 1 | Complete |
 | WALK-03 | Phase 5 | Pending |
 | WALK-04 | Phase 1 | Complete |
 | CURR-01 | Phase 2 | Complete |
-| CURR-02 | Phase 3 | Pending |
-| CURR-03 | Phase 4 | Pending |
-| CURR-04 | Phase 4 | Pending |
+| CURR-02 | Phase 3 | Complete |
+| CURR-03 | Phase 4 | Complete |
+| CURR-04 | Phase 4 | Complete |
 | CURR-05 | Phase 5 | Pending |
 | CURR-06 | Phase 5 | Pending |
-| CURR-07 | Phase 3 | Pending |
+| CURR-07 | Phase 3 | Complete |
 | RUN-01 | Phase 7 | Pending |
 | RUN-02 | Phase 7 | Pending |
 | SEC-01 | Phase 8 | Pending |
