@@ -17,7 +17,7 @@ file drifts from the catalogs or a cataloged lesson is missing.
 - Authored: 1838; planned: 0
 - Execution: 1478 runnable, 348 reading, 12 operations
 - Module variants folded into canonical rows: 236 across 173 lessons
-- Lessons with no recorded gap: 565
+- Lessons with no recorded gap: 534
 
 ## Gap codes
 
@@ -26,7 +26,7 @@ file drifts from the catalogs or a cataloged lesson is missing.
 | `missing-path` | A cataloged lesson, guide or solution file does not exist. | 0 |
 | `missing-outcome` | The catalog entry has no learner-facing outcome. | 31 |
 | `unknown-prerequisite` | A prerequisite names an id that is not in either catalog. | 0 |
-| `guide-no-orientation` | The guide states neither prerequisites nor objectives in its own text. | 332 |
+| `weak-outcome` | The catalog outcome is not a specific, observable statement led by an action verb. | 131 |
 | `thin-guide` | The guide has fewer than 1050 words. | 418 |
 | `few-examples` | The guide has fewer than 2 fenced examples. | 352 |
 | `few-terms` | The guide defines fewer than 3 terms. | 971 |
@@ -43,7 +43,7 @@ lessons are complete worked chapters and carry no exercise contract.
 | --- | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
 | core | Python and PostgreSQL engineering (`bridge`) | 13 | 13 | 0 | 13 | 0 | 0 | 0 | 2408 | 13 |
 | core | Python and data science (`python`) | 102 | 102 | 0 | 102 | 0 | 0 | 0 | 2217 | 77 |
-| core | PostgreSQL (`sql`) | 86 | 86 | 0 | 86 | 0 | 0 | 0 | 3007 | 80 |
+| core | PostgreSQL (`sql`) | 86 | 86 | 0 | 86 | 0 | 0 | 0 | 3007 | 77 |
 | module | Advanced Spark modeling: likelihoods, autodiff and engine internals (`advanced-spark-modeling`) | 38 | 0 | 38 | 21 | 17 | 0 | 0 | 960 | 0 |
 | module | Apache and open data platforms (`apache-data-platforms`) | 88 | 0 | 88 | 24 | 64 | 0 | 0 | 974 | 0 |
 | module | Applied science: identification, prediction and decisions (`applied-science`) | 24 | 0 | 24 | 24 | 0 | 0 | 0 | 1039 | 0 |
@@ -66,9 +66,9 @@ lessons are complete worked chapters and carry no exercise contract.
 | module | JAX: numerical functions to independent scientific work (`jax`) | 34 | 34 | 0 | 31 | 3 | 0 | 0 | 1449 | 0 |
 | module | Julia language and scientific computing (`julia`) | 32 | 32 | 0 | 32 | 0 | 0 | 0 | 1021 | 0 |
 | module | Kubernetes: from first object to platform reasoning (`kubernetes`) | 66 | 66 | 0 | 0 | 54 | 12 | 3 | 1587 | 4 |
-| module | Applied LLMs: subject assistants, retrieval and adaptation (`llm-applied`) | 24 | 24 | 0 | 23 | 1 | 0 | 0 | 3651 | 24 |
+| module | Applied LLMs: subject assistants, retrieval and adaptation (`llm-applied`) | 24 | 24 | 0 | 23 | 1 | 0 | 0 | 3651 | 1 |
 | module | LLM evaluation and alignment (`llm-evaluation`) | 24 | 24 | 0 | 24 | 0 | 0 | 0 | 1446 | 0 |
-| module | Language models: mechanisms, training and evidence (`llm-theory`) | 48 | 48 | 0 | 43 | 5 | 0 | 3 | 3079 | 48 |
+| module | Language models: mechanisms, training and evidence (`llm-theory`) | 48 | 48 | 0 | 43 | 5 | 0 | 3 | 3079 | 47 |
 | module | Machine learning engineering (`ml-engineering`) | 18 | 18 | 0 | 18 | 0 | 0 | 0 | 1095 | 0 |
 | module | Natural Language Processing: from text to reliable language systems (`nlp`) | 24 | 24 | 0 | 24 | 0 | 0 | 0 | 1790 | 0 |
 | module | Polars: columnar data engineering (`polars`) | 18 | 18 | 0 | 18 | 0 | 0 | 0 | 1057 | 0 |
@@ -77,7 +77,7 @@ lessons are complete worked chapters and carry no exercise contract.
 | module | Rust: ownership, reliable systems and Arrow data engineering (`rust`) | 48 | 48 | 0 | 48 | 0 | 0 | 0 | 1163 | 30 |
 | module | Scala and Apache Spark: Correct Data, Measured Execution, Recoverable Products (`scala-spark`) | 42 | 42 | 0 | 39 | 3 | 0 | 3 | 2286 | 42 |
 | module | Spark deployment: Compose, notebooks and Kubernetes (`spark-deployment`) | 18 | 0 | 18 | 0 | 18 | 0 | 0 | 594 | 0 |
-| module | Statistics and Machine Learning for Data Scientists End To End (`statistics-ml`) | 69 | 0 | 69 | 69 | 0 | 0 | 0 | 2272 | 4 |
+| module | Statistics and Machine Learning for Data Scientists End To End (`statistics-ml`) | 69 | 0 | 69 | 69 | 0 | 0 | 0 | 2272 | 0 |
 | module | Swift: portable language foundations and Apple app architecture (`swift`) | 48 | 48 | 0 | 48 | 0 | 0 | 0 | 1163 | 6 |
 | module | TMB modeling with R and C++ (`tmb-modeling`) | 48 | 0 | 48 | 48 | 0 | 0 | 0 | 633 | 0 |
 | module | Web development: HTML, CSS and PHP (`web-development`) | 60 | 60 | 0 | 56 | 4 | 0 | 0 | 922 | 0 |
@@ -86,22 +86,22 @@ lessons are complete worked chapters and carry no exercise contract.
 
 Counts of lessons per gap code. Tracks with no gaps are omitted.
 
-| Track | `missing-path` | `missing-outcome` | `unknown-prerequisite` | `guide-no-orientation` | `thin-guide` | `few-examples` | `few-terms` | `few-exercises` | `missing-solution` | `thin-solution` |
+| Track | `missing-path` | `missing-outcome` | `unknown-prerequisite` | `weak-outcome` | `thin-guide` | `few-examples` | `few-terms` | `few-exercises` | `missing-solution` | `thin-solution` |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
 | `python` | 0 | 25 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
-| `sql` | 0 | 6 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
+| `sql` | 0 | 6 | 0 | 3 | 0 | 0 | 0 | 0 | 0 | 0 |
 | `advanced-spark-modeling` | 0 | 0 | 0 | 0 | 26 | 38 | 38 | 0 | 0 | 0 |
-| `apache-data-platforms` | 0 | 0 | 0 | 88 | 75 | 41 | 88 | 0 | 0 | 0 |
-| `applied-science` | 0 | 0 | 0 | 23 | 13 | 24 | 24 | 0 | 0 | 0 |
-| `bayesian-computing` | 0 | 0 | 0 | 23 | 15 | 24 | 24 | 0 | 0 | 0 |
+| `apache-data-platforms` | 0 | 0 | 0 | 1 | 75 | 41 | 88 | 0 | 0 | 0 |
+| `applied-science` | 0 | 0 | 0 | 0 | 13 | 24 | 24 | 0 | 0 | 0 |
+| `bayesian-computing` | 0 | 0 | 0 | 0 | 15 | 24 | 24 | 0 | 0 | 0 |
 | `c` | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 15 |
 | `cpp` | 0 | 0 | 0 | 0 | 0 | 0 | 38 | 0 | 0 | 0 |
 | `csharp` | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 23 |
-| `cuda` | 0 | 0 | 0 | 0 | 0 | 0 | 128 | 0 | 0 | 128 |
-| `custom-likelihood-pytorch` | 0 | 0 | 0 | 16 | 2 | 20 | 20 | 0 | 0 | 0 |
+| `cuda` | 0 | 0 | 0 | 63 | 0 | 0 | 128 | 0 | 0 | 128 |
+| `custom-likelihood-pytorch` | 0 | 0 | 0 | 0 | 2 | 20 | 20 | 0 | 0 | 0 |
 | `data-ml-engineering` | 0 | 0 | 0 | 0 | 0 | 71 | 72 | 0 | 0 | 0 |
 | `data-visualization` | 0 | 0 | 0 | 0 | 4 | 0 | 8 | 0 | 0 | 8 |
-| `dax` | 0 | 0 | 0 | 60 | 0 | 0 | 0 | 0 | 0 | 60 |
+| `dax` | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 60 |
 | `dbt` | 0 | 0 | 0 | 0 | 0 | 0 | 26 | 0 | 0 | 9 |
 | `docker` | 0 | 0 | 0 | 0 | 0 | 0 | 42 | 0 | 0 | 42 |
 | `go` | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 17 |
@@ -109,17 +109,19 @@ Counts of lessons per gap code. Tracks with no gaps are omitted.
 | `jax` | 0 | 0 | 0 | 0 | 0 | 3 | 34 | 0 | 0 | 34 |
 | `julia` | 0 | 0 | 0 | 0 | 18 | 0 | 32 | 0 | 0 | 32 |
 | `kubernetes` | 0 | 0 | 0 | 0 | 0 | 0 | 62 | 0 | 0 | 60 |
+| `llm-applied` | 0 | 0 | 0 | 23 | 0 | 0 | 0 | 0 | 0 | 0 |
 | `llm-evaluation` | 0 | 0 | 0 | 0 | 0 | 0 | 24 | 0 | 0 | 24 |
+| `llm-theory` | 0 | 0 | 0 | 1 | 0 | 0 | 0 | 0 | 0 | 0 |
 | `ml-engineering` | 0 | 0 | 0 | 0 | 5 | 0 | 18 | 0 | 0 | 15 |
 | `nlp` | 0 | 0 | 0 | 0 | 0 | 0 | 24 | 0 | 0 | 9 |
 | `polars` | 0 | 0 | 0 | 0 | 8 | 0 | 18 | 0 | 0 | 18 |
 | `python-web` | 0 | 0 | 0 | 0 | 67 | 72 | 72 | 0 | 0 | 0 |
 | `r` | 0 | 0 | 0 | 0 | 31 | 0 | 0 | 0 | 0 | 60 |
 | `rust` | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 18 |
-| `spark-deployment` | 0 | 0 | 0 | 18 | 18 | 0 | 18 | 0 | 0 | 0 |
-| `statistics-ml` | 0 | 0 | 0 | 59 | 29 | 29 | 28 | 0 | 0 | 0 |
+| `spark-deployment` | 0 | 0 | 0 | 0 | 18 | 0 | 18 | 0 | 0 | 0 |
+| `statistics-ml` | 0 | 0 | 0 | 40 | 29 | 29 | 28 | 0 | 0 | 0 |
 | `swift` | 0 | 0 | 0 | 0 | 0 | 0 | 1 | 0 | 0 | 42 |
-| `tmb-modeling` | 0 | 0 | 0 | 45 | 48 | 30 | 48 | 0 | 0 | 0 |
+| `tmb-modeling` | 0 | 0 | 0 | 0 | 48 | 30 | 48 | 0 | 0 | 0 |
 | `web-development` | 0 | 0 | 0 | 0 | 59 | 0 | 60 | 0 | 0 | 60 |
 
 ## Reading a row
@@ -128,5 +130,8 @@ Each JSON row records the lesson id, family, track, sequence, stage,
 level, status, learning mode, execution kind (runnable, reading or
 operations), runtime, dependencies, prerequisites, source/guide/solution
 paths, verification, expected artifacts, variants, measured teaching
-signals and gap codes. Guide orientation is measured from the guide
-text itself; the classroom also shows catalog outcomes and prerequisites.
+signals and gap codes. Orientation comes from the catalog: the classroom
+lesson header renders each outcome and its direct prerequisites (or
+"Start here"), so `weak-outcome` and `unknown-prerequisite` are the
+orientation gaps. `states_prerequisites` and `states_objectives` record
+whether the guide text repeats them and are informational only.

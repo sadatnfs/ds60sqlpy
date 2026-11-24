@@ -312,7 +312,17 @@ plain text, static HTML and the unified classroom.
 - Run `python scripts/build_coverage_matrix.py --write` (or `make generate`)
   after adding or changing any core or module lesson. The generated
   [coverage matrix](coverage-matrix.md) lists each lesson's execution kind,
-  verification and remaining gaps; CI fails when it drifts.
+  verification and remaining gaps; CI fails when it drifts. Use
+  `python scripts/build_coverage_matrix.py --track <id> --gaps weak-outcome,few-terms`
+  to list one track's remaining gaps without rewriting the matrix.
+- Write each catalog outcome as a specific, observable sentence that starts
+  with an action verb ("Explain", "Build", "Diagnose"), never "Understand",
+  "Know" or "Learn", and never a definition. The classroom lesson header shows
+  it with the lesson's direct prerequisites, so it is the learner's first
+  orientation.
+- Give every guide a `## Key terms` section with at least three
+  lesson-specific `- **Term:** definition` bullets drawn from the lesson's
+  plan concepts.
 - Count real learner actions, questions, predictions, diagnoses, and
   explanations. Repeated sub-bullets, headings, hints, and answer steps do not
   become separate exercises merely to satisfy the count.

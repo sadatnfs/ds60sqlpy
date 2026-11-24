@@ -68,7 +68,17 @@ Plans:
 **Success Criteria** (what must be TRUE):
   1. Every authored lesson states an observable outcome, direct prerequisites, essential terms, and enough context to orient a new learner.
   2. Lesson identity remains stable, and generated readers, prerequisites, maintained sources, and authored-versus-planned status agree across all tracks.
-**Plans**: TBD
+**Plans**: 4 plans
+
+**Wave 1**
+- [x] 03-01-PLAN.md: Measure observable outcomes and essential terms
+
+**Wave 2**
+- [ ] 03-02-PLAN.md: Core lesson outcomes
+- [ ] 03-03-PLAN.md: Module outcomes and key terms, track by track
+
+**Wave 3**
+- [ ] 03-04-PLAN.md: Close the gate
 
 ### Phase 4: Worked Examples & Practice
 **Goal:** Learners across the existing catalog can study accurate examples, practice with appropriate support, and understand the reasoning behind feedback or solutions.

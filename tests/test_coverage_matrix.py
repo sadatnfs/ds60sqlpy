@@ -15,10 +15,16 @@ from scripts.build_coverage_matrix import (
     coverage_problems,
     module_exercise_count,
     orientation,
+    outcome_issue,
     term_count,
+    track_gap_lines,
 )
 
 ROOT = Path(__file__).resolve().parents[1]
+
+# Lesson-foundation gaps may only fall. Lower a ceiling whenever content work
+# closes gaps; Phase 3 ends with every ceiling at zero.
+FOUNDATION_GAP_CEILING = {"missing-outcome": 31, "weak-outcome": 132, "few-terms": 971}
 
 
 @cache
@@ -107,3 +113,45 @@ def test_module_exercise_count_uses_the_strongest_signal() -> None:
     assert module_exercise_count([labels]) == 3
     assert module_exercise_count([headings, labels]) == 3
     assert module_exercise_count(["No exercises here."]) == 0
+
+
+def test_outcome_issue_requires_an_observable_action() -> None:
+    assert outcome_issue("Explain why a left join keeps unmatched rows.") is None
+    assert outcome_issue("Jointly fit a mean and a scale parameter.") is None
+    assert outcome_issue("") is None
+    assert "Understand" in str(outcome_issue("Understand joins and their assumptions."))
+    assert "lowercase" in str(outcome_issue("kernel that adds two vectors"))
+    assert "'A'" in str(outcome_issue("A domain corpus is a versioned dataset."))
+    assert "fewer than" in str(outcome_issue("Plan evidence."))
+
+
+def test_foundation_gaps_never_grow() -> None:
+    rows = json.loads(_built()[0])["lessons"]
+    counts = {code: sum(code in row["gaps"] for row in rows) for code in FOUNDATION_GAP_CEILING}
+    assert counts == {
+        code: min(counts[code], ceiling) for code, ceiling in FOUNDATION_GAP_CEILING.items()
+    }
+
+
+def test_track_gap_lines_filter_by_track_and_code() -> None:
+    rows = [
+        {
+            "id": "t-1",
+            "track": "t",
+            "gaps": ["few-terms", "weak-outcome"],
+            "outcome_issue": "starts with 'Understand', not an observable action verb",
+            "metrics": {"terms": 1},
+            "paths": {"guide": "g.md"},
+        },
+        {
+            "id": "u-1",
+            "track": "u",
+            "gaps": ["few-terms"],
+            "outcome_issue": None,
+            "metrics": {"terms": 0},
+            "paths": {"guide": "h.md"},
+        },
+    ]
+    assert track_gap_lines(rows, "t", {"few-terms"}) == ["t-1: few-terms; terms=1; guide=g.md"]
+    assert "Understand" in track_gap_lines(rows, "t", set())[0]
+    assert track_gap_lines(rows, "t", {"thin-guide"}) == []

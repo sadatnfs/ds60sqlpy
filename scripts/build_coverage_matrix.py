@@ -42,15 +42,15 @@ from scripts.audit_practice import count_practice  # noqa: E402
 
 MATRIX_PATH = REPO_ROOT / "curriculum" / "coverage-matrix.json"
 REPORT_PATH = REPO_ROOT / "docs" / "coverage-matrix.md"
-SCHEMA_VERSION = 1
+SCHEMA_VERSION = 2
 MIN_EXERCISES = 6
 
 GAP_CODES: dict[str, str] = {
     "missing-path": "A cataloged lesson, guide or solution file does not exist.",
     "missing-outcome": "The catalog entry has no learner-facing outcome.",
     "unknown-prerequisite": "A prerequisite names an id that is not in either catalog.",
-    "guide-no-orientation": (
-        "The guide states neither prerequisites nor objectives in its own text."
+    "weak-outcome": (
+        "The catalog outcome is not a specific, observable statement led by an action verb."
     ),
     "thin-guide": f"The guide has fewer than {MIN_GUIDE_WORDS} words.",
     "few-examples": f"The guide has fewer than {MIN_GUIDE_CODE_BLOCKS} fenced examples.",
@@ -63,6 +63,41 @@ GAP_CODES: dict[str, str] = {
 }
 
 PRACTICE_ONLY_GAPS = frozenset({"few-exercises", "missing-solution", "thin-solution"})
+
+# Outcomes are shown in the classroom lesson header, so each must name
+# something a learner can be seen to do. A new leading verb is added here only
+# when it describes observable work; "Understand", "Know" and "Learn" do not.
+_OBSERVABLE_VERB_TEXT = """
+    Accept Accumulate Activate Adapt Add Aggregate Align Allocate Analyze Animate
+    Annotate Apply Assemble Assess Audit Authenticate Authorize Avoid Backtest Balance
+    Benchmark Bind Bound Build Cache Calculate Calibrate Call Cancel Capture Carry
+    Change Check Choose Classify Clean Close Cluster Combine Commit Compare Compile
+    Complete Compose Compute Condition Configure Connect Construct Containerize
+    Contrast Control Convert Copy Count Create Critique Debug Decide Declare Decode
+    Defend Define Deliver Demonstrate Deploy Derive Describe Design Detect Diagnose
+    Differentiate Dispatch Distinguish Document Draw Drive Emit Encapsulate Encode
+    Enforce Enrich Escape Estimate Evaluate Execute Exercise Expand Explain Expose
+    Express Extract Extrapolate Filter Find Finish Fit Flatten Forecast Form Format
+    Freeze Generate Give Group Handle Identify Implement Index Infer Ingest Initialize
+    Inject Inspect Install Instrument Integrate Interpret Investigate Join Justify
+    Keep Label Launch Link List Load Locate Log Maintain Make Manage Map Match
+    Materialize Measure Migrate Minimize Mock Model Modify Monitor Move Mutate
+    Navigate Negotiate Normalize Observe Obtain Operate Optimize Orchestrate Order
+    Organize Own Package Parse Partition Pass Perform Persist Pin Pivot Place Plan
+    Plot Pool Populate Predict Prefer Prepare Present Preserve Prespecify Prevent
+    Process Produce Profile Program Project Propagate Protect Prove Publish Put
+    Qualify Quantify Query Rank Read Reason Rebuild Recommend Reconcile Reconstruct
+    Record Recover Reduce Refactor Refine Register Reject Relate Release Render Rent
+    Reorder Repair Repeat Replace Report Represent Reproduce Resample Reshape
+    Respect Restore Retain Retry Return Review Rewrite Round-trip Route Run Sample
+    Save Scale Schedule Scope Secure Select Separate Serialize Serve Share Ship Show
+    Simplify Simulate Sketch Solve Specify Split Stage Standardize Start State
+    Stream Style Summarize Tabulate Teach Tell Test Thread Throw Tie Tokenize Trace
+    Track Train Transform Translate Traverse Treat Tune Turn Type Use Validate
+    Vectorize Verify Visualize Weigh Work Wrap Write
+"""
+OBSERVABLE_VERBS = frozenset(_OBSERVABLE_VERB_TEXT.split())
+MIN_OUTCOME_WORDS = 4
 
 HEADING_LINE = re.compile(r"^(#{1,6})\s+(.+?)\s*#*\s*$")
 PREREQUISITE_HEADING = re.compile(
@@ -220,6 +255,24 @@ def _rel(path: Path) -> str:
         return path.as_posix()
 
 
+def outcome_issue(outcome: str) -> str | None:
+    """Explain why a non-empty outcome is not observable, or return None."""
+
+    words = outcome.split()
+    if not words:
+        return None
+    lead = words[0].rstrip(",:;")
+    if lead.endswith("ly") and len(words) > 1 and words[1].capitalize() in OBSERVABLE_VERBS:
+        lead = words[1].capitalize()
+    elif not lead[:1].isupper():
+        return f"starts with lowercase {lead!r}, not an action verb"
+    if lead not in OBSERVABLE_VERBS:
+        return f"starts with {lead!r}, not an observable action verb"
+    if len(words) < MIN_OUTCOME_WORDS:
+        return f"has fewer than {MIN_OUTCOME_WORDS} words"
+    return None
+
+
 def _gaps(row: Mapping[str, Any]) -> list[str]:
     metrics = row["metrics"]
     gaps: list[str] = []
@@ -227,11 +280,11 @@ def _gaps(row: Mapping[str, Any]) -> list[str]:
         gaps.append("missing-path")
     if not row["outcome"]:
         gaps.append("missing-outcome")
+    elif row["outcome_issue"]:
+        gaps.append("weak-outcome")
     if row["unknown_prerequisites"]:
         gaps.append("unknown-prerequisite")
     if row["paths"]["guide"]:
-        if not (metrics["states_prerequisites"] or metrics["states_objectives"]):
-            gaps.append("guide-no-orientation")
         if metrics["guide_words"] < MIN_GUIDE_WORDS:
             gaps.append("thin-guide")
         if metrics["examples"] < MIN_GUIDE_CODE_BLOCKS:
@@ -301,6 +354,7 @@ def core_rows(catalog: Catalog) -> list[dict[str, Any]]:
             "prerequisites": list(lesson.prerequisites),
             "unknown_prerequisites": [],
             "outcome": bool(lesson.outcome),
+            "outcome_issue": outcome_issue(lesson.outcome),
             "paths": {
                 "lesson": _rel(lesson_path),
                 "guide": _rel(guide_path) if guide_path else None,
@@ -365,6 +419,7 @@ def module_rows(modules: ModuleCatalog) -> list[dict[str, Any]]:
                 "prerequisites": [str(item) for item in planned.get("prerequisites", [])],
                 "unknown_prerequisites": [],
                 "outcome": bool(planned.get("outcome")),
+                "outcome_issue": outcome_issue(str(planned.get("outcome") or "")),
                 "paths": {
                     "lesson": _rel(source_path) if source_path else None,
                     "guide": _rel(guide_path) if guide_path else None,
@@ -563,8 +618,11 @@ def render_report(rows: Sequence[Mapping[str, Any]], capstones: Mapping[str, int
         "level, status, learning mode, execution kind (runnable, reading or",
         "operations), runtime, dependencies, prerequisites, source/guide/solution",
         "paths, verification, expected artifacts, variants, measured teaching",
-        "signals and gap codes. Guide orientation is measured from the guide",
-        "text itself; the classroom also shows catalog outcomes and prerequisites.",
+        "signals and gap codes. Orientation comes from the catalog: the classroom",
+        "lesson header renders each outcome and its direct prerequisites (or",
+        '"Start here"), so `weak-outcome` and `unknown-prerequisite` are the',
+        "orientation gaps. `states_prerequisites` and `states_objectives` record",
+        "whether the guide text repeats them and are informational only.",
         "",
     ]
     return "\n".join(lines)
@@ -585,7 +643,35 @@ def _parser() -> argparse.ArgumentParser:
     mode.add_argument("--write", action="store_true", help="Write the matrix and report.")
     mode.add_argument("--check", action="store_true", help="Fail when outputs drift.")
     mode.add_argument("--json", action="store_true", help="Print the matrix JSON.")
+    mode.add_argument(
+        "--track",
+        metavar="TRACK",
+        help="List each lesson in TRACK that has a gap (core or module track id).",
+    )
+    parser.add_argument(
+        "--gaps",
+        metavar="CODES",
+        help="With --track, only report these comma-separated gap codes.",
+    )
     return parser
+
+
+def track_gap_lines(rows: Sequence[Mapping[str, Any]], track: str, codes: set[str]) -> list[str]:
+    """Return one line per lesson in ``track`` that has a selected gap."""
+
+    lines = []
+    for row in rows:
+        if row["track"] != track:
+            continue
+        gaps = [gap for gap in row["gaps"] if not codes or gap in codes]
+        if not gaps:
+            continue
+        detail = f" ({row['outcome_issue']})" if "weak-outcome" in gaps else ""
+        lines.append(
+            f"{row['id']}: {', '.join(gaps)}; terms={row['metrics']['terms']}{detail}; "
+            f"guide={row['paths']['guide']}"
+        )
+    return lines
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -593,6 +679,22 @@ def main(argv: list[str] | None = None) -> int:
     matrix, report, problems = build()
     for problem in problems:
         print(f"FAIL {problem}", file=sys.stderr)
+    if args.gaps and not args.track:
+        print("FAIL --gaps requires --track", file=sys.stderr)
+        return 2
+    if args.track:
+        rows = json.loads(matrix)["lessons"]
+        if not any(row["track"] == args.track for row in rows):
+            print(f"FAIL unknown track: {args.track}", file=sys.stderr)
+            return 2
+        codes = {code.strip() for code in (args.gaps or "").split(",") if code.strip()}
+        unknown = codes - set(GAP_CODES)
+        if unknown:
+            print(f"FAIL unknown gap codes: {sorted(unknown)}", file=sys.stderr)
+            return 2
+        lines = track_gap_lines(rows, args.track, codes)
+        print("\n".join(lines) if lines else f"{args.track}: no selected gaps")
+        return 1 if lines or problems else 0
     if args.json:
         print(matrix, end="")
     elif args.write:
