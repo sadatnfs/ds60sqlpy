@@ -306,35 +306,18 @@ def test_meets_threshold_rules() -> None:
     assert qualification.meets_threshold(MATRIX, open_gap) == ["go R5: open gap."]
 
 
-def _threshold_param(track: str) -> Any:
-    """Plain param for every track that meets its threshold.
-
-    The strict expected-failure mark is computed, never listed: it applies only to
-    a track whose single remaining reason is R10 awaiting recorded CI evidence
-    (`evidence_pending`), so recording evidence removes the mark automatically.
-    Any other shortfall stays a plain failing param.
-    """
-    record = RECORDS[track]
-    if not qualification.evidence_pending(MATRIX, record):
-        return pytest.param(track, id=track)
-    groups = qualification.required_ci_groups(record)
-    reason = f"Awaiting recorded app-build CI evidence for groups {groups}"
-    return pytest.param(track, id=track, marks=pytest.mark.xfail(strict=True, reason=reason))
-
-
-@pytest.mark.parametrize("track", [_threshold_param(track) for track in sorted(RECORDS)])
+@pytest.mark.parametrize("track", sorted(RECORDS))
 def test_every_track_meets_threshold(track: str) -> None:
     assert qualification.meets_threshold(MATRIX, RECORDS[track]) == []
 
 
-def test_below_threshold_tracks_only_await_ci_evidence() -> None:
+def test_ordinary_profile_tracks_cite_ci_evidence() -> None:
     for track, record in RECORDS.items():
-        below = qualification.meets_threshold(MATRIX, record)
-        if below:
-            assert qualification.evidence_pending(MATRIX, record), (track, below)
-    for track in ("python", "sql", "bridge", "dax", "cuda", "docker", "kubernetes"):
-        assert qualification.meets_threshold(MATRIX, RECORDS[track]) == [], track
-    assert qualification.meets_threshold(MATRIX, RECORDS["spark-deployment"]) == []
+        groups = qualification.required_ci_groups(record)
+        runtime = record["runtime"]
+        assert runtime["walkthrough_outputs_checked"] is bool(groups), track
+        if groups:
+            assert set(groups) <= set(runtime["evidence"]["groups"]), track
 
 
 def test_go_report_writes_nothing(capsys: pytest.CaptureFixture[str]) -> None:

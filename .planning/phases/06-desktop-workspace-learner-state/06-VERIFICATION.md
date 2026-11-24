@@ -28,7 +28,7 @@ covered_files:
   - "tests/test_workspace_mode.py"
   - "work/phase6-browser-receipts.json"
   - "work/phase6-restart-receipts.json"
-covered_digest: "v4:sha256:5594863a154482521a4de0e5086bc80575c574df8eb2356fa22aa1e7d7a40fc5"
+covered_digest: "v4:sha256:30bc7fdc56834be5236eeea7b0e7e2f3a3f93bcbe5d5d6e57283b1a73ff81333"
 behavior_unverified: 0
 overrides_applied: 0
 human_verification:
@@ -42,7 +42,7 @@ human_verification:
 **Phase Goal:** Learners can operate the desktop classroom confidently across its real lesson modes and continue their work without accidental execution or loss of saved evidence.
 **Verified:** 2026-11-24T05:37:19Z (2026-11-23 21:37 local)
 **Status:** human_needed
-**Re-verification:** No, initial verification
+**Re-verification:** Yes, 2026-11-24T21:35Z after Phases 08.1, 9 and 10 changed covered files (see Re-verification below); status unchanged
 
 ## Process Notes
 
@@ -56,6 +56,21 @@ human_verification:
   - So the image was built after the final asset edits, and the receipts came after the image.
   - `scripts/check_classroom_workspace.py` was modified at 21:34:25, after the main receipt and before restart verify. This matches the documented restart verify fix (06-04 deviation 5) and is recorded as info.
   - A read-only check found 0 `ds60-phase6*` containers and 0 volumes.
+
+## Re-verification (2026-11-24)
+
+The report went stale because later phases edited files it covers: `scripts/check_classroom_ui.mjs`, `src/ds60sqlpy/assets/classroom.css`, `src/ds60sqlpy/assets/classroom.html`, `tests/test_classroom_keyboard.py`, `tests/test_module_ui.py` and `tests/test_workspace_mode.py`. Phase 08.1 (unslop chrome) made most of those edits, Phase 9 tightened the tests, and the 2.0.0 release commit `ca8ef9a3` changed one documented command string in `classroom.html` (`--tag 1.4.4` to `--tag 2.0.0`).
+
+Both repeatable checks were rerun against HEAD `2c3c3f8e` plus the uncommitted Phase 10 closeout edits, none of which touch Phase 6 code:
+
+| Check | Command | Result |
+|-------|---------|--------|
+| UI harness | `node scripts/check_classroom_ui.mjs` | `{"checks":115,"passed":true,"final":true}`, exit 0. The 5 extra checks are the 08.1 unslop guards. |
+| Classroom Python tests | the same 11 test files as the original run, `-n 0 --basetemp=work/test-tmp-reverify6` | 214 passed, 1 skipped (the Windows-only path test) in 9.69s |
+
+The browser behavior was rechecked in CI rather than locally: `Browser acceptance` run 45368870932 on `2f9521b2` succeeded on 2026-11-24T09:49:39Z. Since then the only classroom asset change is the command-string edit above, which changes no workspace behavior.
+
+The earlier process notes about STATE.md being stale and the Phase 6 work being uncommitted are resolved: that work is committed and STATE.md is current. The status stays `human_needed` because the first-time learner walkthrough still needs a person.
 
 ## Goal Achievement
 

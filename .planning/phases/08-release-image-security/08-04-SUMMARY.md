@@ -2,7 +2,7 @@
 phase: 08-release-image-security
 plan: 04
 subsystem: release-image-security
-status: partial
+status: complete
 requirements: [SEC-01]
 tags: [trivy, cve, trixie, digest-pin, postgres, spark, r, policy]
 requires: [08-01, 08-02, 08-03]
@@ -238,3 +238,25 @@ scala-spark is expected to pass now that Spark runs 4.3.0 with re-shaded librari
 
 The ledger, this summary, the policy file, the Spark override files and the R lock all
 exist. No commits were expected.
+
+## Closure (2026-11-24, Phase 10)
+
+The follow-ups and the CI proof listed above are done:
+
+- **CI proof:** the 19 marker commits ran `targeted-images.yml`, and every group passed on
+  amd64 and arm64. The run ids and commits are in the `08-SCAN-LEDGER.md` CI proof
+  table. scala-spark passed on Spark 4.3.0 with the re-shaded libraries (`45381445310`).
+- **Ten locally unscanned profiles:** each is covered by its CI group scan and again by
+  the Publish Qualify job for release 2.0.0.
+- **Publish gate:** Publish run 45460757558 (attempt 2) at `a4354ff8` ran 40 Qualify
+  jobs: 19 image groups (application and Core plus 18 worker groups) and the scientific
+  projects, each on amd64 and arm64. All 38 image-group jobs ran the "Scan qualified
+  images before any publication" step against `docker/cve-policy.json` before any push,
+  and all passed. The 2 scientific-projects jobs have no scan step because they publish
+  no image.
+- **Postgres on Docker Hub:** published as `sadatnfs/ds60sqlpy:2.0.0-postgres` (amd64
+  and arm64) after the seed job scanned it on both architectures.
+- **Relock:** `uv.lock` and `requirements/registry-diagnostic-tests.lock` were relocked
+  for the CVE fixes in `e5ebc20a`.
+
+Status moves from partial to complete. Phase-level evidence is in `08-VERIFICATION.md`.

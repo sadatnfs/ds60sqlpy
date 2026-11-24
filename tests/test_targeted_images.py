@@ -181,6 +181,7 @@ def test_app_build_intent_routes_exact_marker_mode(
     expected: str,
 ) -> None:
     monkeypatch.setenv("GITHUB_EVENT_NAME", "push")
+    monkeypatch.setenv("GITHUB_REF", "refs/heads/main")
     monkeypatch.setattr(targeted, "push_intent", lambda root: intent)
     output = tmp_path / "github-output"
     targeted.write_app_build_intent(output)

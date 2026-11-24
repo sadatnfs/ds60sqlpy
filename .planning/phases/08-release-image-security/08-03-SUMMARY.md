@@ -2,7 +2,7 @@
 phase: 08-release-image-security
 plan: 03
 subsystem: release-image-security
-status: partial
+status: complete
 requirements: [SEC-01]
 tags: [trivy, cve, trixie, locks, postgres, policy]
 requires: [08-01]
@@ -186,3 +186,20 @@ Plan 08-04 reviewed, finished and verified it. The details are in `08-04-SUMMARY
   under 08-04, and all are clean.
 - **Status:** the owner items are closed except Spark, which is still blocked by fixable
   shaded-jar findings (Rule 4, see 08-04).
+
+## Closure (2026-11-24, Phase 10)
+
+The open items from this plan were closed before release 2.0.0:
+
+- **CI proof:** all 19 targeted groups passed on amd64 and arm64 (run ids in
+  `08-SCAN-LEDGER.md`). The Python family groups are python-core `45365632986`,
+  python-web `45365631189`, data-engineering `45381381179` and pytorch `45390075438`.
+- **Relock:** `uv.lock` and `requirements/registry-diagnostic-tests.lock` were relocked
+  for the CVE fixes in `e5ebc20a`.
+- **Postgres:** `ds60sqlpy-postgres` was scanned on both architectures by the Publish
+  seed job (run 45460757558 at `a4354ff8`, `passed: true`, 0 blocking findings) and is
+  published as `sadatnfs/ds60sqlpy:2.0.0-postgres` and `latest-postgres` for amd64 and
+  arm64. The one Critical libxml2 finding (CVE-2026-6653) has no fix and is a reviewed
+  policy entry.
+
+Status moves from partial to complete. Phase-level evidence is in `08-VERIFICATION.md`.

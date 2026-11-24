@@ -714,6 +714,10 @@ def render_report(rows: Sequence[Mapping[str, Any]], capstones: Mapping[str, int
         "boilerplate; the corpus total may not grow, so new explanations must be",
         "specific to their lesson.",
         "",
+        "[Track qualification](track-qualification.md) reads these rows for rubric",
+        "criteria R1 to R8 and records each track's result against the shared",
+        "threshold.",
+        "",
     ]
     return "\n".join(lines)
 

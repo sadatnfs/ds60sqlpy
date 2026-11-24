@@ -707,6 +707,10 @@ Useful result labels are **structure validated**, **representative behavior
 executed**, **complete artifact executed**, **offline verified after setup**,
 and **not validated on this platform**. Use the narrowest label supported by
 the evidence. No finite test suite establishes that software has no bugs.
+Per-track curriculum readiness is recorded separately in
+[track qualification](track-qualification.md): its runtime ledger names the
+narrowest supported label for each track's profiles, and authored walkthrough
+expected outputs are checked as part of the reference corpus in CI.
 
 ## D3 and new systems-language qualification
 

@@ -858,7 +858,8 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 </tbody></table></div>
 <h3 id="reading-a-row">Reading a row<a class="heading-anchor" href="#reading-a-row" aria-label="Link to this section">#</a></h3>
 <p>Each JSON row records the lesson id, family, track, sequence, stage, level, status, learning mode, execution kind (runnable, reading or operations), runtime, dependencies, prerequisites, source/guide/solution paths, verification, expected artifacts, variants, measured teaching signals and gap codes. Orientation comes from the catalog: the classroom lesson header renders each outcome and its direct prerequisites (or &quot;Start here&quot;), so <code>weak-outcome</code> and <code>unknown-prerequisite</code> are the orientation gaps. <code>states_prerequisites</code> and <code>states_objectives</code> record whether the guide text repeats them and are informational only.</p>
-<p><code>templated_words</code> counts guide and solution prose in paragraphs of at least 20 words whose sampled 8-word phrases mostly also appear in 3 or more lessons. It measures generator boilerplate; the corpus total may not grow, so new explanations must be specific to their lesson.</p></article>
+<p><code>templated_words</code> counts guide and solution prose in paragraphs of at least 20 words whose sampled 8-word phrases mostly also appear in 3 or more lessons. It measures generator boilerplate; the corpus total may not grow, so new explanations must be specific to their lesson.</p>
+<p><a href="track-qualification.md.html">Track qualification</a> reads these rows for rubric criteria R1 to R8 and records each track&#x27;s result against the shared threshold.</p></article>
   </main>
 </body>
 </html>

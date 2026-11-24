@@ -30,8 +30,13 @@ support.
 
 Thresholds behind the measured gap codes are the matrix thresholds documented in
 `docs/coverage-matrix.md` (guide 1050 words, 2 examples, 3 terms, 6 exercises,
-solution 700 words). While the matrix has no `templated_words` metric, R8 cannot
-be `pass` and is recorded as `gap`.
+solution 700 words). R8 compares the track's current `templated_words` total
+with its `templated_baseline`, the per-track sum at commit
+`b1847ca7e6f36bc851f39daa8e98a96770d371dc` (the first commit carrying the
+metric, catalog total 835280). Each record cites that source in
+`templated_baseline_source`. The baseline is a ceiling, not a target: R8 stops a
+track from adding boilerplate but does not prove the remaining templated prose is
+gone.
 
 ## Statuses
 
@@ -59,9 +64,8 @@ a justified `accepted-gap` within the cap, and R11 may also be a justified
 `len(lessons) * 10 <= track_rows`. Accepted gaps always name exact lesson IDs.
 
 `tests/test_track_qualification.py::test_every_track_meets_threshold` checks this
-for each track. It is a strict expected failure until the Phase 5 closure plan
-records final results, so an unexpected pass is reported as a failure and the
-marker must then be removed.
+for each track as a plain test with no expected-failure marks. All 40 tracks meet
+the threshold; a track that falls below it fails the test.
 
 ## Human review
 
@@ -82,8 +86,14 @@ Each record has a `runtime` block:
   in this phase; content rendering checks cover them. Track notes name the extra
   checks that do exist (C++ expected outputs, JavaScript syntax checks, statistics
   fence parity).
-- `walkthrough_outputs_checked`: whether authored walkthrough expected outputs are
-  confirmed against reference runs; false until the closure plan confirms it.
+- `walkthrough_outputs_checked`: true exactly when the track uses at least one
+  ordinary CI group and a recorded CI run qualified every one of them. Tracks
+  with no ordinary group (core python, sql and bridge, dax, cuda, docker,
+  kubernetes and spark-deployment) record false and carry no evidence.
+- `evidence`: present exactly when `walkthrough_outputs_checked` is true. It
+  holds `ci_run` (the `app-build.yml` run database ID), `commit` (that run's full
+  head SHA) and `groups` (the ordinary CI groups the track uses, all of which
+  concluded `success` in their job and `Qualify complete references` step).
 
 | Route                 | Applies to                             | Label                            |
 | --------------------- | -------------------------------------- | -------------------------------- |
@@ -110,6 +120,75 @@ automatic tracer exists, and no record, label or document may claim one. An
 authored track records a `floor` equal to the number of stages that contain an
 ordinary-profile lesson (3 today). R9 `pass` on an authored track requires
 `courses/<track>/walkthroughs.json` to cover each of those stages.
+
+## Recording CI evidence
+
+`scripts/record_track_runtime_evidence.py --run RUN` reads one `app-build.yml`
+run and records `runtime.evidence`, `walkthrough_outputs_checked: true` and an
+R10 `pass` for every track whose ordinary CI groups all succeeded. The run's
+commit must be available locally, and the course content and reference checker
+in the working tree must equal that commit. `--dry-run` prints the plan and
+writes nothing.
+
+Every recorded track cites run 45399494825 at commit
+`0770e8fd4c58030c20d8267ed3820eb630d1442f`. The 2.0.0 release commit
+(`a4354ff8bf50bd2ea48d7eff2c130b75fb34dcc6`) later changed runtime files
+(Spark 4.3.0, torch 2.15.0, Debian 13 Python). Its `app-build.yml` run skipped
+the ordinary qualification jobs because the commit was marked for publication,
+so the recorder has no newer run to read. The same references, walkthrough
+expected outputs included, were qualified on amd64 and arm64 by the release
+publish run 45460757558 before any image was promoted. The recorder does not
+read publish runs, so that run is not cited in the ledger.
+
+## Current results
+
+All 40 tracks meet the threshold with no accepted gaps. R1 to R5, R8 and R10 are
+`pass` everywhere. R6 and R7 are `na` only for tracks made entirely of tutorial
+lessons, and R9 is `na` only for tracks with no ordinary-profile runnable lesson.
+R11 is `not-assessed` on every track because no named person has reviewed one.
+
+| Track                       | Threshold met | Accepted gaps | `na` criteria | CI groups in evidence                               |
+| --------------------------- | ------------- | ------------- | ------------- | --------------------------------------------------- |
+| `advanced-spark-modeling`   | yes           | none          | R6, R7        | scala-spark                                         |
+| `apache-data-platforms`     | yes           | none          | R6, R7        | data-platforms                                      |
+| `applied-science`           | yes           | none          | R6, R7        | python-core                                         |
+| `bayesian-computing`        | yes           | none          | R6, R7        | bayesian, python-core, stan                         |
+| `bridge`                    | yes           | none          | none          | none (no ordinary group)                            |
+| `c`                         | yes           | none          | none          | c-go                                                |
+| `cpp`                       | yes           | none          | none          | cpp                                                 |
+| `csharp`                    | yes           | none          | none          | csharp                                              |
+| `cuda`                      | yes           | none          | R9            | none (no ordinary group)                            |
+| `custom-likelihood-pytorch` | yes           | none          | R6, R7        | pytorch                                             |
+| `data-ml-engineering`       | yes           | none          | R6, R7        | data-engineering, python-core, pytorch, scala-spark |
+| `data-visualization`        | yes           | none          | none          | python-core                                         |
+| `dax`                       | yes           | none          | none          | none (no ordinary group)                            |
+| `dbt`                       | yes           | none          | none          | data-engineering                                    |
+| `deep-learning-pytorch`     | yes           | none          | none          | pytorch                                             |
+| `deep-learning-tensorflow`  | yes           | none          | none          | python-core, tensorflow                             |
+| `docker`                    | yes           | none          | R9            | none (no ordinary group)                            |
+| `go`                        | yes           | none          | none          | c-go                                                |
+| `java`                      | yes           | none          | none          | java                                                |
+| `javascript-typescript`     | yes           | none          | none          | javascript-typescript                               |
+| `jax`                       | yes           | none          | none          | jax                                                 |
+| `julia`                     | yes           | none          | none          | julia                                               |
+| `kubernetes`                | yes           | none          | R9            | none (no ordinary group)                            |
+| `llm-applied`               | yes           | none          | none          | python-core, pytorch                                |
+| `llm-evaluation`            | yes           | none          | none          | python-core, pytorch                                |
+| `llm-theory`                | yes           | none          | none          | python-core, pytorch                                |
+| `ml-engineering`            | yes           | none          | none          | data-engineering                                    |
+| `nlp`                       | yes           | none          | none          | python-core                                         |
+| `polars`                    | yes           | none          | none          | data-engineering                                    |
+| `python`                    | yes           | none          | none          | none (no ordinary group)                            |
+| `python-web`                | yes           | none          | R6, R7        | python-web                                          |
+| `r`                         | yes           | none          | none          | r                                                   |
+| `rust`                      | yes           | none          | none          | data-platforms                                      |
+| `scala-spark`               | yes           | none          | none          | scala-spark                                         |
+| `spark-deployment`          | yes           | none          | R6, R7, R9    | none (no ordinary group)                            |
+| `sql`                       | yes           | none          | none          | none (no ordinary group)                            |
+| `statistics-ml`             | yes           | none          | R6, R7        | bayesian, python-core                               |
+| `swift`                     | yes           | none          | none          | swift                                               |
+| `tmb-modeling`              | yes           | none          | R6, R7        | r                                                   |
+| `web-development`           | yes           | none          | none          | php                                                 |
 
 ## Running the checks
 

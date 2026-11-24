@@ -107,3 +107,7 @@ least 20 words whose sampled 8-word phrases mostly
 also appear in 3 or more lessons. It measures generator
 boilerplate; the corpus total may not grow, so new explanations must be
 specific to their lesson.
+
+[Track qualification](track-qualification.md) reads these rows for rubric
+criteria R1 to R8 and records each track's result against the shared
+threshold.

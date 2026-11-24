@@ -1,7 +1,15 @@
 ---
 phase: 09-code-desktop-acceptance-gates
 type: verification
-status: in_progress
+status: passed
+covered_files:
+  - .planning/phases/09-code-desktop-acceptance-gates/09-01-PLAN.md
+  - .planning/phases/09-code-desktop-acceptance-gates/09-01-SUMMARY.md
+  - .planning/phases/09-code-desktop-acceptance-gates/09-02-PLAN.md
+  - .planning/phases/09-code-desktop-acceptance-gates/09-02-SUMMARY.md
+  - courses/java/authoring/specs.py
+  - scripts/check_classroom_browser.py
+covered_digest: v4:sha256:1d6a1f54726b017d189e14ed90d2cf546ff5cdc4fc23f3749454d1f7744010ee
 ---
 
 # Phase 9 verification: repository and desktop acceptance gates
@@ -11,8 +19,45 @@ classroom URL, secrets or the text of any learner draft.
 
 ## 09-01 repository acceptance gate (QUAL-01)
 
-Status: pending. This gate must run on the exact release candidate commit, so
-it is recorded with the 2.0.0 release in Phase 10.
+Result: PASS on the release line. The gate ran locally with
+`work/p10/gates.sh` on the release candidate working trees, and hosted Course
+validation passed on the tagged release commit.
+
+| Run | Commit | Result |
+|-----|--------|--------|
+| `work/p10/gates.sh` | `bca223a5` plus the 2.0.0 working tree (released as `ca8ef9a3`) | 13 of 13 gates rc=0 |
+| `work/p10/gates.sh` | `7c322a8d` plus the follow-up working tree | 13 of 13 gates rc=0 |
+| Full pytest (`-n auto`) | `bca223a5` working tree | 6196 passed, 520 skipped; 2 failures fixed in the tree, then 250 launcher and audit tests passed |
+| Course validation 45460757714 | `a4354ff8` (tag `v2.0.0`) | success: core checks on Python 3.11 and 3.12, contributor bootstrap, PostgreSQL 17 end to end, source formatting and lint for main, R and Julia |
+| Full pytest (`-n auto`), Phase 10 closeout | `2c3c3f8e` plus the `GITHUB_REF` test pin | 5838 passed, 514 skipped, 1 failed (the known flaky Apache `ballista` resume timeout), which then passed serially |
+
+The 6196 passed and 520 skipped total above could not be reproduced at
+closeout: collecting at `bca223a5` today gives 6351 items, and the closeout
+tree collects 6352. The closeout run is the full-suite figure of record.
+
+Gates in `work/p10/gates.sh` (second run, `7c322a8d`):
+
+| Gate | Result |
+|------|--------|
+| `ruff check` | All checks passed |
+| `ruff format --check` | 615 files already formatted |
+| `mypy` | no issues in 62 source files |
+| `scripts/check_modules.py` | passed |
+| `scripts/check_walkthroughs.py --check` | 96 authored walkthroughs across 32 tracks |
+| `scripts/check_track_qualification.py --check` | threshold met by 40 of 40 tracks |
+| `scripts/build_coverage_matrix.py --check` | coverage matrix is current |
+| `scripts/normalize_lesson_prose.py` | unchanged |
+| `scripts/check_classroom_ui.mjs` | 115 checks passed |
+| `scripts/check_public_release.py` | 17504 files, 0 findings |
+| Dash scan | 0 em or en dashes in lines added since `c46e6ad4` |
+| `./scripts/lint-repo` | lint checks passed |
+| `./scripts/format-repo` | formatting checks passed (1061 s) |
+
+The two release follow-up commits (`36769d25`, `a4354ff8`) changed Docker
+locks, scientific project pins and tests. Their hosted Course validation run
+above is the gate of record for the tagged commit. A later test hermeticity
+fix (pinning `GITHUB_REF` in `tests/test_targeted_images.py`) is recorded in
+Phase 10.
 
 Pre-flight on `2f9521b2` (`work/p9/gates.sh`) found three failures, all fixed
 in the working tree before the release commit:

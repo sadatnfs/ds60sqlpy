@@ -54,7 +54,10 @@ replace the catalog loaders or learner progress.
 The [curriculum map](curriculum-map.md), [gap backlog](curriculum-gap-backlog.md)
 and [design references](curriculum-design-references.md) support teaching decisions.
 Generated [practice coverage](practice-coverage.md), [depth reports](lesson-depth-report.md)
-and the catalog-wide [coverage matrix](coverage-matrix.md) are maintained outputs. The [founding subject plans](expansion/README.md) remain active
+and the catalog-wide [coverage matrix](coverage-matrix.md) are maintained outputs.
+[Track qualification](track-qualification.md) scores every track against the
+shared rubric, and [walkthroughs](walkthroughs.md) describes the beginner routes it
+checks. The [founding subject plans](expansion/README.md) remain active
 metadata; the former prototype application has been removed.
 
 ## Python applications and APIs

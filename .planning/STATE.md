@@ -1,19 +1,19 @@
 ---
 gsd_state_version: "1.0"
-current_phase: 08
-current_phase_name: Release Image Security
-current_plan: 3
-status: in_progress
-stopped_at: Phase-8-plan-03
-last_updated: "2026-11-24T07:46:57.760Z"
-last_activity: 2026-11-23; Phase 4 verification written after the accuracy spot-check fixes; 08-04 local remediation in progress.
-state_head: 7f50b9da05a077f7c006c6ce456c8a8953d9228b
+current_phase: 10
+current_phase_name: Verified Publication & Safe Closeout
+current_plan: 2
+status: completed
+stopped_at: Phase-10-complete
+last_updated: "2026-11-24T21:30:06.000Z"
+last_activity: 2026-11-24; release 2.0.0 published and verified, local DS60 Docker cleanup done, Phase 10 closeout recorded.
+state_head: 2c3c3f8ecefde5a26325f6f49f22238c8b5b147a
 progress:
   total_phases: 11
-  completed_phases: 3
-  total_plans: 34
-  completed_plans: 29
-  percent: 27
+  completed_phases: 9
+  total_plans: 35
+  completed_plans: 35
+  percent: 100
 ---
 
 # Project State
@@ -23,17 +23,17 @@ progress:
 See: .planning/PROJECT.md (updated 2026-11-23)
 
 **Core value:** Learners can understand, practice, run, and keep their work in any DS60 course without installing toolchains or losing learning state.
-**Current focus:** Phase 8; Release Image Security, then Phase 3 to 5 gates and Phases 9 and 10
+**Current focus:** Milestone closed with release 2.0.0; only the human UAT for Phases 1 and 6 remains open
 
 ## Current Position
 
-Phase: 08 (Release Image Security): IN PROGRESS
-Current Plan: 3
-Total Plans in Phase: 4
-Status: Phases 2, 3 and 4 verified (passed); Phases 1 and 6 verified human_needed (first-time learner walkthrough). Phase 5 plans 01 to 04 complete; 05-05 pending. Phase 7 plans 01 and 02 complete; 07-03 CI dispatch and 07-04 ledger pending. Phase 8 plans 01 and 02 complete; 08-03 and 08-04 in progress.
-Last activity: 2026-11-23; Phase 4 verification written after the accuracy spot-check fixes; 08-04 local remediation in progress.
+Phase: 10 (Verified Publication & Safe Closeout): COMPLETE
+Current Plan: 2
+Total Plans in Phase: 2
+Status: All 35 plans have summaries. Phases 2, 3, 4, 5, 7, 8, 08.1, 9 and 10 verified (passed). Phases 1 and 6 verified human_needed (first-time learner walkthrough). Release v2.0.0 is a published, non-draft GitHub release tagged at a4354ff8; every local DS60 image, container and network was removed, and learner volumes were kept.
+Last activity: 2026-11-24; Phase 10 closeout recorded (GITHUB_REF pinned in the app build intent test, track qualification docs finished, all VERIFICATION reports fingerprinted).
 
-Progress: [███░░░░░░░] 27%
+Progress: [██████████] 100% of plans (9 of 11 phases closed; 2 await human UAT)
 
 ## Performance Metrics
 
@@ -75,7 +75,8 @@ Progress: [███░░░░░░░] 27%
 
 ### Pending Todos
 
-None yet.
+- Human UAT: a first-time learner walkthrough for Phases 1 and 6.
+- Owner review of the 276 pending-owner CVE exceptions before their earliest expiry (2026-12-23).
 
 ### Blockers/Concerns
 
@@ -91,10 +92,16 @@ None yet.
 
 | Category | Item | Status | Deferred At | Milestone |
 |----------|------|--------|-------------|-----------|
-| *(none)* | | | | |
+| UAT | Phases 1 and 6 first-time learner walkthrough | human_needed | 2026-11-24 | v2.0.0 |
+| Security | 276 pending-owner CVE exceptions (earliest expiry 2026-12-23) | owner review | 2026-11-24 | v2.0.0 |
+| Images | Scientific profile images are not published to Docker Hub | deferred | 2026-11-24 | v2.0.0 |
+| Runtime | R worker ships without compilers; spark-tmb on OpenSSL 3.5; standalone packages on Spark 4.0.1 | deferred | 2026-11-24 | v2.0.0 |
+| Content | Templated stub lessons and guide code that is not executed in CI | deferred | 2026-11-24 | v2.0.0 |
+| Quality | 6 flaky tests (including ballista); 879 repo-wide em/en dash hits outside the changed files | deferred | 2026-11-24 | v2.0.0 |
+| Caches | About 60.63 GB of BuildKit cache and 10 GB in ~/.cache/ds60sqlpy kept locally | owner decision | 2026-11-24 | v2.0.0 |
 
 ## Session Continuity
 
-Last session: 2026-11-24T02:34:35.947Z
-Stopped at: Phase-1-complete
+Last session: 2026-11-24T21:30:06.000Z
+Stopped at: Phase-10-complete
 Resume file: None

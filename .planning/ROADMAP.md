@@ -10,13 +10,13 @@ Qualify the unfinished release 1.4.4 classroom-guide and Python/SQL walkthrough 
 - [x] **Phase 2: Catalog-wide Coverage Matrix** - Establish source-backed coverage and acceptance evidence for every existing course and lesson.
 - [x] **Phase 3: Lesson Foundations & Source Integrity** - Bring authored lessons across all tracks to clear outcomes, prerequisites, and consistent source identity.
 - [x] **Phase 4: Worked Examples & Practice** - Improve course-specific examples, scaffolded practice, and explanatory solutions across the catalog.
-- [ ] **Phase 5: Walkthroughs & Track Qualification** - Verify course-appropriate walkthroughs, runnable examples, and each track's quality threshold.
+- [x] **Phase 5: Walkthroughs & Track Qualification** - Verify course-appropriate walkthroughs, runnable examples, and each track's quality threshold.
 - [ ] **Phase 6: Desktop Workspace & Learner State** - Make classroom capabilities clear and preserve learner work through normal operation.
-- [ ] **Phase 7: Docker Runtime & Persistence Qualification** - Verify release image profiles and disposable lifecycle behavior without losing saved work.
-- [ ] **Phase 8: Release Image Security** - Require clean applicable vulnerability scans for every image intended for publication.
-- [ ] **Phase 08.1: Unslop Classroom UI Chrome (INSERTED)** - Remove visual slop from the classroom chrome without touching lesson content.
-- [ ] **Phase 9: Code & Desktop Acceptance Gates** - Pass repository quality checks and bounded desktop browser acceptance for the overhaul.
-- [ ] **Phase 10: Verified Publication & Safe Closeout** - Publish only qualified artifacts, smoke-test the pull, and separately verify safe cleanup.
+- [x] **Phase 7: Docker Runtime & Persistence Qualification** - Verify release image profiles and disposable lifecycle behavior without losing saved work.
+- [x] **Phase 8: Release Image Security** - Require clean applicable vulnerability scans for every image intended for publication.
+- [x] **Phase 08.1: Unslop Classroom UI Chrome (INSERTED)** - Remove visual slop from the classroom chrome without touching lesson content.
+- [x] **Phase 9: Code & Desktop Acceptance Gates** - Pass repository quality checks and bounded desktop browser acceptance for the overhaul.
+- [x] **Phase 10: Verified Publication & Safe Closeout** - Publish only qualified artifacts, smoke-test the pull, and separately verify safe cleanup.
 
 ## Phase Details
 
@@ -120,7 +120,7 @@ Plans:
 - [x] 05-04-PLAN.md: Walkthroughs for the subject tracks
 
 **Wave 3**
-- [ ] 05-05-PLAN.md: Recompute the rubric and close Phase 5
+- [x] 05-05-PLAN.md: Recompute the rubric and close Phase 5
 
 ### Phase 6: Desktop Workspace & Learner State
 **Goal:** Learners can operate the desktop classroom confidently across its real lesson modes and continue their work without accidental execution or loss of saved evidence.
@@ -159,10 +159,10 @@ Plans:
 - [x] 07-02-PLAN.md: Disposable lifecycle harness
 
 **Wave 2**
-- [ ] 07-03-PLAN.md: Two-architecture runtime qualification workflow
+- [x] 07-03-PLAN.md: Two-architecture runtime qualification workflow
 
 **Wave 3**
-- [ ] 07-04-PLAN.md: Phase 7 evidence ledger
+- [x] 07-04-PLAN.md: Phase 7 evidence ledger
 
 ### Phase 8: Release Image Security
 **Goal:** No image advances toward publication with an unresolved CVE reported by the applicable configured scan.
@@ -179,10 +179,10 @@ Plans:
 
 **Wave 2**
 - [x] 08-02-PLAN.md: Scan gate in the publish workflows
-- [ ] 08-03-PLAN.md: Remediate the Python image family and postgres
+- [x] 08-03-PLAN.md: Remediate the Python image family and postgres
 
 **Wave 3**
-- [ ] 08-04-PLAN.md: Remediate the native and SDK workers
+- [x] 08-04-PLAN.md: Remediate the native and SDK workers
 
 ### Phase 08.1: Unslop Classroom UI Chrome (INSERTED)
 
@@ -198,7 +198,7 @@ Plans:
 **Plans:** 1 plan
 
 Plans:
-- [ ] 08.1-01-PLAN.md: Unslop audit, direction and nine-pass chrome refinement
+- [x] 08.1-01-PLAN.md: Unslop audit, direction and nine-pass chrome refinement
 
 ### Phase 9: Code & Desktop Acceptance Gates
 **Goal:** The overhaul has recorded repository and desktop-browser evidence for the relevant changed flows before any publication decision.
@@ -211,8 +211,8 @@ Plans:
 **Plans**: 2 plans
 
 Plans:
-- [ ] 09-01-PLAN.md: Repository acceptance gate
-- [ ] 09-02-PLAN.md: Desktop browser acceptance
+- [x] 09-01-PLAN.md: Repository acceptance gate
+- [x] 09-02-PLAN.md: Desktop browser acceptance
 **UI hint**: yes
 
 ### Phase 10: Verified Publication & Safe Closeout
@@ -227,8 +227,8 @@ Plans:
 **Plans**: 2 plans
 
 Plans:
-- [ ] 10-01-PLAN.md: Publish and verify release 2.0.0
-- [ ] 10-02-PLAN.md: Safe closeout and local DS60 Docker cleanup
+- [x] 10-01-PLAN.md: Publish and verify release 2.0.0
+- [x] 10-02-PLAN.md: Safe closeout and local DS60 Docker cleanup
 
 ## Progress
 
@@ -238,10 +238,10 @@ Plans:
 | 2. Catalog-wide Coverage Matrix | 1/1 | Complete | 2026-11-23 |
 | 3. Lesson Foundations & Source Integrity | 4/4 | Complete | 2026-11-23 |
 | 4. Worked Examples & Practice | 3/3 | Complete | 2026-11-23 |
-| 5. Walkthroughs & Track Qualification | 4/5 | In Progress | - |
+| 5. Walkthroughs & Track Qualification | 5/5 | Complete | 2026-11-24 |
 | 6. Desktop Workspace & Learner State | 4/4 | Verified, human UAT pending | - |
-| 7. Docker Runtime & Persistence Qualification | 2/4 | In Progress | - |
-| 8. Release Image Security | 2/4 | In Progress | - |
-| 08.1. Unslop Classroom UI Chrome (INSERTED) | 0/1 | Planned | - |
-| 9. Code & Desktop Acceptance Gates | 0/2 | Planned | - |
-| 10. Verified Publication & Safe Closeout | 0/2 | Planned | - |
+| 7. Docker Runtime & Persistence Qualification | 4/4 | Complete | 2026-11-24 |
+| 8. Release Image Security | 4/4 | Complete | 2026-11-24 |
+| 08.1. Unslop Classroom UI Chrome (INSERTED) | 1/1 | Complete | 2026-11-24 |
+| 9. Code & Desktop Acceptance Gates | 2/2 | Complete | 2026-11-24 |
+| 10. Verified Publication & Safe Closeout | 2/2 | Complete | 2026-11-24 |
