@@ -1,0 +1,242 @@
+{
+  "conclusion": "failure",
+  "headSha": "0123456789abcdef0123456789abcdef01234567",
+  "workflowName": "Application builds",
+  "jobs": [
+    {
+      "conclusion": "success",
+      "databaseId": 1,
+      "name": "Select ordinary Docker qualification",
+      "status": "completed",
+      "steps": []
+    },
+    {
+      "conclusion": "success",
+      "databaseId": 100023,
+      "name": "Docker classroom (c-go)",
+      "status": "completed",
+      "steps": [
+        {
+          "conclusion": "success",
+          "name": "Set up job",
+          "number": 1,
+          "status": "completed"
+        },
+        {
+          "conclusion": "success",
+          "name": "Build and start through the learner entrypoint with verified mirrors",
+          "number": 2,
+          "status": "completed"
+        },
+        {
+          "conclusion": "success",
+          "name": "Qualify complete references, failures, browser behavior and retained state",
+          "number": 3,
+          "status": "completed"
+        }
+      ]
+    },
+    {
+      "conclusion": "success",
+      "databaseId": 100030,
+      "name": "Docker classroom (python-core)",
+      "status": "completed",
+      "steps": [
+        {
+          "conclusion": "success",
+          "name": "Set up job",
+          "number": 1,
+          "status": "completed"
+        },
+        {
+          "conclusion": "success",
+          "name": "Build and start through the learner entrypoint with verified mirrors",
+          "number": 2,
+          "status": "completed"
+        },
+        {
+          "conclusion": "success",
+          "name": "Qualify complete references, failures, browser behavior and retained state",
+          "number": 3,
+          "status": "completed"
+        }
+      ]
+    },
+    {
+      "conclusion": "success",
+      "databaseId": 100026,
+      "name": "Docker classroom (pytorch)",
+      "status": "completed",
+      "steps": [
+        {
+          "conclusion": "success",
+          "name": "Set up job",
+          "number": 1,
+          "status": "completed"
+        },
+        {
+          "conclusion": "success",
+          "name": "Build and start through the learner entrypoint with verified mirrors",
+          "number": 2,
+          "status": "completed"
+        },
+        {
+          "conclusion": "success",
+          "name": "Qualify complete references, failures, browser behavior and retained state",
+          "number": 3,
+          "status": "completed"
+        }
+      ]
+    },
+    {
+      "conclusion": "failure",
+      "databaseId": 100023,
+      "name": "Docker classroom (java)",
+      "status": "completed",
+      "steps": [
+        {
+          "conclusion": "success",
+          "name": "Set up job",
+          "number": 1,
+          "status": "completed"
+        },
+        {
+          "conclusion": "success",
+          "name": "Build and start through the learner entrypoint with verified mirrors",
+          "number": 2,
+          "status": "completed"
+        },
+        {
+          "conclusion": "failure",
+          "name": "Qualify complete references, failures, browser behavior and retained state",
+          "number": 3,
+          "status": "completed"
+        }
+      ]
+    },
+    {
+      "conclusion": "skipped",
+      "databaseId": 100024,
+      "name": "Docker classroom (swift)",
+      "status": "completed",
+      "steps": [
+        {
+          "conclusion": "success",
+          "name": "Set up job",
+          "number": 1,
+          "status": "completed"
+        },
+        {
+          "conclusion": "success",
+          "name": "Build and start through the learner entrypoint with verified mirrors",
+          "number": 2,
+          "status": "completed"
+        },
+        {
+          "conclusion": "skipped",
+          "name": "Qualify complete references, failures, browser behavior and retained state",
+          "number": 3,
+          "status": "completed"
+        }
+      ]
+    },
+    {
+      "conclusion": "success",
+      "databaseId": 100022,
+      "name": "Docker classroom (cpp)",
+      "status": "completed",
+      "steps": [
+        {
+          "conclusion": "success",
+          "name": "Set up job",
+          "number": 1,
+          "status": "completed"
+        },
+        {
+          "conclusion": "success",
+          "name": "Build and start through the learner entrypoint with verified mirrors",
+          "number": 2,
+          "status": "completed"
+        }
+      ]
+    },
+    {
+      "conclusion": "success",
+      "databaseId": 100020,
+      "name": "Docker classroom (r)",
+      "status": "completed",
+      "steps": [
+        {
+          "conclusion": "success",
+          "name": "Set up job",
+          "number": 1,
+          "status": "completed"
+        },
+        {
+          "conclusion": "success",
+          "name": "Build and start through the learner entrypoint with verified mirrors",
+          "number": 2,
+          "status": "completed"
+        },
+        {
+          "conclusion": "success",
+          "name": "Qualify complete references, failures, browser behavior and retained state",
+          "number": 3,
+          "status": "completed"
+        }
+      ]
+    },
+    {
+      "conclusion": "failure",
+      "databaseId": 100020,
+      "name": "Docker classroom (r)",
+      "status": "completed",
+      "steps": [
+        {
+          "conclusion": "success",
+          "name": "Set up job",
+          "number": 1,
+          "status": "completed"
+        },
+        {
+          "conclusion": "success",
+          "name": "Build and start through the learner entrypoint with verified mirrors",
+          "number": 2,
+          "status": "completed"
+        },
+        {
+          "conclusion": "failure",
+          "name": "Qualify complete references, failures, browser behavior and retained state",
+          "number": 3,
+          "status": "completed"
+        }
+      ]
+    },
+    {
+      "conclusion": "success",
+      "databaseId": 100030,
+      "name": "Docker classroom (not-a-group)",
+      "status": "completed",
+      "steps": [
+        {
+          "conclusion": "success",
+          "name": "Set up job",
+          "number": 1,
+          "status": "completed"
+        },
+        {
+          "conclusion": "success",
+          "name": "Build and start through the learner entrypoint with verified mirrors",
+          "number": 2,
+          "status": "completed"
+        },
+        {
+          "conclusion": "success",
+          "name": "Qualify complete references, failures, browser behavior and retained state",
+          "number": 3,
+          "status": "completed"
+        }
+      ]
+    }
+  ]
+}

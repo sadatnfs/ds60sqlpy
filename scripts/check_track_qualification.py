@@ -16,6 +16,7 @@ import json
 import re
 import sys
 from datetime import date
+from functools import lru_cache
 from pathlib import Path
 from typing import Any
 
@@ -23,6 +24,8 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
 sys.path.insert(0, str(ROOT))
 
+from ds60sqlpy.modules import ModuleCatalog  # noqa: E402
+from ds60sqlpy.walkthroughs import load_walkthroughs  # noqa: E402
 from scripts.check_module_references import (  # noqa: E402
     BROWSER_PROFILES,
     EXTERNAL_REASONS,
@@ -47,7 +50,15 @@ STATUSES = frozenset({"pass", "na", "accepted-gap", "gap", "not-assessed"})
 MUST_PASS = frozenset({"R1", "R2", "R10"})
 MIN_JUSTIFICATION = 40
 CRITERION_KEYS = frozenset(
-    {"status", "justification", "lessons", "reviewer", "date", "templated_baseline"}
+    {
+        "status",
+        "justification",
+        "lessons",
+        "reviewer",
+        "date",
+        "templated_baseline",
+        "templated_baseline_source",
+    }
 )
 RECORD_KEYS = frozenset(
     {"track", "family", "rows", "runtime", "walkthrough", "criteria", "reviewed"}
@@ -55,6 +66,10 @@ RECORD_KEYS = frozenset(
 RUNTIME_KEYS = frozenset(
     {"profiles", "unavailable", "guide_examples", "walkthrough_outputs_checked"}
 )
+# `evidence` is present exactly when `walkthrough_outputs_checked` is true.
+EVIDENCE_KEYS = frozenset({"ci_run", "commit", "groups"})
+CI_RUN = re.compile(r"[0-9]{1,20}")
+COMMIT = re.compile(r"[0-9a-f]{40}")
 RESULT_LABELS = (
     "structure validated",
     "representative behavior executed",
@@ -167,25 +182,86 @@ def guide_prefix(matrix: dict[str, Any], track: str) -> str:
     return GUIDE_PREFIX["reference" if ordinary_stages(matrix, track) else "none"]
 
 
-def walkthrough_stages(root: Path, matrix: dict[str, Any], track: str) -> set[str]:
-    """Stages covered by `courses/<track>/walkthroughs.json`, read as plain JSON.
+@lru_cache(maxsize=4)
+def _catalog(root: str) -> ModuleCatalog:
+    return ModuleCatalog(Path(root))
 
-    Entry validation belongs to `ds60sqlpy.walkthroughs` (05-02); this count only
-    maps listed lesson IDs to their matrix stages. 05-05 switches to validated entries.
+
+def validated_walkthroughs(root: Path, track: str) -> tuple[set[str], str | None]:
+    """Lesson IDs with a walkthrough that passes `ds60sqlpy.walkthroughs`, plus any error.
+
+    An invalid walkthrough file counts as zero coverage, so R9 cannot pass on it.
     """
     if TRACK_NAME.fullmatch(track) is None:
-        return set()
-    path = root / "courses" / track / "walkthroughs.json"
-    if not path.is_file():
-        return set()
-    payload = json.loads(path.read_text(encoding="utf-8"))
-    entries = payload.get("walkthroughs", []) if isinstance(payload, dict) else []
+        return set(), f"{track}: not a valid track name."
+    if not (root / "courses" / track / "walkthroughs.json").is_file():
+        return set(), None
+    try:
+        return set(load_walkthroughs(root, _catalog(str(root.resolve())), track)), None
+    except (OSError, ValueError) as error:
+        return set(), str(error)
+
+
+def walkthrough_stages(root: Path, matrix: dict[str, Any], track: str) -> set[str]:
+    """Stages covered by validated walkthroughs in `courses/<track>/walkthroughs.json`."""
+    lesson_ids, _error = validated_walkthroughs(root, track)
     stages = {row["id"]: row["stage"] for row in track_rows(matrix, track)}
-    return {
-        stages[entry["lesson_id"]]
-        for entry in entries
-        if isinstance(entry, dict) and entry.get("lesson_id") in stages
-    }
+    return {stages[lesson_id] for lesson_id in lesson_ids if lesson_id in stages}
+
+
+def required_ci_groups(record: dict[str, Any]) -> list[str]:
+    """CI groups whose qualify jobs must pass before walkthrough outputs count as checked."""
+    profiles = record.get("runtime", {}).get("profiles", {})
+    if not isinstance(profiles, dict):
+        return []
+    return sorted(
+        {
+            entry["ci_group"]
+            for entry in profiles.values()
+            if isinstance(entry, dict) and isinstance(entry.get("ci_group"), str)
+        }
+    )
+
+
+def evidence_errors(record: dict[str, Any], root: Path = ROOT) -> list[str]:
+    """`walkthrough_outputs_checked` true needs a cited CI run covering every ordinary group."""
+    track = record.get("track")
+    runtime = record["runtime"]
+    checked = runtime.get("walkthrough_outputs_checked")
+    evidence = runtime.get("evidence")
+    if checked is not True:
+        if "evidence" in runtime:
+            return [f"{track} runtime: evidence is recorded only with walkthrough_outputs_checked."]
+        return []
+    required = required_ci_groups(record)
+    if not required:
+        return [f"{track} runtime: no ordinary CI group exists, so outputs cannot be CI checked."]
+    if not isinstance(evidence, dict) or set(evidence) != EVIDENCE_KEYS:
+        return [
+            f"{track} runtime: walkthrough_outputs_checked needs evidence {sorted(EVIDENCE_KEYS)}."
+        ]
+    errors: list[str] = []
+    run, commit, listed = evidence["ci_run"], evidence["commit"], evidence["groups"]
+    if not isinstance(run, str) or CI_RUN.fullmatch(run) is None:
+        errors.append(f"{track} runtime: evidence ci_run must be a string of digits.")
+    if not isinstance(commit, str) or COMMIT.fullmatch(commit) is None:
+        errors.append(f"{track} runtime: evidence commit must be 40 lowercase hex characters.")
+    if (
+        not isinstance(listed, list)
+        or not all(isinstance(group, str) for group in listed)
+        or listed != sorted(set(listed))
+    ):
+        errors.append(f"{track} runtime: evidence groups must be a sorted list of unique names.")
+        return errors
+    known = {row["id"] for row in groups(root)}
+    if set(listed) - known:
+        errors.append(
+            f"{track} runtime: evidence names unknown groups {sorted(set(listed) - known)}."
+        )
+    missing = sorted(set(required) - set(listed))
+    if missing:
+        errors.append(f"{track} runtime: evidence lacks the ordinary CI groups {missing}.")
+    return errors
 
 
 def templated_total(matrix: dict[str, Any], track: str) -> int | None:
@@ -209,8 +285,8 @@ def runtime_errors(matrix: dict[str, Any], record: dict[str, Any], root: Path = 
     track = record.get("track")
     rows = track_rows(matrix, str(track))
     runtime = record.get("runtime")
-    if not rows or not isinstance(runtime, dict) or set(runtime) != RUNTIME_KEYS:
-        return [f"{track} runtime: needs exactly {sorted(RUNTIME_KEYS)}."]
+    if not rows or not isinstance(runtime, dict) or set(runtime) - {"evidence"} != RUNTIME_KEYS:
+        return [f"{track} runtime: needs exactly {sorted(RUNTIME_KEYS)} and optional evidence."]
     errors: list[str] = []
     family = rows[0]["family"]
     profiles = runtime["profiles"]
@@ -245,6 +321,8 @@ def runtime_errors(matrix: dict[str, Any], record: dict[str, Any], root: Path = 
         errors.append(f"{track} runtime: guide_examples must start with the registered statement.")
     if not isinstance(runtime["walkthrough_outputs_checked"], bool):
         errors.append(f"{track} runtime: walkthrough_outputs_checked must be true or false.")
+    else:
+        errors += evidence_errors(record, root)
     return errors
 
 
@@ -265,6 +343,9 @@ def _walkthrough_errors(matrix: dict[str, Any], record: dict[str, Any], root: Pa
     if route == "authored":
         if status not in {"pass", "gap"}:
             return [f"{track} R9: an authored track records pass or gap."]
+        _ids, invalid = validated_walkthroughs(root, track)
+        if status == "pass" and invalid:
+            return [f"{track} R9: pass needs a valid walkthrough file: {invalid}"]
         missing = ordinary_stages(matrix, track) - walkthrough_stages(root, matrix, track)
         if status == "pass" and missing:
             return [f"{track} R9: pass needs walkthroughs for stages {sorted(missing)}."]
@@ -318,15 +399,22 @@ def _criterion_errors(
             errors.append(f"{where}: accepted-gap applies only to measured criteria R1 to R7.")
         if status == "na" and criterion != "R9":
             errors.append(f"{where}: na is allowed only on R4, R6, R7 and R9.")
+    if criterion != "R8" and {"templated_baseline", "templated_baseline_source"} & set(entry):
+        errors.append(f"{where}: only R8 records a templated baseline.")
     if criterion == "R8" and status == "pass":
         total = templated_total(matrix, track)
         baseline = entry.get("templated_baseline")
+        source = entry.get("templated_baseline_source")
         if total is None:
             errors.append(
                 f"{where}: pass needs the templated_words metric, which the matrix lacks."
             )
-        elif not isinstance(baseline, int) or total > baseline:
+        elif isinstance(baseline, bool) or not isinstance(baseline, int) or baseline < 0:
+            errors.append(f"{where}: pass needs an integer templated_baseline.")
+        elif total > baseline:
             errors.append(f"{where}: templated_words {total} exceeds the recorded baseline.")
+        if not isinstance(source, str) or COMMIT.search(source) is None:
+            errors.append(f"{where}: pass needs a templated_baseline_source citing a commit.")
     if criterion == "R11" and status == "pass":
         reviewer, when = entry.get("reviewer"), entry.get("date")
         if not isinstance(reviewer, str) or not reviewer.strip() or not _is_date(when):
@@ -368,6 +456,16 @@ def evaluate_track(matrix: dict[str, Any], record: dict[str, Any], root: Path = 
     errors += ledger
     if ledger and criteria["R10"].get("status") == "pass":
         errors.append(f"{track} R10: pass requires a complete and consistent runtime ledger.")
+    elif (
+        not ledger
+        and criteria["R10"].get("status") == "pass"
+        and required_ci_groups(record)
+        and record["runtime"]["walkthrough_outputs_checked"] is not True
+    ):
+        errors.append(
+            f"{track} R10: pass requires recorded CI evidence for groups "
+            f"{required_ci_groups(record)}."
+        )
     errors += _walkthrough_errors(matrix, record, root)
     return errors
 
@@ -394,6 +492,17 @@ def meets_threshold(matrix: dict[str, Any], record: dict[str, Any]) -> list[str]
     return reasons
 
 
+def evidence_pending(matrix: dict[str, Any], record: dict[str, Any]) -> bool:
+    """True when the only reason below threshold is R10 awaiting recorded CI evidence."""
+    track = str(record["track"])
+    return (
+        bool(required_ci_groups(record))
+        and record["runtime"]["walkthrough_outputs_checked"] is False
+        and record["criteria"]["R10"]["status"] == "gap"
+        and meets_threshold(matrix, record) == [f"{track} R10: must be pass, found gap."]
+    )
+
+
 def report(matrix: dict[str, Any], record: dict[str, Any], root: Path = ROOT) -> str:
     track = str(record["track"])
     lines = [
@@ -413,7 +522,7 @@ def report(matrix: dict[str, Any], record: dict[str, Any], root: Path = ROOT) ->
             )
         elif criterion == "R9":
             covered = sorted(walkthrough_stages(root, matrix, track))
-            detail = f"route {record['walkthrough']['route']}, stages covered {covered}"
+            detail = f"route {record['walkthrough']['route']}, validated stages covered {covered}"
         else:
             detail = ""
         lines.append(f"  {criterion:<4} {status:<13} {detail}".rstrip())
@@ -424,6 +533,14 @@ def report(matrix: dict[str, Any], record: dict[str, Any], root: Path = ROOT) ->
     for item in record["runtime"]["unavailable"]:
         lines.append(f"    unavailable {item['profile']}: {item['reason']}")
     lines.append(f"    guide examples: {record['runtime']['guide_examples']}")
+    evidence = record["runtime"].get("evidence")
+    if evidence:
+        lines.append(
+            f"    CI evidence: run {evidence['ci_run']}, commit {evidence['commit']}, "
+            f"groups {evidence['groups']}"
+        )
+    elif required_ci_groups(record):
+        lines.append(f"    CI evidence: pending for groups {required_ci_groups(record)}")
     errors = evaluate_track(matrix, record, root)
     below = meets_threshold(matrix, record)
     lines.append(f"  consistency: {'ok' if not errors else f'{len(errors)} errors'}")
@@ -462,7 +579,17 @@ def main(argv: list[str] | None = None) -> int:
         for error in errors:
             print(f"FAIL {error}", file=sys.stderr)
         if not errors:
-            print(f"OK {len(load_ledger(args.root)['tracks'])} track records are consistent.")
+            matrix = load_matrix(args.root)
+            records = load_ledger(args.root)["tracks"]
+            met = [r["track"] for r in records if not meets_threshold(matrix, r)]
+            pending = [r["track"] for r in records if evidence_pending(matrix, r)]
+            print(f"OK {len(records)} track records are consistent.")
+            print(f"Threshold met by {len(met)} of {len(records)} tracks.")
+            if pending:
+                print(
+                    f"Awaiting CI runtime evidence (R10) for {len(pending)} tracks: "
+                    + ", ".join(pending)
+                )
         return 1 if errors else 0
     matrix = load_matrix(args.root)
     found = [r for r in load_ledger(args.root)["tracks"] if r.get("track") == args.track]

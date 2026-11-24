@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import copy
-import json
 from pathlib import Path
 from typing import Any
 
@@ -118,27 +117,119 @@ def test_walkthrough_routes_and_counts() -> None:
         assert "count" not in RECORDS[track]["walkthrough"]
 
 
-def test_r9_pass_requires_every_ordinary_stage(tmp_path: Path) -> None:
-    (tmp_path / "courses/go").mkdir(parents=True)
-    (tmp_path / "docker").mkdir()
-    for name in ("ci-profile-groups.json", "classroom-images.tsv"):
-        (tmp_path / "docker" / name).write_bytes((ROOT / "docker" / name).read_bytes())
+def test_r9_counts_only_validated_walkthroughs(monkeypatch: pytest.MonkeyPatch) -> None:
     beginner = next(
         row["id"]
         for row in MATRIX["lessons"]
         if row["track"] == "go" and row["stage"] == "beginner"
     )
-    (tmp_path / "courses/go/walkthroughs.json").write_text(
-        json.dumps({"walkthroughs": [{"lesson_id": beginner}]}), encoding="utf-8"
-    )
+    assert qualification.walkthrough_stages(ROOT, MATRIX, "go") == {
+        "beginner",
+        "intermediate",
+        "advanced",
+    }
     record = go_record()
-    record["criteria"]["R9"] = {"status": "pass"}
-    errors = qualification.evaluate_track(MATRIX, record, tmp_path)
+    assert record["criteria"]["R9"] == {"status": "pass"}
+
+    def only_beginner(root: Path, catalog: object, track: str) -> dict[str, dict[str, Any]]:
+        return {beginner: {"lesson_id": beginner}}
+
+    monkeypatch.setattr(qualification, "load_walkthroughs", only_beginner)
+    assert qualification.walkthrough_stages(ROOT, MATRIX, "go") == {"beginner"}
+    errors = qualification.evaluate_track(MATRIX, record, ROOT)
     assert any(e.startswith("go R9: pass needs walkthroughs") for e in errors)
-    record["criteria"]["R9"] = copy.deepcopy(RECORDS["go"]["criteria"]["R9"])
-    assert record["criteria"]["R9"]["status"] == "gap"
-    assert qualification.evaluate_track(MATRIX, record, tmp_path) == []
-    assert qualification.walkthrough_stages(tmp_path, MATRIX, "go") == {"beginner"}
+    record["criteria"]["R9"] = {"status": "gap", "justification": "x" * 40}
+    assert qualification.evaluate_track(MATRIX, record, ROOT) == []
+
+    def invalid(root: Path, catalog: object, track: str) -> dict[str, dict[str, Any]]:
+        raise ValueError("go-001: excerpt does not match the source lines.")
+
+    monkeypatch.setattr(qualification, "load_walkthroughs", invalid)
+    assert qualification.walkthrough_stages(ROOT, MATRIX, "go") == set()
+    record["criteria"]["R9"] = {"status": "pass"}
+    errors = qualification.evaluate_track(MATRIX, record, ROOT)
+    assert any("pass needs a valid walkthrough file" in e for e in errors)
+
+
+def test_r8_baseline_rule() -> None:
+    record = go_record()
+    entry = record["criteria"]["R8"]
+    assert entry["status"] == "pass"
+    total = qualification.templated_total(MATRIX, "go")
+    assert total is not None and total <= entry["templated_baseline"]
+    assert qualification.COMMIT.search(entry["templated_baseline_source"])
+    for track, other in RECORDS.items():
+        r8 = other["criteria"]["R8"]
+        assert r8["status"] == "pass", track
+        assert qualification.templated_total(MATRIX, track) == r8["templated_baseline"], track
+    del record["criteria"]["R8"]["templated_baseline_source"]
+    assert any("templated_baseline_source" in e for e in _errors(record))
+    record = go_record()
+    record["criteria"]["R8"]["templated_baseline"] = True
+    assert any("integer templated_baseline" in e for e in _errors(record))
+    record = go_record()
+    record["criteria"]["R3"]["templated_baseline"] = 1
+    assert any("only R8 records" in e for e in _errors(record))
+
+
+def _with_evidence(record: dict[str, Any], **changes: Any) -> dict[str, Any]:
+    runtime = record["runtime"]
+    runtime["walkthrough_outputs_checked"] = True
+    runtime["evidence"] = {"ci_run": "45313712049", "commit": "a" * 40, "groups": ["c-go"]}
+    runtime["evidence"].update(changes)
+    record["criteria"]["R10"] = {"status": "pass"}
+    return record
+
+
+def test_walkthrough_outputs_checked_requires_ci_evidence() -> None:
+    assert _errors(_with_evidence(go_record())) == []
+    assert qualification.meets_threshold(MATRIX, _with_evidence(go_record())) == []
+    for changes, message in (
+        ({"ci_run": "run-1"}, "ci_run must be a string of digits"),
+        ({"ci_run": 45313712049}, "ci_run must be a string of digits"),
+        ({"commit": "A" * 40}, "commit must be 40 lowercase hex"),
+        ({"commit": "a" * 39}, "commit must be 40 lowercase hex"),
+        ({"groups": []}, "lacks the ordinary CI groups ['c-go']"),
+        ({"groups": ["java"]}, "lacks the ordinary CI groups ['c-go']"),
+        ({"groups": ["c-go", "not-a-group"]}, "unknown groups"),
+        ({"groups": ["c-go", "c-go"]}, "sorted list of unique names"),
+    ):
+        errors = _errors(_with_evidence(go_record(), **changes))
+        assert any(message in e for e in errors), (changes, errors)
+        assert any("R10: pass requires" in e for e in errors), changes
+    record = _with_evidence(go_record())
+    del record["runtime"]["evidence"]["groups"]
+    assert any("needs evidence" in e for e in _errors(record))
+    record = _with_evidence(go_record())
+    del record["runtime"]["evidence"]
+    assert any("needs evidence" in e for e in _errors(record))
+    record = _with_evidence(go_record())
+    record["runtime"]["walkthrough_outputs_checked"] = False
+    assert any("recorded only with walkthrough_outputs_checked" in e for e in _errors(record))
+    multi = copy.deepcopy(RECORDS["llm-theory"])
+    _with_evidence(multi, groups=["python-core"])
+    assert any("lacks the ordinary CI groups ['pytorch']" in e for e in _errors(multi))
+    _with_evidence(multi, groups=["python-core", "pytorch"])
+    assert _errors(multi) == []
+    core = copy.deepcopy(RECORDS["python"])
+    core["runtime"]["walkthrough_outputs_checked"] = True
+    core["runtime"]["evidence"] = {"ci_run": "1", "commit": "a" * 40, "groups": []}
+    assert any("no ordinary CI group" in e for e in _errors(core))
+
+
+def test_r10_pass_requires_ci_evidence_for_ordinary_profiles() -> None:
+    record = go_record()
+    record["runtime"]["walkthrough_outputs_checked"] = False
+    record["runtime"].pop("evidence", None)
+    record["criteria"]["R10"] = {"status": "pass"}
+    assert any("R10: pass requires recorded CI evidence" in e for e in _errors(record))
+    for track, other in RECORDS.items():
+        if qualification.required_ci_groups(other):
+            checked = other["runtime"]["walkthrough_outputs_checked"]
+            assert (other["criteria"]["R10"]["status"] == "pass") == checked, track
+        else:
+            assert other["criteria"]["R10"]["status"] == "pass", track
+            assert other["runtime"]["walkthrough_outputs_checked"] is False, track
 
 
 def test_gap_and_status_rules() -> None:
@@ -159,7 +250,7 @@ def test_gap_and_status_rules() -> None:
     record["criteria"]["R11"] = {"status": "pass"}
     assert any("named reviewer" in e for e in _errors(record))
     record = go_record()
-    record["criteria"]["R8"] = {"status": "pass", "templated_baseline": 10**9}
+    record["criteria"]["R8"]["templated_baseline"] = 10**9
     assert not any("R8" in e for e in _errors(record))
     unmeasured = copy.deepcopy(MATRIX)
     for row in unmeasured["lessons"]:
@@ -214,10 +305,35 @@ def test_meets_threshold_rules() -> None:
     assert qualification.meets_threshold(MATRIX, open_gap) == ["go R5: open gap."]
 
 
-@pytest.mark.xfail(strict=True, reason="Phase 5 closure (05-05) records final rubric results")
-@pytest.mark.parametrize("track", sorted(RECORDS))
+def _threshold_param(track: str) -> Any:
+    """Plain param for every track that meets its threshold.
+
+    The strict expected-failure mark is computed, never listed: it applies only to
+    a track whose single remaining reason is R10 awaiting recorded CI evidence
+    (`evidence_pending`), so recording evidence removes the mark automatically.
+    Any other shortfall stays a plain failing param.
+    """
+    record = RECORDS[track]
+    if not qualification.evidence_pending(MATRIX, record):
+        return pytest.param(track, id=track)
+    groups = qualification.required_ci_groups(record)
+    reason = f"Awaiting recorded app-build CI evidence for groups {groups}"
+    return pytest.param(track, id=track, marks=pytest.mark.xfail(strict=True, reason=reason))
+
+
+@pytest.mark.parametrize("track", [_threshold_param(track) for track in sorted(RECORDS)])
 def test_every_track_meets_threshold(track: str) -> None:
     assert qualification.meets_threshold(MATRIX, RECORDS[track]) == []
+
+
+def test_below_threshold_tracks_only_await_ci_evidence() -> None:
+    for track, record in RECORDS.items():
+        below = qualification.meets_threshold(MATRIX, record)
+        if below:
+            assert qualification.evidence_pending(MATRIX, record), (track, below)
+    for track in ("python", "sql", "bridge", "dax", "cuda", "docker", "kubernetes"):
+        assert qualification.meets_threshold(MATRIX, RECORDS[track]) == [], track
+    assert qualification.meets_threshold(MATRIX, RECORDS["spark-deployment"]) == []
 
 
 def test_go_report_writes_nothing(capsys: pytest.CaptureFixture[str]) -> None:
