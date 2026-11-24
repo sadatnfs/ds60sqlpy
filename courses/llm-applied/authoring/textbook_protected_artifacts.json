@@ -43,7 +43,9 @@
     },
     {
       "path": "courses/llm-applied/lessons/llm-applied-011.py",
-      "sha256": "f4290435f19323d208644d78d60dbca571a6b7641bba67ae77278ba8162cf725"
+      "sha256": "b837bc9f9ea311d0140e40925561eaab2fdcc843f3430496fd51ccf1c5ea2f30",
+      "previous_sha256": "f4290435f19323d208644d78d60dbca571a6b7641bba67ae77278ba8162cf725",
+      "revision": "Comment-only correction of numerals that lost their spacing or leading zero (for example rate.3 to rate 0.3); code unchanged."
     },
     {
       "path": "courses/llm-applied/lessons/llm-applied-012.py",
@@ -75,7 +77,9 @@
     },
     {
       "path": "courses/llm-applied/lessons/llm-applied-019.py",
-      "sha256": "03274fabb23d8b35c871426c47482c70fabef47f02237c6d3dbe3c2d06525697"
+      "sha256": "ec8e507b19f860871e4ba60641aeab89d7e740e06e67a99822040070c35c330d",
+      "previous_sha256": "03274fabb23d8b35c871426c47482c70fabef47f02237c6d3dbe3c2d06525697",
+      "revision": "Comment-only correction of numerals that lost their spacing or leading zero (for example rate.3 to rate 0.3); code unchanged."
     },
     {
       "path": "courses/llm-applied/lessons/llm-applied-020.py",
@@ -95,7 +99,9 @@
     },
     {
       "path": "courses/llm-applied/lessons/llm-applied-024.py",
-      "sha256": "1cf16fb23b5b7b2ddf28efcfea8d5cde8a5a605f4a4cf89d871a5610d213fe87"
+      "sha256": "ef77a8ba3f840cd048ffdb17c3c0ab27f62736d223a71837397ffb08eeb4d934",
+      "previous_sha256": "1cf16fb23b5b7b2ddf28efcfea8d5cde8a5a605f4a4cf89d871a5610d213fe87",
+      "revision": "Comment-only correction of numerals that lost their spacing or leading zero (for example rate.3 to rate 0.3); code unchanged."
     },
     {
       "path": "courses/llm-applied/solutions/llm-applied-001_solution.py",

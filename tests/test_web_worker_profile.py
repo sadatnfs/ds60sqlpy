@@ -71,7 +71,7 @@ def test_web_image_is_an_explicit_complete_native_ci_group() -> None:
 
 def test_web_image_uses_only_prepared_packages_and_one_probe_source() -> None:
     recipe = (ROOT / "docker/workers/Dockerfile.python-web").read_text()
-    assert "python -m venv /opt/web" in recipe
+    assert "python -m venv --without-pip /opt/web" in recipe
     assert "--require-hashes --only-binary=:all:" in recipe
     assert "courses/python-web/runtime_probe.py" in recipe
     for architecture in ("amd64", "arm64"):
