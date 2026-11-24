@@ -13,6 +13,7 @@ from __future__ import annotations
 import argparse
 import contextlib
 import functools
+import hashlib
 import importlib
 import json
 import re
@@ -103,10 +104,27 @@ class Audit:
         self.page_errors: list[str] = []
         self.http_errors: list[str] = []
         self.outside_requests: list[str] = []
+        self.preservation: list[dict[str, str | None]] = []
 
     def passed(self, name: str) -> None:
         self.checks.append(name)
         print("PASS: " + name, flush=True)
+
+    def preserved(self, inspection: str, before: dict[str, Any], after: dict[str, Any]) -> None:
+        """Record the selected lesson and saved-draft digest around one inspection."""
+
+        def digest(snapshot: dict[str, Any]) -> str:
+            return hashlib.sha256(str(snapshot["pad"]["code"]).encode("utf-8")).hexdigest()
+
+        self.preservation.append(
+            {
+                "inspection": inspection,
+                "lesson_before": before["selectedLesson"],
+                "lesson_after": after["selectedLesson"],
+                "draft_sha256_before": digest(before),
+                "draft_sha256_after": digest(after),
+            }
+        )
 
     def screenshot(self, page: Any, name: str) -> None:
         if self.screenshots is not None:
@@ -262,12 +280,18 @@ def learner_snapshot(page: Any, lesson_id: str) -> dict[str, Any]:
 
 
 def assert_learning_state_unchanged(
-    page: Any, lesson_id: str, before: dict[str, Any], action: str
+    page: Any,
+    lesson_id: str,
+    before: dict[str, Any],
+    action: str,
+    audit: Audit | None = None,
 ) -> None:
     """Verify a guide or tour action did not alter a learner's saved work."""
     after = learner_snapshot(page, lesson_id)
     changed = [key for key in before if before[key] != after[key]]
     assert not changed, f"{action} changed learner state: {changed}"
+    if audit is not None:
+        audit.preserved(action, before, after)
 
 
 def assert_no_execution_requests(actions: list[str], start: int, action: str) -> None:
@@ -276,13 +300,12 @@ def assert_no_execution_requests(actions: list[str], start: int, action: str) ->
     assert not executed, f"{action} submitted execution request(s): {executed}"
 
 
-def reveal_steppable_solution(page: Any, expect: Any) -> None:
-    """Open one available standalone Python exercise solution for step-through."""
+def reveal_steppable_solution(page: Any, expect: Any, *, first_only: bool = False) -> int:
+    """Open an exercise solution that offers step-through and return its position."""
     exercises = page.locator("#exercise-steps .exercise-step")
-    assert exercises.count() > 0, "The selected Python lesson has no exercises."
-    for position in range(exercises.count()):
-        if position:
-            exercises.nth(position).click()
+    assert exercises.count() > 0, "The selected lesson has no exercises."
+    for position in range(1 if first_only else exercises.count()):
+        exercises.nth(position).click()
         solve = page.locator("#exercise-solve")
         if not solve.is_visible():
             continue
@@ -292,9 +315,79 @@ def reveal_steppable_solution(page: Any, expect: Any) -> None:
         expect(page.locator("#exercise-solution")).to_be_visible()
         step_solution = page.locator("#exercise-step-solution")
         if step_solution.is_visible() and step_solution.is_enabled():
-            return
+            return position
         page.locator("#exercise-hide-solution").click()
-    raise AssertionError("The selected Python lesson has no standalone step-through solution.")
+    raise AssertionError("The selected lesson has no step-through exercise solution.")
+
+
+def verify_walkthrough(
+    page: Any,
+    expect: Any,
+    lab_actions: list[str],
+    *,
+    lesson_id: str,
+    language: str,
+    purpose: str,
+    trigger: str,
+    learner_source: str,
+    audit: Audit,
+) -> dict[str, Any]:
+    """Run one walkthrough and prove it is distinct from Run and leaves learner work alone."""
+    before = learner_snapshot(page, lesson_id)
+    assert before["source"] == learner_source, "The editor did not hold the learner draft."
+    assert before["pad"]["code"] == learner_source, "The learner draft was not saved."
+
+    def is_trace(response: Any) -> bool:
+        if urlsplit(response.url).path != "/api/lab" or response.request.method != "POST":
+            return False
+        payload = response.request.post_data_json
+        return bool(
+            isinstance(payload, dict)
+            and payload.get("action") == "step-through"
+            and payload.get("lesson_id") == lesson_id
+        )
+
+    start = len(lab_actions)
+    with page.expect_response(is_trace, timeout=90_000) as trace_response:
+        page.locator(trigger).click()
+    trace: dict[str, Any] = trace_response.value.json()
+    request = trace_response.value.request.post_data_json
+    assert request["purpose"] == purpose and request["language"] == language, request
+    if purpose == "practice":
+        assert request["code"] == learner_source, "Practice stepping used a different source."
+    else:
+        assert request["code"].strip() and request["code"] != learner_source, (
+            "Solution stepping did not use the worked solution."
+        )
+    label = f"{language.upper() if language == 'sql' else 'Python'} {purpose}"
+    assert trace.get("kind") == language and trace.get("steps"), f"{label}: no steps: {trace}"
+    if language == "sql":
+        assert trace.get("unsupported") is None, f"{label}: {trace.get('unsupported')}"
+        failed = [step["clause"] for step in trace["steps"] if step.get("error")]
+        assert not failed, f"{label}: clause steps failed: {failed}"
+    panel = page.locator("#step-panel")
+    expect(panel).to_be_visible()
+    expect(panel).to_have_attribute("data-kind", language)
+    expect(page.locator("#step-title")).to_have_text(
+        "Step through the worked solution"
+        if purpose == "solution"
+        else "Step through your query"
+        if language == "sql"
+        else "Step through your code"
+    )
+    total = len(trace["steps"])
+    expect(page.locator("#step-count")).to_have_text(f"Step 1 of {total}")
+    assert page.locator("#step-body").inner_text().strip(), f"{label}: nothing rendered."
+    if total > 1:
+        page.locator("#step-last").click()
+        expect(page.locator("#step-count")).to_have_text(f"Step {total} of {total}")
+    assert_learning_state_unchanged(page, lesson_id, before, f"The {label} walkthrough", audit)
+    actions = lab_actions[start:]
+    assert actions.count("step-through") == 1 and "run" not in actions, actions
+    page.locator("#step-close").click()
+    expect(panel).to_be_hidden()
+    assert_learning_state_unchanged(page, lesson_id, before, f"Closing the {label} walkthrough")
+    return trace
 
 
 def no_overflow(page: Any) -> None:
@@ -310,7 +403,12 @@ def classroom_checks(browser: Any, origin: str, audit: Audit, expect: Any) -> No
     sql_marker = "BROWSER_SQL_42_" + nonce
     module_marker = "BROWSER_MODULE_42_" + nonce
     python_source = f"print({python_marker!r})\n"
-    sql_source = f"SELECT 42 AS answer, '{sql_marker}' AS label;\n"
+    sql_source = (
+        f"SELECT n AS answer, '{sql_marker}' AS label\n"
+        "FROM generate_series(40, 42) AS g(n)\n"
+        "WHERE n > 41\n"
+        "ORDER BY n;\n"
+    )
     module_source = f"print({module_marker!r})\n"
     context = audit.context(browser, origin)
     try:
@@ -389,52 +487,40 @@ def classroom_checks(browser: Any, origin: str, audit: Audit, expect: Any) -> No
         offer.get_by_role("button", name="No thanks").click()
         expect(offer).to_have_count(0)
         assert_learning_state_unchanged(
-            page, "python-02", before_decline, "Declining the tour offer"
+            page, "python-02", before_decline, "Declining the tour offer", audit
         )
         assert_no_execution_requests(lab_actions, decline_action_start, "Declining the tour offer")
         audit.passed("Declining the optional tour preserves the lesson and learner state")
+        verify_walkthrough(
+            page,
+            expect,
+            lab_actions,
+            lesson_id="python-02",
+            language="python",
+            purpose="practice",
+            trigger="#step-through",
+            learner_source=python_source,
+            audit=audit,
+        )
+        audit.passed("Python practice step-through traces the saved draft without a Run")
+        assert learner_snapshot(page, "python-02")["receipts"], (
+            "The baseline Python run did not create a receipt."
+        )
         reveal_steppable_solution(page, expect)
-        before_walk = learner_snapshot(page, "python-02")
-        assert before_walk["source"] == python_source
-        assert before_walk["note"] == NOTE
-        assert before_walk["pad"]["code"] == python_source
-        assert before_walk["receipts"], "The baseline Python run did not create a receipt."
-
-        def is_python_solution_trace(response: Any) -> bool:
-            if urlsplit(response.url).path != "/api/lab" or response.request.method != "POST":
-                return False
-            payload = response.request.post_data_json
-            return bool(
-                isinstance(payload, dict)
-                and payload.get("action") == "step-through"
-                and payload.get("lesson_id") == "python-02"
-            )
-
-        trace_start = len(lab_actions)
-        with page.expect_response(is_python_solution_trace, timeout=90_000) as trace_response:
-            page.locator("#exercise-step-solution").click()
-        trace = trace_response.value.json()
-        trace_request = trace_response.value.request.post_data_json
-        assert trace_request["purpose"] == "solution"
-        assert trace_request["language"] == "python"
-        assert trace_request["code"].strip()
-        assert trace_request["code"] != python_source
-        assert trace.get("kind") == "python" and trace.get("steps"), (
-            "The worked solution returned no Python trace steps."
+        verify_walkthrough(
+            page,
+            expect,
+            lab_actions,
+            lesson_id="python-02",
+            language="python",
+            purpose="solution",
+            trigger="#exercise-step-solution",
+            learner_source=python_source,
+            audit=audit,
         )
-        expect(page.locator("#step-panel")).to_be_visible()
-        expect(page.locator("#step-count")).to_contain_text("Step 1 of")
-        assert page.locator("#step-body").inner_text().strip(), (
-            "The browser did not render the Python solution trace."
-        )
-        assert_learning_state_unchanged(page, "python-02", before_walk, "The solution walkthrough")
-        walkthrough_actions = lab_actions[trace_start:]
-        assert walkthrough_actions.count("step-through") == 1
-        assert "run" not in walkthrough_actions
         audit.passed(
             "Python solution step-through uses a distinct request and preserves learner state"
         )
-        page.locator("#step-close").click()
         page.locator("#exercise-hide-solution").click()
         before_manual = learner_snapshot(page, "python-02")
         manual_action_start = len(lab_actions)
@@ -466,17 +552,17 @@ def classroom_checks(browser: Any, origin: str, audit: Audit, expect: Any) -> No
         expect(page.locator("#workspace-view")).to_be_visible()
         assert page.url == lesson_url, "Starting the tour from the manual changed lessons."
         assert_learning_state_unchanged(
-            page, "python-02", before_tour, "Starting the tour from the manual"
+            page, "python-02", before_tour, "Starting the tour from the manual", audit
         )
         page.get_by_role("button", name="End tour").click()
         expect(page.locator(".tour-card")).to_have_count(0)
-        assert_learning_state_unchanged(page, "python-02", before_tour, "Ending the tour")
+        assert_learning_state_unchanged(page, "python-02", before_tour, "Ending the tour", audit)
         page.locator("#tour-start").click()
         expect(page.locator(".tour-card")).to_be_visible()
         page.keyboard.press("Escape")
         expect(page.locator(".tour-card")).to_have_count(0)
         assert_learning_state_unchanged(
-            page, "python-02", before_tour, "Dismissing the restarted tour"
+            page, "python-02", before_tour, "Dismissing the restarted tour", audit
         )
         page.locator("#tour-start").click()
         expect(page.locator(".tour-card")).to_be_visible()
@@ -489,7 +575,9 @@ def classroom_checks(browser: Any, origin: str, audit: Audit, expect: Any) -> No
             raise AssertionError("The tour did not reach its Finish step.")
         page.locator(".tour-next").click()
         expect(page.locator(".tour-card")).to_have_count(0)
-        assert_learning_state_unchanged(page, "python-02", before_tour, "Completing the tour")
+        assert_learning_state_unchanged(
+            page, "python-02", before_tour, "Completing the tour", audit
+        )
         assert_no_execution_requests(lab_actions, tour_action_start, "Tour lifecycle")
         audit.passed("The lesson tour starts, dismisses, restarts and completes without data loss")
         before_home_tour = learner_snapshot(page, "python-02")
@@ -504,7 +592,7 @@ def classroom_checks(browser: Any, origin: str, audit: Audit, expect: Any) -> No
         )
         assert page.url == lesson_url, "Starting the tour from home did not restore the lesson."
         assert_learning_state_unchanged(
-            page, "python-02", before_home_tour, "Returning from home to start the tour"
+            page, "python-02", before_home_tour, "Returning from home to start the tour", audit
         )
         assert_no_execution_requests(
             lab_actions, home_tour_action_start, "Starting the tour from home"
@@ -546,6 +634,35 @@ def classroom_checks(browser: Any, origin: str, audit: Audit, expect: Any) -> No
         expect(page.locator("#sql-results")).to_contain_text(sql_marker, timeout=90_000)
         expect(page.locator("#job-status")).to_contain_text("Finished \u00b7 exit 0")
         expect(page.locator("#sql-results")).to_contain_text("42")
+        practice = verify_walkthrough(
+            page,
+            expect,
+            lab_actions,
+            lesson_id="sql-start-02",
+            language="sql",
+            purpose="practice",
+            trigger="#step-through",
+            learner_source=sql_source,
+            audit=audit,
+        )
+        clauses = [step["clause"] for step in practice["steps"]]
+        assert clauses == ["from", "where", "select", "order"], clauses
+        assert practice["steps"][-1]["rows"] == [[42, sql_marker]], practice["steps"][-1]
+        audit.passed("SQL practice step-through shows FROM, WHERE, SELECT and ORDER BY rows")
+        assert reveal_steppable_solution(page, expect, first_only=True) == 0
+        verify_walkthrough(
+            page,
+            expect,
+            lab_actions,
+            lesson_id="sql-start-02",
+            language="sql",
+            purpose="solution",
+            trigger="#exercise-step-solution",
+            learner_source=sql_source,
+            audit=audit,
+        )
+        page.locator("#exercise-hide-solution").click()
+        audit.passed("SQL Exercise 1 solution step-through preserves the learner draft")
         choose_lesson(page, "llm-theory", "llm-002", expect)
         show_code_and_notes(page, expect)
         page.locator(SOURCE_EDITOR).fill(module_source)
@@ -943,6 +1060,7 @@ def main(argv: list[str] | None = None) -> int:
                     "browser_version": browser_version,
                     "scope": "fixtures" if args.fixtures_only else "classroom-and-fixtures",
                     "checks": audit.checks,
+                    "preservation": audit.preservation,
                 },
                 indent=2,
             )
