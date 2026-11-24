@@ -28,7 +28,7 @@ Open `spark-009` in the classroom, select the Scala source, prepare the `scala-j
 
 A source file, a compiled class and a dependency artifact are different objects. The classroom compiles the single Scala source as Main.scala and runs object Main. A real project can organize source into packages and build modules, but this fixed single-file pad does not implicitly run sbt, download artifacts or resolve arbitrary dependencies. A build specification should record the actual Scala binary family, JDK and Spark version separately from the source text.
 
-Spark's Scala artifacts use a binary suffix such as spark-sql_2.13. A Scala 3 artifact or a 2.12 artifact is not interchangeable merely because the package name looks similar. The authored worker target is Spark 4.0.1 with Scala binary 2.13 and JDK 17. The earlier expansion plan's 4.2.0/JDK 21 tuple is a proposal, not evidence that this runtime has those versions. Each reference prints actual Scala and Java readback.
+Spark's Scala artifacts use a binary suffix such as spark-sql_2.13. A Scala 3 artifact or a 2.12 artifact is not interchangeable merely because the package name looks similar. The authored worker target is Spark 4.3.0 with Scala binary 2.13 and JDK 17. The earlier expansion plan's 4.2.0/JDK 21 tuple is a proposal, not evidence that this runtime has those versions. Each reference prints actual Scala and Java readback.
 
 A closure retains the values it needs from an outer scope. If a class method returns value => factor*value and factor is a field, the closure may retain the owner object to access that field. If the owner also contains a nonserializable resource, the function can fail when sent through Java serialization. The failure concerns the captured object graph, not whether the arithmetic expression itself is simple.
 
@@ -44,8 +44,8 @@ A master URL is also an execution boundary. The fixed teaching profile accepts o
 
 ```scala
 val binary = "2.13"
-val artifact = s"org.apache.spark:spark-sql_$binary:4.0.1"
-assert(artifact == "org.apache.spark:spark-sql_2.13:4.0.1")
+val artifact = s"org.apache.spark:spark-sql_$binary:4.3.0"
+assert(artifact == "org.apache.spark:spark-sql_2.13:4.3.0")
 assert(!artifact.contains("_3:"))
 println(artifact)
 ```
@@ -68,9 +68,9 @@ The function's result depends on its argument and one captured immutable value. 
 
 ### Exercise 1: Validate the prepared dependency family
 
-Construct an org.apache.spark coordinate for a lowercase hyphenated artifact base, requiring Scala binary 2.13 and Spark target 4.0.1. Reject other binary/version tuples and malformed base names. Do not download anything.
+Construct an org.apache.spark coordinate for a lowercase hyphenated artifact base, requiring Scala binary 2.13 and Spark target 4.3.0. Reject other binary/version tuples and malformed base names. Do not download anything.
 
-**Expected result/shape:** spark-sql,2.13,4.0.1 yields org.apache.spark: spark-sql_2.13:4.0.1. Binary 3 or 2.12 and version 4.2.0 are outside this prepared target contract.
+**Expected result/shape:** spark-sql,2.13,4.3.0 yields org.apache.spark: spark-sql_2.13:4.3.0. Binary 3 or 2.12 and version 4.2.0 are outside this prepared target contract.
 
 **Verify:** Assert the exact coordinate and catch each unsupported tuple or malformed artifact base.
 
@@ -118,9 +118,9 @@ Serialize the supplied local function to memory, deserialize only those self-pro
 
 ### Exercise 6: Separate runtime readback from a target declaration
 
-Return actual Scala version and Java specification version plus the declared spark_target4.0.1. Do not label the target string as an observed Spark runtime version. The prepared foundation profile should report Scala 2.13 and Java 17.
+Return actual Scala version and Java specification version plus the declared spark_target4.3.0. Do not label the target string as an observed Spark runtime version. The prepared foundation profile should report Scala 2.13 and Java 17.
 
-**Expected result/shape:** Keys are scala_actual, java_actual, spark_target. Scala starts with 2.13., Java is 17, and target is 4.0.1. Exact Scala patch comes from the run.
+**Expected result/shape:** Keys are scala_actual, java_actual, spark_target. Scala starts with 2.13., Java is 17, and target is 4.3.0. Exact Scala patch comes from the run.
 
 **Verify:** Assert the keys and version families, then retain the printed runtime line as platform-specific evidence.
 
@@ -142,7 +142,7 @@ Continue to the next lesson only after you can explain the boundary behavior. Th
 
 - [Scala binary compatibility](https://docs.scala-lang.org/overviews/core/binary-compatibility-for-library-authors.html).
 
-- [Spark 4.0.1 deployment overview](https://spark.apache.org/docs/4.0.1/cluster-overview.html).
+- [Spark 4.3.0 deployment overview](https://spark.apache.org/docs/4.3.0/cluster-overview.html).
 
 - [Java 17 ObjectOutputStream](https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/io/ObjectOutputStream.html).
 

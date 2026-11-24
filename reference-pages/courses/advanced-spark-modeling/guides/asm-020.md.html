@@ -231,7 +231,7 @@ edge <span class="syntax-operator">=</span> math<span class="syntax-operator">.<
 <pre class="highlighted-code"><code class="language-text">[1, 2, 5, 10, 17, 26, 37, 50, 65, 82]
 largest safe x: 3037000499 x*x+1 = 9223372030926249002
 int64 results: [9223372030926249002, -9223372036709301615]</code></pre>
-<p>Python integers and a numpy int64 array stand in for Spark&#x27;s LongType here. The first line matches the chapter&#x27;s expected values for 0 through 9, ending at 82. The largest x for which x squared plus one still fits below 2 to the 63rd minus 1 is 3037000499, giving 9223372030926249002. One step larger, the int64 computation silently wraps to a large negative number. Spark 4.0.1 enables ANSI mode by default and raises an arithmetic overflow error instead, while setting spark.sql.ansi.enabled to false restores the legacy wraparound that numpy shows. That is the overflow contract the chapter says must be declared before the generated-code fixture can be trusted for larger inputs.</p>
+<p>Python integers and a numpy int64 array stand in for Spark&#x27;s LongType here. The first line matches the chapter&#x27;s expected values for 0 through 9, ending at 82. The largest x for which x squared plus one still fits below 2 to the 63rd minus 1 is 3037000499, giving 9223372030926249002. One step larger, the int64 computation silently wraps to a large negative number. Spark 4.3.0 enables ANSI mode by default and raises an arithmetic overflow error instead, while setting spark.sql.ansi.enabled to false restores the legacy wraparound that numpy shows. That is the overflow contract the chapter says must be declared before the generated-code fixture can be trusted for larger inputs.</p>
 <h3 id="failure-diagnosis">Failure diagnosis<a class="heading-anchor" href="#failure-diagnosis" aria-label="Link to this section">#</a></h3>
 <p>If toggling code generation changes results, inspect whether the two queries truly use the same source, schema and configuration. For custom expressions, compare null handling and type casts in both paths. If compilation fails, retain the generated source and exact exception rather than silently changing modes and claiming equivalence. If performance worsens, check compilation overhead and code-size limits before adding more custom fusion.</p>
 <h3 id="interview-discussion">Interview discussion<a class="heading-anchor" href="#interview-discussion" aria-label="Link to this section">#</a></h3>
@@ -256,7 +256,7 @@ int64 results: [9223372030926249002, -9223372036709301615]</code></pre>
       <span class="syntax-punctuation">.</span>config<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;spark.sql.adaptive.enabled&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;false&quot;</span><span class="syntax-punctuation">)</span>
       <span class="syntax-punctuation">.</span>config<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;spark.sql.ansi.enabled&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;true&quot;</span><span class="syntax-punctuation">)</span>
       <span class="syntax-punctuation">.</span>getOrCreate<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
-    require<span class="syntax-punctuation">(</span>spark<span class="syntax-punctuation">.</span>version <span class="syntax-operator">==</span> <span class="syntax-string">&quot;4.0.1&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;This example targets Spark 4.0.1&quot;</span><span class="syntax-punctuation">)</span>
+    require<span class="syntax-punctuation">(</span>spark<span class="syntax-punctuation">.</span>version <span class="syntax-operator">==</span> <span class="syntax-string">&quot;4.3.0&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;This example targets Spark 4.3.0&quot;</span><span class="syntax-punctuation">)</span>
     spark<span class="syntax-punctuation">.</span>sparkContext<span class="syntax-punctuation">.</span>setLogLevel<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;ERROR&quot;</span><span class="syntax-punctuation">)</span>
     <span class="syntax-keyword">import</span> spark<span class="syntax-punctuation">.</span>implicits<span class="syntax-punctuation">.</span>_
     <span class="syntax-keyword">try</span> <span class="syntax-punctuation">{</span>
@@ -279,8 +279,8 @@ int64 results: [9223372030926249002, -9223372036709301615]</code></pre>
 <span class="syntax-punctuation">}</span></code></pre>
 <h3 id="primary-references">Primary references<a class="heading-anchor" href="#primary-references" aria-label="Link to this section">#</a></h3>
 <ul>
-<li><a href="https://spark.apache.org/docs/4.0.1/sql-performance-tuning.html">Spark 4.0.1 SQL performance tuning</a></li>
-<li><a href="https://github.com/apache/spark/blob/v4.0.1/sql/catalyst/src/main/scala/org/apache/spark/sql/catalyst/expressions/Expression.scala">Spark 4.0.1 Catalyst expression source</a></li>
+<li><a href="https://spark.apache.org/docs/4.3.0/sql-performance-tuning.html">Spark 4.3.0 SQL performance tuning</a></li>
+<li><a href="https://github.com/apache/spark/blob/v4.3.0/sql/catalyst/src/main/scala/org/apache/spark/sql/catalyst/expressions/Expression.scala">Spark 4.3.0 Catalyst expression source</a></li>
 </ul></article>
   </main>
 </body>

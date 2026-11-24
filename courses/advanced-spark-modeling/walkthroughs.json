@@ -8,7 +8,7 @@
       "title": "One objective evaluation in Spark and partition independent results",
       "anchor": "reference",
       "source_path": "courses/advanced-spark-modeling/examples/asm-001.py",
-      "source_sha256": "44c076d51f277c28c4775a1c75ed302508f840e92c78d6e2b84abdfcc2e97848",
+      "source_sha256": "3ada1ad4fda1bc652d7b10f58527d622fc4ba55b34f99c5af2b9c0d69378e1ef",
       "expected_output": [
         "\"case_2_partition_parity\": [{\"requested_partitions\": 1, \"n\": 12, \"loss\": 506}, {\"requested_partitions\": 2, \"n\": 12, \"loss\": 506}, {\"requested_partitions\": 3, \"n\": 12, \"loss\": 506}]",
         "== Physical Plan =="
@@ -16,9 +16,9 @@
       "steps": [
         {
           "lines": [6, 25],
-          "excerpt": "def session(name):\n    from pyspark.sql import SparkSession\n\n    spark = (\n        SparkSession.builder.master(\"local[2]\")\n        .appName(name)\n        .config(\"spark.ui.enabled\", \"false\")\n        .config(\"spark.driver.host\", \"127.0.0.1\")\n        .config(\"spark.driver.bindAddress\", \"127.0.0.1\")\n        .config(\"spark.sql.shuffle.partitions\", \"2\")\n        .config(\"spark.sql.adaptive.enabled\", \"false\")\n        .config(\"spark.sql.ansi.enabled\", \"true\")\n        .config(\"spark.sql.session.timeZone\", \"UTC\")\n        .getOrCreate()\n    )\n    if spark.version != \"4.0.1\":\n        spark.stop()\n        raise RuntimeError(\"This worked reference is qualified for Spark 4.0.1\")\n    spark.sparkContext.setLogLevel(\"ERROR\")\n    return spark",
+          "excerpt": "def session(name):\n    from pyspark.sql import SparkSession\n\n    spark = (\n        SparkSession.builder.master(\"local[2]\")\n        .appName(name)\n        .config(\"spark.ui.enabled\", \"false\")\n        .config(\"spark.driver.host\", \"127.0.0.1\")\n        .config(\"spark.driver.bindAddress\", \"127.0.0.1\")\n        .config(\"spark.sql.shuffle.partitions\", \"2\")\n        .config(\"spark.sql.adaptive.enabled\", \"false\")\n        .config(\"spark.sql.ansi.enabled\", \"true\")\n        .config(\"spark.sql.session.timeZone\", \"UTC\")\n        .getOrCreate()\n    )\n    if spark.version != \"4.3.0\":\n        spark.stop()\n        raise RuntimeError(\"This worked reference is qualified for Spark 4.3.0\")\n    spark.sparkContext.setLogLevel(\"ERROR\")\n    return spark",
           "title": "A bounded local Spark session",
-          "explanation": "session builds a local Spark session with two worker threads, no web UI and networking bound to the loopback address, so nothing leaves the machine. Two shuffle partitions and disabled adaptive execution keep plans small and predictable. ANSI mode makes invalid arithmetic raise errors instead of returning NULL, and a UTC time zone avoids clock surprises. The version check refuses to run on any Spark other than 4.0.1, because the expected behavior was qualified on that release, and the log level is lowered to ERROR.",
+          "explanation": "session builds a local Spark session with two worker threads, no web UI and networking bound to the loopback address, so nothing leaves the machine. Two shuffle partitions and disabled adaptive execution keep plans small and predictable. ANSI mode makes invalid arithmetic raise errors instead of returning NULL, and a UTC time zone avoids clock surprises. The version check refuses to run on any Spark other than 4.3.0, because the expected behavior was qualified on that release, and the log level is lowered to ERROR.",
           "observe": "PySpark is imported inside the function, so the file can be read without Spark installed."
         },
         {
@@ -70,16 +70,16 @@
       "title": "Group means versus a shared mean when group sizes differ",
       "anchor": "reference",
       "source_path": "courses/advanced-spark-modeling/examples/asm-003.py",
-      "source_sha256": "ce2778b677e581bae7e05455f50391323b218746144acbb7770a9a43d55e005f",
+      "source_sha256": "fe1d225b12c013b1aee65628467afbf72437e914bca52b0c11bf69f5cf2a785e",
       "expected_output": [
         "{\"independent_means\": {\"A\": 2.0, \"B\": 10.0}, \"shared_mean_mle\": 8.0, \"unweighted_model_mean\": 6.0"
       ],
       "steps": [
         {
           "lines": [7, 26],
-          "excerpt": "def session(name):\n    from pyspark.sql import SparkSession\n\n    spark = (\n        SparkSession.builder.master(\"local[2]\")\n        .appName(name)\n        .config(\"spark.ui.enabled\", \"false\")\n        .config(\"spark.driver.host\", \"127.0.0.1\")\n        .config(\"spark.driver.bindAddress\", \"127.0.0.1\")\n        .config(\"spark.sql.shuffle.partitions\", \"2\")\n        .config(\"spark.sql.adaptive.enabled\", \"false\")\n        .config(\"spark.sql.ansi.enabled\", \"true\")\n        .config(\"spark.sql.session.timeZone\", \"UTC\")\n        .getOrCreate()\n    )\n    if spark.version != \"4.0.1\":\n        spark.stop()\n        raise RuntimeError(\"This worked reference is qualified for Spark 4.0.1\")\n    spark.sparkContext.setLogLevel(\"ERROR\")\n    return spark",
+          "excerpt": "def session(name):\n    from pyspark.sql import SparkSession\n\n    spark = (\n        SparkSession.builder.master(\"local[2]\")\n        .appName(name)\n        .config(\"spark.ui.enabled\", \"false\")\n        .config(\"spark.driver.host\", \"127.0.0.1\")\n        .config(\"spark.driver.bindAddress\", \"127.0.0.1\")\n        .config(\"spark.sql.shuffle.partitions\", \"2\")\n        .config(\"spark.sql.adaptive.enabled\", \"false\")\n        .config(\"spark.sql.ansi.enabled\", \"true\")\n        .config(\"spark.sql.session.timeZone\", \"UTC\")\n        .getOrCreate()\n    )\n    if spark.version != \"4.3.0\":\n        spark.stop()\n        raise RuntimeError(\"This worked reference is qualified for Spark 4.3.0\")\n    spark.sparkContext.setLogLevel(\"ERROR\")\n    return spark",
           "title": "A bounded local Spark session",
-          "explanation": "session builds a local Spark session with two worker threads, no web UI and networking bound to the loopback address, so nothing leaves the machine. Two shuffle partitions and disabled adaptive execution keep plans small and predictable. ANSI mode makes invalid arithmetic raise errors instead of returning NULL, and a UTC time zone avoids clock surprises. The version check refuses to run on any Spark other than 4.0.1, because the expected behavior was qualified on that release, and the log level is lowered to ERROR.",
+          "explanation": "session builds a local Spark session with two worker threads, no web UI and networking bound to the loopback address, so nothing leaves the machine. Two shuffle partitions and disabled adaptive execution keep plans small and predictable. ANSI mode makes invalid arithmetic raise errors instead of returning NULL, and a UTC time zone avoids clock surprises. The version check refuses to run on any Spark other than 4.3.0, because the expected behavior was qualified on that release, and the log level is lowered to ERROR.",
           "observe": "Every lesson in this track uses the same session settings."
         },
         {
@@ -131,16 +131,16 @@
       "title": "Reconciling repeated partition evaluations by identity",
       "anchor": "reference",
       "source_path": "courses/advanced-spark-modeling/examples/asm-009.py",
-      "source_sha256": "4cc76834da318d5446d39bfe53cc88a486bf8cc2a0809b90cb9fa98f7c8faded",
+      "source_sha256": "fec37db31fcc61852c6475f5cfc6052ae3c0e83c9596087988cc4f58492a4b05",
       "expected_output": [
         "{\"two_actual_evaluations\": 2, \"accepted_rows\": 4, \"naive_attempt_rows\": 8, \"conflict_rejected\": true, \"fault_injection\": false}"
       ],
       "steps": [
         {
           "lines": [7, 26],
-          "excerpt": "def session(name):\n    from pyspark.sql import SparkSession\n\n    spark = (\n        SparkSession.builder.master(\"local[2]\")\n        .appName(name)\n        .config(\"spark.ui.enabled\", \"false\")\n        .config(\"spark.driver.host\", \"127.0.0.1\")\n        .config(\"spark.driver.bindAddress\", \"127.0.0.1\")\n        .config(\"spark.sql.shuffle.partitions\", \"2\")\n        .config(\"spark.sql.adaptive.enabled\", \"false\")\n        .config(\"spark.sql.ansi.enabled\", \"true\")\n        .config(\"spark.sql.session.timeZone\", \"UTC\")\n        .getOrCreate()\n    )\n    if spark.version != \"4.0.1\":\n        spark.stop()\n        raise RuntimeError(\"This worked reference is qualified for Spark 4.0.1\")\n    spark.sparkContext.setLogLevel(\"ERROR\")\n    return spark",
+          "excerpt": "def session(name):\n    from pyspark.sql import SparkSession\n\n    spark = (\n        SparkSession.builder.master(\"local[2]\")\n        .appName(name)\n        .config(\"spark.ui.enabled\", \"false\")\n        .config(\"spark.driver.host\", \"127.0.0.1\")\n        .config(\"spark.driver.bindAddress\", \"127.0.0.1\")\n        .config(\"spark.sql.shuffle.partitions\", \"2\")\n        .config(\"spark.sql.adaptive.enabled\", \"false\")\n        .config(\"spark.sql.ansi.enabled\", \"true\")\n        .config(\"spark.sql.session.timeZone\", \"UTC\")\n        .getOrCreate()\n    )\n    if spark.version != \"4.3.0\":\n        spark.stop()\n        raise RuntimeError(\"This worked reference is qualified for Spark 4.3.0\")\n    spark.sparkContext.setLogLevel(\"ERROR\")\n    return spark",
           "title": "A bounded local Spark session",
-          "explanation": "session builds a local Spark session with two worker threads, no web UI and networking bound to the loopback address, so nothing leaves the machine. Two shuffle partitions and disabled adaptive execution keep plans small and predictable. ANSI mode makes invalid arithmetic raise errors instead of returning NULL, and a UTC time zone avoids clock surprises. The version check refuses to run on any Spark other than 4.0.1, because the expected behavior was qualified on that release, and the log level is lowered to ERROR.",
+          "explanation": "session builds a local Spark session with two worker threads, no web UI and networking bound to the loopback address, so nothing leaves the machine. Two shuffle partitions and disabled adaptive execution keep plans small and predictable. ANSI mode makes invalid arithmetic raise errors instead of returning NULL, and a UTC time zone avoids clock surprises. The version check refuses to run on any Spark other than 4.3.0, because the expected behavior was qualified on that release, and the log level is lowered to ERROR.",
           "observe": "The rest of the file only uses the RDD API through spark.sparkContext."
         },
         {

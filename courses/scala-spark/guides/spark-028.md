@@ -4,7 +4,7 @@ Authored paired Scala/PySpark teaching content. The default fixtures are tiny, l
 
 ## Level and prerequisites
 
-Intermediate; approximately 150 minutes. Direct prerequisites: `spark-027`. The prepared baseline is Spark 4.0.1, Scala binary 2.13, JDK 17 and Python 3.12. Read the [execution baseline](../execution-baseline.md).
+Intermediate; approximately 150 minutes. Direct prerequisites: `spark-027`. The prepared baseline is Spark 4.3.0, Scala binary 2.13, JDK 17 and Python 3.12. Read the [execution baseline](../execution-baseline.md).
 
 ## How to run this lesson
 
@@ -44,7 +44,7 @@ The independent golden summary is derived from the fixture formula rather than f
 
 A duplicate-sensitive distributed comparison then checks both directions of the full projected relation. It avoids collecting the whole fact product on the driver. Only the five-row key summary and one-row metric summary are collected, with fixed schemas and bounded output. This preserves a realistic discipline even though the generated input itself is small enough to fit locally.
 
-The resource observation helper executes a summary query and then reads the actual executed exchange metric maps from that same query tree. This intentionally uses classic Spark 4.0.1 internals, as in the earlier shuffle lesson. Its records include operator names because a broadcast exchange's data-size metric and a shuffle exchange's data-size metric must not be casually added together and called remote network bytes. Missing metrics remain absent rather than becoming fabricated zeros.
+The resource observation helper executes a summary query and then reads the actual executed exchange metric maps from that same query tree. This intentionally uses classic Spark 4.3.0 internals, as in the earlier shuffle lesson. Its records include operator names because a broadcast exchange's data-size metric and a shuffle exchange's data-size metric must not be casually added together and called remote network bytes. Missing metrics remain absent rather than becoming fabricated zeros.
 
 The evidence packet records Spark version, local master, AQE state, automatic threshold, key-frequency ledger, the two observed join plans and their separate exchange maps. It does not claim measured peak memory, spill or cluster throughput when those were not collected. A lower exchange count or smaller serialized data amount can motivate a representative benchmark, but it is not by itself a complete production cost result.
 
@@ -227,7 +227,7 @@ Broadcast the reviewed dimension for the same equality join and projection. Pres
 
 Return version, master, AQE and automatic broadcast threshold as named fields. Attach key frequencies, the baseline/candidate plans and each observed summary-query exchange metric map.
 
-**Expected result/shape:** Spark 4.0.1, `local[2]`, AQE false, threshold -1; key 0 frequency 1600 and others 100. Both runs expose actual nonempty exchange observations. No peak-memory or throughput value is invented.
+**Expected result/shape:** Spark 4.3.0, `local[2]`, AQE false, threshold -1; key 0 frequency 1600 and others 100. Both runs expose actual nonempty exchange observations. No peak-memory or throughput value is invented.
 
 **Verify:** Assert controlled settings and frequency ledger, then print plans and separately labeled actual metric maps.
 
@@ -245,7 +245,7 @@ Choose baseline or broadcast using an explicit Boolean switch over the same acce
 
 ## Common pitfalls
 
-Do not optimize a fanout error or replace NULL amounts with zero to simplify a checksum. Do not select dimension winners arbitrarily. Keep fact identity, known-value counts and measure totals in the acceptance contract. Do not collect an unbounded result to compare strategies. Internal metric names and plan access are pinned to classic Spark 4.0.1; keep their units and limitations visible. Rollback must preserve the repaired data contract even when it changes the physical implementation.
+Do not optimize a fanout error or replace NULL amounts with zero to simplify a checksum. Do not select dimension winners arbitrarily. Keep fact identity, known-value counts and measure totals in the acceptance contract. Do not collect an unbounded result to compare strategies. Internal metric names and plan access are pinned to classic Spark 4.3.0; keep their units and limitations visible. Rollback must preserve the repaired data contract even when it changes the physical implementation.
 
 ## Self-check
 
@@ -257,11 +257,11 @@ Use the [course route](../README.md) to continue. Paired-language agreement is u
 
 ## Primary sources and official APIs
 
-- [Spark 4.0.1 join strategies and AQE](https://spark.apache.org/docs/4.0.1/sql-performance-tuning.html)
+- [Spark 4.3.0 join strategies and AQE](https://spark.apache.org/docs/4.3.0/sql-performance-tuning.html)
 
-- [Spark 4.0.1 monitoring](https://spark.apache.org/docs/4.0.1/monitoring.html)
+- [Spark 4.3.0 monitoring](https://spark.apache.org/docs/4.3.0/monitoring.html)
 
-- [Spark 4.0.1 duplicate-sensitive exceptAll](https://spark.apache.org/docs/4.0.1/api/python/reference/pyspark.sql/api/pyspark.sql.DataFrame.exceptAll.html)
+- [Spark 4.3.0 duplicate-sensitive exceptAll](https://spark.apache.org/docs/4.3.0/api/python/reference/pyspark.sql/api/pyspark.sql.DataFrame.exceptAll.html)
 
 ## Ask an AI tutor about this lesson
 

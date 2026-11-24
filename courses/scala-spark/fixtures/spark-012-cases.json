@@ -41,7 +41,7 @@
       "exercise": 6,
       "title": "Read back the actual local session contract",
       "input_contract": "Return master, timezone, shuffle-partition, ANSI, AQE, UI, driver-binding and Spark-version settings from the active session. Compare them with this prepared profile and rely on finally for owned stop. Do not substitute a hardcoded target string for version readback.",
-      "expected": "Master local[2], UTC, two shuffle partitions, ANSI true, AQE false, UI false, both driver addresses 127.0.0.1, and Spark version 4.0.1.",
+      "expected": "Master local[2], UTC, two shuffle partitions, ANSI true, AQE false, UI false, both driver addresses 127.0.0.1, and Spark version 4.3.0.",
       "verification": "Assert the complete settings map;record actual version output and distinguish it from worker cleanup evidence."
     }
   ],
@@ -61,6 +61,6 @@
     "observed_ids": [1, 3, 4],
     "observed_total": 65,
     "master": "local[2]",
-    "spark_version": "4.0.1"
+    "spark_version": "4.3.0"
   }
 }

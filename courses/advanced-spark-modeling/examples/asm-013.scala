@@ -24,7 +24,7 @@ object Main {
       .config("spark.sql.adaptive.enabled", "false")
       .config("spark.sql.ansi.enabled", "true")
       .getOrCreate()
-    require(spark.version == "4.0.1", "This example targets Spark 4.0.1")
+    require(spark.version == "4.3.0", "This example targets Spark 4.3.0")
     spark.sparkContext.setLogLevel("ERROR")
     import spark.implicits._
     try {

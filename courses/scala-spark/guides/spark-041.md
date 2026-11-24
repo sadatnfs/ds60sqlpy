@@ -4,7 +4,7 @@ Authored paired Scala/PySpark teaching content. The default fixtures are tiny, l
 
 ## Level and prerequisites
 
-Advanced; approximately 120 minutes. Direct prerequisites: `spark-040`. The prepared baseline is Spark 4.0.1, Scala binary 2.13, JDK 17 and Python 3.12. Read the [execution baseline](../execution-baseline.md).
+Advanced; approximately 120 minutes. Direct prerequisites: `spark-040`. The prepared baseline is Spark 4.3.0, Scala binary 2.13, JDK 17 and Python 3.12. Read the [execution baseline](../execution-baseline.md).
 
 ## How to run this lesson
 
@@ -32,7 +32,7 @@ The [Scala learner](../lessons/spark-041.scala) and [PySpark learner](../lessons
 
 - **Qualification:** Actual execution evidence for the named stack and behavior, not the presence of a version string in configuration.
 
-A runtime change can affect binary loading, SQL semantics, Python dependencies, state schemas and sink behavior. A successful version print proves only which runtime answered that request. A credible change review joins the actual version tuple with independent golden results and a recovery plan. This lesson executes the current prepared Spark 4.0.1 stack and rehearses a query-shape change without pretending a second runtime has been provisioned.
+A runtime change can affect binary loading, SQL semantics, Python dependencies, state schemas and sink behavior. A successful version print proves only which runtime answered that request. A credible change review joins the actual version tuple with independent golden results and a recovery plan. This lesson executes the current prepared Spark 4.3.0 stack and rehearses a query-shape change without pretending a second runtime has been provisioned.
 
 The receipt records Scala binary family and actual patch, JDK major and runtime patch, Python version and optional PyArrow distribution presence. Scala invokes only the bundled python 3 with a fixed five-second metadata probe; it does not install or import Arrow. PySpark records its own interpreter and JVM. An absent optional dependency is recorded as not-installed rather than silently fetched. These values matter at different boundaries: Scala binary compatibility is not the same as Python wheel compatibility or a valid persisted state schema.
 
@@ -76,7 +76,7 @@ import scala.jdk.CollectionConverters._
 import org.apache.spark.sql.streaming.{StreamingQuery, Trigger}
 import scala.collection.mutable.ArrayBuffer
 
-require(spark.version == "4.0.1", "Prepared Spark 4.0.1 required")
+require(spark.version == "4.3.0", "Prepared Spark 4.3.0 required")
 spark.conf.set("spark.sql.streaming.stopTimeout", "5000")
 ownedRoot = Files.createTempDirectory(Paths.get(".").toAbsolutePath.normalize(), "spark-041-")
 val input = ownedRoot.resolve("input");
@@ -102,8 +102,8 @@ import shutil
 import json
 import uuid
 
-if spark.version != "4.0.1":
-    raise ValueError("Prepared Spark 4.0.1 required")
+if spark.version != "4.3.0":
+    raise ValueError("Prepared Spark 4.3.0 required")
 spark.conf.set("spark.sql.streaming.stopTimeout", "5000")
 owned_root = Path(tempfile.mkdtemp(prefix="spark-041-", dir=Path.cwd()))
 input_path = owned_root / "input"
@@ -156,7 +156,7 @@ The actual SQL expression checks the instant under the UTC session. Preserving d
 
 Record Spark, Scala binary and patch, JDK major and patch, Python version and optional PyArrow distribution version without installing anything.
 
-**Expected result/shape:** Spark 4.0.1, Scala 2.13 family, JDK 17; actual patch strings and explicit not-installed Arrow when absent.
+**Expected result/shape:** Spark 4.3.0, Scala 2.13 family, JDK 17; actual patch strings and explicit not-installed Arrow when absent.
 
 **Verify:** Inspect actual values and reject a claimed target qualification based only on a proposed version string.
 
@@ -226,9 +226,9 @@ Use the [course route](../README.md) to continue. Paired-language agreement is u
 
 ## Primary sources and official APIs
 
-- [Spark 4.0.1 recovery after query changes](https://spark.apache.org/docs/4.0.1/streaming/apis-on-dataframes-and-datasets.html#recovery-semantics-after-changes-in-a-streaming-query)
+- [Spark 4.3.0 recovery after query changes](https://spark.apache.org/docs/4.3.0/streaming/apis-on-dataframes-and-datasets.html#recovery-semantics-after-changes-in-a-streaming-query)
 
-- [Spark 4.0.1 SQL migration guide](https://spark.apache.org/docs/4.0.1/sql-migration-guide.html)
+- [Spark 4.3.0 SQL migration guide](https://spark.apache.org/docs/4.3.0/sql-migration-guide.html)
 
 ## Ask an AI tutor about this lesson
 

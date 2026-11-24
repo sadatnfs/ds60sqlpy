@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Compile and execute inside a separately prepared Spark 4.0.1 Linux environment."""
+"""Compile and execute inside a separately prepared Spark 4.3.0 Linux environment."""
 
 from __future__ import annotations
 
@@ -14,8 +14,8 @@ from pathlib import Path
 def main():
     home = Path(os.environ.get("SPARK_HOME", "/opt/spark"))
     jars = sorted((home / "jars").glob("*.jar"))
-    if not list((home / "jars").glob("spark-sql_2.13-4.0.1.jar")):
-        raise SystemExit("Prepare Spark 4.0.1, Scala 2.13 and JDK 17 before this project")
+    if not list((home / "jars").glob("spark-sql_2.13-4.3.0.jar")):
+        raise SystemExit("Prepare Spark 4.3.0, Scala 2.13 and JDK 17 before this project")
     root = Path(__file__).resolve().parent
     sources = sorted((root / "src/main/scala").rglob("*.scala"))
     with tempfile.TemporaryDirectory(prefix="ds60-catalyst-") as work:
@@ -54,7 +54,7 @@ def main():
             json.dumps(
                 {
                     "scope": "single-host CPU Spark/Catalyst compilation and execution",
-                    "spark": "4.0.1",
+                    "spark": "4.3.0",
                     "sources": {
                         str(p.relative_to(root)): hashlib.sha256(p.read_bytes()).hexdigest()
                         for p in sources

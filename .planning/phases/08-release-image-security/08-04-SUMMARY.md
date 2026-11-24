@@ -46,7 +46,8 @@ decisions:
   - The R worker moves to rocker/r-ver (Ubuntu, source-built R) instead of Debian r-base; Matrix 1.7-6 is added to the lock to keep the qualified version.
   - R compilers are purged after package builds; the TMB project image installs its own toolchain.
   - The 27 app misconfigurations stay as reviewed D-06 policy entries instead of a scanner skip-dir, so new learner Dockerfiles are still scanned.
-  - Spark shaded jar findings are not accepted in policy; Spark stays blocked (Rule 4).
+  - Spark shaded jar findings are not accepted in policy. Spark moved to 4.3.0 and its shaded libraries are re-shaded from pinned Maven Central jars, so the Spark images pass with 0 fixable findings.
+  - Hadoop's shaded Jetty 9.4 is removed from hadoop-client-runtime because no fixed 9.4 release exists and local mode never loads it.
 metrics:
   completed: 2026-11-24
 actuals:
@@ -57,13 +58,13 @@ actuals:
 # Phase 8 Plan 04: Worker Image Remediation Summary
 
 C, C++, Go, Rust, PHP, Swift, .NET, Java, R, app, python-core, python-web,
-data-engineering and the new DS60 postgres image all scan locally with 0 fixable
-High/Critical findings, and each one passes its qualification. Spark remains blocked by
-fixable Java libraries shaded inside upstream jars.
+data-engineering, the new DS60 postgres image and the Spark worker all scan locally
+with 0 fixable findings, and each one passes its qualification. The Spark worker now
+runs Spark 4.3.0 with re-shaded patched libraries (see Spark Resolution).
 
 Status is **partial**. Everything is uncommitted by instruction (the orchestrator commits),
-so `commits: 0` is expected. The CI proof is pending, and the Spark blocker needs an owner
-decision.
+so `commits: 0` is expected. The CI proof is pending. The Spark fix landed separately in
+`fix(08): Spark 4.3.0 with re-shaded patched libraries`.
 
 ## Results
 
@@ -71,10 +72,10 @@ Per-image counts and the CI marker table are in `08-SCAN-LEDGER.md`. In summary:
 
 - **0 fixable findings, passed:** app, python-core, python-web, data-engineering,
   postgres (reference), c17, cpp20, go, rust-stable, php-cli, csharp-dotnet, java21,
-  swift-linux, r-statistics.
-- **Blocked:** scala-jvm, spark-local-scala and spark-local-python. 50 fixable findings
-  remain (24 HIGH, 24 MEDIUM, 2 LOW, 0 Critical; Critical findings went from 8 to 0).
-  All of them are shaded jetty, guava, jackson, jline, commons-configuration2 and kerby.
+  swift-linux, r-statistics, scala-jvm, spark-local-scala, spark-local-python.
+- **Spark:** the earlier 50 fixable findings (shaded jetty, guava, jackson, jline,
+  commons-configuration2 and kerby) are gone. The Spark image now reports 0 blocking,
+  53 suppressed unfixed findings (C0 H53 M75 L79 U16).
 
 ### Qualification
 
@@ -117,8 +118,8 @@ Other checks:
    - The remaining 27 DS-0002 entries are reviewed misconfig entries (D-06).
    - I added one entry for the course's postgres example, because the official
      entrypoint starts as root and then drops privileges with gosu.
-4. **Spark:** jar overrides removed every Critical finding, but 24 fixable HIGH findings
-   remain in shaded jars (see Blockers).
+4. **Spark:** jar overrides removed every Critical finding. The remaining shaded findings
+   were fixed by the Spark 4.3.0 move and re-shading (see Spark Resolution).
 
 ## Deviations from Plan
 
@@ -169,17 +170,54 @@ Other checks:
 - Cleanup: all `ds60-p8-scan/*` images and the base digests I pulled were removed. No
   `ds60-p8-scan-*` containers or volumes remain. Protected resources were not touched.
 
-## Blockers
+## Spark Resolution
 
-**Spark (Rule 4, owner decision).** The fixed jetty lines are 12.x, which needs a source
-re-shade rather than a jar swap. Options:
+The earlier Spark blocker (Rule 4) is resolved. Spark 4.0.x and 4.1.x shade Jetty 11, which
+is end of life; CVE-2024-6763 and CVE-2025-11143 are fixed only in Jetty 12. Spark 4.3.0
+already uses Jetty 12.1, so the worker moved to
+`spark:4.3.0-scala2.13-java17-python3-ubuntu@sha256:6f4beaaae1b084cad88493a894141d9f26a0a810f6c688519b036d34f1c2475e`
+(Scala 2.13.18, Hadoop 3.5.0).
 
-- (A) Move to Spark 4.x on jetty 12 when upstream ships it, or re-shade spark-core and
-  hadoop-client-runtime from source against jetty 12.
-- (B) Backport the jetty 11 and 9.4 fixes and re-shade.
-- (C) Drop the hadoop-client-runtime shaded client in favor of non-shaded dependencies.
+Approach:
 
-None of these is a local fix. Policy acceptance is forbidden (D-03).
+- `apply_jar_overrides.py` gained a `reshade_jars` operation backed by
+  `docker/workers/spark/jar_reshade.py`, a standard-library relocator. It downloads each
+  source jar from Maven Central, pinned by SHA-256 and failing closed on a mismatch. It
+  removes the old shaded packages, relocates the new classes into the original prefix
+  (class constants, descriptors, string constants, resource paths and `META-INF/services`),
+  and replaces the old `META-INF/maven/<group>/<artifact>` metadata with the new library's
+  real `pom.properties` and `pom.xml`, so the scanner sees the true version. No metadata is
+  removed while vulnerable classes stay.
+- Standalone jar swaps: guava 33.8.0-jre, jackson 2.21.8, jline 3.30.17, log4j 2.25.5,
+  lz4-java 1.11.4, snappy-java 1.1.10.12, netty 4.2.21.Final, parquet-jackson 1.18.2.
+- spark-core: shaded Jetty 12.1.8 replaced by Jetty 12.1.15 under `org/sparkproject/jetty`.
+- spark-network-common: shaded guava replaced by 33.8.0-jre plus failureaccess 1.0.3 under
+  `org/sparkproject/guava`.
+- hadoop-client-runtime 3.5.0: shaded jackson 2.18.12, kerby 2.1.2, commons-configuration2
+  2.15.1, jline 3.30.17 and guava 33.7.2 under `org/apache/hadoop/shaded`.
+- hadoop-client-runtime shaded Jetty 9.4 is removed: 753 entries under
+  `org/apache/hadoop/shaded/org/eclipse/jetty/`, its 6 service registrations and its Maven
+  metadata. Jetty 9.4 is end of life and 9.4.58 still carries the findings.
+
+Why removing Hadoop's Jetty is safe: statically, only Hadoop daemon classes (HttpServer2,
+the YARN and HDFS web servers) refer to it. At runtime, a local-mode smoke run with
+`-verbose:class` read and wrote Parquet and CSV through LocalFileSystem and served the
+Spark UI (`/jobs/`, `/SQL/` and `/api/v1/applications` all returned 200). Of 25595 loaded
+classes, 0 came from `org.apache.hadoop.shaded.org.eclipse.jetty`; 698 came from the
+relocated Jetty 12.1.15. All three qualifications below passed on the same image.
+
+Bug found and fixed on the way: the first re-shade dropped zip directory entries, and the
+Spark UI then failed with "Could not find resource path for Web UI". The relocator now keeps
+directory entries and synthesizes missing parents; a test covers it.
+
+Results on `linux/arm64`: scala-jvm, spark-local-scala and spark-local-python all report 0
+blocking (53 suppressed). Qualification: scala-jvm 9/9, spark-local-scala 43/43,
+spark-local-python 47/47.
+
+Deferred on Spark 4.0.1: `packages/spark-likelihood` and `packages/spark-tmbad` (their own
+wrapper preparation and native builds are qualified against 4.0.1 by their own workflows),
+the advanced-spark-modeling spark-tmb and spark-torch projects, and the spark-deployment
+track with its learner-built cluster lab. None of these is a classroom profile image.
 
 ## Follow-ups
 
@@ -194,7 +232,7 @@ Push the commit, then push one commit per group carrying exactly one
 `[build-test-<group>]` marker for each of the 19 groups listed in the ledger.
 `targeted-images.yml` runs each group on amd64 and arm64. Record the run ids, and keep the
 `scan-reports-*`, `scan-evidence*.json` and `r-build-logs-*` artifacts in the ledger.
-scala-spark is expected to fail until the Spark blocker is resolved.
+scala-spark is expected to pass now that Spark runs 4.3.0 with re-shaded libraries.
 
 ## Self-Check: PASSED
 

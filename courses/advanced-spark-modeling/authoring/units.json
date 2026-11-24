@@ -34,12 +34,12 @@
     ],
     "sources": [
       [
-        "Spark 4.0.1 programming guide",
-        "https://spark.apache.org/docs/4.0.1/rdd-programming-guide.html"
+        "Spark 4.3.0 programming guide",
+        "https://spark.apache.org/docs/4.3.0/rdd-programming-guide.html"
       ],
       [
-        "Spark 4.0.1 SQL programming guide",
-        "https://spark.apache.org/docs/4.0.1/sql-programming-guide.html"
+        "Spark 4.3.0 SQL programming guide",
+        "https://spark.apache.org/docs/4.3.0/sql-programming-guide.html"
       ]
     ],
     "worked_examples": [
@@ -87,12 +87,12 @@
     ],
     "sources": [
       [
-        "Spark 4.0.1 programming guide",
-        "https://spark.apache.org/docs/4.0.1/rdd-programming-guide.html"
+        "Spark 4.3.0 programming guide",
+        "https://spark.apache.org/docs/4.3.0/rdd-programming-guide.html"
       ],
       [
-        "Spark 4.0.1 SQL programming guide",
-        "https://spark.apache.org/docs/4.0.1/sql-programming-guide.html"
+        "Spark 4.3.0 SQL programming guide",
+        "https://spark.apache.org/docs/4.3.0/sql-programming-guide.html"
       ]
     ],
     "worked_examples": [
@@ -140,12 +140,12 @@
     ],
     "sources": [
       [
-        "Spark 4.0.1 programming guide",
-        "https://spark.apache.org/docs/4.0.1/rdd-programming-guide.html"
+        "Spark 4.3.0 programming guide",
+        "https://spark.apache.org/docs/4.3.0/rdd-programming-guide.html"
       ],
       [
-        "Spark 4.0.1 SQL programming guide",
-        "https://spark.apache.org/docs/4.0.1/sql-programming-guide.html"
+        "Spark 4.3.0 SQL programming guide",
+        "https://spark.apache.org/docs/4.3.0/sql-programming-guide.html"
       ]
     ],
     "worked_examples": [
@@ -193,12 +193,12 @@
     ],
     "sources": [
       [
-        "Spark 4.0.1 programming guide",
-        "https://spark.apache.org/docs/4.0.1/rdd-programming-guide.html"
+        "Spark 4.3.0 programming guide",
+        "https://spark.apache.org/docs/4.3.0/rdd-programming-guide.html"
       ],
       [
-        "Spark 4.0.1 SQL programming guide",
-        "https://spark.apache.org/docs/4.0.1/sql-programming-guide.html"
+        "Spark 4.3.0 SQL programming guide",
+        "https://spark.apache.org/docs/4.3.0/sql-programming-guide.html"
       ]
     ],
     "worked_examples": [
@@ -246,12 +246,12 @@
     ],
     "sources": [
       [
-        "Spark 4.0.1 programming guide",
-        "https://spark.apache.org/docs/4.0.1/rdd-programming-guide.html"
+        "Spark 4.3.0 programming guide",
+        "https://spark.apache.org/docs/4.3.0/rdd-programming-guide.html"
       ],
       [
-        "Spark 4.0.1 SQL programming guide",
-        "https://spark.apache.org/docs/4.0.1/sql-programming-guide.html"
+        "Spark 4.3.0 SQL programming guide",
+        "https://spark.apache.org/docs/4.3.0/sql-programming-guide.html"
       ]
     ],
     "worked_examples": [
@@ -299,12 +299,12 @@
     ],
     "sources": [
       [
-        "Spark 4.0.1 programming guide",
-        "https://spark.apache.org/docs/4.0.1/rdd-programming-guide.html"
+        "Spark 4.3.0 programming guide",
+        "https://spark.apache.org/docs/4.3.0/rdd-programming-guide.html"
       ],
       [
-        "Spark 4.0.1 SQL programming guide",
-        "https://spark.apache.org/docs/4.0.1/sql-programming-guide.html"
+        "Spark 4.3.0 SQL programming guide",
+        "https://spark.apache.org/docs/4.3.0/sql-programming-guide.html"
       ]
     ],
     "worked_examples": [
@@ -352,12 +352,12 @@
     ],
     "sources": [
       [
-        "Spark 4.0.1 programming guide",
-        "https://spark.apache.org/docs/4.0.1/rdd-programming-guide.html"
+        "Spark 4.3.0 programming guide",
+        "https://spark.apache.org/docs/4.3.0/rdd-programming-guide.html"
       ],
       [
-        "Spark 4.0.1 SQL programming guide",
-        "https://spark.apache.org/docs/4.0.1/sql-programming-guide.html"
+        "Spark 4.3.0 SQL programming guide",
+        "https://spark.apache.org/docs/4.3.0/sql-programming-guide.html"
       ]
     ],
     "worked_examples": [
@@ -405,12 +405,12 @@
     ],
     "sources": [
       [
-        "Spark 4.0.1 programming guide",
-        "https://spark.apache.org/docs/4.0.1/rdd-programming-guide.html"
+        "Spark 4.3.0 programming guide",
+        "https://spark.apache.org/docs/4.3.0/rdd-programming-guide.html"
       ],
       [
-        "Spark 4.0.1 SQL programming guide",
-        "https://spark.apache.org/docs/4.0.1/sql-programming-guide.html"
+        "Spark 4.3.0 SQL programming guide",
+        "https://spark.apache.org/docs/4.3.0/sql-programming-guide.html"
       ]
     ],
     "worked_examples": [
@@ -458,12 +458,12 @@
     ],
     "sources": [
       [
-        "Spark 4.0.1 programming guide",
-        "https://spark.apache.org/docs/4.0.1/rdd-programming-guide.html"
+        "Spark 4.3.0 programming guide",
+        "https://spark.apache.org/docs/4.3.0/rdd-programming-guide.html"
       ],
       [
-        "Spark 4.0.1 SQL programming guide",
-        "https://spark.apache.org/docs/4.0.1/sql-programming-guide.html"
+        "Spark 4.3.0 SQL programming guide",
+        "https://spark.apache.org/docs/4.3.0/sql-programming-guide.html"
       ]
     ],
     "worked_examples": [
@@ -511,12 +511,12 @@
     ],
     "sources": [
       [
-        "Spark 4.0.1 programming guide",
-        "https://spark.apache.org/docs/4.0.1/rdd-programming-guide.html"
+        "Spark 4.3.0 programming guide",
+        "https://spark.apache.org/docs/4.3.0/rdd-programming-guide.html"
       ],
       [
-        "Spark 4.0.1 SQL programming guide",
-        "https://spark.apache.org/docs/4.0.1/sql-programming-guide.html"
+        "Spark 4.3.0 SQL programming guide",
+        "https://spark.apache.org/docs/4.3.0/sql-programming-guide.html"
       ]
     ],
     "worked_examples": [
@@ -564,12 +564,12 @@
     ],
     "sources": [
       [
-        "Spark 4.0.1 programming guide",
-        "https://spark.apache.org/docs/4.0.1/rdd-programming-guide.html"
+        "Spark 4.3.0 programming guide",
+        "https://spark.apache.org/docs/4.3.0/rdd-programming-guide.html"
       ],
       [
-        "Spark 4.0.1 SQL programming guide",
-        "https://spark.apache.org/docs/4.0.1/sql-programming-guide.html"
+        "Spark 4.3.0 SQL programming guide",
+        "https://spark.apache.org/docs/4.3.0/sql-programming-guide.html"
       ]
     ],
     "worked_examples": [
@@ -617,12 +617,12 @@
     ],
     "sources": [
       [
-        "Spark 4.0.1 programming guide",
-        "https://spark.apache.org/docs/4.0.1/rdd-programming-guide.html"
+        "Spark 4.3.0 programming guide",
+        "https://spark.apache.org/docs/4.3.0/rdd-programming-guide.html"
       ],
       [
-        "Spark 4.0.1 SQL programming guide",
-        "https://spark.apache.org/docs/4.0.1/sql-programming-guide.html"
+        "Spark 4.3.0 SQL programming guide",
+        "https://spark.apache.org/docs/4.3.0/sql-programming-guide.html"
       ]
     ],
     "worked_examples": [
@@ -670,12 +670,12 @@
     ],
     "sources": [
       [
-        "Spark 4.0.1 typed aggregate API",
-        "https://spark.apache.org/docs/4.0.1/sql-ref-functions-udf-aggregate.html"
+        "Spark 4.3.0 typed aggregate API",
+        "https://spark.apache.org/docs/4.3.0/sql-ref-functions-udf-aggregate.html"
       ],
       [
-        "Spark 4.0.1 SQL null semantics",
-        "https://spark.apache.org/docs/4.0.1/sql-ref-null-semantics.html"
+        "Spark 4.3.0 SQL null semantics",
+        "https://spark.apache.org/docs/4.3.0/sql-ref-null-semantics.html"
       ]
     ],
     "worked_examples": [
@@ -723,12 +723,12 @@
     ],
     "sources": [
       [
-        "Spark 4.0.1 typed aggregate API",
-        "https://spark.apache.org/docs/4.0.1/sql-ref-functions-udf-aggregate.html"
+        "Spark 4.3.0 typed aggregate API",
+        "https://spark.apache.org/docs/4.3.0/sql-ref-functions-udf-aggregate.html"
       ],
       [
-        "Spark 4.0.1 SQL null semantics",
-        "https://spark.apache.org/docs/4.0.1/sql-ref-null-semantics.html"
+        "Spark 4.3.0 SQL null semantics",
+        "https://spark.apache.org/docs/4.3.0/sql-ref-null-semantics.html"
       ]
     ],
     "worked_examples": [
@@ -776,12 +776,12 @@
     ],
     "sources": [
       [
-        "Spark 4.0.1 typed aggregate API",
-        "https://spark.apache.org/docs/4.0.1/sql-ref-functions-udf-aggregate.html"
+        "Spark 4.3.0 typed aggregate API",
+        "https://spark.apache.org/docs/4.3.0/sql-ref-functions-udf-aggregate.html"
       ],
       [
-        "Spark 4.0.1 SQL null semantics",
-        "https://spark.apache.org/docs/4.0.1/sql-ref-null-semantics.html"
+        "Spark 4.3.0 SQL null semantics",
+        "https://spark.apache.org/docs/4.3.0/sql-ref-null-semantics.html"
       ]
     ],
     "worked_examples": [
@@ -827,10 +827,10 @@
       ]
     ],
     "sources": [
-      ["Spark 4.0.1 ML pipeline contract", "https://spark.apache.org/docs/4.0.1/ml-pipeline.html"],
+      ["Spark 4.3.0 ML pipeline contract", "https://spark.apache.org/docs/4.3.0/ml-pipeline.html"],
       [
-        "Spark 4.0.1 SQL programming guide",
-        "https://spark.apache.org/docs/4.0.1/sql-programming-guide.html"
+        "Spark 4.3.0 SQL programming guide",
+        "https://spark.apache.org/docs/4.3.0/sql-programming-guide.html"
       ]
     ],
     "worked_examples": [
@@ -873,10 +873,10 @@
       ["Parent link", "The setParent call that records which Estimator produced a fitted Model."]
     ],
     "sources": [
-      ["Spark 4.0.1 ML pipeline contract", "https://spark.apache.org/docs/4.0.1/ml-pipeline.html"],
+      ["Spark 4.3.0 ML pipeline contract", "https://spark.apache.org/docs/4.3.0/ml-pipeline.html"],
       [
-        "Spark 4.0.1 SQL programming guide",
-        "https://spark.apache.org/docs/4.0.1/sql-programming-guide.html"
+        "Spark 4.3.0 SQL programming guide",
+        "https://spark.apache.org/docs/4.3.0/sql-programming-guide.html"
       ]
     ],
     "worked_examples": [
@@ -924,12 +924,12 @@
     ],
     "sources": [
       [
-        "Spark 4.0.1 Arrow and pandas guide",
-        "https://spark.apache.org/docs/4.0.1/api/python/tutorial/sql/arrow_pandas.html"
+        "Spark 4.3.0 Arrow and pandas guide",
+        "https://spark.apache.org/docs/4.3.0/api/python/tutorial/sql/arrow_pandas.html"
       ],
       [
-        "Spark 4.0.1 SQL programming guide",
-        "https://spark.apache.org/docs/4.0.1/sql-programming-guide.html"
+        "Spark 4.3.0 SQL programming guide",
+        "https://spark.apache.org/docs/4.3.0/sql-programming-guide.html"
       ]
     ],
     "worked_examples": [
@@ -977,12 +977,12 @@
     ],
     "sources": [
       [
-        "Spark 4.0.1 SQL performance tuning",
-        "https://spark.apache.org/docs/4.0.1/sql-performance-tuning.html"
+        "Spark 4.3.0 SQL performance tuning",
+        "https://spark.apache.org/docs/4.3.0/sql-performance-tuning.html"
       ],
       [
-        "Spark 4.0.1 Catalyst expression source",
-        "https://github.com/apache/spark/blob/v4.0.1/sql/catalyst/src/main/scala/org/apache/spark/sql/catalyst/expressions/Expression.scala"
+        "Spark 4.3.0 Catalyst expression source",
+        "https://github.com/apache/spark/blob/v4.3.0/sql/catalyst/src/main/scala/org/apache/spark/sql/catalyst/expressions/Expression.scala"
       ]
     ],
     "worked_examples": [
@@ -1029,12 +1029,12 @@
     ],
     "sources": [
       [
-        "Spark 4.0.1 SQL performance tuning",
-        "https://spark.apache.org/docs/4.0.1/sql-performance-tuning.html"
+        "Spark 4.3.0 SQL performance tuning",
+        "https://spark.apache.org/docs/4.3.0/sql-performance-tuning.html"
       ],
       [
-        "Spark 4.0.1 Catalyst expression source",
-        "https://github.com/apache/spark/blob/v4.0.1/sql/catalyst/src/main/scala/org/apache/spark/sql/catalyst/expressions/Expression.scala"
+        "Spark 4.3.0 Catalyst expression source",
+        "https://github.com/apache/spark/blob/v4.3.0/sql/catalyst/src/main/scala/org/apache/spark/sql/catalyst/expressions/Expression.scala"
       ]
     ],
     "worked_examples": [
@@ -1043,7 +1043,7 @@
         "language": "python",
         "code": "import math\n\nimport numpy as np\n\nprint([x * x + 1 for x in range(10)])\nlimit = 2**63 - 1\nedge = math.isqrt(limit - 1)\nprint(\"largest safe x:\", edge, \"x*x+1 =\", edge * edge + 1)\nwith np.errstate(over=\"ignore\"):\n    wrapped = np.array([edge, edge + 1], dtype=np.int64) ** 2 + 1\nprint(\"int64 results:\", wrapped.tolist())",
         "output": "[1, 2, 5, 10, 17, 26, 37, 50, 65, 82]\nlargest safe x: 3037000499 x*x+1 = 9223372030926249002\nint64 results: [9223372030926249002, -9223372036709301615]",
-        "interpretation": "Python integers and a numpy int64 array stand in for Spark's LongType here. The first line matches the chapter's expected values for 0 through 9, ending at 82. The largest x for which x squared plus one still fits below 2 to the 63rd minus 1 is 3037000499, giving 9223372030926249002. One step larger, the int64 computation silently wraps to a large negative number. Spark 4.0.1 enables ANSI mode by default and raises an arithmetic overflow error instead, while setting spark.sql.ansi.enabled to false restores the legacy wraparound that numpy shows. That is the overflow contract the chapter says must be declared before the generated-code fixture can be trusted for larger inputs."
+        "interpretation": "Python integers and a numpy int64 array stand in for Spark's LongType here. The first line matches the chapter's expected values for 0 through 9, ending at 82. The largest x for which x squared plus one still fits below 2 to the 63rd minus 1 is 3037000499, giving 9223372030926249002. One step larger, the int64 computation silently wraps to a large negative number. Spark 4.3.0 enables ANSI mode by default and raises an arithmetic overflow error instead, while setting spark.sql.ansi.enabled to false restores the legacy wraparound that numpy shows. That is the overflow contract the chapter says must be declared before the generated-code fixture can be trusted for larger inputs."
       }
     ]
   },
@@ -1057,7 +1057,7 @@
     "language": "markdown",
     "suffix": ".md",
     "concepts": ["SparkSessionExtensions", "injection", "lifecycle"],
-    "outcome": "Compile an owned Spark4.0.1 extension and prove that it is installed when the session is constructed.",
+    "outcome": "Compile an owned Spark4.3.0 extension and prove that it is installed when the session is constructed.",
     "key_terms": [
       [
         "SparkSessionExtensions",
@@ -1073,7 +1073,7 @@
       ],
       [
         "Version pinning",
-        "Compiling against the exact Spark, Scala and JDK versions of the prepared image, here Spark 4.0.1, Scala 2.13 and JDK 17."
+        "Compiling against the exact Spark, Scala and JDK versions of the prepared image, here Spark 4.3.0, Scala 2.13 and JDK 17."
       ],
       [
         "Extension JAR",
@@ -1082,12 +1082,12 @@
     ],
     "sources": [
       [
-        "Spark 4.0.1 extension API",
-        "https://spark.apache.org/docs/4.0.1/api/scala/org/apache/spark/sql/SparkSessionExtensions.html"
+        "Spark 4.3.0 extension API",
+        "https://spark.apache.org/docs/4.3.0/api/scala/org/apache/spark/sql/SparkSessionExtensions.html"
       ],
       [
-        "Spark 4.0.1 Catalyst expression source",
-        "https://github.com/apache/spark/blob/v4.0.1/sql/catalyst/src/main/scala/org/apache/spark/sql/catalyst/expressions/Expression.scala"
+        "Spark 4.3.0 Catalyst expression source",
+        "https://github.com/apache/spark/blob/v4.3.0/sql/catalyst/src/main/scala/org/apache/spark/sql/catalyst/expressions/Expression.scala"
       ]
     ],
     "worked_examples": [
@@ -1134,12 +1134,12 @@
     ],
     "sources": [
       [
-        "Spark 4.0.1 extension API",
-        "https://spark.apache.org/docs/4.0.1/api/scala/org/apache/spark/sql/SparkSessionExtensions.html"
+        "Spark 4.3.0 extension API",
+        "https://spark.apache.org/docs/4.3.0/api/scala/org/apache/spark/sql/SparkSessionExtensions.html"
       ],
       [
-        "Spark 4.0.1 Catalyst expression source",
-        "https://github.com/apache/spark/blob/v4.0.1/sql/catalyst/src/main/scala/org/apache/spark/sql/catalyst/expressions/Expression.scala"
+        "Spark 4.3.0 Catalyst expression source",
+        "https://github.com/apache/spark/blob/v4.3.0/sql/catalyst/src/main/scala/org/apache/spark/sql/catalyst/expressions/Expression.scala"
       ]
     ],
     "worked_examples": [
@@ -1187,12 +1187,12 @@
     ],
     "sources": [
       [
-        "Spark 4.0.1 extension API",
-        "https://spark.apache.org/docs/4.0.1/api/scala/org/apache/spark/sql/SparkSessionExtensions.html"
+        "Spark 4.3.0 extension API",
+        "https://spark.apache.org/docs/4.3.0/api/scala/org/apache/spark/sql/SparkSessionExtensions.html"
       ],
       [
-        "Spark 4.0.1 Catalyst expression source",
-        "https://github.com/apache/spark/blob/v4.0.1/sql/catalyst/src/main/scala/org/apache/spark/sql/catalyst/expressions/Expression.scala"
+        "Spark 4.3.0 Catalyst expression source",
+        "https://github.com/apache/spark/blob/v4.3.0/sql/catalyst/src/main/scala/org/apache/spark/sql/catalyst/expressions/Expression.scala"
       ]
     ],
     "worked_examples": [
@@ -1240,12 +1240,12 @@
     ],
     "sources": [
       [
-        "Spark 4.0.1 extension API",
-        "https://spark.apache.org/docs/4.0.1/api/scala/org/apache/spark/sql/SparkSessionExtensions.html"
+        "Spark 4.3.0 extension API",
+        "https://spark.apache.org/docs/4.3.0/api/scala/org/apache/spark/sql/SparkSessionExtensions.html"
       ],
       [
-        "Spark 4.0.1 Catalyst expression source",
-        "https://github.com/apache/spark/blob/v4.0.1/sql/catalyst/src/main/scala/org/apache/spark/sql/catalyst/expressions/Expression.scala"
+        "Spark 4.3.0 Catalyst expression source",
+        "https://github.com/apache/spark/blob/v4.3.0/sql/catalyst/src/main/scala/org/apache/spark/sql/catalyst/expressions/Expression.scala"
       ]
     ],
     "worked_examples": [
@@ -1293,12 +1293,12 @@
     ],
     "sources": [
       [
-        "Spark 4.0.1 extension API",
-        "https://spark.apache.org/docs/4.0.1/api/scala/org/apache/spark/sql/SparkSessionExtensions.html"
+        "Spark 4.3.0 extension API",
+        "https://spark.apache.org/docs/4.3.0/api/scala/org/apache/spark/sql/SparkSessionExtensions.html"
       ],
       [
-        "Spark 4.0.1 Catalyst expression source",
-        "https://github.com/apache/spark/blob/v4.0.1/sql/catalyst/src/main/scala/org/apache/spark/sql/catalyst/expressions/Expression.scala"
+        "Spark 4.3.0 Catalyst expression source",
+        "https://github.com/apache/spark/blob/v4.3.0/sql/catalyst/src/main/scala/org/apache/spark/sql/catalyst/expressions/Expression.scala"
       ]
     ],
     "worked_examples": [
@@ -1346,8 +1346,8 @@
     ],
     "sources": [
       [
-        "Spark 4.0.1 TorchDistributor implementation",
-        "https://github.com/apache/spark/blob/v4.0.1/python/pyspark/ml/torch/distributor.py"
+        "Spark 4.3.0 TorchDistributor implementation",
+        "https://github.com/apache/spark/blob/v4.3.0/python/pyspark/ml/torch/distributor.py"
       ],
       [
         "PyTorch 2.9 distributed data parallel",
@@ -1399,8 +1399,8 @@
     ],
     "sources": [
       [
-        "Spark 4.0.1 TorchDistributor implementation",
-        "https://github.com/apache/spark/blob/v4.0.1/python/pyspark/ml/torch/distributor.py"
+        "Spark 4.3.0 TorchDistributor implementation",
+        "https://github.com/apache/spark/blob/v4.3.0/python/pyspark/ml/torch/distributor.py"
       ],
       [
         "PyTorch 2.9 distributed data parallel",
@@ -1451,8 +1451,8 @@
     ],
     "sources": [
       [
-        "Spark 4.0.1 TorchDistributor implementation",
-        "https://github.com/apache/spark/blob/v4.0.1/python/pyspark/ml/torch/distributor.py"
+        "Spark 4.3.0 TorchDistributor implementation",
+        "https://github.com/apache/spark/blob/v4.3.0/python/pyspark/ml/torch/distributor.py"
       ],
       [
         "PyTorch 2.9 distributed data parallel",
@@ -1614,8 +1614,8 @@
       ["TMB introduction", "https://kaskr.github.io/adcomp/Introduction.html"],
       ["TMB methods paper", "https://www.jstatsoft.org/article/view/v070i05"],
       [
-        "Spark 4.0.1 programming guide",
-        "https://spark.apache.org/docs/4.0.1/rdd-programming-guide.html"
+        "Spark 4.3.0 programming guide",
+        "https://spark.apache.org/docs/4.3.0/rdd-programming-guide.html"
       ]
     ],
     "worked_examples": [
@@ -1665,8 +1665,8 @@
       ["TMB introduction", "https://kaskr.github.io/adcomp/Introduction.html"],
       ["TMB methods paper", "https://www.jstatsoft.org/article/view/v070i05"],
       [
-        "Spark 4.0.1 programming guide",
-        "https://spark.apache.org/docs/4.0.1/rdd-programming-guide.html"
+        "Spark 4.3.0 programming guide",
+        "https://spark.apache.org/docs/4.3.0/rdd-programming-guide.html"
       ]
     ],
     "worked_examples": [
@@ -1716,8 +1716,8 @@
       ["TMB introduction", "https://kaskr.github.io/adcomp/Introduction.html"],
       ["TMB methods paper", "https://www.jstatsoft.org/article/view/v070i05"],
       [
-        "Spark 4.0.1 programming guide",
-        "https://spark.apache.org/docs/4.0.1/rdd-programming-guide.html"
+        "Spark 4.3.0 programming guide",
+        "https://spark.apache.org/docs/4.3.0/rdd-programming-guide.html"
       ]
     ],
     "worked_examples": [
@@ -1767,8 +1767,8 @@
       ["TMB introduction", "https://kaskr.github.io/adcomp/Introduction.html"],
       ["TMB methods paper", "https://www.jstatsoft.org/article/view/v070i05"],
       [
-        "Spark 4.0.1 programming guide",
-        "https://spark.apache.org/docs/4.0.1/rdd-programming-guide.html"
+        "Spark 4.3.0 programming guide",
+        "https://spark.apache.org/docs/4.3.0/rdd-programming-guide.html"
       ]
     ],
     "worked_examples": [
@@ -1818,8 +1818,8 @@
       ["TMB introduction", "https://kaskr.github.io/adcomp/Introduction.html"],
       ["TMB methods paper", "https://www.jstatsoft.org/article/view/v070i05"],
       [
-        "Spark 4.0.1 programming guide",
-        "https://spark.apache.org/docs/4.0.1/rdd-programming-guide.html"
+        "Spark 4.3.0 programming guide",
+        "https://spark.apache.org/docs/4.3.0/rdd-programming-guide.html"
       ]
     ],
     "worked_examples": [
@@ -1935,12 +1935,12 @@
     ],
     "sources": [
       [
-        "Spark 4.0.1 programming guide",
-        "https://spark.apache.org/docs/4.0.1/rdd-programming-guide.html"
+        "Spark 4.3.0 programming guide",
+        "https://spark.apache.org/docs/4.3.0/rdd-programming-guide.html"
       ],
       [
-        "Spark 4.0.1 SQL performance tuning",
-        "https://spark.apache.org/docs/4.0.1/sql-performance-tuning.html"
+        "Spark 4.3.0 SQL performance tuning",
+        "https://spark.apache.org/docs/4.3.0/sql-performance-tuning.html"
       ]
     ],
     "worked_examples": [
@@ -1995,12 +1995,12 @@
     ],
     "sources": [
       [
-        "Spark 4.0.1 programming guide",
-        "https://spark.apache.org/docs/4.0.1/rdd-programming-guide.html"
+        "Spark 4.3.0 programming guide",
+        "https://spark.apache.org/docs/4.3.0/rdd-programming-guide.html"
       ],
       [
-        "Spark 4.0.1 SQL performance tuning",
-        "https://spark.apache.org/docs/4.0.1/sql-performance-tuning.html"
+        "Spark 4.3.0 SQL performance tuning",
+        "https://spark.apache.org/docs/4.3.0/sql-performance-tuning.html"
       ]
     ],
     "worked_examples": [

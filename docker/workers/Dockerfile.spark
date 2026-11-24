@@ -1,4 +1,4 @@
-ARG DS60_SPARK_IMAGE=spark:4.0.1-scala2.13-java17-python3-ubuntu@sha256:a552a335e0aedb44fa28b20ed7e9dc52c2e856faf87fb0409fb57dbf37b45bf7
+ARG DS60_SPARK_IMAGE=spark:4.3.0-scala2.13-java17-python3-ubuntu@sha256:6f4beaaae1b084cad88493a894141d9f26a0a810f6c688519b036d34f1c2475e
 ARG DS60_PYTHON_IMAGE=python:3.12.16-slim-trixie@sha256:5e2bdb1b0d542d5039cffb8181c65930093949194a65c365dfb1b0fe13a4fa5b
 FROM ${DS60_SPARK_IMAGE} AS spark
 FROM ${DS60_PYTHON_IMAGE}
@@ -11,9 +11,10 @@ RUN apt-get update && apt-get upgrade -y && rm -rf /var/lib/apt/lists/* \
 COPY --from=spark /opt/java/openjdk /opt/java/openjdk
 ENV JAVA_HOME=/opt/java/openjdk PATH="/opt/java/openjdk/bin:$PATH"
 COPY --from=spark /opt/spark /opt/spark
-# Drop the Hive, Spark Connect, Kubernetes, and ZooKeeper jars the classroom never loads
-# and swap standalone dependency jars for SHA-256 pinned releases with security fixes.
-COPY docker/workers/fetch_pinned.py docker/workers/spark/apply_jar_overrides.py docker/workers/spark/jar-overrides.json /tmp/spark-overrides/
+# Drop the Hive, Spark Connect, Kubernetes, and ZooKeeper jars the classroom never loads,
+# swap standalone dependency jars for SHA-256 pinned releases with security fixes, and
+# re-shade the libraries Spark and Hadoop bundle inside their own jars with fixed releases.
+COPY docker/workers/fetch_pinned.py docker/workers/spark/apply_jar_overrides.py docker/workers/spark/jar_reshade.py docker/workers/spark/jar-overrides.json /tmp/spark-overrides/
 RUN python /tmp/spark-overrides/apply_jar_overrides.py /opt/spark /tmp/spark-overrides/jar-overrides.json \
     && rm -rf /tmp/spark-overrides
 # Learner jobs log Spark warnings and errors only (no INFO startup chatter).

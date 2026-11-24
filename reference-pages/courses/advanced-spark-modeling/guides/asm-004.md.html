@@ -268,9 +268,9 @@ state=(n=16, s=120.0, q=1240.0); raw payload 763 MiB vs 512 MiB</code></pre>
         <span class="syntax-operator">.</span>config<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">spark.sql.session.timeZone</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">UTC</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
         <span class="syntax-operator">.</span>getOrCreate<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
     <span class="syntax-punctuation">)</span>
-    <span class="syntax-keyword">if</span> spark<span class="syntax-operator">.</span>version <span class="syntax-operator">!=</span> <span class="syntax-string">&quot;</span><span class="syntax-string">4.0.1</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span>
+    <span class="syntax-keyword">if</span> spark<span class="syntax-operator">.</span>version <span class="syntax-operator">!=</span> <span class="syntax-string">&quot;</span><span class="syntax-string">4.3.0</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span>
         spark<span class="syntax-operator">.</span>stop<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
-        <span class="syntax-keyword">raise</span> RuntimeError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">This worked reference is qualified for Spark 4.0.1</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+        <span class="syntax-keyword">raise</span> RuntimeError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">This worked reference is qualified for Spark 4.3.0</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
     spark<span class="syntax-operator">.</span>sparkContext<span class="syntax-operator">.</span>setLogLevel<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">ERROR</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
     <span class="syntax-keyword">return</span> spark
 
@@ -327,8 +327,8 @@ state=(n=16, s=120.0, q=1240.0); raw payload 763 MiB vs 512 MiB</code></pre>
         spark<span class="syntax-operator">.</span>stop<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></code></pre>
 <h3 id="primary-references">Primary references<a class="heading-anchor" href="#primary-references" aria-label="Link to this section">#</a></h3>
 <ul>
-<li><a href="https://spark.apache.org/docs/4.0.1/rdd-programming-guide.html">Spark 4.0.1 programming guide</a></li>
-<li><a href="https://spark.apache.org/docs/4.0.1/sql-programming-guide.html">Spark 4.0.1 SQL programming guide</a></li>
+<li><a href="https://spark.apache.org/docs/4.3.0/rdd-programming-guide.html">Spark 4.3.0 programming guide</a></li>
+<li><a href="https://spark.apache.org/docs/4.3.0/sql-programming-guide.html">Spark 4.3.0 SQL programming guide</a></li>
 </ul></article>
   </main>
 </body>

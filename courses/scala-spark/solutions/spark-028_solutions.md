@@ -120,7 +120,7 @@ The candidate changes physical execution while retaining the same selected input
 
 Return version, master, AQE and automatic broadcast threshold as named fields. Attach key frequencies, the baseline/candidate plans and each observed summary-query exchange metric map.
 
-**Expected:** Spark 4.0.1, `local[2]`, AQE false, threshold -1; key 0 frequency 1600 and others 100. Both runs expose actual nonempty exchange observations. No peak-memory or throughput value is invented.
+**Expected:** Spark 4.3.0, `local[2]`, AQE false, threshold -1; key 0 frequency 1600 and others 100. Both runs expose actual nonempty exchange observations. No peak-memory or throughput value is invented.
 
 ```scala
 def configurationReceipt(spark: SparkSession): Map[String, String] = {

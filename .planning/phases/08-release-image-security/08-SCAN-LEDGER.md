@@ -27,22 +27,29 @@ reviewed pending-owner entries (expiring within 90 days) plus D-06 misconfig ent
 | java21 | temurin 21 stage, python slim trixie | yes | 0 | 53 | 0 | 36/36 |
 | swift-linux | swift:6.3.3-noble | yes | 0 | 137 | 0 | 48/48 |
 | r-statistics | rocker/r-ver:4.6.1, compilers purged | yes | 0 | 0 (no High/Critical at all) | 0 | 108/108, R references 270/270 |
-| scala-jvm | spark:4.0.1 jars + overrides | **no** | 24 HIGH (+24 MEDIUM, 2 LOW) | 53 | 0 | 9/9 |
-| spark-local-scala | same image | **no** | same | 53 | 0 | 43/43 |
-| spark-local-python | same image | **no** | same | 53 | 0 | 47/47 |
+| scala-jvm | spark:4.3.0 jars + overrides and re-shades | yes | 0 | 53 | 0 | 9/9 |
+| spark-local-scala | same image | yes | 0 | 53 | 0 | 43/43 |
+| spark-local-python | same image | yes | 0 | 53 | 0 | 47/47 |
 
 Supporting checks on images built from the R worker: tmb-local (toolchain installed in
 its own dependencies stage) compiled and passed `tests/acceptance.R`; `tests/public_api.R`
 and `tmb-cpp-api/check.R` passed (R 4.6.1, TMB 1.9.25, Matrix 1.7.6).
 
-### Spark blocker (Rule 4, open)
+### Spark blocker (Rule 4, resolved)
 
-All remaining blocking findings are fixable Java libraries shaded inside upstream jars:
-jetty 11.0.24 (spark-core), guava 33.4.0 (spark-network-common), jackson 2.18.1
-(parquet-jackson), and in hadoop-client-runtime 3.4.3: jackson 2.12.7, guava 33.4.8,
-jetty 9.4.57, jline 3.9.0, commons-configuration2 2.10.1, kerby-asn1 2.0.3.
-Critical findings went from 8 to 0 through jar overrides. The fixed jetty lines are 12.x,
-which needs a source re-shade, not a drop-in jar swap.
+Before: fixable libraries shaded inside upstream jars blocked Spark 4.0.1: jetty 11.0.24
+(spark-core), guava 33.4.0 (spark-network-common), jackson 2.18.1 (parquet-jackson), and
+in hadoop-client-runtime 3.4.3: jackson 2.12.7, guava 33.4.8, jetty 9.4.57, jline 3.9.0,
+commons-configuration2 2.10.1, kerby-asn1 2.0.3.
+
+After: Spark 4.3.0 (`sha256:6f4beaaae1b084cad88493a894141d9f26a0a810f6c688519b036d34f1c2475e`)
+with the `reshade_jars` operation. spark-core carries Jetty 12.1.15, spark-network-common
+guava 33.8.0-jre, parquet-jackson is 1.18.2, and hadoop-client-runtime 3.5.0 carries
+jackson 2.18.12, guava 33.7.2, jline 3.30.17, kerby 2.1.2 and commons-configuration2
+2.15.1. Hadoop's shaded Jetty 9.4 is removed; a local-mode `-verbose:class` smoke run
+loaded 0 of its classes while the Spark UI, Parquet and CSV paths worked. Scan on
+2026-11-24: 0 blocking, 53 suppressed (C0 H53 M75 L79 U16) for all three profiles. Details
+are in `08-04-SUMMARY.md` under Spark Resolution.
 
 Not scanned locally (CI is the first scan after the 08-03 base moves): javascript-node,
 typescript-node, tensorflow-cpu, llm-torch-cpu, dbt-duckdb, stan-cpu, julia, jax-cpu,
@@ -66,7 +73,7 @@ plus the postgres reference. Nineteen groups means nineteen marker commits.
 | `[build-test-csharp]` | csharp-dotnet | `<RUN_ID_PENDING>` | `<PENDING>` | `<PENDING>` |
 | `[build-test-swift]` | swift-linux | `<RUN_ID_PENDING>` | `<PENDING>` | `<PENDING>` |
 | `[build-test-javascript-typescript]` | javascript-node, typescript-node | `<RUN_ID_PENDING>` | `<PENDING>` | `<PENDING>` |
-| `[build-test-scala-spark]` | scala-jvm, spark-local-scala, spark-local-python | `<RUN_ID_PENDING>` | expected fail (Spark blocker) | expected fail |
+| `[build-test-scala-spark]` | scala-jvm, spark-local-scala, spark-local-python | `<RUN_ID_PENDING>` | `<PENDING>` | `<PENDING>` |
 | `[build-test-tensorflow]` | tensorflow-cpu | `<RUN_ID_PENDING>` | `<PENDING>` | `<PENDING>` |
 | `[build-test-pytorch]` | llm-torch-cpu | `<RUN_ID_PENDING>` | `<PENDING>` | `<PENDING>` |
 | `[build-test-data-engineering]` | data-engineering, dbt-duckdb | `<RUN_ID_PENDING>` | `<PENDING>` | `<PENDING>` |

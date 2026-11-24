@@ -191,8 +191,8 @@ def main():
     try:
         assert spark.sparkContext.master == "local[2]"
         spark.sparkContext.setLogLevel("ERROR")
-        if spark.version != "4.0.1":
-            raise ValueError("Prepared Spark 4.0.1 required")
+        if spark.version != "4.3.0":
+            raise ValueError("Prepared Spark 4.3.0 required")
         spark.conf.set("spark.sql.streaming.stopTimeout", "5000")
         owned_root = Path(tempfile.mkdtemp(prefix="spark-041-", dir=Path.cwd()))
         input_path = owned_root / "input"
@@ -208,7 +208,7 @@ def main():
         # Exercise 1: Capture the actual runtime tuple
         versions = version_receipt(spark)
         assert (
-            versions["spark"] == "4.0.1"
+            versions["spark"] == "4.3.0"
             and versions["scala"].startswith("2.13.")
             and versions["java_major"] == "17"
             and versions["python"]
@@ -272,7 +272,7 @@ def main():
 if __name__ == "__main__":
     main()
 
-# Exercise 1: Capture the actual runtime tuple. Inputs/task: Record Spark, Scala binary and patch, JDK major and patch, Python version and optional PyArrow distribution version without installing anything. Expected: Spark 4.0.1, Scala 2.13 family, JDK 17;actual patch strings and explicit not-installed Arrow when absent. Verify: Inspect actual values and reject a claimed target qualification based only on a proposed version string.
+# Exercise 1: Capture the actual runtime tuple. Inputs/task: Record Spark, Scala binary and patch, JDK major and patch, Python version and optional PyArrow distribution version without installing anything. Expected: Spark 4.3.0, Scala 2.13 family, JDK 17;actual patch strings and explicit not-installed Arrow when absent. Verify: Inspect actual values and reject a claimed target qualification based only on a proposed version string.
 # Exercise 2: Run a type, NULL and multiplicity golden suite. Inputs/task: Evaluate the supplied four-row bag plus exact decimal and timezone expressions. Expected: 4 rows,3 known amounts, total 200,3 distinct IDs; decimal 12345678.90;instant 19:00UTC. Verify: Compare exact metrics and rendered values under the UTC baseline.
 # Exercise 3: Preserve baseline state and reject incompatible reuse. Inputs/task: Run the baseline ID-only deduplication query, then reject a request to change its state keys to id, cents while retaining that checkpoint. Expected: Baseline output 1:100,2:200;preflight rejects changed keys before starting a new query. Verify: Compare owned-query count before/after the refusal and confirm the old checkpoint/output remain present and unchanged.
 # Exercise 4: Run the changed query in a separate candidate namespace. Inputs/task: Add a new occurrence 1:999 and run id, cents deduplication using a new checkpoint/output. Expected: Candidate bag 1:100,1:999,2:200, which fails the baseline one-row-per-ID product gate. Verify: Compare candidate and baseline exact bags and preserve old checkpoint/output.

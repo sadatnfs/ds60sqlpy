@@ -634,10 +634,22 @@ def test_every_python_base_is_one_maintained_pinned_image() -> None:
     assert len(postgres) == 1, postgres
     assert re.fullmatch(r"postgres:\d+\.\d+-trixie@sha256:[0-9a-f]{64}", postgres.pop())
     assert not [name for name, text in texts.items() if "astral-sh/uv:python" in text]
+    spark_pattern = r"(?<![\w.])(?:mirror\.gcr\.io/library/)?(spark:[^\s\"'}]*)"
+    # The standalone scientific packages qualify their own Spark 4.0.1 wrappers and
+    # native builds; only the classroom images must share one Spark base.
     spark = {
         match.group(1)
-        for text in texts.values()
-        for match in re.finditer(r"(?<![\w.])(?:mirror\.gcr\.io/library/)?(spark:[^\s\"'}]*)", text)
+        for name, text in texts.items()
+        if not name.startswith("packages/")
+        for match in re.finditer(spark_pattern, text)
     }
     assert len(spark) == 1, spark
     assert re.fullmatch(r"spark:[\w.-]+@sha256:[0-9a-f]{64}", spark.pop())
+    package_spark = {
+        match.group(1)
+        for name, text in texts.items()
+        if name.startswith("packages/")
+        for match in re.finditer(spark_pattern, text)
+    }
+    assert len(package_spark) == 1, package_spark
+    assert re.fullmatch(r"spark:[\w.-]+@sha256:[0-9a-f]{64}", package_spark.pop())

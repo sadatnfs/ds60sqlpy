@@ -14,7 +14,7 @@ object Probe {
       .config("spark.sql.adaptive.enabled", "false")
       .withExtensions(new TeachingExtensions)
       .getOrCreate()
-    require(spark.version == "4.0.1")
+    require(spark.version == "4.3.0")
     spark.sparkContext.setLogLevel("ERROR")
     import spark.implicits._
     try {

@@ -8,7 +8,7 @@ Read the [guide](../guides/spark-041.md) and attempt one language first. The [Sc
 
 Record Spark, Scala binary and patch, JDK major and patch, Python version and optional PyArrow distribution version without installing anything.
 
-**Expected:** Spark 4.0.1, Scala 2.13 family, JDK 17; actual patch strings and explicit not-installed Arrow when absent.
+**Expected:** Spark 4.3.0, Scala 2.13 family, JDK 17; actual patch strings and explicit not-installed Arrow when absent.
 
 ```scala
 def versionReceipt(spark: SparkSession): Map[String, String] = {
@@ -147,12 +147,12 @@ def may_promote(profile_qualified, golden_passed, recovery_reviewed, product_pas
     return profile_qualified and golden_passed and recovery_reviewed and product_passed
 ```
 
-The gate keeps missing evidence visible. Only the current Spark 4.0.1 stack is executed by this lesson. A future target must run the same golden suite and its own recovery checks with actual version receipts. The Boolean model organizes that decision but cannot create missing runtime evidence.
+The gate keeps missing evidence visible. Only the current Spark 4.3.0 stack is executed by this lesson. A future target must run the same golden suite and its own recovery checks with actual version receipts. The Boolean model organizes that decision but cannot create missing runtime evidence.
 
 **Verification evidence:** Check missing-profile and wrong-product negatives, then record that no second runtime was provisioned.
 
 ## Execution and interpretation
 
-Run the complete reference in its prepared fixed worker. Its first check (Capture the actual runtime tuple) is built inside the program, so opening the lesson fetches nothing; it expects: Spark 4.0.1, Scala 2.13 family, JDK 17; actual patch strings and explicit not-installed Arrow when absent. The final success line prints only after every reference assertion passes.
+Run the complete reference in its prepared fixed worker. Its first check (Capture the actual runtime tuple) is built inside the program, so opening the lesson fetches nothing; it expects: Spark 4.3.0, Scala 2.13 family, JDK 17; actual patch strings and explicit not-installed Arrow when absent. The final success line prints only after every reference assertion passes.
 
 Local plan, partition and resource evidence does not establish cluster-scale performance; session cleanup is explicit.

@@ -86,7 +86,7 @@ def exchange_metrics(frame):
     return result
 ```
 
-The helper reads metrics belonging to the executed DataFrame rather than estimating bytes from logical rows. It intentionally depends on the prepared classic Spark 4.0.1 internal plan shape and must be reviewed when upgrading. The dataSize measurement is not a universal network-byte metric. An absent metric would need to be reported as unavailable instead of silently replaced with zero.
+The helper reads metrics belonging to the executed DataFrame rather than estimating bytes from logical rows. It intentionally depends on the prepared classic Spark 4.3.0 internal plan shape and must be reviewed when upgrading. The dataSize measurement is not a universal network-byte metric. An absent metric would need to be reported as unavailable instead of silently replaced with zero.
 
 **Verification evidence:** Assert one observed exchange, its partition metric and positive serialized data size; print the complete available map.
 
@@ -181,7 +181,7 @@ def work_model(reducers):
 
 The arithmetic explains why local aggregation and reduce partition count can matter while keeping estimates distinct from observed metrics. Hash distribution can be uneven and task overhead can offset smaller per-task state. The reference intentionally makes no faster/slower assertion. A useful tuning conclusion would require representative data, controlled repeats and measured task/spill distributions beyond this lesson.
 
-**Verification evidence:** Assert the two model tuples and print Spark 4.0.1, AQE false, `local[2]` with the distinct p2/p5 observations.
+**Verification evidence:** Assert the two model tuples and print Spark 4.3.0, AQE false, `local[2]` with the distinct p2/p5 observations.
 
 ## Execution and interpretation
 

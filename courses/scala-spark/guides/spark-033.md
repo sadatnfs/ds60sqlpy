@@ -4,7 +4,7 @@ Authored paired Scala/PySpark teaching content. The default fixtures are tiny, l
 
 ## Level and prerequisites
 
-Advanced; approximately 105 minutes. Direct prerequisites: `spark-032`. The prepared baseline is Spark 4.0.1, Scala binary 2.13, JDK 17 and Python 3.12. Read the [execution baseline](../execution-baseline.md).
+Advanced; approximately 105 minutes. Direct prerequisites: `spark-032`. The prepared baseline is Spark 4.3.0, Scala binary 2.13, JDK 17 and Python 3.12. Read the [execution baseline](../execution-baseline.md).
 
 ## How to run this lesson
 
@@ -40,7 +40,7 @@ The accepted branch applies a five-minute watermark to event_time and dropDuplic
 
 Deduplication by ID also does not decide which conflicting payload is authoritative. This fixture replays the same amount and timestamp. A real event ID reused with a different amount or meaning requires a conflict/version policy, not an assumption that whichever record survives is correct. Stable identity and idempotency are data contracts in addition to the stateful operator choice.
 
-Two finite file queries read the same source. The accepted query writes watermarked deduplicated records to one Parquet sink and checkpoint. The quarantine query writes missing-ID records to its own sink and checkpoint. In the prepared Spark 4.0.1 execution, their progress input metrics count records after the respective branch filters: the first phase reports 2 for accepted identities and 1 for quarantine, not 3 for each raw file scan. The accepted metric still includes an in-horizon replay before deduplication removes it. The final ledger therefore reads the source once as a bounded batch to establish six delivery identities independently of engine metric placement. Adding metrics from arbitrary queries is not a general source-population rule; this fixture has disjoint exhaustive branches and explicit reconciliation.
+Two finite file queries read the same source. The accepted query writes watermarked deduplicated records to one Parquet sink and checkpoint. The quarantine query writes missing-ID records to its own sink and checkpoint. In the prepared Spark 4.3.0 execution, their progress input metrics count records after the respective branch filters: the first phase reports 2 for accepted identities and 1 for quarantine, not 3 for each raw file scan. The accepted metric still includes an in-horizon replay before deduplication removes it. The final ledger therefore reads the source once as a bounded batch to establish six delivery identities independently of engine metric placement. Adding metrics from arbitrary queries is not a general source-population rule; this fixture has disjoint exhaustive branches and explicit reconciliation.
 
 The third phase publishes an administrative event at 00:20. It remains in the accepted sink with amount 0 so it can advance event-time progress through the stateful operator. Filtering it out before watermarking would remove the evidence needed for that advancement. After the finite run, the business view excludes the explicit administrative ID, but the source and accepted-output ledgers continue to account for it.
 
@@ -218,9 +218,9 @@ Use the [course route](../README.md) to continue. Paired-language agreement is u
 
 ## Primary sources and official APIs
 
-- [Spark 4.0.1 dropDuplicatesWithinWatermark](https://spark.apache.org/docs/4.0.1/api/python/reference/pyspark.sql/api/pyspark.sql.DataFrame.dropDuplicatesWithinWatermark.html)
+- [Spark 4.3.0 dropDuplicatesWithinWatermark](https://spark.apache.org/docs/4.3.0/api/python/reference/pyspark.sql/api/pyspark.sql.DataFrame.dropDuplicatesWithinWatermark.html)
 
-- [Spark 4.0.1 streaming deduplication, watermarks and progress](https://spark.apache.org/docs/4.0.1/streaming/apis-on-dataframes-and-datasets.html)
+- [Spark 4.3.0 streaming deduplication, watermarks and progress](https://spark.apache.org/docs/4.3.0/streaming/apis-on-dataframes-and-datasets.html)
 
 ## Ask an AI tutor about this lesson
 

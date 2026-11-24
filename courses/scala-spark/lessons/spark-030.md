@@ -56,7 +56,7 @@ Review the proposed/driver-local/input.parquet path. State the visibility proble
 
 Produce a dependency matrix for the Scala jar, pure Python rules.zip, a hypothetical native-extension wheel and JDK/Spark runtime. State which proposed substitution is unsupported.
 
-**Inputs/evidence:** Spark 4.0.1, Scala binary 2.13, JDK 17, course_2.13.jar, rules.zip and an unqualified native-extension wheel.
+**Inputs/evidence:** Spark 4.3.0, Scala binary 2.13, JDK 17, course_2.13.jar, rules.zip and an unqualified native-extension wheel.
 
 **Expected result/shape:** A matrix locating each dependency and its qualification evidence; reject a Scala 3 binary substitution and treating a native wheel as an ordinary pure-Python source zip.
 

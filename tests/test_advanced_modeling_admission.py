@@ -141,7 +141,7 @@ def test_reading_and_r_companion_services_describe_the_actual_execution_surface(
     assert reading["setup_commands"] == []
     assert "no code execution" in reading["runtime_guidance"]
     assert reading["capability"]["profile"] == "reading"
-    assert "Spark 4.0.1" in reading["guide_html"]
+    assert "Spark 4.3.0" in reading["guide_html"]
     companion = service.action({"action": "module-lesson", "lesson_id": "tmb-005"})
     assert companion["language"] == "r" and companion["runtime_profile"] == "r-statistics"
     assert companion["source_filename"] == "main.R"

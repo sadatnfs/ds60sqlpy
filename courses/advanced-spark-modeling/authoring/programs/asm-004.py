@@ -18,9 +18,9 @@ def session(name):
         .config("spark.sql.session.timeZone", "UTC")
         .getOrCreate()
     )
-    if spark.version != "4.0.1":
+    if spark.version != "4.3.0":
         spark.stop()
-        raise RuntimeError("This worked reference is qualified for Spark 4.0.1")
+        raise RuntimeError("This worked reference is qualified for Spark 4.3.0")
     spark.sparkContext.setLogLevel("ERROR")
     return spark
 

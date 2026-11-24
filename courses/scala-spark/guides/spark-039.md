@@ -4,7 +4,7 @@ Authored paired Scala/PySpark teaching content. The default fixtures are tiny, l
 
 ## Level and prerequisites
 
-Advanced; approximately 105 minutes. Direct prerequisites: `spark-038`. The prepared baseline is Spark 4.0.1, Scala binary 2.13, JDK 17 and Python 3.12. Read the [execution baseline](../execution-baseline.md).
+Advanced; approximately 105 minutes. Direct prerequisites: `spark-038`. The prepared baseline is Spark 4.3.0, Scala binary 2.13, JDK 17 and Python 3.12. Read the [execution baseline](../execution-baseline.md).
 
 ## How to run this lesson
 
@@ -40,7 +40,7 @@ The source has IDs 0 through 19999. IDs below 16000 share key 0; the remaining 4
 
 The query explicitly repartitions by key, groups and counts, then collects the known 100-row result under a unique job group. The elapsed interval covers that collect action. Separate diagnostics count physical rows by spark_partition_id, and a later write/readback checks the persisted product. Those extra scans and writes are outside the reported collect interval. The guide states this boundary so the timings are not mistaken for full end-to-end pipeline duration.
 
-Executed-plan metrics are read after the action through classic Spark 4.0.1 JVM diagnostics. dataSize is kept under its actual metric name; it is not relabeled as bytes sent over a remote network. shuffleBytesWritten and spillSize are reported when present. Missing values remain unavailable rather than zero. The program prints the observations instead of asserting one exact machine-dependent byte or time value.
+Executed-plan metrics are read after the action through classic Spark 4.3.0 JVM diagnostics. dataSize is kept under its actual metric name; it is not relabeled as bytes sent over a remote network. shuffleBytesWritten and spillSize are reported when present. Missing values remain unavailable rather than zero. The program prints the observations instead of asserting one exact machine-dependent byte or time value.
 
 The status tracker attaches retained stage/task counters to the named action. Retention and asynchronous updates mean these are bounded diagnostic observations rather than a permanent complete history. The reference requires meaningful stage evidence but does not assert one universal stage-ID sequence. Exact per-task duration distributions are not collected here. The measured max-to-mean partition-row ratio is explicitly a work-distribution proxy, not a claim about observed task runtime skew.
 
@@ -73,7 +73,7 @@ import scala.jdk.CollectionConverters._
 import org.apache.spark.sql.streaming.{StreamingQuery, Trigger}
 import scala.collection.mutable.ArrayBuffer
 
-require(spark.version == "4.0.1", "Prepared Spark 4.0.1 required")
+require(spark.version == "4.3.0", "Prepared Spark 4.3.0 required")
 spark.conf.set("spark.sql.streaming.stopTimeout", "5000")
 ownedRoot = Files.createTempDirectory(Paths.get(".").toAbsolutePath.normalize(), "spark-039-")
 val source = spark
@@ -89,8 +89,8 @@ import shutil
 import json
 import uuid
 
-if spark.version != "4.0.1":
-    raise ValueError("Prepared Spark 4.0.1 required")
+if spark.version != "4.3.0":
+    raise ValueError("Prepared Spark 4.3.0 required")
 spark.conf.set("spark.sql.streaming.stopTimeout", "5000")
 owned_root = Path(tempfile.mkdtemp(prefix="spark-039-", dir=Path.cwd()))
 source = spark.range(0, 20000, 1, 4).withColumn(
@@ -206,9 +206,9 @@ Use the [course route](../README.md) to continue. Paired-language agreement is u
 
 ## Primary sources and official APIs
 
-- [Spark 4.0.1 monitoring metrics](https://spark.apache.org/docs/4.0.1/monitoring.html)
+- [Spark 4.3.0 monitoring metrics](https://spark.apache.org/docs/4.3.0/monitoring.html)
 
-- [Spark 4.0.1 SQL performance tuning](https://spark.apache.org/docs/4.0.1/sql-performance-tuning.html)
+- [Spark 4.3.0 SQL performance tuning](https://spark.apache.org/docs/4.3.0/sql-performance-tuning.html)
 
 ## Ask an AI tutor about this lesson
 

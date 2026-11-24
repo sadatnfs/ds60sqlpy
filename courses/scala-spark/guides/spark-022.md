@@ -4,7 +4,7 @@ Authored paired Scala/PySpark teaching content. The default fixtures are tiny, l
 
 ## Level and prerequisites
 
-Intermediate; approximately 90 minutes. Direct prerequisites: `spark-021`. The prepared baseline is Spark 4.0.1, Scala binary 2.13, JDK 17 and Python 3.12. Read the [execution baseline](../execution-baseline.md).
+Intermediate; approximately 90 minutes. Direct prerequisites: `spark-021`. The prepared baseline is Spark 4.3.0, Scala binary 2.13, JDK 17 and Python 3.12. Read the [execution baseline](../execution-baseline.md).
 
 ## How to run this lesson
 
@@ -40,9 +40,9 @@ The controlled comparison sets shuffle partitions to two and then five, with AQE
 
 Each collection action gets a unique job-group label. The status tracker locates jobs and stages associated with that action and reports task counts. This is stronger than guessing stage count from source code, but the tracker is a live, retention-limited view. A missing record would be unavailable evidence rather than proof of zero tasks. The fixture's completed action is inspected immediately, within one owned application. The lesson records available completed/failed counts without pretending the status tracker is a durable production audit log.
 
-The exchange metrics exercise intentionally crosses into classic Spark's JVM execution internals. Scala inspects queryExecution.executedPlan; Python uses its _jdf bridge. This is a diagnostic recipe pinned to Spark 4.0.1, not a stable Spark Connect or public cross-version application interface. The reader should understand the boundary: ordinary transformations stay on the public DataFrame API, while this small evidence helper reads the actual executed Exchange metric map after the action.
+The exchange metrics exercise intentionally crosses into classic Spark's JVM execution internals. Scala inspects queryExecution.executedPlan; Python uses its _jdf bridge. This is a diagnostic recipe pinned to Spark 4.3.0, not a stable Spark Connect or public cross-version application interface. The reader should understand the boundary: ordinary transformations stay on the public DataFrame API, while this small evidence helper reads the actual executed Exchange metric map after the action.
 
-The verified Spark 4.0.1 exchange implementation exposes dataSize and numPartitions metrics. Here dataSize is serialized data represented by that exchange, not automatically compressed network bytes, remote network transfer or a cluster billing measure. The reference asserts positive observed dataSize and the requested partition count, and prints the metric map with the action's configuration. It does not invent a byte count from the input row count. More detailed task metrics and durable event logs would be needed for a production performance investigation.
+The verified Spark 4.3.0 exchange implementation exposes dataSize and numPartitions metrics. Here dataSize is serialized data represented by that exchange, not automatically compressed network bytes, remote network transfer or a cluster billing measure. The reference asserts positive observed dataSize and the requested partition count, and prints the metric map with the action's configuration. It does not invent a byte count from the input row count. More detailed task metrics and durable event logs would be needed for a production performance investigation.
 
 The result comparison sorts only the bounded 1000 collected group rows on the driver, so it does not introduce an extra Spark global-order exchange into the measured aggregate plan. This scope choice matters. Calling orderBy before collection would add another physical operation, and a later metrics reader could accidentally attribute that extra work to the original groupBy. The helper retains the same DataFrame object whose action ran so the observed metric tree belongs to the measured query.
 
@@ -160,7 +160,7 @@ For the declared 20000-row,1000-key, four-mapper fixture, return source_rows_per
 
 **Expected result/shape:** For reducers 2:5000,4000,500. For reducers 5:5000,4000,200. These values do not assert actual balanced hash buckets or network bytes.
 
-**Verify:** Assert the two model tuples and print Spark 4.0.1, AQE false, `local[2]` with the distinct p2/p5 observations.
+**Verify:** Assert the two model tuples and print Spark 4.3.0, AQE false, `local[2]` with the distinct p2/p5 observations.
 
 **Progressive hint:** The local-combine bound is mappers times distinct keys; the average is groups divided by reducers.
 
@@ -178,11 +178,11 @@ Use the [course route](../README.md) to continue. Paired-language agreement is u
 
 ## Primary sources and official APIs
 
-- [Spark 4.0.1 monitoring and task metrics](https://spark.apache.org/docs/4.0.1/monitoring.html)
+- [Spark 4.3.0 monitoring and task metrics](https://spark.apache.org/docs/4.3.0/monitoring.html)
 
-- [Apache Spark 4.0.1 ShuffleExchangeExec source](https://github.com/apache/spark/blob/v4.0.1/sql/core/src/main/scala/org/apache/spark/sql/execution/exchange/ShuffleExchangeExec.scala)
+- [Apache Spark 4.3.0 ShuffleExchangeExec source](https://github.com/apache/spark/blob/v4.3.0/sql/core/src/main/scala/org/apache/spark/sql/execution/exchange/ShuffleExchangeExec.scala)
 
-- [Spark 4.0.1 SQL performance configuration](https://spark.apache.org/docs/4.0.1/sql-performance-tuning.html)
+- [Spark 4.3.0 SQL performance configuration](https://spark.apache.org/docs/4.3.0/sql-performance-tuning.html)
 
 ## Ask an AI tutor about this lesson
 

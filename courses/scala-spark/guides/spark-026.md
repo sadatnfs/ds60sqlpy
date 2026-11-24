@@ -4,7 +4,7 @@ Authored paired Scala/PySpark teaching content. The default fixtures are tiny, l
 
 ## Level and prerequisites
 
-Intermediate; approximately 105 minutes. Direct prerequisites: `spark-025`. The prepared baseline is Spark 4.0.1, Scala binary 2.13, JDK 17 and Python 3.12. Read the [execution baseline](../execution-baseline.md).
+Intermediate; approximately 105 minutes. Direct prerequisites: `spark-025`. The prepared baseline is Spark 4.3.0, Scala binary 2.13, JDK 17 and Python 3.12. Read the [execution baseline](../execution-baseline.md).
 
 ## How to run this lesson
 
@@ -48,7 +48,7 @@ A UDF must be pure for this example: it does not write files, call a service, mu
 
 The final counterexample deliberately uses a broader lowercase-and-trim implementation. It changesnon-ASCII capitals and fails to collapse interior whitespace correctly. Python's default strip also removes the nonbreaking spaces that this contract preserves, while the JVMtrim behavior differs. The validators must reject the wrong implementation even if its output looks reasonable to a human. This teaches why a business rule needs examples at semantic boundaries rather than only a happy-path word.
 
-Arrow and pandas UDFs are an optional extension, not imported or executed by the default sources. Spark 4.0.1 documents pandas 2.0.0 and PyArrow 11.0.0 as minimum supported versions for this SQL integration. A dedicated profile must still record exact compatible package pins, then rerun the golden fixture and inspect the resulting plan; minimum versions alone do not qualify an environment. Arrow changes the transfer representation and batching boundary; it does not eliminate data conversion or guarantee speed. No optional dependency is assumed installed, and no lesson code downloads one.
+Arrow and pandas UDFs are an optional extension, not imported or executed by the default sources. Spark 4.3.0 documents pandas 2.0.0 and PyArrow 11.0.0 as minimum supported versions for this SQL integration. A dedicated profile must still record exact compatible package pins, then rerun the golden fixture and inspect the resulting plan; minimum versions alone do not qualify an environment. Arrow changes the transfer representation and batching boundary; it does not eliminate data conversion or guarantee speed. No optional dependency is assumed installed, and no lesson code downloads one.
 
 ## Supplied local fixture
 
@@ -261,9 +261,9 @@ Use the [course route](../README.md) to continue. Paired-language agreement is u
 
 ## Primary sources and official APIs
 
-- [Spark 4.0.1 regexp_replace](https://spark.apache.org/docs/4.0.1/api/python/reference/pyspark.sql/api/pyspark.sql.functions.regexp_replace.html)
+- [Spark 4.3.0 regexp_replace](https://spark.apache.org/docs/4.3.0/api/python/reference/pyspark.sql/api/pyspark.sql.functions.regexp_replace.html)
 
-- [Spark 4.0.1 Arrow and pandas guide](https://spark.apache.org/docs/4.0.1/api/python/tutorial/sql/arrow_pandas.html)
+- [Spark 4.3.0 Arrow and pandas guide](https://spark.apache.org/docs/4.3.0/api/python/tutorial/sql/arrow_pandas.html)
 
 ## Ask an AI tutor about this lesson
 

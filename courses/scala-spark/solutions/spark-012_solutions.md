@@ -136,7 +136,7 @@ Repartitioning changes physical organization and can change arrival order, so ra
 
 Return master, timezone, shuffle-partition, ANSI, AQE, UI, driver-binding and Spark-version settings from the active session. Compare them with this prepared profile and rely on finally for owned stop. Do not substitute a hardcoded target string for version readback.
 
-**Expected:** Master `local[2]`, UTC, two shuffle partitions, ANSI true, AQE false, UI false, both driver addresses 127.0.0.1, and Spark version 4.0.1.
+**Expected:** Master `local[2]`, UTC, two shuffle partitions, ANSI true, AQE false, UI false, both driver addresses 127.0.0.1, and Spark version 4.3.0.
 
 ```scala
 def settings(spark: SparkSession): Map[String, String] = {

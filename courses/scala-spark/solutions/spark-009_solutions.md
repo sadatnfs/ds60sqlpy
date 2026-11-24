@@ -15,14 +15,14 @@ final class Owner(val factor: Long) {
 
 ### Exercise 1: Validate the prepared dependency family
 
-Construct an org.apache.spark coordinate for a lowercase hyphenated artifact base, requiring Scala binary 2.13 and Spark target 4.0.1. Reject other binary/version tuples and malformed base names. Do not download anything.
+Construct an org.apache.spark coordinate for a lowercase hyphenated artifact base, requiring Scala binary 2.13 and Spark target 4.3.0. Reject other binary/version tuples and malformed base names. Do not download anything.
 
-**Expected:** spark-sql,2.13,4.0.1 yields org.apache.spark: spark-sql_2.13:4.0.1. Binary 3 or 2.12 and version 4.2.0 are outside this prepared target contract.
+**Expected:** spark-sql,2.13,4.3.0 yields org.apache.spark: spark-sql_2.13:4.3.0. Binary 3 or 2.12 and version 4.2.0 are outside this prepared target contract.
 
 ```scala
 def artifactCoordinate(base: String, scalaBinary: String, sparkVersion: String): String = {
   require(base != null && base.matches("[a-z][a-z0-9-]*"), "invalid artifact base")
-  require(scalaBinary == "2.13" && sparkVersion == "4.0.1", "unsupported prepared target tuple")
+  require(scalaBinary == "2.13" && sparkVersion == "4.3.0", "unsupported prepared target tuple")
   s"org.apache.spark:${base}_${scalaBinary}:${sparkVersion}"
 }
 ```
@@ -30,11 +30,11 @@ def artifactCoordinate(base: String, scalaBinary: String, sparkVersion: String):
 The function is a validator for the declared prepared target, not a general statement that other versions are invalid software. Binary suffix and Spark version both participate in artifact identity. Rejecting path-like base names prevents confusing an artifact name with a filesystem or URL selection. Returning a string proves only configuration construction; it does not prove that the artifact was resolved, compiled or run.
 
 ```scala
-assert(artifactCoordinate("spark-sql", "2.13", "4.0.1") == "org.apache.spark:spark-sql_2.13:4.0.1")
-expectIllegalArgument(artifactCoordinate("spark-sql", "3", "4.0.1"))
-expectIllegalArgument(artifactCoordinate("spark-sql", "2.12", "4.0.1"))
+assert(artifactCoordinate("spark-sql", "2.13", "4.3.0") == "org.apache.spark:spark-sql_2.13:4.3.0")
+expectIllegalArgument(artifactCoordinate("spark-sql", "3", "4.3.0"))
+expectIllegalArgument(artifactCoordinate("spark-sql", "2.12", "4.3.0"))
 expectIllegalArgument(artifactCoordinate("spark-sql", "2.13", "4.2.0"))
-expectIllegalArgument(artifactCoordinate("bad/name", "2.13", "4.0.1"))
+expectIllegalArgument(artifactCoordinate("bad/name", "2.13", "4.3.0"))
 ```
 
 ### Exercise 2: Keep execution local and bounded
@@ -138,16 +138,16 @@ assert(restored(7L) == 21L)
 
 ### Exercise 6: Separate runtime readback from a target declaration
 
-Return actual Scala version and Java specification version plus the declared spark_target4.0.1. Do not label the target string as an observed Spark runtime version. The prepared foundation profile should report Scala 2.13 and Java 17.
+Return actual Scala version and Java specification version plus the declared spark_target4.3.0. Do not label the target string as an observed Spark runtime version. The prepared foundation profile should report Scala 2.13 and Java 17.
 
-**Expected:** Keys are scala_actual, java_actual, spark_target. Scala starts with 2.13., Java is 17, and target is 4.0.1. Exact Scala patch comes from the run.
+**Expected:** Keys are scala_actual, java_actual, spark_target. Scala starts with 2.13., Java is 17, and target is 4.3.0. Exact Scala patch comes from the run.
 
 ```scala
 def versionReport(): Map[String, String] = {
   Map(
     "scala_actual" -> scala.util.Properties.versionNumberString,
     "java_actual" -> System.getProperty("java.specification.version"),
-    "spark_target" -> "4.0.1"
+    "spark_target" -> "4.3.0"
   )
 }
 ```
@@ -158,7 +158,7 @@ The map deliberately distinguishes observations from intentions. Scala and Java 
 val report = versionReport()
 assert(report.keySet == Set("scala_actual", "java_actual", "spark_target"))
 assert(report("scala_actual").startsWith("2.13.") && report("java_actual") == "17")
-assert(report("spark_target") == "4.0.1")
+assert(report("spark_target") == "4.3.0")
 ```
 
 ## Evidence and scope

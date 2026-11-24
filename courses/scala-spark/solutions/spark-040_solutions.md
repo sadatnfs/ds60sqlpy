@@ -62,7 +62,7 @@ Redacting only a field literally named password is insufficient because credenti
 
 **Expected:** A reviewable acceptance matrix with unavailable runtime rows, not a fabricated successful connection.
 
-The acceptance matrix records Spark 4.0.1, Scala 2.13, JDK 17, Python and exact JDBC driver/database versions. A future bounded fixture must confirm the inferred schema, all tricky values, population/uniqueness, source filter, partition connection behavior and snapshot strategy. It also needs an expected missing-driver failure, a forbidden-write control, a timeout/cancellation case and proof that connections are closed afterward.
+The acceptance matrix records Spark 4.3.0, Scala 2.13, JDK 17, Python and exact JDBC driver/database versions. A future bounded fixture must confirm the inferred schema, all tricky values, population/uniqueness, source filter, partition connection behavior and snapshot strategy. It also needs an expected missing-driver failure, a forbidden-write control, a timeout/cancellation case and proof that connections are closed afterward.
 
 The current row is unavailable because neither the connector nor a remote target is qualified in this lesson. That is the honest result of the design review. Do not download a driver or choose an ambient database to make the example runnable. The local immutable-export alternative can be tested separately with the ordinary file profile. sql-quality-01 and sql-test-01 are optional SQL quality/testing enrichment, not additional entry prerequisites for understanding this chapter.
 

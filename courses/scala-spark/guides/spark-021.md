@@ -4,7 +4,7 @@ Authored paired Scala/PySpark teaching content. The default fixtures are tiny, l
 
 ## Level and prerequisites
 
-Intermediate; approximately 90 minutes. Direct prerequisites: `spark-020`. The prepared baseline is Spark 4.0.1, Scala binary 2.13, JDK 17 and Python 3.12. Read the [execution baseline](../execution-baseline.md).
+Intermediate; approximately 90 minutes. Direct prerequisites: `spark-020`. The prepared baseline is Spark 4.3.0, Scala binary 2.13, JDK 17 and Python 3.12. Read the [execution baseline](../execution-baseline.md).
 
 ## How to run this lesson
 
@@ -186,7 +186,7 @@ Replace expression-number suffixes such as#123 with#ID and the exact owned root 
 
 Execute a nested projection/filter form of the direct query and compare its exact rows. Capture its extended plan and return a bounded receipt containing Spark version, ANSI, AQE and shuffle partition settings.
 
-**Expected result/shape:** The nested query has the same nine tuples. Receipt shows Spark 4.0.1, ANSI true, AQE false, shuffle partitions 2. Both extended plans expose an optimized stage.
+**Expected result/shape:** The nested query has the same nine tuples. Receipt shows Spark 4.3.0, ANSI true, AQE false, shuffle partitions 2. Both extended plans expose an optimized stage.
 
 **Verify:** Assert full output parity with the literal oracle and exact controlled settings; do not assert whole-plan byte equality or faster execution.
 
@@ -198,7 +198,7 @@ Do not treat EXPLAIN as a benchmark or proof that the final action completed. Do
 
 ## Self-check
 
-Explain the contract of `projectionResult` / `projection_result` without reading its solution. Then, from memory, state what Exercise 6 (Compare equivalent query forms with separate semantic and plan evidence) must produce: The nested query has the same nine tuples. Receipt shows Spark 4.0.1, ANSI true, AQE false, shuffle partitions 2. Both extended plans expose an optimized stage. Say which part of that result is evidence and what it still cannot show. Name the action in your trace that actually runs the plan.
+Explain the contract of `projectionResult` / `projection_result` without reading its solution. Then, from memory, state what Exercise 6 (Compare equivalent query forms with separate semantic and plan evidence) must produce: The nested query has the same nine tuples. Receipt shows Spark 4.3.0, ANSI true, AQE false, shuffle partitions 2. Both extended plans expose an optimized stage. Say which part of that result is evidence and what it still cannot show. Name the action in your trace that actually runs the plan.
 
 ## Next step
 
@@ -206,9 +206,9 @@ Use the [course route](../README.md) to continue. Paired-language agreement is u
 
 ## Primary sources and official APIs
 
-- [Spark 4.0.1 EXPLAIN stages and modes](https://spark.apache.org/docs/4.0.1/sql-ref-syntax-qry-explain.html)
+- [Spark 4.3.0 EXPLAIN stages and modes](https://spark.apache.org/docs/4.3.0/sql-ref-syntax-qry-explain.html)
 
-- [Spark 4.0.1 Parquet schema and scans](https://spark.apache.org/docs/4.0.1/sql-data-sources-parquet.html)
+- [Spark 4.3.0 Parquet schema and scans](https://spark.apache.org/docs/4.3.0/sql-data-sources-parquet.html)
 
 ## Ask an AI tutor about this lesson
 

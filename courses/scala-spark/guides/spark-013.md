@@ -18,10 +18,10 @@ or the PySpark bridge `spark-011` with existing `python-10` skills. Neither path
 requires the historical SQL course: the small amount of SQL below is explained
 here. Existing `sql-02` offers optional extra aggregate practice.
 
-The classroom worker configuration uses Spark 4.0.1, the Scala 2.13 binary
+The classroom worker configuration uses Spark 4.3.0, the Scala 2.13 binary
 line, Java 17 and Python 3.12. Read the actual worker version report when
 reproducing a run, especially after an explicit image override. Apache's
-[versioned environment requirements](https://spark.apache.org/docs/4.0.1/)
+[versioned environment requirements](https://spark.apache.org/docs/4.3.0/)
 explain the compatible language lines. The earlier expansion design discussed
 a newer candidate tuple; that historical plan is not the installed image.
 

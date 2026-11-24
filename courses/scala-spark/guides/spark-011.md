@@ -4,7 +4,7 @@ Authored paired Scala/PySpark teaching content. The default fixtures are tiny, l
 
 ## Level and prerequisites
 
-Beginner; approximately 75 minutes. Direct prerequisites: `spark-001`, `python-10`. The prepared baseline is Spark 4.0.1, Scala binary 2.13, JDK 17 and Python 3.12. Read the [execution baseline](../execution-baseline.md).
+Beginner; approximately 75 minutes. Direct prerequisites: `spark-001`, `python-10`. The prepared baseline is Spark 4.3.0, Scala binary 2.13, JDK 17 and Python 3.12. Read the [execution baseline](../execution-baseline.md).
 
 ## How to run this lesson
 
@@ -206,9 +206,9 @@ Use the [course route](../README.md) to continue. Paired-language agreement is u
 
 ## Primary sources and official APIs
 
-- [Spark 4.0.1 DataFrame and SQL programming](https://spark.apache.org/docs/4.0.1/sql-getting-started.html).
+- [Spark 4.3.0 DataFrame and SQL programming](https://spark.apache.org/docs/4.3.0/sql-getting-started.html).
 
-- [Spark 4.0.1 NULL semantics](https://spark.apache.org/docs/4.0.1/sql-ref-null-semantics.html).
+- [Spark 4.3.0 NULL semantics](https://spark.apache.org/docs/4.3.0/sql-ref-null-semantics.html).
 
 ## Ask an AI tutor about this lesson
 

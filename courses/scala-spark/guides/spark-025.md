@@ -4,7 +4,7 @@ Authored paired Scala/PySpark teaching content. The default fixtures are tiny, l
 
 ## Level and prerequisites
 
-Intermediate; approximately 105 minutes. Direct prerequisites: `spark-024`. The prepared baseline is Spark 4.0.1, Scala binary 2.13, JDK 17 and Python 3.12. Read the [execution baseline](../execution-baseline.md).
+Intermediate; approximately 105 minutes. Direct prerequisites: `spark-024`. The prepared baseline is Spark 4.3.0, Scala binary 2.13, JDK 17 and Python 3.12. Read the [execution baseline](../execution-baseline.md).
 
 ## How to run this lesson
 
@@ -217,11 +217,11 @@ Use the [course route](../README.md) to continue. Paired-language agreement is u
 
 ## Primary sources and official APIs
 
-- [Spark 4.0.1 Parquet data source and partition discovery](https://spark.apache.org/docs/4.0.1/sql-data-sources-parquet.html)
+- [Spark 4.3.0 Parquet data source and partition discovery](https://spark.apache.org/docs/4.3.0/sql-data-sources-parquet.html)
 
-- [Spark 4.0.1 file partition configuration](https://spark.apache.org/docs/4.0.1/sql-performance-tuning.html)
+- [Spark 4.3.0 file partition configuration](https://spark.apache.org/docs/4.3.0/sql-performance-tuning.html)
 
-- [Spark 4.0.1 save modes](https://spark.apache.org/docs/4.0.1/sql-data-sources-load-save-functions.html)
+- [Spark 4.3.0 save modes](https://spark.apache.org/docs/4.3.0/sql-data-sources-load-save-functions.html)
 
 ## Ask an AI tutor about this lesson
 

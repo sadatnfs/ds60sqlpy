@@ -1,6 +1,6 @@
 {
   "schema": 1,
-  "spark_version": "4.0.1",
+  "spark_version": "4.3.0",
   "remove_paths": [
     "examples",
     "jars/connect-repl"
@@ -11,9 +11,9 @@
     "antlr-runtime-3.5.2.jar",
     "commons-dbcp-1.4.jar",
     "commons-pool-1.5.4.jar",
-    "curator-client-5.7.1.jar",
-    "curator-framework-5.7.1.jar",
-    "curator-recipes-5.7.1.jar",
+    "curator-client-5.9.0.jar",
+    "curator-framework-5.9.0.jar",
+    "curator-recipes-5.9.0.jar",
     "datanucleus-api-jdo-4.2.4.jar",
     "datanucleus-core-4.1.17.jar",
     "datanucleus-rdbms-4.1.19.jar",
@@ -32,342 +32,695 @@
     "hive-shims-2.3.10.jar",
     "hive-shims-common-2.3.10.jar",
     "hive-shims-scheduler-2.3.10.jar",
+    "hive-storage-api-2.8.1.jar",
     "javax.jdo-3.2.0-m3.jar",
     "javolution-5.5.1.jar",
     "jdo-api-3.0.1.jar",
     "jline-2.14.6.jar",
-    "jodd-core-3.5.2.jar",
     "jpam-1.1.jar",
-    "kubernetes-client-7.1.0.jar",
-    "kubernetes-client-api-7.1.0.jar",
-    "kubernetes-httpclient-vertx-7.1.0.jar",
-    "kubernetes-model-admissionregistration-7.1.0.jar",
-    "kubernetes-model-apiextensions-7.1.0.jar",
-    "kubernetes-model-apps-7.1.0.jar",
-    "kubernetes-model-autoscaling-7.1.0.jar",
-    "kubernetes-model-batch-7.1.0.jar",
-    "kubernetes-model-certificates-7.1.0.jar",
-    "kubernetes-model-common-7.1.0.jar",
-    "kubernetes-model-coordination-7.1.0.jar",
-    "kubernetes-model-core-7.1.0.jar",
-    "kubernetes-model-discovery-7.1.0.jar",
-    "kubernetes-model-events-7.1.0.jar",
-    "kubernetes-model-extensions-7.1.0.jar",
-    "kubernetes-model-flowcontrol-7.1.0.jar",
-    "kubernetes-model-gatewayapi-7.1.0.jar",
-    "kubernetes-model-metrics-7.1.0.jar",
-    "kubernetes-model-networking-7.1.0.jar",
-    "kubernetes-model-node-7.1.0.jar",
-    "kubernetes-model-policy-7.1.0.jar",
-    "kubernetes-model-rbac-7.1.0.jar",
-    "kubernetes-model-resource-7.1.0.jar",
-    "kubernetes-model-scheduling-7.1.0.jar",
-    "kubernetes-model-storageclass-7.1.0.jar",
+    "kubernetes-client-7.6.1.jar",
+    "kubernetes-client-api-7.6.1.jar",
+    "kubernetes-httpclient-vertx-7.6.1.jar",
+    "kubernetes-model-admissionregistration-7.6.1.jar",
+    "kubernetes-model-apiextensions-7.6.1.jar",
+    "kubernetes-model-apps-7.6.1.jar",
+    "kubernetes-model-autoscaling-7.6.1.jar",
+    "kubernetes-model-batch-7.6.1.jar",
+    "kubernetes-model-certificates-7.6.1.jar",
+    "kubernetes-model-common-7.6.1.jar",
+    "kubernetes-model-coordination-7.6.1.jar",
+    "kubernetes-model-core-7.6.1.jar",
+    "kubernetes-model-discovery-7.6.1.jar",
+    "kubernetes-model-events-7.6.1.jar",
+    "kubernetes-model-extensions-7.6.1.jar",
+    "kubernetes-model-flowcontrol-7.6.1.jar",
+    "kubernetes-model-gatewayapi-7.6.1.jar",
+    "kubernetes-model-metrics-7.6.1.jar",
+    "kubernetes-model-networking-7.6.1.jar",
+    "kubernetes-model-node-7.6.1.jar",
+    "kubernetes-model-policy-7.6.1.jar",
+    "kubernetes-model-rbac-7.6.1.jar",
+    "kubernetes-model-resource-7.6.1.jar",
+    "kubernetes-model-scheduling-7.6.1.jar",
+    "kubernetes-model-storageclass-7.6.1.jar",
     "libfb303-0.9.3.jar",
     "libthrift-0.16.0.jar",
-    "netty-tcnative-boringssl-static-2.0.70.Final-osx-aarch_64.jar",
-    "netty-tcnative-boringssl-static-2.0.70.Final-osx-x86_64.jar",
-    "netty-tcnative-boringssl-static-2.0.70.Final-windows-x86_64.jar",
-    "netty-transport-classes-kqueue-4.1.118.Final.jar",
-    "netty-transport-native-epoll-4.1.118.Final-linux-riscv64.jar",
-    "netty-transport-native-kqueue-4.1.118.Final-osx-aarch_64.jar",
-    "netty-transport-native-kqueue-4.1.118.Final-osx-x86_64.jar",
+    "netty-tcnative-boringssl-static-2.0.76.Final-osx-aarch_64.jar",
+    "netty-tcnative-boringssl-static-2.0.76.Final-osx-x86_64.jar",
+    "netty-tcnative-boringssl-static-2.0.76.Final-windows-x86_64.jar",
+    "netty-transport-classes-kqueue-4.2.13.Final.jar",
+    "netty-transport-native-epoll-4.2.13.Final-linux-riscv64.jar",
+    "netty-transport-native-kqueue-4.2.13.Final-osx-aarch_64.jar",
+    "netty-transport-native-kqueue-4.2.13.Final-osx-x86_64.jar",
     "opencsv-2.3.jar",
-    "spark-connect_2.13-4.0.1.jar",
-    "spark-hive-thriftserver_2.13-4.0.1.jar",
-    "spark-hive_2.13-4.0.1.jar",
-    "spark-kubernetes_2.13-4.0.1.jar",
+    "spark-connect_2.13-4.3.0.jar",
+    "spark-hive-thriftserver_2.13-4.3.0.jar",
+    "spark-hive_2.13-4.3.0.jar",
+    "spark-kubernetes_2.13-4.3.0.jar",
     "super-csv-2.2.0.jar",
     "transaction-api-1.1.jar",
-    "vertx-auth-common-4.5.12.jar",
-    "vertx-core-4.5.12.jar",
-    "vertx-web-client-4.5.12.jar",
-    "vertx-web-common-4.5.12.jar",
-    "zookeeper-3.9.3.jar",
-    "zookeeper-jute-3.9.3.jar"
+    "vertx-auth-common-4.5.26.jar",
+    "vertx-core-4.5.26.jar",
+    "vertx-uri-template-4.5.26.jar",
+    "vertx-web-client-4.5.26.jar",
+    "vertx-web-common-4.5.26.jar",
+    "zookeeper-3.9.5.jar",
+    "zookeeper-jute-3.9.5.jar"
   ],
   "replace_jars": [
     {
-      "remove": "aircompressor-2.0.2.jar",
-      "url": "https://repo1.maven.org/maven2/io/airlift/aircompressor/2.0.3/aircompressor-2.0.3.jar",
-      "sha256": "b86bb66f610079e0bf790d62e2ff68853eb0dc4748a6d68ae28bce92b68094aa",
-      "jar": "aircompressor-2.0.3.jar"
+      "remove": "guava-33.6.0-jre.jar",
+      "url": "https://repo1.maven.org/maven2/com/google/guava/guava/33.8.0-jre/guava-33.8.0-jre.jar",
+      "sha256": "97b79ec3f2c0a6313a0c2df51ce1abdf8907e6531803467b81efcaaf99b35161",
+      "jar": "guava-33.8.0-jre.jar"
     },
     {
-      "remove": "bcprov-jdk18on-1.80.jar",
-      "url": "https://repo1.maven.org/maven2/org/bouncycastle/bcprov-jdk18on/1.87/bcprov-jdk18on-1.87.jar",
-      "sha256": "12d2d3dd82a9ec15e92ec7c7943ee64f6097c6dc12c07e984f1693b77565b9aa",
-      "jar": "bcprov-jdk18on-1.87.jar"
+      "remove": "jackson-core-2.21.2.jar",
+      "url": "https://repo1.maven.org/maven2/com/fasterxml/jackson/core/jackson-core/2.21.8/jackson-core-2.21.8.jar",
+      "sha256": "604ef7765013daf5cde192e40bc4c8412c4ca93f4aaf7bf8e9a62fad1e1026bb",
+      "jar": "jackson-core-2.21.8.jar"
     },
     {
-      "remove": "guava-33.4.0-jre.jar",
-      "url": "https://repo1.maven.org/maven2/com/google/guava/guava/33.7.2-jre/guava-33.7.2-jre.jar",
-      "sha256": "b530942257fb935f8b2cfaa5f8eb5bd59c555fd8e8d01b8ce98912e077ea606c",
-      "jar": "guava-33.7.2-jre.jar"
+      "remove": "jackson-databind-2.21.2.jar",
+      "url": "https://repo1.maven.org/maven2/com/fasterxml/jackson/core/jackson-databind/2.21.8/jackson-databind-2.21.8.jar",
+      "sha256": "ad77f2285717e2f34c319d988b7c85783a47d0b33f33a501d1fcbf196e61bbaa",
+      "jar": "jackson-databind-2.21.8.jar"
     },
     {
-      "remove": "failureaccess-1.0.2.jar",
-      "url": "https://repo1.maven.org/maven2/com/google/guava/failureaccess/1.0.3/failureaccess-1.0.3.jar",
-      "sha256": "cbfc3906b19b8f55dd7cfd6dfe0aa4532e834250d7f080bd8d211a3e246b59cb",
-      "jar": "failureaccess-1.0.3.jar"
+      "remove": "jackson-dataformat-yaml-2.21.2.jar",
+      "url": "https://repo1.maven.org/maven2/com/fasterxml/jackson/dataformat/jackson-dataformat-yaml/2.21.8/jackson-dataformat-yaml-2.21.8.jar",
+      "sha256": "b924025c47ea13da43ff2860b19ce5c18ecd14b8ec5cb7d03fc315f699935abe",
+      "jar": "jackson-dataformat-yaml-2.21.8.jar"
     },
     {
-      "remove": "jackson-annotations-2.18.2.jar",
-      "url": "https://repo1.maven.org/maven2/com/fasterxml/jackson/core/jackson-annotations/2.18.12/jackson-annotations-2.18.12.jar",
-      "sha256": "143b94dd8caa3d5eb4417672f7d00472cec33626cbcb0fd35f0616de0dbccabf",
-      "jar": "jackson-annotations-2.18.12.jar"
+      "remove": "jackson-datatype-jsr310-2.21.2.jar",
+      "url": "https://repo1.maven.org/maven2/com/fasterxml/jackson/datatype/jackson-datatype-jsr310/2.21.8/jackson-datatype-jsr310-2.21.8.jar",
+      "sha256": "63a0854504aa90ed8f34f891aaa5259f9bd622bac115323559a38abdc1e81632",
+      "jar": "jackson-datatype-jsr310-2.21.8.jar"
     },
     {
-      "remove": "jackson-core-2.18.2.jar",
-      "url": "https://repo1.maven.org/maven2/com/fasterxml/jackson/core/jackson-core/2.18.12/jackson-core-2.18.12.jar",
-      "sha256": "367afb4be3efa8a1636200b5faefb67d7d0a1b730f64ec55a971229cb673bc23",
-      "jar": "jackson-core-2.18.12.jar"
+      "remove": "jackson-module-scala_2.13-2.21.2.jar",
+      "url": "https://repo1.maven.org/maven2/com/fasterxml/jackson/module/jackson-module-scala_2.13/2.21.8/jackson-module-scala_2.13-2.21.8.jar",
+      "sha256": "b697f5a396088c569d3eb7f5ea4ee1d7968ab8e13d46d348df94daf9a8ca66b1",
+      "jar": "jackson-module-scala_2.13-2.21.8.jar"
     },
     {
-      "remove": "jackson-databind-2.18.2.jar",
-      "url": "https://repo1.maven.org/maven2/com/fasterxml/jackson/core/jackson-databind/2.18.12/jackson-databind-2.18.12.jar",
-      "sha256": "02b62d64819bc1dbad7f1195c805f950ab3dceef1a479d0e9c55d99b7a04c255",
-      "jar": "jackson-databind-2.18.12.jar"
-    },
-    {
-      "remove": "jackson-dataformat-yaml-2.18.2.jar",
-      "url": "https://repo1.maven.org/maven2/com/fasterxml/jackson/dataformat/jackson-dataformat-yaml/2.18.12/jackson-dataformat-yaml-2.18.12.jar",
-      "sha256": "a9ac98af0e0a3e3f2e9491abb8b55a1b431415397ce4e5e215622755a4506871",
-      "jar": "jackson-dataformat-yaml-2.18.12.jar"
-    },
-    {
-      "remove": "jackson-datatype-jsr310-2.18.2.jar",
-      "url": "https://repo1.maven.org/maven2/com/fasterxml/jackson/datatype/jackson-datatype-jsr310/2.18.12/jackson-datatype-jsr310-2.18.12.jar",
-      "sha256": "bfea00e5943be62b8d126fa679fb607f3ae2c0e0c6495477c866a715bb54a04e",
-      "jar": "jackson-datatype-jsr310-2.18.12.jar"
-    },
-    {
-      "remove": "jackson-module-scala_2.13-2.18.2.jar",
-      "url": "https://repo1.maven.org/maven2/com/fasterxml/jackson/module/jackson-module-scala_2.13/2.18.12/jackson-module-scala_2.13-2.18.12.jar",
-      "sha256": "a3b8577602c1f547367d9efabd7077ad776b0a53568dd4b639460bb518941714",
-      "jar": "jackson-module-scala_2.13-2.18.12.jar"
-    },
-    {
-      "remove": "jersey-client-3.0.16.jar",
-      "url": "https://repo1.maven.org/maven2/org/glassfish/jersey/core/jersey-client/3.0.18/jersey-client-3.0.18.jar",
-      "sha256": "6eb0009203ddc6c98d68be2f0ae9749304e88b91cce41f8898f8f1ca50b4eb5e",
-      "jar": "jersey-client-3.0.18.jar"
-    },
-    {
-      "remove": "jersey-common-3.0.16.jar",
-      "url": "https://repo1.maven.org/maven2/org/glassfish/jersey/core/jersey-common/3.0.18/jersey-common-3.0.18.jar",
-      "sha256": "8ad2eaf8f6825b8d5f729070376767c34c874b3e4cb87a3a908205f9b7fdc359",
-      "jar": "jersey-common-3.0.18.jar"
-    },
-    {
-      "remove": "jersey-server-3.0.16.jar",
-      "url": "https://repo1.maven.org/maven2/org/glassfish/jersey/core/jersey-server/3.0.18/jersey-server-3.0.18.jar",
-      "sha256": "3ec2978b0a739613d2fb835ba398c85413b41ed18407b126f5a52595efa530ad",
-      "jar": "jersey-server-3.0.18.jar"
-    },
-    {
-      "remove": "jersey-hk2-3.0.16.jar",
-      "url": "https://repo1.maven.org/maven2/org/glassfish/jersey/inject/jersey-hk2/3.0.18/jersey-hk2-3.0.18.jar",
-      "sha256": "eef55a8e3c8267ef220272caa3fc587a3c02ad2f1edc22b1157ce9a0761abfa5",
-      "jar": "jersey-hk2-3.0.18.jar"
-    },
-    {
-      "remove": "jersey-container-servlet-3.0.16.jar",
-      "url": "https://repo1.maven.org/maven2/org/glassfish/jersey/containers/jersey-container-servlet/3.0.18/jersey-container-servlet-3.0.18.jar",
-      "sha256": "285dce04c5b1959d5b4334ea134447d0c63a336879de0d582058abf6409cec49",
-      "jar": "jersey-container-servlet-3.0.18.jar"
-    },
-    {
-      "remove": "jersey-container-servlet-core-3.0.16.jar",
-      "url": "https://repo1.maven.org/maven2/org/glassfish/jersey/containers/jersey-container-servlet-core/3.0.18/jersey-container-servlet-core-3.0.18.jar",
-      "sha256": "d46b4f35a1af6ded25e4fe558d30f93d42a7d0b587a6a5f4273d43d8debd1ca1",
-      "jar": "jersey-container-servlet-core-3.0.18.jar"
-    },
-    {
-      "remove": "jline-3.27.1-jdk8.jar",
+      "remove": "jline-3.29.0-jdk8.jar",
       "url": "https://repo1.maven.org/maven2/org/jline/jline/3.30.17/jline-3.30.17-jdk8.jar",
       "sha256": "44a242fec11e344fdfa54fc430d79416b71a508bbace165e9feba3d85dc2ee84",
       "jar": "jline-3.30.17-jdk8.jar"
     },
     {
-      "remove": "lz4-java-1.8.0.jar",
-      "url": "https://repo1.maven.org/maven2/at/yawk/lz4/lz4-java/1.11.4/lz4-java-1.11.4.jar",
-      "sha256": "58c8e0b813960d2a248e050c353baea73139b48a2ffc55382d42c69707e17325",
-      "jar": "lz4-java-1.11.4.jar"
-    },
-    {
-      "remove": "commons-lang3-3.17.0.jar",
-      "url": "https://repo1.maven.org/maven2/org/apache/commons/commons-lang3/3.18.0/commons-lang3-3.18.0.jar",
-      "sha256": "4eeeae8d20c078abb64b015ec158add383ac581571cddc45c68f0c9ae0230720",
-      "jar": "commons-lang3-3.18.0.jar"
-    },
-    {
-      "remove": "log4j-1.2-api-2.24.3.jar",
+      "remove": "log4j-1.2-api-2.25.4.jar",
       "url": "https://repo1.maven.org/maven2/org/apache/logging/log4j/log4j-1.2-api/2.25.5/log4j-1.2-api-2.25.5.jar",
       "sha256": "4dd812dc5a6343f542a9e0046b1ec78ecf10bdd5a8c15745101cdd8b9aa24974",
       "jar": "log4j-1.2-api-2.25.5.jar"
     },
     {
-      "remove": "log4j-api-2.24.3.jar",
+      "remove": "log4j-api-2.25.4.jar",
       "url": "https://repo1.maven.org/maven2/org/apache/logging/log4j/log4j-api/2.25.5/log4j-api-2.25.5.jar",
       "sha256": "64777f73ea0b3104c04eb82befbdccc30a425a19e83ad06cb2f93aa303511863",
       "jar": "log4j-api-2.25.5.jar"
     },
     {
-      "remove": "log4j-core-2.24.3.jar",
+      "remove": "log4j-core-2.25.4.jar",
       "url": "https://repo1.maven.org/maven2/org/apache/logging/log4j/log4j-core/2.25.5/log4j-core-2.25.5.jar",
       "sha256": "050c4f85deb48b055e9c041ac39043fbb79ce477841a11a1eb2969c86c6a0072",
       "jar": "log4j-core-2.25.5.jar"
     },
     {
-      "remove": "log4j-layout-template-json-2.24.3.jar",
+      "remove": "log4j-layout-template-json-2.25.4.jar",
       "url": "https://repo1.maven.org/maven2/org/apache/logging/log4j/log4j-layout-template-json/2.25.5/log4j-layout-template-json-2.25.5.jar",
       "sha256": "27c37313e20c16bf0178e38d9d1a5c7320e34c03aa35bc2c66a589ea14abf545",
       "jar": "log4j-layout-template-json-2.25.5.jar"
     },
     {
-      "remove": "log4j-slf4j2-impl-2.24.3.jar",
+      "remove": "log4j-slf4j2-impl-2.25.4.jar",
       "url": "https://repo1.maven.org/maven2/org/apache/logging/log4j/log4j-slf4j2-impl/2.25.5/log4j-slf4j2-impl-2.25.5.jar",
       "sha256": "8cab16dd6fc4c8f14c1c473022cb217512f2bbb2d59a70f8ec90a268d64d8831",
       "jar": "log4j-slf4j2-impl-2.25.5.jar"
     },
     {
-      "remove": "snappy-java-1.1.10.7.jar",
+      "remove": "lz4-java-1.11.0.jar",
+      "url": "https://repo1.maven.org/maven2/at/yawk/lz4/lz4-java/1.11.4/lz4-java-1.11.4.jar",
+      "sha256": "58c8e0b813960d2a248e050c353baea73139b48a2ffc55382d42c69707e17325",
+      "jar": "lz4-java-1.11.4.jar"
+    },
+    {
+      "remove": "netty-all-4.2.13.Final.jar",
+      "url": "https://repo1.maven.org/maven2/io/netty/netty-all/4.2.21.Final/netty-all-4.2.21.Final.jar",
+      "sha256": "3d990166773ae77f124e16d135e65859882b583d50bb769165ec7a9c57c358b8",
+      "jar": "netty-all-4.2.21.Final.jar"
+    },
+    {
+      "remove": "netty-buffer-4.2.13.Final.jar",
+      "url": "https://repo1.maven.org/maven2/io/netty/netty-buffer/4.2.21.Final/netty-buffer-4.2.21.Final.jar",
+      "sha256": "4b3420b8a0e3928838895749af250fac3454b61ec48a95434345f815e7205b09",
+      "jar": "netty-buffer-4.2.21.Final.jar"
+    },
+    {
+      "remove": "netty-codec-4.2.13.Final.jar",
+      "url": "https://repo1.maven.org/maven2/io/netty/netty-codec/4.2.21.Final/netty-codec-4.2.21.Final.jar",
+      "sha256": "d6dd04bc52b1d869e19818c96f859888398cc715a5e8a158ae39a3c10d40c148",
+      "jar": "netty-codec-4.2.21.Final.jar"
+    },
+    {
+      "remove": "netty-codec-base-4.2.13.Final.jar",
+      "url": "https://repo1.maven.org/maven2/io/netty/netty-codec-base/4.2.21.Final/netty-codec-base-4.2.21.Final.jar",
+      "sha256": "319f70f98ab52c27c3a46c1fd8f0f32746b7bab39bf7e3f126f2c3f2d0ab9b23",
+      "jar": "netty-codec-base-4.2.21.Final.jar"
+    },
+    {
+      "remove": "netty-codec-compression-4.2.13.Final.jar",
+      "url": "https://repo1.maven.org/maven2/io/netty/netty-codec-compression/4.2.21.Final/netty-codec-compression-4.2.21.Final.jar",
+      "sha256": "0c2d4fd7e91aa5f15c5d4e91b6f3bfe8881a16f0260c9e82d1383f5453293974",
+      "jar": "netty-codec-compression-4.2.21.Final.jar"
+    },
+    {
+      "remove": "netty-codec-dns-4.2.13.Final.jar",
+      "url": "https://repo1.maven.org/maven2/io/netty/netty-codec-dns/4.2.21.Final/netty-codec-dns-4.2.21.Final.jar",
+      "sha256": "46bb33437b2888c170e3531ff7b7e8c6fcf89e915803e06198faa3d228bf1a53",
+      "jar": "netty-codec-dns-4.2.21.Final.jar"
+    },
+    {
+      "remove": "netty-codec-http-4.2.13.Final.jar",
+      "url": "https://repo1.maven.org/maven2/io/netty/netty-codec-http/4.2.21.Final/netty-codec-http-4.2.21.Final.jar",
+      "sha256": "fb61bba9877867424d20b188dd6cf77bed14e82e1622a19be05d45886f4124ce",
+      "jar": "netty-codec-http-4.2.21.Final.jar"
+    },
+    {
+      "remove": "netty-codec-http2-4.2.13.Final.jar",
+      "url": "https://repo1.maven.org/maven2/io/netty/netty-codec-http2/4.2.21.Final/netty-codec-http2-4.2.21.Final.jar",
+      "sha256": "03f9af6c2ef998b55f141fc328c7a3b36032b2bb0ee5941c97abc95bd426f187",
+      "jar": "netty-codec-http2-4.2.21.Final.jar"
+    },
+    {
+      "remove": "netty-codec-socks-4.2.13.Final.jar",
+      "url": "https://repo1.maven.org/maven2/io/netty/netty-codec-socks/4.2.21.Final/netty-codec-socks-4.2.21.Final.jar",
+      "sha256": "5c086a22efbfeb4446a79dc85c6585599349a07cf1559928fbc9c2e376c75ee7",
+      "jar": "netty-codec-socks-4.2.21.Final.jar"
+    },
+    {
+      "remove": "netty-common-4.2.13.Final.jar",
+      "url": "https://repo1.maven.org/maven2/io/netty/netty-common/4.2.21.Final/netty-common-4.2.21.Final.jar",
+      "sha256": "7c501587b9496b79cc65822a4cf53b07b5067ebac9533b8484524b94ab182c74",
+      "jar": "netty-common-4.2.21.Final.jar"
+    },
+    {
+      "remove": "netty-handler-4.2.13.Final.jar",
+      "url": "https://repo1.maven.org/maven2/io/netty/netty-handler/4.2.21.Final/netty-handler-4.2.21.Final.jar",
+      "sha256": "dc1cf3063224ab6d5468f51ec3a064839e993eb47e324c2de546c79052e5b051",
+      "jar": "netty-handler-4.2.21.Final.jar"
+    },
+    {
+      "remove": "netty-handler-proxy-4.2.13.Final.jar",
+      "url": "https://repo1.maven.org/maven2/io/netty/netty-handler-proxy/4.2.21.Final/netty-handler-proxy-4.2.21.Final.jar",
+      "sha256": "5846e38e7266a166fd6c276016a9eaa46f0f06697d3f9cb8dda17b5bffe63b92",
+      "jar": "netty-handler-proxy-4.2.21.Final.jar"
+    },
+    {
+      "remove": "netty-resolver-4.2.13.Final.jar",
+      "url": "https://repo1.maven.org/maven2/io/netty/netty-resolver/4.2.21.Final/netty-resolver-4.2.21.Final.jar",
+      "sha256": "3ba53c71a41248f10cd49e27d3d969903f327353c8bf218e378ca902b89c6abd",
+      "jar": "netty-resolver-4.2.21.Final.jar"
+    },
+    {
+      "remove": "netty-resolver-dns-4.2.13.Final.jar",
+      "url": "https://repo1.maven.org/maven2/io/netty/netty-resolver-dns/4.2.21.Final/netty-resolver-dns-4.2.21.Final.jar",
+      "sha256": "7521ddca6795a3679594db606b9454570634b385799f5507442446735371f349",
+      "jar": "netty-resolver-dns-4.2.21.Final.jar"
+    },
+    {
+      "remove": "netty-transport-4.2.13.Final.jar",
+      "url": "https://repo1.maven.org/maven2/io/netty/netty-transport/4.2.21.Final/netty-transport-4.2.21.Final.jar",
+      "sha256": "3bfe0b8feba613aba673b97a865073d57b07fd15aef1380800180ea02cf41ce4",
+      "jar": "netty-transport-4.2.21.Final.jar"
+    },
+    {
+      "remove": "netty-transport-classes-epoll-4.2.13.Final.jar",
+      "url": "https://repo1.maven.org/maven2/io/netty/netty-transport-classes-epoll/4.2.21.Final/netty-transport-classes-epoll-4.2.21.Final.jar",
+      "sha256": "169486d552e0c4ccedc9f9d25b92bd4fe9286ee633859aa6aa70051229c2d1bb",
+      "jar": "netty-transport-classes-epoll-4.2.21.Final.jar"
+    },
+    {
+      "remove": "netty-transport-native-epoll-4.2.13.Final-linux-aarch_64.jar",
+      "url": "https://repo1.maven.org/maven2/io/netty/netty-transport-native-epoll/4.2.21.Final/netty-transport-native-epoll-4.2.21.Final-linux-aarch_64.jar",
+      "sha256": "62f3cb2d4f4e6908802d534bebceb3b0c302da6de4bdd456913849bf41601162",
+      "jar": "netty-transport-native-epoll-4.2.21.Final-linux-aarch_64.jar"
+    },
+    {
+      "remove": "netty-transport-native-epoll-4.2.13.Final-linux-x86_64.jar",
+      "url": "https://repo1.maven.org/maven2/io/netty/netty-transport-native-epoll/4.2.21.Final/netty-transport-native-epoll-4.2.21.Final-linux-x86_64.jar",
+      "sha256": "5f445ad7e8c793f6adee57876a71ed1a01d39992a6e9fda8bb2f72ad351599a6",
+      "jar": "netty-transport-native-epoll-4.2.21.Final-linux-x86_64.jar"
+    },
+    {
+      "remove": "netty-transport-native-unix-common-4.2.13.Final.jar",
+      "url": "https://repo1.maven.org/maven2/io/netty/netty-transport-native-unix-common/4.2.21.Final/netty-transport-native-unix-common-4.2.21.Final.jar",
+      "sha256": "47836e5fffa2e4aca994c5e31f992a12df2511a8be697d9bf104ac8c8df51459",
+      "jar": "netty-transport-native-unix-common-4.2.21.Final.jar"
+    },
+    {
+      "remove": "parquet-jackson-1.17.0.jar",
+      "url": "https://repo1.maven.org/maven2/org/apache/parquet/parquet-jackson/1.18.2/parquet-jackson-1.18.2.jar",
+      "sha256": "dc20428b547c6376ae7dfa20c30a62c326b7e4ed4915ba5370ae7d7b0859408d",
+      "jar": "parquet-jackson-1.18.2.jar"
+    },
+    {
+      "remove": "snappy-java-1.1.10.8.jar",
       "url": "https://repo1.maven.org/maven2/org/xerial/snappy/snappy-java/1.1.10.12/snappy-java-1.1.10.12.jar",
       "sha256": "1c03ce77b3f2e926c25a952612e372404d80bc88c6c8052bede964804fabd732",
       "jar": "snappy-java-1.1.10.12.jar"
+    }
+  ],
+  "reshade_jars": [
+    {
+      "jar": "spark-core_2.13-4.3.0.jar",
+      "reason": "Spark shades Jetty 12.1.8 under org.sparkproject.jetty; relocate the fixed Jetty 12.1.15 into the same prefix.",
+      "relocations": [
+        {
+          "from": "org/eclipse/jetty",
+          "to": "org/sparkproject/jetty"
+        }
+      ],
+      "items": [
+        {
+          "name": "jetty",
+          "namespaces": [
+            "org/sparkproject/jetty/"
+          ],
+          "metadata": [
+            "org.eclipse.jetty/jetty-util",
+            "org.eclipse.jetty/jetty-server",
+            "org.eclipse.jetty/jetty-http",
+            "org.eclipse.jetty/jetty-io",
+            "org.eclipse.jetty/jetty-client",
+            "org.eclipse.jetty/jetty-security",
+            "org.eclipse.jetty/jetty-session",
+            "org.eclipse.jetty.ee10/jetty-ee10-servlet",
+            "org.eclipse.jetty.ee10/jetty-ee10-servlets",
+            "org.eclipse.jetty.ee10/jetty-ee10-proxy",
+            "org.eclipse.jetty.ee10/jetty-ee10-plus",
+            "org.eclipse.jetty.compression/jetty-compression-common",
+            "org.eclipse.jetty.compression/jetty-compression-server",
+            "org.eclipse.jetty.compression/jetty-compression-gzip"
+          ],
+          "sources": [
+            {
+              "url": "https://repo1.maven.org/maven2/org/eclipse/jetty/jetty-util/12.1.15/jetty-util-12.1.15.jar",
+              "sha256": "74cb58a645f9d265d8e061b9227ec13c7acbb16c34bd6610eca229f58e928f37",
+              "jar": "jetty-util-12.1.15.jar"
+            },
+            {
+              "url": "https://repo1.maven.org/maven2/org/eclipse/jetty/jetty-server/12.1.15/jetty-server-12.1.15.jar",
+              "sha256": "38a76ffcd2404dad9a5395d35e741934dcff4ae9d9ab34336d3565582ed1f5ef",
+              "jar": "jetty-server-12.1.15.jar"
+            },
+            {
+              "url": "https://repo1.maven.org/maven2/org/eclipse/jetty/jetty-http/12.1.15/jetty-http-12.1.15.jar",
+              "sha256": "641774717e2fa668ce3a8915c51ce1f4503037a1209620d7bbd074e70b23b7fd",
+              "jar": "jetty-http-12.1.15.jar"
+            },
+            {
+              "url": "https://repo1.maven.org/maven2/org/eclipse/jetty/jetty-io/12.1.15/jetty-io-12.1.15.jar",
+              "sha256": "b5f940782fe61bb1b51269eba7cadd1afa771e2bd649e1fa48057d1647ec9212",
+              "jar": "jetty-io-12.1.15.jar"
+            },
+            {
+              "url": "https://repo1.maven.org/maven2/org/eclipse/jetty/jetty-client/12.1.15/jetty-client-12.1.15.jar",
+              "sha256": "ad910336328a5afde916d1be38391078ac11386038931cdf4637f3c8fef85e9b",
+              "jar": "jetty-client-12.1.15.jar"
+            },
+            {
+              "url": "https://repo1.maven.org/maven2/org/eclipse/jetty/jetty-security/12.1.15/jetty-security-12.1.15.jar",
+              "sha256": "d7f5f68366310075a05596d40ce22e745b7412852112bab8b05d2b092cd565f7",
+              "jar": "jetty-security-12.1.15.jar"
+            },
+            {
+              "url": "https://repo1.maven.org/maven2/org/eclipse/jetty/jetty-session/12.1.15/jetty-session-12.1.15.jar",
+              "sha256": "fa13ef70d76f312c4850d9fdaefba7c41a3ccb5a5fe15c54fd1f8710d599c47b",
+              "jar": "jetty-session-12.1.15.jar"
+            },
+            {
+              "url": "https://repo1.maven.org/maven2/org/eclipse/jetty/ee10/jetty-ee10-servlet/12.1.15/jetty-ee10-servlet-12.1.15.jar",
+              "sha256": "cf35d33d73b4033d53d236ed3147485b20c0faa766ee3161082c3247fd665534",
+              "jar": "jetty-ee10-servlet-12.1.15.jar"
+            },
+            {
+              "url": "https://repo1.maven.org/maven2/org/eclipse/jetty/ee10/jetty-ee10-servlets/12.1.15/jetty-ee10-servlets-12.1.15.jar",
+              "sha256": "b81cc6c84881f2a02b162d30c87f899f830a1591a3d5e2cb6b5468187f5a754a",
+              "jar": "jetty-ee10-servlets-12.1.15.jar"
+            },
+            {
+              "url": "https://repo1.maven.org/maven2/org/eclipse/jetty/ee10/jetty-ee10-proxy/12.1.15/jetty-ee10-proxy-12.1.15.jar",
+              "sha256": "99d6de20a74e0eda388172eace034249ff3f4b9fec88b2f93912089f203e1d69",
+              "jar": "jetty-ee10-proxy-12.1.15.jar"
+            },
+            {
+              "url": "https://repo1.maven.org/maven2/org/eclipse/jetty/ee10/jetty-ee10-plus/12.1.15/jetty-ee10-plus-12.1.15.jar",
+              "sha256": "67688bce3803be207fe760fcb6c3915b64df9e88a4d833b624aa76fe3f45403d",
+              "jar": "jetty-ee10-plus-12.1.15.jar"
+            },
+            {
+              "url": "https://repo1.maven.org/maven2/org/eclipse/jetty/compression/jetty-compression-common/12.1.15/jetty-compression-common-12.1.15.jar",
+              "sha256": "eb879928434fbf9aba1088198349dd5461110f2096c6d084a009de077c76a422",
+              "jar": "jetty-compression-common-12.1.15.jar"
+            },
+            {
+              "url": "https://repo1.maven.org/maven2/org/eclipse/jetty/compression/jetty-compression-server/12.1.15/jetty-compression-server-12.1.15.jar",
+              "sha256": "06a7b569f1d6cb895389c3cb0d3a059de896b14fc7f2ac874e5d23b4d5da21fe",
+              "jar": "jetty-compression-server-12.1.15.jar"
+            },
+            {
+              "url": "https://repo1.maven.org/maven2/org/eclipse/jetty/compression/jetty-compression-gzip/12.1.15/jetty-compression-gzip-12.1.15.jar",
+              "sha256": "746c008d35a9f14a0f2a3b40a52de7c45df6d239e208032b86614a99abf8e4de",
+              "jar": "jetty-compression-gzip-12.1.15.jar"
+            }
+          ]
+        }
+      ]
     },
     {
-      "remove": "hadoop-client-api-3.4.1.jar",
-      "url": "https://repo1.maven.org/maven2/org/apache/hadoop/hadoop-client-api/3.4.3/hadoop-client-api-3.4.3.jar",
-      "sha256": "6443332781f26a7199009d9517cd1eb013fbf54ca1c9759a2a9e487542b1d52a",
-      "jar": "hadoop-client-api-3.4.3.jar"
+      "jar": "spark-network-common_2.13-4.3.0.jar",
+      "reason": "Spark shades Guava 33.6.0 under org.sparkproject.guava; relocate the fixed Guava 33.8.0 into the same prefix.",
+      "relocations": [
+        {
+          "from": "com/google/common",
+          "to": "org/sparkproject/guava"
+        },
+        {
+          "from": "com/google/thirdparty",
+          "to": "org/sparkproject/guava/thirdparty"
+        }
+      ],
+      "items": [
+        {
+          "name": "guava",
+          "namespaces": [
+            "org/sparkproject/guava/"
+          ],
+          "metadata": [
+            "com.google.guava/guava",
+            "com.google.guava/failureaccess"
+          ],
+          "sources": [
+            {
+              "url": "https://repo1.maven.org/maven2/com/google/guava/guava/33.8.0-jre/guava-33.8.0-jre.jar",
+              "sha256": "97b79ec3f2c0a6313a0c2df51ce1abdf8907e6531803467b81efcaaf99b35161",
+              "jar": "guava-33.8.0-jre.jar"
+            },
+            {
+              "url": "https://repo1.maven.org/maven2/com/google/guava/failureaccess/1.0.3/failureaccess-1.0.3.jar",
+              "sha256": "cbfc3906b19b8f55dd7cfd6dfe0aa4532e834250d7f080bd8d211a3e246b59cb",
+              "jar": "failureaccess-1.0.3.jar"
+            }
+          ]
+        }
+      ]
     },
     {
-      "remove": "hadoop-client-runtime-3.4.1.jar",
-      "url": "https://repo1.maven.org/maven2/org/apache/hadoop/hadoop-client-runtime/3.4.3/hadoop-client-runtime-3.4.3.jar",
-      "sha256": "bd20267b0555766ae84697dd888f074ca326d8e2ec3c0008928a6ac2966c67de",
-      "jar": "hadoop-client-runtime-3.4.3.jar"
-    },
-    {
-      "remove": "netty-all-4.1.118.Final.jar",
-      "url": "https://repo1.maven.org/maven2/io/netty/netty-all/4.1.141.Final/netty-all-4.1.141.Final.jar",
-      "sha256": "f8422fcc2df168ca690ec6ef50e1f63abc54b9f0be0bf6e105f00259b4a7dc2f",
-      "jar": "netty-all-4.1.141.Final.jar"
-    },
-    {
-      "remove": "netty-buffer-4.1.118.Final.jar",
-      "url": "https://repo1.maven.org/maven2/io/netty/netty-buffer/4.1.141.Final/netty-buffer-4.1.141.Final.jar",
-      "sha256": "1d9fbe43dd93c5a447ec13a9f877cfdaac17dc1da947b87439cb7d8ffbd731e3",
-      "jar": "netty-buffer-4.1.141.Final.jar"
-    },
-    {
-      "remove": "netty-codec-4.1.118.Final.jar",
-      "url": "https://repo1.maven.org/maven2/io/netty/netty-codec/4.1.141.Final/netty-codec-4.1.141.Final.jar",
-      "sha256": "a4e8bcd07e74ce3300ec18af52d1c4aa46b5a33ae25a6fe9ae281f812cb131b0",
-      "jar": "netty-codec-4.1.141.Final.jar"
-    },
-    {
-      "remove": "netty-codec-dns-4.1.118.Final.jar",
-      "url": "https://repo1.maven.org/maven2/io/netty/netty-codec-dns/4.1.141.Final/netty-codec-dns-4.1.141.Final.jar",
-      "sha256": "6f23a67d8a61cc889523911fbc86cc87dcd7b493bf509cea6d7ae209ce1c4ee6",
-      "jar": "netty-codec-dns-4.1.141.Final.jar"
-    },
-    {
-      "remove": "netty-codec-http-4.1.118.Final.jar",
-      "url": "https://repo1.maven.org/maven2/io/netty/netty-codec-http/4.1.141.Final/netty-codec-http-4.1.141.Final.jar",
-      "sha256": "2be71653e7a0214978282d95c3b41781a4386f3119ace935c9eeb52a7260812b",
-      "jar": "netty-codec-http-4.1.141.Final.jar"
-    },
-    {
-      "remove": "netty-codec-http2-4.1.118.Final.jar",
-      "url": "https://repo1.maven.org/maven2/io/netty/netty-codec-http2/4.1.141.Final/netty-codec-http2-4.1.141.Final.jar",
-      "sha256": "7159b84c9002402c23a04d6ba6a4592759a5e3ad0be9527e1c1185bc2fdf7b9b",
-      "jar": "netty-codec-http2-4.1.141.Final.jar"
-    },
-    {
-      "remove": "netty-codec-socks-4.1.118.Final.jar",
-      "url": "https://repo1.maven.org/maven2/io/netty/netty-codec-socks/4.1.141.Final/netty-codec-socks-4.1.141.Final.jar",
-      "sha256": "8f209c1c4c9c9a103d36affbc299929b7193d0b1ad07d7e1a641ee69263edd76",
-      "jar": "netty-codec-socks-4.1.141.Final.jar"
-    },
-    {
-      "remove": "netty-common-4.1.118.Final.jar",
-      "url": "https://repo1.maven.org/maven2/io/netty/netty-common/4.1.141.Final/netty-common-4.1.141.Final.jar",
-      "sha256": "27ea9204a986e08cec79ba7bedb7e9c486efdd524323d519f6ed32f7a556e3aa",
-      "jar": "netty-common-4.1.141.Final.jar"
-    },
-    {
-      "remove": "netty-handler-4.1.118.Final.jar",
-      "url": "https://repo1.maven.org/maven2/io/netty/netty-handler/4.1.141.Final/netty-handler-4.1.141.Final.jar",
-      "sha256": "7074ebb3e72dad0ed9fecb6ebb3f85537d263429d7812dabf5bc9bfecfe38b1b",
-      "jar": "netty-handler-4.1.141.Final.jar"
-    },
-    {
-      "remove": "netty-handler-proxy-4.1.118.Final.jar",
-      "url": "https://repo1.maven.org/maven2/io/netty/netty-handler-proxy/4.1.141.Final/netty-handler-proxy-4.1.141.Final.jar",
-      "sha256": "4881971e3fdd3217af69e7bf7fa087bf3248e83ab6f10d27e96935f0687cb16b",
-      "jar": "netty-handler-proxy-4.1.141.Final.jar"
-    },
-    {
-      "remove": "netty-resolver-4.1.118.Final.jar",
-      "url": "https://repo1.maven.org/maven2/io/netty/netty-resolver/4.1.141.Final/netty-resolver-4.1.141.Final.jar",
-      "sha256": "22b830f044f9c3431d18eae317036cab097ccc75f8f498673d9dc32e84226b86",
-      "jar": "netty-resolver-4.1.141.Final.jar"
-    },
-    {
-      "remove": "netty-resolver-dns-4.1.118.Final.jar",
-      "url": "https://repo1.maven.org/maven2/io/netty/netty-resolver-dns/4.1.141.Final/netty-resolver-dns-4.1.141.Final.jar",
-      "sha256": "9bc2b8c188746364c627e92a434db3cb2f0a2974227430f698954e17e523b798",
-      "jar": "netty-resolver-dns-4.1.141.Final.jar"
-    },
-    {
-      "remove": "netty-tcnative-boringssl-static-2.0.70.Final-linux-aarch_64.jar",
-      "url": "https://repo1.maven.org/maven2/io/netty/netty-tcnative-boringssl-static/2.0.85.Final/netty-tcnative-boringssl-static-2.0.85.Final-linux-aarch_64.jar",
-      "sha256": "a26ef5c0de387a686c31d773c5b45d2cef11e3722cd7c775067588db78b566fa",
-      "jar": "netty-tcnative-boringssl-static-2.0.85.Final-linux-aarch_64.jar"
-    },
-    {
-      "remove": "netty-tcnative-boringssl-static-2.0.70.Final-linux-x86_64.jar",
-      "url": "https://repo1.maven.org/maven2/io/netty/netty-tcnative-boringssl-static/2.0.85.Final/netty-tcnative-boringssl-static-2.0.85.Final-linux-x86_64.jar",
-      "sha256": "6ed7189a01c38dd7c2161feb93c5318df3ad67dc1b246d166d7751b7010042d4",
-      "jar": "netty-tcnative-boringssl-static-2.0.85.Final-linux-x86_64.jar"
-    },
-    {
-      "remove": "netty-tcnative-classes-2.0.70.Final.jar",
-      "url": "https://repo1.maven.org/maven2/io/netty/netty-tcnative-classes/2.0.85.Final/netty-tcnative-classes-2.0.85.Final.jar",
-      "sha256": "3c1bcba8d80d7002277effe67509979b3a7bd22341bab276b946837f0b76f831",
-      "jar": "netty-tcnative-classes-2.0.85.Final.jar"
-    },
-    {
-      "remove": "netty-transport-4.1.118.Final.jar",
-      "url": "https://repo1.maven.org/maven2/io/netty/netty-transport/4.1.141.Final/netty-transport-4.1.141.Final.jar",
-      "sha256": "f25fec715e9d3a423df9086f5813b4b86aba53798031cb7ebac80d09188ea5cd",
-      "jar": "netty-transport-4.1.141.Final.jar"
-    },
-    {
-      "remove": "netty-transport-classes-epoll-4.1.118.Final.jar",
-      "url": "https://repo1.maven.org/maven2/io/netty/netty-transport-classes-epoll/4.1.141.Final/netty-transport-classes-epoll-4.1.141.Final.jar",
-      "sha256": "4a179cb26c6bdd0b6daacea3fdfcbfb9fd4b23ef2da57b2cccbd65f7b76e3188",
-      "jar": "netty-transport-classes-epoll-4.1.141.Final.jar"
-    },
-    {
-      "remove": "netty-transport-native-epoll-4.1.118.Final-linux-aarch_64.jar",
-      "url": "https://repo1.maven.org/maven2/io/netty/netty-transport-native-epoll/4.1.141.Final/netty-transport-native-epoll-4.1.141.Final-linux-aarch_64.jar",
-      "sha256": "68d265be8f10b6c07d8ea18002810a0e3792e7076846b89e778b2e55cd3413ce",
-      "jar": "netty-transport-native-epoll-4.1.141.Final-linux-aarch_64.jar"
-    },
-    {
-      "remove": "netty-transport-native-epoll-4.1.118.Final-linux-x86_64.jar",
-      "url": "https://repo1.maven.org/maven2/io/netty/netty-transport-native-epoll/4.1.141.Final/netty-transport-native-epoll-4.1.141.Final-linux-x86_64.jar",
-      "sha256": "cc15ad235cebbeb80bf0f318463cd1076dbca7421499e04170974da46a37093d",
-      "jar": "netty-transport-native-epoll-4.1.141.Final-linux-x86_64.jar"
-    },
-    {
-      "remove": "netty-transport-native-unix-common-4.1.118.Final.jar",
-      "url": "https://repo1.maven.org/maven2/io/netty/netty-transport-native-unix-common/4.1.141.Final/netty-transport-native-unix-common-4.1.141.Final.jar",
-      "sha256": "eb0c6fd8134ab04d4abfe9aced91ded318473322ffcefe415b76680c4e8bee02",
-      "jar": "netty-transport-native-unix-common-4.1.141.Final.jar"
+      "jar": "hadoop-client-runtime-3.5.0.jar",
+      "reason": "Hadoop shades vulnerable Jackson, Kerby, Commons Configuration, JLine, and Guava under org.apache.hadoop.shaded; relocate fixed releases with Hadoop's own shading rules. Its shaded Jetty 9.4 is end of life with no fixed release and serves only Hadoop daemon web UIs and YARN web sockets, which local mode never starts, so it is removed.",
+      "relocations": [
+        {
+          "from": "org",
+          "to": "org/apache/hadoop/shaded/org"
+        },
+        {
+          "from": "com",
+          "to": "org/apache/hadoop/shaded/com"
+        },
+        {
+          "from": "io",
+          "to": "org/apache/hadoop/shaded/io"
+        },
+        {
+          "from": "javax/el",
+          "to": "org/apache/hadoop/shaded/javax/el"
+        },
+        {
+          "from": "javax/cache",
+          "to": "org/apache/hadoop/shaded/javax/cache"
+        },
+        {
+          "from": "javax/servlet",
+          "to": "org/apache/hadoop/shaded/javax/servlet"
+        },
+        {
+          "from": "javax/activation",
+          "to": "org/apache/hadoop/shaded/javax/activation"
+        },
+        {
+          "from": "javax/ws",
+          "to": "org/apache/hadoop/shaded/javax/ws"
+        },
+        {
+          "from": "javax/xml/bind",
+          "to": "org/apache/hadoop/shaded/javax/xml/bind"
+        },
+        {
+          "from": "net",
+          "to": "org/apache/hadoop/shaded/net"
+        },
+        {
+          "from": "okio",
+          "to": "org/apache/hadoop/shaded/okio"
+        }
+      ],
+      "excludes": [
+        "org/apache/hadoop",
+        "org/slf4j",
+        "org/apache/commons/logging",
+        "org/apache/log4j",
+        "org/ietf/jgss",
+        "org/omg",
+        "org/w3c/dom",
+        "org/xml/sax",
+        "org/bouncycastle",
+        "org/xerial/snappy",
+        "com/sun/tools",
+        "com/sun/javadoc",
+        "com/sun/security",
+        "com/sun/jndi",
+        "com/sun/management",
+        "com/ibm/security",
+        "io/compression",
+        "io/mapfile",
+        "io/map/index",
+        "io/seqfile",
+        "io/file/buffer/size",
+        "io/skip/checksum/errors",
+        "io/sort",
+        "io/serializations",
+        "net/topology",
+        "net/jpountz"
+      ],
+      "items": [
+        {
+          "name": "jackson",
+          "namespaces": [
+            "org/apache/hadoop/shaded/com/fasterxml/jackson/core/",
+            "org/apache/hadoop/shaded/com/fasterxml/jackson/databind/",
+            "org/apache/hadoop/shaded/com/fasterxml/jackson/annotation/",
+            "META-INF/versions/11/com/fasterxml/jackson/core/",
+            "META-INF/versions/17/com/fasterxml/jackson/core/",
+            "META-INF/versions/21/com/fasterxml/jackson/core/"
+          ],
+          "metadata": [
+            "com.fasterxml.jackson.core/jackson-core",
+            "com.fasterxml.jackson.core/jackson-databind",
+            "com.fasterxml.jackson.core/jackson-annotations"
+          ],
+          "sources": [
+            {
+              "url": "https://repo1.maven.org/maven2/com/fasterxml/jackson/core/jackson-core/2.18.12/jackson-core-2.18.12.jar",
+              "sha256": "367afb4be3efa8a1636200b5faefb67d7d0a1b730f64ec55a971229cb673bc23",
+              "jar": "jackson-core-2.18.12.jar"
+            },
+            {
+              "url": "https://repo1.maven.org/maven2/com/fasterxml/jackson/core/jackson-databind/2.18.12/jackson-databind-2.18.12.jar",
+              "sha256": "02b62d64819bc1dbad7f1195c805f950ab3dceef1a479d0e9c55d99b7a04c255",
+              "jar": "jackson-databind-2.18.12.jar"
+            },
+            {
+              "url": "https://repo1.maven.org/maven2/com/fasterxml/jackson/core/jackson-annotations/2.18.12/jackson-annotations-2.18.12.jar",
+              "sha256": "143b94dd8caa3d5eb4417672f7d00472cec33626cbcb0fd35f0616de0dbccabf",
+              "jar": "jackson-annotations-2.18.12.jar"
+            }
+          ]
+        },
+        {
+          "name": "kerby",
+          "namespaces": [
+            "org/apache/hadoop/shaded/org/apache/kerby/"
+          ],
+          "metadata": [
+            "org.apache.kerby/kerb-util",
+            "org.apache.kerby/kerby-config",
+            "org.apache.kerby/kerb-crypto",
+            "org.apache.kerby/kerb-core",
+            "org.apache.kerby/kerby-pkix",
+            "org.apache.kerby/kerby-asn1",
+            "org.apache.kerby/kerby-util"
+          ],
+          "sources": [
+            {
+              "url": "https://repo1.maven.org/maven2/org/apache/kerby/kerb-util/2.1.2/kerb-util-2.1.2.jar",
+              "sha256": "b8c4ed7f1bac6aadadf0307b49f41e05dca5c61dbe2b1772df37e7225d9f08fe",
+              "jar": "kerb-util-2.1.2.jar"
+            },
+            {
+              "url": "https://repo1.maven.org/maven2/org/apache/kerby/kerby-config/2.1.2/kerby-config-2.1.2.jar",
+              "sha256": "c46c030b082aa13d2e7ba3c837caf24d015e4fad675bb163c00d72672a5822da",
+              "jar": "kerby-config-2.1.2.jar"
+            },
+            {
+              "url": "https://repo1.maven.org/maven2/org/apache/kerby/kerb-crypto/2.1.2/kerb-crypto-2.1.2.jar",
+              "sha256": "1acbbf33346c644535e19db9b1f0fd8fa043aab6ee1b73eeb0ad25b5c95dc6c8",
+              "jar": "kerb-crypto-2.1.2.jar"
+            },
+            {
+              "url": "https://repo1.maven.org/maven2/org/apache/kerby/kerb-core/2.1.2/kerb-core-2.1.2.jar",
+              "sha256": "7eca4bad352f15e9e0cb28636138ed41a917c640c25dfe178c5bbb3e9114ef9a",
+              "jar": "kerb-core-2.1.2.jar"
+            },
+            {
+              "url": "https://repo1.maven.org/maven2/org/apache/kerby/kerby-pkix/2.1.2/kerby-pkix-2.1.2.jar",
+              "sha256": "cd165285f84a1baef1dca4a21a27ffe88b5ff35d86f83c81e06d45d752ecb844",
+              "jar": "kerby-pkix-2.1.2.jar"
+            },
+            {
+              "url": "https://repo1.maven.org/maven2/org/apache/kerby/kerby-asn1/2.1.2/kerby-asn1-2.1.2.jar",
+              "sha256": "aece8c08d4decff1bcf7cd06c9d43f30ec3bfc01ad8d57428443e9f037e06896",
+              "jar": "kerby-asn1-2.1.2.jar"
+            },
+            {
+              "url": "https://repo1.maven.org/maven2/org/apache/kerby/kerby-util/2.1.2/kerby-util-2.1.2.jar",
+              "sha256": "05ff4b1c6864b2660e9451a22dd58010c2a29dd1b296c41d0c3a82078db9c4b9",
+              "jar": "kerby-util-2.1.2.jar"
+            }
+          ]
+        },
+        {
+          "name": "commons-configuration2",
+          "namespaces": [
+            "org/apache/hadoop/shaded/org/apache/commons/configuration2/"
+          ],
+          "metadata": [
+            "org.apache.commons/commons-configuration2"
+          ],
+          "sources": [
+            {
+              "url": "https://repo1.maven.org/maven2/org/apache/commons/commons-configuration2/2.15.1/commons-configuration2-2.15.1.jar",
+              "sha256": "61ba5eaab8a17087042fe3d6811573bb85ccbdd6bd9d21ad464e6e20559dd1e8",
+              "jar": "commons-configuration2-2.15.1.jar"
+            }
+          ]
+        },
+        {
+          "name": "jline",
+          "namespaces": [
+            "org/apache/hadoop/shaded/org/jline/"
+          ],
+          "metadata": [
+            "org.jline/jline",
+            "org.jline/jline-terminal",
+            "org.jline/jline-reader",
+            "org.jline/jline-style",
+            "org.jline/jline-builtins",
+            "org.jline/jline-remote-telnet",
+            "org.jline/jline-remote-ssh",
+            "org.jline/jline-terminal-jansi",
+            "org.jline/jline-terminal-jna"
+          ],
+          "sources": [
+            {
+              "url": "https://repo1.maven.org/maven2/org/jline/jline-terminal/3.30.17/jline-terminal-3.30.17.jar",
+              "sha256": "382ee369588cb014592e3bef08fbf3fbe47c8f76bdc5c5a7aeb1efb1506983f0",
+              "jar": "jline-terminal-3.30.17.jar"
+            },
+            {
+              "url": "https://repo1.maven.org/maven2/org/jline/jline-reader/3.30.17/jline-reader-3.30.17.jar",
+              "sha256": "6efae5be31bf8abca2c27ce4c406685c7726faff22416fe00932dce78f3cda8e",
+              "jar": "jline-reader-3.30.17.jar"
+            },
+            {
+              "url": "https://repo1.maven.org/maven2/org/jline/jline-style/3.30.17/jline-style-3.30.17.jar",
+              "sha256": "aca9a3d5a35ef1c96c193f766735ca7a1a3cd23fff29e983d139f880aaf30215",
+              "jar": "jline-style-3.30.17.jar"
+            },
+            {
+              "url": "https://repo1.maven.org/maven2/org/jline/jline-builtins/3.30.17/jline-builtins-3.30.17.jar",
+              "sha256": "7bc9cac2bdaeb6e76facacf353fe2e2e3d7ff289ae06940c32b4846b978e62c2",
+              "jar": "jline-builtins-3.30.17.jar"
+            },
+            {
+              "url": "https://repo1.maven.org/maven2/org/jline/jline-remote-telnet/3.30.17/jline-remote-telnet-3.30.17.jar",
+              "sha256": "48374cc3ed26d6a941521aea08593650adec1e47aea2958b5f5d011832d584d1",
+              "jar": "jline-remote-telnet-3.30.17.jar"
+            },
+            {
+              "url": "https://repo1.maven.org/maven2/org/jline/jline-remote-ssh/3.30.17/jline-remote-ssh-3.30.17.jar",
+              "sha256": "6111e9ce4d864f8b0a1faba997ad4259ff69ec0b478b1b8f0effd4b94a2188f4",
+              "jar": "jline-remote-ssh-3.30.17.jar"
+            },
+            {
+              "url": "https://repo1.maven.org/maven2/org/jline/jline-native/3.30.17/jline-native-3.30.17.jar",
+              "sha256": "ddfd2cc87e60ffaf9646736d77d81a7a851020d74057069e86b474a066914085",
+              "jar": "jline-native-3.30.17.jar"
+            }
+          ]
+        },
+        {
+          "name": "guava",
+          "namespaces": [
+            "org/apache/hadoop/shaded/com/google/common/",
+            "org/apache/hadoop/shaded/com/google/thirdparty/",
+            "org/apache/hadoop/thirdparty/com/google/",
+            "org/apache/hadoop/thirdparty/org/checkerframework/",
+            "org/apache/hadoop/thirdparty/org/jspecify/"
+          ],
+          "metadata": [
+            "com.google.guava/guava",
+            "com.google.guava/failureaccess",
+            "org.apache.hadoop.thirdparty/hadoop-shaded-guava"
+          ],
+          "sources": [
+            {
+              "url": "https://repo1.maven.org/maven2/com/google/guava/guava/33.7.2-jre/guava-33.7.2-jre.jar",
+              "sha256": "b530942257fb935f8b2cfaa5f8eb5bd59c555fd8e8d01b8ce98912e077ea606c",
+              "jar": "guava-33.7.2-jre.jar"
+            },
+            {
+              "url": "https://repo1.maven.org/maven2/com/google/guava/failureaccess/1.0.3/failureaccess-1.0.3.jar",
+              "sha256": "cbfc3906b19b8f55dd7cfd6dfe0aa4532e834250d7f080bd8d211a3e246b59cb",
+              "jar": "failureaccess-1.0.3.jar"
+            },
+            {
+              "url": "https://repo1.maven.org/maven2/org/apache/hadoop/thirdparty/hadoop-shaded-guava/1.6.0/hadoop-shaded-guava-1.6.0.jar",
+              "sha256": "f747a38003e7fd4c2e9219b39eb67025767a5794bec1874a4a0fc80170aab63d",
+              "jar": "hadoop-shaded-guava-1.6.0.jar"
+            }
+          ]
+        },
+        {
+          "name": "jetty",
+          "namespaces": [
+            "org/apache/hadoop/shaded/org/eclipse/jetty/"
+          ],
+          "metadata": [
+            "org.eclipse.jetty/jetty-util-ajax",
+            "org.eclipse.jetty/jetty-webapp",
+            "org.eclipse.jetty/jetty-xml",
+            "org.eclipse.jetty/jetty-client",
+            "org.eclipse.jetty/jetty-http",
+            "org.eclipse.jetty/jetty-io",
+            "org.eclipse.jetty.websocket/websocket-client",
+            "org.eclipse.jetty.websocket/websocket-common",
+            "org.eclipse.jetty.websocket/websocket-api"
+          ]
+        }
+      ]
     }
   ]
 }

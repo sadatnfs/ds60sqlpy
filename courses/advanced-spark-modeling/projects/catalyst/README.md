@@ -1,7 +1,7 @@
 # Exact-version Catalyst project
 
 This original teaching project compiles two expressions and one optimizer rule
-against **Spark 4.0.1, Scala 2.13 and JDK 17**. Catalyst extension APIs have no
+against **Spark 4.3.0, Scala 2.13 and JDK 17**. Catalyst extension APIs have no
 source or binary stability guarantee. It is a separately prepared multi-file
 project, not an ordinary single-file classroom Run target.
 
@@ -28,4 +28,4 @@ Keep the exact image ID, source hashes and output when qualifying another build.
 
 Read asm-021 through asm-023 for the lifecycle, code generation and rewrite proof.
 The source is original; Apache Spark APIs are used under the project's ordinary
-license. Consult the [versioned extension API](https://spark.apache.org/docs/4.0.1/api/scala/org/apache/spark/sql/SparkSessionExtensions.html).
+license. Consult the [versioned extension API](https://spark.apache.org/docs/4.3.0/api/scala/org/apache/spark/sql/SparkSessionExtensions.html).

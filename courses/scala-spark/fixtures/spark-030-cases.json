@@ -19,7 +19,7 @@
     {
       "exercise": 3,
       "title": "Map dependencies to driver and executor environments",
-      "input_contract": "Spark 4.0.1, Scala binary 2.13, JDK 17, course_2.13.jar, rules.zip and an unqualified native-extension wheel.",
+      "input_contract": "Spark 4.3.0, Scala binary 2.13, JDK 17, course_2.13.jar, rules.zip and an unqualified native-extension wheel.",
       "expected": "A matrix locating each dependency and its qualification evidence;reject aScala 3 binary substitution and treating a native wheel as an ordinary pure-Python source zip.",
       "verification": "Name compiler/binary family, Python interpreter/platform compatibility and worker import checks separately."
     },

@@ -4,7 +4,7 @@ This architecture lesson uses fixed, sanitized reasoning fixtures. It does not c
 
 ## Level and prerequisites
 
-Advanced; approximately 105 minutes. Direct prerequisite: `spark-039`. The prepared execution baseline elsewhere in this course is classic Spark 4.0.1, Scala binary 2.13 and JDK 17. This reading lesson distinguishes that actual local boundary from proposed remote designs.
+Advanced; approximately 105 minutes. Direct prerequisite: `spark-039`. The prepared execution baseline elsewhere in this course is classic Spark 4.3.0, Scala binary 2.13 and JDK 17. This reading lesson distinguishes that actual local boundary from proposed remote designs.
 
 ## How to use this lesson
 
@@ -179,7 +179,7 @@ Continue through the [course route](../README.md). Preserve the written assumpti
 
 ## Primary sources and official APIs
 
-- [Spark 4.0.1 JDBC options and mappings](https://spark.apache.org/docs/4.0.1/sql-data-sources-jdbc.html)
+- [Spark 4.3.0 JDBC options and mappings](https://spark.apache.org/docs/4.3.0/sql-data-sources-jdbc.html)
 
 - [PostgreSQL17 transaction isolation](https://www.postgresql.org/docs/17/transaction-iso.html)
 

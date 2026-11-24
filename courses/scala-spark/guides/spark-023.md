@@ -4,7 +4,7 @@ Authored paired Scala/PySpark teaching content. The default fixtures are tiny, l
 
 ## Level and prerequisites
 
-Intermediate; approximately 105 minutes. Direct prerequisites: `spark-022`. The prepared baseline is Spark 4.0.1, Scala binary 2.13, JDK 17 and Python 3.12. Read the [execution baseline](../execution-baseline.md).
+Intermediate; approximately 105 minutes. Direct prerequisites: `spark-022`. The prepared baseline is Spark 4.3.0, Scala binary 2.13, JDK 17 and Python 3.12. Read the [execution baseline](../execution-baseline.md).
 
 ## How to run this lesson
 
@@ -192,9 +192,9 @@ Use the [course route](../README.md) to continue. Paired-language agreement is u
 
 ## Primary sources and official APIs
 
-- [Spark 4.0.1 statistics, broadcast thresholds and hint eligibility](https://spark.apache.org/docs/4.0.1/sql-performance-tuning.html)
+- [Spark 4.3.0 statistics, broadcast thresholds and hint eligibility](https://spark.apache.org/docs/4.3.0/sql-performance-tuning.html)
 
-- [Spark 4.0.1 join syntax](https://spark.apache.org/docs/4.0.1/sql-ref-syntax-qry-select-join.html)
+- [Spark 4.3.0 join syntax](https://spark.apache.org/docs/4.3.0/sql-ref-syntax-qry-select-join.html)
 
 ## Ask an AI tutor about this lesson
 

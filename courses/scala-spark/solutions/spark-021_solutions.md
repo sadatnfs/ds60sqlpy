@@ -121,7 +121,7 @@ Expression IDs and scratch paths identify this execution but are not the relatio
 
 Execute a nested projection/filter form of the direct query and compare its exact rows. Capture its extended plan and return a bounded receipt containing Spark version, ANSI, AQE and shuffle partition settings.
 
-**Expected:** The nested query has the same nine tuples. Receipt shows Spark 4.0.1, ANSI true, AQE false, shuffle partitions 2. Both extended plans expose an optimized stage.
+**Expected:** The nested query has the same nine tuples. Receipt shows Spark 4.3.0, ANSI true, AQE false, shuffle partitions 2. Both extended plans expose an optimized stage.
 
 ```scala
 def configurationReceipt(spark: SparkSession): Map[String, String] = {

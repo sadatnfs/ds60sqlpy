@@ -4,7 +4,7 @@ Authored paired Scala/PySpark teaching content. The default fixtures are tiny, l
 
 ## Level and prerequisites
 
-Advanced; approximately 120 minutes. Direct prerequisites: `spark-034`. The prepared baseline is Spark 4.0.1, Scala binary 2.13, JDK 17 and Python 3.12. Read the [execution baseline](../execution-baseline.md).
+Advanced; approximately 120 minutes. Direct prerequisites: `spark-034`. The prepared baseline is Spark 4.3.0, Scala binary 2.13, JDK 17 and Python 3.12. Read the [execution baseline](../execution-baseline.md).
 
 ## How to run this lesson
 
@@ -69,7 +69,7 @@ import scala.jdk.CollectionConverters._
 import org.apache.spark.sql.streaming.{StreamingQuery, Trigger}
 import scala.collection.mutable.ArrayBuffer
 
-require(spark.version == "4.0.1", "Prepared Spark 4.0.1 required")
+require(spark.version == "4.3.0", "Prepared Spark 4.3.0 required")
 spark.conf.set("spark.sql.streaming.stopTimeout", "5000")
 ownedRoot = Files.createTempDirectory(Paths.get(".").toAbsolutePath.normalize(), "spark-035-")
 val input = ownedRoot.resolve("input"); val checkpoint = ownedRoot.resolve("checkpoint");
@@ -90,8 +90,8 @@ import shutil
 import json
 import uuid
 
-if spark.version != "4.0.1":
-    raise ValueError("Prepared Spark 4.0.1 required")
+if spark.version != "4.3.0":
+    raise ValueError("Prepared Spark 4.3.0 required")
 spark.conf.set("spark.sql.streaming.stopTimeout", "5000")
 owned_root = Path(tempfile.mkdtemp(prefix="spark-035-", dir=Path.cwd()))
 input_path = owned_root / "input"
@@ -260,9 +260,9 @@ Use the [course route](../README.md) to continue. Paired-language agreement is u
 
 ## Primary sources and official APIs
 
-- [Spark 4.0.1 checkpoint and recovery semantics](https://spark.apache.org/docs/4.0.1/streaming/apis-on-dataframes-and-datasets.html#recovering-from-failures-with-checkpointing)
+- [Spark 4.3.0 checkpoint and recovery semantics](https://spark.apache.org/docs/4.3.0/streaming/apis-on-dataframes-and-datasets.html#recovering-from-failures-with-checkpointing)
 
-- [Spark 4.0.1 query identity and lifecycle](https://spark.apache.org/docs/4.0.1/streaming/apis-on-dataframes-and-datasets.html#managing-streaming-queries)
+- [Spark 4.3.0 query identity and lifecycle](https://spark.apache.org/docs/4.3.0/streaming/apis-on-dataframes-and-datasets.html#managing-streaming-queries)
 
 ## Ask an AI tutor about this lesson
 

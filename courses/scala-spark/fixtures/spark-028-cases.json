@@ -34,7 +34,7 @@
       "exercise": 5,
       "title": "Assemble an honest bounded comparison receipt",
       "input_contract": "Return version, master, AQE and automatic broadcast threshold as named fields. Attach key frequencies, the baseline/candidate plans and each observed summary-query exchange metric map.",
-      "expected": "Spark 4.0.1, local[2], AQEfalse, threshold-1;key 0 frequency 1600 and others 100. Both runs expose actual nonempty exchange observations. No peak-memory or throughput value is invented.",
+      "expected": "Spark 4.3.0, local[2], AQEfalse, threshold-1;key 0 frequency 1600 and others 100. Both runs expose actual nonempty exchange observations. No peak-memory or throughput value is invented.",
       "verification": "Assert controlled settings and frequency ledger, then print plans and separately labeled actual metric maps."
     },
     {

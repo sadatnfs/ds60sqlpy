@@ -4,7 +4,7 @@ Authored paired Scala/PySpark teaching content. The default fixtures are tiny, l
 
 ## Level and prerequisites
 
-Advanced; approximately 120 minutes. Direct prerequisites: `spark-036`. The prepared baseline is Spark 4.0.1, Scala binary 2.13, JDK 17 and Python 3.12. Read the [execution baseline](../execution-baseline.md).
+Advanced; approximately 120 minutes. Direct prerequisites: `spark-036`. The prepared baseline is Spark 4.3.0, Scala binary 2.13, JDK 17 and Python 3.12. Read the [execution baseline](../execution-baseline.md).
 
 ## How to run this lesson
 
@@ -60,7 +60,7 @@ The final negative control submits the unsafe two-copy bag to the one-row duplic
 
 Retain input fixture identity, query/run IDs, batch/input observations, canonical rows and the named failure reason. Avoid copying whole event logs or arbitrary user records when a small field extract explains the case. A test-owned checkpoint exists only during the scenario; cleanup happens after all evidence assertions and query termination. Existing checkpoints are neither reset nor migrated.
 
-These are local classic Spark 4.0.1 tests. They qualify the finite semantics and lifecycle observed in that prepared profile. They do not simulate executor loss, remote storage races or every distributed scheduling interleaving. The next observability chapter uses the same discipline to distinguish actual progress from a diagnosis hypothesis.
+These are local classic Spark 4.3.0 tests. They qualify the finite semantics and lifecycle observed in that prepared profile. They do not simulate executor loss, remote storage races or every distributed scheduling interleaving. The next observability chapter uses the same discipline to distinguish actual progress from a diagnosis hypothesis.
 
 ## Supplied local fixture
 
@@ -75,7 +75,7 @@ import scala.jdk.CollectionConverters._
 import org.apache.spark.sql.streaming.{StreamingQuery, Trigger}
 import scala.collection.mutable.ArrayBuffer
 
-require(spark.version == "4.0.1", "Prepared Spark 4.0.1 required")
+require(spark.version == "4.3.0", "Prepared Spark 4.3.0 required")
 spark.conf.set("spark.sql.streaming.stopTimeout", "5000")
 ownedRoot = Files.createTempDirectory(Paths.get(".").toAbsolutePath.normalize(), "spark-037-")
 val restartPaths = prepareCase(
@@ -116,8 +116,8 @@ import shutil
 import json
 import uuid
 
-if spark.version != "4.0.1":
-    raise ValueError("Prepared Spark 4.0.1 required")
+if spark.version != "4.3.0":
+    raise ValueError("Prepared Spark 4.3.0 required")
 spark.conf.set("spark.sql.streaming.stopTimeout", "5000")
 owned_root = Path(tempfile.mkdtemp(prefix="spark-037-", dir=Path.cwd()))
 restart_paths = prepare_case(
@@ -262,9 +262,9 @@ Use the [course route](../README.md) to continue. Paired-language agreement is u
 
 ## Primary sources and official APIs
 
-- [Spark 4.0.1 triggers and lifecycle](https://spark.apache.org/docs/4.0.1/streaming/apis-on-dataframes-and-datasets.html#triggers)
+- [Spark 4.3.0 triggers and lifecycle](https://spark.apache.org/docs/4.3.0/streaming/apis-on-dataframes-and-datasets.html#triggers)
 
-- [Spark 4.0.1 streaming deduplication](https://spark.apache.org/docs/4.0.1/streaming/apis-on-dataframes-and-datasets.html#streaming-deduplication)
+- [Spark 4.3.0 streaming deduplication](https://spark.apache.org/docs/4.3.0/streaming/apis-on-dataframes-and-datasets.html#streaming-deduplication)
 
 ## Ask an AI tutor about this lesson
 

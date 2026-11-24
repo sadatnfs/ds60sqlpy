@@ -196,7 +196,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
     <article class="document"><h2 id="spark-023-broadcast-joins-statistics-and-strategy-evidence">spark-023: Broadcast joins, statistics and strategy evidence<a class="heading-anchor" href="#spark-023-broadcast-joins-statistics-and-strategy-evidence" aria-label="Link to this section">#</a></h2>
 <p>Authored paired Scala/PySpark teaching content. The default fixtures are tiny, local and deterministic. Runtime acceptance, logical correctness and learner understanding remain separate evidence.</p>
 <h3 id="level-and-prerequisites">Level and prerequisites<a class="heading-anchor" href="#level-and-prerequisites" aria-label="Link to this section">#</a></h3>
-<p>Intermediate; approximately 105 minutes. Direct prerequisites: <code>spark-022</code>. The prepared baseline is Spark 4.0.1, Scala binary 2.13, JDK 17 and Python 3.12. Read the <a href="../execution-baseline.md.html">execution baseline</a>.</p>
+<p>Intermediate; approximately 105 minutes. Direct prerequisites: <code>spark-022</code>. The prepared baseline is Spark 4.3.0, Scala binary 2.13, JDK 17 and Python 3.12. Read the <a href="../execution-baseline.md.html">execution baseline</a>.</p>
 <h3 id="how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#how-to-run-this-lesson" aria-label="Link to this section">#</a></h3>
 <p>Open <code>spark-023</code> in the classroom and choose the Scala or PySpark implementation you understand. Prepare only its fixed <code>spark-local-scala</code> or <code>spark-local-python</code> profile, save your pad and run the complete source. Scala stages as <code>Main.scala</code> with <code>object Main</code>; Python stages as <code>main.py</code> with a main guard. Each program creates its own <code>local[2]</code> session, disables the UI, binds the driver to loopback and stops the session in finally. No external dataset, package download, JDBC connection or cloud service is requested.</p>
 <p>The <a href="../lessons/spark-023.scala.html">Scala learner</a> and <a href="../lessons/spark-023.py.html">PySpark learner</a> run two complete demonstrations and retain six explicit task stubs. Use the <a href="../solutions/spark-023_solutions.md.html">explained solutions</a> only after an attempt or an explicit worked comparison; the <a href="../solutions/spark-023_solution.scala.html">Scala reference</a> and <a href="../solutions/spark-023_solution.py.html">PySpark reference</a> contain complete assertions. A bounded collect is used only for the declared tiny fixture; do not copy it onto an unbounded or large production table.</p>
@@ -313,10 +313,10 @@ println<span class="syntax-punctuation">(</span><span class="syntax-string">&quo
 <p>Use the <a href="../README.md.html">course route</a> to continue. Paired-language agreement is useful only when both outputs also satisfy the independent fixture contract. A successful local run is not evidence of cluster performance or production recovery.</p>
 <h3 id="primary-sources-and-official-apis">Primary sources and official APIs<a class="heading-anchor" href="#primary-sources-and-official-apis" aria-label="Link to this section">#</a></h3>
 <ul>
-<li><a href="https://spark.apache.org/docs/4.0.1/sql-performance-tuning.html">Spark 4.0.1 statistics, broadcast thresholds and hint eligibility</a></li>
+<li><a href="https://spark.apache.org/docs/4.3.0/sql-performance-tuning.html">Spark 4.3.0 statistics, broadcast thresholds and hint eligibility</a></li>
 </ul>
 <ul>
-<li><a href="https://spark.apache.org/docs/4.0.1/sql-ref-syntax-qry-select-join.html">Spark 4.0.1 join syntax</a></li>
+<li><a href="https://spark.apache.org/docs/4.3.0/sql-ref-syntax-qry-select-join.html">Spark 4.3.0 join syntax</a></li>
 </ul>
 <h3 id="ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h3>
 <pre class="highlighted-code"><code class="language-text">Use $guide-ds60sqlpy-learning to coach me through spark-023: Broadcast joins, statistics and strategy evidence.

@@ -194,7 +194,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/advanced-spark-modeling/projects/catalyst/README.md</code></p>
     </header>
     <article class="document"><h2 id="exact-version-catalyst-project">Exact-version Catalyst project<a class="heading-anchor" href="#exact-version-catalyst-project" aria-label="Link to this section">#</a></h2>
-<p>This original teaching project compiles two expressions and one optimizer rule against <strong>Spark 4.0.1, Scala 2.13 and JDK 17</strong>. Catalyst extension APIs have no source or binary stability guarantee. It is a separately prepared multi-file project, not an ordinary single-file classroom Run target.</p>
+<p>This original teaching project compiles two expressions and one optimizer rule against <strong>Spark 4.3.0, Scala 2.13 and JDK 17</strong>. Catalyst extension APIs have no source or binary stability guarantee. It is a separately prepared multi-file project, not an ordinary single-file classroom Run target.</p>
 <p>The expression implements stable softplus for DOUBLE input, preserving nulls. The rule removes a duplicate BIGINT nonnegative clamp. Its proof relies on idempotence over exact long integers; it does not rewrite arbitrary floating arithmetic. The probe checks generated/interpreted parity, extreme finite values, nulls, invalid type/arity and the actual analyzed/optimized trees.</p>
 <p>From the repository root, after preparing the ordinary Spark image:</p>
 <pre class="highlighted-code"><code class="language-bash">docker run --rm --pull never --network none --memory 3g --cpus <span class="syntax-number">2</span> <span class="syntax-string">\</span>
@@ -202,7 +202,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
   --mount <span class="syntax-string">&quot;</span><span class="syntax-string">type=bind,src=</span>$PWD<span class="syntax-string">/courses/advanced-spark-modeling/projects/catalyst,dst=/project,readonly</span><span class="syntax-string">&quot;</span> <span class="syntax-string">\</span>
   --entrypoint python ds60sqlpy-worker-spark-local-scala:1.4.3 /project/run.py</code></pre>
 <p>Use the locally prepared version tag if different. No image is pulled by this command. All classes, JARs and Spark scratch files live in disposable <code>/tmp</code>; there is no learner volume and no Docker socket mount. A successful probe proves this tiny single-host compiler/runtime contract, not production cluster speed. Keep the exact image ID, source hashes and output when qualifying another build.</p>
-<p>Read asm-021 through asm-023 for the lifecycle, code generation and rewrite proof. The source is original; Apache Spark APIs are used under the project&#x27;s ordinary license. Consult the <a href="https://spark.apache.org/docs/4.0.1/api/scala/org/apache/spark/sql/SparkSessionExtensions.html">versioned extension API</a>.</p></article>
+<p>Read asm-021 through asm-023 for the lifecycle, code generation and rewrite proof. The source is original; Apache Spark APIs are used under the project&#x27;s ordinary license. Consult the <a href="https://spark.apache.org/docs/4.3.0/api/scala/org/apache/spark/sql/SparkSessionExtensions.html">versioned extension API</a>.</p></article>
   </main>
 </body>
 </html>

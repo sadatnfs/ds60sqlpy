@@ -20,9 +20,9 @@ A source file is a description of work. A compiler checks Scala syntax and produ
 The Scala-first route needs no Python prerequisite. The PySpark-first route
 uses existing Python functions, collections and testing skills, represented by
 `python-10`. Both routes eventually need the same row and schema concepts.
-The classroom's configured Spark image uses Spark 4.0.1 and the Scala 2.13
+The classroom's configured Spark image uses Spark 4.3.0 and the Scala 2.13
 binary line with Java 17, while its worker Python is 3.12. Consult the actual
-worker version report and the [versioned Spark requirements](https://spark.apache.org/docs/4.0.1/)
+worker version report and the [versioned Spark requirements](https://spark.apache.org/docs/4.3.0/)
 when reproducing a run. A compatible version range is useful setup guidance;
 it is separate from evidence that your current worker executed successfully.
 

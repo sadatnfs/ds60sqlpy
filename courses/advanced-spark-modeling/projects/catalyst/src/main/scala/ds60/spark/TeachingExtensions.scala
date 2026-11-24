@@ -9,7 +9,7 @@ import org.apache.spark.sql.catalyst.plans.logical.LogicalPlan
 import org.apache.spark.sql.catalyst.rules.Rule
 import org.apache.spark.sql.types.{DataType, DoubleType, LongType}
 
-// Original teaching expressions. This project targets Spark 4.0.1 exactly.
+// Original teaching expressions. This project targets Spark 4.3.0 exactly.
 case class StableSoftplus(child: Expression) extends UnaryExpression {
   override def dataType: DataType = DoubleType
   override def prettyName: String = "teaching_softplus"

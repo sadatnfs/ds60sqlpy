@@ -223,7 +223,7 @@ Review result: Connect diagnostic path is unimplemented and unqualified</code></
 <p><strong>Progressive hint:</strong> A path string is interpreted in a filesystem namespace; identical spelling does not imply identical storage.</p>
 <h4 id="exercise-3-map-dependencies-to-driver-and-executor-environments">Exercise 3: Map dependencies to driver and executor environments<a class="heading-anchor" href="#exercise-3-map-dependencies-to-driver-and-executor-environments" aria-label="Link to this section">#</a></h4>
 <p>Produce a dependency matrix for the Scala jar, pure Python rules.zip, a hypothetical native-extension wheel and JDK/Spark runtime. State which proposed substitution is unsupported.</p>
-<p><strong>Inputs/evidence:</strong> Spark 4.0.1, Scala binary 2.13, JDK 17, course_2.13.jar, rules.zip and an unqualified native-extension wheel.</p>
+<p><strong>Inputs/evidence:</strong> Spark 4.3.0, Scala binary 2.13, JDK 17, course_2.13.jar, rules.zip and an unqualified native-extension wheel.</p>
 <p><strong>Expected result/shape:</strong> A matrix locating each dependency and its qualification evidence; reject a Scala 3 binary substitution and treating a native wheel as an ordinary pure-Python source zip.</p>
 <p><strong>Verify:</strong> Name compiler/binary family, Python interpreter/platform compatibility and worker import checks separately.</p>
 <p><strong>Progressive hint:</strong> A source archive can distribute modules without supplying an interpreter or native shared libraries.</p>

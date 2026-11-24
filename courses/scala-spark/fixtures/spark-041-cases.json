@@ -6,7 +6,7 @@
       "exercise": 1,
       "title": "Capture the actual runtime tuple",
       "input_contract": "Record Spark, Scala binary and patch, JDK major and patch, Python version and optional PyArrow distribution version without installing anything.",
-      "expected": "Spark 4.0.1, Scala 2.13 family, JDK 17;actual patch strings and explicit not-installed Arrow when absent.",
+      "expected": "Spark 4.3.0, Scala 2.13 family, JDK 17;actual patch strings and explicit not-installed Arrow when absent.",
       "verification": "Inspect actual values and reject a claimed target qualification based only on a proposed version string."
     },
     {

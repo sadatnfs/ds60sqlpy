@@ -4,7 +4,7 @@ Authored paired Scala/PySpark teaching content. The default fixtures are tiny, l
 
 ## Level and prerequisites
 
-Intermediate; approximately 90 minutes. Direct prerequisites: `spark-014`. The prepared baseline is Spark 4.0.1, Scala binary 2.13, JDK 17 and Python 3.12. Read the [execution baseline](../execution-baseline.md).
+Intermediate; approximately 90 minutes. Direct prerequisites: `spark-014`. The prepared baseline is Spark 4.3.0, Scala binary 2.13, JDK 17 and Python 3.12. Read the [execution baseline](../execution-baseline.md).
 
 ## How to run this lesson
 
@@ -28,7 +28,7 @@ The [Scala learner](../lessons/spark-015.scala) and [PySpark learner](../lessons
 
 - **Temporary view:** A session-local name for a DataFrame plan used by SQL without creating an external database table.
 
-Spark 4.0.1 enables ANSI behavior by default, and the complete source sets it explicitly. A strict cast of malformed text to BIGINT is expected to fail when evaluated. That is different from a parser that returns a rejected-record result. Choose the behavior deliberately: fail the job for an unexpected broken contract, or use an explicit tolerant parse branch and retain an error ledger for expected dirty data.
+Spark 4.3.0 enables ANSI behavior by default, and the complete source sets it explicitly. A strict cast of malformed text to BIGINT is expected to fail when evaluated. That is different from a parser that returns a rejected-record result. Choose the behavior deliberately: fail the job for an unexpected broken contract, or use an explicit tolerant parse branch and retain an error ledger for expected dirty data.
 
 The source contains eight event IDs and text amounts 100,0, whitespace-padded 25, NULL, bad, an integer above Long.MaxValue,-5 and 50. The two unconvertible nonnull tokens are IDs 5 and 6. Source NULL at ID 4 is an allowed unknown value in this lesson and must not be mislabeled as a malformed token. Negative 5 is a valid signed BIGINT but can violate a later nonnegative-amount domain rule.
 
@@ -222,9 +222,9 @@ Use the [course route](../README.md) to continue. Paired-language agreement is u
 
 ## Primary sources and official APIs
 
-- [Spark 4.0.1 ANSI and tolerant cast behavior](https://spark.apache.org/docs/4.0.1/sql-ref-ansi-compliance.html).
+- [Spark 4.3.0 ANSI and tolerant cast behavior](https://spark.apache.org/docs/4.3.0/sql-ref-ansi-compliance.html).
 
-- [Spark 4.0.1 built-in functions](https://spark.apache.org/docs/4.0.1/sql-ref-functions-builtin.html).
+- [Spark 4.3.0 built-in functions](https://spark.apache.org/docs/4.3.0/sql-ref-functions-builtin.html).
 
 ## Ask an AI tutor about this lesson
 

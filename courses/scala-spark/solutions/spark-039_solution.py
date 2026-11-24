@@ -234,8 +234,8 @@ def main():
     try:
         assert spark.sparkContext.master == "local[2]"
         spark.sparkContext.setLogLevel("ERROR")
-        if spark.version != "4.0.1":
-            raise ValueError("Prepared Spark 4.0.1 required")
+        if spark.version != "4.3.0":
+            raise ValueError("Prepared Spark 4.3.0 required")
         spark.conf.set("spark.sql.streaming.stopTimeout", "5000")
         owned_root = Path(tempfile.mkdtemp(prefix="spark-039-", dir=Path.cwd()))
         source = spark.range(0, 20000, 1, 4).withColumn(

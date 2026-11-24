@@ -437,7 +437,7 @@
         "injection",
         "lifecycle"
       ],
-      "outcome": "Compile an owned Spark4.0.1 extension and prove that it is installed when the session is constructed.",
+      "outcome": "Compile an owned Spark4.3.0 extension and prove that it is installed when the session is constructed.",
       "lab": "Read the worked cases \"register and resolve a valid function\" and \"distinguish arity from type failures\", run the linked project only through its own documented entrypoint, and compare its recorded observations with the chapter.",
       "verification": "Compare the project's recorded observations with the values and failure cases each worked case states; a command reference or hand calculation does not show that the project ran."
     },

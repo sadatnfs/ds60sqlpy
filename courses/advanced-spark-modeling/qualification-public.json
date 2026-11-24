@@ -3,7 +3,7 @@
   "date": "2026-10-29",
   "scope": "public Spark examples and exact-version Catalyst project",
   "platform": "linux/arm64",
-  "spark": "4.0.1",
+  "spark": "4.3.0",
   "scala_binary": "2.13",
   "java": "17.0.21",
   "runtime_image_id": "sha256:7eaaf5b6ff64e67e033cae8b3b3a516c86f973c1358ea37f8580fc7b0cfb5385",
@@ -141,7 +141,7 @@
   ],
   "catalyst": {
     "scope": "single-host CPU Spark/Catalyst compilation and execution",
-    "spark": "4.0.1",
+    "spark": "4.3.0",
     "sources": {
       "src/main/scala/ds60/spark/Probe.scala": "3127552b6d9c3bb31d808776369ec89b6b43b0fe695a37b97d0a6e5b8dd8de51",
       "src/main/scala/ds60/spark/TeachingExtensions.scala": "c5924609c1b7fe2883c0fee0087668267d1a805de44524a56277cedbbb1059d7"

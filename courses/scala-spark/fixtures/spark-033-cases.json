@@ -46,7 +46,7 @@
     }
   ],
   "golden": {
-    "branch_metric_scope": "Prepared Spark 4.0.1 reports scan rows after branch filters; raw deliveries are independently counted.",
+    "branch_metric_scope": "Prepared Spark 4.3.0 reports scan rows after branch filters; raw deliveries are independently counted.",
     "reported_inputs_by_phase": {
       "accepted": [2, 2, 1],
       "quarantine": [1, 0, 0]

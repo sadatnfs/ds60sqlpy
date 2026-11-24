@@ -317,7 +317,7 @@ object Main {
     try {
       require(spark.sparkContext.master == "local[2]", "local-only course session")
       spark.sparkContext.setLogLevel("ERROR")
-      require(spark.version == "4.0.1", "Prepared Spark 4.0.1 required")
+      require(spark.version == "4.3.0", "Prepared Spark 4.3.0 required")
       spark.conf.set("spark.sql.streaming.stopTimeout", "5000")
       ownedRoot = Files.createTempDirectory(Paths.get(".").toAbsolutePath.normalize(), "spark-042-")
       val input = ownedRoot.resolve("input"); val checkpoint = ownedRoot.resolve("checkpoint");

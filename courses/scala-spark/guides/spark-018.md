@@ -4,7 +4,7 @@ Authored paired Scala/PySpark teaching content. The default fixtures are tiny, l
 
 ## Level and prerequisites
 
-Intermediate; approximately 105 minutes. Direct prerequisites: `spark-017`. The prepared baseline is Spark 4.0.1, Scala binary 2.13, JDK 17 and Python 3.12. Read the [execution baseline](../execution-baseline.md).
+Intermediate; approximately 105 minutes. Direct prerequisites: `spark-017`. The prepared baseline is Spark 4.3.0, Scala binary 2.13, JDK 17 and Python 3.12. Read the [execution baseline](../execution-baseline.md).
 
 ## How to run this lesson
 
@@ -217,13 +217,13 @@ Use the [course route](../README.md) to continue. Paired-language agreement is u
 
 ## Primary sources and official APIs
 
-- [Spark 4.0.1 timestamp data types](https://spark.apache.org/docs/4.0.1/sql-ref-datatypes.html)
+- [Spark 4.3.0 timestamp data types](https://spark.apache.org/docs/4.3.0/sql-ref-datatypes.html)
 
-- [Spark 4.0.1 datetime patterns](https://spark.apache.org/docs/4.0.1/sql-ref-datetime-pattern.html)
+- [Spark 4.3.0 datetime patterns](https://spark.apache.org/docs/4.3.0/sql-ref-datetime-pattern.html)
 
-- [Spark 4.0.1 session time zone](https://spark.apache.org/docs/4.0.1/configuration.html)
+- [Spark 4.3.0 session time zone](https://spark.apache.org/docs/4.3.0/configuration.html)
 
-- [Spark 4.0.1 try_to_timestamp](https://spark.apache.org/docs/4.0.1/api/sql/index.html#try_to_timestamp)
+- [Spark 4.3.0 try_to_timestamp](https://spark.apache.org/docs/4.3.0/api/sql/index.html#try_to_timestamp)
 
 ## Ask an AI tutor about this lesson
 

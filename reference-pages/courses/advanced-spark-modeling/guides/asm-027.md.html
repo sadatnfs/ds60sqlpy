@@ -206,7 +206,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <li><strong>Private helper:</strong> A leading-underscore function in Spark source that is not a supported public API for a course contract.</li>
 </ul>
 <h3 id="mechanism-launcher-and-training-code-have-separate-responsibilities">Mechanism: launcher and training code have separate responsibilities<a class="heading-anchor" href="#mechanism-launcher-and-training-code-have-separate-responsibilities" aria-label="Link to this section">#</a></h3>
-<p>In Spark 4.0.1, the public entrypoint is <code>TorchDistributor(...).run(...)</code>. The version&#x27;s source also contains private helpers; a leading-underscore helper is not a supported public API to build a course contract around. The owned project uses the reviewed public path. The exact installed package and project source determine the supported argument and return behavior.</p>
+<p>In Spark 4.3.0, the public entrypoint is <code>TorchDistributor(...).run(...)</code>. The version&#x27;s source also contains private helpers; a leading-underscore helper is not a supported public API to build a course contract around. The owned project uses the reviewed public path. The exact installed package and project source determine the supported argument and return behavior.</p>
 <p>The launched function must define model construction, deterministic initialization, data loading, loss reduction, optimizer steps and result serialization. A process launch does not choose any of those statistical decisions. For one CPU process, a complete tiny dataset can be constructed locally. That is a bounded fixture, not a proposal to collect an arbitrarily large Spark table.</p>
 <p>There are two independent meanings of “local.” Spark can run on one host, and TorchDistributor can use its local mode. A receipt should name both the Spark topology and actual Torch world size. Avoid calling a single process “distributed training” merely because Spark initiated it.</p>
 <h3 id="worked-case-one-process-establishes-the-training-contract">Worked case: one process establishes the training contract<a class="heading-anchor" href="#worked-case-one-process-establishes-the-training-contract" aria-label="Link to this section">#</a></h3>
@@ -255,7 +255,7 @@ evidence <span class="syntax-operator">=</span> TorchDistributor<span class="syn
 <p>Inspect the actual source-bound receipt. This command reference does not assert that preparation or execution has already occurred on your machine.</p>
 <h3 id="primary-references">Primary references<a class="heading-anchor" href="#primary-references" aria-label="Link to this section">#</a></h3>
 <ul>
-<li><a href="https://github.com/apache/spark/blob/v4.0.1/python/pyspark/ml/torch/distributor.py">Spark 4.0.1 TorchDistributor implementation</a></li>
+<li><a href="https://github.com/apache/spark/blob/v4.3.0/python/pyspark/ml/torch/distributor.py">Spark 4.3.0 TorchDistributor implementation</a></li>
 <li><a href="https://docs.pytorch.org/docs/2.9/generated/torch.nn.parallel.DistributedDataParallel.html">PyTorch 2.9 distributed data parallel</a></li>
 </ul></article>
   </main>

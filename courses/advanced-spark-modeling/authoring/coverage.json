@@ -30,7 +30,7 @@
     {
       "area": "Arrow, plans and exact-version engine extensions",
       "units": ["asm-018", "asm-019", "asm-020", "asm-021", "asm-022", "asm-023"],
-      "new_evidence": "Declared Arrow project boundary, actual plan/codegen probes and compiled Spark4.0.1 Catalyst expression/rule project.",
+      "new_evidence": "Declared Arrow project boundary, actual plan/codegen probes and compiled Spark4.3.0 Catalyst expression/rule project.",
       "limits": "Combined Arrow runtime requires its own project receipt; Catalyst APIs are unstable across versions."
     },
     {

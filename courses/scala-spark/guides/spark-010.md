@@ -147,7 +147,7 @@ Continue to the next lesson only after you can explain the boundary behavior. Th
 
 - [Scala 2.13 iterator semantics](https://docs.scala-lang.org/overviews/collections-2.13/iterators.html).
 
-- [Spark 4.0.1 RDD laziness and closure semantics](https://spark.apache.org/docs/4.0.1/rdd-programming-guide.html).
+- [Spark 4.3.0 RDD laziness and closure semantics](https://spark.apache.org/docs/4.3.0/rdd-programming-guide.html).
 
 ## Ask an AI tutor about this lesson
 

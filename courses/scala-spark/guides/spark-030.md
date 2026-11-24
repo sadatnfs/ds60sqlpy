@@ -4,7 +4,7 @@ This architecture lesson uses fixed, sanitized reasoning fixtures. It does not c
 
 ## Level and prerequisites
 
-Advanced; approximately 90 minutes. Direct prerequisite: `spark-029`. The prepared execution baseline elsewhere in this course is classic Spark 4.0.1, Scala binary 2.13 and JDK 17. This reading lesson distinguishes that actual local boundary from proposed remote designs.
+Advanced; approximately 90 minutes. Direct prerequisite: `spark-029`. The prepared execution baseline elsewhere in this course is classic Spark 4.3.0, Scala binary 2.13 and JDK 17. This reading lesson distinguishes that actual local boundary from proposed remote designs.
 
 ## How to use this lesson
 
@@ -79,7 +79,7 @@ The sanitized specification below is a proposal to review. Its local path and de
 {
   "application": "bounded-course-product",
   "proposed_deploy_mode": "cluster",
-  "spark_version": "4.0.1",
+  "spark_version": "4.3.0",
   "scala_binary": "2.13",
   "jdk_major": 17,
   "application_jar": "artifacts/course_2.13.jar",
@@ -147,7 +147,7 @@ Review the proposed/driver-local/input.parquet path. State the visibility proble
 
 Produce a dependency matrix for the Scala jar, pure Python rules.zip, a hypothetical native-extension wheel and JDK/Spark runtime. State which proposed substitution is unsupported.
 
-**Inputs/evidence:** Spark 4.0.1, Scala binary 2.13, JDK 17, course_2.13.jar, rules.zip and an unqualified native-extension wheel.
+**Inputs/evidence:** Spark 4.3.0, Scala binary 2.13, JDK 17, course_2.13.jar, rules.zip and an unqualified native-extension wheel.
 
 **Expected result/shape:** A matrix locating each dependency and its qualification evidence; reject a Scala 3 binary substitution and treating a native wheel as an ordinary pure-Python source zip.
 
@@ -205,13 +205,13 @@ Continue through the [course route](../README.md). Preserve the written assumpti
 
 ## Primary sources and official APIs
 
-- [Spark 4.0.1 cluster roles](https://spark.apache.org/docs/4.0.1/cluster-overview.html)
+- [Spark 4.3.0 cluster roles](https://spark.apache.org/docs/4.3.0/cluster-overview.html)
 
-- [Spark 4.0.1 submitting applications and deploy modes](https://spark.apache.org/docs/4.0.1/submitting-applications.html)
+- [Spark 4.3.0 submitting applications and deploy modes](https://spark.apache.org/docs/4.3.0/submitting-applications.html)
 
-- [Spark 4.0.1 Python package distribution](https://spark.apache.org/docs/4.0.1/api/python/tutorial/python_packaging.html)
+- [Spark 4.3.0 Python package distribution](https://spark.apache.org/docs/4.3.0/api/python/tutorial/python_packaging.html)
 
-- [Spark 4.0.1 Connect architecture](https://spark.apache.org/docs/4.0.1/spark-connect-overview.html)
+- [Spark 4.3.0 Connect architecture](https://spark.apache.org/docs/4.3.0/spark-connect-overview.html)
 
 ## Ask an AI tutor about this lesson
 

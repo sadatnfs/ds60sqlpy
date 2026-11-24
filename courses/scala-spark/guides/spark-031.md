@@ -4,7 +4,7 @@ Authored paired Scala/PySpark teaching content. The default fixtures are tiny, l
 
 ## Level and prerequisites
 
-Advanced; approximately 105 minutes. Direct prerequisites: `spark-030`. The prepared baseline is Spark 4.0.1, Scala binary 2.13, JDK 17 and Python 3.12. Read the [execution baseline](../execution-baseline.md).
+Advanced; approximately 105 minutes. Direct prerequisites: `spark-030`. The prepared baseline is Spark 4.3.0, Scala binary 2.13, JDK 17 and Python 3.12. Read the [execution baseline](../execution-baseline.md).
 
 ## How to run this lesson
 
@@ -234,9 +234,9 @@ Use the [course route](../README.md) to continue. Paired-language agreement is u
 
 ## Primary sources and official APIs
 
-- [Spark 4.0.1 file sources, triggers, output modes and query lifecycle](https://spark.apache.org/docs/4.0.1/streaming/apis-on-dataframes-and-datasets.html)
+- [Spark 4.3.0 file sources, triggers, output modes and query lifecycle](https://spark.apache.org/docs/4.3.0/streaming/apis-on-dataframes-and-datasets.html)
 
-- [Spark 4.0.1 checkpoint configuration limits](https://spark.apache.org/docs/4.0.1/streaming/additional-information.html)
+- [Spark 4.3.0 checkpoint configuration limits](https://spark.apache.org/docs/4.3.0/streaming/additional-information.html)
 
 ## Ask an AI tutor about this lesson
 

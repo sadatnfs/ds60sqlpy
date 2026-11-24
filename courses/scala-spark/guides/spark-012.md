@@ -4,7 +4,7 @@ Authored paired Scala/PySpark teaching content. The default fixtures are tiny, l
 
 ## Level and prerequisites
 
-Beginner; approximately 90 minutes. Direct prerequisites: `spark-001`. The prepared baseline is Spark 4.0.1, Scala binary 2.13, JDK 17 and Python 3.12. Read the [execution baseline](../execution-baseline.md).
+Beginner; approximately 90 minutes. Direct prerequisites: `spark-001`. The prepared baseline is Spark 4.3.0, Scala binary 2.13, JDK 17 and Python 3.12. Read the [execution baseline](../execution-baseline.md).
 
 ## How to run this lesson
 
@@ -40,7 +40,7 @@ Driver result size must be controlled deliberately. The bounded ID reader select
 
 Canonical comparison includes field meaning and row identity. NULL is represented as Option in Scala and None in Python; observed zero remains a value. Repartitioning changes physical placement but must not change the canonical row bag. A final complete order is used only for comparison and display, not as an assumption about raw collect order.
 
-The final settings report distinguishes an actual Spark version from a target declaration. The prepared worker is 4.0.1 with the specified local policies. A matching version string alone is not proof of correct results, cleanup or cluster compatibility. The reference combines settings readback with schema, identity, missingness and bounded-result assertions, then leaves process-level cleanup qualification to the worker receipt.
+The final settings report distinguishes an actual Spark version from a target declaration. The prepared worker is 4.3.0 with the specified local policies. A matching version string alone is not proof of correct results, cleanup or cluster compatibility. The reference combines settings readback with schema, identity, missingness and bounded-result assertions, then leaves process-level cleanup qualification to the worker receipt.
 
 ## Supplied local fixture
 
@@ -178,7 +178,7 @@ Return ordered triples (event_id, optional team, optional amount) for this bound
 
 Return master, timezone, shuffle-partition, ANSI, AQE, UI, driver-binding and Spark-version settings from the active session. Compare them with this prepared profile and rely on finally for owned stop. Do not substitute a hardcoded target string for version readback.
 
-**Expected result/shape:** Master `local[2]`, UTC, two shuffle partitions, ANSI true, AQE false, UI false, both driver addresses 127.0.0.1, and Spark version 4.0.1.
+**Expected result/shape:** Master `local[2]`, UTC, two shuffle partitions, ANSI true, AQE false, UI false, both driver addresses 127.0.0.1, and Spark version 4.3.0.
 
 **Verify:** Assert the complete settings map; record actual version output and distinguish it from worker cleanup evidence.
 
@@ -190,7 +190,7 @@ If a schema assertion fails, compare names, types and nullability separately rat
 
 ## Self-check
 
-Explain the contract of `schemaFields` / `schema_fields` without reading its solution. Then, from memory, state what Exercise 6 (Read back the actual local session contract) must produce: Master `local[2]`, UTC, two shuffle partitions, ANSI true, AQE false, UI false, both driver addresses 127.0.0.1, and Spark version 4.0.1. Say which part of that result is evidence and what it still cannot show. Name the action in your trace that actually runs the plan.
+Explain the contract of `schemaFields` / `schema_fields` without reading its solution. Then, from memory, state what Exercise 6 (Read back the actual local session contract) must produce: Master `local[2]`, UTC, two shuffle partitions, ANSI true, AQE false, UI false, both driver addresses 127.0.0.1, and Spark version 4.3.0. Say which part of that result is evidence and what it still cannot show. Name the action in your trace that actually runs the plan.
 
 ## Next step
 
@@ -198,9 +198,9 @@ Use the [course route](../README.md) to continue. Paired-language agreement is u
 
 ## Primary sources and official APIs
 
-- [Spark 4.0.1 SparkSession and explicit schemas](https://spark.apache.org/docs/4.0.1/sql-getting-started.html).
+- [Spark 4.3.0 SparkSession and explicit schemas](https://spark.apache.org/docs/4.3.0/sql-getting-started.html).
 
-- [Spark 4.0.1 configuration](https://spark.apache.org/docs/4.0.1/configuration.html).
+- [Spark 4.3.0 configuration](https://spark.apache.org/docs/4.3.0/configuration.html).
 
 ## Ask an AI tutor about this lesson
 

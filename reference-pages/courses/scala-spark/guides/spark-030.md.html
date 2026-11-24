@@ -196,7 +196,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
     <article class="document"><h2 id="spark-030-deployment-topology-and-dependency-boundaries">spark-030: Deployment topology and dependency boundaries<a class="heading-anchor" href="#spark-030-deployment-topology-and-dependency-boundaries" aria-label="Link to this section">#</a></h2>
 <p>This architecture lesson uses fixed, sanitized reasoning fixtures. It does not connect to a cluster, open a database, install dependencies or perform a deployment.</p>
 <h3 id="level-and-prerequisites">Level and prerequisites<a class="heading-anchor" href="#level-and-prerequisites" aria-label="Link to this section">#</a></h3>
-<p>Advanced; approximately 90 minutes. Direct prerequisite: <code>spark-029</code>. The prepared execution baseline elsewhere in this course is classic Spark 4.0.1, Scala binary 2.13 and JDK 17. This reading lesson distinguishes that actual local boundary from proposed remote designs.</p>
+<p>Advanced; approximately 90 minutes. Direct prerequisite: <code>spark-029</code>. The prepared execution baseline elsewhere in this course is classic Spark 4.3.0, Scala binary 2.13 and JDK 17. This reading lesson distinguishes that actual local boundary from proposed remote designs.</p>
 <h3 id="how-to-use-this-lesson">How to use this lesson<a class="heading-anchor" href="#how-to-use-this-lesson" aria-label="Link to this section">#</a></h3>
 <p>Read the mechanisms and two worked examples, then complete the <a href="../lessons/spark-030.md.html">learner worksheet</a>. Write one evidence-backed response per task before opening the <a href="../solutions/spark-030_solutions.md.html">explained reference</a>. The classroom reading profile does not execute the schematic examples. No remote account or service is required.</p>
 <h3 id="learning-objectives">Learning objectives<a class="heading-anchor" href="#learning-objectives" aria-label="Link to this section">#</a></h3>
@@ -255,7 +255,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <pre class="highlighted-code"><code class="language-json"><span class="syntax-punctuation">{</span>
   <span class="syntax-tag">&quot;application&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;bounded-course-product&quot;</span><span class="syntax-punctuation">,</span>
   <span class="syntax-tag">&quot;proposed_deploy_mode&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;cluster&quot;</span><span class="syntax-punctuation">,</span>
-  <span class="syntax-tag">&quot;spark_version&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;4.0.1&quot;</span><span class="syntax-punctuation">,</span>
+  <span class="syntax-tag">&quot;spark_version&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;4.3.0&quot;</span><span class="syntax-punctuation">,</span>
   <span class="syntax-tag">&quot;scala_binary&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;2.13&quot;</span><span class="syntax-punctuation">,</span>
   <span class="syntax-tag">&quot;jdk_major&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">17</span><span class="syntax-punctuation">,</span>
   <span class="syntax-tag">&quot;application_jar&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;artifacts/course_2.13.jar&quot;</span><span class="syntax-punctuation">,</span>
@@ -294,7 +294,7 @@ Review result: Connect diagnostic path is unimplemented and unqualified</code></
 <p><strong>Progressive hint:</strong> A path string is interpreted in a filesystem namespace; identical spelling does not imply identical storage.</p>
 <h4 id="exercise-3-map-dependencies-to-driver-and-executor-environments">Exercise 3: Map dependencies to driver and executor environments<a class="heading-anchor" href="#exercise-3-map-dependencies-to-driver-and-executor-environments" aria-label="Link to this section">#</a></h4>
 <p>Produce a dependency matrix for the Scala jar, pure Python rules.zip, a hypothetical native-extension wheel and JDK/Spark runtime. State which proposed substitution is unsupported.</p>
-<p><strong>Inputs/evidence:</strong> Spark 4.0.1, Scala binary 2.13, JDK 17, course_2.13.jar, rules.zip and an unqualified native-extension wheel.</p>
+<p><strong>Inputs/evidence:</strong> Spark 4.3.0, Scala binary 2.13, JDK 17, course_2.13.jar, rules.zip and an unqualified native-extension wheel.</p>
 <p><strong>Expected result/shape:</strong> A matrix locating each dependency and its qualification evidence; reject a Scala 3 binary substitution and treating a native wheel as an ordinary pure-Python source zip.</p>
 <p><strong>Verify:</strong> Name compiler/binary family, Python interpreter/platform compatibility and worker import checks separately.</p>
 <p><strong>Progressive hint:</strong> A source archive can distribute modules without supplying an interpreter or native shared libraries.</p>
@@ -324,16 +324,16 @@ Review result: Connect diagnostic path is unimplemented and unqualified</code></
 <p>Continue through the <a href="../README.md.html">course route</a>. Preserve the written assumptions and evidence gaps when moving into a runnable lesson; a reviewed design is not an execution receipt.</p>
 <h3 id="primary-sources-and-official-apis">Primary sources and official APIs<a class="heading-anchor" href="#primary-sources-and-official-apis" aria-label="Link to this section">#</a></h3>
 <ul>
-<li><a href="https://spark.apache.org/docs/4.0.1/cluster-overview.html">Spark 4.0.1 cluster roles</a></li>
+<li><a href="https://spark.apache.org/docs/4.3.0/cluster-overview.html">Spark 4.3.0 cluster roles</a></li>
 </ul>
 <ul>
-<li><a href="https://spark.apache.org/docs/4.0.1/submitting-applications.html">Spark 4.0.1 submitting applications and deploy modes</a></li>
+<li><a href="https://spark.apache.org/docs/4.3.0/submitting-applications.html">Spark 4.3.0 submitting applications and deploy modes</a></li>
 </ul>
 <ul>
-<li><a href="https://spark.apache.org/docs/4.0.1/api/python/tutorial/python_packaging.html">Spark 4.0.1 Python package distribution</a></li>
+<li><a href="https://spark.apache.org/docs/4.3.0/api/python/tutorial/python_packaging.html">Spark 4.3.0 Python package distribution</a></li>
 </ul>
 <ul>
-<li><a href="https://spark.apache.org/docs/4.0.1/spark-connect-overview.html">Spark 4.0.1 Connect architecture</a></li>
+<li><a href="https://spark.apache.org/docs/4.3.0/spark-connect-overview.html">Spark 4.3.0 Connect architecture</a></li>
 </ul>
 <h3 id="ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h3>
 <pre class="highlighted-code"><code class="language-text">Use $guide-ds60sqlpy-learning to coach me through spark-030: Deployment topology and dependency boundaries.

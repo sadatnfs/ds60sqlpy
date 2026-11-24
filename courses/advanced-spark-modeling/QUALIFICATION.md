@@ -2,7 +2,7 @@
 
 The [source-bound public receipt](qualification-public.json) records actual
 native ARM64 Linux execution on 2026-10-29. Twelve PySpark programs and nine
-Scala programs passed in Spark 4.0.1. Scala sources were compiled with the
+Scala programs passed in Spark 4.3.0. Scala sources were compiled with the
 prepared Scala 2.13 compiler and Java 17. The separate Catalyst project compiled
 and executed both expression paths, null/type/arity cases and its actual
 analyzed-to-optimized two-node-to-one-node rewrite.
