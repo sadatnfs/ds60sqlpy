@@ -15,6 +15,7 @@ from urllib.parse import quote, urlsplit, urlunsplit
 
 import pytest
 
+from ds60sqlpy import step_through as stepping
 from ds60sqlpy.catalog import Catalog
 from ds60sqlpy.curriculum_framework import RUNNERS
 from ds60sqlpy.execution import MAX_OUTPUT_BYTES, PadResult, PadRunner, lesson_search_path
@@ -786,3 +787,103 @@ def test_whole_script_output_drain_still_obeys_the_process_time_limit(course: Ca
     )
     assert result.stopped == "time limit" and result.elapsed_seconds < 3
     assert len(result.output.encode()) <= MAX_OUTPUT_BYTES
+
+
+TRACE_BACKENDS = pytest.mark.parametrize("backend", ["auto", "settrace"])
+
+
+def _variables(frame: dict[str, Any]) -> dict[str, str]:
+    return {item["name"]: item["value"] for item in frame["variables"]}
+
+
+@TRACE_BACKENDS
+def test_step_through_python_has_source_linked_events_and_locals(
+    course: Catalog, monkeypatch: pytest.MonkeyPatch, backend: str
+) -> None:
+    monkeypatch.setattr(stepping, "PYTHON_TRACE_BACKEND", backend)
+    code = (
+        "def double(n):\n"
+        "    result = n * 2\n"
+        "    return result\n"
+        "\n"
+        "total = double(21)\n"
+        "print('total', total)\n"
+    )
+    source = code.splitlines()
+    response = PadRunner(course).step_through("python-01", "python", code)
+
+    assert response["kind"] == "python" and response["code"] == code
+    assert response["error"] is None and response["stopped"] is None
+    assert response["step_limit_reached"] is False
+    assert response["output"] == "total 42\n"
+    assert isinstance(response["elapsed_seconds"], float)
+    steps = response["steps"]
+    assert steps and len(steps) < stepping.MAX_STEPS
+    assert {step["event"] for step in steps} <= {"line", "call", "return", "exception"}
+    for step in steps:
+        assert 1 <= step["line"] <= len(source)
+        assert step["stack"][-1]["function"] == step["function"]
+        assert step["stack"][-1]["line"] == step["line"]
+    assert (steps[0]["function"], steps[0]["line"]) == ("<module>", 1)
+    assert [step["output_length"] for step in steps] == sorted(s["output_length"] for s in steps)
+    assert steps[-1]["output_length"] == len(response["output"])
+
+    def first(event: str, line: int) -> dict[str, Any]:
+        return next(s for s in steps if s["event"] == event and s["line"] == line)
+
+    call = first("call", 1)
+    assert call["function"] == "double"
+    assert [frame["function"] for frame in call["stack"]] == ["<module>", "double"]
+    assert [frame["depth"] for frame in call["stack"]] == [0, 1]
+    assert _variables(call["stack"][-1]) == {"n": "21"}
+    # Line events report state before that statement runs.
+    assert source[1].strip() == "result = n * 2"
+    assert "result" not in _variables(first("line", 2)["stack"][-1])
+    assert source[2].strip() == "return result"
+    assert _variables(first("line", 3)["stack"][-1]) == {"n": "21", "result": "42"}
+    assert first("return", 3)["return_value"] == "42"
+    printing = first("line", 6)
+    assert printing["function"] == "<module>" and printing["output_length"] == 0
+    assert _variables(printing["stack"][0])["total"] == "42"
+    module_return = steps[-1]
+    assert (module_return["event"], module_return["function"]) == ("return", "<module>")
+    assert module_return["return_value"] is None
+
+
+@TRACE_BACKENDS
+def test_step_through_python_reports_output_step_limits_and_errors(
+    course: Catalog, monkeypatch: pytest.MonkeyPatch, backend: str
+) -> None:
+    monkeypatch.setattr(stepping, "PYTHON_TRACE_BACKEND", backend)
+    runner = PadRunner(course)
+
+    failed = runner.step_through("python-01", "python", "x = 1\nprint('a')\ny = x / 0\n")
+    assert failed["error"] == {
+        "type": "ZeroDivisionError",
+        "message": "division by zero",
+        "line": 3,
+    }
+    assert failed["output"] == "a\n"
+    assert failed["step_limit_reached"] is False and failed["stopped"] is None
+    raised = [step for step in failed["steps"] if step["event"] == "exception"]
+    assert [(step["line"], step["exception"]) for step in raised] == [
+        (3, "ZeroDivisionError: division by zero")
+    ]
+
+    nested = runner.step_through(
+        "python-01", "python", "def inner():\n    return {}['missing']\n\ninner()\n"
+    )
+    assert nested["error"] is not None
+    assert (nested["error"]["type"], nested["error"]["line"]) == ("KeyError", 2)
+
+    looping = runner.step_through("python-01", "python", "for i in range(1000):\n    pass\n")
+    assert looping["step_limit_reached"] is True
+    assert len(looping["steps"]) == stepping.MAX_STEPS
+    assert looping["error"] is None and looping["stopped"] is None
+
+    noisy = runner.step_through("python-01", "python", "print('x' * 100000)\nprint('after')\n")
+    assert noisy["output"].endswith(stepping.OUTPUT_NOTICE)
+    assert len(noisy["output"]) == stepping.OUTPUT_CAP + len(stepping.OUTPUT_NOTICE)
+    assert "after" not in noisy["output"]
+    assert noisy["error"] is None and noisy["step_limit_reached"] is False
+    assert all(step["output_length"] <= len(noisy["output"]) for step in noisy["steps"])
