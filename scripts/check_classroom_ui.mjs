@@ -3251,4 +3251,80 @@ await test("opening a module Saved runs entry sends no run or step request", asy
   assert.equal(e.element("source").value, "my current code");
 });
 
+// Chrome polish guards (phase 08.1, unslop by @heydamir, CC BY 4.0).
+const cssRules = [...stylesheet.matchAll(/([^{}]+)\{([^{}]*)\}/g)].map((match) => ({
+  selector: match[1].trim(),
+  body: match[2],
+}));
+const chromeSources = [
+  "src/ds60sqlpy/assets/classroom.html",
+  "src/ds60sqlpy/assets/classroom.js",
+  "src/ds60sqlpy/assets/classroom-shell.js",
+  "src/ds60sqlpy/assets/classroom-guide.js",
+].map((name) => [name, fs.readFileSync(name, "utf8")]);
+
+await test("chrome stylesheet has no decorative gradients", async () => {
+  const gradients = cssRules.filter((rule) => /(linear|radial|conic)-gradient\(/.test(rule.body));
+  // The guide's page map draws neutral stripes that stand for lines of text.
+  assert.deepEqual(
+    gradients.map((rule) => rule.selector),
+    [".map-lesson"],
+  );
+  assert.doesNotMatch(gradients[0].body, /var\(--(accent|tint)\)/);
+});
+
+await test("chrome stylesheet animates only named properties", async () => {
+  assert.doesNotMatch(stylesheet, /transition:\s*all\b|transition-all/);
+  for (const match of stylesheet.matchAll(/transition:\s*([^;]+);/g)) {
+    for (const part of match[1].split(",")) {
+      const property = part.trim().split(/\s+/)[0];
+      assert.ok(
+        /^(none|opacity|transform|color|background-color|border-color|box-shadow|filter|width|height)$/.test(
+          property,
+        ),
+        `transition on ${property}`,
+      );
+    }
+  }
+});
+
+await test("looping animation is limited to busy indicators and stops under reduced motion", async () => {
+  const looping = cssRules
+    .filter((rule) => /\binfinite\b/.test(rule.body))
+    .map((rule) => rule.selector);
+  assert.deepEqual(looping, [
+    '#job-status[data-state="running"]::before',
+    '.db-status[data-state="checking"] h3::before,\n.db-status[data-state="working"] h3::before',
+    '.step-panel[aria-busy="true"] .step-status::before',
+  ]);
+  assert.match(
+    stylesheet,
+    /@media \(prefers-reduced-motion: reduce\) \{\s*\*,\s*\*::before,\s*\*::after \{[^}]*animation: none !important;/,
+  );
+  assert.match(stylesheet, /--ease: cubic-bezier\(0\.22, 1, 0\.36, 1\);/);
+});
+
+await test("chrome type uses weights 400 to 600 without tracked uppercase labels", async () => {
+  const weights = [...stylesheet.matchAll(/font-weight:\s*(\d+)/g)].map((match) =>
+    Number(match[1]),
+  );
+  const shorthand = [...stylesheet.matchAll(/\bfont:\s*(?:italic\s+)?(\d{3})\s/g)].map((match) =>
+    Number(match[1]),
+  );
+  for (const weight of [...weights, ...shorthand]) {
+    assert.ok(weight >= 400 && weight <= 600, `font weight ${weight}`);
+  }
+  assert.doesNotMatch(stylesheet, /text-transform:\s*uppercase/);
+  assert.doesNotMatch(stylesheet, /letter-spacing:\s*-/);
+  assert.doesNotMatch(stylesheet, /Georgia,\s*serif;\s*transition/);
+});
+
+await test("chrome markup and scripts use no emoji as icons", async () => {
+  const emoji = /[\u{1F300}-\u{1FAFF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}\u{2B50}]/u;
+  for (const [name, source] of chromeSources) {
+    const hit = source.split("\n").findIndex((line) => emoji.test(line.replace(/\u2713/g, "")));
+    assert.equal(hit, -1, `${name}:${hit + 1}`);
+  }
+});
+
 console.log(JSON.stringify({ checks, passed: true, final: true }));
