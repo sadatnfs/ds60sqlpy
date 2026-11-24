@@ -16,7 +16,7 @@
 
 ### Walkthroughs
 
-- [ ] **WALK-01**: A Python walkthrough presents a bounded, testable execution trace with relevant source location, event, stack or local state, output, and clear limit or error behavior.
+- [x] **WALK-01**: A Python walkthrough presents a bounded, testable execution trace with relevant source location, event, stack or local state, output, and clear limit or error behavior.
 - [ ] **WALK-02**: A SQL walkthrough explains only its documented, verified query subset, ties clause highlights to source offsets and PostgreSQL results, and clearly handles unsupported input without modifying learner data.
 - [ ] **WALK-03**: Each existing track that benefits from a guided worked-example or solution walkthrough provides a course-appropriate explanation through a tested adapter or authored steps, without claiming universal automatic tracing.
 - [ ] **WALK-04**: Learners can distinguish a code walkthrough from an ordinary run and inspect a solution walkthrough without replacing their own draft.
@@ -79,7 +79,7 @@ Deferred until the existing course quality floor and core classroom workflows ar
 | UX-01 | Phase 6 | Pending |
 | UX-02 | Phase 6 | Pending |
 | STATE-01 | Phase 6 | Pending |
-| WALK-01 | Phase 1 | Pending |
+| WALK-01 | Phase 1 | Complete |
 | WALK-02 | Phase 1 | Pending |
 | WALK-03 | Phase 5 | Pending |
 | WALK-04 | Phase 1 | Pending |

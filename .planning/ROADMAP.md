@@ -29,13 +29,13 @@ Qualify the unfinished release 1.4.4 classroom-guide and Python/SQL walkthrough 
   2. A learner can start, dismiss, and restart the optional tour without changing the selected lesson, overwriting a draft, or executing code.
   3. Python traces expose bounded source-linked events and state, while SQL highlights correspond to supported syntax and verified PostgreSQL behavior; unsupported SQL is clearly rejected or safely handled without learner-data changes.
   4. Learners can tell walkthroughs from ordinary runs and inspect the Python/SQL solution walkthroughs without replacing their drafts; checkpoint acceptance evidence covers automated, disposable PostgreSQL integration, and desktop-browser checks.
-**Plans**: 1/5 plans executed
+**Plans**: 2/5 plans executed
 Plans:
 **Wave 1**
 - [x] 01-01-PLAN.md — Prove the walkthrough tracer and qualify guide/tour safety
 
 **Wave 2** *(after Wave 1)*
-- [ ] 01-02-PLAN.md — Qualify bounded source-linked Python traces
+- [x] 01-02-PLAN.md — Qualify bounded source-linked Python traces
 
 **Wave 3** *(after Wave 2)*
 - [ ] 01-03-PLAN.md — Reject unsupported SQL and verify offsets/results
@@ -145,7 +145,7 @@ Plans:
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Qualify 1.4.4 Guide & Python/SQL Walkthroughs | 1/5 | In Progress | - |
+| 1. Qualify 1.4.4 Guide & Python/SQL Walkthroughs | 2/5 | In Progress | - |
 | 2. Catalog-wide Coverage Matrix | 0/TBD | Not started | - |
 | 3. Lesson Foundations & Source Integrity | 0/TBD | Not started | - |
 | 4. Worked Examples & Practice | 0/TBD | Not started | - |
